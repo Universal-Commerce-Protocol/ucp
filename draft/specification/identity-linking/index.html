@@ -1739,6 +1739,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#business-populated-response-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business-Populated Response Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#ucp-and-oauth" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2638,6 +2649,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#business-populated-response-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business-Populated Response Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#ucp-and-oauth" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3217,6 +3239,31 @@ profile lists <code>dev.ucp.shopping.order</code> has it in the negotiated inter
 either way. If their profile <em>also</em> lists identity linking with
 <code>dev.ucp.shopping.order:read</code> in <code>config.scopes</code>, operations covered by
 that scope require a user identity token.</p>
+<h3 id="business-populated-response-values">Business-Populated Response Values<a class="headerlink" href="#business-populated-response-values" title="Permanent link">&para;</a></h3>
+<p>When a request is user-authenticated, a business <strong>MAY</strong> populate response
+fields it owns for that user from its own stored state, rather than only echoing
+values the platform supplied.</p>
+<p>Request annotations determine whether the platform may send a field; they do
+not assign semantic ownership of its value. A field annotated
+<code>ucp_request: "omit"</code> is excluded from requests and, when permitted and present
+on a response, is populated by the business (for example, <code>totals</code>, <code>messages</code>,
+and <code>order</code>). Fields annotated <code>optional</code> for an operation, or left unannotated,
+may also be supplied by the platform in applicable requests. Where the response
+schema and the field's semantic contract permit business-owned user state, the
+business <strong>MAY</strong> populate it from stored state on the response (for example,
+<code>buyer</code> and <code>payment.instruments[]</code>).</p>
+<p>Identity linking provides the authenticated user context for these values.
+Subject to the scopes that gate the operation, a business <strong>MAY</strong> return the
+user's loyalty membership in <code>loyalty</code> (see <a href="../loyalty/">Loyalty</a>), saved
+payment instruments in <code>payment.instruments[]</code> (see <a href="../checkout/">Checkout</a>), or
+buyer profile data in <code>buyer</code>.</p>
+<p>Businesses <strong>MUST NOT</strong> return stored user-specific state unless the request is
+user-authenticated and authorized for the operation. They <strong>MUST</strong> only return
+values that belong to the authenticated user and are appropriate for the
+current transaction, and <strong>SHOULD</strong> limit them to the data needed for that
+transaction. Platforms <strong>MUST</strong> treat returned business-owned identifiers as
+opaque and business-scoped, and <strong>MUST NOT</strong> infer raw credentials from a
+display value.</p>
 <h3 id="ucp-and-oauth">UCP and OAuth<a class="headerlink" href="#ucp-and-oauth" title="Permanent link">&para;</a></h3>
 <p>UCP defines commerce semantics (which scopes mean what, which gate which
 operations); OAuth (<a href="https://datatracker.ietf.org/doc/html/rfc8414" target="_blank">RFC 8414</a>)

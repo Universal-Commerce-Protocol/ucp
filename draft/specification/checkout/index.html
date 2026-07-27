@@ -3971,6 +3971,22 @@ populates the <code>payment.instruments</code> array with the collected instrume
 <p>The <code>payment</code> object is optional on checkout creation and may be omitted for
 use cases that don't require payment processing (e.g., quote generation, cart
 management).</p>
+<p>Businesses may also populate <code>payment.instruments</code> on responses with
+display-safe payment instruments from their own user state, such as payment
+methods the authenticated buyer has saved with the business. Such an instrument
+carries no raw credential: it is a display-safe, business-scoped reference (an
+opaque <code>id</code> plus <code>display</code> fields) that the business resolves server-side when
+the buyer selects it. The
+<a href="../checkout-rest/#create-checkout">create checkout REST example</a> already returns
+this shape for a Shop Pay instrument. Returning user-specific saved state
+requires a user-authenticated request; see
+<a href="../identity-linking/#business-populated-response-values">Identity Linking</a> for
+the access levels and scopes that gate it.</p>
+<p>The <code>display</code> fields let the platform present a saved instrument and let the
+buyer recognize it. Whether the instrument can be charged as-is or still
+requires credential collection is not distinguished by the base schema today, so
+platforms should not infer readiness from the absence of a <code>credential</code> or from
+<code>id</code> naming.</p>
 <h3 id="fulfillment">Fulfillment<a class="headerlink" href="#fulfillment" title="Permanent link">&para;</a></h3>
 <p>Fulfillment is modelled as an extension in UCP to account for diverse use cases.</p>
 <p>Fulfillment is optional in the checkout object. This is done to enable a
@@ -5571,7 +5587,7 @@ this response root (e.g., <code>$.line_items[0]</code>). See
 <td style="text-align: left;">id</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">A unique identifier for this instrument instance, assigned by the platform.</td>
+<td style="text-align: left;">A unique identifier for this instrument instance. Typically assigned by the platform for instruments it collects. For a business-owned saved instrument returned on an identity-linked response, this identifier is assigned by the business; the platform MUST treat it as an opaque, business-scoped reference, and the business resolves it server-side when the buyer selects it.</td>
 </tr>
 <tr>
 <td style="text-align: left;">handler_id</td>
