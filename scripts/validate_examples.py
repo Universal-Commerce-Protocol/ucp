@@ -295,11 +295,7 @@ def unwrap_http_envelope(content: str) -> str:
   if HTTP_METHOD_RE.match(first_line):
     parts = content.split("\n\n", 1)
     if len(parts) == 2:
-      body = parts[1].strip()
-      return body if body else "{}"
-    else:
-      # No body separator — request/response with only headers/status
-      return "{}"
+      return parts[1].strip()
   return content
 
 
@@ -350,30 +346,14 @@ def strip_line_comments(content: str) -> str:
 # dots (e.g. `[1, ..., 3]`) are not supported — only whole-container
 # bare-dot ellipsis. For partial elision use the string form
 # (`[1, "...", 3]`).
-_JSON_STRING = r'"(?:[^"\\]|\\.)*"'
-_BARE_ELLIPSIS_ARRAY = re.compile(
-  "(" + _JSON_STRING + r")|(\[\s*)\.\.\.(\s*\])"
-)
-_BARE_ELLIPSIS_OBJECT = re.compile(
-  "(" + _JSON_STRING + r")|(\{\s*)\.\.\.(\s*\})"
-)
+_BARE_ELLIPSIS_ARRAY = re.compile(r"(\[\s*)\.\.\.(\s*\])")
+_BARE_ELLIPSIS_OBJECT = re.compile(r"(\{\s*)\.\.\.(\s*\})")
 
 
 def lower_ellipsis_to_sentinels(content: str) -> str:
-  """Stage 4. Lower bare `...` to string-sentinel form (outside strings)."""
-
-  def sub_arr(m):
-    if m.group(1):
-      return m.group(1)
-    return m.group(2) + '"..."' + m.group(3)
-
-  def sub_obj(m):
-    if m.group(1):
-      return m.group(1)
-    return m.group(2) + '"...": "..."' + m.group(3)
-
-  content = _BARE_ELLIPSIS_ARRAY.sub(sub_arr, content)
-  content = _BARE_ELLIPSIS_OBJECT.sub(sub_obj, content)
+  """Stage 4. Lower bare `...` to string-sentinel form."""
+  content = _BARE_ELLIPSIS_ARRAY.sub(r'\1"..."\2', content)
+  content = _BARE_ELLIPSIS_OBJECT.sub(r'\1"...": "..."\2', content)
   return content
 
 
@@ -578,74 +558,6 @@ def _resolve_discriminator(schema: dict, value) -> dict:
   return schema
 
 
-def apply_transitions(schema: dict) -> bool:
-  """Apply x-ucp-schema-transition annotations to the schema.
-
-  Returns True if any changes were made.
-  """
-  if not isinstance(schema, dict):
-    return False
-
-  modified = False
-
-  # Handle properties of this object
-  if "properties" in schema and isinstance(schema["properties"], dict):
-    props = schema["properties"]
-    required = schema.get("required", [])
-    if not isinstance(required, list):
-      required = []
-    new_required = list(required)
-    keys_to_remove = []
-
-    for key, prop_schema in props.items():
-      if isinstance(prop_schema, dict):
-        # Recurse first to handle nested transitions
-        if apply_transitions(prop_schema):
-          modified = True
-
-        if "x-ucp-schema-transition" in prop_schema:
-          transition = prop_schema["x-ucp-schema-transition"]
-          if isinstance(transition, dict) and "to" in transition:
-            to_state = transition["to"]
-            if to_state == "omit":
-              keys_to_remove.append(key)
-              if key in new_required:
-                new_required.remove(key)
-              modified = True
-            elif to_state == "optional":
-              if key in new_required:
-                new_required.remove(key)
-                modified = True
-            elif to_state == "required":
-              if key not in new_required:
-                new_required.append(key)
-                modified = True
-
-    for key in keys_to_remove:
-      del props[key]
-
-    if new_required != required:
-      if new_required:
-        schema["required"] = new_required
-      elif "required" in schema:
-        del schema["required"]
-      modified = True
-
-  # Recurse into other dict values (like $defs, allOf, oneOf, etc.)
-  # but skip "properties" since we handled it above.
-  for key, value in schema.items():
-    if key in ("properties", "required"):
-      continue
-    if isinstance(value, dict) and apply_transitions(value):
-      modified = True
-    elif isinstance(value, list):
-      for item in value:
-        if isinstance(item, dict) and apply_transitions(item):
-          modified = True
-
-  return modified
-
-
 def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
   """Verify required fields are present or elided."""
   errors: list[str] = []
@@ -715,7 +627,7 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
 # Schema resolution (cached)
 # -----------------------------------------------------------
 
-_schema_cache: dict[tuple, tuple[dict, bool]] = {}
+_schema_cache: dict[tuple, dict] = {}
 
 
 def resolve_schema(
@@ -723,7 +635,7 @@ def resolve_schema(
   direction: str,
   op: str,
   schema_base: Path,
-) -> tuple[dict, bool]:
+) -> dict:
   """Resolve a schema via ucp-schema, with caching."""
   key = (schema_path, direction, op)
   if key in _schema_cache:
@@ -752,9 +664,8 @@ def resolve_schema(
       f" {result.stderr.strip()}"
     )
   schema = json.loads(result.stdout)
-  modified = apply_transitions(schema)
-  _schema_cache[key] = (schema, modified)
-  return schema, modified
+  _schema_cache[key] = schema
+  return schema
 
 
 # -----------------------------------------------------------
@@ -1038,9 +949,7 @@ def process_block(
 
   # Layer 3: resolve schema
   try:
-    resolved, schema_modified = resolve_schema(
-      schema_path, direction, op, schema_base
-    )
+    resolved = resolve_schema(schema_path, direction, op, schema_base)
   except RuntimeError as e:
     return Result(file, line, "error", str(e), annotation)
 
@@ -1120,7 +1029,7 @@ def process_block(
     merged = deep_merge(scaffold, stripped)
 
   # 9. Validate — use extracted $def schema if specified
-  if schema_def or schema_modified:
+  if schema_def:
     valid, val_errors = validate_payload_with_schema(
       merged, validation_schema, direction, op, schema_base
     )
@@ -1179,13 +1088,13 @@ def main() -> int:
     "--scaffolds",
     type=Path,
     default=None,
-    help="Path to scaffolds directory (default: scripts/scaffolds/)",
+    help=("Path to scaffolds directory (default: scripts/scaffolds/)"),
   )
   parser.add_argument(
     "--docs",
     type=Path,
     default=None,
-    help="Path to docs/ directory (default: docs/)",
+    help=("Path to docs/ directory (default: docs/)"),
   )
   parser.add_argument(
     "--file",

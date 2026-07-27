@@ -1,4 +1,5 @@
 {
+  "id": "cart_scaffold",
   "line_items": [
     {
       "item": { "id": "item_scaffold" },

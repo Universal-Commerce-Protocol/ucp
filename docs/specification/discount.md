@@ -403,6 +403,7 @@ to the order as a whole and uses `type: "discount"` in totals.
     <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     {
+      "id": "...",
       "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10"]
@@ -447,6 +448,7 @@ to line items, and an automatic shipping discount at the order level.
     <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     {
+      "id": "...",
       "line_items": [ ... ],
       "discounts": {
         "codes": ["SUMMER20"]
@@ -517,6 +519,7 @@ but not in `discounts.applied`.
     <!-- ucp:example schema=shopping/cart op=update direction=request -->
     ```json
     {
+      "id": "...",
       "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10", "EXPIRED50"]
