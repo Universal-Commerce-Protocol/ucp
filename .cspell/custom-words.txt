@@ -158,3 +158,11 @@ punycode
 userinfo
 examplecorp
 zapatillas
+Pix
+pix
+Mercadopago
+mercadopago
+Pago
+boleto
+copia
+vencimento
