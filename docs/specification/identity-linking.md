@@ -91,11 +91,13 @@ user's loyalty membership in `loyalty` (see [Loyalty](loyalty.md)), saved
 payment instruments in `payment.instruments[]` (see [Checkout](checkout.md)), or
 buyer profile data in `buyer`.
 
-Businesses **MUST** only return values that belong to the authenticated user and
-are appropriate for the current transaction. Platforms **MUST** treat returned
-business-owned identifiers as opaque and business-scoped, and **MUST NOT** infer
-raw credentials from a display value. Businesses **SHOULD** omit this state when
-the request lacks the required user authorization.
+Businesses **MUST NOT** return stored user-specific state unless the request is
+user-authenticated and authorized for the operation. They **MUST** only return
+values that belong to the authenticated user and are appropriate for the
+current transaction, and **SHOULD** limit them to the data needed for that
+transaction. Platforms **MUST** treat returned business-owned identifiers as
+opaque and business-scoped, and **MUST NOT** infer raw credentials from a
+display value.
 
 ### UCP and OAuth
 
