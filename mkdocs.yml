@@ -31,6 +31,7 @@ nav:
   - Overview:
       - Home: index.md
       - Core Concepts: documentation/core-concepts.md
+      - Getting Started: documentation/getting-started.md
       - Specification: !ENV [
           SPEC_URL,
           "https://ucp.dev/latest/specification/overview/",
