@@ -1,74 +1,99 @@
 ---
-name: "UCP Contributor Playbook"
-description: "Instructions for AI coding agents to contribute to the Universal Commerce Protocol ecosystem."
+name: "UCP AI Agent Playbook"
+description: "Operating contract and reference guide for AI agents implementing UCP or contributing to the UCP specification."
 ---
 
-# UCP AI Contributor Playbook
+# Universal Commerce Protocol (UCP) AI Agent Playbook
 
-You are the principal architect for this repository: the Universal Commerce Protocol (UCP) specification and ecosystem documentation. Your job is to ensure the protocol we ship is secure, standards-compliant, and easy for merchants, agents, and payment platforms to implement correctly.
-
-This file is the operating contract for AI agents working in this repository.
-
----
-
-## 1. Context Initialization & Resource Fetching
-
-**When to fetch:** Only fetch external resources when you need to understand specific protocol details, integration patterns, or schema conventions. Do not fetch for every task. Use local `README.md` and inline documentation first.
-
-The following resources are available to support code generation, architectural questions, and change proposals:
-
-* **Local Context:** Read the local `README.md` for immediate repository scope and setup commands.
-* **Protocol Architecture:** Fetch `https://ucp.dev/llms.txt` for comprehensive UCP documentation including architecture, core concepts, AP2 integration patterns, schema authoring guidelines, and versioning policies.
-* **Contribution Rules:** Fetch `https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md` for overarching organizational contribution guidelines.
+Welcome! This file serves as the operating contract for AI agents working with the Universal Commerce Protocol (UCP).
 
 ---
 
-## 2. Core Operational Guidelines
+## 🎯 Step 1: Identify Your Task Persona
 
-Adhere strictly to the following parameters when editing the repository:
+Before executing any commands or writing code, determine your primary task:
 
-* **Schemas:** Edit JSON schemas only in the `source/` directory. Maintain all `ucp_*` annotations.
-* **Commits:** Use Conventional Commits (e.g., `feat: add gateway`, `docs: update guide`). Use a `!` for breaking changes (e.g., `feat!: remove buyer field`).
-* **Quality Guardrails:** Never bypass, comment out, or disable linter rules, pre-commit hooks, or test assertions.
-* **Significant Changes:** Core schema edits, new endpoints, or breaking changes require an approved Enhancement Proposal from the Tech Council. See [CONTRIBUTING.md](https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md#significant-changes) for details.
-* **Documentation:** Sync any MkDocs navigation additions (`mkdocs.yml`) with the `llmstxt` plugin section to ensure that content is discoverable and legible by agents.
+* **Persona A: UCP Implementer / Integrator**
+
+    * *Goal:* Implementing UCP endpoints for a business node, platform, or service provider.
+    * ➡️ **Proceed to Section 1: UCP Implementer Guide**
+
+* **Persona B: UCP Protocol & Documentation Contributor**
+
+    * *Goal:* Editing specification JSON schemas, modifying documentation, or contributing to the `Universal-Commerce-Protocol/ucp` repository.
+    * ➡️ **Proceed to Section 2: UCP Contributor Playbook**
 
 ---
 
-## 3. Terminal Commands Reference
+## 1. UCP Implementer Guide (Platforms & Service Providers)
 
-Validate your changes locally using these commands before considering a task complete.
+Use these guidelines when helping a business node or service provider implement UCP endpoints or integrate with UCP platforms.
 
-### Code Quality & Schemas
+> [!NOTE]
+> UCP protocol releases (including schemas and specifications) are versioned by date (YYYY-MM-DD) and are located in dedicated release branches named like **`release/YYYY-MM-DD`** (for example: `release/2026-04-08`).
 
-**Installing ucp-schema:** If `ucp-schema` is not available in your environment, install it using Cargo:
+### Core Architecture & Key Concepts
 
-* From crates.io: `cargo install ucp-schema`
-* From git: `cargo install --git https://github.com/universal-commerce-protocol/ucp-schema`
+* **Capabilities:** Standardized functional primitives (e.g., discovery, transactions, identity linking).
+* **Extensions:** Modular enhancements to capabilities to support specific use cases without bloating base interfaces.
+* **Dynamic Discovery:** Business nodes declare supported capabilities via `.well-known/ucp` (or profile endpoints) to enable autonomous discovery and connection by client platforms.
 
-Then validate your changes with:
+### Protocol Specifications & Schema Resources
 
-* **Lint Schemas:** `ucp-schema lint source/` (after schema changes)
-* **Regenerate SDK Models:** `bash sdk/python/generate_models.sh` (after schema changes)
-* **Run Pre-commit Checks:** `pre-commit run --all-files` (after all changes)
-* **Execute Local Super-Linter:** `./scripts/super_linter_local.py` (requires docker or podman)
+*When to fetch:* Only fetch external resource links (like `llms.txt` or spec pages) when you need to understand specific schema details, integration patterns, or protocol rules. Avoid fetching for simple coding tasks.
 
-### Documentation (MkDocs)
+* **UCP Specification Index (LLM-friendly):** [`https://ucp.dev/llms.txt`](https://ucp.dev/llms.txt) (Directory of all versioned specifications).
+* **Latest Stable Specification Index:** [`https://ucp.dev/latest/llms.txt`](https://ucp.dev/latest/llms.txt) (Standardized specification directory for production deployments).
+* **Key Integration Reference Sections:**
+    * **Protocol Overview & Discovery:** [Specification Overview](https://ucp.dev/latest/specification/overview/) (Covers discovery via `/.well-known/ucp`, transports, and error models).
+    * **Checkout / Transaction:** Covers session state lifecycles, calculations, and inputs. Refer to [REST Spec](https://ucp.dev/latest/specification/checkout-rest/) or [MCP Spec](https://ucp.dev/latest/specification/checkout-mcp/).
+    * **Identity Linking / Authentication:** Covers user account authentication and token exchange. Refer to [Identity Spec](https://ucp.dev/latest/specification/identity-linking/).
+    * **Order / Fulfillment Status:** Covers post-transaction lifecycle events and webhooks. Refer to [REST Webhooks](https://ucp.dev/latest/specification/order-rest/) or [MCP Spec](https://ucp.dev/latest/specification/order-mcp/).
+* **Conformance Testing:** Use the [UCP Conformance Test Suite](https://github.com/Universal-Commerce-Protocol/conformance) to validate endpoint compliance.
+* **All Sample Implementations:** [GitHub Repo](https://github.com/Universal-Commerce-Protocol/samples)
 
-These commands should be run from the ucp root directory.
+### Language-Specific SDKs & Sample Code
 
-#### Build and serve full site
+* **Python Developer Stack:**
+    * **SDK:** [GitHub Repo](https://github.com/Universal-Commerce-Protocol/python-sdk) | [PyPI Package](https://pypi.org/project/ucp-sdk/) (`pip install ucp-sdk`)
+    * **Reference Implementation (FastAPI):** [Python Sample Server & Client](https://github.com/Universal-Commerce-Protocol/samples/tree/main/rest/python)
+* **JavaScript / Node.js Developer Stack:**
+    * **SDK:** [GitHub Repo](https://github.com/Universal-Commerce-Protocol/js-sdk) | [npm Package](https://www.npmjs.com/package/@ucp-js/sdk) (`npm install @ucp-js/sdk`)
+    * **Reference Implementation (Hono):** [Node.js Sample Server](https://github.com/Universal-Commerce-Protocol/samples/tree/main/rest/nodejs)
 
-* **Build Full Multi-Version Site**: `./scripts/build_local.sh`. The resulting build will be placed in the local_preview/ directory. Add `[--draft-only]` to avoid building every version of the specification.
-* **Serve the site locally after build**: `python3 -m http.server 8000 -d local_preview/`
-* **Check Broken Links after build:** `uv run ./scripts/check_links.py local_preview/`
+### Implementation Checklist for Agents
 
-#### Optional: build and serve specification by version(s)
+1. **Declare Capabilities:** Expose `.well-known/ucp` listing supported capability versions and transport bindings.
+2. **Implement Handlers:** Create API handlers matching UCP JSON schemas for request/response payloads.
+3. **Handle Security & Protocol Rules:** Support UCP transport bindings, security tokens, and identity authorization where applicable.
+4. **Validate:** Test endpoints against UCP schema definitions and the Conformance Suite.
 
-* **Deploy a Version (Mike):** `mike deploy [version] [alias]` (e.g., `mike deploy 2026-04-08 latest`)
-* **Serve Versioned Site Locally (Mike):** `mike serve`
+---
 
-#### Optional: build and serve site overview (without specification)
+## 2. UCP Contributor Playbook (Repository Maintainers)
 
-* **Sync Dependencies:** `uv sync`
-* **Run Live Dev Server Without Specification (strict mode):** `uv run mkdocs serve [--strict]`
+Follow these parameters when editing and contributing directly to this repository (`Universal-Commerce-Protocol/ucp`).
+
+### Core Operational Rules
+
+* **Schema Source of Truth:** Edit JSON schemas only inside the `source/` directory. Always preserve `ucp_*` annotations.
+* **Commit Messages:** Follow Conventional Commits (e.g., `feat: add transaction extension`, `docs: update guide`). Use `!` for breaking changes (e.g., `feat!: update profile schema`).
+* **Quality Guardrails:** Never bypass or comment out linter rules, pre-commit hooks, or test assertions.
+* **Significant Changes:** Core schema edits, new endpoints, or breaking changes require an approved Enhancement Proposal from the Tech Council. See [CONTRIBUTING.md](https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md#significant-changes).
+
+### Local Command Reference
+
+#### Schema Validation & Resolution
+
+* **Lint Schemas:** `ucp-schema lint source/` (checks syntax, broken references, and annotation structures).
+* **Resolve Annotations:** `ucp-schema resolve source/schemas/shopping/checkout.json --op create --request --pretty` (compiles a master schema for a specific direction/operation, resolving `ucp_*` annotations).
+* **Validate Payloads:** `ucp-schema validate --schema source/schemas/shopping/checkout.json --op create --request source/examples/checkout_create_request.json` (validates a sample payload against a schema).
+* **Run Pre-Commit Checks:** `PIP_INDEX_URL=https://pypi.org/simple/ pre-commit run --all-files`
+
+#### Documentation (MkDocs)
+
+* **Build Full Preview (All Versions):** `./scripts/build_local.sh`
+* **Build Draft Preview (Faster, local only):** `./scripts/build_local.sh --draft-only`
+* **Serve Local Preview:** `python3 -m http.server 8000 -d local_preview/`
+* **Live Dev Server (Quick Edits):** `uv run mkdocs serve`
+* **Check Broken Links:** `uv run ./scripts/check_links.py local_preview/`
