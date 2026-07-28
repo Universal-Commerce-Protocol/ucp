@@ -15,7 +15,7 @@
       "properties": {
         "location": {
           "type": "string",
-          "description": "Identifier or name hint for the specific location (e.g., physical store, property, or restaurant) associated with the user. A common example in retail shopping is the default home store selected and saved by the user when purchasing grocery."
+          "description": "Reference to the specific location (e.g., physical store, property, or restaurant) associated with the user. A common example in retail shopping is the default home store selected and saved by the user on their profile when purchasing grocery."
         },
         "intent": {
           "type": "string",
