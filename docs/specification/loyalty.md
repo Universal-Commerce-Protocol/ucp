@@ -216,7 +216,10 @@ request to activate the loyalty extension and claim loyalty benefits. Alternativ
 when the buyer is authenticated and the business can determine loyalty membership from
 the authenticated identity, businesses MAY populate the loyalty extension without an
 explicit eligibility claim. In this case, the map key MUST be the same reverse-domain
-identifier the business would accept as a claim value.
+identifier the business would accept as a claim value. This is a specific instance of
+the general pattern where identity linking lets a business return its own user state on a
+response; see
+[Business-Populated Response Values](identity-linking.md#business-populated-response-values).
 
 * When a business verifies a membership claim or determines membership from
   authenticated identity, it MUST return `provisional: false`. It MUST populate the
