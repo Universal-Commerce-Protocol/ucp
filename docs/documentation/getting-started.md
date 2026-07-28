@@ -179,7 +179,7 @@ Define the endpoint to create a checkout session. UCP requires `Idempotency-Key`
 
       const body = validation.data;
 
-      # Generate a unique checkout session ID
+      // Generate a unique checkout session ID
       const sessionId = `chk_${uuidv4().substring(0, 10)}`;
     ```
 
@@ -395,6 +395,11 @@ Implement the retrieval route so the agent can fetch the checkout state.
         return res.status(404).json({ error: 'Checkout session not found' });
       }
       res.json(session);
+    });
+
+    const PORT = 8000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
     ```
 
