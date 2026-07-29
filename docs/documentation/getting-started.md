@@ -6,7 +6,7 @@ description: Getting started guide for building UCP servers in Python and Node.j
 
 # Getting Started with UCP
 
-This guide will walk you through building a basic Universal Commerce Protocol (UCP) server. We provide examples for both **Python (FastAPI)** and **Node.js (Express)** using the official UCP SDKs.
+This guide will walk you through building a basic Universal Commerce Protocol (UCP) server. We provide examples for both **Python (FastAPI)** and **Node.js (Express)** using the official [Python SDK](https://github.com/Universal-Commerce-Protocol/python-sdk) and [TypeScript SDK](https://github.com/Universal-Commerce-Protocol/js-sdk).
 
 We will implement a simple checkout server that allows an agent to initiate a checkout session and retrieve it.
 
@@ -37,7 +37,7 @@ We will implement a simple checkout server that allows an agent to initiate a ch
     uv init
     ```
 
-    Add the required dependencies. `ucp-sdk` contains the Pydantic models generated from UCP schemas:
+    Add the required dependencies. [`ucp-sdk`](https://github.com/Universal-Commerce-Protocol/python-sdk) contains the Pydantic models generated from UCP schemas:
 
     ```bash
     uv add fastapi uvicorn ucp-sdk
@@ -55,7 +55,7 @@ We will implement a simple checkout server that allows an agent to initiate a ch
 
     Configure your `package.json` to use ES Modules by adding `"type": "module"`.
 
-    Add the required dependencies. `@ucp-js/sdk` contains the TypeScript types and Zod schemas:
+    Add the required dependencies. [`@ucp-js/sdk`](https://github.com/Universal-Commerce-Protocol/js-sdk) contains the TypeScript types and Zod schemas:
 
     ```bash
     npm install express uuid @ucp-js/sdk
