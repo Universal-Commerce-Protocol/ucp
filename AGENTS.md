@@ -42,13 +42,10 @@ Use these guidelines when helping a business node or service provider implement 
 
 *When to fetch:* Only fetch external resource links (like `llms.txt` or spec pages) when you need to understand specific schema details, integration patterns, or protocol rules. Avoid fetching for simple coding tasks.
 
-* **UCP Specification Index (LLM-friendly):** [`https://ucp.dev/llms.txt`](https://ucp.dev/llms.txt) (Directory of all versioned specifications).
-* **Latest Stable Specification Index:** [`https://ucp.dev/latest/llms.txt`](https://ucp.dev/latest/llms.txt) (Standardized specification directory for production deployments).
-* **Key Integration Reference Sections:**
-    * **Protocol Overview & Discovery:** [Specification Overview](https://ucp.dev/latest/specification/overview/) (Covers discovery via `/.well-known/ucp`, transports, and error models).
-    * **Checkout / Transaction:** Covers session state lifecycles, calculations, and inputs. Refer to [REST Spec](https://ucp.dev/latest/specification/checkout-rest/) or [MCP Spec](https://ucp.dev/latest/specification/checkout-mcp/).
-    * **Identity Linking / Authentication:** Covers user account authentication and token exchange. Refer to [Identity Spec](https://ucp.dev/latest/specification/identity-linking/).
-    * **Order / Fulfillment Status:** Covers post-transaction lifecycle events and webhooks. Refer to [REST Webhooks](https://ucp.dev/latest/specification/order-rest/) or [MCP Spec](https://ucp.dev/latest/specification/order-mcp/).
+* **Latest Stable Specification Index:** [`https://ucp.dev/latest/llms.txt`](https://ucp.dev/latest/llms.txt)
+  *Use when:* You are developing new integrations, updating to the latest version, or when no specific version is requested (defaults to latest). This index contains links to LLM-optimized markdown specifications for all UCP capabilities (Discovery, Checkout, Identity, Order).
+* **UCP Specification Index (All Versions):** [`https://ucp.dev/llms.txt`](https://ucp.dev/llms.txt)
+  *Use when:* You need to find specifications for a specific historical version (e.g., matching a release branch like `release/2026-04-08` being used by the target node).
 * **Conformance Testing:** Use the [UCP Conformance Test Suite](https://github.com/Universal-Commerce-Protocol/conformance) to validate endpoint compliance.
 * **All Sample Implementations:** [GitHub Repo](https://github.com/Universal-Commerce-Protocol/samples)
 
