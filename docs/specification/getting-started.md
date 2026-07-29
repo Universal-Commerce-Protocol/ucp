@@ -82,15 +82,16 @@ We will implement the server step-by-step. The server needs to handle:
 Here is how the components interact during the checkout process:
 
 ```mermaid
+%%{init: {'sequence': {'actorMargin': 90, 'messageMargin': 45}}}%%
 sequenceDiagram
     autonumber
-    actor Platform as Platform
+    participant Platform as "Platform"
     participant Server as "Checkout Server (Your App)"
-    database DB as "In-Memory DB"
+    participant DB as "In-Memory DB"
 
     Note over Platform,Server: Create Checkout Session
-    Platform->>+Server: POST /checkout-sessions (with Items & Headers)
-    Note over Server: Validate, Calculate Totals, & Advertise Payment Handlers
+    Platform->>+Server: POST /checkout-sessions (with Items and Headers)
+    Note over Server: Validate, Calculate Totals, and Advertise Payment Handlers
     Server->>DB: Store Session
     Server-->>-Platform: 201 Created (Checkout Response)
 
