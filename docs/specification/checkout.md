@@ -43,6 +43,24 @@ The `payment` object is optional on checkout creation and may be omitted for
 use cases that don't require payment processing (e.g., quote generation, cart
 management).
 
+Businesses may also populate `payment.instruments` on responses with
+display-safe payment instruments from their own user state, such as payment
+methods the authenticated buyer has saved with the business. Such an instrument
+carries no raw credential: it is a display-safe, business-scoped reference (an
+opaque `id` plus `display` fields) that the business resolves server-side when
+the buyer selects it. The
+[create checkout REST example](checkout-rest.md#create-checkout) already returns
+this shape for a Shop Pay instrument. Returning user-specific saved state
+requires a user-authenticated request; see
+[Identity Linking](identity-linking.md#business-populated-response-values) for
+the access levels and scopes that gate it.
+
+The `display` fields let the platform present a saved instrument and let the
+buyer recognize it. Whether the instrument can be charged as-is or still
+requires credential collection is not distinguished by the base schema today, so
+platforms should not infer readiness from the absence of a `credential` or from
+`id` naming.
+
 ### Fulfillment
 
 Fulfillment is modelled as an extension in UCP to account for diverse use cases.
