@@ -2,7 +2,7 @@
 description: Getting started guide for building UCP servers in Python and Node.js.
 ---
 
-<!-- cspell:ignore uuidv4 uuidv -->
+<!-- cspell:ignore uuidv4 uuidv autonumber -->
 
 # Getting Started with UCP
 
@@ -76,6 +76,40 @@ We will implement the server step-by-step. The server needs to handle:
 
 1. **Create Checkout (`POST /checkout-sessions`)**: Receives desired items and returns a checkout session with totals and available payment handlers.
 2. **Get Checkout (`GET /checkout-sessions/{id}`)**: Allows the agent to poll the session status.
+
+### High-Level Flow
+
+Here is how the components interact during the checkout process:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Agent as AI Agent
+    participant Server as Checkout Server (Your App)
+    database DB as In-Memory DB
+
+    Note over Agent,Server: Create Checkout Session
+    Agent->>+Server: POST /checkout-sessions\n(Items, Headers: Idempotency-Key, UCP-Agent)
+    Note over Server: 1. Validate Headers & Body\n2. Calculate Totals (Minor Units)\n3. Advertise Payment Handlers
+    Server->>DB: Store Session
+    Server-->>-Agent: 201 Created (Checkout Object)
+
+    Note over Agent,Server: Retrieve Checkout Session (Polling)
+    Agent->>+Server: GET /checkout-sessions/{id}
+    Server->>DB: Fetch Session
+    Server-->>-Agent: 200 OK (Checkout Object)
+```
+
+### How it fits into the E2E Flow
+
+In a complete UCP integration, the flow follows these phases:
+
+1. **Discovery:** The AI Agent discovers your UCP endpoints (like `/checkout-sessions`) by fetching your UCP Discovery Profile at `/.well-known/ucp`.
+2. **Create Checkout (Implemented in this guide):** The Agent initiates the checkout session with the items the user wants to buy.
+3. **Update Checkout:** The Agent updates the checkout session with buyer details (e.g., shipping address, email) to calculate final taxes and shipping options.
+4. **Complete Checkout:** The Agent submits the payment credentials to finalize the order.
+
+This guide focuses on step 2 (Create Checkout) and the subsequent retrieval of the checkout session state.
 
 ### 1. Imports and Setup
 
