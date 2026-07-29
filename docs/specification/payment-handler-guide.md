@@ -737,7 +737,7 @@ Handler authors have two options:
   defines the `dev.ucp.payment.device_data_collection` and
   `dev.ucp.payment.three_ds_challenge` Action types. The handler specification
   states which types it can cause and any provider-specific trust or fallback
-  requirements.
+  requirements, such as allowed origins.
 - **Define handler-specific Actions.** When the standard types do not fit, the
   handler author publishes a Checkout extension that declares its Action type
   keys and `config` shapes. Both the Business and Platform advertise that
@@ -841,6 +841,7 @@ Before publishing a payment handler specification, verify:
 - [ ] Every Action type is declared by a negotiated extension
 - [ ] The gated effect, emission conditions, and sequencing are documented
 - [ ] Instrument and handler association is unambiguous
+- [ ] The allowed origins of any handler-operated Action surfaces are documented
 - [ ] Unsupported, abandoned, expired, and failed fallbacks are documented
 - [ ] Safe-retry conditions are defined, or retrying the same occurrence is forbidden
 - [ ] Server-side outcome observation and pending-attempt cleanup are defined

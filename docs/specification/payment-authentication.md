@@ -209,7 +209,9 @@ different payment instrument through an ordinary Update and later submit a new
 Complete operation. This option is unavailable during `complete_in_progress`,
 when Update Checkout is frozen. The Business treats work associated with the
 previous instrument as superseded and stops using it for the new payment
-attempt.
+attempt. Superseded work is no longer outstanding, so those Action occurrences
+do not appear in later Checkout responses, and a Business **MUST** drop Actions
+for instruments that are no longer present in the Checkout.
 
 The individual Action specifications define type-specific timeout and fallback
 behavior:
@@ -220,8 +222,13 @@ behavior:
 ## Surface Rendering and Notifications
 
 Returning a Payment Authentication Action asks the Platform to render its
-`config.url`. Before navigating, the Platform **MUST** validate the URL and
-install its message receiver so an immediately completing surface cannot race
+`config.url`. The payment handler specification names the origins its Action
+surfaces load from; those are the occurrence's **allowed origins**. They may be
+provider-operated, Business-operated, or both, so this specification does not
+choose which party holds that trust, only that the expectation exists before the
+Action is emitted. The Platform **MUST** decline an occurrence whose
+`config.url` origin is not among them, and **MUST** install its message receiver
+before navigating so an immediately completing surface cannot race
 initialization.
 
 The `postMessage` and native-webview mechanics follow
@@ -236,9 +243,9 @@ interaction with the rest of Checkout, and **SHOULD** show a loading state until
 its content renders. Web Platforms use an iframe or other handler-approved
 browser context. For messages from a native surface to the Platform, native
 Platforms **MUST** expose a JSON-string bridge through
-`window.EmbeddedActionProtocolConsumer` or
-`window.webkit.messageHandlers.EmbeddedActionProtocolConsumer`. For the ready
-response from the Platform to the surface, the Platform calls
+`window.EmbeddedActionProtocolConsumer` (Android) or
+`window.webkit.messageHandlers.EmbeddedActionProtocolConsumer` (iOS). For the
+ready response from the Platform to the surface, the Platform calls
 `window.EmbeddedActionProtocol.postMessage()` with the JSON-stringified JSON-RPC
 response.
 
@@ -263,7 +270,7 @@ extension version in the containing Checkout.
 }
 ```
 
-The Platform **MUST** validate the message source, authorized origin, Action
+The Platform **MUST** validate the message source, allowed origin, Action
 occurrence, and version before responding. A source or origin failure is
 untrusted and receives no response. If the trusted surface names an unknown
 Action occurrence or a version other than the active version, the Platform
@@ -292,9 +299,9 @@ After the handshake, surfaces send `action.done` or `action.error` notifications
 defined by the
 [payment Action OpenRPC](site:services/payment-actions/embedded.openrpc.json).
 On the web, the Platform **MUST** validate `event.source` against the mounted
-surface and `event.origin` against the origin set authorized by the payment
-handler. After a valid terminal notification, it unmounts the surface and
-ignores duplicate or late notifications from that context.
+surface and `event.origin` against the occurrence's allowed origins. After a
+valid terminal notification, it unmounts the surface and ignores duplicate or
+late notifications from that context.
 
 ### Buyer Dismissal
 
@@ -316,9 +323,11 @@ not adopt the Embedded Protocol's capability lifecycle or delegation messages.
 
 In addition, Platforms **MUST**:
 
-- parse `config.url` with a conformant URL parser; it **MUST** be absolute and
-  use the `https` scheme;
-- enforce the handler's trust policy on the initial URL and every redirect;
+- parse `config.url` with a conformant URL parser; it **MUST** be absolute, use
+  the `https` scheme, and carry no userinfo component;
+- keep the surface within the allowed origins; on the web, a `frame-src`
+  directive naming only them makes a cross-origin redirect fail to load rather
+  than silently widen trust;
 - grant only the frame or webview capabilities required by the handler, which
   **MUST** document any deviation from the shared sandbox baseline;
 - avoid logging session URLs or leaking them through referrers; and
