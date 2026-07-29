@@ -85,19 +85,19 @@ Here is how the components interact during the checkout process:
 sequenceDiagram
     autonumber
     actor Platform as Platform
-    participant Server as Checkout Server (Your App)
-    database DB as In-Memory DB
+    participant Server as "Checkout Server (Your App)"
+    database DB as "In-Memory DB"
 
     Note over Platform,Server: Create Checkout Session
-    Platform->>+Server: POST /checkout-sessions\n(Items, Headers: Idempotency-Key, UCP-Agent)
-    Note over Server: 1. Validate Headers & Body\n2. Calculate Totals (Minor Units)\n3. Advertise Payment Handlers
+    Platform->>+Server: POST /checkout-sessions (with Items & Headers)
+    Note over Server: Validate, Calculate Totals, & Advertise Payment Handlers
     Server->>DB: Store Session
-    Server-->>-Platform: 201 Created (Checkout Object)
+    Server-->>-Platform: 201 Created (Checkout Response)
 
     Note over Platform,Server: Retrieve Checkout Session (Polling)
     Platform->>+Server: GET /checkout-sessions/{id}
     Server->>DB: Fetch Session
-    Server-->>-Platform: 200 OK (Checkout Object)
+    Server-->>-Platform: 200 OK (Checkout Response)
 ```
 
 ### How it fits into the E2E Flow
