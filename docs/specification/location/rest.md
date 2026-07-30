@@ -171,7 +171,7 @@ Maps to the [Location Search](search.md) capability.
           "inventory": [
             {
               "id": "item_id_phone_15_pro",
-              "quantity": 1
+              "availability_status": "in_stock"
             }
           ]
         },

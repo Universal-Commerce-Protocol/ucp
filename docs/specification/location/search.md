@@ -76,11 +76,10 @@ Separates static location characteristics from dynamic availability:
     All specified amenities **MUST** be supported by the location (AND semantic).
 * **`inventory`** (Array of Objects): Real-time availability of items/goods at
     the location. Some industry specific use cases include:
-    * *Shopping*: Checking stock levels for specific products or variants.
-    * *Food Ordering*: Checking availability of specific dishes or menu items.
-    Each inventory filter requires an `id` (product/dish ID) and can optionally specify
-    a `type` to help multi-industry business with backend routing and a
-    minimum `quantity`.
+    * *Shopping*: Checking stock availability for specific products or variants.
+    * *Food Ordering*: Checking offering availability of specific dishes or menu items.
+    Each inventory filter requires an `id` (e.g., product/dish ID) and can optionally specify
+    a coarse `availability_status` value.
 
 ### Geographic & Geofencing Filter
 
