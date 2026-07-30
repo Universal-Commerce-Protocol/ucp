@@ -93,8 +93,14 @@ Supports two distinct, industry-agnostic spatial search models:
 > user's address hint provided in the request `context` (which may be coarse/sanitized)
 > to derive the center.
 
-* **`geofence_point` (Service Area Coverage)**: Filters for locations whose circular
-    service area (defined by `geofence_radius`) contains the specified point.
+* **`serves` (Service Area Coverage)**: Filters for locations that can serve
+    a target destination. The business evaluates coverage using their internal service area rules
+    (e.g., internal geometry, ZIP code lists) and returns qualifying locations only.
+
+> **Contextual Fallback**: If the `serves` filter is not explicitly specified in
+> the request, the business **MAY** use the user's contextual location hints passed in the
+> request `context` object to implicitly apply a `serves` filter, returning only locations
+> that can service the user.
 
 ## Pagination
 

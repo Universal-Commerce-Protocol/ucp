@@ -17,10 +17,6 @@
       "minimum": -180,
       "maximum": 180,
       "description": "Longitude in decimal degrees."
-    },
-    "geofence_radius": {
-      "type": "number",
-      "description": "Geofence radius in RFC 7035 distance unit (meters). Used for proximity detection."
     }
   }
 }

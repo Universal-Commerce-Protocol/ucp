@@ -98,9 +98,11 @@ Maps to the [Location Search](search.md) capability.
           "amenities": ["curbside_pickup"]
         },
         "geo": {
-          "geofence_point": {
-            "latitude": 37.422,
-            "longitude": -122.084
+          "serves": {
+            "point": {
+              "latitude": 37.422,
+              "longitude": -122.084
+            }
           }
         }
       }
@@ -137,8 +139,7 @@ Maps to the [Location Search](search.md) capability.
           },
           "geo": {
             "latitude": 37.420,
-            "longitude": -122.080,
-            "geofence_radius": 10000
+            "longitude": -122.080
           },
           "timezone": "America/Los_Angeles"
         }
@@ -216,8 +217,7 @@ Maps to the [Location Search](search.md) capability.
           },
           "geo": {
             "latitude": 40.709,
-            "longitude": -74.008,
-            "geofence_radius": 2000
+            "longitude": -74.008
           },
           "timezone": "America/New_York"
         }
@@ -277,8 +277,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           },
           "geo": {
             "latitude": 40.707,
-            "longitude": -74.011,
-            "geofence_radius": 2000
+            "longitude": -74.011
           },
           "timezone": "America/New_York",
           "hours": [
@@ -331,8 +330,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           },
           "geo": {
             "latitude": 40.790,
-            "longitude": -73.950,
-            "geofence_radius": 1000
+            "longitude": -73.950
           },
           "timezone": "America/New_York",
           "hours": [
@@ -423,8 +421,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           },
           "geo": {
             "latitude": 40.707,
-            "longitude": -74.011,
-            "geofence_radius": 2000
+            "longitude": -74.011
           },
           "timezone": "America/New_York",
           "hours": [

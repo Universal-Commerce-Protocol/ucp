@@ -37,16 +37,16 @@ This is vertical-agnostic and enables key commerce flows such as:
 ## Key Concepts
 
 * **Location**: A physical entity that can be found on a map. Defined by a display name,
-    address, operating hours, and **geographic context** (geographic coordinates and an
-    optional circular **geofence service radius** for delivery/service area checks).
+    address, operating hours, and **geographic context** (geographic coordinates).
 * **Offerings**: Features, capabilities, and inventory provided by the location.
     This is split into two distinct concepts to ensure tooling compatibility and semantic clarity:
     * **Amenities**: Static features, services, or capabilities of the location
         (e.g., `free_wifi`, `parking`, `outdoor_seating`, `curbside_pickup`).
     * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
-* **Geofencing**: Locations can define a `geofence_radius` around their coordinates.
+* **Geofencing & Service Area**: Locations implicitly carry a geofence boundary around their coordinates.
     This is used to determine if a location can serve a specific user (e.g., delivery area check).
-    Clients can perform proximity searches (`distance` filter) or coverage checks (`geofence_point` filter) using the filter.
+    Clients can perform proximity searches (`distance` filter) or coverage checks (`geofence_point` filter)
+    using the filter.
 * **Operating Hours**: Weekly schedules (`hours`) and date-specific overrides
     (`exception_hours` - e.g., holidays, temporary closures) associated with a timezone.
 

@@ -56,10 +56,10 @@ to narrow down the returned locations.
 Filters use the same schema and AND semantics as [Search Filters](search.md#search-filters).
 
 Filters apply **after** identifier resolution. For example, if a client requests
-`["loc_downtown", "loc_uptown"]` with a filter of `hours.open_now: true`:
+`["loc_downtown", "loc_uptown"]` with a filter of `open_now: true`:
 
 1. The server first resolves both identifiers to their respective locations.
-2. The server then evaluates the `open_now` filter against each resolved location.
+2. The server then evaluates the `open_now` hour filter against each resolved location.
 3. If `loc_uptown` is currently closed, it is excluded, and only `loc_downtown` is returned.
 
 ### Request

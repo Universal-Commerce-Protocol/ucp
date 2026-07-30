@@ -26,9 +26,20 @@
           },
           "additionalProperties": false
         },
-        "geofence_point": {
-          "$ref": "geo.json",
-          "description": "Filter locations whose geofence contains a specific point (e.g., delivery area check)."
+        "serves": {
+          "type": "object",
+          "description": "Filter locations that serve the target destination (e.g., delivery area geofence check).",
+          "properties": {
+            "point": {
+              "$ref": "geo.json",
+              "description": "Coordinates of the target destination."
+            },
+            "address": {
+              "$ref": "locality.json",
+              "description": "Coarse postal address reference of the target destination (e.g., for ZIP-code based routing)."
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
