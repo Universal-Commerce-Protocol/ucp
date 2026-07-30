@@ -9,6 +9,7 @@ Anytown
 Backordered
 Braintree
 CFRG
+CEFACT
 CIMD
 Carrefour
 Centricity
@@ -99,6 +100,7 @@ llmstxt
 mastercard
 meunier
 midsole
+millilitre
 misparsed
 mkdocs
 mtok

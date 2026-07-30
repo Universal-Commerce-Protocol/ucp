@@ -56,7 +56,11 @@ Orders have three main components:
 Line items reflect what was purchased at checkout and their current state:
 
 * Item details (product, price, quantity ordered)
-* Quantity counts and fulfillment status
+* Quantity counts and fulfillment status — `original`, `total`, and `fulfilled`
+  are integer step counts of the item's inherited `quantity_unit` under the
+  shared [quantities and units](overview.md#quantities-and-units) contract; an
+  absent `quantity_unit` means the quantities count whole items (`each`) at
+  `scale` 0
 
 ### Fulfillment
 
@@ -109,8 +113,8 @@ fulfillment:
   `price_adjustment`, `dispute`, `cancellation`)
 * Can be any post-order change
 * Optionally link to line items (or order-level for things like shipping refunds)
-* Quantities and amounts are signed—negative for reductions (returns, refunds),
-  positive for additions (exchanges)
+* Quantities are signed step counts and amounts are signed—negative for
+  reductions (returns, refunds), positive for additions (exchanges)
 * Include totals breakdown when relevant
 * Can happen at any time regardless of fulfillment status
 
@@ -137,7 +141,15 @@ Line items reflect what was purchased at checkout and their current state.
 }
 ```
 
+When the item is measure-denominated these are step counts — for an
+`item.quantity_unit` of
+`{ "unit": "KGM", "scale": 2, "display_text": "kg" }`, `fulfilled: 50` means
+0.50 kg fulfilled.
+
 **Status Derivation:**
+
+`total` and `fulfilled` are step counts in the same inherited
+`item.quantity_unit`; the derivation operates on those counts:
 
 ```text
 if (total == 0) → "removed"
@@ -274,6 +286,76 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     { "type": "fulfillment", "amount": 1200 },
     { "type": "tax", "amount": 1142 },
     { "type": "total", "amount": 15342 }
+  ]
+}
+```
+
+## Example: goods sold by measure
+
+An order for loose stainless steel fasteners sold by the kilogram
+(`item.quantity_unit`
+`{ "unit": "KGM", "scale": 2, "display_text": "kg" }`). Quantities are step
+counts: the Buyer ordered 1.50 kg (`total: 150`), of which 0.50 kg has shipped
+(`fulfilled: 50`), so the line is `partial`. A later return of 0.25 kg is
+recorded as an adjustment of `-25` steps. Amounts are priced at $12.99/kg and
+rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
+`1299 × 0.25 = 324.75`, rounded to `325`:
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
+  },
+  "id": "order_fasteners_1",
+  "checkout_id": "chk_fasteners_1",
+  "permalink_url": "https://business.example.com/orders/fasteners1",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
+      },
+      "quantity": { "original": 150, "total": 150, "fulfilled": 50 },
+      "totals": [
+        { "type": "subtotal", "amount": 1949 },
+        { "type": "total", "amount": 1949 }
+      ],
+      "status": "partial"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-08T10:30:00Z",
+        "type": "shipped",
+        "line_items": [{ "id": "li_fasteners", "quantity": 50 }],
+        "tracking_number": "123456789",
+        "tracking_url": "https://carrier.example/track/123456789",
+        "description": "0.50 kg shipped"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "return",
+      "occurred_at": "2026-01-10T14:30:00Z",
+      "status": "completed",
+      "line_items": [{ "id": "li_fasteners", "quantity": -25 }],
+      "totals": [{ "type": "total", "amount": -325 }],
+      "description": "Returned 0.25 kg"
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1949 },
+    { "type": "total", "amount": 1949 }
   ]
 }
 ```

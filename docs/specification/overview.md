@@ -31,6 +31,74 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
+## Quantities and units
+
+UCP uses a shared quantity representation wherever a schema contains an integer
+`quantity`, a `quantity_unit`, or the shared measure type.
+
+A `quantity` is an integer count of **steps**. A unit descriptor consists of:
+
+- `unit` — a required, stable machine identifier.
+- `scale` — an optional nonnegative integer. Its effective value is the provided
+    value or `0` when omitted.
+- `display_text` — a required printable label for the unit.
+
+One step is `10^-scale` of `unit`. The shared measure type adds a required
+integer `value`, which is also a count of those steps. Because these counts are
+integers, `scale` fixes the representation's granularity. A unit descriptor's
+machine identity is the (`unit`, effective `scale`) pair; `display_text` is not
+part of that identity.
+
+The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is
+the United Nations Centre for Trade Facilitation and Electronic Business
+(UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business
+**MAY** omit `quantity_unit` from an authoritative Business representation to
+encode this default. When a Business or Platform includes a
+descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`;
+`scale` can only be omitted or explicitly set to `0`.
+
+### Unit vocabulary
+
+The Business **SHOULD** use the exact Rec20 Common Code unless no code
+accurately identifies the unit. When no Rec20 code accurately identifies the
+unit, the Business **MAY** use a custom unit identifier. If it does, the Business
+**MUST** use that identifier consistently for the same unit. The Platform
+**MUST** treat an unrecognized `unit` value as opaque. The following table is
+non-exhaustive:
+
+| Code  | Unit         |
+| :---- | :----------- |
+| `C62` | one / `each` |
+| `KGM` | kilogram     |
+| `GRM` | gram         |
+| `LBR` | pound        |
+| `MLT` | millilitre   |
+| `LTR` | litre        |
+| `MTR` | metre        |
+| `INH` | inch         |
+| `YRD` | yard         |
+| `FTK` | square foot  |
+| `MTK` | square metre |
+| `HUR` | hour         |
+| `MIN` | minute       |
+
+Rec20 includes X-prefixed package units derived from UN/CEFACT Recommendation
+21 (Rec21). UCP deliberately excludes those values from `quantity_unit`. The
+Business **MUST** make package form part of the purchasable variant's identity
+and count packages as `each`. The Business **MUST NOT** use an X-prefixed
+Rec21-derived package code as `quantity_unit`.
+
+### Display text
+
+When sending a unit descriptor, a Business or Platform **MUST** include
+`display_text`. The Platform **MUST** use that value when it does not recognize
+`unit`. For a recognized Rec20 code, the Platform **MAY** substitute its own
+localized label. The Business and Platform **MUST NOT** use `display_text` when
+matching machine identities or as an input to quantity conversion.
+
+Request assertions, mismatch handling, response echo, pricing, and lifecycle
+behavior are defined by the capability that uses the shared representation.
+
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to

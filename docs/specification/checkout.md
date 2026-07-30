@@ -51,6 +51,106 @@ Fulfillment is optional in the checkout object. This is done to enable a
 platform to perform checkout for digital goods without needing to furnish
 fulfillment details more relevant for physical goods.
 
+### Quantity and sale basis
+
+Checkout applies the shared
+[quantities and units](overview.md#quantities-and-units) contract, including the
+default (`C62`, `0`) identity. The Business determines each item's authoritative
+sale basis for the transaction. The Business's response is authoritative, and
+each `line_items[].quantity` is an integer step count in that basis.
+
+**Requesting a quantity.** When a Platform request omits
+`line_items[].item.quantity_unit`, the Platform makes no assertion about the
+sale-basis identity. The Business interprets `quantity` using the item's
+authoritative sale basis. A request for a measure-denominated item can therefore
+omit the descriptor without asserting the default identity.
+
+The Platform **MAY** include `quantity_unit` on a request line to assert the
+basis it believes it is ordering in. When the Platform includes it, the Business
+**MUST** compare the asserted and authoritative
+[machine identities](overview.md#quantities-and-units). An explicit assertion
+with `unit: "C62"` and effective `scale` `0` matches the default identity
+represented by an absent descriptor; a `display_text` difference is not a
+mismatch.
+
+If an asserted `quantity_unit` does not match the item's authoritative sale
+basis, the Business **MUST** reject that line with a recoverable business outcome
+that names the authoritative unit — a `messages[]` entry on a `200` response,
+not a transport error (see [Error Handling](#error-handling)). The Business and
+Platform **MUST NOT** silently convert a quantity between units in either
+direction. A quantity the receiver cannot read in the authoritative basis is an
+error to surface, not a value to reinterpret.
+
+**Echoing the sale basis.** The Business **MAY** omit `quantity_unit` from a
+response line whose effective sale-basis identity is the default identity. The
+Business **MUST** include `quantity_unit` on the item in every Cart, Checkout,
+and Order line response whenever the effective identity differs from the
+default identity. Omission would otherwise make a measure-denominated line read
+as a count of whole items.
+
+**Pricing a line.** `item.price` is the amount per one whole
+`quantity_unit.unit` (for example, per kg or per hour); when `quantity_unit` is
+absent, it is the price per `each`. The Business **MUST** compute the line total
+as `price × quantity × 10^-scale` and round once at the line. The presented
+`totals[]` remain authoritative (see [Totals](checkout.md#totals)). The Platform
+**MUST NOT** recompute a line total from the fractional quantity and substitute
+its own rounding.
+
+For example, a Business sells loose stainless steel fasteners by the kilogram
+with `quantity_unit`
+`{ "unit": "KGM", "scale": 2, "display_text": "kg" }` and a `price` of `1299`
+($12.99/kg). A Buyer orders 1.50 kg, so the Platform sends `quantity` `150` — 150
+hundredth-of-a-kilogram steps. The line total is
+`1299 × 150 × 10^-2 = 1948.5`, rounded once to `1949` ($19.49):
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
+  "id": "chk_fasteners_1",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
+      },
+      "quantity": 150,
+      "totals": [
+        { "type": "subtotal", "amount": 1949 },
+        { "type": "total", "amount": 1949 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1949 },
+    { "type": "total", "amount": 1949 }
+  ],
+  "links": []
+}
+```
+
+If the Platform instead asserts a unit the Business does not sell the item in,
+the Business returns the current Checkout with a recoverable message that names
+the authoritative unit and leaves the quantity for the Platform to resubmit:
+
+<!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
+```json
+[
+  {
+    "type": "error",
+    "code": "quantity_unit_mismatch",
+    "severity": "recoverable",
+    "path": "$.line_items[0].item.quantity_unit",
+    "content": "This item is sold by the kilogram (KGM). Resubmit the quantity in 0.01-kg steps."
+  }
+]
+```
+
 ### Checkout Status Lifecycle
 
 The checkout `status` field indicates the current phase of the session and

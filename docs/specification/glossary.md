@@ -46,6 +46,8 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 | **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                         |
 | **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                             |
 | **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                     |
+| **Quantity Unit**            | -       | A [sale-basis descriptor](overview.md#quantities-and-units) with machine identity (`unit`, effective `scale`); `display_text` is excluded.            |
+| **Step**                     | -       | One [integer increment](overview.md#quantities-and-units) in the authoritative sale basis: `10^-scale` of `unit`.                                     |
 
 ## Payments
 

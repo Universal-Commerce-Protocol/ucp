@@ -63,7 +63,11 @@
     },
     "price": {
       "$ref": "../../common/types/price.json",
-      "description": "Current selling price."
+      "description": "Current selling price. Price is the amount per one whole `quantity_unit.unit` (for example, per lb or per hour); when `quantity_unit` is absent, it is per `each`. Line total is `price × quantity × 10^-scale`, computed and rounded once by the Business; `totals` remain authoritative."
+    },
+    "quantity_unit": {
+      "$ref": "../../common/types/unit.json",
+      "description": "Sale basis this variant's `quantity` is denominated in. The default sale basis is `each`, whose machine identity is (`C62`, 0); `C62` is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default."
     },
     "list_price": {
       "$ref": "../../common/types/price.json",
@@ -71,12 +75,12 @@
     },
     "unit_price": {
       "type": "object",
-      "description": "Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.",
+      "description": "Price per standard unit of measurement. MAY be omitted when unit pricing does not apply. `unit_price.currency` MUST equal `price.currency`; the comparator MUST NOT perform currency conversion. `measure.unit` and `reference.unit` MUST be identical; cross-unit conversion is not permitted. Their scales MAY differ; each value represents `value × 10^-scale`.",
       "required": ["amount", "currency", "measure", "reference"],
       "properties": {
         "amount": {
           "$ref": "../../common/types/amount.json",
-          "description": "Unit price in ISO 4217 minor units. Business MUST return precomputed unit price value: (variant.price / measure.value) * reference.value."
+          "description": "Unit price in ISO 4217 minor units. After satisfying the same-unit invariant, the Business MUST compute the comparator as `(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)` and round it once to ISO 4217 minor units according to its pricing rules. The returned `unit_price.amount` is authoritative; the Platform MUST NOT recompute or substitute its own result."
         },
         "currency": {
           "type": "string",
@@ -84,22 +88,36 @@
           "description": "ISO 4217 currency code."
         },
         "measure": {
-          "type": "object",
-          "description": "Product quantity in packaging (e.g., 750ml bottle).",
-          "required": ["value", "unit"],
-          "properties": {
-            "value": { "type": "number", "description": "Package quantity." },
-            "unit": { "type": "string", "description": "Unit of measurement." }
-          }
+          "description": "Product quantity in packaging/content (for example, a 750 mL bottle), distinct from `quantity_unit`, which defines the sale basis. Its integer `value` MUST be at least 1.",
+          "allOf": [
+            {
+              "$ref": "../../common/types/measure.json"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "minimum": 1
+                }
+              }
+            }
+          ]
         },
         "reference": {
-          "type": "object",
-          "description": "Denominator for unit price display (e.g., per 100ml, per 1kg).",
-          "required": ["value", "unit"],
-          "properties": {
-            "value": { "type": "integer", "description": "Reference quantity." },
-            "unit": { "type": "string", "description": "Unit of measurement." }
-          }
+          "description": "Denominator for unit price display (for example, per 100 mL or per 1 kg). Its integer `value` MUST be at least 1.",
+          "allOf": [
+            {
+              "$ref": "../../common/types/measure.json"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "minimum": 1
+                }
+              }
+            }
+          ]
         }
       }
     },
