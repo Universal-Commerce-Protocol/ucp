@@ -156,8 +156,9 @@ See [Message Signatures](signatures.md) for key format and rotation.
 When a verifier selects a key, it **MUST** ensure that the protected JWS
 `alg` is compatible with the key's curve according to the table above. This
 binding follows [RFC 8725 Section 3.1](https://datatracker.ietf.org/doc/html/rfc8725#section-3.1).
-If the JWK includes its optional `alg` member, that value **MUST** also match
-the protected JWS `alg`. A mismatch makes the AP2 signature invalid.
+For keys used with this extension, the JWK `alg` member **MUST** be present and
+**MUST** match the protected JWS `alg`. A missing or mismatched `alg` makes the
+AP2 signature invalid.
 
 The profile JWK vocabulary is open, so a P-521 key used for an AP2 `ES512`
 signature can be published in the same `keys[]` array used for other UCP
