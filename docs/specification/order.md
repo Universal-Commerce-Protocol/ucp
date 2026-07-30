@@ -94,6 +94,11 @@ Businesses MAY surface a snapshot of the originating checkout's
 `order.attribution`. See [Attribution](overview.md#attribution) for the
 underlying contract.
 
+### Policies
+
+Businesses MAY surface a snapshot of the policies that applied at checkout on
+the order. See [Policies](overview.md#policies) for the underlying contract.
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of

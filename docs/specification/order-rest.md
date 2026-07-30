@@ -102,7 +102,7 @@ Returns the current-state snapshot of an order.
     UCP-Agent: profile="https://platform.example/.well-known/ucp"
     Accept: application/json
     Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent");created=1706800000;keyid="platform-2026"
-    Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+    Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
     ```
 
 === "Response"

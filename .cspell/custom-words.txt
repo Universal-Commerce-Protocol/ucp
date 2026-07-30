@@ -107,6 +107,7 @@ openrpc
 paypal
 permissionless
 podman
+prefetchers
 preorder
 preorders
 proto
@@ -128,8 +129,10 @@ talla
 thibmeu
 tracción
 ttclid
+unparseable
 upsell
 upsells
+userinfo
 variante
 vulnz
 webbotauth
