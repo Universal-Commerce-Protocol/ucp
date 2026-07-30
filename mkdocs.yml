@@ -53,6 +53,7 @@ nav:
           - Buyer Consent Extension: specification/buyer-consent.md
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
+          - Gift Extension: specification/gift.md
           - Loyalty Extension: specification/loyalty.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
@@ -322,6 +323,10 @@ plugins:
           - specification/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
+          - specification/gift.md: >-
+              Gift Extension for recipient-based checkout, defining
+              recipient-required checkout and privacy-preserving checkout
+              handoff and resumption.
           - specification/loyalty.md: >-
               Loyalty Extension, enabling high-fidelity member benefit recognition
               during catalog, cart, and checkout by defining schemas for
