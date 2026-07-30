@@ -72,14 +72,19 @@ Filters locations based on their operating hours:
 Separates static location characteristics from dynamic availability:
 
 * **`amenities`** (Array of Strings): Static features or services of the
-    location (e.g., `free_wifi`, `parking`, `outdoor_seating`, `curbside_pickup`, `vegetarian`).
-    All specified amenities **MUST** be supported by the location (AND semantic).
+    location. All specified amenities **MUST** be supported by the location (AND semantic).
+    See [Amenity Vocabulary](#amenity-vocabulary) for well-known values.
 * **`inventory`** (Array of Objects): Real-time availability of items/goods at
     the location. Some industry specific use cases include:
     * *Shopping*: Checking stock availability for specific products or variants.
     * *Food Ordering*: Checking offering availability of specific dishes or menu items.
     Each inventory filter requires an `id` (e.g., product/dish ID) and can optionally specify
     a coarse `availability_status` value.
+
+#### Amenity Vocabulary
+
+UCP defines an open string vocabulary for amenities via `amenity_type.json` to ensure cross-business
+interoperability. Implementations **SHOULD** map their internal features to the well-known types where applicable.
 
 ### Geographic & Geofencing Filter
 

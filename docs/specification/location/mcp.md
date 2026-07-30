@@ -140,9 +140,7 @@ Maps to the [Location Search](search.md) capability.
               "hours": {
                 "open_now": true
               },
-              "offerings": {
-                "amenities": ["curbside_pickup"]
-              },
+              "amenities": ["curbside_pickup"],
               "geo": {
                 "serves": {
                   "point": {
@@ -190,6 +188,7 @@ Maps to the [Location Search](search.md) capability.
                 "latitude": 37.420,
                 "longitude": -122.080
               },
+              "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
               "timezone": "America/Los_Angeles"
             }
           ]
@@ -268,6 +267,7 @@ Maps to the [Location Lookup](lookup.md) capability.
                 "latitude": 40.707,
                 "longitude": -74.011
               },
+              "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
               "timezone": "America/New_York"
             }
           ],
@@ -297,6 +297,10 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 
 ## Entities
 
+### Amenity Type
+
+{{ schema_fields('types/amenity_type', 'location/mcp') }}
+
 ### Location {: #location-entity }
 
 {{ schema_fields('types/location', 'location/mcp') }}
@@ -304,10 +308,6 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 ### Location Filter {: #location-filter-schema }
 
 {{ schema_fields('types/location_filter', 'location/mcp') }}
-
-### Location Offering Filter {: #location-offering-filter-schema }
-
-{{ schema_fields('types/location_offering_filter', 'location/mcp') }}
 
 ### Error Response {: #error-response }
 

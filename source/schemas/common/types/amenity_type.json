@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/amenity_type.json",
+  "title": "Amenity Type",
+  "description": "The type of amenity supported by a vertical-agnostic location. Some well-known values are defined below as examples and have standardized semantics; freeform codes are permitted.",
+  "type": "string",
+  "examples": [
+    "in_store_pickup",
+    "curbside_pickup",
+    "drive_through"
+  ]
+}

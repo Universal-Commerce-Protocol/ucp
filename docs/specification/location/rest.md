@@ -94,9 +94,7 @@ Maps to the [Location Search](search.md) capability.
         "hours": {
           "open_now": true
         },
-        "offerings": {
-          "amenities": ["curbside_pickup"]
-        },
+        "amenities": ["curbside_pickup"],
         "geo": {
           "serves": {
             "point": {
@@ -141,6 +139,7 @@ Maps to the [Location Search](search.md) capability.
             "latitude": 37.420,
             "longitude": -122.080
           },
+          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
           "timezone": "America/Los_Angeles"
         }
       ]
@@ -167,14 +166,12 @@ Maps to the [Location Search](search.md) capability.
         "hours": {
           "open_now": true
         },
-        "offerings": {
-          "inventory": [
-            {
-              "id": "item_id_phone_15_pro",
-              "availability_status": "in_stock"
-            }
-          ]
-        },
+        "inventory": [
+          {
+            "id": "item_id_phone_15_pro",
+            "availability_status": "in_stock"
+          }
+        ],
         "geo": {
           "distance": {
             "center": {
@@ -219,6 +216,7 @@ Maps to the [Location Search](search.md) capability.
             "latitude": 40.709,
             "longitude": -74.008
           },
+          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
           "timezone": "America/New_York"
         }
       ]
@@ -279,6 +277,7 @@ Maps to the [Location Lookup](lookup.md) capability.
             "latitude": 40.707,
             "longitude": -74.011
           },
+          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
           "timezone": "America/New_York",
           "hours": [
             {
@@ -341,6 +340,7 @@ Maps to the [Location Lookup](lookup.md) capability.
             "latitude": 40.790,
             "longitude": -73.950
           },
+          "amenities": ["in_store_pickup"],
           "timezone": "America/New_York",
           "hours": [
             {
@@ -431,6 +431,7 @@ Maps to the [Location Lookup](lookup.md) capability.
             "latitude": 40.707,
             "longitude": -74.011
           },
+          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
           "timezone": "America/New_York",
           "hours": [
             {
@@ -510,6 +511,10 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 {{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'location/rest') }}
 
+### Amenity Type
+
+{{ schema_fields('types/amenity_type', 'location/rest') }}
+
 ### Location {: #location-entity }
 
 {{ schema_fields('types/location', 'location/rest') }}
@@ -517,10 +522,6 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 ### Location Filter {: #location-filter-schema }
 
 {{ schema_fields('types/location_filter', 'location/rest') }}
-
-### Location Offering Filter {: #location-offering-filter-schema }
-
-{{ schema_fields('types/location_offering_filter', 'location/rest') }}
 
 ### Error Response {: #error-response }
 

@@ -38,6 +38,14 @@
       "description": "Geographic coordinates and geofence for the location.",
       "ucp_request": "omit"
     },
+    "amenities": {
+      "type": "array",
+      "description": "Static features of the location (e.g., 'free_wifi', 'wheelchair_accessible', 'parking', 'curbside_pickup').",
+      "items": {
+        "$ref": "amenity_type.json"
+      },
+      "ucp_request": "omit"
+    },
     "hours": {
       "type": "array",
       "description": "Regular weekly operating hours. Support split hours through multiple entries on the same day and overnight hours (open > close). Omission of days implies full day closures.",
