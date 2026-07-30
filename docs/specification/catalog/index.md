@@ -64,9 +64,9 @@ transaction. The descriptor follows the shared
 absence advertises the default `each` basis; the Business advertises a
 non-`each` basis by including the descriptor.
 
-The variant identity, such as a stock keeping unit (SKU), defines *what* each
-step is a step of; `quantity_unit` defines *how much* one step is. Stainless
-steel fasteners whose `quantity_unit` is
+`variants[].id` identifies the purchasable variant; `quantity_unit` defines the
+denomination and granularity used to order it.
+Stainless steel fasteners whose `quantity_unit` is
 `{ "unit": "KGM", "scale": 2, "display_text": "kg" }` are sold in
 hundredth-of-a-kilogram steps, so a `quantity` of `150` represents 1.50 kg.
 

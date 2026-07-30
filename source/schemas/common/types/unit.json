@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/unit.json",
   "title": "Unit",
-  "description": "A reusable unit descriptor for quantities and measures. Its machine identity is (`unit`, effective `scale`), where effective `scale` is the provided `scale` or 0; `display_text` is excluded.",
+  "description": "A reusable unit descriptor for quantities and measures. Its unit-descriptor machine identity is (`unit`, effective `scale`), where effective `scale` is the provided `scale` or 0; `display_text` is excluded.",
   "type": "object",
   "required": ["unit", "display_text"],
   "properties": {

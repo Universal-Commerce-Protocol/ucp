@@ -47,7 +47,8 @@ One step is `10^-scale` of `unit`. The shared measure type adds a required
 integer `value`, which is also a count of those steps. Because these counts are
 integers, `scale` fixes the representation's granularity. A unit descriptor's
 machine identity is the (`unit`, effective `scale`) pair; `display_text` is not
-part of that identity.
+part of that identity. This identity applies only to the unit descriptor; it
+does not identify the purchasable item or exhaustively describe one sale unit.
 
 The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is
 the United Nations Centre for Trade Facilitation and Electronic Business

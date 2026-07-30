@@ -90,8 +90,10 @@ as a count of whole items.
 
 **Pricing a line.** `item.price` is the amount per one whole
 `quantity_unit.unit` (for example, per kg or per hour); when `quantity_unit` is
-absent, it is the price per `each`. The Business **MUST** compute the line total
-as `price × quantity × 10^-scale` and round once at the line. The presented
+absent, it is the price per `each`. Other characteristics of a sale unit may
+affect the quoted `item.price`, but do not change its sale-basis denominator.
+The Business **MUST** compute the line total as
+`price × quantity × 10^-scale` and round once at the line. The presented
 `totals[]` remain authoritative (see [Totals](checkout.md#totals)). The Platform
 **MUST NOT** recompute a line total from the fractional quantity and substitute
 its own rounding.

@@ -62,6 +62,10 @@ Line items reflect what was purchased at checkout and their current state:
   absent `quantity_unit` means the quantities count whole items (`each`) at
   `scale` 0
 
+All order lifecycle arithmetic over quantities operates on sale-basis step
+counts inherited from the item; other item characteristics do not enter that
+arithmetic.
+
 ### Fulfillment
 
 Fulfillment tracks how items are delivered to the buyer.
