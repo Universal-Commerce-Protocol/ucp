@@ -283,38 +283,47 @@ Maps to the [Location Lookup](lookup.md) capability.
           "hours": [
             {
               "day": "monday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "tuesday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "12:00"
+            },
+            {
+              "day": "tuesday",
+              "open": "13:00",
+              "close": "21:00"
             },
             {
               "day": "wednesday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "thursday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "friday",
-              "intervals": [{"open": "09:00", "close": "22:00"}]
+              "open": "09:00",
+              "close": "22:00"
             },
             {
               "day": "saturday",
-              "intervals": [{"open": "10:00", "close": "20:00"}]
-            },
-            {
-              "day": "sunday",
-              "is_closed": true
+              "open": "10:00",
+              "close": "20:00"
             }
           ],
           "exception_hours": [
             {
-              "date": "2026-11-26",
+              "from": "2026-11-26",
+              "through": "2026-11-26",
               "label": "Thanksgiving",
-              "is_closed": true
+              "open": "00:00",
+              "close": "00:00"
             }
           ]
         },
@@ -336,38 +345,37 @@ Maps to the [Location Lookup](lookup.md) capability.
           "hours": [
             {
               "day": "monday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "tuesday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "wednesday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "thursday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "friday",
-              "intervals": [{"open": "09:00", "close": "22:00"}]
-            },
-            {
-              "day": "saturday",
-              "is_closed": true
-            },
-            {
-              "day": "sunday",
-              "is_closed": true
+              "open": "09:00",
+              "close": "22:00"
             }
           ],
           "exception_hours": [
             {
-              "date": "2026-11-26",
+              "from": "2026-11-26",
+              "through": "2026-11-26",
               "label": "Thanksgiving",
-              "is_closed": true
+              "open": "00:00",
+              "close": "00:00"
             }
           ]
         }
@@ -427,38 +435,42 @@ Maps to the [Location Lookup](lookup.md) capability.
           "hours": [
             {
               "day": "monday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "tuesday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "wednesday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "thursday",
-              "intervals": [{"open": "09:00", "close": "21:00"}]
+              "open": "09:00",
+              "close": "21:00"
             },
             {
               "day": "friday",
-              "intervals": [{"open": "09:00", "close": "22:00"}]
+              "open": "09:00",
+              "close": "22:00"
             },
             {
               "day": "saturday",
-              "intervals": [{"open": "10:00", "close": "20:00"}]
-            },
-            {
-              "day": "sunday",
-              "is_closed": true
+              "open": "10:00",
+              "close": "20:00"
             }
           ],
           "exception_hours": [
             {
-              "date": "2026-11-26",
+              "from": "2026-11-26",
+              "through": "2026-11-26",
               "label": "Thanksgiving",
-              "is_closed": true
+              "open": "00:00",
+              "close": "00:00"
             }
           ]
         }
