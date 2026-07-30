@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location_base.json",
+  "title": "Base Location",
+  "description": "A minimalist representation of a physical business location. Contains only the stable identifier, display name, and postal address. Used in contexts (like checkout & catalog lookup) to minimize payload size and avoid exposing unnecessary discovery details.",
+  "type": "object",
+  "required": ["id", "name"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique location identifier.",
+      "ucp_request": {
+        "transition": {
+          "from": "omit",
+          "to": "optional",
+          "description": "Location ids MAY be specified by platforms in requests."
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "description": "Location display name.",
+      "ucp_request": {
+        "transition": {
+          "from": "required",
+          "to": "omit",
+          "description": "Location names should not be specified by platforms."
+        }
+      }
+    },
+    "address": {
+      "$ref": "postal_address.json",
+      "description": "Physical address of the location."
+    }
+  }
+}
