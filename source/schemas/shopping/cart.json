@@ -47,7 +47,13 @@
       "description": "Unique cart identifier.",
       "ucp_request": {
         "create": "omit",
-        "update": "required"
+        "update": {
+          "transition": {
+            "from": "required",
+            "to": "omit",
+            "description": "Id should be omitted in requests to favour transport level identifications (no duplication needed)."
+          }
+        }
       }
     },
     "line_items": {
