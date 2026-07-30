@@ -333,7 +333,7 @@ UCP-Agent: profile="https://platform.example/profile"
 Content-Type: application/json
 
 {
-  "id": "cart_abc123",
+  "id": "cart_abc123",  // deprecated: id is provided in URL path
   "line_items": [
     {
       "item": {
