@@ -143,3 +143,17 @@ The capabilities above are bound to specific transport protocols:
 
 * [REST Binding](rest.md): RESTful API mapping.
 * [MCP Binding](mcp.md): Model Context Protocol mapping via JSON-RPC.
+
+## Security & Privacy Considerations
+
+1. **Coarse-by-default**: Platforms **SHOULD** default to sending coarse location hints (e.g., postal code or rounded coordinates) during the discovery phase.
+  Precise locations/coordinates **SHOULD** only be shared when the user explicitly consents or selects a specific location.
+2. **Inventory Probing Mitigation**: Businesses **SHOULD** implement rate-limiting on search requests, especially if containing inventory availability filters,
+  to prevent scraping & aggressive numeration of the entire directory.
+3. **Private/Dark Locations**: Businesses **MUST** filter out internal-only or non-user-accessible locations (e.g., dark kitchens, fulfillment-only hubs)
+  from search results.
+4. **Physical Address Spoofing (Integrity)**: While location discovery is read-only, tampering with physical addresses in responses (e.g., through MITM attacks)
+  poses a physical safety/fraud risk. Platforms **SHOULD** verify signatures on location payloads before rendering them to users.
+5. **Data Retention & Logging Sanitization**: Businesses **MUST NOT** persist precise location inputs beyond the lifecycle of the request, unless explicit user
+  consent is collected. Server logs should sanitize coordinate inputs by truncating decimal places (e.g., to 2 decimal places, ~1km accuracy) to prevent
+  accidental storage of precise user history.
