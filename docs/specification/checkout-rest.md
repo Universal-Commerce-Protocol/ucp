@@ -237,12 +237,20 @@ supplied resource replaces the existing Checkout session state. The Platform
 new Update Checkout request in that state, it **MUST** leave the Checkout
 unchanged and return the current Checkout with a recoverable error Message.
 
+When the buyer-consent capability is active, captured `buyer.consent` is exempt
+from the full replacement: an update that omits `consent` MUST NOT clear
+previously submitted consent. See
+[Buyer Consent](buyer-consent.md#normative-requirements).
+
 #### Update Buyer Info
 
 All fields in `buyer` are optional, allowing the Platform to progressively build
 the Checkout state across multiple calls. Outside `complete_in_progress`, each
 Update Checkout replaces the entire Checkout session, so the Platform **MUST**
-include all previously set fields it intends to retain.
+include all previously set fields it intends to retain. Captured `buyer.consent`
+is the exception when the buyer-consent capability is active: an update that omits
+`consent` MUST NOT clear it (see
+[Buyer Consent](buyer-consent.md#normative-requirements)).
 
 === "Request"
 
