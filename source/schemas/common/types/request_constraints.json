@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/request_constraints.json",
   "title": "Request Constraints",
-  "description": "A closed, bounded JSON Schema Draft 2020-12 fragment that constrains a corresponding representation in a later request.",
+  "description": "Closed, bounded JSON Schema Draft 2020-12 fragment emitted and authoritatively enforced by the Business through registered `ucp.request_constraints` to narrow a corresponding representation in a later request.",
   "$ref": "#/$defs/object_constraint",
   "$defs": {
     "object_constraint": {

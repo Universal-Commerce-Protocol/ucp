@@ -515,7 +515,7 @@ object fields:
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
   Implementers should accept and process them as a no-op.
 
-## `$requestConstraints` Structural Vocabulary
+## The `request_constraints` Protocol Member
 
 Canonical placement, correspondence, lifecycle, and evaluation behavior is
 defined in
@@ -524,12 +524,15 @@ section defines how schema authors encode and adopt that behavior.
 
 ### Namespace and encoding
 
-`$requestConstraints` is ambient UCP structural vocabulary, not a JSON Schema
-keyword or an ordinary property of a response or request schema. UCP reserves
-`$`-prefixed member names on domain objects for structural vocabulary.
-Structural names use lower camel case; ordinary domain fields remain snake case.
-A Business or Platform publishing an extension **MUST NOT** define an extension
-member whose name begins with `$`.
+`request_constraints` is a response-only protocol member centrally registered
+in `ucp.json#/$defs/members`. Host domain schemas do not declare it. Its
+containing `ucp` object follows [The Reserved `ucp` Member](#the-reserved-ucp-member),
+including the rule that a closed host object explicitly declares an optional
+`ucp` property referencing `ucp.json#/$defs/members`. That declaration admits
+the centrally registered vocabulary; the host schema does not add an individual
+`request_constraints` property. Businesses and Platforms **MUST NOT** publish
+`ucp.request_constraints` in discovery profiles, and Platforms **MUST NOT**
+include it in requests.
 
 The shared `schemas/common/types/request_constraints.json` type has two closed
 constraint positions:
@@ -558,24 +561,24 @@ present, and both apply when both are present. No other member is valid.
 
 For each adoption, document:
 
-- the objects in authoritative Business responses that are eligible to carry
-  `$requestConstraints`;
-- the corresponding representation in a later request;
+- the authoritative Business response scopes eligible to carry
+  `ucp.request_constraints`;
+- the parent logical object's corresponding representation in a later request;
 - the target operation and operation-specific request schema; and
 - the lifecycle under which a later authoritative representation supersedes an
   earlier one and omission removes the constraint.
 
-The attachment identifies the constrained logical object, and the documented
-correspondence identifies its representation in the later request. Do not
-declare `$requestConstraints` under the ordinary `properties` of a response or
-request schema.
+The `ucp` object containing `request_constraints` annotates its parent logical
+object, and the documented correspondence identifies that object's
+representation in the later request. Central registration supplies the protocol
+member at every eligible scope; host domain schemas do not redeclare it.
 
 Ensure that names in `required` and under `properties` exist at the
 corresponding level of the intended composed, operation-specific request schema.
 Before emission, a Business **MUST** validate the fragment against the shared
 type and **MUST** ensure that every target name is valid in the actual composed
-request schema. A Platform that chooses to evaluate the fragment **MUST** perform the
-same checks first. A composed extension field is a valid target; a field
+request schema. A Platform that chooses to evaluate the fragment **MUST** perform
+the same checks first. A composed extension field is a valid target; a field
 omitted from that request by `ucp_request`, including a response-only field, is
 not.
 
