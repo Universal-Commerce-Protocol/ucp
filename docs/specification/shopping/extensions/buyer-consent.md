@@ -371,7 +371,16 @@ Handling](../checkout/index.md#error-handling) flow.
 
 2. **Confirm semantics.** The `consent` field is optional on requests;
    omitting it provides no consent update and the business retains its prior
-   position. When submitting `consent`, platforms MUST include every advertised
+   position. This persistence is an explicit exception to the cart and checkout
+   full-replacement rules (see
+   [Update Cart](shopping/cart/index.md#update-cart) and
+   [Update Checkout](shopping/checkout/index.md#update-checkout)): a business
+   MUST retain the last submitted `buyer.consent` state across subsequent cart
+   or checkout updates that omit `consent`, and MUST NOT reset it to
+   advertised defaults, so that an update sent for an unrelated field (for
+   example a fulfillment change) does not silently discard captured consent.
+   When submitting `consent`,
+   platforms MUST include every advertised
    purpose and segment key, carrying both `granted` and `source` for each.
    Omitting an advertised key within a submitted `consent` map MUST NOT be
    used to signal any value.
