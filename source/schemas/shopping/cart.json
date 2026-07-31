@@ -47,7 +47,13 @@
       "description": "Unique cart identifier.",
       "ucp_request": {
         "create": "omit",
-        "update": "required"
+        "update": {
+          "transition": {
+            "from": "required",
+            "to": "omit",
+            "description": "Id should be omitted in requests to favour transport level identifications (no duplication needed)."
+          }
+        }
       }
     },
     "line_items": {
@@ -101,6 +107,11 @@
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this cart.",
+      "ucp_request": "omit"
+    },
     "messages": {
       "type": "array",
       "items": {
@@ -115,6 +126,14 @@
         "$ref": "../common/types/link.json"
       },
       "description": "Optional merchant links (policies, FAQs).",
+      "ucp_request": "omit"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "types/policy.json"
+      },
+      "description": "Policies (e.g., return/refund terms) that apply to the items in this cart. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"
     },
     "continue_url": {
