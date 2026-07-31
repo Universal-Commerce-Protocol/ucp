@@ -68,15 +68,19 @@ The catalog is where the Platform learns the sale basis before transacting:
 `unit` and `scale` define how quantities are denominated, and an optional
 [`increment`](../overview.md#ordering-increment) advertises the ordering
 granularity the Business sells in, letting the Platform build quantity
-steppers and validate input before submission. A Business selling loose
-fasteners by the kilogram in quarter-kilogram multiples advertises
-`{ "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }`.
+steppers and validate input before submission. A Business selling bananas by
+the pound in quarter-pound multiples advertises
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
+
+The sale basis is not limited to physical measure: metered offerings —
+parking by the minute, labor by the hour — use the same descriptor (`MIN`,
+`HUR`) with the same contract.
 
 `variants[].id` identifies the purchasable variant; `quantity_unit` defines the
 denomination and granularity used to order it.
-Stainless steel fasteners whose `quantity_unit` is
-`{ "unit": "KGM", "scale": 2, "display_text": "kg" }` are sold in
-hundredth-of-a-kilogram steps, so a `quantity` of `150` represents 1.50 kg.
+Bananas whose `quantity_unit` is
+`{ "unit": "LBR", "scale": 2, "display_text": "lb" }` are sold in
+hundredth-of-a-pound steps, so a `quantity` of `150` represents 1.50 lb.
 
 ### Distinction from unit price
 
@@ -129,30 +133,30 @@ carrying a `unit_price` per metre. Its `measure` can be
 
 ### Example: a good sold by weight
 
-A `get_product` response for loose metal fasteners sold by the kilogram. The
-variant advertises `quantity_unit`
-`{ "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }` and a
-`price` of `1299` — $12.99 per whole kilogram, sold in 0.25-kg multiples:
+A `get_product` response for bananas sold by the pound. The variant advertises
+`quantity_unit`
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a
+`price` of `79` — $0.79 per whole pound, sold in 0.25-lb multiples:
 
 <!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
 ```json
 {
   "ucp": { "version": "{{ ucp_version }}" },
   "product": {
-    "id": "prod_fasteners",
-    "title": "Stainless Steel Fasteners",
-    "description": { "plain": "Fasteners sold by the kilogram." },
+    "id": "prod_bananas",
+    "title": "Bananas",
+    "description": { "plain": "Fresh bananas sold by the pound." },
     "price_range": {
-      "min": { "amount": 1299, "currency": "USD" },
-      "max": { "amount": 1299, "currency": "USD" }
+      "min": { "amount": 79, "currency": "USD" },
+      "max": { "amount": 79, "currency": "USD" }
     },
     "variants": [
       {
-        "id": "var_fasteners",
-        "title": "Stainless Steel Fasteners",
-        "description": { "plain": "Fasteners sold by the kilogram." },
-        "price": { "amount": 1299, "currency": "USD" },
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 },
+        "id": "var_bananas",
+        "title": "Bananas",
+        "description": { "plain": "Fresh bananas sold by the pound." },
+        "price": { "amount": 79, "currency": "USD" },
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 },
         "availability": { "available": true }
       }
     ]

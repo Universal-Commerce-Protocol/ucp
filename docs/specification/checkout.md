@@ -113,8 +113,9 @@ under the response-echo rule. The Platform recovers by reading the echoed
 descriptor — or re-reading the catalog — and resubmitting; the message
 `content` is explanatory text for humans, never the recovery input.
 
-For example, stale data leads a Platform to believe an item sold by the
-kilogram is sold by the pound. It submits an update asserting that basis:
+For example, an industrial supplier sells loose fasteners by the kilogram,
+but stale data leads a Platform to believe they are sold by the pound. It
+submits an update asserting that basis:
 
 <!-- ucp:example schema=shopping/checkout op=update direction=request -->
 ```json
@@ -134,8 +135,8 @@ kilogram is sold by the pound. It submits an update asserting that basis:
 
 A Business that converts applies the update as a visible revision.
 The line is denominated in the authoritative basis — the requested 2.75 lb
-converts to 1.25 kg, rounded once to `scale` 2 and landing on the item's
-0.25-kg ordering increment — and a warning marks the revision:
+converts to 1.25 kg, rounded once to `scale` 2 — and a warning marks the
+revision:
 
 <!-- ucp:example schema=shopping/checkout op=read -->
 ```json
@@ -151,7 +152,7 @@ converts to 1.25 kg, rounded once to `scale` 2 and landing on the item's
         "id": "var_fasteners",
         "title": "Stainless Steel Fasteners",
         "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
       },
       "quantity": 125,
       "totals": [
@@ -194,7 +195,7 @@ requested `275` — and the error names the authoritative basis:
         "id": "var_fasteners",
         "title": "Stainless Steel Fasteners",
         "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
       },
       "quantity": 150,
       "totals": [
@@ -235,8 +236,8 @@ also revise a quantity for its own reasons (for example, limited stock); such
 revisions **SHOULD** stay on the increment grid so subsequent Platform stepper
 edits from the revised value remain on-grid.
 
-For example, the fasteners above are sold in quarter-kilogram multiples
-(`increment` `25` at `scale` `2`). A request for `quantity` `137` (1.37 kg) is
+For example, bananas sold by the pound in quarter-pound multiples
+(`increment` `25` at `scale` `2`). A request for `quantity` `137` (1.37 lb) is
 off-increment; a Business that snaps it returns the line revised to `125` with
 a warning:
 
@@ -247,7 +248,7 @@ a warning:
     "type": "warning",
     "code": "quantity_increment_revised",
     "path": "$.line_items[0].quantity",
-    "content": "This item is sold in 0.25 kg increments. Your requested 1.37 kg was adjusted to 1.25 kg."
+    "content": "This item is sold in 0.25 lb increments. Your requested 1.37 lb was adjusted to 1.25 lb."
   }
 ]
 ```
@@ -269,39 +270,39 @@ The Business **MUST** compute the line total as
 **MUST NOT** recompute a line total from the fractional quantity and substitute
 its own rounding.
 
-For example, a Business sells loose stainless steel fasteners by the kilogram
-with `quantity_unit`
-`{ "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }` and a
-`price` of `1299` ($12.99/kg). A Buyer orders 1.50 kg, so the Platform sends
-`quantity` `150` — 150 hundredth-of-a-kilogram steps. The line total is
-`1299 × 150 × 10^-2 = 1948.5`, rounded once to `1949` ($19.49):
+For example, a Business sells bananas by the pound with `quantity_unit`
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a
+`price` of `79` ($0.79/lb). A Buyer orders 1.50 lb, so the Platform sends
+`quantity` `150` — 150 hundredth-of-a-pound steps. The line total is
+`79 × 150 × 10^-2 = 118.5`, rounded once per its pricing rules to `119`
+($1.19):
 
 <!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
   "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
-  "id": "chk_fasteners_1",
+  "id": "chk_bananas_1",
   "status": "incomplete",
   "currency": "USD",
   "line_items": [
     {
-      "id": "li_fasteners",
+      "id": "li_bananas",
       "item": {
-        "id": "var_fasteners",
-        "title": "Stainless Steel Fasteners",
-        "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+        "id": "var_bananas",
+        "title": "Bananas",
+        "price": 79,
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }
       },
       "quantity": 150,
       "totals": [
-        { "type": "subtotal", "amount": 1949 },
-        { "type": "total", "amount": 1949 }
+        { "type": "subtotal", "amount": 119 },
+        { "type": "total", "amount": 119 }
       ]
     }
   ],
   "totals": [
-    { "type": "subtotal", "amount": 1949 },
-    { "type": "total", "amount": 1949 }
+    { "type": "subtotal", "amount": 119 },
+    { "type": "total", "amount": 119 }
   ],
   "links": []
 }

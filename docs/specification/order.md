@@ -67,9 +67,9 @@ counts inherited from the item; other item characteristics do not enter that
 arithmetic. Business-recorded quantities — fulfillment events, adjustments, and
 revised totals — are bounded only by `scale`: a declared ordering
 [`increment`](overview.md#ordering-increment) binds Platform requests at cart
-and checkout and does not constrain what the Business records (a 0.25-kg
+and checkout and does not constrain what the Business records (a 0.25-lb
 ordering increment does not prevent recording an actual picked weight of
-1.45 kg).
+1.90 lb).
 
 ### Fulfillment
 
@@ -152,8 +152,8 @@ Line items reflect what was purchased at checkout and their current state.
 
 When the item is measure-denominated these are step counts — for an
 `item.quantity_unit` of
-`{ "unit": "KGM", "scale": 2, "display_text": "kg" }`, `fulfilled: 50` means
-0.50 kg fulfilled.
+`{ "unit": "LBR", "scale": 2, "display_text": "lb" }`, `fulfilled: 50` means
+0.50 lb fulfilled.
 
 **Status Derivation:**
 
@@ -301,14 +301,14 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 
 ## Example: goods sold by measure
 
-An order for loose stainless steel fasteners sold by the kilogram
-(`item.quantity_unit`
-`{ "unit": "KGM", "scale": 2, "display_text": "kg" }`). Quantities are step
-counts: the Buyer ordered 1.50 kg (`total: 150`), of which 0.50 kg has shipped
-(`fulfilled: 50`), so the line is `partial`. A later return of 0.25 kg is
-recorded as an adjustment of `-25` steps. Amounts are priced at $12.99/kg and
-rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
-`1299 × 0.25 = 324.75`, rounded to `325`:
+An order for bananas sold by the pound (`item.quantity_unit`
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`).
+Quantities are step counts: the Buyer ordered 1.50 lb (`total: 150`), of which
+0.50 lb has shipped (`fulfilled: 50`), so the line is `partial`. A later
+return of 0.25 lb is recorded as an adjustment of `-25` steps. Amounts are
+priced at $0.79/lb and rounded once — the line total is `79 × 1.50 = 118.5`,
+rounded to `119`, and the return credits `79 × 0.25 = 19.75`, rounded to
+`20`:
 
 <!-- ucp:example schema=shopping/order op=read -->
 ```json
@@ -317,23 +317,23 @@ rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
     "version": "{{ ucp_version }}",
     "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
   },
-  "id": "order_fasteners_1",
-  "checkout_id": "chk_fasteners_1",
-  "permalink_url": "https://business.example.com/orders/fasteners1",
+  "id": "order_bananas_1",
+  "checkout_id": "chk_bananas_1",
+  "permalink_url": "https://business.example.com/orders/bananas1",
   "currency": "USD",
   "line_items": [
     {
-      "id": "li_fasteners",
+      "id": "li_bananas",
       "item": {
-        "id": "var_fasteners",
-        "title": "Stainless Steel Fasteners",
-        "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+        "id": "var_bananas",
+        "title": "Bananas",
+        "price": 79,
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }
       },
       "quantity": { "original": 150, "total": 150, "fulfilled": 50 },
       "totals": [
-        { "type": "subtotal", "amount": 1949 },
-        { "type": "total", "amount": 1949 }
+        { "type": "subtotal", "amount": 119 },
+        { "type": "total", "amount": 119 }
       ],
       "status": "partial"
     }
@@ -344,10 +344,10 @@ rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
         "id": "evt_1",
         "occurred_at": "2026-01-08T10:30:00Z",
         "type": "shipped",
-        "line_items": [{ "id": "li_fasteners", "quantity": 50 }],
+        "line_items": [{ "id": "li_bananas", "quantity": 50 }],
         "tracking_number": "123456789",
         "tracking_url": "https://carrier.example/track/123456789",
-        "description": "0.50 kg shipped"
+        "description": "0.50 lb shipped"
       }
     ]
   },
@@ -357,14 +357,14 @@ rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
       "type": "return",
       "occurred_at": "2026-01-10T14:30:00Z",
       "status": "completed",
-      "line_items": [{ "id": "li_fasteners", "quantity": -25 }],
-      "totals": [{ "type": "total", "amount": -325 }],
-      "description": "Returned 0.25 kg"
+      "line_items": [{ "id": "li_bananas", "quantity": -25 }],
+      "totals": [{ "type": "total", "amount": -20 }],
+      "description": "Returned 0.25 lb"
     }
   ],
   "totals": [
-    { "type": "subtotal", "amount": 1949 },
-    { "type": "total", "amount": 1949 }
+    { "type": "subtotal", "amount": 119 },
+    { "type": "total", "amount": 119 }
   ]
 }
 ```
@@ -378,16 +378,14 @@ records the actual pick and reconciles the difference with an
 tolerance comparison is involved; the status derivation operates on exact step
 counts throughout.
 
-A Buyer orders 1.50 kg of the same loose fasteners at $12.99/kg, sold in
-quarter-kilogram increments (`quantity` `150`, line total
-`1299 × 1.50 = 1948.5`, rounded once to `1949`). The picker weighs out
-1.45 kg — an off-increment fact, recorded as-is, because the
+A Buyer orders 2.00 lb of the same bananas at $0.79/lb, sold in quarter-pound
+increments (`quantity` `200`, line total `79 × 2.00 = 158`). The picker weighs
+out 1.90 lb — an off-increment fact, recorded as-is, because the
 [`increment`](overview.md#ordering-increment) binds Platform ordering, not
-Business records. The fulfillment event records the actual `145` steps, and a
-`price_adjustment` of `-5` steps reconciles `total` to the actual pick with
-its price delta (`1299 × 0.05 = 64.95`, rounded once to `65`).
-`fulfilled == total` then holds exactly (`145 == 145`) and the line derives
-`fulfilled`:
+Business records. The fulfillment event records the actual `190` steps, and a
+`price_adjustment` of `-10` steps reconciles `total` to the actual pick with
+its price delta (`79 × 0.10 = 7.9`, rounded once to `8`). `fulfilled == total`
+then holds exactly (`190 == 190`) and the line derives `fulfilled`:
 
 <!-- ucp:example schema=shopping/order op=read -->
 ```json
@@ -396,23 +394,23 @@ its price delta (`1299 × 0.05 = 64.95`, rounded once to `65`).
     "version": "{{ ucp_version }}",
     "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
   },
-  "id": "order_fasteners_2",
-  "checkout_id": "chk_fasteners_2",
-  "permalink_url": "https://business.example.com/orders/fasteners2",
+  "id": "order_bananas_2",
+  "checkout_id": "chk_bananas_2",
+  "permalink_url": "https://business.example.com/orders/bananas2",
   "currency": "USD",
   "line_items": [
     {
-      "id": "li_fasteners",
+      "id": "li_bananas",
       "item": {
-        "id": "var_fasteners",
-        "title": "Stainless Steel Fasteners",
-        "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+        "id": "var_bananas",
+        "title": "Bananas",
+        "price": 79,
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }
       },
-      "quantity": { "original": 150, "total": 145, "fulfilled": 145 },
+      "quantity": { "original": 200, "total": 190, "fulfilled": 190 },
       "totals": [
-        { "type": "subtotal", "amount": 1949 },
-        { "type": "total", "amount": 1949 }
+        { "type": "subtotal", "amount": 158 },
+        { "type": "total", "amount": 158 }
       ],
       "status": "fulfilled"
     }
@@ -423,8 +421,8 @@ its price delta (`1299 × 0.05 = 64.95`, rounded once to `65`).
         "id": "evt_1",
         "occurred_at": "2026-01-12T09:15:00Z",
         "type": "shipped",
-        "line_items": [{ "id": "li_fasteners", "quantity": 145 }],
-        "description": "Picked 1.45 kg"
+        "line_items": [{ "id": "li_bananas", "quantity": 190 }],
+        "description": "Picked 1.90 lb"
       }
     ]
   },
@@ -434,14 +432,14 @@ its price delta (`1299 × 0.05 = 64.95`, rounded once to `65`).
       "type": "price_adjustment",
       "occurred_at": "2026-01-12T09:15:00Z",
       "status": "completed",
-      "line_items": [{ "id": "li_fasteners", "quantity": -5 }],
-      "totals": [{ "type": "total", "amount": -65 }],
-      "description": "Adjusted to actual picked weight of 1.45 kg"
+      "line_items": [{ "id": "li_bananas", "quantity": -10 }],
+      "totals": [{ "type": "total", "amount": -8 }],
+      "description": "Adjusted to actual picked weight of 1.90 lb"
     }
   ],
   "totals": [
-    { "type": "subtotal", "amount": 1949 },
-    { "type": "total", "amount": 1949 }
+    { "type": "subtotal", "amount": 158 },
+    { "type": "total", "amount": 158 }
   ]
 }
 ```

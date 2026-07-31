@@ -66,8 +66,8 @@ count plus a declared interpretation, exactly as an `amount` relates to its
 `currency`. Integer counts keep every total and comparison exact in every
 language, and UCP therefore defines no rounding tolerances and no epsilon
 comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
-legitimately differs from the ordered quantity — a 1.45 kg pick against a
-1.50 kg order — is a commercial fact reconciled through
+legitimately differs from the ordered quantity — a 1.90 lb pick against a
+2.00 lb order — is a commercial fact reconciled through
 [adjustments](order.md#adjustments) that move money together with quantity,
 not a numeric error absorbed by comparison fuzz.
 
@@ -125,7 +125,7 @@ optional positive integer, denominated in steps, whose effective value is the
 provided value or `1` when omitted. Only the sale basis carries an increment;
 the bare unit descriptor and the shared measure type do not. It declares the
 ordering granularity the Business sells in — for example, an item sold by the
-kilogram with `scale` `2` and `increment` `25` is sold in 0.25 kg multiples.
+pound with `scale` `2` and `increment` `25` is sold in 0.25 lb multiples.
 
 `scale` and `increment` play different roles: `scale` bounds what any quantity
 can express; `increment` shapes what the Platform asks for. The increment is
