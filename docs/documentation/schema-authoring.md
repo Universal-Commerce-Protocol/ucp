@@ -184,6 +184,43 @@ The same registry structure appears in three contexts with different field requi
 | Business Profile | `/.well-known/ucp` | `version`; may add `config` |
 | API Responses | Checkout/order payloads | `version` (+ `id` for handlers) |
 
+## The Reserved `ucp` Member
+
+The member name `ucp` is reserved at every UCP object scope for the protocol
+namespace — the top-level envelope is its root manifestation. See
+[The `ucp` Protocol Namespace](../specification/overview.md#the-ucp-protocol-namespace)
+for the normative rules. For schema authors this means:
+
+- **Never mint a domain field named `ucp`.** Domain schemas and extensions
+  **MUST NOT** declare a property named `ucp`; the name always denotes the
+  protocol namespace.
+- **Never declare the `ucp` member, either — with one exception, below.**
+  The member is UCP document grammar, defined centrally: any object scope
+  **MAY** carry it without the domain schema saying so, just as no schema
+  declares the name reservation.
+  Domain schemas and extensions do not add a `ucp` property. Instance
+  validation treats an ambient `ucp` member as an ignored unknown object;
+  validating its contents is a conformance-tooling concern.
+- **The vocabulary grows only in UCP core.** New protocol members are added
+  in `ucp.json#/$defs/members`, never in domain or extension schemas, and a
+  member is admitted only if it is safe to ignore — a consumer that does not
+  process it loses only that member's benefit, never correctness. The
+  container is open for forward compatibility with future UCP versions, not
+  as an extension point.
+- **Registry maps can never host `ucp`.** Registry keys are constrained by
+  `propertyNames` to reverse-domain names, which rejects `ucp` by
+  construction. This is why structural metadata about a map — such as
+  `map_order` — sits in the parent scope's protocol namespace rather than
+  inside the map itself.
+- **Closed objects must declare `ucp` explicitly.** Closing an object does
+  not exempt it from the protocol grammar. When an object scope in a UCP
+  payload is validated with `additionalProperties: false`, its schema
+  **MUST** declare an optional `ucp` property referencing
+  `ucp.json#/$defs/members` so the ambient member remains representable
+  there. This is the one exception to the never-declare rule above — and
+  one more reason to leave objects open (see
+  [Open Objects](#open-objects-additionalproperties)).
+
 ## The Entity Pattern
 
 All capabilities, services, and handlers extend a common `entity` base schema:
@@ -402,10 +439,7 @@ Marking an object as closed preemptively prevents any future non-breaking additi
 protocol, what would otherwise be a backward-compatible field addition (e.g., adding a "gift_message" field to an order)
 becomes a breaking change for any client validating against a closed schema.
 
-By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare
-circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity), security-critical
-payloads (where unknown fields may indicate tampering), or protocol envelopes (where strictness is useful to catch
-typos in core metadata like the `ucp` block).
+By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity) or security-critical payloads (where unknown fields may indicate tampering). The `ucp` protocol namespace itself is deliberately open (tolerant readers ignore unrecognized members); typo discipline there is an authoring-time concern, not a wire-validation one.
 
 **Anti-Pattern (Prevents adding new fields without a reversion):**
 

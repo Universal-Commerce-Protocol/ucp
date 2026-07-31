@@ -46,6 +46,25 @@
       "additionalProperties": true
     },
 
+    "map_order": {
+      "type": "object",
+      "description": "Preferred key-traversal order for sibling map-valued fields of the containing scope. Each property names a sibling map field and its array lists that map's keys in preferred order. Lists may be partial: unlisted keys remain valid and are appended using the field-defined fallback or lexicographic order. This member is not an allowlist; consumers ignore unknown or absent target fields.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "uniqueItems": true
+      }
+    },
+
+    "members": {
+      "type": "object",
+      "description": "Vocabulary and processing contract for the reserved `ucp` protocol-namespace member. Any object scope in a UCP payload MAY carry a `ucp` member conforming to this definition; consumers process recognized members and MUST ignore unrecognized ones. At the document root, the `ucp` envelope additionally carries the handshake members defined by this schema. Open for forward compatibility; not an extension point — only UCP core registers members, and every member MUST be safe to ignore.",
+      "properties": {
+        "map_order": { "$ref": "#/$defs/map_order" }
+      },
+      "additionalProperties": true
+    },
+
     "entity": {
       "type": "object",
       "description": "Shared foundation for all UCP entities.",
@@ -83,6 +102,10 @@
       "required": ["version"],
       "properties": {
         "version": { "$ref": "#/$defs/version" },
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "description": "Preferred key-traversal order for sibling map-valued registry fields in this object (`services`, `capabilities`, and `payment_handlers`)."
+        },
         "status": {
           "type": "string",
           "enum": ["success", "error"],
