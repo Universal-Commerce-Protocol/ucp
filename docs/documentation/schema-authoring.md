@@ -515,6 +515,70 @@ object fields:
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
   Implementers should accept and process them as a no-op.
 
+## `$requestConstraints` Structural Vocabulary
+
+Canonical placement, correspondence, lifecycle, and evaluation behavior is
+defined in
+[Request Constraints](../specification/overview.md#request-constraints). This
+section defines how schema authors encode and adopt that behavior.
+
+### Namespace and encoding
+
+`$requestConstraints` is ambient UCP structural vocabulary, not a JSON Schema
+keyword or an ordinary property of a response or request schema. UCP reserves
+`$`-prefixed member names on domain objects for structural vocabulary.
+Structural names use lower camel case; ordinary domain fields remain snake case.
+A Business or Platform publishing an extension **MUST NOT** define an extension
+member whose name begins with `$`.
+
+The shared `schemas/common/types/request_constraints.json` type has two closed
+constraint positions:
+
+| Position | Executable keywords | Inert members | Shape |
+| :-- | :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `title`, `description`, `$comment` | Closed |
+| Value Constraint | `enum`, `const` | None | Closed |
+
+At an Object Constraint position, `required` is an array of unique strings and
+`properties` maps request field names to Object or Value Constraints. An empty
+Object Constraint is a valid no-op. Optional string `title` and `description`
+members provide Business-authored display text that a Platform **MAY** present;
+they never affect validity.
+
+`$comment` is separately permitted as an inert string. JSON Schema
+[Core §8.3](https://json-schema.org/draft/2020-12/json-schema-core#section-8.3)
+defines it as a reserved comment location that does not produce an annotation
+result. It is not display text and does not affect validity.
+
+At a Value Constraint position, `enum` is a non-empty array of values unique
+under JSON Schema equality and `const` is any JSON value. At least one is
+present, and both apply when both are present. No other member is valid.
+
+### Adoption requirements
+
+For each adoption, document:
+
+- the objects in authoritative Business responses that are eligible to carry
+  `$requestConstraints`;
+- the corresponding representation in a later request;
+- the target operation and operation-specific request schema; and
+- the lifecycle under which a later authoritative representation supersedes an
+  earlier one and omission removes the constraint.
+
+The attachment identifies the constrained logical object, and the documented
+correspondence identifies its representation in the later request. Do not
+declare `$requestConstraints` under the ordinary `properties` of a response or
+request schema.
+
+Ensure that names in `required` and under `properties` exist at the
+corresponding level of the intended composed, operation-specific request schema.
+Before emission, a Business **MUST** validate the fragment against the shared
+type and **MUST** ensure that every target name is valid in the actual composed
+request schema. A Platform that chooses to evaluate the fragment **MUST** perform the
+same checks first. A composed extension field is a valid target; a field
+omitted from that request by `ucp_request`, including a response-only field, is
+not.
+
 ## Extension-Declared Action Types
 
 Every Action type is declared by an extension and becomes available only when
