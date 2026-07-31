@@ -150,6 +150,15 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/rating', 'catalog') }}
 
+### Policy
+
+Policies (return/refund terms, warranty, and the like) that apply to the
+products in a catalog response. JSONPath targets in `applies_to` are
+relative to the response root — `$.products[N]` for search and batch lookup,
+`$.product` for get_product. See [Policies](../overview.md#policies) for the full model.
+
+{{ schema_fields('types/policy', 'catalog') }}
+
 ## Actions
 
 Catalog Search, batch Lookup, and successful Get Product responses can include

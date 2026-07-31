@@ -313,7 +313,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     Content-Type: application/json
 
     {
-      "id": "cart_abc123",
+      "id": "cart_abc123",  // deprecated: id is provided in URL path
       "line_items": [
         {
           "item": {
