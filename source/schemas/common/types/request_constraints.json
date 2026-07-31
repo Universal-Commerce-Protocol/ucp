@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/request_constraints.json",
+  "title": "Request Constraints",
+  "description": "A closed, bounded JSON Schema Draft 2020-12 fragment that constrains a corresponding representation in a later request.",
+  "$ref": "#/$defs/object_constraint",
+  "$defs": {
+    "object_constraint": {
+      "type": "object",
+      "description": "A closed Object Constraint that applies standard Draft 2020-12 `required` and `properties` semantics to a corresponding submitted object.",
+      "properties": {
+        "required": {
+          "type": "array",
+          "ucp_request": "omit",
+          "description": "Names of fields required in the corresponding object of the later submitted representation.",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "ucp_request": "omit",
+          "description": "Constraints for named fields of the corresponding object in the later submitted representation.",
+          "additionalProperties": {
+            "oneOf": [
+              {"$ref": "#"},
+              {"$ref": "#/$defs/value_constraint"}
+            ]
+          }
+        },
+        "title": {
+          "type": "string",
+          "ucp_request": "omit",
+          "description": "Optional short display label."
+        },
+        "description": {
+          "type": "string",
+          "ucp_request": "omit",
+          "description": "Optional display explanation."
+        },
+        "$comment": {
+          "type": "string",
+          "ucp_request": "omit",
+          "description": "Inert JSON Schema Core comment."
+        }
+      },
+      "additionalProperties": false
+    },
+    "value_constraint": {
+      "type": "object",
+      "description": "A Value Constraint applies standard Draft 2020-12 `enum` and/or `const` semantics to the corresponding value in the later submitted representation. When both are present, both constraints apply.",
+      "anyOf": [
+        {"required": ["enum"]},
+        {"required": ["const"]}
+      ],
+      "properties": {
+        "enum": {
+          "type": "array",
+          "ucp_request": "omit",
+          "description": "A non-empty set of JSON values permitted for the corresponding submitted value.",
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "const": {
+          "ucp_request": "omit"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

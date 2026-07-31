@@ -31,6 +31,250 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
+## Request Constraints
+
+A static UCP request schema describes the inputs a Business generally accepts,
+but a Business can accept a narrower set for one transaction. For example, an
+agreed Line Item can be available only at quantity `100`, or a selected payment
+path can require `billing_address` even though the general request shape does
+not.
+
+`$requestConstraints` carries that transaction-specific restriction. It is
+ambient UCP structural vocabulary, not a JSON Schema keyword or an ordinary
+domain field. Its value is the shared
+[Request Constraints](site:schemas/common/types/request_constraints.json) type,
+a bounded JSON Schema Draft 2020-12 fragment.
+
+On UCP domain objects, member names beginning with `$` are reserved for UCP
+structural vocabulary. Structural names use lower camel case, such as
+`$requestConstraints`; ordinary UCP fields remain snake case. A Business or
+Platform publishing an extension **MUST NOT** define an extension member whose
+name begins with `$`. The `$comment` member admitted inside a Request Constraints
+fragment is standard JSON Schema vocabulary, not an extension to the UCP
+structural namespace. `$requestConstraints` is response-only and **MUST NOT**
+appear in a request or discovery profile.
+
+### Guidelines
+
+#### Business
+
+A Business **MAY** attach `$requestConstraints` only to an object in an
+authoritative response that has a corresponding representation in a later
+request. When it does, the Business **MUST** emit a fragment that conforms to the
+shared Request Constraints type and **MUST** enforce it.
+
+#### Platform
+
+A Platform **MAY** use `$requestConstraints` to form or validate the
+corresponding request input. If the Platform cannot safely process a fragment,
+it **MAY** ignore the fragment and rely on Business validation and the
+containing operation's existing errors.
+
+### Correspondence and lifecycle
+
+The attachment identifies the constrained logical object. The fragment applies
+to that object's representation in the later request, not to the response
+object that carries it. That request representation can have a different shape
+because response-only fields are omitted by `ucp_request`. When existing
+operation semantics do not already establish the correspondence, the adopting
+contract defines the corresponding request representation, target operation,
+and operation-specific request schema.
+
+For the same logical object, a later authoritative representation supersedes an
+earlier one. If the later representation omits `$requestConstraints`, the
+earlier constraint is removed.
+
+### Constraint language
+
+This Cart response shows a transaction-specific constraint in context. The
+Business offers the Line Item only as the negotiated lot of `100`:
+
+<!-- ucp:example schema=shopping/cart op=read direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}"
+  },
+  "id": "cart_123",
+  "line_items": [
+    {
+      "id": "line_123",
+      "item": {
+        "id": "sku_123",
+        "title": "Bulk screws",
+        "price": 1200
+      },
+      "quantity": 100,
+      "totals": [
+        {"type": "subtotal", "amount": 120000},
+        {"type": "total", "amount": 120000}
+      ],
+      "$requestConstraints": {
+        "title": "Contract quantity",
+        "description": "This item is available only in the negotiated quantity.",
+        "properties": {
+          "quantity": {
+            "const": 100
+          }
+        }
+      }
+    }
+  ],
+  "currency": "USD",
+  "totals": [
+    {"type": "subtotal", "amount": 120000},
+    {"type": "total", "amount": 120000}
+  ]
+}
+```
+
+The static Line Item schema accepts many positive quantities. For this response,
+`properties` selects `quantity` in the corresponding request Line Item and
+`const` narrows its accepted value to `100`. `title` and `description` are
+optional display text and do not affect validity.
+
+The root is an **Object Constraint**. Under its `properties` member, each named
+field maps to another Object Constraint or to a **Value Constraint**. Both
+positions are closed:
+
+| Position | Executable members | Inert members | Shape and behavior |
+| :-- | :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `title`, `description`, `$comment` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. An empty Object Constraint is a valid no-op. |
+| Value Constraint | `enum`, `const` | None | `enum` is a non-empty array of values unique under JSON Schema equality. `const` is any JSON value. At least one is present; when both appear, both apply. |
+
+A Platform **MAY** present Business-authored `title` and `description` text;
+neither member affects validity. `$comment` is an inert JSON Schema
+Core comment string, not display text, and does not affect validity.
+
+A Business **MUST** validate each fragment against the shared closed shape
+before emitting it. The Business **MUST** also ensure that every field name in
+`required` or under `properties` exists at the corresponding level of the
+actual composed, operation-specific request schema. A response-only field is
+not a valid target. A Business **MUST NOT** emit an invalid fragment.
+
+A Platform that chooses to evaluate a fragment **MUST** perform those checks
+first. If the fragment is invalid or cannot be processed safely, the Platform
+**MAY** ignore it and rely on Business validation. The Platform **MUST NOT**
+partially interpret a fragment.
+
+A Business **MUST** apply implementation-defined resource limits when validating
+a fragment before emission and when enforcing it. The Business **MUST** bound
+encoded size, nesting depth, node and member counts, and equality work such as
+checking `enum` uniqueness. If it cannot validate a fragment within those
+limits, the Business **MUST NOT** emit it. A Platform that chooses to evaluate a
+fragment **MUST** apply equivalent local limits. If a limit is exhausted, the
+Platform **MAY** ignore the fragment and rely on Business validation; it **MUST
+NOT** partially interpret the fragment.
+
+### Validation and evaluation
+
+A Business **MUST** validate the corresponding submitted representation against
+both the resolved request schema and the fragment, and **MUST** reject the
+representation if either validation fails. A Platform **MAY** perform the same
+two validations before submission.
+
+If `S` is the resolved request schema and `C` is the fragment, applying `C`
+alongside `S` is validity-equivalent to `{ "allOf": [S, C] }`; an implementation
+does not need to materialize a combined schema.
+
+The containing operation's existing outcomes and error contract apply.
+`$requestConstraints` defines no new outcome or error code.
+
+### Examples
+
+#### Locked negotiated discount codes
+
+This Checkout response has the Discount extension active. Its fragment locks
+the negotiated business-to-business discount-code array in the corresponding
+Checkout update.
+
+<!-- ucp:example schema=shopping/discount def=dev.ucp.shopping.checkout op=update direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {"version": "{{ ucp_version }}"}
+      ],
+      "dev.ucp.shopping.discount": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    },
+    "payment_handlers": {}
+  },
+  "id": "checkout_123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "line_123",
+      "item": {
+        "id": "sku_123",
+        "title": "Bulk screws",
+        "price": 1200
+      },
+      "quantity": 24,
+      "totals": [
+        {"type": "subtotal", "amount": 28800},
+        {"type": "total", "amount": 28800}
+      ]
+    }
+  ],
+  "totals": [
+    {"type": "subtotal", "amount": 28800},
+    {"type": "total", "amount": 28800}
+  ],
+  "links": [
+    {
+      "type": "terms_of_service",
+      "url": "https://business.example/terms"
+    }
+  ],
+  "discounts": {
+    "codes": ["ACME-X7Q9-L2M4"]
+  },
+  "$requestConstraints": {
+    "required": ["discounts"],
+    "properties": {
+      "discounts": {
+        "required": ["codes"],
+        "properties": {
+          "codes": {"const": ["ACME-X7Q9-L2M4"]}
+        }
+      }
+    }
+  }
+}
+```
+
+Because `discounts.codes` exists in the resolved Checkout update schema when the
+Discount extension is active, it is a valid target. Ambient structural
+vocabulary does not require the Discount schema to declare a carrier slot for
+`$requestConstraints`.
+
+#### Billing address on a submitted card instrument
+
+A Business can attach `$requestConstraints` to an available card instrument to
+require a field on the corresponding submitted card instrument:
+
+<!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
+```json
+{
+  "type": "card",
+  "$requestConstraints": {
+    "required": ["billing_address"]
+  }
+}
+```
+
+The adopting payment-handler contract defines the corresponding submitted
+instrument and its target request schema. The available instrument remains
+availability metadata; `$requestConstraints` applies to the submitted
+instrument. This illustration defines no card brands, credentials, availability
+or options model, or payment-resolution behavior.
+
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to
