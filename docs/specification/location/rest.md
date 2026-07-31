@@ -319,7 +319,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           "exception_hours": [
             {
               "from": "2026-11-26",
-              "through": "2026-11-26",
+              "through": "2026-11-27",
               "label": "Thanksgiving",
               "open": "00:00",
               "close": "00:00"
@@ -372,7 +372,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           "exception_hours": [
             {
               "from": "2026-11-26",
-              "through": "2026-11-26",
+              "through": "2026-11-27",
               "label": "Thanksgiving",
               "open": "00:00",
               "close": "00:00"
@@ -468,7 +468,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           "exception_hours": [
             {
               "from": "2026-11-26",
-              "through": "2026-11-26",
+              "through": "2026-11-27",
               "label": "Thanksgiving",
               "open": "00:00",
               "close": "00:00"
