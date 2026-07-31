@@ -39,49 +39,46 @@ agreed Line Item can be available only at quantity `100`, or a selected payment
 path can require `billing_address` even though the general request shape does
 not.
 
-`$requestConstraints` carries that transaction-specific restriction. It is
-ambient UCP structural vocabulary, not a JSON Schema keyword or an ordinary
-domain field. Its value is the shared
+`request_constraints` carries that transaction-specific restriction at
+`ucp.request_constraints`. It is a response-only protocol member registered in
+`ucp.json#/$defs/members`. Its value is the shared
 [Request Constraints](site:schemas/common/types/request_constraints.json) type,
-a bounded JSON Schema Draft 2020-12 fragment.
-
-On UCP domain objects, member names beginning with `$` are reserved for UCP
-structural vocabulary. Structural names use lower camel case, such as
-`$requestConstraints`; ordinary UCP fields remain snake case. A Business or
-Platform publishing an extension **MUST NOT** define an extension member whose
-name begins with `$`. The `$comment` member admitted inside a Request Constraints
-fragment is standard JSON Schema vocabulary, not an extension to the UCP
-structural namespace. `$requestConstraints` is response-only and **MUST NOT**
-appear in a request or discovery profile.
+a bounded JSON Schema Draft 2020-12 fragment. The enclosing `ucp` object is the
+ambient protocol namespace; see [The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)
+for its general rules. Businesses and Platforms **MUST NOT** publish
+`ucp.request_constraints` in discovery profiles, and Platforms **MUST NOT**
+include it in requests.
 
 ### Guidelines
 
 #### Business
 
-A Business **MAY** attach `$requestConstraints` only to an object in an
-authoritative response that has a corresponding representation in a later
-request. When it does, the Business **MUST** emit a fragment that conforms to the
-shared Request Constraints type and **MUST** enforce it.
+A Business **MAY** emit `ucp.request_constraints` only in an authoritative
+response scope that has a corresponding representation in a later request.
+When it does, the Business **MUST** emit a fragment that conforms to the shared
+Request Constraints type and **MUST** enforce it.
 
 #### Platform
 
-A Platform **MAY** use `$requestConstraints` to form or validate the
-corresponding request input. If the Platform cannot safely process a fragment,
-it **MAY** ignore the fragment and rely on Business validation and the
-containing operation's existing errors.
+A Platform **MAY** use `ucp.request_constraints` to form or validate the
+corresponding request input and to present its display text. A Platform **MAY**
+instead ignore `ucp.request_constraints`. Doing so loses only early request
+formation, validation, and display benefits. Business validation remains
+authoritative, so correctness does not depend on Platform processing.
 
 ### Correspondence and lifecycle
 
-The attachment identifies the constrained logical object. The fragment applies
-to that object's representation in the later request, not to the response
-object that carries it. That request representation can have a different shape
-because response-only fields are omitted by `ucp_request`. When existing
-operation semantics do not already establish the correspondence, the adopting
-contract defines the corresponding request representation, target operation,
-and operation-specific request schema.
+The `ucp` object containing `request_constraints` annotates its parent logical
+object. The fragment applies to that object's corresponding representation in
+the later request, not to the response representation that carries it. The
+request representation can have a different shape because response-only fields
+are omitted by `ucp_request`. When existing operation semantics do not already
+establish the correspondence, the adopting contract defines the corresponding
+request representation, target operation, and operation-specific request
+schema.
 
 For the same logical object, a later authoritative representation supersedes an
-earlier one. If the later representation omits `$requestConstraints`, the
+earlier one. If the later representation omits `ucp.request_constraints`, the
 earlier constraint is removed.
 
 ### Constraint language
@@ -109,12 +106,14 @@ Business offers the Line Item only as the negotiated lot of `100`:
         {"type": "subtotal", "amount": 120000},
         {"type": "total", "amount": 120000}
       ],
-      "$requestConstraints": {
-        "title": "Contract quantity",
-        "description": "This item is available only in the negotiated quantity.",
-        "properties": {
-          "quantity": {
-            "const": 100
+      "ucp": {
+        "request_constraints": {
+          "title": "Contract quantity",
+          "description": "This item is available only in the negotiated quantity.",
+          "properties": {
+            "quantity": {
+              "const": 100
+            }
           }
         }
       }
@@ -178,7 +177,7 @@ alongside `S` is validity-equivalent to `{ "allOf": [S, C] }`; an implementation
 does not need to materialize a combined schema.
 
 The containing operation's existing outcomes and error contract apply.
-`$requestConstraints` defines no new outcome or error code.
+`request_constraints` defines no new outcome or error code.
 
 ### Examples
 
@@ -202,7 +201,18 @@ Checkout update.
         {"version": "{{ ucp_version }}"}
       ]
     },
-    "payment_handlers": {}
+    "payment_handlers": {},
+    "request_constraints": {
+      "required": ["discounts"],
+      "properties": {
+        "discounts": {
+          "required": ["codes"],
+          "properties": {
+            "codes": {"const": ["ACME-X7Q9-L2M4"]}
+          }
+        }
+      }
+    }
   },
   "id": "checkout_123",
   "status": "incomplete",
@@ -234,44 +244,35 @@ Checkout update.
   ],
   "discounts": {
     "codes": ["ACME-X7Q9-L2M4"]
-  },
-  "$requestConstraints": {
-    "required": ["discounts"],
-    "properties": {
-      "discounts": {
-        "required": ["codes"],
-        "properties": {
-          "codes": {"const": ["ACME-X7Q9-L2M4"]}
-        }
-      }
-    }
   }
 }
 ```
 
 Because `discounts.codes` exists in the resolved Checkout update schema when the
-Discount extension is active, it is a valid target. Ambient structural
-vocabulary does not require the Discount schema to declare a carrier slot for
-`$requestConstraints`.
+Discount extension is active, it is a valid target. UCP centrally registers
+`request_constraints`; the Discount schema does not declare it.
 
 #### Billing address on a submitted card instrument
 
-A Business can attach `$requestConstraints` to an available card instrument to
-require a field on the corresponding submitted card instrument:
+In this example, a Business emits `ucp.request_constraints` on an available
+card instrument to require a field on the corresponding submitted card
+instrument:
 
 <!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
 ```json
 {
   "type": "card",
-  "$requestConstraints": {
-    "required": ["billing_address"]
+  "ucp": {
+    "request_constraints": {
+      "required": ["billing_address"]
+    }
   }
 }
 ```
 
 The adopting payment-handler contract defines the corresponding submitted
 instrument and its target request schema. The available instrument remains
-availability metadata; `$requestConstraints` applies to the submitted
+availability metadata; `request_constraints` applies to the submitted
 instrument. This illustration defines no card brands, credentials, availability
 or options model, or payment-resolution behavior.
 
