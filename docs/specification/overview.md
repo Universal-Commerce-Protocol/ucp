@@ -97,8 +97,27 @@ When sending a unit descriptor, a Business or Platform **MUST** include
 localized label. The Business and Platform **MUST NOT** use `display_text` when
 matching machine identities or as an input to quantity conversion.
 
-Request assertions, mismatch handling, response echo, pricing, and lifecycle
-behavior are defined by the capability that uses the shared representation.
+### Ordering increment
+
+A sale-basis descriptor (`quantity_unit`) **MAY** declare an `increment`: an
+optional positive integer, denominated in steps, whose effective value is the
+provided value or `1` when omitted. Only the sale basis carries an increment;
+the bare unit descriptor and the shared measure type do not. It declares the
+ordering granularity the Business sells in — for example, a pound-denominated
+item with `scale` `2` and `increment` `25` is sold in 0.25 lb multiples.
+
+`scale` and `increment` play different roles: `scale` bounds what any quantity
+can express; `increment` shapes what the Platform asks for. The increment is
+advisory merchandising policy, not a representational bound — Platform-authored
+quantities **SHOULD** be integer multiples of the line's effective increment,
+while Business-authored quantities (checkout revisions, fulfillment events,
+adjustments) are bounded only by `scale`. `increment` is not part of the
+unit-descriptor machine identity and **MUST NOT** participate in mismatch
+comparison.
+
+Request assertions, mismatch handling, response echo, off-increment request
+handling, pricing, and lifecycle behavior are defined by the capability that
+uses the shared representation.
 
 ## Actions
 

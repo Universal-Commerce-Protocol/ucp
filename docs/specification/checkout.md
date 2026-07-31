@@ -81,6 +81,38 @@ Platform **MUST NOT** silently convert a quantity between units in either
 direction. A quantity the receiver cannot read in the authoritative basis is an
 error to surface, not a value to reinterpret.
 
+**Ordering increment.** The sale basis **MAY** declare an
+[`increment`](overview.md#ordering-increment) — the ordering granularity, in
+steps, the Business sells in. The declaration lets the Platform build quantity
+steppers and validate input before submission. Platform-authored quantities
+**SHOULD** be integer multiples of the line's effective increment. The
+increment is merchandising policy, not a representational bound, and schema
+validation does not enforce it: on receiving an off-increment quantity, the
+Business **MAY** accept it, revise the line to an increment multiple, or reject
+it with a recoverable business outcome. A revision **MUST** be returned as a
+revised line `quantity` with an explanatory `messages[]` entry; the Business
+**MUST NOT** silently reinterpret the requested quantity. The Business **MAY**
+also revise a quantity for its own reasons (for example, limited stock); such
+revisions **SHOULD** stay on the increment grid so subsequent Platform stepper
+edits from the revised value remain on-grid.
+
+For example, bananas sold by the pound in quarter-pound multiples declare
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`. A
+request for `quantity` `137` (1.37 lb) is off-increment; a Business that snaps
+it returns the line revised to `125` with a warning:
+
+<!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
+```json
+[
+  {
+    "type": "warning",
+    "code": "quantity_increment_revised",
+    "path": "$.line_items[0].quantity",
+    "content": "Bananas are sold in 0.25 lb increments. Your requested 1.37 lb was adjusted to 1.25 lb."
+  }
+]
+```
+
 **Echoing the sale basis.** The Business **MAY** omit `quantity_unit` from a
 response line whose effective sale-basis identity is the default identity. The
 Business **MUST** include `quantity_unit` on the item in every Cart, Checkout,

@@ -24,8 +24,8 @@
       "ucp_request": "omit"
     },
     "quantity_unit": {
-      "$ref": "../../common/types/unit.json",
-      "description": "Sale basis this item's `quantity` is denominated in. On an authoritative Business response, absence encodes the default `each` machine identity (`C62`, 0); the Business MUST include this descriptor for every non-`each` response. On Platform requests, omission makes no assertion: the Business interprets `quantity` using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (`unit`, effective `scale`), ignore `display_text`, and reject a mismatch with a recoverable business outcome. An explicit `C62` descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor.",
+      "$ref": "../../common/types/quantity_unit.json",
+      "description": "Sale basis this item's `quantity` is denominated in. On an authoritative Business response, absence encodes the default `each` machine identity (`C62`, 0); the Business MUST include this descriptor for every non-`each` response. On Platform requests, omission makes no assertion: the Business interprets `quantity` using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (`unit`, effective `scale`), ignore `display_text` and `increment`, and reject a mismatch with a recoverable business outcome. An explicit `C62` descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor.",
       "ucp_request": "optional"
     },
     "image_url": {

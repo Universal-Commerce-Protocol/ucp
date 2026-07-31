@@ -105,7 +105,8 @@ without asserting `each`. The Platform **MAY** include `item.quantity_unit` to
 assert the sale-basis identity.
 
 Cart follows [Checkout — Quantity and sale basis](checkout.md#quantity-and-sale-basis)
-for assertion matching, mismatch handling, response echo, and line pricing.
+for assertion matching, mismatch handling, response echo, ordering-increment
+handling, and line pricing.
 Cart totals remain estimates (see [Total](#total)). A measure-denominated line
 counts as one line item in cart summaries; its `quantity` is an amount, not an
 item count.

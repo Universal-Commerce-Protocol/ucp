@@ -64,7 +64,12 @@ Line items reflect what was purchased at checkout and their current state:
 
 All order lifecycle arithmetic over quantities operates on sale-basis step
 counts inherited from the item; other item characteristics do not enter that
-arithmetic.
+arithmetic. Business-recorded quantities — fulfillment events, adjustments, and
+revised totals — are bounded only by `scale`: a declared ordering
+[`increment`](overview.md#ordering-increment) binds Platform requests at cart
+and checkout and does not constrain what the Business records (a 0.25 lb
+ordering increment does not prevent recording an actual picked weight of
+1.48 lb).
 
 ### Fulfillment
 
