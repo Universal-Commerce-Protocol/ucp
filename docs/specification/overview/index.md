@@ -3018,7 +3018,7 @@ policy targets nodes in one of three forms:
   §2.3.5.1](https://www.rfc-editor.org/rfc/rfc9535#section-2.3.5.1)), e.g.
   `$.line_items[2]`.
 - **Set match** — a filter, wildcard, or slice matching a set of nodes, e.g.
-  `$.products[?@.category=='electronics']`.
+  `$.products[?@.tags[?@=='electronics']]`.
 - **Response-wide** — an omitted `applies_to`; the policy applies to the entire
   response. This is the common case: a single site-wide policy is one entry with
   no targeting, never repeated per item.
@@ -3047,8 +3047,8 @@ Every node has a canonical identity: its **Normalized Path** ([RFC 9535
 segments locating it from the root — `$.products[0].variants[3]` is `products`,
 `0`, `variants`, `3`, and the root `$` is the empty sequence. A target
 **covers** a node when a node it matches is that node or an ancestor of it —
-equivalently, when the matched node's Normalized Path is a prefix of the target
-node's. The length of that prefix is its **depth**.
+equivalently, when the matched node's Normalized Path is a prefix of that
+node's Normalized Path. The length of that prefix is its **depth**.
 
 To resolve which policy of a given `type` governs a node:
 
@@ -3186,7 +3186,7 @@ there, while other electronics keep the 2-year term:
   {
     "type": "dev.ucp.shopping.policy.warranty",
     "description": { "plain": "2-year warranty on electronics." },
-    "applies_to": ["$.products[?@.category=='electronics']"]
+    "applies_to": ["$.products[?@.tags[?@=='electronics']]"]
   },
   {
     "type": "dev.ucp.shopping.policy.warranty",
