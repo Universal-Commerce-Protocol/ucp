@@ -9,6 +9,7 @@
     "prop65",
     "fulfillment_changed",
     "payment_term_changed",
-    "age_restricted"
+    "age_restricted",
+    "membership_benefit_ineligible"
   ]
 }
