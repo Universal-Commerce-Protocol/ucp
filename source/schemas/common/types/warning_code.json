@@ -8,6 +8,7 @@
     "final_sale",
     "prop65",
     "fulfillment_changed",
-    "age_restricted"
+    "age_restricted",
+    "membership_benefit_ineligible"
   ]
 }
