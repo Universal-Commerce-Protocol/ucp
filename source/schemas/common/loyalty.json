@@ -47,7 +47,7 @@
           "items": {
             "$ref": "#/$defs/earning_breakdown"
           },
-          "description": "List of breakdown of earning contributing to the total."
+          "description": "List of breakdown of earning contributing to the total. When present, the sum of the breakdown `amount` values MUST equal `earning_forecast.amount`."
         }
       }
     },
