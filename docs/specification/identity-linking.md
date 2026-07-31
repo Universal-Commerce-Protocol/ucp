@@ -72,6 +72,36 @@ either way. If their profile *also* lists identity linking with
 `dev.ucp.shopping.order:read` in `config.scopes`, operations covered by
 that scope require a user identity token.
 
+### Business-Populated Response Values
+
+When a request is user-authenticated, a business **MAY** populate response
+fields it owns for that user from its own stored state, rather than only echoing
+values the platform supplied.
+
+Request annotations determine whether the platform may send a field; they do
+not assign semantic ownership of its value. A field annotated
+`ucp_request: "omit"` is excluded from requests and, when permitted and present
+on a response, is populated by the business (for example, `totals`, `messages`,
+and `order`). Fields annotated `optional` for an operation, or left unannotated,
+may also be supplied by the platform in applicable requests. Where the response
+schema and the field's semantic contract permit business-owned user state, the
+business **MAY** populate it from stored state on the response (for example,
+`buyer` and `payment.instruments[]`).
+
+Identity linking provides the authenticated user context for these values.
+Subject to the scopes that gate the operation, a business **MAY** return the
+user's loyalty membership in `loyalty` (see [Loyalty](loyalty.md)), saved
+payment instruments in `payment.instruments[]` (see [Checkout](checkout.md)), or
+buyer profile data in `buyer`.
+
+Businesses **MUST NOT** return stored user-specific state unless the request is
+user-authenticated and authorized for the operation. They **MUST** only return
+values that belong to the authenticated user and are appropriate for the
+current transaction, and **SHOULD** limit them to the data needed for that
+transaction. Platforms **MUST** treat returned business-owned identifiers as
+opaque and business-scoped, and **MUST NOT** infer raw credentials from a
+display value.
+
 ### UCP and OAuth
 
 UCP defines commerce semantics (which scopes mean what, which gate which

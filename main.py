@@ -643,8 +643,22 @@ def define_env(env):
       diff_request = {}
       for op in ("create", "update", "complete"):
         val = ucp_request.get(op)
-        if val and val != response:
-          diff_request[op] = val
+        if val:
+          disp_val = None
+          if isinstance(val, str):
+            if val != response:
+              disp_val = word.get(val, val)
+          elif isinstance(val, dict) and "transition" in val:
+            transition = val["transition"]
+            to_state = transition.get("to")
+            from_state = transition.get("from")
+            from_disp = word.get(from_state, from_state)
+            to_disp = word.get(to_state, to_state)
+            disp_val = f"transitioning from {from_disp} to {to_disp}"
+
+          if disp_val:
+            diff_request[op] = disp_val
+
       if not diff_request:
         return base_disp
 
@@ -659,9 +673,7 @@ def define_env(env):
           groups[-1][1].append(op)
         else:
           groups.append((val, [op]))
-      clauses = [
-        f"{word.get(val, val)} on {' & '.join(ops)}" for val, ops in groups
-      ]
+      clauses = [f"{val} on {' & '.join(ops)}" for val, ops in groups]
       if not clauses:
         return base_disp
       return f"{base_disp}; {', '.join(clauses)}"
