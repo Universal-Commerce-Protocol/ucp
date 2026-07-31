@@ -67,9 +67,9 @@ counts inherited from the item; other item characteristics do not enter that
 arithmetic. Business-recorded quantities — fulfillment events, adjustments, and
 revised totals — are bounded only by `scale`: a declared ordering
 [`increment`](overview.md#ordering-increment) binds Platform requests at cart
-and checkout and does not constrain what the Business records (a 0.25 lb
+and checkout and does not constrain what the Business records (a 0.25-kg
 ordering increment does not prevent recording an actual picked weight of
-1.48 lb).
+1.45 kg).
 
 ### Fulfillment
 
@@ -328,7 +328,7 @@ rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
         "id": "var_fasteners",
         "title": "Stainless Steel Fasteners",
         "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
       },
       "quantity": { "original": 150, "total": 150, "fulfilled": 50 },
       "totals": [
@@ -360,6 +360,83 @@ rounded once — the line total is `1299 × 1.50 = 1949`, and the return credits
       "line_items": [{ "id": "li_fasteners", "quantity": -25 }],
       "totals": [{ "type": "total", "amount": -325 }],
       "description": "Returned 0.25 kg"
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1949 },
+    { "type": "total", "amount": 1949 }
+  ]
+}
+```
+
+## Example: catch-weight reconciliation
+
+For weighed goods, the picked weight routinely differs from the ordered
+weight. The difference is a commercial fact, not a numeric error: the Business
+records the actual pick and reconciles the difference with an
+[adjustment](#adjustments) that moves money together with quantity. No
+tolerance comparison is involved; the status derivation operates on exact step
+counts throughout.
+
+A Buyer orders 1.50 kg of the same loose fasteners at $12.99/kg, sold in
+quarter-kilogram increments (`quantity` `150`, line total
+`1299 × 1.50 = 1948.5`, rounded once to `1949`). The picker weighs out
+1.45 kg — an off-increment fact, recorded as-is, because the
+[`increment`](overview.md#ordering-increment) binds Platform ordering, not
+Business records. The fulfillment event records the actual `145` steps, and a
+`price_adjustment` of `-5` steps reconciles `total` to the actual pick with
+its price delta (`1299 × 0.05 = 64.95`, rounded once to `65`).
+`fulfilled == total` then holds exactly (`145 == 145`) and the line derives
+`fulfilled`:
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
+  },
+  "id": "order_fasteners_2",
+  "checkout_id": "chk_fasteners_2",
+  "permalink_url": "https://business.example.com/orders/fasteners2",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+      },
+      "quantity": { "original": 150, "total": 145, "fulfilled": 145 },
+      "totals": [
+        { "type": "subtotal", "amount": 1949 },
+        { "type": "total", "amount": 1949 }
+      ],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-12T09:15:00Z",
+        "type": "shipped",
+        "line_items": [{ "id": "li_fasteners", "quantity": 145 }],
+        "description": "Picked 1.45 kg"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "price_adjustment",
+      "occurred_at": "2026-01-12T09:15:00Z",
+      "status": "completed",
+      "line_items": [{ "id": "li_fasteners", "quantity": -5 }],
+      "totals": [{ "type": "total", "amount": -65 }],
+      "description": "Adjusted to actual picked weight of 1.45 kg"
     }
   ],
   "totals": [

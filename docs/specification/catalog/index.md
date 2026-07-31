@@ -64,6 +64,14 @@ transaction. The descriptor follows the shared
 absence advertises the default `each` basis; the Business advertises a
 non-`each` basis by including the descriptor.
 
+The catalog is where the Platform learns the sale basis before transacting:
+`unit` and `scale` define how quantities are denominated, and an optional
+[`increment`](../overview.md#ordering-increment) advertises the ordering
+granularity the Business sells in, letting the Platform build quantity
+steppers and validate input before submission. A Business selling loose
+fasteners by the kilogram in quarter-kilogram multiples advertises
+`{ "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }`.
+
 `variants[].id` identifies the purchasable variant; `quantity_unit` defines the
 denomination and granularity used to order it.
 Stainless steel fasteners whose `quantity_unit` is
@@ -123,8 +131,8 @@ carrying a `unit_price` per metre. Its `measure` can be
 
 A `get_product` response for loose metal fasteners sold by the kilogram. The
 variant advertises `quantity_unit`
-`{ "unit": "KGM", "scale": 2, "display_text": "kg" }` and a `price` of `1299` —
-$12.99 per whole kilogram:
+`{ "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }` and a
+`price` of `1299` — $12.99 per whole kilogram, sold in 0.25-kg multiples:
 
 <!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
 ```json
@@ -144,7 +152,7 @@ $12.99 per whole kilogram:
         "title": "Stainless Steel Fasteners",
         "description": { "plain": "Fasteners sold by the kilogram." },
         "price": { "amount": 1299, "currency": "USD" },
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" },
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 },
         "availability": { "available": true }
       }
     ]

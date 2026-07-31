@@ -58,6 +58,27 @@ encode this default. When a Business or Platform includes a
 descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`;
 `scale` can only be omitted or explicitly set to `0`.
 
+UCP does not put floating-point numbers on the wire. Quantity arithmetic
+feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled`
+accumulates across fulfillment events, and status derives from
+`fulfilled == total` — so quantities get money's representation: an integer
+count plus a declared interpretation, exactly as an `amount` relates to its
+`currency`. Integer counts keep every total and comparison exact in every
+language, and UCP therefore defines no rounding tolerances and no epsilon
+comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
+legitimately differs from the ordered quantity — a 1.45 kg pick against a
+1.50 kg order — is a commercial fact reconciled through
+[adjustments](order.md#adjustments) that move money together with quantity,
+not a numeric error absorbed by comparison fuzz.
+
+Reading a quantity requires no arithmetic and no unit knowledge: shift the
+decimal point `scale` places and append `display_text`. `150` with
+`{ "scale": 2, "display_text": "kg" }` renders as `1.50 kg`, by the same code
+path for a Rec20 code and for a custom unit. Unlike a currency exponent,
+`scale` is per-item data rather than a static table — which is why
+authoritative responses always carry their own descriptor on every non-`each`
+line.
+
 ### Unit vocabulary
 
 The Business **SHOULD** use the exact Rec20 Common Code unless no code
@@ -103,8 +124,8 @@ A sale-basis descriptor (`quantity_unit`) **MAY** declare an `increment`: an
 optional positive integer, denominated in steps, whose effective value is the
 provided value or `1` when omitted. Only the sale basis carries an increment;
 the bare unit descriptor and the shared measure type do not. It declares the
-ordering granularity the Business sells in — for example, a pound-denominated
-item with `scale` `2` and `increment` `25` is sold in 0.25 lb multiples.
+ordering granularity the Business sells in — for example, an item sold by the
+kilogram with `scale` `2` and `increment` `25` is sold in 0.25 kg multiples.
 
 `scale` and `increment` play different roles: `scale` bounds what any quantity
 can express; `increment` shapes what the Platform asks for. The increment is

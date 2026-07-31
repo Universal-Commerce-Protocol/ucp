@@ -59,6 +59,18 @@ default (`C62`, `0`) identity. The Business determines each item's authoritative
 sale basis for the transaction. The Business's response is authoritative, and
 each `line_items[].quantity` is an integer step count in that basis.
 
+**Discovering the sale basis.** The sale basis is item data: the Platform
+**SHOULD** discover an item's `quantity_unit` — including `scale` and any
+`increment` — from the
+[catalog](catalog/index.md#sale-basis-and-quantity-units) before transacting.
+A Platform without catalog knowledge can omit the descriptor: the Business
+applies its authoritative basis and confirms it on the response line, and the
+Platform inspects the echoed descriptor and, if that interpretation is not
+what it intended, resubmits the quantity denominated in the now-known basis.
+Asserting `quantity_unit` on a request (below) is how the Platform checks that
+a basis it previously discovered still holds; a Platform that does not know
+the basis omits the descriptor rather than asserting a guess.
+
 **Requesting a quantity.** When a Platform request omits
 `line_items[].item.quantity_unit`, the Platform makes no assertion about the
 sale-basis identity. The Business interprets `quantity` using the item's
@@ -74,12 +86,139 @@ represented by an absent descriptor; a `display_text` difference is not a
 mismatch.
 
 If an asserted `quantity_unit` does not match the item's authoritative sale
-basis, the Business **MUST** reject that line with a recoverable business outcome
-that names the authoritative unit — a `messages[]` entry on a `200` response,
-not a transport error (see [Error Handling](#error-handling)). The Business and
-Platform **MUST NOT** silently convert a quantity between units in either
-direction. A quantity the receiver cannot read in the authoritative basis is an
-error to surface, not a value to reinterpret.
+basis, the requested quantity is denominated in a basis the Business does not
+sell in. Silent conversion is forbidden in both directions: neither party may
+reinterpret a quantity the other denominated without surfacing the change. The
+Business resolves the mismatch in one of two ways:
+
+* **Convert, visibly.** When the Business can convert the asserted
+    basis to its authoritative basis (for example, pounds to kilograms), it
+    **MAY** apply the request as a visible line revision: the line carries the
+    authoritative descriptor and the converted quantity — rounded once to the
+    authoritative `scale` according to its rules, with any ordering-increment
+    policy applied after conversion — and the response includes a warning
+    `messages[]` entry at the line. UCP defines no conversion factors or
+    dimensions; whether to convert is the Business's own determination.
+* **Reject, recoverably.** When it cannot or chooses not to convert (for
+    example, a quantity of fasteners denominated in litres), the Business
+    **MUST** reject the request's effect on that line with a recoverable
+    business outcome naming the authoritative basis. On update, the line
+    remains at its previous authoritative state. On create, the line is not created and the
+    message identifies the item in `content`; when no line can be created, the
+    Business **MAY** return an error response instead.
+
+In both cases the response reflects authoritative state, never an echo of
+rejected input, and every line present carries its authoritative sale basis
+under the response-echo rule. The Platform recovers by reading the echoed
+descriptor — or re-reading the catalog — and resubmitting; the message
+`content` is explanatory text for humans, never the recovery input.
+
+For example, stale data leads a Platform to believe an item sold by the
+kilogram is sold by the pound. It submits an update asserting that basis:
+
+<!-- ucp:example schema=shopping/checkout op=update direction=request -->
+```json
+{
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb" }
+      },
+      "quantity": 275
+    }
+  ]
+}
+```
+
+A Business that converts applies the update as a visible revision.
+The line is denominated in the authoritative basis — the requested 2.75 lb
+converts to 1.25 kg, rounded once to `scale` 2 and landing on the item's
+0.25-kg ordering increment — and a warning marks the revision:
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
+  "id": "chk_fasteners_1",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+      },
+      "quantity": 125,
+      "totals": [
+        { "type": "subtotal", "amount": 1624 },
+        { "type": "total", "amount": 1624 }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "quantity_unit_converted",
+      "path": "$.line_items[0].quantity",
+      "content": "This item is sold by the kilogram. The requested 2.75 lb was converted to 1.25 kg."
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1624 },
+    { "type": "total", "amount": 1624 }
+  ],
+  "links": []
+}
+```
+
+A Business that does not convert rejects the update instead. The line remains
+unchanged — `quantity` stays `150` (1.50 kg), not a reinterpretation of the
+requested `275` — and the error names the authoritative basis:
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
+  "id": "chk_fasteners_1",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
+      },
+      "quantity": 150,
+      "totals": [
+        { "type": "subtotal", "amount": 1949 },
+        { "type": "total", "amount": 1949 }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "quantity_unit_mismatch",
+      "severity": "recoverable",
+      "path": "$.line_items[0].item.quantity_unit",
+      "content": "This item is sold by the kilogram, not by the pound. Resubmit the quantity as a count of 0.01-kg steps."
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1949 },
+    { "type": "total", "amount": 1949 }
+  ],
+  "links": []
+}
+```
 
 **Ordering increment.** The sale basis **MAY** declare an
 [`increment`](overview.md#ordering-increment) — the ordering granularity, in
@@ -96,10 +235,10 @@ also revise a quantity for its own reasons (for example, limited stock); such
 revisions **SHOULD** stay on the increment grid so subsequent Platform stepper
 edits from the revised value remain on-grid.
 
-For example, bananas sold by the pound in quarter-pound multiples declare
-`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`. A
-request for `quantity` `137` (1.37 lb) is off-increment; a Business that snaps
-it returns the line revised to `125` with a warning:
+For example, the fasteners above are sold in quarter-kilogram multiples
+(`increment` `25` at `scale` `2`). A request for `quantity` `137` (1.37 kg) is
+off-increment; a Business that snaps it returns the line revised to `125` with
+a warning:
 
 <!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
 ```json
@@ -108,7 +247,7 @@ it returns the line revised to `125` with a warning:
     "type": "warning",
     "code": "quantity_increment_revised",
     "path": "$.line_items[0].quantity",
-    "content": "Bananas are sold in 0.25 lb increments. Your requested 1.37 lb was adjusted to 1.25 lb."
+    "content": "This item is sold in 0.25 kg increments. Your requested 1.37 kg was adjusted to 1.25 kg."
   }
 ]
 ```
@@ -132,9 +271,9 @@ its own rounding.
 
 For example, a Business sells loose stainless steel fasteners by the kilogram
 with `quantity_unit`
-`{ "unit": "KGM", "scale": 2, "display_text": "kg" }` and a `price` of `1299`
-($12.99/kg). A Buyer orders 1.50 kg, so the Platform sends `quantity` `150` — 150
-hundredth-of-a-kilogram steps. The line total is
+`{ "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }` and a
+`price` of `1299` ($12.99/kg). A Buyer orders 1.50 kg, so the Platform sends
+`quantity` `150` — 150 hundredth-of-a-kilogram steps. The line total is
 `1299 × 150 × 10^-2 = 1948.5`, rounded once to `1949` ($19.49):
 
 <!-- ucp:example schema=shopping/checkout op=read -->
@@ -151,7 +290,7 @@ hundredth-of-a-kilogram steps. The line total is
         "id": "var_fasteners",
         "title": "Stainless Steel Fasteners",
         "price": 1299,
-        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg", "increment": 25 }
       },
       "quantity": 150,
       "totals": [
@@ -166,23 +305,6 @@ hundredth-of-a-kilogram steps. The line total is
   ],
   "links": []
 }
-```
-
-If the Platform instead asserts a unit the Business does not sell the item in,
-the Business returns the current Checkout with a recoverable message that names
-the authoritative unit and leaves the quantity for the Platform to resubmit:
-
-<!-- ucp:example schema=shopping/checkout target=$.messages op=read -->
-```json
-[
-  {
-    "type": "error",
-    "code": "quantity_unit_mismatch",
-    "severity": "recoverable",
-    "path": "$.line_items[0].item.quantity_unit",
-    "content": "This item is sold by the kilogram (KGM). Resubmit the quantity in 0.01-kg steps."
-  }
-]
 ```
 
 ### Checkout Status Lifecycle
