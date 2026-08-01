@@ -47,5 +47,14 @@
       },
       "additionalProperties": true
     }
-  ]
+  ],
+  "if": {
+    "anyOf": [
+      { "required": ["hours"] },
+      { "required": ["exception_hours"] }
+    ]
+  },
+  "then": {
+    "required": ["timezone"]
+  }
 }
