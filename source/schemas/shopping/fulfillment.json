@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/fulfillment.json",
   "name": "dev.ucp.shopping.fulfillment",
   "title": "Fulfillment Extension",
-  "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
+  "description": "Extends Catalog with fulfillment discovery, Cart with location-aware context, and Checkout with hierarchical fulfillment.",
   "$defs": {
     "fulfillment_option": {
       "$ref": "types/fulfillment_option.json"
@@ -19,6 +19,27 @@
     },
     "fulfillment": {
       "$ref": "types/fulfillment.json"
+    },
+    "fulfillment_context": {
+      "title": "Fulfillment Context",
+      "description": "Provisional Business location for location-scoped pricing, availability, and initial fulfillment-option generation.",
+      "allOf": [
+        {
+          "$ref": "types/context.json"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "location": {
+              "$ref": "../common/types/location_id.json",
+              "description": "Provisional Business location for pricing, availability, and initial fulfillment-option generation. Explicit fulfillment destinations, selections, and authoritative fulfillment addresses supersede this context.",
+              "ucp_request": "optional",
+              "ucp_response": "optional"
+            }
+          }
+        }
+      ]
     },
     "catalog_fulfillment_method": {
       "title": "Catalog Fulfillment Method",
@@ -40,12 +61,12 @@
           "description": "Availability of this variant via this method at the specified or inferred location."
         },
         "location": {
-          "type": "string",
-          "description": "The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id."
+          "$ref": "../common/types/location_id.json",
+          "description": "The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location ID."
         },
         "options": {
           "type": "array",
-          "description": "Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout.",
+          "description": "Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in Checkout.",
           "items": { "$ref": "types/fulfillment_option_base.json" }
         }
       }
@@ -141,7 +162,7 @@
           "properties": {
             "fulfills_to": {
               "$ref": "types/fulfillment_destination_filter.json",
-              "description": "Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context`."
+              "description": "Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context.address_country`, `context.address_region`, `context.postal_code`, and `context.location` only for fulfillment destination and availability resolution."
             },
             "methods": {
               "type": "array",
@@ -155,37 +176,70 @@
     "fulfillment_search_request": {
       "allOf": [
         { "$ref": "catalog_search.json#/$defs/search_request" },
-        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+        {
+          "type": "object",
+          "properties": {
+            "context": { "$ref": "#/$defs/fulfillment_context" },
+            "filters": { "$ref": "#/$defs/fulfillment_search_filters" }
+          }
+        }
       ]
     },
     "fulfillment_search_response": {
       "allOf": [
         { "$ref": "catalog_search.json#/$defs/search_response" },
-        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_product" } } } }
+        {
+          "type": "object",
+          "properties": {
+            "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_product" } }
+          }
+        }
       ]
     },
     "fulfillment_lookup_request": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/lookup_request" },
-        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+        {
+          "type": "object",
+          "properties": {
+            "context": { "$ref": "#/$defs/fulfillment_context" },
+            "filters": { "$ref": "#/$defs/fulfillment_search_filters" }
+          }
+        }
       ]
     },
     "fulfillment_lookup_response": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/lookup_response" },
-        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_lookup_product" } } } }
+        {
+          "type": "object",
+          "properties": {
+            "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_lookup_product" } }
+          }
+        }
       ]
     },
     "fulfillment_get_product_request": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/get_product_request" },
-        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+        {
+          "type": "object",
+          "properties": {
+            "context": { "$ref": "#/$defs/fulfillment_context" },
+            "filters": { "$ref": "#/$defs/fulfillment_search_filters" }
+          }
+        }
       ]
     },
     "fulfillment_get_product_response": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/get_product_response" },
-        { "type": "object", "properties": { "product": { "$ref": "#/$defs/fulfillment_detail_product" } } }
+        {
+          "type": "object",
+          "properties": {
+            "product": { "$ref": "#/$defs/fulfillment_detail_product" }
+          }
+        }
       ]
     },
     "dev.ucp.shopping.catalog.search": {
@@ -204,6 +258,27 @@
         "get_product_response": { "$ref": "#/$defs/fulfillment_get_product_response" }
       }
     },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Fulfillment",
+      "description": "Cart extended with location-aware fulfillment context only.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "context": {
+              "$ref": "#/$defs/fulfillment_context",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Fulfillment",
       "description": "Checkout extended with hierarchical fulfillment.",
@@ -214,6 +289,14 @@
         {
           "type": "object",
           "properties": {
+            "context": {
+              "$ref": "#/$defs/fulfillment_context",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            },
             "fulfillment": {
               "$ref": "#/$defs/fulfillment",
               "description": "Fulfillment details.",

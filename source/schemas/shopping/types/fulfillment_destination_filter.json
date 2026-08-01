@@ -14,7 +14,7 @@
       "additionalProperties": true,
       "properties": {
         "location": {
-          "type": "string",
+          "$ref": "../../common/types/location_id.json",
           "description": "A reference to the destination (e.g. store, pickup location, saved address)."
         }
       }
