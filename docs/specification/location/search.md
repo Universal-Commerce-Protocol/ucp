@@ -50,6 +50,16 @@ appropriate error. Implementations define and enforce their own rules for
 input presence and content — for example, requiring `query`, rejecting
 empty `query` strings, or accepting filter-only requests.
 
+> **Implementation guidance:** For processing search requests containing only `context`,
+> the following rules **MAY** be followed by businesses:
+>
+> If the provided `context` is insufficient to determine a location boundary
+> (e.g., only country is provided, or context is empty), business **MAY** return a default
+> set of locations (e.g., featured locations, or all locations up to a default server-side limit).
+>
+> If the server cannot resolve the location and does not support default lists,
+> it **SHOULD** return an empty list.
+
 ## Search Filters
 
 Location filters allow narrowing results based on specific criteria.
