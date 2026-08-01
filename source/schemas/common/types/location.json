@@ -12,7 +12,7 @@
       "properties": {
         "geo": {
           "$ref": "geo.json",
-          "description": "Geographic coordinates and geofence for the location.",
+          "description": "Geographic coordinates for the location.",
           "ucp_request": "omit"
         },
         "amenities": {

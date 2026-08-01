@@ -39,10 +39,10 @@ amenities and inventory availability.
 
 ## Search Inputs
 
-A valid search request **MUST** include at least one of: a `query` string
-or one or more `filters`. When `query` is omitted, the request represents
-a browse operation — the business returns locations matching the provided
-filters without text-relevance ranking.
+A valid search request **MUST** include at least one of: a `query` string, one or more
+`filters`, platform-provided user `context` hints, or an extension-defined input.
+When `query` is omitted, the request represents a browse operation — the business
+returns locations matching the provided filters without text-relevance ranking.
 
 Implementations **MUST** validate that incoming requests contain at least one
 recognized input and **SHOULD** reject empty or invalid requests with an
