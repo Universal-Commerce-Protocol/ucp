@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/exception_hour.json",
   "title": "Exception Hour",
-  "description": "Operating hours for a specific date range that differs from normal ones (e.g., holiday or temporary change). Omission of explicit intervals implies open 24 hours.",
+  "description": "Operating hours for a specific date range that differs from normal ones (e.g., holiday or temporary change).",
   "type": "object",
   "required": ["from", "through"],
   "allOf": [
