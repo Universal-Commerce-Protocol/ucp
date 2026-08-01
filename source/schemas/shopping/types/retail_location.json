@@ -9,7 +9,7 @@
   "additionalProperties": true,
   "properties": {
     "id": {
-      "type": "string",
+      "$ref": "../../common/types/location_id.json",
       "description": "Unique location identifier.",
       "ucp_request": "omit"
     },

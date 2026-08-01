@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location_id.json",
+  "title": "Location ID",
+  "description": "Opaque, stable identifier for a location assigned within a Business namespace. Across UCP surfaces exposed by that Business, the same value identifies the same location; the containing field defines the role of that location.",
+  "type": "string"
+}
