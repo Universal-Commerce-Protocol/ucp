@@ -39,7 +39,11 @@
               "description": "Coarse postal address reference of the target destination (e.g., for ZIP-code based routing)."
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "oneOf": [
+            { "required": ["point"] },
+            { "required": ["address"] }
+          ]
         }
       },
       "additionalProperties": false

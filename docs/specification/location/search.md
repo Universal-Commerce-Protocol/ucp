@@ -55,10 +55,10 @@ empty `query` strings, or accepting filter-only requests.
 >
 > If the provided `context` is insufficient to determine a location boundary
 > (e.g., only country is provided, or context is empty), business **MAY** return a default
-> set of locations (e.g., featured locations, or all locations up to a default server-side limit).
+> set of locations (e.g., featured locations, or all locations up to a default server-side
+> limit) or an empty list.
 >
-> If the server cannot resolve the location and does not support default lists,
-> it **SHOULD** return an empty list.
+> If the server cannot resolve the location, it **SHOULD** return an error message.
 
 ## Search Filters
 
@@ -103,9 +103,11 @@ Supports two distinct, industry-agnostic spatial search models:
 * **`distance` (Proximity Search)**: Filters for locations within a `max_distance`
     (in RFC 7035 distance units = meters) of a `center` point.
 
-> **Privacy Integration**: If `center` is omitted, the server **MUST** use the
+> **Privacy Integration**: If `center` is omitted, business **MUST** use the
 > user's address hint provided in the request `context` (which may be coarse/sanitized)
-> to derive the center.
+> to derive the center. If `context` is omitted or business is unable to resolve the
+> provided address hint, then business **MUST** return an error message with
+> `code: "location_geo_filter_resolution_failed"`.
 
 * **`serves` (Service Area Coverage)**: Filters for locations that can serve
     a target destination. The business evaluates coverage using their internal service area rules
@@ -114,7 +116,9 @@ Supports two distinct, industry-agnostic spatial search models:
 > **Contextual Fallback**: If the `serves` filter is not explicitly specified in
 > the request, the business **MAY** use the user's contextual location hints passed in the
 > request `context` object to implicitly apply a `serves` filter, returning only locations
-> that can service the user.
+> that can service the user. Similarly to the callout above, if `context` is omitted or
+> business is unable to resolve the provided address hint, then business **MUST** return
+> an error message with `code: "location_geo_filter_resolution_failed"`.
 
 ## Pagination
 
