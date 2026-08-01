@@ -59,6 +59,13 @@
     "description": {
       "type": "string",
       "description": "Human-readable description of the shipment status or delivery information (e.g., 'Delivered to front door', 'Out for delivery')."
+    },
+    "agent_hints": {
+      "type": "array",
+      "description": "Advisory hints for agents consuming this event. Non-normative — agents decide whether to act. Businesses use this to suggest contextually appropriate follow-up actions without prescribing behaviour.",
+      "items": {
+        "$ref": "../../common/types/agent_hint.json"
+      }
     }
   }
 }
