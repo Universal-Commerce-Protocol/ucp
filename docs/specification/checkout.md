@@ -79,24 +79,25 @@ platform receives messages indicating what's needed to progress.
        +------------+                         +---------------------+
        | incomplete |<----------------------->| requires_escalation |
        +-----+------+                         |   (buyer handoff    |
-             |                                |  via continue_url)  |
-             | all info collected             +----------+----------+
-             v                                           |
-    +------------------+                                 |
-    |ready_for_complete|                                 |
-    |                  |                                 |
-    | (platform can    |                                 | continue_url
-    | call Complete    |                                 |
-    |   Checkout)      |                                 |
-    +--------+---------+                                 |
-             |                                           |
-             | Complete Checkout                         |
-             v                                           |
-   +--------------------+                                |
-   |complete_in_progress|                                |
-   +---------+----------+                                |
-             |                                           |
-             +-----------------------+-------------------+
+    all info | ^                              |  via continue_url)  |
+   collected | |                              +----+-----------+----+
+             | | Update Checkout, or               ^            |
+             v | Complete Checkout (recoverable)   |            |
+    +------------------+                           |            |
+    |ready_for_complete|---------------------------+            |
+    |                  |    Complete Checkout                   |
+    | (platform can    |    (escalation needed)                 |
+    | call Complete    |                                        |
+    |   Checkout)      |                                        |
+    +--------+---------+                                        |
+             |                                                  |
+             | Complete Checkout                                |
+             v                                                  |
+   +--------------------+                                       |
+   |complete_in_progress|                                       | continue_url
+   +---------+----------+                                       |
+             |                                                  |
+             +-----------------------+--------------------------+
                                      v
                                +-------------+
                                |  completed  |
@@ -107,6 +108,12 @@ platform receives messages indicating what's needed to progress.
                                +-------------+
           (session invalid/expired - can occur from any state)
 ```
+
+> **Note:** Two transitions are omitted from the diagram above for
+> readability: `complete_in_progress` can also resolve via Buyer handoff
+> (`continue_url`) when an outstanding Action's fallback is exhausted, or via
+> cancellation per the race scenario described in
+> [Accepted completion](#accepted-completion) below.
 
 ### Status Values
 
