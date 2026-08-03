@@ -2727,19 +2727,22 @@ Platforms discover a business's capabilities through the following flow:
 
 1. The Platform fetches `/.well-known/ucp` — this is the current version
     profile.
-2. If the Platform's protocol version matches `version`, it uses this
-    profile directly and proceeds to capability negotiation.
-3. If the Platform's protocol version is a key in
+2. The Platform selects a mutually supported protocol version from the
+    Business's `version` and `supported_versions` keys; Platforms **SHOULD**
+    prefer the most recent. If the selected version matches `version`, the
+    Platform uses this profile directly and proceeds to capability
+    negotiation.
+3. If the selected version is a key in
     `supported_versions`: fetch the profile at the mapped URI. The
     Platform **MUST** verify that the fetched profile's `ucp.version`
     equals the `supported_versions` key it selected; on mismatch the
     Platform **MUST NOT** use that profile. Otherwise this profile
     describes the capabilities available at that protocol version —
     proceed to capability negotiation.
-4. Otherwise, the Business does not support the Platform's protocol
-    version. Platforms **SHOULD NOT** send requests with an incompatible
-    version; Businesses **MUST** respond with a `version_unsupported`
-    error.
+4. If no mutually supported version exists, the Business does not support
+    the Platform's protocol version. Platforms **SHOULD NOT** send requests
+    with an incompatible version; Businesses **MUST** respond with a
+    `version_unsupported` error.
 
 Version-specific profiles are leaf documents — they describe exactly
 one protocol version and **MUST NOT** contain a `supported_versions`
