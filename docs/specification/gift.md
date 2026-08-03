@@ -19,17 +19,16 @@
 ## Overview
 
 The Gift extension supports a buyer-paid purchase for another person. The
-buyer selects and pays for the product. The Business selects and validates the
-recipient.
+buyer selects and pays for the product, then selects a recipient. The Business
+validates that selection.
 
 Gift purchases differ from ordinary checkout because the buyer and recipient
 are distinct participants. A recipient is not necessarily a fulfillment
 destination: the Business may manage recipient selection, recipient acceptance,
 and delivery details in its own experience.
 
-The extension gives the Platform only what it needs to continue checkout and
-refer to the selected recipient. It does not expose a friend graph, contact
-book, address book, recipient identifier, or selection credential.
+The extension does not expose a friend graph, contact book, address book,
+recipient identifier, or selection credential.
 
 ## Scope
 
@@ -88,9 +87,9 @@ Platforms MUST negotiate both Checkout and Gift before sending `gift` data.
 
 ## Authentication and Identity Linking
 
-Gift does not define a login flow or require Identity Linking. A Business can
-sign in the buyer while they select a recipient. It can require authentication
-for Checkout operations through the existing
+Gift does not define a login flow or require Identity Linking. The buyer may
+sign in to the Business while selecting a recipient. The Business can require
+authentication for Checkout operations through the existing
 [Identity Linking](identity-linking.md) capability and its
 `dev.ucp.shopping.checkout:manage` scope.
 

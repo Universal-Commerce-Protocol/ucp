@@ -13,7 +13,7 @@
   "$defs": {
     "recipient_display": {
       "type": "object",
-      "description": "Merchant-approved buyer-facing presentation of a selected recipient.",
+      "description": "Business-provided buyer-facing presentation of a selected recipient.",
       "required": ["name"],
       "properties": {
         "name": {
