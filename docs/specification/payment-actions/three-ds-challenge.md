@@ -23,8 +23,7 @@ This specification defines the 3DS challenge Action type declared by the
 dev.ucp.payment.three_ds_challenge
 ```
 
-It asks the Platform to present a scoped, buyer-facing payment-authentication
-surface.
+It asks the Platform to present a buyer-facing payment-authentication surface to complete 3ds challenges.
 
 ## Purpose and Scope
 
@@ -38,7 +37,7 @@ The Platform presents the surface and observes only when the Platform-facing
 interaction finishes or cannot continue. The Business determines the
 authentication and payment outcome from its server-side provider state.
 
-## Emission and Gated Effect
+## Blocking Action
 
 The 3DS challenge Action gates the associated payment attempt from producing a
 completed Checkout while the occurrence remains outstanding. It does not assert

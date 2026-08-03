@@ -23,8 +23,7 @@ the [Payment Authentication extension](../payment-authentication.md):
 dev.ucp.payment.device_data_collection
 ```
 
-It asks the Platform to run a scoped, invisible browser-capable surface associated
-with a payment instrument or attempt.
+It asks the Platform to mount an invisible payment-authentication surface to complete device data collection.
 
 ## Purpose and Scope
 
@@ -39,7 +38,7 @@ availability, method timeouts, or collection outcomes into EMVCo state such as
 `threeDSCompInd`. If a provider or Business skips collection, including when an
 ACS supplies no method URL, the Business does not emit this Action.
 
-## Emission and Gated Effect
+## Blocking Action
 
 A Business **MAY** emit this type from a Create, Update, or Complete Checkout
 response after it can associate collection with a payment instrument and
