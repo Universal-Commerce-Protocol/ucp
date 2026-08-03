@@ -496,15 +496,21 @@ Each variant has its own config schema tailored to its context:
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                     | Description                                                      |
-| :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+| Schema                                                                                      | Description                                                       |
+| :------------------------------------------------------------------------------------------ | :----------------------------------------------------------------- |
+| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)            | Entity-agnostic base: id, type, billing_address, credential, display |
+| `payment_instrument.json#/$defs/selected_payment_instrument`                                | Checkout context: base plus required handler routing and selection state |
+| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)  | Extends base with display: brand, last_digits, expiry, card art   |
 
-UCP provides base schemas for universal payment instruments like `card`. Spec
-authors **MAY** extend any of the base instruments to add handler-specific
-display data or customize the credential reference. Handlers **MAY** define
-multiple instrument types for different payment flows.
+UCP provides base schemas for universal payment instruments like `card`.
+Handler instrument schemas extend the entity-agnostic base once to add
+handler-specific display data or customize the credential reference; the same
+schema then applies wherever instruments surface. Containing capabilities add
+their own context: Checkout uses `selected_payment_instrument` to require
+`handler_id` and add selection state, while Order uses the base without
+processing-time routing. Handler authors **MUST NOT** redeclare routing fields
+in their instrument schemas. Handlers **MAY** define multiple instrument types
+for different payment flows.
 
 **Available Instrument Schemas:**
 

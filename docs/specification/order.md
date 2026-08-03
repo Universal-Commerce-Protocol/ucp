@@ -93,12 +93,17 @@ Expectations can be split, merged, or adjusted post-order. For example:
 order confirmation. Like the rest of the order it reflects current state, so
 it may change post-purchase (e.g. an order edit that adds or changes a tender).
 
-It mirrors the checkout `payment` object, reduced to the subset relevant to a
-placed order:
+Each instrument reuses the base checkout
+[Payment Instrument](checkout.md#payment), adjusted for the order context:
 
-* Each instrument keeps only what a confirmation needs (`type`,
-  `billing_address`, `display`) and drops the checkout instrument's
-  collection-time details — no handler reference, credential, or selection state
+* `display` is required — it is the buyer-facing record of the tender
+* `handler_id` and selection state are absent; handler routing is a
+  Checkout processing concern, not an order property
+* Credentials are never returned in responses (see
+  [Credential Flow & PCI Scope](overview.md#credential-flow-pci-scope));
+  businesses omit `credential` on the order
+* `amount` reports the amount charged to the instrument, in the order
+  currency's minor units (ISO 4217)
 
 ### Attribution
 
@@ -154,11 +159,15 @@ else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
 
-### Order Payment Instrument
+### Payment Instrument
 
-Each instrument represents a single tender used on the order.
+Each instrument represents a single tender used on the order. It uses the
+shared base Payment Instrument — handler instrument schemas extend the base
+once and apply in both Checkout and Order contexts — with `display` required
+and an order-specific `amount` reporting the charge in the order currency's
+minor units (ISO 4217).
 
-{{ schema_fields('order_payment_instrument', 'order') }}
+{{ schema_fields('types/payment_instrument', 'order') }}
 
 ### Expectation
 

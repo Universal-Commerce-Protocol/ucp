@@ -2,21 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/payment_instrument.json",
   "title": "Payment Instrument",
-  "description": "The base definition for any payment instrument. It links the instrument to a specific payment handler.",
+  "description": "The entity-agnostic base for a payment instrument. Payment handlers extend this schema once with their concrete credential, display, and instrument-specific fields; containing capabilities add contextual fields (e.g. Checkout adds handler routing and selection state).",
   "type": "object",
   "required": [
     "id",
-    "handler_id",
     "type"
   ],
   "properties": {
     "id": {
       "type": "string",
       "description": "A unique identifier for this instrument instance, assigned by the platform."
-    },
-    "handler_id": {
-      "type": "string",
-      "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition."
     },
     "type": {
       "type": "string",
@@ -38,12 +33,17 @@
   "$defs": {
     "selected_payment_instrument": {
       "title": "Selected Payment Instrument",
-      "description": "A payment instrument with selection state.",
+      "description": "A Checkout payment instrument with handler routing and selection state.",
       "allOf": [
         { "$ref": "#" },
         {
           "type": "object",
+          "required": ["handler_id"],
           "properties": {
+            "handler_id": {
+              "type": "string",
+              "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition."
+            },
             "selected": {
               "type": "boolean",
               "description": "Whether this instrument is selected by the user."
