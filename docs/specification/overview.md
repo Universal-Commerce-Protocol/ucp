@@ -1930,10 +1930,12 @@ profile and response envelopes (see
 [The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)). The preference
 is suggestive: it communicates the business's preferred presentation —
 typically a conversion or risk judgment — and platforms **SHOULD** take it
-into account but **MAY** apply their own ordering. It is distinct from, and
-does not override, the buyer-side preference a platform submits in
-`context.payment[]` (buyer-preferred handlers, on the request side); the
-platform arbitrates between the two.
+into account but **MAY** apply their own ordering. The same suggestive
+preference applies within a handler: the order of the business's advertised
+`available_instruments` array communicates preferred instrument presentation,
+earliest first. It is distinct from, and does not override, the buyer-side
+preference a platform submits in `context.payment[]` (buyer-preferred
+handlers, on the request side); the platform arbitrates between the two.
 
 **Available Instrument Resolution:** Within each active handler, both the
 platform and the business independently advertise `available_instruments` — the
