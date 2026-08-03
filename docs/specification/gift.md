@@ -18,36 +18,34 @@
 
 ## Overview
 
-The Gift extension represents a buyer-paid purchase for another person. The
-buyer selects and pays for the product, while the recipient is selected and
-validated by the Business.
+The Gift extension supports a buyer-paid purchase for another person. The
+buyer selects and pays for the product. The Business selects and validates the
+recipient.
 
 Gift purchases differ from ordinary checkout because the buyer and recipient
 are distinct participants. A recipient is not necessarily a fulfillment
 destination: the Business may manage recipient selection, recipient acceptance,
 and delivery details in its own experience.
 
-The extension exposes only the information needed for an agent or platform to
-continue the checkout and address the buyer's selected recipient. It does not
-expose a friend graph, contact book, address book, recipient identifier, or
-recipient-selection credential.
+The extension gives the Platform only what it needs to continue checkout and
+refer to the selected recipient. It does not expose a friend graph, contact
+book, address book, recipient identifier, or selection credential.
 
 ## Scope
 
-This version extends Checkout only. It supports a buyer who has selected a
-product and wants to send it as a gift. The Business may require the buyer to
-select a recipient in its own checkout experience before checkout can complete.
+Gift extends Checkout. It starts after a buyer selects a product and decides to
+send it as a gift. The Business may require the buyer to select a recipient in
+its own checkout experience before it completes checkout.
 
-This version does not define a recipient-selection API. The Business owns the
-recipient selection and stores its result as private Checkout-bound state. The
-Platform never submits, stores, or reuses a recipient identifier or selection
-credential.
+Gift does not define a recipient-selection API. The Business owns the selection
+and keeps it as private state for that Checkout. The Platform never submits,
+stores, or reuses a recipient identifier or selection credential.
 
 ## Data Boundaries
 
 | Data | Owner | UCP visibility |
 | --- | --- | --- |
-| Recipient display name | Business | Buyer-facing display value |
+| Recipient display name | Business | Buyer-facing display value, only on a user-authenticated and authorized Checkout response |
 | Recipient selection state | Business | Checkout status and optional display value only |
 | Friend graph, contact details, address | Business | Never exposed by this extension |
 | Recipient eligibility and acceptance | Business | Reflected only through normal Checkout state and messages |
@@ -87,6 +85,24 @@ Businesses advertise Gift support alongside Checkout:
 ```
 
 Platforms MUST negotiate both Checkout and Gift before sending `gift` data.
+
+## Authentication and Identity Linking
+
+Gift does not define a login flow or require Identity Linking. A Business can
+sign in the buyer while they select a recipient. It can require authentication
+for Checkout operations through the existing
+[Identity Linking](identity-linking.md) capability and its
+`dev.ucp.shopping.checkout:manage` scope.
+
+The Business MUST NOT return `gift.recipient` unless the Checkout request is
+user-authenticated and authorized for the operation. It MUST ensure that the
+recipient selection belongs to the authenticated buyer and the current
+Checkout. A Business session created through `continue_url` does not by itself
+authenticate the Platform's UCP requests.
+
+An unauthenticated Checkout response may show Checkout status and generic
+messages, but MUST omit `gift.recipient`. The Platform can tell the buyer that
+a recipient was selected, but not who it was.
 
 ## Schema
 
@@ -164,7 +180,8 @@ authoritative Checkout status.
 
 After the buyer returns from the Business experience, the Platform uses Get
 Checkout to obtain the current checkout. When selection succeeds, the Business
-may return its buyer-facing presentation.
+may return its buyer-facing presentation only on a user-authenticated and
+authorized request.
 
 <!-- ucp:example schema=shopping/gift def=recipient extract=$.gift.recipient -->
 ```json
