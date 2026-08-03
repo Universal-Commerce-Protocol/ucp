@@ -1124,6 +1124,21 @@ when provided.
 ]
 ```
 
+**VAT, mixed rates (tax-inclusive total):**
+
+Where the buyer-facing price is tax-inclusive, `subtotal` stays net and each VAT
+rate is a separate `tax` entry; `total` is the gross amount the buyer pays.
+
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
+```json
+[
+  { "type": "subtotal", "display_text": "Subtotal (net)", "amount": 6000 },
+  { "type": "tax",      "display_text": "VAT 20%",        "amount": 800 },
+  { "type": "tax",      "display_text": "VAT 5.5%",       "amount": 110 },
+  { "type": "total",    "display_text": "Total",          "amount": 6910 }
+]
+```
+
 **Collapsed fees with optional breakdown:**
 
 <!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
