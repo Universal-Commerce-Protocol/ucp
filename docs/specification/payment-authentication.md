@@ -134,10 +134,16 @@ collection step can be followed by a challenge in a later response:
 }
 ```
 
-A Business normally emits only the next interaction the Platform can process.
-If collection must precede a challenge, it emits the DDC Action first and emits
-the challenge under `dev.ucp.payment.three_ds_challenge` only in a later
-Checkout response.
+A Business **SHOULD** keep at most one Payment Authentication Action
+outstanding per payment attempt at a time, emitting only the next interaction
+the Platform can process, because collection completes or times out before a
+challenge is emitted. When collection must precede a challenge, the Business
+emits the device data collection Action first and emits the challenge under
+`dev.ucp.payment.three_ds_challenge` only in a later Checkout response.
+
+When `dev.ucp.shopping.split_payments` is active a Checkout can carry an attempt
+per instrument, each with its own outstanding authentication action, and
+`config.payment_instrument_id` is what distinguishes them.
 
 Each Action's `config.payment_instrument_id` **MUST** identify an instrument in
 the containing Checkout. The Platform resolves that instrument's `handler_id`
@@ -302,6 +308,19 @@ On the web, the Platform **MUST** validate `event.source` against the mounted
 surface and `event.origin` against the occurrence's allowed origins. After a
 valid terminal notification, it unmounts the surface and ignores duplicate or
 late notifications from that context.
+
+This extension defines the following well-known `action.error` codes:
+
+| Code | Meaning |
+| :--- | :------ |
+| `action_unavailable` | The surface could not initialize. |
+| `action_expired` | The surface's session expired. |
+| `action_failed` | Another terminal surface error. |
+
+These are diagnostic surface codes, never authentication or payment outcomes.
+Following [Error Code](site:schemas/common/types/error_code.json), the set stays
+open: a surface **MAY** send another value, and a Platform **MUST** tolerate one
+it does not recognize and reconcile the same way.
 
 ### Buyer Dismissal
 

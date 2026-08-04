@@ -15,6 +15,7 @@
           "properties": {
             "actions": {
               "type": "object",
+              "ucp_request": "omit",
               "properties": {
                 "dev.ucp.payment.device_data_collection": {
                   "type": "array",

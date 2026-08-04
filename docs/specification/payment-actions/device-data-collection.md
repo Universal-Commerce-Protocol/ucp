@@ -23,7 +23,8 @@ the [Payment Authentication extension](../payment-authentication.md):
 dev.ucp.payment.device_data_collection
 ```
 
-It asks the Platform to mount an invisible payment-authentication surface to complete device data collection.
+It asks the Platform to mount an invisible payment-authentication surface to
+complete device data collection.
 
 ## Purpose and Scope
 
@@ -80,9 +81,9 @@ The config shape is defined inline by the
 | `payment_instrument_id` | string | ✓ | ID of the associated instrument in the containing Checkout. |
 | `url` | string | ✓ | Absolute HTTPS URL for the invisible collection surface. |
 
-The Business **SHOULD** provide a Business- or provider-operated wrapper URL that
-owns any provider-specific POST, such as posting `threeDSMethodData` to an ACS
-method URL. The Platform performs an ordinary navigation to `config.url`.
+`config.url` **SHOULD** be Business- or provider-operated and own any
+provider-specific POST, such as posting `threeDSMethodData` to an ACS method
+URL. The Platform performs an ordinary navigation to it.
 
 ## Platform Behavior
 
@@ -102,8 +103,8 @@ Mounting the surface **MUST** follow the shared
 and [Embedded Protocol security requirements](../embedded-protocol.md#security).
 
 On the web the surface is typically a hidden iframe. A native Platform may use
-an isolated webview or equivalent browser surface. It must not be visible to the
-Buyer or request Buyer interaction.
+an isolated webview or equivalent browser surface. It **MUST NOT** be visible to
+the Buyer or request Buyer interaction.
 
 The Platform distinguishes only whether its surface finished or could not
 continue. It does not determine whether device data was collected successfully,
@@ -131,10 +132,9 @@ When the Platform-facing collection step is finished, the surface **MUST** send:
 }
 ```
 
-The surface may send `action.done` when handler-owned logic determines that the
-Platform should close the surface. The notification does not reveal whether
-collection succeeded, was unavailable, was skipped, or mapped to a particular
-provider completion indicator.
+Handler-owned logic determines when that step is finished. The notification does
+not reveal whether collection succeeded, was unavailable, was skipped, or mapped
+to a particular provider completion indicator.
 
 ### Error
 
@@ -163,14 +163,13 @@ it **MAY** send:
 }
 ```
 
-Recommended surface-level codes are `action_unavailable` when initialization
-fails, `action_expired` when the surface's session expired, and `action_failed`
-for another terminal surface error. These are diagnostic codes, not EMV 3DS or
-payment outcomes. A provider-domain timeout or unavailable method that the
-handler can safely continue past should normally result in `action.done`, with
-the Business and provider recording the domain outcome server-side. After either
-notification, the Platform follows the shared Payment Authentication
-reconciliation contract.
+Surface-level codes are the shared
+[well-known `action.error` codes](../payment-authentication.md#surface-rendering-and-notifications).
+They are not EMV 3DS or payment outcomes: a provider-domain timeout or
+unavailable method that the handler can safely continue past should normally
+result in `action.done`, with the Business and provider recording the domain
+outcome server-side. After either notification, the Platform follows the shared
+Payment Authentication reconciliation contract.
 
 ## Deadline and Fallback
 

@@ -23,7 +23,8 @@ This specification defines the 3DS challenge Action type declared by the
 dev.ucp.payment.three_ds_challenge
 ```
 
-It asks the Platform to present a buyer-facing payment-authentication surface to complete 3ds challenges.
+It asks the Platform to present a buyer-facing payment-authentication surface to
+complete 3DS challenges.
 
 ## Purpose and Scope
 
@@ -79,11 +80,10 @@ The config shape is defined inline by the
 | `payment_instrument_id` | string | ✓ | ID of the associated instrument in the containing Checkout. |
 | `url` | string | ✓ | Absolute HTTPS URL for the buyer-facing challenge surface. |
 
-The Business **SHOULD** provide a Business- or provider-operated wrapper URL that
-owns any provider-specific POST, such as submitting CReq to an ACS challenge
-URL. The Platform performs an ordinary navigation to `config.url`; it
-**MUST NOT** construct provider requests, parse challenge payloads, or relay 3DS
-protocol data.
+`config.url` **SHOULD** be Business- or provider-operated and own any
+provider-specific POST, such as submitting CReq to an ACS challenge URL. The
+Platform performs an ordinary navigation to it; it **MUST NOT** construct
+provider requests, parse challenge payloads, or relay 3DS protocol data.
 
 ## Platform Behavior
 
@@ -139,8 +139,11 @@ send:
 
 `action.done` means only that the Platform should close the challenge surface
 and retrieve Checkout. It does not mean authentication or payment succeeded.
-After closing the surface, the Platform uses Get Checkout and does not call
-Complete Checkout again to resume the accepted operation.
+After closing the surface, the Platform should issue Get Checkout to confirm
+processing state. Get Checkout is a read-only observation and does not
+itself advance the payment attempt; the Business advances Checkout state
+from server-side provider state (typically an out-of-band provider
+push/callback), independent of when the Platform calls Get Checkout.
 
 A handler-owned surface **MAY** include provider-specific or diagnostic params
 such as correlation identifiers or SDK outcomes. Platforms **MUST** ignore
@@ -173,18 +176,17 @@ If the surface cannot continue, it **MAY** send:
 }
 ```
 
-Recommended surface-level codes are `action_unavailable` when initialization
-fails, `action_expired` when the challenge session expired, and `action_failed`
-for another terminal surface error. Buyer abandonment and provider
-authentication outcomes may be unavailable to the surface or known only by the
-provider backend; the Business and payment provider remain authoritative for
-those distinctions. After either notification, the Platform follows the shared
-Payment Authentication reconciliation contract.
+Surface-level codes are the shared
+[well-known `action.error` codes](../payment-authentication.md#surface-rendering-and-notifications).
+Buyer abandonment and provider authentication outcomes may be unavailable to the
+surface or known only by the provider backend; the Business and payment provider
+remain authoritative for those distinctions. After either notification, the
+Platform follows the shared Payment Authentication reconciliation contract.
 
 ## Combined Provider Flows
 
-A payment provider may use one wrapper URL to orchestrate device data collection
-and a challenge. The emitted Action type describes the Platform-facing behavior:
+A payment provider may serve both device data collection and a challenge from
+one `config.url`. The emitted Action type describes the Platform-facing behavior:
 
 - If the surface remains invisible and never requests Buyer interaction, the
   Business emits device data collection.
@@ -193,8 +195,8 @@ and a challenge. The emitted Action type describes the Platform-facing behavior:
 The Business must not emit an invisible DDC Action and then make that surface
 visible. If collection completes first, the preferred flow is to remove the DDC
 occurrence and emit a new challenge occurrence in a later Checkout response.
-The two occurrences have different Action types and IDs even when their wrapper
-URL origin is the same.
+The two occurrences have different Action types and IDs even when their
+`config.url` origin is the same.
 
 ## Deadline and Fallback
 
@@ -202,7 +204,7 @@ URL origin is the same.
 gives the ACS 10 minutes (600 seconds) after successfully sending each challenge
 interface to the challenge iframe (Req 226). The surface and provider own that
 per-interface timer. It does not define a single UCP deadline beginning at the
-initial wrapper navigation.
+initial navigation.
 
 The Platform applies a bounded outer-surface deadline defined by the handler or
 Platform policy, measured from navigation and capped by Checkout `expires_at`.
