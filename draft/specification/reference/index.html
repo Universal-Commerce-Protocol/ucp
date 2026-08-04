@@ -784,6 +784,148 @@
   
   
   
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_4" id="__nav_2_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Payment Authentication Extension
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Payment Authentication Extension
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-actions/device-data-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Device Data Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-actions/three-ds-challenge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3DS Challenge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../buyer-consent/" class="md-nav__link">
         
@@ -3490,6 +3632,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#payment-authentication-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Authentication Extension
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Payment Authentication Extension">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#devucpshoppingcheckout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dev.Ucp.Shopping.Checkout
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#split-payments-extension" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5181,6 +5351,34 @@
     <span class="md-ellipsis">
       
         Dev.Ucp.Shopping.Fulfillment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#payment-authentication-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Authentication Extension
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Payment Authentication Extension">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#devucpshoppingcheckout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dev.Ucp.Shopping.Checkout
       
     </span>
   </a>
@@ -10381,6 +10579,135 @@ within the UCP.</p>
 </table>
 <h4 id="devucpshoppingfulfillment">Dev.Ucp.Shopping.Fulfillment<a class="headerlink" href="#devucpshoppingfulfillment" title="Permanent link">&para;</a></h4>
 <p><em>No properties defined.</em></p>
+<hr />
+<h3 id="payment-authentication-extension">Payment Authentication Extension<a class="headerlink" href="#payment-authentication-extension" title="Permanent link">&para;</a></h3>
+<h4 id="devucpshoppingcheckout">Dev.Ucp.Shopping.Checkout<a class="headerlink" href="#devucpshoppingcheckout" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ucp</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">UCP metadata for checkout responses.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Unique identifier of the checkout session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">line_items</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">List of line items being checked out.</td>
+</tr>
+<tr>
+<td style="text-align: left;">buyer</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Representation of the buyer.</td>
+</tr>
+<tr>
+<td style="text-align: left;">context</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
+</tr>
+<tr>
+<td style="text-align: left;">signals</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">attribution</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details.<br><strong>Enum:</strong> <code>incomplete</code>, <code>requires_escalation</code>, <code>ready_for_complete</code>, <code>complete_in_progress</code>, <code>completed</code>, <code>canceled</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.</td>
+</tr>
+<tr>
+<td style="text-align: left;">totals</td>
+<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Different cart totals.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
+</tr>
+<tr>
+<td style="text-align: left;">messages</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
+</tr>
+<tr>
+<td style="text-align: left;">links</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
+</tr>
+<tr>
+<td style="text-align: left;">policies</td>
+<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expires_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.</td>
+</tr>
+<tr>
+<td style="text-align: left;">continue_url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.</td>
+</tr>
+<tr>
+<td style="text-align: left;">payment</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Payment configuration containing handlers.</td>
+</tr>
+<tr>
+<td style="text-align: left;">order</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Details about an order created for this checkout session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">actions</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h3 id="split-payments-extension">Split Payments Extension<a class="headerlink" href="#split-payments-extension" title="Permanent link">&para;</a></h3>
 <h4 id="instrument-group_1">Instrument Group<a class="headerlink" href="#instrument-group_1" title="Permanent link">&para;</a></h4>

@@ -8466,6 +8466,490 @@ Error codes specific to AP2 mandate verification.
 | `merchant_authorization_invalid` | The business authorization signature could not be verified.       |
 | `merchant_authorization_missing` | The checkout response omits `ap2.merchant_authorization`.         |
 
+# Payment Authentication Extension
+
+## Overview
+
+The Payment Authentication extension defines browser-surface interactions that a Platform may need to process while a payment attempt is underway. It declares two concrete [Action types](http://ucp.dev/draft/specification/overview/#actions):
+
+| Action type                              | Platform interaction                                             |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `dev.ucp.payment.device_data_collection` | Run an invisible browser-capable device data collection surface. |
+| `dev.ucp.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge surface.                    |
+
+The extension is named:
+
+```text
+dev.ucp.shopping.payment_authentication
+```
+
+It extends `dev.ucp.shopping.checkout`. Negotiating this extension activates the complete contract for both Action types. A Business **MUST NOT** emit either type unless this extension is active for the Checkout.
+
+The extension standardizes only the Platform-facing interaction. It does not re-specify EMV 3DS, carry EMV 3DS messages, report authentication outcomes, or replace payment-handler processing. The Business, its payment handler, and its payment provider remain responsible for provider protocol state and for the authoritative payment outcome.
+
+## Discovery and Negotiation
+
+Businesses and Platforms advertise this extension in their profiles:
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.shopping.payment_authentication": [
+        {
+          "version": "draft",
+          "extends": "dev.ucp.shopping.checkout",
+          "spec": "https://ucp.dev/draft/specification/payment-authentication",
+          "schema": "https://ucp.dev/draft/schemas/shopping/payment_authentication.json"
+        }
+      ]
+    }
+  }
+}
+```
+
+A Platform advertises the extension only if it can process both the invisible and buyer-facing browser surfaces, enforce the security requirements in this specification, and process the embedded notifications. A Business advertises it only when each payment handler that may cause these Actions defines the required trust and fallback contract.
+
+Negotiating the extension does not make every runtime URL trustworthy. Each instance remains subject to its schema, the payment handler and instrument context established by the payment attempt, and Platform policy.
+
+## Runtime Shape
+
+Actions are keyed by type in the Checkout response. For example, a device data collection step can be followed by a challenge in a later response:
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.payment_authentication": [
+        {
+          "version": "draft",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.example.card": [
+        { "id": "card_handler_1", "version": "draft" }
+      ]
+    }
+  },
+  "id": "checkout_123",
+  "status": "complete_in_progress",
+  "currency": "USD",
+  "line_items": [],
+  "totals": [
+    { "type": "subtotal", "amount": 100 },
+    { "type": "total", "amount": 100 }
+  ],
+  "links": [],
+  "payment": {
+    "instruments": [
+      {
+        "id": "instrument_1",
+        "handler_id": "card_handler_1",
+        "type": "card",
+        "selected": true
+      }
+    ]
+  },
+  "actions": {
+    "dev.ucp.payment.device_data_collection": [
+      {
+        "id": "ddc-1",
+        "config": {
+          "payment_instrument_id": "instrument_1",
+          "url": "https://payments.example.com/3ds/method/session_123"
+        }
+      }
+    ]
+  }
+}
+```
+
+A Business **SHOULD** keep at most one Payment Authentication Action outstanding per payment attempt at a time, emitting only the next interaction the Platform can process, because collection completes or times out before a challenge is emitted. When collection must precede a challenge, the Business emits the device data collection Action first and emits the challenge under `dev.ucp.payment.three_ds_challenge` only in a later Checkout response.
+
+When `dev.ucp.shopping.split_payments` is active a Checkout can carry an attempt per instrument, each with its own outstanding authentication action, and `config.payment_instrument_id` is what distinguishes them.
+
+Each Action's `config.payment_instrument_id` **MUST** identify an instrument in the containing Checkout. The Platform resolves that instrument's `handler_id` against `ucp.payment_handlers` and applies that handler's trust and fallback rules. The Platform **MUST** decline an Action whose instrument or handler association cannot be resolved unambiguously.
+
+## Checkout Lifecycle
+
+These Action types use the parent Checkout lifecycle defined in [Checkout — Actions](http://ucp.dev/draft/specification/checkout/#actions):
+
+- Every emitted Payment Authentication Action gates advancement of its associated payment attempt while the same Action type and `id` remain outstanding in the authoritative Checkout. A terminal surface event ends the Platform's current processing attempt; it does not lift the gate.
+- A Business **MAY** emit device data collection from Create or Update Checkout to perform it before payment completion. While the Checkout is `incomplete`, the Action prevents `ready_for_complete` until it resolves; unrelated Updates remain allowed.
+- A Business **SHOULD** accept Complete Checkout before beginning a payment-authentication interaction needed during payment processing and return `complete_in_progress` with the Action. This represents an accepted payment attempt that is waiting for Platform work.
+- If an Action instead prevents Complete Checkout from being accepted, the Business **MUST** return `status: incomplete` and a `recoverable` error Message whose `path` selects the exact Action occurrence.
+- While the Checkout is `complete_in_progress`, the Platform **MUST NOT** start another Update or Complete Checkout operation. It uses Get Checkout to observe Business processing and follows the parent fallback, handoff, and cancellation rules.
+
+A Payment Authentication Action occurrence is single-use. After starting its surface, the Platform **MUST NOT** process the same Action type and `id` again, including after `action.done`, `action.error`, a load failure, timeout, or Buyer dismissal. If the Business needs the Platform to retry the interaction, it **MUST** replace the occurrence with a new `id`.
+
+After a terminal surface outcome, the Platform unmounts the surface and reconciles with the authoritative Checkout:
+
+| Surface outcome                                           | Reconciliation                                                                                                           |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `action.done`                                             | Use Get Checkout and repeat with bounded backoff for no more than 30 seconds, stopping earlier at `expires_at`.          |
+| `action.error`, load failure, timeout, or Buyer dismissal | Use Get Checkout once before applying fallback. The Action type or handler may define additional bounded reconciliation. |
+
+If the later response removes the Action, replaces it with a new `id`, or advances the Checkout, that response is authoritative. After learning a terminal provider outcome, the Business **MUST** remove the original occurrence, replace it with new work under a new `id`, or advance the Checkout. It **MUST NOT** continue returning an occurrence that no longer represents processable work.
+
+If the same occurrence remains after its reconciliation window, the Platform **MUST NOT** reopen it and follows the parent Checkout Actions fallback, handoff, and cancellation rules.
+
+An `action.done` notification means only that the Platform-facing surface finished. The Business determines whether collection or authentication succeeded from its server-side payment-provider state.
+
+## Decline, Failure, and Abandonment
+
+A Platform **MAY** decline an instance that violates its runtime policy. If it cannot process the instance, it **SHOULD** use a valid `continue_url` to hand the session to the Business when available.
+
+For an Action on an `incomplete` Checkout, the Platform may instead choose a different payment instrument through an ordinary Update and later submit a new Complete operation. This option is unavailable during `complete_in_progress`, when Update Checkout is frozen. The Business treats work associated with the previous instrument as superseded and stops using it for the new payment attempt. Superseded work is no longer outstanding, so those Action occurrences do not appear in later Checkout responses, and a Business **MUST** drop Actions for instruments that are no longer present in the Checkout.
+
+The individual Action specifications define type-specific timeout and fallback behavior:
+
+- [Payment Device Data Collection](http://ucp.dev/draft/specification/payment-actions/device-data-collection/index.md)
+- [Payment 3DS Challenge](http://ucp.dev/draft/specification/payment-actions/three-ds-challenge/index.md)
+
+## Surface Rendering and Notifications
+
+Returning a Payment Authentication Action asks the Platform to render its `config.url`. The payment handler specification names the origins its Action surfaces load from; those are the occurrence's **allowed origins**. They may be provider-operated, Business-operated, or both, so this specification does not choose which party holds that trust, only that the expectation exists before the Action is emitted. The Platform **MUST** decline an occurrence whose `config.url` origin is not among them, and **MUST** install its message receiver before navigating so an immediately completing surface cannot race initialization.
+
+The `postMessage` and native-webview mechanics follow [Embedded Protocol — Communication Channels](http://ucp.dev/draft/specification/embedded-protocol/#communication-channels). Payment Authentication uses the Action methods below. It does not use a capability-specific Embedded Protocol `ready` method or `MessageChannel` upgrade; `action.ready` is its scoped handshake.
+
+Each Action occurrence uses a fresh, isolated browsing context. Device data collection is hidden and non-interactive. A 3DS challenge is visible, blocks interaction with the rest of Checkout, and **SHOULD** show a loading state until its content renders. Web Platforms use an iframe or other handler-approved browser context. For messages from a native surface to the Platform, native Platforms **MUST** expose a JSON-string bridge through `window.EmbeddedActionProtocolConsumer` (Android) or `window.webkit.messageHandlers.EmbeddedActionProtocolConsumer` (iOS). For the ready response from the Platform to the surface, the Platform calls `window.EmbeddedActionProtocol.postMessage()` with the JSON-stringified JSON-RPC response.
+
+### Ready Handshake
+
+Before beginning Action-specific work, every surface **MUST** send an `action.ready` JSON-RPC request. Its `params.id` identifies the outstanding Action occurrence, while the JSON-RPC envelope `id` correlates the ready response. Its `params.version` **MUST** equal the active Payment Authentication extension version in the containing Checkout.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "ready-1",
+  "method": "action.ready",
+  "params": {
+    "id": "ddc-1",
+    "version": "draft"
+  }
+}
+```
+
+The Platform **MUST** validate the message source, allowed origin, Action occurrence, and version before responding. A source or origin failure is untrusted and receives no response. If the trusted surface names an unknown Action occurrence or a version other than the active version, the Platform returns an error result, unmounts the surface, and follows non-successful reconciliation.
+
+For a valid request, the Platform returns an empty JSON-RPC result. The successful response confirms that the requested Payment Authentication extension version was accepted:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "ready-1",
+  "result": {}
+}
+```
+
+The surface **MUST** wait for this successful response before beginning device data collection, presenting a challenge, or sending `action.done` or `action.error`. The version remains fixed for the lifetime of that Action occurrence.
+
+After the handshake, surfaces send `action.done` or `action.error` notifications defined by the [payment Action OpenRPC](/draft/services/payment-actions/embedded.openrpc.json). On the web, the Platform **MUST** validate `event.source` against the mounted surface and `event.origin` against the occurrence's allowed origins. After a valid terminal notification, it unmounts the surface and ignores duplicate or late notifications from that context.
+
+This extension defines the following well-known `action.error` codes:
+
+| Code                 | Meaning                           |
+| -------------------- | --------------------------------- |
+| `action_unavailable` | The surface could not initialize. |
+| `action_expired`     | The surface's session expired.    |
+| `action_failed`      | Another terminal surface error.   |
+
+These are diagnostic surface codes, never authentication or payment outcomes. Following [Error Code](/draft/schemas/common/types/error_code.json), the set stays open: a surface **MAY** send another value, and a Platform **MUST** tolerate one it does not recognize and reconcile the same way.
+
+### Buyer Dismissal
+
+Cancellation inside a 3DS surface is a provider outcome, not a surface error. After recording it for the Business, the surface **SHOULD** send `action.done`. If the Buyer instead dismisses a Platform-owned container before a terminal notification, the Platform unmounts it and follows the non-successful surface reconciliation path above.
+
+## Security and Data Handling
+
+Web Platforms **MUST** follow the shared [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security) for CSP, iframe sandboxing, credentialless iframe evaluation, and strict origin validation. [Embedded Checkout security](http://ucp.dev/draft/specification/embedded-checkout/#security-for-web-based-hosts) shows how a UCP capability applies those requirements. Payment Authentication uses its own `action.ready` handshake and terminal notification methods; it does not adopt the Embedded Protocol's capability lifecycle or delegation messages.
+
+In addition, Platforms **MUST**:
+
+- parse `config.url` with a conformant URL parser; it **MUST** be absolute, use the `https` scheme, and carry no userinfo component;
+- keep the surface within the allowed origins; on the web, a `frame-src` directive naming only them makes a cross-origin redirect fail to load rather than silently widen trust;
+- grant only the frame or webview capabilities required by the handler, which **MUST** document any deviation from the shared sandbox baseline;
+- avoid logging session URLs or leaking them through referrers; and
+- treat all completion and diagnostic notifications as advisory.
+
+# Payment Device Data Collection Action
+
+This specification defines the device data collection Action type declared by the [Payment Authentication extension](http://ucp.dev/draft/specification/payment-authentication/index.md):
+
+```text
+dev.ucp.payment.device_data_collection
+```
+
+It asks the Platform to mount an invisible payment-authentication surface to complete device data collection.
+
+## Purpose and Scope
+
+Device data collection lets a Business, payment handler, PSP, or 3DS provider collect device or browser data before payment processing continues. UCP does not carry the collected data. The loaded surface sends provider-specific data directly to the Business or payment provider through its own integration.
+
+For EMV 3DS, this Action represents only the Platform-facing instruction to mount the collection surface. UCP does not define how a Business maps ACS method availability, method timeouts, or collection outcomes into EMVCo state such as `threeDSCompInd`. If a provider or Business skips collection, including when an ACS supplies no method URL, the Business does not emit this Action.
+
+## Blocking Action
+
+A Business **MAY** emit this type from a Create, Update, or Complete Checkout response after it can associate collection with a payment instrument and negotiated payment handler. `config.payment_instrument_id` identifies that instrument.
+
+The Action gates advancement of the associated payment attempt while the occurrence remains outstanding in the authoritative Checkout. A terminal surface event starts reconciliation; it does not itself lift the gate or assert that collection succeeded. If collection is merely an optimization that the Business will not wait for, the Business **MUST NOT** emit an Action.
+
+## Runtime Shape
+
+The Action is emitted under its type key:
+
+```json
+{
+  "actions": {
+    "dev.ucp.payment.device_data_collection": [
+      {
+        "id": "ddc-1",
+        "config": {
+          "payment_instrument_id": "instrument_1",
+          "url": "https://payments.example.com/ucp/payment/ddc/session_123"
+        }
+      }
+    ]
+  }
+}
+```
+
+The config shape is defined inline by the [Payment Authentication extension schema](/draft/schemas/shopping/payment_authentication.json).
+
+| Field                   | Type   | Required | Notes                                                       |
+| ----------------------- | ------ | -------- | ----------------------------------------------------------- |
+| `payment_instrument_id` | string | ✓        | ID of the associated instrument in the containing Checkout. |
+| `url`                   | string | ✓        | Absolute HTTPS URL for the invisible collection surface.    |
+
+`config.url` **SHOULD** be Business- or provider-operated and own any provider-specific POST, such as posting `threeDSMethodData` to an ACS method URL. The Platform performs an ordinary navigation to it.
+
+## Platform Behavior
+
+The Platform **MUST**:
+
+1. validate the URL according to the Payment Authentication contract, the payment handler and instrument context, and Platform policy;
+1. load the URL in an isolated, invisible browser-capable surface;
+1. complete the `action.ready` handshake before allowing collection to begin;
+1. correlate embedded notifications with both this Action occurrence and the mounted surface; and
+1. unmount the surface after `action.done`, `action.error`, load failure, or timeout.
+
+Mounting the surface **MUST** follow the shared [Payment Authentication rendering contract](http://ucp.dev/draft/specification/payment-authentication/#surface-rendering-and-notifications) and [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security).
+
+On the web the surface is typically a hidden iframe. A native Platform may use an isolated webview or equivalent browser surface. It **MUST NOT** be visible to the Buyer or request Buyer interaction.
+
+The Platform distinguishes only whether its surface finished or could not continue. It does not determine whether device data was collected successfully, whether an ACS method timed out, or whether 3DS authentication should proceed.
+
+## Embedded Notifications
+
+After completing the shared [`action.ready` handshake](http://ucp.dev/draft/specification/payment-authentication/#ready-handshake), the surface sends JSON-RPC 2.0 notifications defined by the [payment Action embedded contract](http://ucp.dev/draft/specification/payment-authentication/#surface-rendering-and-notifications).
+
+### Done
+
+When the Platform-facing collection step is finished, the surface **MUST** send:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "action.done",
+  "params": {
+    "id": "ddc-1"
+  }
+}
+```
+
+Handler-owned logic determines when that step is finished. The notification does not reveal whether collection succeeded, was unavailable, was skipped, or mapped to a particular provider completion indicator.
+
+### Error
+
+If the surface cannot continue from the Platform-facing transport perspective, it **MAY** send:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "action.error",
+  "params": {
+    "id": "ddc-1",
+    "error": {
+      "ucp": { "version": "draft", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "action_unavailable",
+          "content": "Device data collection could not start.",
+          "severity": "recoverable"
+        }
+      ]
+    }
+  }
+}
+```
+
+Surface-level codes are the shared [well-known `action.error` codes](http://ucp.dev/draft/specification/payment-authentication/#surface-rendering-and-notifications). They are not EMV 3DS or payment outcomes: a provider-domain timeout or unavailable method that the handler can safely continue past should normally result in `action.done`, with the Business and provider recording the domain outcome server-side. After either notification, the Platform follows the shared Payment Authentication reconciliation contract.
+
+## Deadline and Fallback
+
+[EMV 3-D Secure Protocol and Core Functions v2.3.1.1](https://www.emvco.com/specifications/emv-3-d-secure-protocol-and-core-functions-specification-6/) requires the 3DS Server to set `threeDSCompInd` to `N` when the 3DS Method does not complete within five seconds (Req 315). That provider-domain timer begins when the method is invoked and remains owned by the Business and provider; the Platform **MUST NOT** derive it from the outer surface's load event.
+
+The Platform applies a bounded outer-surface deadline defined by the handler or Platform policy, measured from navigation and capped by Checkout `expires_at`. That deadline controls only how long the Platform keeps the UCP surface mounted; it does not set `threeDSCompInd` or another provider outcome.
+
+If no valid `action.done` or `action.error` arrives before the outer deadline, the Platform **MUST** unmount the surface, treat the interaction as timed out, and follow the non-successful surface reconciliation path. It may unmount sooner after load failure or a valid terminal notification. The Platform **MUST NOT** remount the same Action type and `id`; an unchanged occurrence follows the parent Checkout Actions fallback, handoff, and cancellation rules.
+
+## Security
+
+The common [Payment Authentication security requirements](http://ucp.dev/draft/specification/payment-authentication/#security-and-data-handling) apply. In addition:
+
+- The handler's trust policy **MUST** authorize the initial and redirect origins before the Platform loads them.
+- The surface **MUST NOT** receive Platform credentials or access Platform storage.
+- Provider payloads and collected device data **MUST NOT** be copied into the Action, notification params, Checkout, or payment instrument.
+- `action.done` and `action.error` are advisory surface signals. A later Checkout response, based on Business/provider state, remains authoritative.
+
+# Payment 3DS Challenge Action
+
+This specification defines the 3DS challenge Action type declared by the [Payment Authentication extension](http://ucp.dev/draft/specification/payment-authentication/index.md):
+
+```text
+dev.ucp.payment.three_ds_challenge
+```
+
+It asks the Platform to present a buyer-facing payment-authentication surface to complete 3DS challenges.
+
+## Purpose and Scope
+
+A 3DS challenge Action lets the Business and payment handler ask the Platform to present an issuer or provider challenge to the Buyer. UCP does not carry EMV 3DS payloads such as CReq/CRes, AReq/ARes, RReq/RRes, or `transStatus`. Those details remain within the loaded surface and the Business, payment handler, PSP, 3DS server, issuer, or ACS integration.
+
+The Platform presents the surface and observes only when the Platform-facing interaction finishes or cannot continue. The Business determines the authentication and payment outcome from its server-side provider state.
+
+## Blocking Action
+
+The 3DS challenge Action gates the associated payment attempt from producing a completed Checkout while the occurrence remains outstanding. It does not assert that the Complete Checkout operation was rejected, and a terminal surface event does not itself lift the gate.
+
+A Business **SHOULD** accept Complete Checkout, begin the payment attempt, and return `complete_in_progress` with the challenge Action. If the Business cannot accept completion before the challenge, it follows the core Checkout rule: it returns `incomplete` with a recoverable error Message whose `path` selects the challenge occurrence.
+
+## Runtime Shape
+
+The Action is emitted under its type key:
+
+```json
+{
+  "actions": {
+    "dev.ucp.payment.three_ds_challenge": [
+      {
+        "id": "three-ds-challenge-1",
+        "config": {
+          "payment_instrument_id": "instrument_1",
+          "url": "https://payments.example.com/ucp/payment/3ds/session_456"
+        }
+      }
+    ]
+  }
+}
+```
+
+The config shape is defined inline by the [Payment Authentication extension schema](/draft/schemas/shopping/payment_authentication.json).
+
+| Field                   | Type   | Required | Notes                                                       |
+| ----------------------- | ------ | -------- | ----------------------------------------------------------- |
+| `payment_instrument_id` | string | ✓        | ID of the associated instrument in the containing Checkout. |
+| `url`                   | string | ✓        | Absolute HTTPS URL for the buyer-facing challenge surface.  |
+
+`config.url` **SHOULD** be Business- or provider-operated and own any provider-specific POST, such as submitting CReq to an ACS challenge URL. The Platform performs an ordinary navigation to it; it **MUST NOT** construct provider requests, parse challenge payloads, or relay 3DS protocol data.
+
+## Platform Behavior
+
+The Platform **MUST**:
+
+1. validate the URL according to the Payment Authentication contract, the payment handler and instrument context, and Platform policy;
+1. load the URL in an isolated, visible browser-capable surface;
+1. complete the `action.ready` handshake before presenting the challenge;
+1. prevent interaction with the rest of Checkout while the challenge is outstanding;
+1. correlate embedded notifications with both this Action occurrence and the mounted surface; and
+1. close the surface after `action.done`, `action.error`, unrecoverable load failure, or abandonment.
+
+Mounting the surface **MUST** follow the shared [Payment Authentication rendering contract](http://ucp.dev/draft/specification/payment-authentication/#surface-rendering-and-notifications) and [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security).
+
+On the web the surface may be a full-page frame, modal frame, or separate window when the negotiated handler defines that presentation and its security policy. A native Platform may use an isolated webview, browser view, or system browser. A top-level or system-browser handoff is permitted only when the handler defines a completion channel that the Platform can authenticate and correlate with the Action occurrence.
+
+The Platform **MUST NOT** infer an authentication outcome from frame content, URL changes, or notification diagnostics.
+
+## Embedded Notifications
+
+After completing the shared [`action.ready` handshake](http://ucp.dev/draft/specification/payment-authentication/#ready-handshake), the surface sends JSON-RPC 2.0 notifications defined by the [payment Action embedded contract](http://ucp.dev/draft/specification/payment-authentication/#surface-rendering-and-notifications).
+
+### Done
+
+When the Platform-facing challenge interaction finishes, the surface **MUST** send:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "action.done",
+  "params": {
+    "id": "three-ds-challenge-1"
+  }
+}
+```
+
+`action.done` means only that the Platform should close the challenge surface and retrieve Checkout. It does not mean authentication or payment succeeded. After closing the surface, the Platform should issue Get Checkout to confirm processing state. Get Checkout is a read-only observation and does not itself advance the payment attempt; the Business advances Checkout state from server-side provider state (typically an out-of-band provider push/callback), independent of when the Platform calls Get Checkout.
+
+A handler-owned surface **MAY** include provider-specific or diagnostic params such as correlation identifiers or SDK outcomes. Platforms **MUST** ignore unknown params for UCP processing unless the negotiated handler defines them. They are never authoritative payment outcomes by default.
+
+### Error
+
+If the surface cannot continue, it **MAY** send:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "action.error",
+  "params": {
+    "id": "three-ds-challenge-1",
+    "error": {
+      "ucp": { "version": "draft", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "action_failed",
+          "content": "The challenge surface could not continue.",
+          "severity": "recoverable"
+        }
+      ]
+    }
+  }
+}
+```
+
+Surface-level codes are the shared [well-known `action.error` codes](http://ucp.dev/draft/specification/payment-authentication/#surface-rendering-and-notifications). Buyer abandonment and provider authentication outcomes may be unavailable to the surface or known only by the provider backend; the Business and payment provider remain authoritative for those distinctions. After either notification, the Platform follows the shared Payment Authentication reconciliation contract.
+
+## Combined Provider Flows
+
+A payment provider may serve both device data collection and a challenge from one `config.url`. The emitted Action type describes the Platform-facing behavior:
+
+- If the surface remains invisible and never requests Buyer interaction, the Business emits device data collection.
+- If the surface may display a Buyer challenge, the Business emits 3DS challenge.
+
+The Business must not emit an invisible DDC Action and then make that surface visible. If collection completes first, the preferred flow is to remove the DDC occurrence and emit a new challenge occurrence in a later Checkout response. The two occurrences have different Action types and IDs even when their `config.url` origin is the same.
+
+## Deadline and Fallback
+
+[EMV 3-D Secure Protocol and Core Functions v2.3.1.1](https://www.emvco.com/specifications/emv-3-d-secure-protocol-and-core-functions-specification-6/) gives the ACS 10 minutes (600 seconds) after successfully sending each challenge interface to the challenge iframe (Req 226). The surface and provider own that per-interface timer. It does not define a single UCP deadline beginning at the initial navigation.
+
+The Platform applies a bounded outer-surface deadline defined by the handler or Platform policy, measured from navigation and capped by Checkout `expires_at`. The Business **MUST** choose an expiry that accommodates the handler-defined window. The outer deadline governs only the Platform-owned container and does not replace or reset an ACS timer.
+
+The Platform may close sooner after a valid terminal notification, load failure, Buyer dismissal, or terminal Checkout state. When the outer deadline elapses, it **MUST** close the surface, treat the interaction as abandoned, and follow the non-successful surface reconciliation path. It **MUST NOT** remount the same Action type and `id`; further handling follows the parent Checkout Actions fallback, handoff, and cancellation rules.
+
+## Security
+
+The common [Payment Authentication security requirements](http://ucp.dev/draft/specification/payment-authentication/#security-and-data-handling) apply. In addition:
+
+- The handler's trust policy **MUST** authorize the initial and redirect origins before the Platform displays them.
+- The Platform validates both message source and origin.
+- A later Checkout response based on server-side provider state remains authoritative regardless of any surface notification.
+
 # Buyer Consent Extension
 
 ## Overview
@@ -18095,6 +18579,19 @@ Payment handler specifications do NOT need to define a formal process for instru
 - How to apply the handler's `config` to construct a valid `checkout_instrument`.
 - How to create an effective credential binding to the specific checkout and business for usage, which is critical for security, based on the available `config` and `checkout`.
 
+### Payment Actions
+
+A payment handler may require the Platform to perform additional work while the Business processes an instrument. The Business returns that work in the Checkout's `actions` map.
+
+Handler authors have two options:
+
+- **Use the standard Payment Authentication extension.** Handlers that need device data collection or a 3DS challenge use [`dev.ucp.shopping.payment_authentication`](http://ucp.dev/draft/specification/payment-authentication/index.md), which defines the `dev.ucp.payment.device_data_collection` and `dev.ucp.payment.three_ds_challenge` Action types. The handler specification states which types it can cause and any provider-specific trust or fallback requirements, such as allowed origins.
+- **Define handler-specific Actions.** When the standard types do not fit, the handler author publishes a Checkout extension that declares its Action type keys and `config` shapes. Both the Business and Platform advertise that extension before those Actions are emitted.
+
+For each handler-specific Action, document when it is emitted, the exact effect its type gates, how the Platform processes its config, how the Business observes its completion, whether processing the same occurrence is ever safe to retry, and its trust, failure, abandonment, and fallback behavior.
+
+See [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common envelope and [Schema Authoring — Extension-Declared Action Types](/draft/documentation/schema-authoring.html) for the extension schema pattern.
+
 ### Processing
 
 **Definition:** The steps a participant (typically business or PSP) takes to process a received payment instrument and complete the transaction.
@@ -18172,6 +18669,16 @@ Before publishing a payment handler specification, verify:
 - API calls or SDK usage is shown with examples
 - Binding requirements are specified
 - Checkout Payment Instrument creation and shape is well-defined
+
+### Payment Authentication Actions (if applicable)
+
+- Every Action type is declared by a negotiated extension
+- The gated effect, emission conditions, and sequencing are documented
+- Instrument and handler association is unambiguous
+- The allowed origins of any handler-operated Action surfaces are documented
+- Unsupported, abandoned, expired, and failed fallbacks are documented
+- Safe-retry conditions are defined, or retrying the same occurrence is forbidden
+- Server-side outcome observation and pending-attempt cleanup are defined
 
 ### Processing
 
@@ -18512,6 +19019,18 @@ Content-Type: application/json
   }
 }
 ```
+
+______________________________________________________________________
+
+## Payment Actions [CONDITIONAL]
+
+{Include this section if the handler can cause Actions. Identify the negotiated Checkout extension that declares them. Use the standard [Payment Authentication extension](http://ucp.dev/draft/specification/payment-authentication/index.md) for device data collection and 3DS challenges; link to the defining extension specification for custom Actions.}
+
+| Action type     | When emitted | Gated effect | Handler-specific requirements                                   |
+| --------------- | ------------ | ------------ | --------------------------------------------------------------- |
+| `{action_type}` | {conditions} | {effect}     | {provider-specific trust, fallback, retry, or cleanup behavior} |
+
+For standard Payment Authentication Actions, document only the behavior specific to this handler, such as which types it can cause, trusted URL rules, how the Action is associated with its payment instrument, and how the Business observes provider state. For custom Actions, also document or link to their config and Platform processing contract.
 
 ______________________________________________________________________
 
@@ -19437,6 +19956,19 @@ Content-Type: application/json
   }
 }
 ```
+
+______________________________________________________________________
+
+## Runtime Payment Authentication Actions
+
+This handler supports both Action types from the negotiated [Payment Authentication extension](http://ucp.dev/draft/specification/payment-authentication/index.md):
+
+| Action type                              | Use                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| `dev.ucp.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
+| `dev.ucp.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge during payment completion.    |
+
+When either step is needed, the Business returns the corresponding Action while processing the selected instrument. Its `config.payment_instrument_id` identifies that instrument, from which the Platform resolves this handler and its trust policy. The Platform processes the Action according to the extension and retrieves Checkout after `action.done`. The submitted token and instrument remain unchanged; the Business determines the payment outcome from its provider state.
 
 ______________________________________________________________________
 
@@ -21252,6 +21784,34 @@ Checkout extended with hierarchical fulfillment.
 #### Dev.Ucp.Shopping.Fulfillment
 
 *No properties defined.*
+
+______________________________________________________________________
+
+### Payment Authentication Extension
+
+#### Dev.Ucp.Shopping.Checkout
+
+| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------ | ------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp          | any           | **Required** | UCP metadata for checkout responses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| id           | string        | **Required** | Unique identifier of the checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| line_items   | Array[object] | **Required** | List of line items being checked out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| buyer        | object        | Optional     | Representation of the buyer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| context      | object        | Optional     | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals      | object        | Optional     | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| attribution  | object        | Optional     | Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| status       | string        | **Required** | Checkout state indicating the current phase and required processing. See Checkout Status lifecycle documentation for state transition details. **Enum:** `incomplete`, `requires_escalation`, `ready_for_complete`, `complete_in_progress`, `completed`, `canceled`                                                                                                                                                                                                                                                                                                                                                                                                     |
+| currency     | string        | **Required** | ISO 4217 currency code reflecting the merchant's market determination. Derived from address, context, and geo IP—buyers provide signals, merchants determine currency.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| totals       | Array[Total]  | **Required** | Different cart totals.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| actions      | object        | Optional     | Outstanding extension-defined Actions for this checkout.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| messages     | Array[object] | Optional     | List of messages with error and info about the checkout session state.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| links        | Array[object] | **Required** | Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| policies     | Array[object] | Optional     | Policies (e.g., return/refund terms) that apply to the items in this checkout. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| expires_at   | string        | Optional     | RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| continue_url | string        | Optional     | URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| payment      | object        | Optional     | Payment configuration containing handlers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| order        | object        | Optional     | Details about an order created for this checkout session.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| actions      | object        | Optional     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ______________________________________________________________________
 

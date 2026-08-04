@@ -784,6 +784,148 @@
   
   
   
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_4" id="__nav_2_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Payment Authentication Extension
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Payment Authentication Extension
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-actions/device-data-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Device Data Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-actions/three-ds-challenge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3DS Challenge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../buyer-consent/" class="md-nav__link">
         
@@ -1952,6 +2094,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#payment-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#processing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2067,6 +2220,17 @@
     <span class="md-ellipsis">
       
         Instrument Acquisition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#payment-authentication-actions-if-applicable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Authentication Actions (if applicable)
       
     </span>
   </a>
@@ -2683,6 +2847,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#payment-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#processing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2798,6 +2973,17 @@
     <span class="md-ellipsis">
       
         Instrument Acquisition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#payment-authentication-actions-if-applicable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Authentication Actions (if applicable)
       
     </span>
   </a>
@@ -3740,6 +3926,31 @@ instrument acquisition. Instead, the specification <strong>SHOULD</strong> clear
   business for usage, which is critical for security, based on the available
   <code>config</code> and <code>checkout</code>.</li>
 </ul>
+<h3 id="payment-actions">Payment Actions<a class="headerlink" href="#payment-actions" title="Permanent link">&para;</a></h3>
+<p>A payment handler may require the Platform to perform additional work while the
+Business processes an instrument. The Business returns that work in the
+Checkout's <code>actions</code> map.</p>
+<p>Handler authors have two options:</p>
+<ul>
+<li><strong>Use the standard Payment Authentication extension.</strong> Handlers that need
+  device data collection or a 3DS challenge use
+  <a href="../payment-authentication/"><code>dev.ucp.shopping.payment_authentication</code></a>, which
+  defines the <code>dev.ucp.payment.device_data_collection</code> and
+  <code>dev.ucp.payment.three_ds_challenge</code> Action types. The handler specification
+  states which types it can cause and any provider-specific trust or fallback
+  requirements, such as allowed origins.</li>
+<li><strong>Define handler-specific Actions.</strong> When the standard types do not fit, the
+  handler author publishes a Checkout extension that declares its Action type
+  keys and <code>config</code> shapes. Both the Business and Platform advertise that
+  extension before those Actions are emitted.</li>
+</ul>
+<p>For each handler-specific Action, document when it is emitted, the exact effect
+its type gates, how the Platform processes its config, how the Business observes
+its completion, whether processing the same occurrence is ever safe to retry,
+and its trust, failure, abandonment, and fallback behavior.</p>
+<p>See <a href="../overview/#actions">Overview — Actions</a> for the common envelope and
+<a href="/draft/documentation/schema-authoring.html">Schema Authoring — Extension-Declared Action Types</a>
+for the extension schema pattern.</p>
 <h3 id="processing">Processing<a class="headerlink" href="#processing" title="Permanent link">&para;</a></h3>
 <p><strong>Definition:</strong> The steps a participant (typically business or PSP) takes to
 process a received payment instrument and complete the transaction.</p>
@@ -3841,6 +4052,16 @@ are required only when applicable.</p>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> API calls or SDK usage is shown with examples</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Binding requirements are specified</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Checkout Payment Instrument creation and shape is well-defined</li>
+</ul>
+<h3 id="payment-authentication-actions-if-applicable">Payment Authentication Actions (if applicable)<a class="headerlink" href="#payment-authentication-actions-if-applicable" title="Permanent link">&para;</a></h3>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Every Action type is declared by a negotiated extension</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> The gated effect, emission conditions, and sequencing are documented</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Instrument and handler association is unambiguous</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> The allowed origins of any handler-operated Action surfaces are documented</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Unsupported, abandoned, expired, and failed fallbacks are documented</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Safe-retry conditions are defined, or retrying the same occurrence is forbidden</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Server-side outcome observation and pending-attempt cleanup are defined</li>
 </ul>
 <h3 id="processing_1">Processing<a class="headerlink" href="#processing_1" title="Permanent link">&para;</a></h3>
 <ul class="task-list">

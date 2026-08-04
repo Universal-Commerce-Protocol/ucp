@@ -784,6 +784,148 @@
   
   
   
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_4" id="__nav_2_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Payment Authentication Extension
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Payment Authentication Extension
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-actions/device-data-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Device Data Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payment-actions/three-ds-challenge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3DS Challenge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../buyer-consent/" class="md-nav__link">
         
@@ -2091,6 +2233,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#payment-actions-conditional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Actions [CONDITIONAL]
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#participant-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2734,6 +2887,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#payment-actions-conditional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payment Actions [CONDITIONAL]
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#participant-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3199,6 +3363,36 @@ for the full pattern.</p>
 </span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="p">}</span>
 </span></code></pre></div>
+<hr />
+<h2 id="payment-actions-conditional">Payment Actions [CONDITIONAL]<a class="headerlink" href="#payment-actions-conditional" title="Permanent link">&para;</a></h2>
+<p>{Include this section if the handler can cause Actions. Identify the negotiated
+Checkout extension that declares them. Use the standard
+<a href="../payment-authentication/">Payment Authentication extension</a> for device data
+collection and 3DS challenges; link to the defining extension specification for
+custom Actions.}</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Action type</th>
+<th style="text-align: left;">When emitted</th>
+<th style="text-align: left;">Gated effect</th>
+<th style="text-align: left;">Handler-specific requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>{action_type}</code></td>
+<td style="text-align: left;">{conditions}</td>
+<td style="text-align: left;">{effect}</td>
+<td style="text-align: left;">{provider-specific trust, fallback, retry, or cleanup behavior}</td>
+</tr>
+</tbody>
+</table>
+<p>For standard Payment Authentication Actions, document only the behavior specific
+to this handler, such as which types it can cause, trusted URL rules, how the
+Action is associated with its payment instrument, and how the Business observes
+provider state. For custom Actions, also document or link to their config and
+Platform processing contract.</p>
 <hr />
 <!--
   ADDITIONAL PARTICIPANT SECTIONS

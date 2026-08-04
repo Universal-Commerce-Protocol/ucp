@@ -360,6 +360,19 @@ Content-Type: application/json
 
 ______________________________________________________________________
 
+## Runtime Payment Authentication Actions
+
+This handler supports both Action types from the negotiated [Payment Authentication extension](http://ucp.dev/draft/specification/payment-authentication/index.md):
+
+| Action type                              | Use                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| `dev.ucp.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
+| `dev.ucp.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge during payment completion.    |
+
+When either step is needed, the Business returns the corresponding Action while processing the selected instrument. Its `config.payment_instrument_id` identifies that instrument, from which the Platform resolves this handler and its trust policy. The Platform processes the Action according to the extension and retrieves Checkout after `action.done`. The submitted token and instrument remain unchanged; the Business determines the payment outcome from its provider state.
+
+______________________________________________________________________
+
 ## PSP Integration
 
 ### Prerequisites

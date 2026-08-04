@@ -784,6 +784,148 @@
   
   
   
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_4" id="__nav_2_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Payment Authentication Extension
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Payment Authentication Extension
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../payment-authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../payment-actions/device-data-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Device Data Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../payment-actions/three-ds-challenge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3DS Challenge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../buyer-consent/" class="md-nav__link">
         
@@ -2250,6 +2392,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#runtime-payment-authentication-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Payment Authentication Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#psp-integration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2812,6 +2965,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-payment-authentication-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Payment Authentication Actions
+      
+    </span>
+  </a>
   
 </li>
       
@@ -3419,6 +3583,34 @@ payment credential provider):</p>
 </span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="p">}</span>
 </span></code></pre></div>
+<hr />
+<h2 id="runtime-payment-authentication-actions">Runtime Payment Authentication Actions<a class="headerlink" href="#runtime-payment-authentication-actions" title="Permanent link">&para;</a></h2>
+<p>This handler supports both Action types from the negotiated
+<a href="../../payment-authentication/">Payment Authentication extension</a>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Action type</th>
+<th style="text-align: left;">Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.payment.device_data_collection</code></td>
+<td style="text-align: left;">Collect device/browser data for the selected tokenized instrument.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.payment.three_ds_challenge</code></td>
+<td style="text-align: left;">Present a buyer-facing 3DS challenge during payment completion.</td>
+</tr>
+</tbody>
+</table>
+<p>When either step is needed, the Business returns the corresponding Action while
+processing the selected instrument. Its <code>config.payment_instrument_id</code> identifies
+that instrument, from which the Platform resolves this handler and its trust
+policy. The Platform processes the Action according to the extension and
+retrieves Checkout after <code>action.done</code>. The submitted token and instrument remain
+unchanged; the Business determines the payment outcome from its provider state.</p>
 <hr />
 <h2 id="psp-integration">PSP Integration<a class="headerlink" href="#psp-integration" title="Permanent link">&para;</a></h2>
 <h3 id="prerequisites_2">Prerequisites<a class="headerlink" href="#prerequisites_2" title="Permanent link">&para;</a></h3>

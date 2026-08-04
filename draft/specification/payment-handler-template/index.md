@@ -273,6 +273,18 @@ Content-Type: application/json
 
 ______________________________________________________________________
 
+## Payment Actions [CONDITIONAL]
+
+{Include this section if the handler can cause Actions. Identify the negotiated Checkout extension that declares them. Use the standard [Payment Authentication extension](http://ucp.dev/draft/specification/payment-authentication/index.md) for device data collection and 3DS challenges; link to the defining extension specification for custom Actions.}
+
+| Action type     | When emitted | Gated effect | Handler-specific requirements                                   |
+| --------------- | ------------ | ------------ | --------------------------------------------------------------- |
+| `{action_type}` | {conditions} | {effect}     | {provider-specific trust, fallback, retry, or cleanup behavior} |
+
+For standard Payment Authentication Actions, document only the behavior specific to this handler, such as which types it can cause, trusted URL rules, how the Action is associated with its payment instrument, and how the Business observes provider state. For custom Actions, also document or link to their config and Platform processing contract.
+
+______________________________________________________________________
+
 ## {Participant} Integration
 
 ### Prerequisites
