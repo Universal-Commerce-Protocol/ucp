@@ -2748,10 +2748,11 @@ Version-specific profiles are leaf documents — they describe exactly
 one protocol version and **MUST NOT** contain a `supported_versions`
 field.
 
-Platforms and Businesses **MUST** negotiate using exactly one selected profile
-and **MUST NOT** combine or intersect capabilities across profiles: a capability
-is negotiable at a given protocol version only if it appears in that version's
-profile.
+A selected profile guarantees compatibility among its declared capabilities at
+its declared version; across versions, resource representations may differ.
+Platforms **MAY** run separate negotiations with the same Business at different
+supported versions, and **SHOULD NOT** combine or intersect capabilities across
+profiles within the same negotiation.
 
 ##### Request-Time Validation
 
