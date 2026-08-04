@@ -669,12 +669,13 @@ An extension that declares `extends` without its parent in the negotiated inters
 
 The following are examples of extensions defined in UCP — see the [Specification](/latest/specification/overview/) for the authoritative and up-to-date list.
 
-| Extension                        | Extends        | Description                                          |
-| -------------------------------- | -------------- | ---------------------------------------------------- |
-| `dev.ucp.shopping.discount`      | checkout, cart | Discount codes and promotions                        |
-| `dev.ucp.shopping.fulfillment`   | checkout       | Shipping and delivery options                        |
-| `dev.ucp.shopping.ap2_mandate`   | checkout       | Non-repudiable authorization for autonomous commerce |
-| `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture                             |
+| Extension                                 | Extends        | Description                                               |
+| ----------------------------------------- | -------------- | --------------------------------------------------------- |
+| `dev.ucp.shopping.discount`               | checkout, cart | Discount codes and promotions                             |
+| `dev.ucp.shopping.fulfillment`            | checkout       | Shipping and delivery options                             |
+| `dev.ucp.shopping.payment_authentication` | checkout       | Browser-surface device data collection and 3DS challenges |
+| `dev.ucp.shopping.ap2_mandate`            | checkout       | Non-repudiable authorization for autonomous commerce      |
+| `dev.ucp.shopping.buyer_consent`          | checkout, cart | Explicit consent capture                                  |
 
 ### Services
 
