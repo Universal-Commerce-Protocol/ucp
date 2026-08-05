@@ -209,6 +209,29 @@ def test_string_ellipsis_in_array() -> None:
   )
 
 
+def test_array_ellipsis_paths_use_stripped_indices() -> None:
+  """Elision paths inside arrays reflect post-strip positions.
+
+  Removing a `"..."` sentinel shifts later items left. Recorded paths
+  must match the stripped payload the validator sees \u2014 recording the
+  source index would fail to suppress the acknowledged elision (and
+  could suppress a real error on the sibling that shifts into that
+  index).
+  """
+  tree = {"items": ["...", {"price": "..."}]}
+  cleaned, paths = v.strip_ellipsis(tree)
+  _check(
+    "array_sentinel_removed_items_shift",
+    cleaned == {"items": [{}]},
+    f"got {cleaned!r}",
+  )
+  _check(
+    "array_ellipsis_paths_use_stripped_indices",
+    "/items/0/price" in paths and "/items/1/price" not in paths,
+    f"got {paths!r}",
+  )
+
+
 # -----------------------------------------------------------
 # Annotation parsing
 # -----------------------------------------------------------
@@ -583,6 +606,7 @@ def main() -> int:
   test_parse_example_keeps_sentinels()
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()
+  test_array_ellipsis_paths_use_stripped_indices()
   test_annotation_parsing()
   test_extract_blocks()
   test_scaffold_resolution()
