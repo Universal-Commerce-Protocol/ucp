@@ -1306,7 +1306,6 @@ method.
                         "selected_destination_id": "address_123",
                         "destinations": [
                             {
-                                "type": "shipping_address",
                                 "id": "address_123",
                                 "street_address": "456 Old Street"
                                 // ...
@@ -1354,7 +1353,6 @@ rather than attempting to merge the new data with existing state.
                         "selected_destination_id": "address_789",
                         "destinations": [
                             {
-                                "type": "shipping_address",
                                 "id": "address_789",
                                 "first_name": "John",
                                 "last_name": "Doe",
