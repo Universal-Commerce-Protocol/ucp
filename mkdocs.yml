@@ -58,7 +58,7 @@ nav:
               - Fulfillment Extension: specification/fulfillment.md
               - Loyalty Extension: specification/loyalty.md
               - Payment Terms Extension: specification/payment-terms.md
-              - Payment Display Extension: specification/payment-display.md
+              - Payment Render Artifact Extension: specification/payment-render-artifact.md
           - Cart Capability:
               - Overview: specification/shopping/cart/index.md
               - Transports:
@@ -420,8 +420,8 @@ plugins:
               Payment Terms Extension, enabling checkout payment schedules for
               immediate and deferred payments such as deposits, installments,
               and lodging balance-at-check-in flows.
-          - specification/payment-display.md: >-
-              Payment Display Extension, defining an in-session, out-of-band
+          - specification/payment-render-artifact.md: >-
+              Payment Render Artifact Extension, defining an in-session, out-of-band
               payment Action (e.g., Pix) that surfaces an inert display artifact
               (QR image, copy-and-paste code, hosted instructions) for the
               Platform to render without redirect or continue_url, resolved by

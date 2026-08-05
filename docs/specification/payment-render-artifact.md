@@ -14,14 +14,14 @@
    limitations under the License.
 -->
 
-# Payment Display Extension
+# Payment Render Artifact Extension
 
-* **Capability Name:** `com.mercadopago.payments.display`
-* **Schema:** `https://ucp.dev/schemas/shopping/payment_display.json`
+* **Capability Name:** `com.mercadopago.payment.render_artifact`
+* **Schema:** `https://ucp.dev/schemas/shopping/payment_render_artifact.json`
 
 ## Overview
 
-The Payment Display extension lets a Business complete an **in-session,
+The Payment Render Artifact extension lets a Business complete an **in-session,
 out-of-band payment method** — such as **Pix** in Brazil — without redirecting
 the buyer or handing off a `continue_url`. When the buyer chooses such a method,
 the Business surfaces an **inert display artifact** (a QR image, a
@@ -31,7 +31,7 @@ checkout. The Platform renders it, the buyer pays in their bank app, and the
 
 This is a concrete, vendor-namespaced Action type stacked on the generic
 [Actions](overview.md#actions) primitive. It defines the Action type
-`com.mercadopago.payments.display` and the shape of its `config`.
+`com.mercadopago.payment.render_artifact` and the shape of its `config`.
 
 **Key features:**
 
@@ -59,12 +59,12 @@ capability:
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "com.mercadopago.payments.display": [
+      "com.mercadopago.payment.render_artifact": [
         {
           "version": "{{ ucp_version }}",
           "extends": ["dev.ucp.shopping.checkout"],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment-display",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/payment_display.json"
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment-render-artifact",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/payment_render_artifact.json"
         }
       ]
     }
@@ -75,12 +75,12 @@ capability:
 ## Schema
 
 When this extension is active, the checkout `actions` map MAY carry outstanding
-`com.mercadopago.payments.display` instances. Each instance is a common Action
+`com.mercadopago.payment.render_artifact` instances. Each instance is a common Action
 instance (`id`, optional `config`) whose `config` is the display artifact below.
 
-### Payment Display Config
+### Payment Render Artifact Config
 
-{{ extension_schema_fields('payment_display.json#/$defs/config', 'payment_display') }}
+{{ extension_schema_fields('payment_render_artifact.json#/$defs/config', 'payment_render_artifact') }}
 
 At least one of `code`, `image`, or `instructions_url` MUST be present so the
 Platform always has something renderable.
@@ -113,7 +113,7 @@ render on any surface. Implementations MUST honor the following:
 1. Platform → Business : Complete Checkout (buyer chose Pix)
 2. Business → Platform : status = complete_in_progress
                          actions {
-                           "com.mercadopago.payments.display": [
+                           "com.mercadopago.payment.render_artifact": [
                              { "id": "...", "config": { "type": "qr_code", ... } }
                            ]
                          }
@@ -127,7 +127,7 @@ render on any surface. Implementations MUST honor the following:
 
 On expiry or failure, the Business returns the checkout with a `recoverable`
 error [Message](overview.md#messages) whose `path` points at the exact Action
-occurrence, e.g. `$.actions['com.mercadopago.payments.display'][0]`. The Platform
+occurrence, e.g. `$.actions['com.mercadopago.payment.render_artifact'][0]`. The Platform
 surfaces the recovery path (for example, refreshing the artifact) rather than
 re-driving Complete.
 
