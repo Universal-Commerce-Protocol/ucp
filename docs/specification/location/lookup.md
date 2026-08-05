@@ -55,12 +55,14 @@ Optional `filters` (hours, offerings/inventory, geo) are accepted
 to narrow down the returned locations.
 Filters use the same schema and AND semantics as [Search Filters](search.md#search-filters).
 
-Filters apply **after** identifier resolution. For example, if a client requests
-`["loc_downtown", "loc_uptown"]` with a filter of `open_now: true`:
+Filters apply **after** identifier resolution. For example, if a Platform
+requests `["loc_downtown", "loc_uptown"]` with an hours filter of
+`{"open_at": "2026-05-18T17:00:00Z"}`:
 
-1. The server first resolves both identifiers to their respective locations.
-2. The server then evaluates the `open_now` hour filter against each resolved location.
-3. If `loc_uptown` is currently closed, it is excluded, and only `loc_downtown` is returned.
+1. The Business first resolves both identifiers to their respective Locations.
+2. The Business evaluates the supplied instant against each resolved Location.
+3. If `loc_uptown` is closed at that instant, the Business excludes it and
+    returns only `loc_downtown`.
 
 ### Request
 
@@ -69,6 +71,121 @@ Filters apply **after** identifier resolution. For example, if a client requests
 ### Response
 
 {{ extension_schema_fields('location_lookup.json#/$defs/lookup_response', 'location') }}
+
+## Examples {: #examples }
+
+The following request and response are transport-neutral UCP payloads.
+
+### Downtown Store schedule
+
+=== "Request"
+
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=request -->
+    ```json
+    {
+      "ids": ["loc_downtown"]
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.location.lookup": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_downtown",
+          "name": "Downtown Store",
+          "address": {
+            "street_address": "100 Broadway",
+            "address_locality": "New York",
+            "address_region": "NY",
+            "address_country": "US",
+            "postal_code": "10005"
+          },
+          "geo": {
+            "latitude": 40.707,
+            "longitude": -74.011
+          },
+          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
+          "timezone": "America/New_York",
+          "hours": [
+            {"day": "monday", "opens": "09:00", "closes": "21:00"},
+            {"day": "tuesday", "opens": "09:00", "closes": "12:00"},
+            {"day": "tuesday", "opens": "13:00", "closes": "21:00"},
+            {"day": "wednesday", "opens": "09:00", "closes": "21:00"},
+            {"day": "thursday", "opens": "09:00", "closes": "21:00"},
+            {"day": "friday", "opens": "09:00", "closes": "22:00"},
+            {"day": "saturday", "opens": "10:00", "closes": "20:00"}
+          ],
+          "exception_hours": [
+            {
+              "title": "Thanksgiving",
+              "valid_from": "2026-11-26",
+              "valid_through": "2026-11-26"
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+Tuesday's two `hours` entries form a split shift. Sunday has no `hours` entry,
+meaning no regular interval begins that day. The `exception_hours` entry omits
+`opens` and `closes`, making it a full closure.
+See [Operating Hours](index.md#operating-hours) for schedule representation and
+evaluation rules.
+
+### Partial success
+
+=== "Request"
+
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=request -->
+    ```json
+    {
+      "ids": ["loc_downtown", "loc_invalid_id"]
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.location.lookup": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_downtown",
+          "name": "Downtown Store"
+        }
+      ],
+      "messages": [
+        {
+          "type": "info",
+          "code": "not_found",
+          "content": "Unable to find the location associated with loc_invalid_id."
+        }
+      ]
+    }
+    ```
+
+The request succeeds with the Locations that resolve. A Business can use an
+informational `not_found` message to identify an unresolved ID.
 
 ## Transport Bindings
 

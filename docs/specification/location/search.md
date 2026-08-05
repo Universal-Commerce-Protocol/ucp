@@ -70,12 +70,23 @@ custom filters via `additionalProperties`.
 
 ### Hours-Based Filter
 
-Filters locations based on their operating hours:
+The standard `filters.hours` object requires `open_at`, an exact RFC 3339
+instant expressed with `Z` or a numeric offset, and can include
+extension-defined fields. Before sending a Buyer-local wall time, a Platform
+**MUST** resolve it to an exact instant for `open_at`. When asking which
+Locations are open now, a Platform **MUST** supply the current instant. No
+timezone field is needed in the standard `context` object because `open_at`
+already identifies the instant.
 
-* `open_now`: A quick boolean filter to find locations currently open.
-* `open_at`: An RFC 3339 date-time string to find locations open at a
-    specific future time (e.g., planning a visit or ordering ahead).
-    The business resolves this against the location's local time and timezone.
+The `Z` or numeric offset identifies only that instant. Platforms and
+Businesses **MUST NOT** treat the offset as the Internet Assigned Numbers
+Authority (IANA) Time Zone Database identifier of a Platform, Business, Buyer,
+or Location. For each candidate Location, a Business **MUST** use that
+Location's authoritative `timezone` to convert `open_at` to the local date,
+weekday, and time, then evaluate the effective schedule under
+[Operating Hours](index.md#operating-hours). A Business **MUST** treat absent,
+invalid, or otherwise unusable schedule data as not matching the supplied
+instant.
 
 ### Offerings-Based Filter
 
@@ -140,6 +151,144 @@ error. Clients MUST NOT assume the response size equals the requested limit.
 ### Pagination Response
 
 {{ extension_schema_fields('types/pagination.json#/$defs/response', 'location') }}
+
+## Examples {: #examples }
+
+The following requests and responses are transport-neutral UCP payloads.
+
+### Grocery stores serving a point and open at an instant
+
+=== "Request"
+
+    <!-- ucp:example schema=common/location_search op=search direction=request -->
+    ```json
+    {
+      "query": "grocery store near me",
+      "context": {
+        "address_country": "US",
+        "address_region": "CA",
+        "postal_code": "94043"
+      },
+      "filters": {
+        "hours": {
+          "open_at": "2026-05-18T17:00:00Z"
+        },
+        "amenities": ["curbside_pickup"],
+        "geo": {
+          "serves": {
+            "point": {
+              "latitude": 37.422,
+              "longitude": -122.084
+            }
+          }
+        }
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/location_search op=search direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.location.search": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_valley_grocers",
+          "name": "Valley Grocers",
+          "address": {
+            "street_address": "789 Maple Ave",
+            "address_locality": "Mountain View",
+            "address_region": "CA",
+            "address_country": "US",
+            "postal_code": "94043"
+          },
+          "geo": {
+            "latitude": 37.420,
+            "longitude": -122.080
+          },
+          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
+          "timezone": "America/Los_Angeles",
+          "hours": [
+            {"day": "monday", "opens": "08:00", "closes": "21:00"}
+          ]
+        }
+      ]
+    }
+    ```
+
+At the supplied instant, it is Monday at `10:00` in
+`America/Los_Angeles`, within the returned interval. See
+[Operating Hours](index.md#operating-hours) for complete schedule evaluation
+rules.
+
+### Locations with an inventory item within a distance
+
+=== "Request"
+
+    <!-- ucp:example schema=common/location_search op=search direction=request -->
+    ```json
+    {
+      "filters": {
+        "inventory": [
+          {
+            "id": "item_id_phone_15_pro",
+            "availability_status": "in_stock"
+          }
+        ],
+        "geo": {
+          "distance": {
+            "center": {
+              "latitude": 40.707,
+              "longitude": -74.011
+            },
+            "max_distance": 10000
+          }
+        }
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/location_search op=search direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.location.search": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_downtown_electronics",
+          "name": "Downtown Electronics",
+          "address": {
+            "street_address": "100 Broadway",
+            "address_locality": "New York",
+            "address_region": "NY",
+            "address_country": "US",
+            "postal_code": "10005"
+          },
+          "geo": {
+            "latitude": 40.709,
+            "longitude": -74.008
+          },
+          "amenities": ["curbside_pickup", "in_store_pickup"]
+        }
+      ]
+    }
+    ```
 
 ## Transport Bindings
 

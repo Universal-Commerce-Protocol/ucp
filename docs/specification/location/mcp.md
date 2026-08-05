@@ -59,38 +59,11 @@ Businesses advertise MCP transport availability for the Common service and Locat
 
 ### Request Metadata
 
-MCP clients **MUST** include a `meta` object in every request containing
-protocol metadata:
-
-<!-- ucp:example schema=common/location_search op=search direction=request extract=$.params.arguments.location -->
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "search_locations",
-    "arguments": {
-      "meta": {
-        "ucp-agent": {
-          "profile": "https://platform.example/profiles/v2026-01/agent.json"
-        }
-      },
-      "location": {
-        "query": "grocery store open now",
-        "filters": {
-          "hours": {
-            "open_now": true
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-The `meta["ucp-agent"]` field is **required** on all requests to enable
-version compatibility checking and capability negotiation.
+A Platform using MCP **MUST** include a `meta` object with
+`meta["ucp-agent"].profile` in every request. The field identifies the
+Platform's UCP profile for version compatibility checks and capability
+negotiation. Protocol metadata remains in `meta`, separate from the domain
+request in `location`.
 
 ## Tools
 
@@ -101,7 +74,8 @@ version compatibility checking and capability negotiation.
 
 ### `search_locations`
 
-Maps to the [Location Search](search.md) capability.
+Maps to the [Location Search](search.md) capability. See the
+[complete transport-neutral Search example](search.md#examples).
 
 #### Request Arguments
 
@@ -111,7 +85,7 @@ Maps to the [Location Search](search.md) capability.
 
 {{ extension_schema_fields('location_search.json#/$defs/search_response', 'location/mcp') }}
 
-#### Example
+#### Binding envelope example
 
 === "Request"
 
@@ -130,26 +104,7 @@ Maps to the [Location Search](search.md) capability.
             }
           },
           "location": {
-            "query": "grocery store near me",
-            "context": {
-              "address_country": "US",
-              "address_region": "CA",
-              "postal_code": "94043"
-            },
-            "filters": {
-              "hours": {
-                "open_now": true
-              },
-              "amenities": ["curbside_pickup"],
-              "geo": {
-                "serves": {
-                  "point": {
-                    "latitude": 37.422,
-                    "longitude": -122.084
-                  }
-                }
-              }
-            }
+            "query": "grocery store"
           }
         }
       }
@@ -176,20 +131,7 @@ Maps to the [Location Search](search.md) capability.
           "locations": [
             {
               "id": "loc_valley_grocers",
-              "name": "Valley Grocers",
-              "address": {
-                "street_address": "789 Maple Ave",
-                "address_locality": "Mountain View",
-                "address_region": "CA",
-                "address_country": "US",
-                "postal_code": "94043"
-              },
-              "geo": {
-                "latitude": 37.420,
-                "longitude": -122.080
-              },
-              "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
-              "timezone": "America/Los_Angeles"
+              "name": "Valley Grocers"
             }
           ]
         }
@@ -199,7 +141,8 @@ Maps to the [Location Search](search.md) capability.
 
 ### `lookup_locations`
 
-Maps to the [Location Lookup](lookup.md) capability.
+Maps to the [Location Lookup](lookup.md) capability. See the
+[complete transport-neutral Lookup example](lookup.md#examples).
 
 #### Request Arguments
 
@@ -209,11 +152,11 @@ Maps to the [Location Lookup](lookup.md) capability.
 
 {{ extension_schema_fields('location_lookup.json#/$defs/lookup_response', 'location/mcp') }}
 
-#### Example
+#### Binding envelope example
 
 === "Request"
 
-     <!-- ucp:example schema=common/location_lookup op=lookup direction=request extract=$.params.arguments.location -->
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=request extract=$.params.arguments.location -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -228,7 +171,7 @@ Maps to the [Location Lookup](lookup.md) capability.
             }
           },
           "location": {
-            "ids": ["loc_downtown", "loc_uptown"]
+            "ids": ["loc_downtown"]
           }
         }
       }
@@ -255,27 +198,7 @@ Maps to the [Location Lookup](lookup.md) capability.
           "locations": [
             {
               "id": "loc_downtown",
-              "name": "Downtown Store",
-              "address": {
-                "street_address": "100 Broadway",
-                "address_locality": "New York",
-                "address_region": "NY",
-                "address_country": "US",
-                "postal_code": "10005"
-              },
-              "geo": {
-                "latitude": 40.707,
-                "longitude": -74.011
-              },
-              "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
-              "timezone": "America/New_York"
-            }
-          ],
-          "messages": [
-            {
-              "type": "info",
-              "code": "not_found",
-              "content": "Unable to find the location associated with loc_uptown"
+              "name": "Downtown Store"
             }
           ]
         }

@@ -47,8 +47,9 @@ This is vertical-agnostic and enables key commerce flows such as:
     This is used to determine if a location can serve a specific user (e.g., delivery area check).
     Clients can perform proximity searches (`distance` filter) or coverage checks (`geofence_point` filter)
     using the filter.
-* **Operating Hours**: Weekly schedules (`hours`) and date-specific overrides
-    (`exception_hours` - e.g., holidays, temporary closures) associated with a timezone.
+* **Operating Hours**: Regular weekly schedules (`hours`) and date-specific
+    exceptions (`exception_hours`), interpreted in the Location's `timezone`.
+    See [Operating Hours](#operating-hours).
 
 ### Relationship to Other Capabilities
 
@@ -70,6 +71,115 @@ other capabilities (like Catalog, Cart, and Checkout in Shopping):
     * *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup)
         **MUST** be negotiated and finalized authoritatively. Discovery signals **SHOULD NOT** be cached
         or reused across sessions without re-validation.
+
+## Operating Hours
+
+### Representation
+
+The hours filter's [`open_at`](search.md#hours-based-filter) value is an exact
+instant. By contrast, `day`, `opens`, `closes`, `valid_from`, and
+`valid_through` are canonical local civil values interpreted in the containing
+Location's `timezone`; they are not timestamps.
+
+* `hours` is a list of regular weekly intervals. Each item contains `day`,
+    `opens`, and `closes`. `day` is a stable UCP weekday identifier for the day
+    on which the interval begins, not localized display text. A Platform
+    **MAY** localize it for presentation. Times use 24-hour `HH:MM` form.
+* `exception_hours` is a list of date-specific timed intervals or full
+    closures. Each item contains inclusive local-date bounds `valid_from` and
+    `valid_through` in `YYYY-MM-DD` form; equal bounds select one date. Both
+    `opens` and `closes` define a timed interval, while omitting both defines a
+    full closure. The optional `title` is a short, human-readable heading. It is
+    presentation metadata and does not affect schedule evaluation.
+* `timezone` identifies the Business-owned canonical local civil-time frame for
+    both schedules.
+
+### Evaluation
+
+Timed intervals ordinarily include the opening time and exclude the closing
+time. If `closes` is earlier than `opens`, the interval continues into the next
+local date. As a reserved exception to those half-open semantics, the exact
+`00:00`–`23:59` pair represents the entire local civil date, including daylight
+saving time transitions. Every pair with equal `opens` and `closes` is invalid,
+including `00:00`–`00:00`.
+
+Schedule evaluation is deterministic for each instant: convert the instant to
+the Location's local date, weekday, and time using `timezone`, then apply the
+effective schedule to those local values. During a forward daylight saving time
+(DST) transition, local clock labels in the gap correspond to no instants and
+are not shifted. During a backward DST transition, both instants in the fold
+that map to the same repeated local time receive the same schedule result. The
+current schedule shape cannot distinguish the two fold occurrences.
+
+Multiple `hours` items for the same `day` combine as split shifts. An omitted
+weekday means no regular interval begins that day, but an interval from the
+preceding day can carry into it. Absent `hours` means the regular schedule is
+unknown, not closed.
+
+An exception schedule replaces the regular schedule on every covered local
+date. If an interval carries into a local date governed by an exception, that
+exception takes authority at local midnight. Intersecting non-identical
+exception ranges are invalid, including when one contains another. Timed
+entries with identical bounds can coexist as split shifts, but a full closure
+stands alone for its bounds. Array order establishes no precedence.
+
+#### Exception hours example
+
+<!-- ucp:example schema=common/types/location op=read direction=response -->
+```json
+{
+  "id": "loc_downtown",
+  "name": "Downtown Store",
+  "timezone": "America/New_York",
+  "exception_hours": [
+    {
+      "title": "Holiday hours",
+      "valid_from": "2026-12-24",
+      "valid_through": "2026-12-26",
+      "opens": "10:00",
+      "closes": "14:00"
+    },
+    {
+      "title": "Holiday hours",
+      "valid_from": "2026-12-24",
+      "valid_through": "2026-12-26",
+      "opens": "16:00",
+      "closes": "18:00"
+    }
+  ]
+}
+```
+
+The two entries share date bounds, so they define split shifts that apply
+independently on each date in the inclusive range. A full closure instead uses
+one item that omits both `opens` and `closes`.
+
+### Guidelines
+
+#### Business
+
+A Business owns each Location's canonical schedule frame. When a Business
+emits `hours` or `exception_hours`, it **MUST** express every `day`, `opens`,
+`closes`, `valid_from`, and `valid_through` value in that frame and **MUST**
+include `timezone` as a valid
+[Internet Assigned Numbers Authority (IANA) Time Zone Database](https://www.iana.org/time-zones)
+identifier. A Business **MUST NOT** vary the canonical schedule frame according
+to the requesting Platform's or Buyer's timezone. Because JSON Schema does not
+enforce every semantic constraint, a Business **MUST** emit only schedules that
+follow the rules above, including unequal `opens` and `closes`, a `valid_from`
+value no later than `valid_through`, and valid exception-range intersections.
+When a request provides a language preference, a Business **SHOULD** localize
+`title` accordingly, unless that language is unavailable.
+
+#### Platform
+
+When evaluating a returned schedule, a Platform **MUST** use the returned
+Location's `timezone`. A Platform **MAY** convert concrete dated occurrences to
+another timezone for presentation, but it **MUST NOT** reinterpret the canonical
+schedule values in another timezone. A Platform **MUST NOT** infer that a
+Location with absent, invalid, or otherwise unusable schedule data is open. A
+Platform **MAY** present `title` according to its presentation policy and
+**MUST NOT** use it to determine whether a Location is open or closed.
 
 ## Shared Entities
 
