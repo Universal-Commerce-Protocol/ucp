@@ -269,12 +269,12 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       "description": "Defective item"
     }
   ],
-  "totals": [
-    { "type": "subtotal", "amount": 13000 },
-    { "type": "fulfillment", "amount": 1200 },
-    { "type": "tax", "amount": 1142 },
-    { "type": "total", "amount": 15342 }
-  ]
+  "totals": {
+    "subtotal": { "display_text": "Subtotal", "amount": 13000 },
+    "fulfillment": { "display_text": "Shipping", "amount": 1200 },
+    "tax": { "display_text": "Taxes", "amount": 1142 },
+    "total": { "display_text": "Total", "amount": 15342 }
+  }
 }
 ```
 
