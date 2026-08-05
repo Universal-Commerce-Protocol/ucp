@@ -2,27 +2,30 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/exception_hour.json",
   "title": "Exception Hour",
-  "description": "Operating hours for a specific date range that differs from normal ones (e.g., holiday or temporary change).",
+  "description": "A date-specific operating interval or full closure. Its `valid_from`, `valid_through`, `opens`, and `closes` are local civil values interpreted in the containing Location's `timezone`. Date bounds are inclusive.",
   "type": "object",
-  "required": ["from", "through"],
+  "required": ["valid_from", "valid_through"],
   "allOf": [
     { "$ref": "time_interval.json" },
     {
       "type": "object",
       "properties": {
-        "from": {
+        "title": {
+          "type": "string",
+          "description": "A short human-readable heading naming the exception (for example, 'Thanksgiving'). Presentation metadata that does not affect schedule evaluation.",
+          "ucp_request": "omit"
+        },
+        "valid_from": {
           "type": "string",
           "format": "date",
-          "description": "An ISO 8601 date representing the start of the date range."
+          "description": "The first local civil date to which this exception applies, interpreted in the containing Location's `timezone`.",
+          "ucp_request": "omit"
         },
-        "through": {
+        "valid_through": {
           "type": "string",
           "format": "date",
-          "description": "An ISO 8601 date representing the date after the end of the date range."
-        },
-        "label": {
-          "type": "string",
-          "description": "Human readable explanation for the exception (e.g., 'Thanksgiving')."
+          "description": "The last local civil date to which this exception applies, interpreted in the containing Location's `timezone`.",
+          "ucp_request": "omit"
         }
       }
     }

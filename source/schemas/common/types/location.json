@@ -25,7 +25,7 @@
         },
         "hours": {
           "type": "array",
-          "description": "Regular weekly operating hours. Support split hours through multiple entries on the same day and overnight hours (open > close). Omission of days implies full day closures.",
+          "description": "Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts.",
           "items": {
             "$ref": "daily_hour.json"
           },
@@ -33,7 +33,7 @@
         },
         "exception_hours": {
           "type": "array",
-          "description": "Exception hours for specific dates (holidays, closures, etc.). Support split hours through multiple entries on the same day and overnight hours (open > close). For full day closures, MUST explicitly set open and close to 00:00.",
+          "description": "Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.",
           "items": {
             "$ref": "exception_hour.json"
           },
@@ -41,11 +41,10 @@
         },
         "timezone": {
           "type": "string",
-          "description": "IANA timezone identifier (e.g., 'America/New_York'). MUST be set when hours or exception_hours are present. Required for correct interpretation.",
+          "description": "The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.",
           "ucp_request": "omit"
         }
-      },
-      "additionalProperties": true
+      }
     }
   ],
   "if": {

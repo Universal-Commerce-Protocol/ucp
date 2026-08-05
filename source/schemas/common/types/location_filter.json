@@ -50,19 +50,16 @@
     },
     "hours": {
       "type": "object",
-      "description": "Filter by operating hours. If both values are specified, behavior is implementation-defined (usually open_at takes precedence or OR logic is enforced).",
+      "description": "Filter by operating hours, evaluated at the one supplied instant.",
+      "required": ["open_at"],
       "properties": {
-        "open_now": {
-          "type": "boolean",
-          "description": "Only return locations that are currently open."
-        },
         "open_at": {
           "type": "string",
           "format": "date-time",
-          "description": "An RFC 3339 instant. The business converts it to the location's local timezone and evaluates against the known hours."
+          "pattern": "(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "description": "One exact RFC 3339 instant expressed with `Z` or a numeric offset. The `Z` or numeric offset identifies that instant, not the IANA Time Zone Database identifier of a Platform, Business, Buyer, or Location. The Business evaluates that instant in each Location's canonical local civil-time frame, identified by `Location.timezone`."
         }
-      },
-      "additionalProperties": false
+      }
     },
     "amenities": {
       "type": "array",

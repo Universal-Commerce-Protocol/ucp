@@ -67,11 +67,12 @@ Location capabilities through their UCP profile at `/.well-known/ucp`.
 
 ### `POST /locations/search`
 
-Maps to the [Location Search](search.md) capability.
+Maps to the [Location Search](search.md) capability. See the
+[complete transport-neutral Search example](search.md#examples).
 
 {{ method_fields('search_locations', 'common/rest.openapi.json', 'location/rest') }}
 
-#### Example: Search for Grocery Stores with Local Delivery Coverage (Geofencing)
+#### Binding envelope example
 
 === "Request"
 
@@ -84,26 +85,7 @@ Maps to the [Location Search](search.md) capability.
     UCP-Agent: profile="https://platform.example/profiles/v2026-01/agent.json"
 
     {
-      "query": "grocery store near me",
-      "context": {
-        "address_country": "US",
-        "address_region": "CA",
-        "postal_code": "94043"
-      },
-      "filters": {
-        "hours": {
-          "open_now": true
-        },
-        "amenities": ["curbside_pickup"],
-        "geo": {
-          "serves": {
-            "point": {
-              "latitude": 37.422,
-              "longitude": -122.084
-            }
-          }
-        }
-      }
+      "query": "grocery store"
     }
     ```
 
@@ -127,97 +109,7 @@ Maps to the [Location Search](search.md) capability.
       "locations": [
         {
           "id": "loc_valley_grocers",
-          "name": "Valley Grocers",
-          "address": {
-            "street_address": "789 Maple Ave",
-            "address_locality": "Mountain View",
-            "address_region": "CA",
-            "address_country": "US",
-            "postal_code": "94043"
-          },
-          "geo": {
-            "latitude": 37.420,
-            "longitude": -122.080
-          },
-          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
-          "timezone": "America/Los_Angeles"
-        }
-      ]
-    }
-    ```
-
-#### Example: Search for Electronics Stores with Phone In-stock (Store Finder)
-
-=== "Request"
-
-    <!-- ucp:example schema=common/location_search op=search direction=request -->
-    ```json
-    POST /locations/search HTTP/1.1
-    Host: business.example.com
-    Content-Type: application/json
-    Request-Id: 9ef9b0c2-78d1-4e4b-91c2-3e2ef0d3ab9f
-    UCP-Agent: profile="https://platform.example/profiles/v2026-01/agent.json"
-
-    {
-      "context": {
-        "address_country": "US"
-      },
-      "filters": {
-        "hours": {
-          "open_now": true
-        },
-        "inventory": [
-          {
-            "id": "item_id_phone_15_pro",
-            "availability_status": "in_stock"
-          }
-        ],
-        "geo": {
-          "distance": {
-            "center": {
-              "latitude": 40.707,
-              "longitude": -74.011
-            },
-            "max_distance": 10000
-          }
-        }
-      }
-    }
-    ```
-
-=== "Response"
-
-    <!-- ucp:example schema=common/location_search op=search direction=response -->
-    ```json
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-
-    {
-      "ucp": {
-        "version": "{{ ucp_version }}",
-        "capabilities": {
-          "dev.ucp.common.location.search": [
-            {"version": "{{ ucp_version }}"}
-          ]
-        }
-      },
-      "locations": [
-        {
-          "id": "loc_downtown_electronics",
-          "name": "Downtown Electronics",
-          "address": {
-            "street_address": "100 Broadway",
-            "address_locality": "New York",
-            "address_region": "NY",
-            "address_country": "US",
-            "postal_code": "10005"
-          },
-          "geo": {
-            "latitude": 40.709,
-            "longitude": -74.008
-          },
-          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
-          "timezone": "America/New_York"
+          "name": "Valley Grocers"
         }
       ]
     }
@@ -225,11 +117,12 @@ Maps to the [Location Search](search.md) capability.
 
 ### `POST /locations/lookup`
 
-Maps to the [Location Lookup](lookup.md) capability.
+Maps to the [Location Lookup](lookup.md) capability. See the
+[complete transport-neutral Lookup example](lookup.md#examples).
 
 {{ method_fields('lookup_locations', 'common/rest.openapi.json', 'location/rest') }}
 
-#### Example: Simple Lookup
+#### Binding envelope example
 
 === "Request"
 
@@ -242,7 +135,7 @@ Maps to the [Location Lookup](lookup.md) capability.
     UCP-Agent: profile="https://platform.example/profiles/v2026-01/agent.json"
 
     {
-      "ids": ["loc_downtown", "loc_uptown"]
+      "ids": ["loc_downtown"]
     }
     ```
 
@@ -265,222 +158,7 @@ Maps to the [Location Lookup](lookup.md) capability.
       "locations": [
         {
           "id": "loc_downtown",
-          "name": "Downtown Store",
-          "address": {
-            "street_address": "100 Broadway",
-            "address_locality": "New York",
-            "address_region": "NY",
-            "address_country": "US",
-            "postal_code": "10005"
-          },
-          "geo": {
-            "latitude": 40.707,
-            "longitude": -74.011
-          },
-          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
-          "timezone": "America/New_York",
-          "hours": [
-            {
-              "day": "monday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "tuesday",
-              "open": "09:00",
-              "close": "12:00"
-            },
-            {
-              "day": "tuesday",
-              "open": "13:00",
-              "close": "21:00"
-            },
-            {
-              "day": "wednesday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "thursday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "friday",
-              "open": "09:00",
-              "close": "22:00"
-            },
-            {
-              "day": "saturday",
-              "open": "10:00",
-              "close": "20:00"
-            }
-          ],
-          "exception_hours": [
-            {
-              "from": "2026-11-26",
-              "through": "2026-11-27",
-              "label": "Thanksgiving",
-              "open": "00:00",
-              "close": "00:00"
-            }
-          ]
-        },
-        {
-          "id": "loc_uptown",
-          "name": "Uptown Boutique",
-          "address": {
-            "street_address": "2000 Madison Ave",
-            "address_locality": "New York",
-            "address_region": "NY",
-            "address_country": "US",
-            "postal_code": "10035"
-          },
-          "geo": {
-            "latitude": 40.790,
-            "longitude": -73.950
-          },
-          "amenities": ["in_store_pickup"],
-          "timezone": "America/New_York",
-          "hours": [
-            {
-              "day": "monday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "tuesday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "wednesday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "thursday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "friday",
-              "open": "09:00",
-              "close": "22:00"
-            }
-          ],
-          "exception_hours": [
-            {
-              "from": "2026-11-26",
-              "through": "2026-11-27",
-              "label": "Thanksgiving",
-              "open": "00:00",
-              "close": "00:00"
-            }
-          ]
-        }
-      ]
-    }
-    ```
-
-#### Example: Partial Success (Some Locations Not Found)
-
-=== "Request"
-
-    <!-- ucp:example schema=common/location_lookup op=lookup direction=request -->
-    ```json
-    POST /locations/lookup HTTP/1.1
-    Host: business.example.com
-    Content-Type: application/json
-    Request-Id: 2c9b0c2a-18d1-4e4b-91c2-3e2ef0d3ab9f
-    UCP-Agent: profile="https://platform.example/profiles/v2026-01/agent.json"
-
-    {
-      "ids": ["loc_downtown", "loc_invalid_id"]
-    }
-    ```
-
-=== "Response"
-
-    <!-- ucp:example schema=common/location_lookup op=lookup direction=response -->
-    ```json
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-
-    {
-      "ucp": {
-        "version": "{{ ucp_version }}",
-        "capabilities": {
-          "dev.ucp.common.location.lookup": [
-            {"version": "{{ ucp_version }}"}
-          ]
-        }
-      },
-      "locations": [
-        {
-          "id": "loc_downtown",
-          "name": "Downtown Store",
-          "address": {
-            "street_address": "100 Broadway",
-            "address_locality": "New York",
-            "address_region": "NY",
-            "address_country": "US",
-            "postal_code": "10005"
-          },
-          "geo": {
-            "latitude": 40.707,
-            "longitude": -74.011
-          },
-          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
-          "timezone": "America/New_York",
-          "hours": [
-            {
-              "day": "monday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "tuesday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "wednesday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "thursday",
-              "open": "09:00",
-              "close": "21:00"
-            },
-            {
-              "day": "friday",
-              "open": "09:00",
-              "close": "22:00"
-            },
-            {
-              "day": "saturday",
-              "open": "10:00",
-              "close": "20:00"
-            }
-          ],
-          "exception_hours": [
-            {
-              "from": "2026-11-26",
-              "through": "2026-11-27",
-              "label": "Thanksgiving",
-              "open": "00:00",
-              "close": "00:00"
-            }
-          ]
-        }
-      ],
-      "messages": [
-        {
-          "type": "info",
-          "code": "not_found",
-          "content": "Unable to find the location associated with loc_invalid_id."
+          "name": "Downtown Store"
         }
       ]
     }
