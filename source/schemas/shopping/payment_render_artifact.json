@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/payment_display.json",
-  "name": "com.mercadopago.payments.display",
-  "title": "Payment Display Extension",
-  "description": "Extends Checkout with a display Action for in-session, out-of-band payment methods (e.g., Pix). The Business surfaces an inert display artifact (QR image, copy-and-paste code, hosted instructions) that the Platform renders so the buyer can complete payment in a separate app; the same Complete Checkout operation resolves afterward via polling Get Checkout, with no redirect or continue_url handoff. Declares the Action type 'com.mercadopago.payments.display' on top of the common Actions primitive.",
+  "$id": "https://ucp.dev/schemas/shopping/payment_render_artifact.json",
+  "name": "com.mercadopago.payment.render_artifact",
+  "title": "Payment Render Artifact Extension",
+  "description": "Extends Checkout with a render-artifact Action for in-session, out-of-band payment methods (e.g., Pix). The Business surfaces an inert display artifact (QR image, copy-and-paste code, hosted instructions) that the Platform renders so the buyer can complete payment in a separate app; the same Complete Checkout operation resolves afterward via polling Get Checkout, with no redirect or continue_url handoff. Declares the Action type 'com.mercadopago.payment.render_artifact' on top of the common Actions primitive.",
   "$defs": {
     "config": {
       "type": "object",
-      "title": "Payment Display Config",
+      "title": "Payment Render Artifact Config",
       "description": "Public, inert display artifact for one outstanding payment method. Contains display data only: no PAN, OTP, credential, or other secret ever transits this artifact. Render fields are non-executable — 'image' is shown as a static image (never as HTML or script), 'code' is display text, and 'instructions_url' is the only loadable field.",
       "required": ["type"],
       "properties": {
@@ -48,8 +48,8 @@
       ]
     },
     "instance": {
-      "title": "Payment Display Action Instance",
-      "description": "One outstanding payment-display Action: the common Action instance with a payment-display 'config'.",
+      "title": "Payment Render Artifact Action Instance",
+      "description": "One outstanding payment render-artifact Action: the common Action instance with a render-artifact 'config'.",
       "allOf": [
         { "$ref": "../common/types/actions.json#/$defs/instance" },
         {
@@ -61,8 +61,8 @@
       ]
     },
     "dev.ucp.shopping.checkout": {
-      "title": "Checkout with Payment Display",
-      "description": "Checkout whose 'actions' map MAY carry outstanding 'com.mercadopago.payments.display' instances while payment is pending out of band.",
+      "title": "Checkout with Payment Render Artifact",
+      "description": "Checkout whose 'actions' map MAY carry outstanding 'com.mercadopago.payment.render_artifact' instances while payment is pending out of band.",
       "allOf": [
         { "$ref": "checkout.json" },
         {
@@ -71,10 +71,10 @@
             "actions": {
               "type": "object",
               "properties": {
-                "com.mercadopago.payments.display": {
+                "com.mercadopago.payment.render_artifact": {
                   "type": "array",
                   "minItems": 1,
-                  "description": "Outstanding payment-display Actions. Typically a single instance for the buyer's chosen method.",
+                  "description": "Outstanding payment render-artifact Actions. Typically a single instance for the buyer's chosen method.",
                   "items": { "$ref": "#/$defs/instance" }
                 }
               }
