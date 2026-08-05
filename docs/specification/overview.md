@@ -2904,17 +2904,19 @@ UCP **MAY** backport an approved backward-compatible change — a feature, or a
 security, correctness, or interoperability fix — to a supported release and its
 generated `D` artifacts. Breaking changes enter the next release and are not
 backported by default; in exceptional cases, the Governance Council **MAY**
-approve backporting a breaking change to a supported release, following the
-breaking-change notice process. UCP **MUST** re-certify the snapshot before
-publishing any updated artifacts.
+approve backporting a breaking change to a supported release, limited to
+defects that compromise the security, correctness, or interoperability of the
+release as published, and following the breaking-change notice process. UCP
+**MUST** re-certify the snapshot before publishing any updated artifacts.
 
 A Business or Platform that selects `ucp.version` `D` **MUST** declare version
 `D` on every `dev.ucp.*` service, capability, and extension entry in its
 profile. An older release is selected only through a separate
 `supported_versions` leaf profile whose own `ucp.version` is that older release
-date (see [Protocol Version](#protocol-version)). Payment-handler versions remain
-independently controlled by their authors and are not constrained
-to `D`. Declaring `version` `D` does not change negotiation: `dev.ucp.*`
+date (see [Protocol Version](#protocol-version)). Payment-handler versions are
+controlled by their authors: UCP defines the shared declaration structure but
+currently no concrete handler, so no handler version is constrained to `D`.
+Declaring `version` `D` does not change negotiation: `dev.ucp.*`
 capabilities and extensions are still selected by exact-version intersection (see
 [Capability Versions](#capability-versions)).
 

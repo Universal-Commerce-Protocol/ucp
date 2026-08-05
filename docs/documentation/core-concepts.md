@@ -136,8 +136,9 @@ Each capability is identified by a reverse-domain name (e.g.,
 are declared in the Business's UCP profile at `/.well-known/ucp`, negotiated
 by exact version, and confirmed in every response so that the Platform always
 knows the active feature set for a given interaction. UCP-authored `dev.ucp.*`
-capabilities and extensions declare version `D` in each UCP release `D`.
-Third-party extensions publish versions on their own cadence.
+capabilities and extensions are versioned in lockstep with the specification:
+each declares the date `D` of the UCP release it ships in. Third-party
+extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the
 [Specification](../specification/overview.md) for the authoritative and
@@ -208,10 +209,8 @@ A single service can be accessed via multiple transport bindings:
 A Business declares which transport bindings it supports within each service;
 Platforms pick whichever fits their context — an AI agent may prefer MCP, a
 traditional web app may use REST. Every UCP-defined service declares an explicit
-`version` equal to the selected `ucp.version`; because each entry pairs the
-service with one transport binding, that service `version` repeats on each entry.
-Transport bindings have no separate version. Multiple UCP-defined vertical
-services can coexist under one `ucp.version`, each declaring that version.
+`version` equal to the selected `ucp.version`, repeated on every entry since they
+differ only by transport binding. Transport bindings have no separate version.
 
 Service namespaces are also UCP's extensibility mechanism for new verticals.
 Businesses opt in by declaring which services they support.
@@ -444,15 +443,14 @@ Businesses publish their OAuth 2.0 server metadata at
 
 UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a
 snapshot of the core protocol — its services and transport bindings,
-capabilities, extensions, and shared schemas — published and certified together
-as internally compatible. The selected `ucp.version` selects that snapshot;
-selection is exact, so an older date is available only when the Business
+capabilities, extensions, and shared schemas — published together as one
+internally compatible set. A profile's `ucp.version` selects that snapshot, and
+the match is exact: an older date is available only when the Business
 advertises it in `supported_versions`.
 
 Every UCP-defined service, capability, and extension in release `D` declares
-version `D`. Capabilities and extensions are selected by exact-version
-intersection. Third-party extensions and payment handlers version independently
-on their authors' own schedules.
+version `D`. Third-party extensions and payment handlers are versioned by their
+authors, independently of UCP releases.
 
 See [Protocol Version](../specification/overview.md#protocol-version) for version
 discovery, [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
