@@ -901,7 +901,7 @@ To build a fully compliant UCP server, you will also need to:
 
 * Implement the checkout update endpoint (`PUT /checkout-sessions/{id}`) to handle buyer information updates (like shipping address).
 * Implement the checkout completion endpoint (`POST /checkout-sessions/{id}/complete`) to process the payment instrument provided by the platform.
-* Advertise your service using a [UCP Discovery Profile](../documentation/core-concepts.md#discovery-capability-negotiation) at `/.well-known/ucp`.
+* Advertise your service using a [UCP Discovery Profile](/documentation/core-concepts/#discovery-capability-negotiation) at `/.well-known/ucp`.
 * Run the conformance suite from the [UCP Conformance repository](https://github.com/Universal-Commerce-Protocol/conformance) against your server to verify protocol compliance.
 
 For a complete reference implementation, check out the [UCP Samples repository](https://github.com/Universal-Commerce-Protocol/samples).
