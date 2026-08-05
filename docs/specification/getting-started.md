@@ -621,273 +621,277 @@ Retrieve the session using the `id` returned from the previous step:
 
 ## Full File Reference
 
-If you want to verify your code, here are the complete files for both implementations.
+If you want to verify your code, expand the section below to see the complete files.
 
-=== "Python (`main.py`)"
+??? "Complete Code Reference"
 
-    ```python
-    # main.py
-    import uuid
-    from typing import Annotated
-    from fastapi import FastAPI, Header, HTTPException, status
+    === "Python"
 
-    # Import UCP SDK models
-    from ucp_sdk.models.schemas.ucp import ResponseCheckoutSchema
-    from ucp_sdk.models.schemas.shopping.checkout import Checkout
-    from ucp_sdk.models.schemas.shopping.checkout_create_request import CheckoutCreateRequest
-    from ucp_sdk.models.schemas.shopping.types.line_item import LineItem
-    from ucp_sdk.models.schemas.shopping.types.item import Item
-    from ucp_sdk.models.schemas.shopping.types.totals import Total
-    from ucp_sdk.models.schemas.shopping.types.link import Link
-    from ucp_sdk.models.schemas.shopping.types.available_payment_instrument import AvailablePaymentInstrument
-    from ucp_sdk.models.schemas.payment_handler import ResponseSchema as PaymentHandlerResponse
+        `main.py`
+        ```python
+        # main.py
+        import uuid
+        from typing import Annotated
+        from fastapi import FastAPI, Header, HTTPException, status
 
-    # Initialize FastAPI app
-    app = FastAPI(title="UCP Quickstart Server")
+        # Import UCP SDK models
+        from ucp_sdk.models.schemas.ucp import ResponseCheckoutSchema
+        from ucp_sdk.models.schemas.shopping.checkout import Checkout
+        from ucp_sdk.models.schemas.shopping.checkout_create_request import CheckoutCreateRequest
+        from ucp_sdk.models.schemas.shopping.types.line_item import LineItem
+        from ucp_sdk.models.schemas.shopping.types.item import Item
+        from ucp_sdk.models.schemas.shopping.types.totals import Total
+        from ucp_sdk.models.schemas.shopping.types.link import Link
+        from ucp_sdk.models.schemas.shopping.types.available_payment_instrument import AvailablePaymentInstrument
+        from ucp_sdk.models.schemas.payment_handler import ResponseSchema as PaymentHandlerResponse
 
-    # Simple in-memory database
-    checkout_sessions = {}
+        # Initialize FastAPI app
+        app = FastAPI(title="UCP Quickstart Server")
 
-    @app.post(
-        "/checkout-sessions",
-        response_model=Checkout,
-        status_code=status.HTTP_201_CREATED,
-        response_model_exclude_none=True
-    )
-    async def create_checkout(
-        body: CheckoutCreateRequest,
-        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
-        ucp_agent: Annotated[str, Header(alias="UCP-Agent")]
-    ):
-        """Create a new UCP checkout session."""
-        # Note: In a production environment, you must use the Idempotency-Key
-        # to prevent duplicate processing of the same request.
+        # Simple in-memory database
+        checkout_sessions = {}
 
-        # Generate a unique checkout session ID
-        session_id = f"chk_{uuid.uuid4().hex[:10]}"
+        @app.post(
+            "/checkout-sessions",
+            response_model=Checkout,
+            status_code=status.HTTP_201_CREATED,
+            response_model_exclude_none=True
+        )
+        async def create_checkout(
+            body: CheckoutCreateRequest,
+            idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+            ucp_agent: Annotated[str, Header(alias="UCP-Agent")]
+        ):
+            """Create a new UCP checkout session."""
+            # Note: In a production environment, you must use the Idempotency-Key
+            # to prevent duplicate processing of the same request.
 
-        # Map input line items to output line items with pricing
-        output_line_items = []
-        subtotal = 0
-        tax = 0
+            # Generate a unique checkout session ID
+            session_id = f"chk_{uuid.uuid4().hex[:10]}"
 
-        for index, item_req in enumerate(body.line_items):
-            # Mock product database lookup
-            price = 2500  # $25.00 in minor units (cents)
-            title = f"Flower Bouquet {item_req.item.id}"
-            item_subtotal = price * item_req.quantity
-            item_tax = int(item_subtotal * 0.08)  # 8% tax
-            item_total = item_subtotal + item_tax
+            # Map input line items to output line items with pricing
+            output_line_items = []
+            subtotal = 0
+            tax = 0
 
-            subtotal += item_subtotal
-            tax += item_tax
+            for index, item_req in enumerate(body.line_items):
+                # Mock product database lookup
+                price = 2500  # $25.00 in minor units (cents)
+                title = f"Flower Bouquet {item_req.item.id}"
+                item_subtotal = price * item_req.quantity
+                item_tax = int(item_subtotal * 0.08)  # 8% tax
+                item_total = item_subtotal + item_tax
 
-            output_line_items.append(
-                LineItem(
-                    id=f"li_{index}",
-                    item=Item(id=item_req.item.id, title=title, price=price),
-                    quantity=item_req.quantity,
-                    totals=[
-                        Total(type="subtotal", amount=item_subtotal),
-                        Total(type="tax", amount=item_tax),
-                        Total(type="total", amount=item_total)
-                    ]
+                subtotal += item_subtotal
+                tax += item_tax
+
+                output_line_items.append(
+                    LineItem(
+                        id=f"li_{index}",
+                        item=Item(id=item_req.item.id, title=title, price=price),
+                        quantity=item_req.quantity,
+                        totals=[
+                            Total(type="subtotal", amount=item_subtotal),
+                            Total(type="tax", amount=item_tax),
+                            Total(type="total", amount=item_total)
+                        ]
+                    )
                 )
+
+            total = subtotal + tax
+
+            # Configure available payment handlers.
+            # We advertise support for a generic mock payment handler.
+            payment_handlers = {
+                "com.example.mock_pay": [
+                    PaymentHandlerResponse(
+                        id="mock_pay_handler_1",
+                        version="2026-04-08",
+                        available_instruments=[
+                            AvailablePaymentInstrument(type="mock_instrument")
+                        ]
+                    )
+                ]
+            }
+
+            # Construct UCP protocol metadata
+            ucp_metadata = ResponseCheckoutSchema(
+                version="2026-04-08",
+                status="success",
+                payment_handlers=payment_handlers
             )
 
-        total = subtotal + tax
+            # Assemble the final Checkout payload
+            checkout = Checkout(
+                ucp=ucp_metadata,
+                id=session_id,
+                status="incomplete",
+                currency="USD",
+                line_items=output_line_items,
+                totals=[
+                    Total(type="subtotal", amount=subtotal),
+                    Total(type="tax", amount=tax),
+                    Total(type="total", amount=total)
+                ],
+                links=[
+                    Link(type="terms_of_service", url="https://example.com/terms"),
+                    Link(type="privacy_policy", url="https://example.com/privacy")
+                ]
+            )
 
-        # Configure available payment handlers.
-        # We advertise support for a generic mock payment handler.
-        payment_handlers = {
-            "com.example.mock_pay": [
-                PaymentHandlerResponse(
-                    id="mock_pay_handler_1",
-                    version="2026-04-08",
-                    available_instruments=[
-                        AvailablePaymentInstrument(type="mock_instrument")
-                    ]
-                )
-            ]
-        }
+            # Save to database and return
+            checkout_sessions[session_id] = checkout
+            return checkout
 
-        # Construct UCP protocol metadata
-        ucp_metadata = ResponseCheckoutSchema(
-            version="2026-04-08",
-            status="success",
-            payment_handlers=payment_handlers
+        @app.get(
+            "/checkout-sessions/{id}",
+            response_model=Checkout,
+            response_model_exclude_none=True
         )
+        async def get_checkout(id: str):
+            """Retrieve an existing checkout session."""
+            if id not in checkout_sessions:
+                raise HTTPException(status_code=404, detail="Checkout session not found")
+            return checkout_sessions[id]
+        ```
 
-        # Assemble the final Checkout payload
-        checkout = Checkout(
-            ucp=ucp_metadata,
-            id=session_id,
-            status="incomplete",
-            currency="USD",
-            line_items=output_line_items,
-            totals=[
-                Total(type="subtotal", amount=subtotal),
-                Total(type="tax", amount=tax),
-                Total(type="total", amount=total)
-            ],
-            links=[
-                Link(type="terms_of_service", url="https://example.com/terms"),
-                Link(type="privacy_policy", url="https://example.com/privacy")
-            ]
-        )
+    === "Node.js"
 
-        # Save to database and return
-        checkout_sessions[session_id] = checkout
-        return checkout
+        `server.ts`
+        ```typescript
+        // server.ts
+        import express from 'express';
+        import { v4 as uuidv4 } from 'uuid';
 
-    @app.get(
-        "/checkout-sessions/{id}",
-        response_model=Checkout,
-        response_model_exclude_none=True
-    )
-    async def get_checkout(id: str):
-        """Retrieve an existing checkout session."""
-        if id not in checkout_sessions:
-            raise HTTPException(status_code=404, detail="Checkout session not found")
-        return checkout_sessions[id]
-    ```
+        // Import validation schemas from JS SDK
+        import {
+          CheckoutCreateRequestSchema,
+          CheckoutResponseSchema,
+          CheckoutResponse
+        } from '@ucp-js/sdk';
 
-=== "Node.js (`server.ts`)"
+        // Initialize Express app
+        const app = express();
+        app.use(express.json());
 
-    ```typescript
-    // server.ts
-    import express from 'express';
-    import { v4 as uuidv4 } from 'uuid';
+        // Simple in-memory database
+        const checkoutSessions: Record<string, CheckoutResponse> = {};
 
-    // Import validation schemas from JS SDK
-    import {
-      CheckoutCreateRequestSchema,
-      CheckoutResponseSchema,
-      CheckoutResponse
-    } from '@ucp-js/sdk';
+        app.post('/checkout-sessions', (req, res) => {
+          // 1. Validate required UCP headers
+          const idempotencyKey = req.header('Idempotency-Key');
+          const ucpAgent = req.header('UCP-Agent');
 
-    // Initialize Express app
-    const app = express();
-    app.use(express.json());
+          if (!idempotencyKey || !ucpAgent) {
+            return res.status(400).json({
+              error: 'Missing required headers (Idempotency-Key, UCP-Agent)'
+            });
+          }
 
-    // Simple in-memory database
-    const checkoutSessions: Record<string, CheckoutResponse> = {};
+          // 2. Validate request body against UCP schema using Zod
+          const validation = CheckoutCreateRequestSchema.safeParse(req.body);
+          if (!validation.success) {
+            return res.status(400).json({ errors: validation.error.errors });
+          }
 
-    app.post('/checkout-sessions', (req, res) => {
-      // 1. Validate required UCP headers
-      const idempotencyKey = req.header('Idempotency-Key');
-      const ucpAgent = req.header('UCP-Agent');
+          const body = validation.data;
 
-      if (!idempotencyKey || !ucpAgent) {
-        return res.status(400).json({
-          error: 'Missing required headers (Idempotency-Key, UCP-Agent)'
-        });
-      }
+          // Generate a unique checkout session ID
+          const sessionId = `chk_${uuidv4().substring(0, 10)}`;
 
-      // 2. Validate request body against UCP schema using Zod
-      const validation = CheckoutCreateRequestSchema.safeParse(req.body);
-      if (!validation.success) {
-        return res.status(400).json({ errors: validation.error.errors });
-      }
+          // Map input line items to output line items with pricing
+          const outputLineItems = body.line_items.map((item, index) => {
+            // Mock product database lookup
+            const price = 2500; // $25.00 in minor units (cents)
+            const title = `Flower Bouquet ${item.item.id}`;
+            const itemSubtotal = price * item.quantity;
+            const itemTax = Math.floor(itemSubtotal * 0.08); // 8% tax
+            const itemTotal = itemSubtotal + itemTax;
 
-      const body = validation.data;
+            return {
+              id: `li_${index}`,
+              item: { id: item.item.id, title, price },
+              quantity: item.quantity,
+              totals: [
+                { type: 'subtotal', amount: itemSubtotal },
+                { type: 'tax', amount: itemTax },
+                { type: 'total', amount: itemTotal }
+              ]
+            };
+          });
 
-      // Generate a unique checkout session ID
-      const sessionId = `chk_${uuidv4().substring(0, 10)}`;
+          // Calculate order totals from line items
+          const subtotal = outputLineItems.reduce((acc, item) => {
+            const subtotalEntry = item.totals.find(t => t.type === 'subtotal');
+            return acc + (subtotalEntry ? subtotalEntry.amount : 0);
+          }, 0);
+          const tax = outputLineItems.reduce((acc, item) => {
+            const taxEntry = item.totals.find(t => t.type === 'tax');
+            return acc + (taxEntry ? taxEntry.amount : 0);
+          }, 0);
+          const total = subtotal + tax;
 
-      // Map input line items to output line items with pricing
-      const outputLineItems = body.line_items.map((item, index) => {
-        // Mock product database lookup
-        const price = 2500; // $25.00 in minor units (cents)
-        const title = `Flower Bouquet ${item.item.id}`;
-        const itemSubtotal = price * item.quantity;
-        const itemTax = Math.floor(itemSubtotal * 0.08); // 8% tax
-        const itemTotal = itemSubtotal + itemTax;
-
-        return {
-          id: `li_${index}`,
-          item: { id: item.item.id, title, price },
-          quantity: item.quantity,
-          totals: [
-            { type: 'subtotal', amount: itemSubtotal },
-            { type: 'tax', amount: itemTax },
-            { type: 'total', amount: itemTotal }
-          ]
-        };
-      });
-
-      // Calculate order totals from line items
-      const subtotal = outputLineItems.reduce((acc, item) => {
-        const subtotalEntry = item.totals.find(t => t.type === 'subtotal');
-        return acc + (subtotalEntry ? subtotalEntry.amount : 0);
-      }, 0);
-      const tax = outputLineItems.reduce((acc, item) => {
-        const taxEntry = item.totals.find(t => t.type === 'tax');
-        return acc + (taxEntry ? taxEntry.amount : 0);
-      }, 0);
-      const total = subtotal + tax;
-
-      // Configure available payment handlers.
-      // We advertise support for a generic mock payment handler.
-      const ucpMetadata = {
-        version: '2026-04-08',
-        status: 'success' as const,
-        payment_handlers: {
-          'com.example.mock_pay': [
-            {
-              id: 'mock_pay_handler_1',
-              version: '2026-04-08',
-              available_instruments: [
-                { type: 'mock_instrument' }
+          // Configure available payment handlers.
+          // We advertise support for a generic mock payment handler.
+          const ucpMetadata = {
+            version: '2026-04-08',
+            status: 'success' as const,
+            payment_handlers: {
+              'com.example.mock_pay': [
+                {
+                  id: 'mock_pay_handler_1',
+                  version: '2026-04-08',
+                  available_instruments: [
+                    { type: 'mock_instrument' }
+                  ]
+                }
               ]
             }
-          ]
-        }
-      };
+          };
 
-      // Assemble the final Checkout payload
-      const checkout: CheckoutResponse = {
-        ucp: ucpMetadata,
-        id: sessionId,
-        status: 'incomplete',
-        currency: 'USD',
-        line_items: outputLineItems,
-        totals: [
-          { type: 'subtotal', amount: subtotal },
-          { type: 'tax', amount: tax },
-          { type: 'total', amount: total }
-        ],
-        links: [
-          { type: 'terms_of_service', url: 'https://example.com/terms' },
-          { type: 'privacy_policy', url: 'https://example.com/privacy' }
-        ]
-      };
+          // Assemble the final Checkout payload
+          const checkout: CheckoutResponse = {
+            ucp: ucpMetadata,
+            id: sessionId,
+            status: 'incomplete',
+            currency: 'USD',
+            line_items: outputLineItems,
+            totals: [
+              { type: 'subtotal', amount: subtotal },
+              { type: 'tax', amount: tax },
+              { type: 'total', amount: total }
+            ],
+            links: [
+              { type: 'terms_of_service', url: 'https://example.com/terms' },
+              { type: 'privacy_policy', url: 'https://example.com/privacy' }
+            ]
+          };
 
-      // Validate output matches CheckoutResponse schema before sending
-      const outputValidation = CheckoutResponseSchema.safeParse(checkout);
-      if (!outputValidation.success) {
-        console.error('Output validation failed:', outputValidation.error);
-        return res.status(500).json({ error: 'Internal server error' });
-      }
+          // Validate output matches CheckoutResponse schema before sending
+          const outputValidation = CheckoutResponseSchema.safeParse(checkout);
+          if (!outputValidation.success) {
+            console.error('Output validation failed:', outputValidation.error);
+            return res.status(500).json({ error: 'Internal server error' });
+          }
 
-      // Save to database and return
-      checkoutSessions[sessionId] = checkout;
-      res.status(201).json(checkout);
-    });
+          // Save to database and return
+          checkoutSessions[sessionId] = checkout;
+          res.status(201).json(checkout);
+        });
 
-    app.get('/checkout-sessions/:id', (req, res) => {
-      const session = checkoutSessions[req.params.id];
-      if (!session) {
-        return res.status(404).json({ error: 'Checkout session not found' });
-      }
-      res.json(session);
-    });
+        app.get('/checkout-sessions/:id', (req, res) => {
+          const session = checkoutSessions[req.params.id];
+          if (!session) {
+            return res.status(404).json({ error: 'Checkout session not found' });
+          }
+          res.json(session);
+        });
 
-    const PORT = 3000;
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-    ```
+        const PORT = 3000;
+        app.listen(PORT, () => {
+          console.log(`Server is running on port ${PORT}`);
+        });
+        ```
 
 ---
 
