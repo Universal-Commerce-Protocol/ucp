@@ -81,9 +81,13 @@ method.
 
 {{ schema_fields('types/shipping_destination_resp', 'fulfillment') }}
 
-#### Retail Location
+#### Business Location Destination
 
-{{ schema_fields('types/retail_location_resp', 'fulfillment') }}
+{{ schema_fields('types/location_destination_resp', 'fulfillment') }}
+
+#### Location Summary
+
+{{ schema_fields('location_summary', 'fulfillment') }}
 
 #### Fulfillment Group
 
@@ -126,6 +130,7 @@ method.
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -170,6 +175,77 @@ method.
   }
 }
 ```
+
+## Destinations
+
+A fulfillment method's `type` describes how items are fulfilled, while each
+destination's `type` describes where fulfillment occurs. These discriminators
+are independent; neither implies the other.
+
+Every destination has a required, open `type`. The well-known values are:
+
+| Value | Meaning |
+| --- | --- |
+| `shipping_address` | A Shipping Destination with flat Postal Address fields. |
+| `business_location` | A Business Location Destination identified by a Business-scoped `id`. |
+
+Additional values are defined by negotiated extensions. Destination fields
+specific to such a value are validated by the negotiated extension's schema.
+
+### Shipping Destination
+
+For a Shipping Destination, the Platform supplies shipping-address facts as
+flat Postal Address fields directly on the destination. The Platform **MUST**
+include `type: "shipping_address"` and **MAY** include `id` in its request. The
+Business **MUST** include `type: "shipping_address"` and assign `id` in its
+response.
+
+### Business Location Destination
+
+For a Business Location Destination, the Platform selects the location with a
+stable, opaque, Business-scoped `id`. The Platform **MUST** include
+`type: "business_location"` and `id` in its request and **MUST NOT** include the
+Business-owned `name` or `address`. The Business **MUST** return
+`type: "business_location"`, `id`, and its Buyer-facing `name`, and **MAY**
+return its Postal Address in `address`.
+
+#### Platform Request
+
+<!-- ucp:example schema=shopping/types/location_destination op=update direction=request -->
+```json
+{
+  "type": "business_location",
+  "id": "loc_downtown"
+}
+```
+
+#### Business Response
+
+<!-- ucp:example schema=shopping/types/location_destination op=read direction=response -->
+```json
+{
+  "type": "business_location",
+  "id": "loc_downtown",
+  "name": "Downtown Store",
+  "address": {
+    "street_address": "123 Main St",
+    "address_locality": "Springfield",
+    "address_region": "IL",
+    "postal_code": "62701",
+    "address_country": "US"
+  }
+}
+```
+
+### Selection and Location Identity
+
+`selected_destination_id` identifies the selected destination in a method by
+its `id`. When Catalog represents a location as applicable to a particular
+fulfillment method, the Business **MUST** recognize the same Business-scoped ID
+when the Platform submits it in Checkout for that method, including as
+`selected_destination_id`. The Business **MUST** revalidate current availability
+and terms during Checkout; recognition does not reserve inventory or guarantee
+eligibility.
 
 ## Rendering
 
@@ -311,11 +387,14 @@ method has:
     renderable; see [Rendering](#rendering).
 * `availability` — whether the variant is available via this method at the
     specified or inferred location.
-* `location` — for place-based methods (e.g. `pickup`), the resolved
-    location id, and the business's stable identifier for that location. A
-    business that advertises pickup at a `location` MUST accept the same id
-    as `selected_destination_id` for that method, so a discovered location
-    can be used in cart and checkout.
+* `location` — when the method is scoped to a specific Business Location,
+    that location's stable, opaque, Business-scoped identifier. When Catalog
+    represents the location as applicable to a particular method, the Business
+    **MUST** recognize the same ID when the Platform submits it for that
+    method, including as `selected_destination_id`. Recognition is
+    method-scoped and does not reserve inventory or guarantee eligibility; the
+    Business revalidates current availability and terms during Checkout. See
+    [Selection and Location Identity](#selection-and-location-identity).
 * `options` — concrete fulfillment choices within this method (e.g.
     Standard, Express); see [Options](#options). Optional.
 
@@ -652,6 +731,7 @@ so a cart can mix shipped and installed items (see
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -723,6 +803,7 @@ package.
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -799,6 +880,7 @@ same type, each with its own destination.
         "selected_destination_id": "dest_mom",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_mom",
             "street_address": "123 Mom St",
             "address_locality": "Springfield",
@@ -844,6 +926,7 @@ same type, each with its own destination.
         "selected_destination_id": "dest_grandma",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_grandma",
             "street_address": "88 Queensway",
             "address_locality": "Hong Kong",

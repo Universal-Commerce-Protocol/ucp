@@ -5,12 +5,37 @@
   "description": "A destination for fulfillment.",
   "type": "object",
   "ucp_shared_request": true,
-  "oneOf": [
+  "required": ["type", "id"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Fulfillment destination type. Well-known values: `shipping_address`, `business_location`. Additional values are extension-defined and active only when their defining extension is negotiated.",
+      "ucp_request": "required"
+    },
+    "id": {
+      "type": "string",
+      "description": "Fulfillment destination identifier.",
+      "ucp_request": "optional"
+    }
+  },
+  "allOf": [
     {
-      "$ref": "shipping_destination.json"
+      "if": {
+        "properties": { "type": { "const": "shipping_address" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "shipping_destination.json"
+      }
     },
     {
-      "$ref": "retail_location.json"
+      "if": {
+        "properties": { "type": { "const": "business_location" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "location_destination.json"
+      }
     }
   ]
 }

@@ -371,9 +371,10 @@ include all previously set fields it intends to retain.
 
 #### Update Fulfillment
 
-Fulfillment is an extension to the checkout capability. Most fields are provided
-by the business based on buyer inputs, which includes desired fulfillment
-type & addresses.
+Fulfillment is an extension to the checkout capability. The Business provides
+most fields based on Buyer inputs, including desired fulfillment method types
+and typed destinations such as shipping addresses and Business Location
+references.
 
 === "Request"
 
@@ -405,6 +406,7 @@ type & addresses.
             "type": "shipping",
             "destinations": [
               {
+                "type": "shipping_address",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
                 "address_region": "IL",
@@ -513,6 +515,7 @@ type & addresses.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
@@ -610,6 +613,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
@@ -712,6 +716,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
@@ -913,6 +918,7 @@ for status and `order` semantics.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
@@ -1072,6 +1078,7 @@ for status and `order` semantics.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
@@ -1229,6 +1236,7 @@ for status and `order` semantics.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
