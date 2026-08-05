@@ -39,8 +39,8 @@ We will implement a simple checkout server that allows a platform to initiate a 
 
     Add the required dependencies. [`ucp-sdk`](https://github.com/Universal-Commerce-Protocol/python-sdk) contains the Pydantic models generated from UCP schemas:
 
-    > [!NOTE]
-    > The Python SDK package is registered as `ucp-sdk` on PyPI, but is imported as `ucp_sdk` (with an underscore) in your Python code.
+    !!! note
+        The Python SDK package is registered as `ucp-sdk` on PyPI, but is imported as `ucp_sdk` (with an underscore) in your Python code.
 
     ```bash
     uv add fastapi uvicorn ucp-sdk
@@ -221,8 +221,8 @@ Define the endpoint to create a checkout session. UCP requires `Idempotency-Key`
       const sessionId = `chk_${uuidv4().substring(0, 10)}`;
     ```
 
-> [!NOTE]
-> If the required UCP headers are missing, FastAPI (Python) will automatically return an **HTTP 422 Unprocessable Entity** error due to its built-in validation. In our Express (Node.js) implementation, we manually return an **HTTP 400 Bad Request** error.
+!!! note
+    If the required UCP headers are missing, FastAPI (Python) will automatically return an **HTTP 422 Unprocessable Entity** error due to its built-in validation. In our Express (Node.js) implementation, we manually return an **HTTP 400 Bad Request** error.
 
 ### 3. Business Logic (Process Items & Calculate Totals)
 
