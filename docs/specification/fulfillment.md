@@ -179,8 +179,12 @@ method.
 ## Destinations
 
 A fulfillment method's `type` describes how items are fulfilled, while each
-destination's `type` describes where fulfillment occurs. These discriminators
-are independent; neither implies the other.
+destination's `type` describes where fulfillment occurs. The two
+discriminators play different roles by direction: in Business responses,
+every destination carries a required `type`, so responses are
+self-describing; in Platform requests, the method's contract determines who
+authors `destinations[]` and MAY define a default destination shape when
+`type` is omitted.
 
 Destination authorship — whether the Platform may write entries into a
 method's `destinations[]` — is keyed by the method's `type`:
@@ -189,20 +193,25 @@ method's `destinations[]` — is keyed by the method's `type`:
 | --- | --- |
 | `shipping` | Platform-writable. The Platform writes the Buyer's shipping-address facts. |
 | `pickup` | Not Platform-writable (schema-enforced). The Business enumerates locations in its response; the Platform selects one by ID (see [Selection and Location Identity](#selection-and-location-identity)). |
-| extension-defined | The defining extension specifies the destination shape and whether it is Platform-writable. |
+| other method type | The method's defining contract specifies the destination shape and whether it is Platform-writable. |
 
-Destination `type` is **required in responses and optional in requests**. When
-a request destination omits `type`, the method's `type` implies its shape: an
-untyped destination under a `shipping` method validates as a Shipping
-Destination, and destinations under an extension-defined method type are
-validated by the negotiated extension's schema. A Platform **MAY** include
-`type` to disambiguate a destination reference when more than one kind can
-appear under a method — for example, an `id`-only destination that references
-a Business-managed mailing address versus an entry in an identity provider's
-customer address book. In responses, every destination carries a required,
-open `type`, so destinations remain self-describing wherever they appear. A
-request that includes `destinations[]` MUST also include the method's `type`.
-The well-known values are:
+Destination `type` is **required in responses and optional in requests**. In
+responses, every destination carries a required, open `type`, so destinations
+remain self-describing wherever they appear. In requests, the method's
+contract defines the destination shape:
+
+* Under a well-known `shipping` method, every destination is a Shipping
+    Destination: a destination that omits `type` defaults to
+    `shipping_address`.
+* Under a well-known `pickup` method, destinations are response-only; the
+    Platform selects a location via `selected_destination_id` (see
+    [Selection and Location Identity](#selection-and-location-identity)).
+* Under any other method type, the method's defining contract — a future
+    revision of this specification or a negotiated extension — specifies the
+    request destination shape and whether it is Platform-writable.
+
+A request that includes `destinations[]` MUST also include the method's
+`type`. The well-known values are:
 
 | Value | Meaning |
 | --- | --- |
@@ -218,7 +227,9 @@ For a Shipping Destination, the Platform supplies shipping-address facts as
 flat Postal Address fields directly on the destination. The Platform **MAY**
 include `id` and **MAY** include `type: "shipping_address"` in its request.
 The Business **MUST** include `type: "shipping_address"` and assign `id` in
-its response.
+its response. An `id`-only destination that references a saved or
+provider-held address is still a Shipping Destination; conveying provider
+provenance or additional fields requires a negotiated extension contract.
 
 #### Platform Request
 

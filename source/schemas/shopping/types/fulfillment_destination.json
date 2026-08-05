@@ -9,7 +9,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "description": "Fulfillment destination type. Required in responses; optional in requests. When a request destination omits `type`, the enclosing fulfillment method's `type` implies its shape. A Platform MAY include `type` to disambiguate a destination reference when more than one kind can appear under a method. Well-known values: `shipping_address`, `business_location`. Additional values are extension-defined and active only when their defining extension is negotiated.",
+      "description": "Destination contract discriminator. Required in Business responses and optional in Platform requests. Well-known values: `shipping_address`, `business_location`. The enclosing method contract defines request defaults and which fields the Platform may write; negotiated extensions define additional values.",
       "ucp_request": "optional"
     },
     "id": {
