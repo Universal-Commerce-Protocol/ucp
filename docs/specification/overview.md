@@ -960,17 +960,21 @@ example:
 
 ### The `ucp` Protocol Namespace
 
-The member name `ucp` is reserved in every UCP object scope as the **protocol
-namespace**. The top-level `ucp` member that profiles and responses carry —
+The member name `ucp` is reserved as the **protocol namespace** in every
+structured UCP object scope — an object whose members are schema-defined
+fields. The top-level `ucp` member that profiles and responses carry —
 described in [Profile Structure](#profile-structure) above — is not a special
 wrapper; it is the root manifestation of this reservation: a reserved member
-of the root object. The same reservation applies at every nested object
-scope. Schema authors **MUST NOT** define a member named `ucp` in domain
-schemas or extensions.
+of the root object. The reservation does not apply to a dictionary container,
+whose keys are data rather than fields. A dictionary key named `ucp` is
+ordinary data. A structured object used as a dictionary value remains an
+eligible scope. Schema authors **MUST NOT** define a domain field named `ucp`
+in structured object schemas or extensions.
 
-At each scope, `ucp` carries the protocol's statements about that scope:
-protocol metadata at the root (version, services, capabilities, payment
-handlers) and structural annotations such as [`map_order`](#map_order).
+At each eligible structured scope, `ucp` carries the protocol's statements
+about that scope: protocol metadata at the root (version, services,
+capabilities, payment handlers) and structural annotations such as
+[`map_order`](#map_order).
 
 **Openness.** The `ucp` container is open. Consumers **MUST** ignore members
 inside `ucp` that they do not recognize (tolerant reader). Openness exists so
@@ -988,27 +992,35 @@ unknown member that consumers ignore; schema validation does not reject such
 instances. Guarding against them is an authoring-time concern, not a
 wire-validation one.
 
-**Ambient vocabulary.** The protocol namespace is ambient: any object scope
-in a UCP payload **MAY** carry a `ucp` member, and its contents are defined
-exclusively by UCP core's vocabulary — the member is part of the UCP document
-grammar, like the name reservation itself. Guidance for schema authors on
-working within this reservation lives in the Schema Authoring Guide's
+**Ambient vocabulary.** The protocol namespace is ambient within structured
+UCP objects: a Business or Platform **MAY** include a `ucp` member at any
+eligible structured scope, and its contents are defined exclusively by UCP
+core's vocabulary — the member is part of the UCP document grammar, like the
+name reservation itself. The reservation stops at a dictionary container. A
+Business or Platform **MUST NOT** interpret a dictionary key named `ucp` as
+the protocol namespace; the key and its value are ordinary dictionary data.
+For example, `attribution` is a dictionary of string values, so an attribution
+key named `ucp` is ordinary attribution data, not a protocol-namespace member.
+Guidance for schema authors on working within this reservation lives in the
+Schema Authoring Guide's
 [The Reserved `ucp` Member](/documentation/schema-authoring/#the-reserved-ucp-member)
-section. A consumer encountering a `ucp` member at any scope processes the
-members it recognizes, each per its own definition, and **MUST** ignore
-unrecognized members (see *Openness* above).
+section. A Business or Platform encountering a `ucp` member at an eligible
+structured scope processes the members it recognizes, each per its own
+definition, and **MUST** ignore unrecognized members (see *Openness* above).
 A member is admitted to the vocabulary only if it is safe to ignore: a
-consumer that does not process it loses only that member's benefit, never
-correctness. A consumer that ignores `map_order`, for example, simply
-traverses the map unordered — the status quo before ordering existed.
+Business or Platform that does not process it loses only that member's
+benefit, never correctness. A Business or Platform that ignores `map_order`,
+for example, simply traverses the map unordered — the status quo before
+ordering existed.
 
 **Scope determines obligations.** At the root of profiles and responses, the
 `ucp` envelope additionally carries the required handshake members exactly as
 specified elsewhere in this document — this section changes none of those
-obligations. At every other scope the member is optional and its absence is
-always valid. Conformance to the vocabulary is defined by this
-specification's processing rules, not by instance validation, which treats
-ambient `ucp` members as ignored unknown objects.
+obligations. A Business or Platform **MAY** omit the member at every other
+eligible structured scope. Dictionary containers are not eligible scopes and
+carry no protocol-namespace obligation. Conformance to the vocabulary is
+defined by this specification's processing rules, not by instance validation,
+which treats ambient `ucp` members as ignored unknown objects.
 
 #### `map_order`
 
@@ -1024,8 +1036,8 @@ signing — and `map_order` uses one.
 fields of its containing scope. Each key of `map_order` names a sibling map
 field; its value is an array of that map's keys in preferred traversal order.
 At the root envelope, `map_order` appears directly beside the registries it
-orders — both are protocol-namespace members. In a nested scope, it lives
-inside that scope's `ucp` member.
+orders — both are protocol-namespace members. In a nested eligible structured
+scope, it lives inside that scope's `ucp` member.
 
 For a sibling map field `<field>` and its companion array
 `map_order.<field>`:
@@ -1080,8 +1092,8 @@ A business profile ordering its payment handlers:
 ```
 
 `map_order` is scope-generic — the same mechanism orders sibling maps at any
-scope, as when a business orders the identity-provider registry inside a
-capability's `config`:
+eligible structured scope, as when a Business orders the identity-provider
+registry inside a capability's `config`:
 
 <!-- ucp:example skip reason="illustrative fragment" -->
 ```json
