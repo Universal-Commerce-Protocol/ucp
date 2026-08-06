@@ -1039,21 +1039,21 @@ member names while preserving array element order. An array
 value is therefore the only order carrier that survives canonicalization and
 signing — and `map_order` uses one.
 
-`map_order` declares a preferred key-traversal order for sibling map-valued
-fields of its containing scope. Each key of `map_order` names a sibling map
-field; its value is an array of that map's keys in preferred traversal order.
-At the root envelope, `map_order` appears directly beside the registries it
-orders — both are protocol-namespace members. In a nested eligible structured
-scope, it lives inside that scope's `ucp` member.
+`map_order` declares a preferred key-traversal order for map-valued fields in
+the scope annotated by its containing `ucp` member. At a nested scope, each
+key of `map_order` names a map field on the object that contains `ucp`. At the
+document root, each key instead names a sibling map field inside the root `ucp`
+envelope. Root domain fields outside `ucp`, such as a checkout response's
+`actions`, are not targets. Each value is an array of the target map's keys in
+preferred traversal order.
 
 `map_order` does not apply to UCP operation requests.
 
-For a sibling map field `<field>` and its companion array
-`map_order.<field>`:
+For a target map field `<field>` and its companion array `map_order.<field>`:
 
 1. Producers **MUST NOT** rely on JSON object member order for UCP map-valued
     registries; `map_order` is the order carrier.
-2. `map_order.<field>` contains keys from the sibling map `<field>` in
+2. `map_order.<field>` contains keys from the target map field `<field>` in
     preferred traversal order.
 3. The order array **MAY** be partial: listed keys are traversed first, in
     array order.
@@ -1062,7 +1062,7 @@ For a sibling map field `<field>` and its companion array
     field defines none, lexicographic order.
 5. The order array is not an allowlist: consumers **MUST NOT** interpret
     omission of a key as removal, ineligibility, or reduced support.
-6. Producers **SHOULD** list only keys present in the sibling map. Consumers
+6. Producers **SHOULD** list only keys present in the target map. Consumers
     **SHOULD** ignore entries naming keys that are not present, and entries
     whose target field is absent or is not a map.
 7. Duplicate keys are invalid; consumers **SHOULD** honor the first
