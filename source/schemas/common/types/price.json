@@ -17,6 +17,10 @@
       "type": "string",
       "description": "ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').",
       "pattern": "^[A-Z]{3}$"
+    },
+    "tax_included": {
+      "type": "boolean",
+      "description": "Whether the amount includes tax (e.g. VAT, GST). When omitted, tax treatment is not asserted and follows the resolved market."
     }
   }
 }
