@@ -37,6 +37,14 @@
         "update": "required"
       }
     },
+    "destinations": {
+      "type": "array",
+      "description": "Available destinations for this method. In Business responses, each destination carries a `type` and `id`.",
+      "ucp_request": "omit",
+      "items": {
+        "$ref": "fulfillment_destination.json"
+      }
+    },
     "selected_destination_id": {
       "type": [
         "string",
@@ -69,6 +77,7 @@
           "destinations": {
             "type": "array",
             "description": "Platform-authored shipping addresses for this method.",
+            "ucp_request": "optional",
             "items": {
               "$ref": "shipping_destination.json"
             }
