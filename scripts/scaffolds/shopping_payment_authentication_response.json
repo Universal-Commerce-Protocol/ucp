@@ -1,0 +1,47 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.payment_authentication": [
+        {
+          "version": "2026-01-01",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.example.card": [
+        {
+          "id": "card_handler_1",
+          "version": "2026-01-01"
+        }
+      ]
+    }
+  },
+  "id": "checkout_scaffold",
+  "status": "complete_in_progress",
+  "currency": "USD",
+  "line_items": [],
+  "totals": [
+    {
+      "type": "subtotal",
+      "amount": 100
+    },
+    {
+      "type": "total",
+      "amount": 100
+    }
+  ],
+  "links": [],
+  "payment": {
+    "instruments": [
+      {
+        "id": "instrument_1",
+        "handler_id": "card_handler_1",
+        "type": "card",
+        "selected": true
+      }
+    ]
+  }
+}
