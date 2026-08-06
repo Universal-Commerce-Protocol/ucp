@@ -984,13 +984,9 @@ consumers — it is *not* extension space. Only UCP core defines members inside
 unrecognized member inside `ucp` means "defined by a newer UCP version,"
 never "extension data."
 
-**Idempotence.** Within `ucp`, protocol members appear directly: `ucp.ucp`
-never exists. Producers **MUST NOT** emit a `ucp` member inside `ucp`, and no
-UCP version will define one. Note that because the container is open, an
-errant `ucp.ucp` — like any misspelled member name — still validates as an
-unknown member that consumers ignore; schema validation does not reject such
-instances. Guarding against them is an authoring-time concern, not a
-wire-validation one.
+**No direct recursion.** Producers **MUST NOT** emit a `ucp` member as a direct
+child of another `ucp` member (`ucp.ucp`). Structured objects beneath it, such
+as a capability's `config`, remain eligible for their own `ucp` member.
 
 **Ambient vocabulary.** The protocol namespace is ambient within structured
 UCP objects: a Business or Platform **MAY** include a `ucp` member at any
