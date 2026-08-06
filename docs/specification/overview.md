@@ -1018,6 +1018,14 @@ carry no protocol-namespace obligation. Conformance to the vocabulary is
 defined by this specification's processing rules, not by instance validation,
 which treats ambient `ucp` members as ignored unknown objects.
 
+**Schema processing.** UCP schemas are open by default. Ordinary JSON Schema
+validation accepts an undeclared ambient `ucp` at an eligible structured scope
+without applying UCP vocabulary rules; UCP-aware tooling **SHOULD** recognize
+and apply `ucp.json#/$defs/members`. A UCP-aware strict validator **MUST**
+allow and validate the member, even when rejecting other unknown domain fields.
+A non-UCP-aware strict validator may reject it; this is an accepted
+compatibility limit.
+
 #### `map_order`
 
 JSON object members are unordered: member order is not guaranteed to survive

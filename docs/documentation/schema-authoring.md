@@ -204,6 +204,15 @@ for the normative rules. For schema authors this means:
   domain object. Instance validation treats an ambient `ucp` member as an
   ignored unknown object; validating its contents is a conformance-tooling
   concern.
+- **Keep open schemas and strict tooling namespace-aware.** UCP schemas are
+  open by default, and ambient `ucp` is protocol metadata rather than a domain
+  field. Generic JSON tooling can parse the member; ordinary JSON Schema
+  validation accepts it as an undeclared property at an eligible structured
+  scope without applying UCP vocabulary rules. A UCP-aware strict validator
+  **MUST** allow the undeclared member and validate it against
+  `ucp.json#/$defs/members`, even when rejecting other unknown domain fields.
+  A non-UCP-aware strict validator may reject the member; this is an accepted
+  compatibility limit.
 - **Dictionary keys remain data.** A dictionary container cannot host the
   protocol namespace. Schema authors **MUST NOT** model a dictionary key named
   `ucp` as that namespace; the key is governed by the dictionary's key and
