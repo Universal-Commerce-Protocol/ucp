@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_image.json",
+  "title": "Media Image",
+  "description": "Type-specific properties for image media.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "A directly displayable image."
+    },
+    "width": {
+      "description": "Authoritative pixel width of the image."
+    },
+    "height": {
+      "description": "Authoritative pixel height of the image."
+    }
+  }
+}

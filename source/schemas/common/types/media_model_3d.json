@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_model_3d.json",
+  "title": "Media Model 3D",
+  "description": "Type-specific properties for 3D model media.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "The primary model file (e.g. GLB)."
+    },
+    "sources": {
+      "type": "array",
+      "description": "The complete set of available model encodings/file formats (glTF/GLB/USDZ). When present, the Business SHOULD include a source whose `url` equals the media `url`.",
+      "items": {
+        "$ref": "media_source.json"
+      }
+    }
+  }
+}

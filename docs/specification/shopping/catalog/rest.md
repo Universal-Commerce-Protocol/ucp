@@ -409,7 +409,79 @@ on option values and returns variants matching the selection.
           {
             "type": "image",
             "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
-            "alt_text": "Runner Pro in Blue"
+            "alt_text": "Runner Pro in Blue",
+            "width": 1600,
+            "height": 1600
+          },
+          {
+            "type": "video",
+            "url": "https://cdn.example.com/products/runner-pro-demo-720p.mp4",
+            "name": "Runner Pro flex demo",
+            "alt_text": "Runner Pro shoe flexing to show sole cushioning",
+            "duration": 24,
+            "preview": {
+              "url": "https://cdn.example.com/products/runner-pro-demo-poster.jpg",
+              "width": 1280,
+              "height": 720
+            },
+            "sources": [
+              {
+                "url": "https://cdn.example.com/products/runner-pro-demo-720p.mp4",
+                "mime_type": "video/mp4",
+                "format": "mp4",
+                "width": 1280,
+                "height": 720,
+                "filesize": 4200000
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro-demo-1080p.mp4",
+                "mime_type": "video/mp4",
+                "format": "mp4",
+                "width": 1920,
+                "height": 1080,
+                "filesize": 8480000
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro-demo.m3u8",
+                "mime_type": "application/vnd.apple.mpegurl",
+                "format": "m3u8"
+              }
+            ]
+          },
+          {
+            "type": "model_3d",
+            "url": "https://cdn.example.com/products/runner-pro.glb",
+            "alt_text": "Runner Pro 3D model",
+            "preview": {
+              "url": "https://cdn.example.com/products/runner-pro-3d-thumb.jpg"
+            },
+            "sources": [
+              {
+                "url": "https://cdn.example.com/products/runner-pro.glb",
+                "mime_type": "model/gltf-binary",
+                "format": "glb",
+                "filesize": 4200000
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro.usdz",
+                "mime_type": "model/vnd.usdz+zip",
+                "format": "usdz",
+                "filesize": 5100000
+              }
+            ]
+          },
+          {
+            "type": "video",
+            "url": "https://videos.example.com/watch?v=abc123",
+            "embed_url": "https://videos.example.com/embed/abc123",
+            "name": "Runner Pro trail review",
+            "alt_text": "Reviewer running a trail in the Runner Pro",
+            "duration": 212,
+            "preview": {
+              "url": "https://cdn.example.com/products/runner-pro-review-poster.jpg",
+              "width": 1280,
+              "height": 720
+            }
           }
         ],
         "options": [

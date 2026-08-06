@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_video.json",
+  "title": "Media Video",
+  "description": "Type-specific properties for video media.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "The directly playable default rendition for a self-hosted video, or the watch-page URL for an externally hosted video with `embed_url`. When `sources` is present and `url` identifies a rendition, the Business SHOULD include a source whose `url` equals the media `url`; this does not apply when `url` is an external watch-page URL."
+    },
+    "embed_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Player embed (iframe) URL for an externally hosted video, through which the Platform may play the video; absent for self-hosted video. A Platform MAY decline third-party active content under its security, privacy, or presentation policy and use the watch-page `url` instead."
+    },
+    "duration": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Duration in seconds."
+    },
+    "width": {
+      "description": "The video's display width in pixels, for layout and aspect ratio. A selected rendition's exact width is in that `sources[]` entry."
+    },
+    "height": {
+      "description": "The video's display height in pixels, for layout and aspect ratio. A selected rendition's exact height is in that `sources[]` entry."
+    },
+    "sources": {
+      "type": "array",
+      "description": "The complete set of available encoded renditions (MP4/WebM, HLS/DASH manifests). A Business that provides `sources` SHOULD include a source whose `url` equals the media `url` when `url` identifies a rendition; an external watch-page `url` does not identify a rendition.",
+      "items": {
+        "$ref": "media_source.json"
+      }
+    }
+  }
+}
