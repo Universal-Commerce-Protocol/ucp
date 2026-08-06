@@ -131,6 +131,12 @@ carrying a `unit_price` per metre. Its `measure` can be
 `{ "value": 1, "unit": "MTR", "display_text": "m" }`. Both measures use
 `MTR`; they represent 50 m and 1 m respectively without cross-unit conversion.
 
+On transaction lines, presence marks the role: the Business **MUST** echo
+`unit_price` on any line whose pricing basis differs from its sale basis (see
+[Checkout — pricing basis](../checkout.md#quantity-and-sale-basis)). A
+catalog-only `unit_price`, like this spool's per-metre figure, is a display
+comparator; a line-level one carries the rate the charge is computed from.
+
 ### Example: a good sold by weight
 
 A `get_product` response for bananas sold by the pound. The variant advertises

@@ -288,6 +288,17 @@ The Business **MUST** compute the line total as
 **MUST NOT** recompute a line total from the fractional quantity and substitute
 its own rounding.
 
+**Pricing basis.** `item.price` is always denominated against the sale basis,
+but the Business MAY quote it from a different measurement basis — for
+example, apples priced per pound and sold per `each`. On authoritative
+responses the Business **MUST** include `item.unit_price` on every cart,
+checkout, and order line whose pricing basis differs from its sale basis: the
+rate that determines the charge travels with the line, exactly as the sale
+basis itself does. When the pricing basis is the sale basis, `unit_price`
+remains a catalog display comparator and MAY be omitted from lines. Presence
+on a line is the marker: a line-level `unit_price` is transactional; a
+catalog-only one is display.
+
 For example, a Business sells bananas by the pound with `quantity_unit`
 `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a
 `price` of `79` ($0.79/lb). A Buyer orders 1.50 lb, so the Platform sends

@@ -369,6 +369,98 @@ rounded to `119`, and the return credits `79 × 0.25 = 19.75`, rounded to
 }
 ```
 
+## Example: count-sold, measure-priced settlement
+
+Some items are sold by count but priced by measurement — apples at $2.00/lb,
+sold per `each`, with a nominal per-apple weight. Two bases are in play, and
+both travel: the sale basis governs `quantity` (whole apples, lifecycle
+arithmetic untouched), and the pricing basis — the line's echoed
+[`unit_price`](checkout.md#quantity-and-sale-basis) — carries the rate and
+nominal measure the charge is computed from. When the price settles against an
+actual measurement, the adjustment **MUST** carry the settled `measure`; its
+unit identity **MUST** match the pricing basis (no conversion), and a pure
+price settlement uses `quantity: 0` so the count is untouched. (A settled
+`measure` is Business-recorded fact; Buyer-configured measurements that define
+item identity are a separate negotiated extension.)
+
+A Buyer orders 3 apples at $0.80 each (nominal 0.40 lb × $2.00/lb; line total
+`240`). The picker weighs the three apples at 1.14 lb against the nominal
+1.20 lb, and the settlement is fully verifiable from the order alone:
+nominal steps `3 × 40 = 120`, settled `114`, delta `6` steps
+`× 200 × 10^-2 = 12` — the `-12` adjustment checks out in integer arithmetic:
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
+  },
+  "id": "order_apples_1",
+  "checkout_id": "chk_apples_1",
+  "permalink_url": "https://business.example.com/orders/apples1",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_apples",
+      "item": {
+        "id": "var_apple",
+        "title": "Honeycrisp Apple",
+        "price": 80,
+        "unit_price": {
+          "amount": 200,
+          "currency": "USD",
+          "measure": { "value": 40, "scale": 2, "unit": "LBR", "display_text": "lb" },
+          "reference": { "value": 1, "unit": "LBR", "display_text": "lb" }
+        }
+      },
+      "quantity": { "original": 3, "total": 3, "fulfilled": 3 },
+      "totals": [
+        { "type": "subtotal", "amount": 240 },
+        { "type": "total", "amount": 240 }
+      ],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-14T09:15:00Z",
+        "type": "shipped",
+        "line_items": [{ "id": "li_apples", "quantity": 3 }],
+        "description": "Picked 3 apples, 1.14 lb total"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "price_adjustment",
+      "occurred_at": "2026-01-14T09:15:00Z",
+      "status": "completed",
+      "line_items": [
+        {
+          "id": "li_apples",
+          "quantity": 0,
+          "measure": { "value": 114, "scale": 2, "unit": "LBR", "display_text": "lb" }
+        }
+      ],
+      "totals": [{ "type": "total", "amount": -12 }],
+      "description": "Settled to actual picked weight of 1.14 lb"
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 240 },
+    { "type": "total", "amount": 240 }
+  ]
+}
+```
+
+The count lifecycle never moves — `fulfilled == total` holds on whole apples —
+while the money reconciles to the measured reality, and every number needed to
+verify the credit is on the order itself.
+
 ## Example: catch-weight reconciliation
 
 For weighed goods, the picked weight routinely differs from the ordered
