@@ -22,9 +22,9 @@
         { "$ref": "payment.json" },
         {
           "type": "object",
-          "required": ["available_terms"],
+          "required": ["terms"],
           "properties": {
-            "available_terms": {
+            "terms": {
               "type": "array",
               "items": { "$ref": "#/$defs/payment_term" },
               "minItems": 1,
@@ -33,7 +33,7 @@
             },
             "selected_term_id": {
               "type": "string",
-              "description": "ID of the selected payment term. MUST match one `available_terms[].id` from the latest Checkout response. Always present in responses: the Checkout total is the selected term's total, so a response without a selection would show an amount that matches no stated terms. Where the Buyer has made no choice, the Business selects a default. Omitted on create requests because term IDs are checkout-scoped and no terms exist yet. Selecting a term is a Checkout mutation: the Business response is authoritative for all derived state.",
+              "description": "ID of the selected payment term. MUST match one `terms[].id` from the latest Checkout response. Always present in responses: the Checkout total is the selected term's total, so a response without a selection would show an amount that matches no stated terms. Where the Buyer has made no choice, the Business selects a default. Omitted on create requests because term IDs are checkout-scoped and no terms exist yet. Selecting a term is a Checkout mutation: the Business response is authoritative for all derived state.",
               "ucp_request": {
                 "create": "omit",
                 "update": "optional",

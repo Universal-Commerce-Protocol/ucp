@@ -32,12 +32,12 @@ buyer-facing statement of when it is due.
 
 This extension adds two properties to `checkout.payment`:
 
-* `available_terms[]` — the terms the Business offers for this checkout.
+* `terms[]` — the payment terms the Business offers for this checkout.
   Response-only.
 * `selected_term_id` — the selected term. Always present in a response;
   a Platform writes it to change the selection.
 
-A Buyer picks one of the options in `available_terms[]`, the same way they pick
+A Buyer picks one of the options in `terms[]`, the same way they pick
 one [fulfillment option](fulfillment.md#platform-responsibilities).
 
 ## Presenting payment terms
@@ -126,10 +126,10 @@ Selecting a payment term is a **Checkout mutation**. A Platform sets
 discount eligibility, `policies[]`, `messages[]`, and the payment handlers
 offered.
 
-A Platform **MUST NOT** assume that the amounts shown in `available_terms[]`
+A Platform **MUST NOT** assume that the amounts shown in `terms[]`
 survive selection unchanged, and **MUST** re-render from the response.
 
-A Business **MUST** make `available_terms[].id` unique within a Checkout, so
+A Business **MUST** make `terms[].id` unique within a Checkout, so
 that a selection resolves to exactly one term.
 
 A term is always selected. The Checkout `total` is the selected term's total, so
@@ -138,7 +138,7 @@ terms. A Business **MUST** return `selected_term_id` in every response. Where
 the Buyer has made no choice, the Business selects a default.
 
 When changing the selection, a Platform **MUST** set `selected_term_id` to an
-`id` from the latest `available_terms[]`. A Platform **MUST** omit it on create,
+`id` from the latest `terms[]`. A Platform **MUST** omit it on create,
 because term IDs are scoped to a Checkout and no options exist yet — the create
 response establishes both the options and the default. A Business receiving a
 selection that no longer resolves — because the options changed — **MUST**
@@ -274,8 +274,8 @@ terms and the selected term.
 ### Order Payment
 
 On the Order, `payment` carries the accepted term. A Business **MUST** ensure
-its schedule `total` entries sum to the Order `total`. The available terms are
-checkout state and are not projected.
+its schedule `total` entries sum to the Order `total`. The terms offered at
+checkout are not projected.
 
 {{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment_terms') }}
 
@@ -299,14 +299,14 @@ checkout state and are not projected.
 The two terms have **different payable amounts**. Their schedules sum to their
 own term's total, and only the selected one is bound to the checkout total.
 
-**Checkout response fragment — the available terms.** The Buyer has not chosen
+**Checkout response fragment — the terms on offer.** The Buyer has not chosen
 yet, so the Business defaults to paying now, and says so:
 
 <!-- ucp:example schema=shopping/payment_terms def=payment op=read direction=response -->
 ```json
 {
   "selected_term_id": "pt_pay_now",
-  "available_terms": [
+  "terms": [
     {
       "id": "pt_pay_now",
       "title": "Pay now",
@@ -389,7 +389,7 @@ yet, so the Business defaults to paying now, and says so:
   ],
   "payment": {
     "selected_term_id": "pt_deposit_balance",
-    "available_terms": [
+    "terms": [
       {
         "id": "pt_pay_now",
         "title": "Pay now",
@@ -511,7 +511,7 @@ disclosure moves with the term it governs:
 ```
 
 The schedules sum to the Order `total`, and the policy that named
-`$.payment.available_terms[1]` on the Checkout names `$.payment.accepted_term`
+`$.payment.terms[1]` on the Checkout names `$.payment.accepted_term`
 here. No representation of `pt_pay_now` survives.
 
 ### Installments
@@ -632,7 +632,7 @@ Platforms **MUST**:
 * Present each term's `title`, and each schedule's `description` and `total`
   amount, formatted in the Checkout `currency`.
 * Re-render from the Business response after selecting a term, rather than
-  reusing amounts read from `available_terms[]`.
+  reusing amounts read from `terms[]`.
 * Treat an unrecognized schedule `type` as not captured at completion, and
   present the term regardless.
 * Process disclosures attached to terms per
