@@ -4,6 +4,14 @@ Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we pos
 
 ---
 
+## July 16, 2026: Food Technical Council (Food TC) Formed
+
+The UCP Governing Council finalized the foundational members of the newly formed Food Technical Council (Food TC). Initial members include Block (Square), DoorDash, Google, Toast, and Uber Eats.
+
+For more details, read the full announcement in the [GitHub Discussion #593](https://github.com/Universal-Commerce-Protocol/ucp/discussions/593).
+
+---
+
 ## April 28, 2026: Stripe Joins the Governing Council
 
 Stripe has joined the UCP Governing Council as a new member, joining existing permanent members Google and Shopify. Additionally, the Governing Council structure is being updated to add two more elected open seats for future nominations.
