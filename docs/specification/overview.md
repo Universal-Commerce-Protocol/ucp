@@ -1018,6 +1018,9 @@ carry no protocol-namespace obligation. Conformance to the vocabulary is
 defined by this specification's processing rules, not by instance validation,
 which treats ambient `ucp` members as ignored unknown objects.
 
+**Vocabulary applicability.** Each registered protocol-namespace member defines
+the document contexts and message directions where it applies.
+
 **Schema processing.** UCP schemas are open by default. Ordinary JSON Schema
 validation accepts an undeclared ambient `ucp` at an eligible structured scope
 without applying UCP vocabulary rules; UCP-aware tooling **SHOULD** recognize
@@ -1042,6 +1045,8 @@ field; its value is an array of that map's keys in preferred traversal order.
 At the root envelope, `map_order` appears directly beside the registries it
 orders — both are protocol-namespace members. In a nested eligible structured
 scope, it lives inside that scope's `ucp` member.
+
+`map_order` does not apply to UCP operation requests.
 
 For a sibling map field `<field>` and its companion array
 `map_order.<field>`:

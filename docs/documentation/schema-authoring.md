@@ -242,6 +242,12 @@ for the normative rules. For schema authors this means:
   open (see [Open Objects](#open-objects-additionalproperties)). This
   exception applies only to structured object scopes; closing a dictionary
   does not create an ambient namespace there.
+- **Declare member applicability.** Schema authors **MUST** annotate every
+  property registered in `ucp.json#/$defs/members` with `ucp_request` (`omit`,
+  `optional`, or `required`, as appropriate). They **MUST** repeat the
+  annotation wherever the same member is exposed elsewhere in `ucp.json`. An
+  explicit ambient `ucp` property follows the applicability of its containing
+  schema and is not automatically omitted from requests.
 
 ## The Entity Pattern
 

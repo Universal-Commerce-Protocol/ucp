@@ -60,7 +60,10 @@
       "type": "object",
       "description": "Vocabulary and processing contract for the reserved `ucp` protocol-namespace member. Any structured UCP object scope—an object whose members are schema-defined fields—MAY carry a `ucp` member conforming to this definition. The reservation does not apply to dictionary scopes, where keys are data: a dictionary key named `ucp` is ordinary data. A structured object used as a dictionary value remains an eligible scope. Consumers process recognized members and MUST ignore unrecognized ones. At the document root, the `ucp` envelope additionally carries the handshake members defined by this schema. Open for forward compatibility; not an extension point — only UCP core registers members, and every member MUST be safe to ignore.",
       "properties": {
-        "map_order": { "$ref": "#/$defs/map_order" }
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "ucp_request": "omit"
+        }
       },
       "additionalProperties": true
     },
@@ -104,7 +107,8 @@
         "version": { "$ref": "#/$defs/version" },
         "map_order": {
           "$ref": "#/$defs/map_order",
-          "description": "Preferred key-traversal order for sibling map-valued registry fields in this object (`services`, `capabilities`, and `payment_handlers`)."
+          "description": "Preferred key-traversal order for sibling map-valued registry fields in this object (`services`, `capabilities`, and `payment_handlers`).",
+          "ucp_request": "omit"
         },
         "status": {
           "type": "string",
