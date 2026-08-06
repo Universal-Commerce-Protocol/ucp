@@ -48,11 +48,10 @@
 
     "map_order": {
       "type": "object",
-      "description": "Preferred key-traversal order for map-valued fields in the scope annotated by the containing `ucp` member. In a nested scope, each key names a map-valued field on the object containing `ucp`; at the document root, each key names a sibling map-valued field inside the root `ucp` envelope. Each array lists its target map's keys in preferred order. Lists may be partial: unlisted keys remain valid and are appended using the field-defined fallback or lexicographic order. This member is not an allowlist; consumers ignore unknown or absent target fields.",
+      "description": "Preferred key-traversal order for map-valued fields in the scope annotated by the containing `ucp` member. In a nested scope, each key names a map-valued field on the object containing `ucp`; at the document root, each key names a sibling map-valued field inside the root `ucp` envelope. Each array lists its target map's keys in preferred order. Lists may be partial: unlisted keys remain valid and are appended using the field-defined fallback or lexicographic order. This member is not an allowlist; consumers ignore unknown or absent target fields. Repeated map keys in an order array do not invalidate the containing payload; consumers use the first occurrence and ignore later repetitions.",
       "additionalProperties": {
         "type": "array",
-        "items": { "type": "string" },
-        "uniqueItems": true
+        "items": { "type": "string" }
       }
     },
 

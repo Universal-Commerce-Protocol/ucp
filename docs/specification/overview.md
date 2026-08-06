@@ -1065,8 +1065,10 @@ For a target map field `<field>` and its companion array `map_order.<field>`:
 6. Producers **SHOULD** list only keys present in the target map. Consumers
     **SHOULD** ignore entries naming keys that are not present, and entries
     whose target field is absent or is not a map.
-7. Duplicate keys are invalid; consumers **SHOULD** honor the first
-    occurrence of a key and ignore later duplicates.
+7. Producers **MUST NOT** list the same map key more than once in an order
+    array. Consumers **MUST NOT** reject the containing document solely because
+    an order array repeats a map key. Consumers that process `map_order`
+    **MUST** honor the first occurrence and ignore later repetitions.
 8. If `map_order`, or its entry for a field, is absent, no order is declared;
     consumers **MUST NOT** fall back to object member order.
 9. A field's own specification defines what ordered traversal *means* for it
