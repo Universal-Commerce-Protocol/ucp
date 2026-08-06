@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/payment_schedule.json",
   "title": "Payment Schedule",
-  "description": "Defines when payment is due for a payment term. A schedule can represent a single payment or a recurring series of payments.",
+  "description": "A named payment obligation within a payment term. Timing is disclosed in buyer-facing text while totals provide a structured allocation amount.",
   "type": "object",
-  "required": ["id", "type", "totals"],
+  "required": ["id", "type", "description", "totals"],
   "properties": {
     "id": {
       "type": "string",
@@ -12,15 +12,15 @@
     },
     "type": {
       "$ref": "schedule_type.json",
-      "description": "Payment timing type. 'immediate' = captured immediately at order creation. 'deferred' = captured later per due_at schedule."
+      "description": "Broad payment timing class. Well-known values: `immediate` and `deferred`."
     },
-    "due_at": {
-      "$ref": "schedule.json",
-      "description": "When the payment is due. Protocol semantics require this for deferred schedules and omit it for immediate schedules."
+    "description": {
+      "type": "string",
+      "description": "Complete buyer-facing explanation of when and how the payment is due."
     },
     "totals": {
       "$ref": "totals.json",
-      "description": "Complete pricing breakdown for this obligation. The entry with `type: total` is the amount due in the checkout or order currency."
+      "description": "Aggregate pricing breakdown for every payment represented by this schedule. The entry with `type: total` is the complete amount allocated to the schedule in the checkout or order currency."
     }
   }
 }
