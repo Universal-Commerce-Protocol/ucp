@@ -13,8 +13,9 @@
     "scale": {
       "type": "integer",
       "minimum": 0,
+      "maximum": 15,
       "default": 0,
-      "description": "One step equals `10^-scale` of `unit`. When `unit` is `C62`, `scale`, if present, MUST be 0."
+      "description": "One step equals `10^-scale` of `unit`. When `unit` is `C62`, `scale`, if present, MUST be 0. The maximum of 15 is derived from the interoperable integer range: at scale 16 a single whole unit (10^16 steps) is no longer representable, so larger scales cannot denominate one unit of their own basis. Businesses needing finer granularity use a smaller unit."
     },
     "display_text": {
       "type": "string",

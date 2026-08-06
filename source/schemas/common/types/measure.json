@@ -13,6 +13,8 @@
       "properties": {
         "value": {
           "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991,
           "description": "Integer count of `10^-scale` units of `unit`."
         }
       }

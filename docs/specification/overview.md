@@ -39,8 +39,9 @@ UCP uses a shared quantity representation wherever a schema contains an integer
 A `quantity` is an integer count of **steps**. A unit descriptor consists of:
 
 - `unit` — a required, stable machine identifier.
-- `scale` — an optional nonnegative integer. Its effective value is the provided
-    value or `0` when omitted.
+- `scale` — an optional nonnegative integer, at most 15 (a bound derived from
+    the integer range; see below). Its effective value is the provided value or
+    `0` when omitted.
 - `display_text` — a required printable label for the unit.
 
 One step is `10^-scale` of `unit`. The shared measure type adds a required
@@ -78,6 +79,37 @@ path for a Rec20 code and for a custom unit. Unlike a currency exponent,
 `scale` is per-item data rather than a static table — which is why
 authoritative responses always carry their own descriptor on every non-`each`
 line.
+
+### Integer range and ingestion
+
+Every integer-valued field in UCP — amounts, quantity step counts, measure
+values — is a JSON integer; each field's schema declares its sign and
+bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the
+range within which every JSON implementation agrees exactly on integer
+values
+([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html){ target="_blank" },
+Section 6) and within which
+[JCS](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
+canonicalization, required for
+[AP2 mandate signing](ap2-mandates.md#canonicalization), is defined. The
+same cap derives `scale`'s maximum of 15: at scale 16, one whole unit
+(10^16 steps) would be unrepresentable. An out-of-range value is
+schema-invalid and is rejected like any other invalid payload.
+
+Arithmetic over these values **MUST** be exact. Within the wire range,
+IEEE 754 binary64 — a JavaScript `Number` from `JSON.parse` — holds every
+integer exactly; products such as `amount × quantity` can exceed 64 bits, so
+use wider or arbitrary-precision integers, or overflow checks. An
+implementation that cannot produce an exact, in-range result **MUST**
+surface an error rather than emit, display, or act on an approximate or
+wrapped value.
+
+When UCP data crosses into external systems, implementations **SHOULD**
+convert once at ingestion — apply the declared scale (or currency exponent)
+into an exact decimal type (SQL `NUMERIC`, Java `BigDecimal`, Python
+`Decimal`), or carry the (value, scale) pair unchanged — and **SHOULD NOT**
+perform scale application or value-bearing arithmetic in binary floating
+point.
 
 ### Unit vocabulary
 
