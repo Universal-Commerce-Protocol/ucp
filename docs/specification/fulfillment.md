@@ -179,10 +179,39 @@ method.
 ## Destinations
 
 A fulfillment method's `type` describes how items are fulfilled, while each
-destination's `type` describes where fulfillment occurs. These discriminators
-are independent; neither implies the other.
+destination's `type` describes where fulfillment occurs. The two
+discriminators play different roles by direction: in Business responses,
+every destination carries a required `type`, so responses are
+self-describing; in Platform requests, the method's contract determines who
+authors `destinations[]` and MAY define a default destination shape when
+`type` is omitted.
 
-Every destination has a required, open `type`. The well-known values are:
+Destination authorship — whether the Platform may write entries into a
+method's `destinations[]` — is keyed by the method's `type`:
+
+| Method `type` | Request `destinations[]` |
+| --- | --- |
+| `shipping` | Platform-writable. The Platform writes the Buyer's shipping-address facts. |
+| `pickup` | Not Platform-writable (schema-enforced). The Business enumerates locations in its response; the Platform selects one by ID (see [Selection and Location Identity](#selection-and-location-identity)). |
+| other method type | The method's defining contract specifies the destination shape and whether it is Platform-writable. |
+
+Destination `type` is **required in responses and optional in requests**. In
+responses, every destination carries a required, open `type`, so destinations
+remain self-describing wherever they appear. In requests, the method's
+contract defines the destination shape:
+
+* Under a well-known `shipping` method, every destination is a Shipping
+    Destination: a destination that omits `type` defaults to
+    `shipping_address`.
+* Under a well-known `pickup` method, destinations are response-only; the
+    Platform selects a location via `selected_destination_id` (see
+    [Selection and Location Identity](#selection-and-location-identity)).
+* Under any other method type, the method's defining contract — a future
+    revision of this specification or a negotiated extension — specifies the
+    request destination shape and whether it is Platform-writable.
+
+A request that includes `destinations[]` MUST also include the method's
+`type`. The well-known values are:
 
 | Value | Meaning |
 | --- | --- |
@@ -195,27 +224,59 @@ specific to such a value are validated by the negotiated extension's schema.
 ### Shipping Destination
 
 For a Shipping Destination, the Platform supplies shipping-address facts as
-flat Postal Address fields directly on the destination. The Platform **MUST**
-include `type: "shipping_address"` and **MAY** include `id` in its request. The
-Business **MUST** include `type: "shipping_address"` and assign `id` in its
-response.
+flat Postal Address fields directly on the destination. The Platform **MAY**
+include `id` and **MAY** include `type: "shipping_address"` in its request.
+The Business **MUST** include `type: "shipping_address"` and assign `id` in
+its response. An `id`-only destination that references a saved or
+provider-held address is still a Shipping Destination; conveying provider
+provenance or additional fields requires a negotiated extension contract.
+
+#### Platform Request
+
+<!-- ucp:example schema=shopping/types/shipping_destination op=update direction=request -->
+```json
+{
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
+
+#### Business Response
+
+<!-- ucp:example schema=shopping/types/shipping_destination op=read direction=response -->
+```json
+{
+  "type": "shipping_address",
+  "id": "dest_1",
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
 
 ### Business Location Destination
 
-For a Business Location Destination, the Platform selects the location with a
-stable, opaque, Business-scoped `id`. The Platform **MUST** include
-`type: "business_location"` and `id` in its request and **MUST NOT** include the
-Business-owned `name` or `address`. The Business **MUST** return
+Business Location Destinations appear only in responses; `destinations[]` on a
+`pickup` method is not a request field. The Platform **MUST NOT** write
+Business Location Destinations into `destinations[]`; it selects a location by
+submitting its stable, opaque, Business-scoped ID as
+`selected_destination_id`. The Business **MUST** return
 `type: "business_location"`, `id`, and its Buyer-facing `name`, and **MAY**
 return its Postal Address in `address`.
 
 #### Platform Request
 
-<!-- ucp:example schema=shopping/types/location_destination op=update direction=request -->
+<!-- ucp:example schema=shopping/types/fulfillment_method op=update direction=request -->
 ```json
 {
-  "type": "business_location",
-  "id": "loc_downtown"
+  "type": "pickup",
+  "line_item_ids": ["shirt", "pants"],
+  "selected_destination_id": "loc_downtown"
 }
 ```
 
@@ -240,12 +301,17 @@ return its Postal Address in `address`.
 ### Selection and Location Identity
 
 `selected_destination_id` identifies the selected destination in a method by
-its `id`. When Catalog represents a location as applicable to a particular
-fulfillment method, the Business **MUST** recognize the same Business-scoped ID
-when the Platform submits it in Checkout for that method, including as
-`selected_destination_id`. The Business **MUST** revalidate current availability
-and terms during Checkout; recognition does not reserve inventory or guarantee
-eligibility.
+its `id`, and is the sole channel for selecting a Business Location. It accepts
+any stable, Business-scoped Location ID the Business recognizes for that
+method, including IDs the Business has not (yet) enumerated in that method's
+`destinations[]` — for example an ID discovered through Catalog or a separately
+negotiated Location capability. When Catalog represents a location as
+applicable to a particular fulfillment method, the Business **MUST** recognize
+the same Business-scoped ID when the Platform submits it in Checkout for that
+method, including as `selected_destination_id`, and **MUST** return the
+corresponding typed destination in `destinations[]` in its response. The
+Business **MUST** revalidate current availability and terms during Checkout;
+recognition does not reserve inventory or guarantee eligibility.
 
 ## Rendering
 

@@ -406,7 +406,6 @@ references.
             "type": "shipping",
             "destinations": [
               {
-                "type": "shipping_address",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
                 "address_region": "IL",
@@ -613,7 +612,6 @@ Follow-up calls after initial `fulfillment` data to update selection.
             "selected_destination_id": "dest_home",
             "destinations": [
               {
-                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",

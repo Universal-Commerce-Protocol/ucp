@@ -190,7 +190,6 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
                   "type": "shipping",
                   "destinations": [
                     {
-                      "type": "shipping_address",
                       "street_address": "123 Main St",
                       "address_locality": "Springfield",
                       "address_region": "IL",
