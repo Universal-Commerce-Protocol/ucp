@@ -12,6 +12,16 @@
     },
     "price": {
       "$ref": "price_filter.json"
+    },
+    "availability": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Filter by variant availability status (OR logic — matches products with at least one variant whose availability.status matches a listed value). Values use the same vocabulary defined in availability.status."
+    },
+    "brand": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Filter by brand name (OR logic — matches products whose brand field matches any listed value). Values are case-insensitive."
     }
   },
   "additionalProperties": true

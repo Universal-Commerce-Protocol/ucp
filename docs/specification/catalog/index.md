@@ -106,11 +106,20 @@ A catalog item representing a sellable item with one or more purchasable variant
 relevant variant and image first—default for lookups, best match based on query
 and context for search. Platforms SHOULD treat the first element as featured.
 
+`brand` identifies the manufacturer or brand name generally recognized by
+consumers. Businesses SHOULD provide the brand name only when a genuine brand
+applies — do not submit placeholder values such as "Generic" or "N/A".
+
 {{ schema_fields('types/product', 'catalog') }}
 
 ### Variant
 
 A purchasable item with specific option selections, price, and availability.
+
+`condition` describes the item state using an open vocabulary. Well-known
+values: `new` (original, unopened packaging), `refurbished` (professionally
+restored, with warranty), `used` (previously used, original packaging may be
+missing). When omitted, platforms SHOULD assume `new`.
 
 In lookup responses, each variant carries an `inputs` array for correlation:
 which request identifiers resolved to this variant, and whether the match
