@@ -1015,19 +1015,23 @@ specified elsewhere in this document — this section changes none of those
 obligations. A Business or Platform **MAY** omit the member at every other
 eligible structured scope. Dictionary containers are not eligible scopes and
 carry no protocol-namespace obligation. Conformance to the vocabulary is
-defined by this specification's processing rules, not by instance validation,
-which treats ambient `ucp` members as ignored unknown objects.
+defined by this specification's processing rules, not by ordinary instance
+validation against open UCP source schemas; that validation treats ambient
+`ucp` members as ignored unknown objects.
 
 **Vocabulary applicability.** Each registered protocol-namespace member defines
 the document contexts and message directions where it applies.
 
-**Schema processing.** UCP schemas are open by default. Ordinary JSON Schema
-validation accepts an undeclared ambient `ucp` at an eligible structured scope
-without applying UCP vocabulary rules; UCP-aware tooling **SHOULD** recognize
-and apply `ucp.json#/$defs/members`. A UCP-aware strict validator **MUST**
-allow and validate the member, even when rejecting other unknown domain fields.
-A non-UCP-aware strict validator may reject it; this is an accepted
-compatibility limit.
+**Schema processing.** UCP source schemas are open by default, so ordinary
+validation against them may accept ambient `ucp` without applying the protocol
+vocabulary. For a selected message direction, a UCP-aware resolver **MUST**
+produce a resolved schema that recognizes and validates ambient `ucp` at every
+eligible structured scope against the central vocabulary in
+`ucp.json#/$defs/members`, subject to that vocabulary's applicability in the
+selected direction. The `ucp` namespace remains open to unrecognized members
+for forward compatibility, even if the resolved schema rejects other unknown
+domain fields. The result is ordinary JSON Schema that standard validators and
+code generators can consume.
 
 #### `map_order`
 
