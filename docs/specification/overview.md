@@ -1469,14 +1469,17 @@ and the Web Bot Auth interop signature shape, see
 
 #### Hosting
 
-Both profiles must be reliably hosted. An unreliable or misconfigured
-profile endpoint may prevent the other party from processing requests.
+Profiles, and the schema and transport-description artifacts they reference,
+must be reliably hosted. An unreliable or misconfigured endpoint may prevent
+the other party from processing requests.
 
-1. Profiles **MUST** be served over HTTPS.
+1. Published artifacts **MUST** be served over HTTPS.
 2. Profile endpoints **MUST NOT** use redirects (3xx).
-3. Profile responses **MUST** include a `Cache-Control` header with
-   `public` and `max-age` of at least 60 seconds. Profiles **MUST NOT**
-   be served with `private`, `no-store`, or `no-cache` directives.
+3. Published artifacts **MUST** include a `Cache-Control` header with
+   `public` and `max-age` of at least 60 seconds, and **MUST NOT** be
+   served with `private`, `no-store`, or `no-cache` directives.
+4. Published artifacts **SHOULD** include a validator (`ETag` or
+   `Last-Modified`) so consumers can revalidate cached copies efficiently.
 
 Profiles represent a party's stable identity and capabilities. Profile
 URLs are expected to remain consistent across requests and not contain
@@ -2909,9 +2912,27 @@ defects that compromise the security, correctness, or interoperability of the
 release as published, and following the breaking-change notice process. UCP
 **MUST** re-certify the snapshot before publishing any updated artifacts.
 
+A dated release works like a long-term-support channel: the date names a
+compatibility line, and backported changes amend the published `D` snapshot in
+place — `D` stays the same while its contents change, so parties that fetched
+at different times can hold different copies of the same `D`. This skew is
+safe by construction: backports default to the backwards-compatible class, so
+an earlier copy is missing later additions, never in conflict with them.
+Parties that fetch artifacts at runtime **SHOULD** follow standard HTTP
+caching semantics, revalidating a cached copy once its `max-age` expires (see
+[Hosting](#hosting)); refresh frequency is therefore controlled by the
+publisher. Parties that consume artifacts at build time pick up amendments on
+their own release cadence. An exceptional breaking backport
+is announced through the breaking-change notice process and enforced at
+request time by the amended contract; it invalidates earlier copies only
+because the release was defective as published.
+
 A Business or Platform that selects `ucp.version` `D` **MUST** declare version
 `D` on every `dev.ucp.*` service, capability, and extension entry in its
-profile. An older release is selected only through a separate
+profile. A Platform that encounters a `dev.ucp.*` entry whose `version`
+differs from the profile's `ucp.version` **MUST** reject that entry — treated
+as not present and never activated — and **MAY** continue with the remaining
+entries. An older release is selected only through a separate
 `supported_versions` leaf profile whose own `ucp.version` is that older release
 date (see [Protocol Version](#protocol-version)). Payment-handler versions are
 controlled by their authors: UCP defines the shared declaration structure but

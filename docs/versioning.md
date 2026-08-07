@@ -38,3 +38,6 @@ re-certifies the snapshot before publishing the updated artifacts.
 * Breaking changes should include `!` in the PR title
 * Timing: We will announce the breaking change in Discussions 2 weeks
   before the change is merged.
+* Security-sensitive fixes are the exception: the Governance Council sets
+  the disclosure timeline case by case, so a fix is not announced before it
+  is safe to disclose.

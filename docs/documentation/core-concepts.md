@@ -446,7 +446,8 @@ snapshot of the core protocol — its services and transport bindings,
 capabilities, extensions, and shared schemas — published together as one
 internally compatible set. A profile's `ucp.version` selects that snapshot, and
 the match is exact: an older date is available only when the Business
-advertises it in `supported_versions`.
+advertises it in `supported_versions`. A published snapshot can gain approved
+backwards-compatible additions over time; copies fetched earlier remain valid.
 
 Every UCP-defined service, capability, and extension in release `D` declares
 version `D`. Third-party extensions and payment handlers are versioned by their
