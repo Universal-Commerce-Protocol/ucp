@@ -971,7 +971,7 @@ class UcpApp {
             req.buyer.email = "test@example.com";
             req.buyer.name = "Test User";
         } else {
-            req.fulfillment.methods = [{ type: 'shipping', destinations: [{ id: "addr_1", street: "123 Main St", city: "Tech City", country: "US", postal_code: "94103" }] }];
+            req.fulfillment.methods = [{ type: 'shipping', destinations: [{ id: "addr_1", street_address: "123 Main St", address_locality: "Tech City", address_country: "US", postal_code: "94103" }] }];
         }
     }
 
@@ -998,7 +998,7 @@ class UcpApp {
       patch.fulfillment = {
         methods: [{
             type: "shipping",
-            destinations: [{ id: "addr_1", street: "123 Main St", city: "Tech City", country: "US", postal_code: "94103" }]
+            destinations: [{ id: "addr_1", street_address: "123 Main St", address_locality: "Tech City", address_country: "US", postal_code: "94103" }]
         }]
       };
     }

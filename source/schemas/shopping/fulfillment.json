@@ -41,7 +41,7 @@
         },
         "location": {
           "type": "string",
-          "description": "The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id."
+          "description": "Stable, opaque, Business-scoped Location ID. The Business recognizes this ID when the Platform submits it for this method. Recognition does not reserve inventory or guarantee eligibility, and current terms are revalidated."
         },
         "options": {
           "type": "array",
