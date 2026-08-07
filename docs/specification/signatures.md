@@ -249,7 +249,9 @@ signing operation, one signature on the wire — that both a UCP verifier
 wanting interop with WBA-conformant verifiers; the requirements below
 apply to any signature carrying `tag="web-bot-auth"`. WBA interop is
 request-scoped: responses are signed with standard UCP signatures
-(covering `@status`) and do not carry `tag="web-bot-auth"`.
+(covering `@status` and the request binding described in
+[REST Response Signing](#rest-response-signing)) and do not carry
+`tag="web-bot-auth"`.
 
 **On the wire.** A dual-audience signature is a normal UCP signature with
 a few additions: it carries a `Signature-Agent` header **alongside**
@@ -536,17 +538,55 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 ### REST Response Signing
 
-Response signatures use `@status` instead of `@method`:
+Response signatures use `@status` instead of `@method`, and **MUST** bind
+the response to the request that produced it.
 
 **Signed Components:**
 
-| Component        | Required   | Description                       |
-| :--------------- | :--------- | :-------------------------------- |
-| `@status`        | Yes        | HTTP status code (200, 201, etc.) |
-| `content-digest` | Cond. `*`  | Body digest (if body present)     |
-| `content-type`   | Cond. `*`  | Content-Type (if body present)    |
+| Component              | Required  | Description                                     |
+| :--------------------- | :-------- | :---------------------------------------------- |
+| `@status`              | Yes       | HTTP status code (200, 201, etc.)               |
+| `@authority`;`req`     | Yes       | Request target host (binds the serving origin)  |
+| `@method`;`req`        | Yes       | Request method (binds the operation)            |
+| `@path`;`req`          | Yes       | Request path (binds the addressed resource)     |
+| `@query`;`req`         | Cond. `*` | Request query string (if the request had one)   |
+| `content-digest`;`req` | Cond. `**`| Request body digest (if the request had a body) |
+| `content-digest`       | Cond. `†` | Response body digest (if response has a body)   |
+| `content-type`         | Cond. `†` | Content-Type (if response has a body)           |
 
-* `*` Required if response has a body
+* `*` Required if the request had query parameters
+
+* `**` Required if the request had a body
+
+* `†` Required if the response has a body
+
+**Request Binding:** The `;req` parameter is
+[RFC 9421 §2.4](https://www.rfc-editor.org/rfc/rfc9421#section-2.4)
+request-response signature binding: it directs the signer and verifier to
+draw the named component from the **associated request** rather than from
+the response. Without it, a response signature covers only the response's
+own status and body, so a correctly signed response remains valid when
+detached from its request. That admits two attacks that TLS does not
+prevent when an intermediary terminates it (see the Intermediary Warning
+in [Headers](#headers)):
+
+* **Rollback / stale replay.** A signed response captured earlier is
+  replayed verbatim in answer to a later request for the same resource.
+  Every covered component still matches, so the verifier accepts a stale
+  view (an outdated `totals`, an expired `status`) as current. Inspecting
+  the body does not help: the body is a genuine, correctly signed earlier
+  state of the correct object.
+
+* **Cross-request substitution.** A signed response to one request is
+  served in answer to a different request to the same origin, since
+  neither the method, the path, nor the query was covered.
+
+**Freshness:** For signed responses the RFC 9421 `created` parameter is
+**REQUIRED**, and verifiers **MUST** reject a response whose `created` is
+outside an acceptable window. Verifiers **SHOULD** use a window of 300
+seconds and **MUST NOT** accept a `created` in the future beyond their
+tolerated clock skew. Request binding alone does not bound how long a
+captured response can be replayed against a repeated identical request.
 
 **Complete Response Example:**
 
@@ -556,11 +596,15 @@ required fields (`ucp`, `currency`, `line_items`, `totals`, `links`); see
 [Create Checkout response](checkout-rest.md#create-checkout) for the
 complete shape.
 
+The signature below answers the `POST /checkout-sessions` request shown in
+[REST Request Signing](#rest-request-signing); the `;req` components are
+drawn from that request.
+
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
 Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
+Signature-Input: sig1=("@status" "@authority";req "@method";req "@path";req "content-digest";req "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
 Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {
@@ -572,31 +616,40 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 **Response Signature Generation:**
 
-Response signing mirrors request signing with `@status` replacing `@method`:
+Response signing mirrors request signing with `@status` replacing `@method`,
+plus the `;req` components drawn from the associated request:
 
 ```text
-sign_rest_response(status, body_bytes, private_key, kid):
+sign_rest_response(status, body_bytes, request, private_key, kid):
     // 1. Compute body digest (if body present)
     if body_bytes:
         digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
         digest_header = "sha-256=:" + base64(digest) + ":"
 
-    // 2. Build signature base (RFC 9421)
+    // 2. Build component list. ";req" components come from the request
+    // this response answers (RFC 9421 section 2.4).
+    components = ["@status", "@authority;req", "@method;req", "@path;req"]
+    if request.query:  components.append("@query;req")
+    if request.body:   components.append("content-digest;req")
+    if body_bytes:     components.extend(["content-digest", "content-type"])
+
+    // 3. Build signature base (RFC 9421). created is REQUIRED on responses.
     signature_base = build_signature_base(
-        components=["@status", "content-digest", "content-type"],
+        components=components,
         status=status,
+        request=request,  // source for the ";req" components
         headers={"content-digest": digest_header, "content-type": "application/json"},
         created=current_timestamp(),
         keyid=kid
     )
 
-    // 3. Sign
+    // 4. Sign
     signature = sign(signature_base, private_key)  // ecdsa for EC, eddsa for OKP
 
-    // 4. Return headers
+    // 5. Return headers
     return {
         "Content-Digest": digest_header,
-        "Signature-Input": 'sig1=("@status" "content-digest" "content-type");created=...;keyid="..."',
+        "Signature-Input": format_signature_input(components, created, kid),
         "Signature": "sig1=:" + base64(signature) + ":"
     }
 ```
@@ -748,7 +801,7 @@ Response verification mirrors request verification with `@status` replacing
 `@method`:
 
 ```text
-verify_rest_response(response, signer_profile_url):
+verify_rest_response(response, request, signer_profile_url):
     // 1. Parse Signature-Input
     sig_input = parse_signature_input(response.headers["Signature-Input"])
     keyid = sig_input.keyid
@@ -768,12 +821,24 @@ verify_rest_response(response, signer_profile_url):
         return skip_signature("algorithm_unsupported")
 
     // 2b. Enforce covered-component requirements for responses (all regimes).
-    // No method/idempotency to bind, but the body still MUST be covered.
-    required = ["@status"]
+    // The response body MUST be covered, and the response MUST be bound to
+    // the request it answers, so it cannot be detached and replayed against
+    // a later or different request (RFC 9421 section 2.4).
+    required = ["@status", "@authority;req", "@method;req", "@path;req"]
+    if request.query:     required += ["@query;req"]
+    if request.has_body:  required += ["content-digest;req"]
     if response.has_body: required += ["content-digest", "content-type"]
     for component in required:
         if component not in components:
-            return skip_signature("signature_invalid")
+            return skip_signature("coverage_insufficient")
+
+    // 2c. Enforce freshness. created is REQUIRED on responses; a bound
+    // response can still be replayed against a repeated identical request
+    // until it ages out.
+    if sig_input.created is absent:
+        return skip_signature("signature_invalid")
+    if abs(current_timestamp() - sig_input.created) > freshness_window:
+        return skip_signature("signature_expired")  // window: 300s RECOMMENDED
 
     // 3. Verify body digest (if body present)
     if "content-digest" in components:
@@ -781,10 +846,13 @@ verify_rest_response(response, signer_profile_url):
         if response.headers["Content-Digest"] != expected:
             return skip_signature("digest_mismatch")
 
-    // 4. Reconstruct signature base
+    // 4. Reconstruct signature base. The ";req" components are taken from
+    // the request this verifier actually sent, NOT from anything the
+    // response asserts. Rebuilding from the response would be
+    // self-certifying and would not bind anything.
     signature_base = build_signature_base(
         components, response.status,
-        response.headers, keyid
+        response.headers, request, keyid
     )
 
     // 5. Verify signature
@@ -797,13 +865,19 @@ verify_rest_response(response, signer_profile_url):
 
 ### Replay Protection
 
-UCP handles replay protection at the **business layer** through idempotency keys,
-not at the signature layer. This provides separation of concerns:
+UCP handles **request** replay protection at the **business layer** through
+idempotency keys, not at the signature layer. This provides separation of
+concerns:
 
 | Layer | Responsibility |
 | :---- | :------------- |
 | **Signature** | Authentication (who), Integrity (what) |
 | **Idempotency** | Safe retries, Replay protection |
+
+Idempotency keys are a request-direction mechanism and do not protect
+responses. **Response** replay is handled at the signature layer instead,
+by the request binding and `created` freshness window specified in
+[REST Response Signing](#rest-response-signing).
 
 **How it works:**
 
@@ -847,9 +921,11 @@ modify the request payload — including retries with modified payment
 instruments, updated shipping addresses, swapped line items, or any
 other change to the request body.
 
-**Note:** For **default UCP** signatures, the RFC 9421 `created`
+**Note:** For **default UCP** *request* signatures, the RFC 9421 `created`
 parameter is **OPTIONAL** and replay protection is handled at the
-business layer through idempotency keys, not signature timestamps.
+business layer through idempotency keys, not signature timestamps. On
+*response* signatures `created` is **REQUIRED** and enforced; see
+[REST Response Signing](#rest-response-signing).
 **WBA-shape** signatures additionally carry `created`/`expires` (and
 SHOULD carry a `nonce`) for WBA verifiers; enforcing that freshness
 window is application-defined (RFC 9421 §3.2.1). See
