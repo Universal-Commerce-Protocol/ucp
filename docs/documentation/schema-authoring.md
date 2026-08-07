@@ -184,6 +184,43 @@ The same registry structure appears in three contexts with different field requi
 | Business Profile | `/.well-known/ucp` | `version`; may add `config` |
 | API Responses | Checkout/order payloads | `version` (+ `id` for handlers) |
 
+## The Reserved `ucp` Member
+
+The member name `ucp` is reserved at every UCP object scope for the protocol
+namespace — the top-level envelope is its root manifestation. See
+[The `ucp` Protocol Namespace](../specification/overview.md#the-ucp-protocol-namespace)
+for the normative rules. For schema authors this means:
+
+- **Never mint a domain field named `ucp`.** Domain schemas and extensions
+  **MUST NOT** declare a property named `ucp`; the name always denotes the
+  protocol namespace.
+- **Never declare the `ucp` member, either — with one exception, below.**
+  The member is UCP document grammar, defined centrally: any object scope
+  **MAY** carry it without the domain schema saying so, just as no schema
+  declares the name reservation.
+  Domain schemas and extensions do not add a `ucp` property. Instance
+  validation treats an ambient `ucp` member as an ignored unknown object;
+  validating its contents is a conformance-tooling concern.
+- **The vocabulary grows only in UCP core.** New protocol members are added
+  in `ucp.json#/$defs/members`, never in domain or extension schemas, and a
+  member is admitted only if it is safe to ignore — a consumer that does not
+  process it loses only that member's benefit, never correctness. The
+  container is open for forward compatibility with future UCP versions, not
+  as an extension point.
+- **Registry maps can never host `ucp`.** Registry keys are constrained by
+  `propertyNames` to reverse-domain names, which rejects `ucp` by
+  construction. This is why structural metadata about a map — such as
+  `map_order` — sits in the parent scope's protocol namespace rather than
+  inside the map itself.
+- **Closed objects must declare `ucp` explicitly.** Closing an object does
+  not exempt it from the protocol grammar. When an object scope in a UCP
+  payload is validated with `additionalProperties: false`, its schema
+  **MUST** declare an optional `ucp` property referencing
+  `ucp.json#/$defs/members` so the ambient member remains representable
+  there. This is the one exception to the never-declare rule above — and
+  one more reason to leave objects open (see
+  [Open Objects](#open-objects-additionalproperties)).
+
 ## The Entity Pattern
 
 All capabilities, services, and handlers extend a common `entity` base schema:
@@ -402,10 +439,7 @@ Marking an object as closed preemptively prevents any future non-breaking additi
 protocol, what would otherwise be a backward-compatible field addition (e.g., adding a "gift_message" field to an order)
 becomes a breaking change for any client validating against a closed schema.
 
-By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare
-circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity), security-critical
-payloads (where unknown fields may indicate tampering), or protocol envelopes (where strictness is useful to catch
-typos in core metadata like the `ucp` block).
+By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity) or security-critical payloads (where unknown fields may indicate tampering). The `ucp` protocol namespace itself is deliberately open (tolerant readers ignore unrecognized members); typo discipline there is an authoring-time concern, not a wire-validation one.
 
 **Anti-Pattern (Prevents adding new fields without a reversion):**
 
@@ -432,6 +466,73 @@ object fields:
   debugging and good behavior.
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
   Implementers should accept and process them as a no-op.
+
+## The `request_constraints` Protocol Member
+
+Canonical placement, correspondence, lifecycle, and evaluation behavior is
+defined in
+[Request Constraints](../specification/overview.md#request-constraints). This
+section defines how schema authors encode and adopt that behavior.
+
+### Namespace and encoding
+
+`request_constraints` is a response-only protocol member centrally registered
+in `ucp.json#/$defs/members`. Host domain schemas do not declare it. Its
+containing `ucp` object follows [The Reserved `ucp` Member](#the-reserved-ucp-member),
+including the rule that a closed host object explicitly declares an optional
+`ucp` property referencing `ucp.json#/$defs/members`. That declaration admits
+the centrally registered vocabulary; the host schema does not add an individual
+`request_constraints` property. Businesses and Platforms **MUST NOT** publish
+`ucp.request_constraints` in discovery profiles, and Platforms **MUST NOT**
+include it in requests.
+
+The shared `schemas/common/types/request_constraints.json` type has two closed
+constraint positions:
+
+| Position | Executable keywords | Inert members | Shape |
+| :-- | :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `title`, `description`, `$comment` | Closed |
+| Value Constraint | `enum`, `const` | None | Closed |
+
+At an Object Constraint position, `required` is an array of unique strings and
+`properties` maps request field names to Object or Value Constraints. An empty
+Object Constraint is a valid no-op. Optional string `title` and `description`
+members provide Business-authored display text that a Platform **MAY** present;
+they never affect validity.
+
+`$comment` is separately permitted as an inert string. JSON Schema
+[Core §8.3](https://json-schema.org/draft/2020-12/json-schema-core#section-8.3)
+defines it as a reserved comment location that does not produce an annotation
+result. It is not display text and does not affect validity.
+
+At a Value Constraint position, `enum` is a non-empty array of values unique
+under JSON Schema equality and `const` is any JSON value. At least one is
+present, and both apply when both are present. No other member is valid.
+
+### Adoption requirements
+
+For each adoption, document:
+
+- the authoritative Business response scopes eligible to carry
+  `ucp.request_constraints`;
+- the parent logical object's corresponding representation in a later request;
+- the target operation and operation-specific request schema; and
+- the lifecycle under which a later authoritative representation supersedes an
+  earlier one and omission removes the constraint.
+
+The `ucp` object containing `request_constraints` annotates its parent logical
+object, and the documented correspondence identifies that object's
+representation in the later request. Central registration supplies the protocol
+member at every eligible scope; host domain schemas do not redeclare it.
+
+Ensure that names in `required` and under `properties` exist at the
+corresponding level of the intended composed, operation-specific request schema.
+Before emission, a Business **MUST** validate the fragment against the shared
+type and **MUST** ensure that every target name is valid in the actual composed
+request schema. A Platform that chooses to evaluate the fragment **MUST** perform
+the same checks first. A composed extension field is a valid target; a field
+omitted from that request by `ucp_request`, including a response-only field, is
+not.
 
 ## Extension-Declared Action Types
 

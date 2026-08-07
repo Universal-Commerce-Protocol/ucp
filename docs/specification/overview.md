@@ -31,6 +31,251 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
+## Request Constraints
+
+A static UCP request schema describes the inputs a Business generally accepts,
+but a Business can accept a narrower set for one transaction. For example, an
+agreed Line Item can be available only at quantity `100`, or a selected payment
+path can require `billing_address` even though the general request shape does
+not.
+
+`request_constraints` carries that transaction-specific restriction at
+`ucp.request_constraints`. It is a response-only protocol member registered in
+`ucp.json#/$defs/members`. Its value is the shared
+[Request Constraints](site:schemas/common/types/request_constraints.json) type,
+a bounded JSON Schema Draft 2020-12 fragment. The enclosing `ucp` object is the
+ambient protocol namespace; see [The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)
+for its general rules. Businesses and Platforms **MUST NOT** publish
+`ucp.request_constraints` in discovery profiles, and Platforms **MUST NOT**
+include it in requests.
+
+### Guidelines
+
+#### Business
+
+A Business **MAY** emit `ucp.request_constraints` only in an authoritative
+response scope that has a corresponding representation in a later request.
+When it does, the Business **MUST** emit a fragment that conforms to the shared
+Request Constraints type and **MUST** enforce it.
+
+#### Platform
+
+A Platform **MAY** use `ucp.request_constraints` to form or validate the
+corresponding request input and to present its display text. A Platform **MAY**
+instead ignore `ucp.request_constraints`. Doing so loses only early request
+formation, validation, and display benefits. Business validation remains
+authoritative, so correctness does not depend on Platform processing.
+
+### Correspondence and lifecycle
+
+The `ucp` object containing `request_constraints` annotates its parent logical
+object. The fragment applies to that object's corresponding representation in
+the later request, not to the response representation that carries it. The
+request representation can have a different shape because response-only fields
+are omitted by `ucp_request`. When existing operation semantics do not already
+establish the correspondence, the adopting contract defines the corresponding
+request representation, target operation, and operation-specific request
+schema.
+
+For the same logical object, a later authoritative representation supersedes an
+earlier one. If the later representation omits `ucp.request_constraints`, the
+earlier constraint is removed.
+
+### Constraint language
+
+This Cart response shows a transaction-specific constraint in context. The
+Business offers the Line Item only as the negotiated lot of `100`:
+
+<!-- ucp:example schema=shopping/cart op=read direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}"
+  },
+  "id": "cart_123",
+  "line_items": [
+    {
+      "id": "line_123",
+      "item": {
+        "id": "sku_123",
+        "title": "Bulk screws",
+        "price": 1200
+      },
+      "quantity": 100,
+      "totals": [
+        {"type": "subtotal", "amount": 120000},
+        {"type": "total", "amount": 120000}
+      ],
+      "ucp": {
+        "request_constraints": {
+          "title": "Contract quantity",
+          "description": "This item is available only in the negotiated quantity.",
+          "properties": {
+            "quantity": {
+              "const": 100
+            }
+          }
+        }
+      }
+    }
+  ],
+  "currency": "USD",
+  "totals": [
+    {"type": "subtotal", "amount": 120000},
+    {"type": "total", "amount": 120000}
+  ]
+}
+```
+
+The static Line Item schema accepts many positive quantities. For this response,
+`properties` selects `quantity` in the corresponding request Line Item and
+`const` narrows its accepted value to `100`. `title` and `description` are
+optional display text and do not affect validity.
+
+The root is an **Object Constraint**. Under its `properties` member, each named
+field maps to another Object Constraint or to a **Value Constraint**. Both
+positions are closed:
+
+| Position | Executable members | Inert members | Shape and behavior |
+| :-- | :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `title`, `description`, `$comment` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. An empty Object Constraint is a valid no-op. |
+| Value Constraint | `enum`, `const` | None | `enum` is a non-empty array of values unique under JSON Schema equality. `const` is any JSON value. At least one is present; when both appear, both apply. |
+
+A Platform **MAY** present Business-authored `title` and `description` text;
+neither member affects validity. `$comment` is an inert JSON Schema
+Core comment string, not display text, and does not affect validity.
+
+A Business **MUST** validate each fragment against the shared closed shape
+before emitting it. The Business **MUST** also ensure that every field name in
+`required` or under `properties` exists at the corresponding level of the
+actual composed, operation-specific request schema. A response-only field is
+not a valid target. A Business **MUST NOT** emit an invalid fragment.
+
+A Platform that chooses to evaluate a fragment **MUST** perform those checks
+first. If the fragment is invalid or cannot be processed safely, the Platform
+**MAY** ignore it and rely on Business validation. The Platform **MUST NOT**
+partially interpret a fragment.
+
+A Business **MUST** apply implementation-defined resource limits when validating
+a fragment before emission and when enforcing it. The Business **MUST** bound
+encoded size, nesting depth, node and member counts, and equality work such as
+checking `enum` uniqueness. If it cannot validate a fragment within those
+limits, the Business **MUST NOT** emit it. A Platform that chooses to evaluate a
+fragment **MUST** apply equivalent local limits. If a limit is exhausted, the
+Platform **MAY** ignore the fragment and rely on Business validation; it **MUST
+NOT** partially interpret the fragment.
+
+### Validation and evaluation
+
+A Business **MUST** validate the corresponding submitted representation against
+both the resolved request schema and the fragment, and **MUST** reject the
+representation if either validation fails. A Platform **MAY** perform the same
+two validations before submission.
+
+If `S` is the resolved request schema and `C` is the fragment, applying `C`
+alongside `S` is validity-equivalent to `{ "allOf": [S, C] }`; an implementation
+does not need to materialize a combined schema.
+
+The containing operation's existing outcomes and error contract apply.
+`request_constraints` defines no new outcome or error code.
+
+### Examples
+
+#### Locked negotiated discount codes
+
+This Checkout response has the Discount extension active. Its fragment locks
+the negotiated business-to-business discount-code array in the corresponding
+Checkout update.
+
+<!-- ucp:example schema=shopping/discount def=dev.ucp.shopping.checkout op=update direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {"version": "{{ ucp_version }}"}
+      ],
+      "dev.ucp.shopping.discount": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    },
+    "payment_handlers": {},
+    "request_constraints": {
+      "required": ["discounts"],
+      "properties": {
+        "discounts": {
+          "required": ["codes"],
+          "properties": {
+            "codes": {"const": ["ACME-X7Q9-L2M4"]}
+          }
+        }
+      }
+    }
+  },
+  "id": "checkout_123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "line_123",
+      "item": {
+        "id": "sku_123",
+        "title": "Bulk screws",
+        "price": 1200
+      },
+      "quantity": 24,
+      "totals": [
+        {"type": "subtotal", "amount": 28800},
+        {"type": "total", "amount": 28800}
+      ]
+    }
+  ],
+  "totals": [
+    {"type": "subtotal", "amount": 28800},
+    {"type": "total", "amount": 28800}
+  ],
+  "links": [
+    {
+      "type": "terms_of_service",
+      "url": "https://business.example/terms"
+    }
+  ],
+  "discounts": {
+    "codes": ["ACME-X7Q9-L2M4"]
+  }
+}
+```
+
+Because `discounts.codes` exists in the resolved Checkout update schema when the
+Discount extension is active, it is a valid target. UCP centrally registers
+`request_constraints`; the Discount schema does not declare it.
+
+#### Billing address on a submitted card instrument
+
+In this example, a Business emits `ucp.request_constraints` on an available
+card instrument to require a field on the corresponding submitted card
+instrument:
+
+<!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
+```json
+{
+  "type": "card",
+  "ucp": {
+    "request_constraints": {
+      "required": ["billing_address"]
+    }
+  }
+}
+```
+
+The adopting payment-handler contract defines the corresponding submitted
+instrument and its target request schema. The available instrument remains
+availability metadata; `request_constraints` applies to the submitted
+instrument. This illustration defines no card brands, credentials, availability
+or options model, or payment-resolution behavior.
+
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to
@@ -958,6 +1203,152 @@ example:
 }
 ```
 
+### The `ucp` Protocol Namespace
+
+The member name `ucp` is reserved in every UCP object scope as the **protocol
+namespace**. The top-level `ucp` member that profiles and responses carry —
+described in [Profile Structure](#profile-structure) above — is not a special
+wrapper; it is the root manifestation of this reservation: a reserved member
+of the root object. The same reservation applies at every nested object
+scope. Schema authors **MUST NOT** define a member named `ucp` in domain
+schemas or extensions.
+
+At each scope, `ucp` carries the protocol's statements about that scope:
+protocol metadata at the root (version, services, capabilities, payment
+handlers) and structural annotations such as [`map_order`](#map_order).
+
+**Openness.** The `ucp` container is open. Consumers **MUST** ignore members
+inside `ucp` that they do not recognize (tolerant reader). Openness exists so
+documents produced under a newer UCP version remain readable by older
+consumers — it is *not* extension space. Only UCP core defines members inside
+`ucp`, and extension authors **MUST NOT** place extension data there. An
+unrecognized member inside `ucp` means "defined by a newer UCP version,"
+never "extension data."
+
+**Idempotence.** Within `ucp`, protocol members appear directly: `ucp.ucp`
+never exists. Producers **MUST NOT** emit a `ucp` member inside `ucp`, and no
+UCP version will define one. Note that because the container is open, an
+errant `ucp.ucp` — like any misspelled member name — still validates as an
+unknown member that consumers ignore; schema validation does not reject such
+instances. Guarding against them is an authoring-time concern, not a
+wire-validation one.
+
+**Ambient vocabulary.** The protocol namespace is ambient: any object scope
+in a UCP payload **MAY** carry a `ucp` member, and its contents are defined
+exclusively by UCP core's vocabulary — the member is part of the UCP document
+grammar, like the name reservation itself. Guidance for schema authors on
+working within this reservation lives in the Schema Authoring Guide's
+[The Reserved `ucp` Member](/documentation/schema-authoring/#the-reserved-ucp-member)
+section. A consumer encountering a `ucp` member at any scope processes the
+members it recognizes, each per its own definition, and **MUST** ignore
+unrecognized members (see *Openness* above).
+A member is admitted to the vocabulary only if it is safe to ignore: a
+consumer that does not process it loses only that member's benefit, never
+correctness. A consumer that ignores `map_order`, for example, simply
+traverses the map unordered — the status quo before ordering existed.
+
+**Scope determines obligations.** At the root of profiles and responses, the
+`ucp` envelope additionally carries the required handshake members exactly as
+specified elsewhere in this document — this section changes none of those
+obligations. At every other scope the member is optional and its absence is
+always valid. Conformance to the vocabulary is defined by this
+specification's processing rules, not by instance validation, which treats
+ambient `ucp` members as ignored unknown objects.
+
+#### `map_order`
+
+JSON object members are unordered: member order is not guaranteed to survive
+parsing, and
+[RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
+(JSON Canonicalization Scheme), which UCP signing relies on, sorts object
+member names while preserving array element order. An array
+value is therefore the only order carrier that survives canonicalization and
+signing — and `map_order` uses one.
+
+`map_order` declares a preferred key-traversal order for sibling map-valued
+fields of its containing scope. Each key of `map_order` names a sibling map
+field; its value is an array of that map's keys in preferred traversal order.
+At the root envelope, `map_order` appears directly beside the registries it
+orders — both are protocol-namespace members. In a nested scope, it lives
+inside that scope's `ucp` member.
+
+For a sibling map field `<field>` and its companion array
+`map_order.<field>`:
+
+1. Producers **MUST NOT** rely on JSON object member order for UCP map-valued
+    registries; `map_order` is the order carrier.
+2. `map_order.<field>` contains keys from the sibling map `<field>` in
+    preferred traversal order.
+3. The order array **MAY** be partial: listed keys are traversed first, in
+    array order.
+4. Unlisted map keys remain valid and available; consumers traverse them
+    after the listed keys, using the field-defined fallback order or, if the
+    field defines none, lexicographic order.
+5. The order array is not an allowlist: consumers **MUST NOT** interpret
+    omission of a key as removal, ineligibility, or reduced support.
+6. Producers **SHOULD** list only keys present in the sibling map. Consumers
+    **SHOULD** ignore entries naming keys that are not present, and entries
+    whose target field is absent or is not a map.
+7. Duplicate keys are invalid; consumers **SHOULD** honor the first
+    occurrence of a key and ignore later duplicates.
+8. If `map_order`, or its entry for a field, is absent, no order is declared;
+    consumers **MUST NOT** fall back to object member order.
+9. A field's own specification defines what ordered traversal *means* for it
+    (presentation, negotiation priority, and so on) — `map_order` carries
+    order and nothing else.
+
+Rules 3–5 are a deliberate divergence from conventions in which unlisted keys
+are an error or are dropped: partial lists are always valid, and unlisted
+keys are always retained.
+
+A business profile ordering its payment handlers:
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": { ... },
+    "payment_handlers": {
+      "com.google.pay": [
+        { "id": "gpay", "version": "{{ ucp_version }}" }
+      ],
+      "dev.shopify.shop_pay": [
+        { "id": "shop_pay", "version": "{{ ucp_version }}" }
+      ]
+    },
+    "map_order": {
+      "payment_handlers": ["dev.shopify.shop_pay", "com.google.pay"]
+    }
+  }
+}
+```
+
+`map_order` is scope-generic — the same mechanism orders sibling maps at any
+scope, as when a business orders the identity-provider registry inside a
+capability's `config`:
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "providers": {
+    "app.example.login": [
+      {"type": "oauth2", "auth_url": "https://login.example.app"}
+    ],
+    "com.google": [
+      {"type": "oauth2", "auth_url": "https://accounts.google.com"}
+    ]
+  },
+  "ucp": {
+    "map_order": {"providers": ["app.example.login", "com.google"]}
+  }
+}
+```
+
+What an order *means* remains per-field (rule 9); the one traversal semantics
+defined today is the business's presentation preference for
+`payment_handlers` — see [Payment Handlers](#payment-handlers).
+
 ### Platform Advertisement on Request
 
 Platforms **MUST** communicate their profile URI with each request to enable
@@ -1777,6 +2168,17 @@ governing body.
 **Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on
 the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
 items, or filtering regional methods based on shipping address).
+
+**Presentation Order:** Businesses **MAY** declare a preferred presentation
+order for their advertised handlers via `map_order.payment_handlers` in their
+profile and response envelopes (see
+[The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)). The preference
+is suggestive: it communicates the business's preferred presentation —
+typically a conversion or risk judgment — and platforms **SHOULD** take it
+into account but **MAY** apply their own ordering. It is distinct from, and
+does not override, the buyer-side preference a platform submits in
+`context.payment[]` (buyer-preferred handlers, on the request side); the
+platform arbitrates between the two.
 
 **Available Instrument Resolution:** Within each active handler, both the
 platform and the business independently advertise `available_instruments` — the
