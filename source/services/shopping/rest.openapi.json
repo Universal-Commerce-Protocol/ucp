@@ -67,7 +67,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/checkout" }
+              "schema": { "$ref": "#/components/schemas/checkout_create_request" }
             }
           }
         },
@@ -212,7 +212,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/checkout" }
+              "schema": { "$ref": "#/components/schemas/checkout_update_request" }
             }
           }
         },
@@ -294,7 +294,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/checkout" }
+              "schema": { "$ref": "#/components/schemas/checkout_complete_request" }
             }
           }
         },
@@ -419,7 +419,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/cart" }
+              "schema": { "$ref": "#/components/schemas/cart_create_request" }
             }
           }
         },
@@ -500,7 +500,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/cart" }
+              "schema": { "$ref": "#/components/schemas/cart_update_request" }
             }
           }
         },
@@ -1000,6 +1000,21 @@
       },
       "ucp": {
         "$ref": "../../schemas/ucp.json"
+      },
+      "checkout_create_request": {
+        "$ref": "../../schemas/shopping/checkout.json#/$defs/create_request"
+      },
+      "checkout_update_request": {
+        "$ref": "../../schemas/shopping/checkout.json#/$defs/update_request"
+      },
+      "checkout_complete_request": {
+        "$ref": "../../schemas/shopping/checkout.json#/$defs/complete_request"
+      },
+      "cart_create_request": {
+        "$ref": "../../schemas/shopping/cart.json#/$defs/create_request"
+      },
+      "cart_update_request": {
+        "$ref": "../../schemas/shopping/cart.json#/$defs/update_request"
       },
       "catalog_search_request": {
         "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"
