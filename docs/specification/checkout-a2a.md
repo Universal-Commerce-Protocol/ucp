@@ -132,6 +132,14 @@ current `contextId` can be reused for subsequent interactions.
 Business agents must leverage the `messageId` sent as part of the A2A `Message`
 to detect duplicate messages from platform retries.
 
+While a Checkout is `complete_in_progress`, it is frozen: the platform **MUST
+NOT** send a further checkout-modifying message (for example an `add_to_checkout`
+action, which maps to [Update Checkout](checkout.md#update-checkout)) for that
+Checkout. If the business agent receives such a message in that state, it **MUST**
+leave the Checkout unchanged and return the current Checkout with a recoverable
+error Message. This matches the `complete_in_progress` freeze the other transport
+bindings state for Update Checkout.
+
 ## Checkout Functionality
 
 The Checkout capability allows consumers to manage items in a checkout session
