@@ -52,6 +52,11 @@ Businesses advertise MCP transport availability through their UCP profile at
         "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
+      }],
+      "dev.ucp.shopping.catalog.list": [{
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/list",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_list.json"
       }]
     },
     "payment_handlers": {}
@@ -100,6 +105,7 @@ version compatibility checking and capability negotiation.
 | `search_catalog` | [Search](search.md) | Search for products. |
 | `lookup_catalog` | [Lookup](lookup.md) | Lookup one or more products or variants by identifier. |
 | `get_product` | [Lookup](lookup.md#get-product-get_product) | Get full product detail by identifier. |
+| `list_catalog` | [List](list.md) | Paginate through the full product catalog. |
 
 ### `search_catalog`
 
