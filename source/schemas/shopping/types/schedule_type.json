@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/schedule_type.json",
+  "title": "Schedule Type",
+  "description": "Classifies timing for entities such as orders, payments, and fulfillment. 'immediate' refers to immediate capture/fulfillment, 'deferred' refers to future scheduled events.",
+  "type": "string",
+  "examples": ["immediate", "deferred"]
+}
