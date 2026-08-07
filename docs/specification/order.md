@@ -87,6 +87,24 @@ Expectations can be split, merged, or adjusted post-order. For example:
   (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
   `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
+### Payment
+
+**Payment** describes how the order was paid, suitable for rendering on an
+order confirmation. Like the rest of the order it reflects current state, so
+it may change post-purchase (e.g. an order edit that adds or changes a tender).
+
+Each instrument reuses the base checkout
+[Payment Instrument](checkout.md#payment), adjusted for the order context:
+
+* `display` is required — it is the buyer-facing record of the tender
+* `handler_id` and selection state are absent; handler routing is a
+  Checkout processing concern, not an order property
+* Credentials are never returned in responses (see
+  [Credential Flow & PCI Scope](overview.md#credential-flow-pci-scope));
+  businesses omit `credential` on the order
+* `amount` reports the amount charged to the instrument, in the order
+  currency's minor units (ISO 4217)
+
 ### Attribution
 
 Businesses MAY surface a snapshot of the originating checkout's
@@ -145,6 +163,16 @@ else if (fulfilled == total) → "fulfilled"
 else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
+
+### Payment Instrument
+
+Each instrument represents a single tender used on the order. It uses the
+shared base Payment Instrument — handler instrument schemas extend the base
+once and apply in both Checkout and Order contexts — with `display` required
+and an order-specific `amount` reporting the charge in the order currency's
+minor units (ISO 4217).
+
+{{ schema_fields('types/payment_instrument', 'order') }}
 
 ### Expectation
 
@@ -253,6 +281,36 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
         "tracking_number": "123456789",
         "tracking_url": "https://fedex.com/track/123456789",
         "description": "Delivered to front door"
+      }
+    ]
+  },
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gift",
+        "type": "gift_card",
+        "amount": 5000,
+        "display": {
+          "description": "Gift card",
+          "last_digits": "9821"
+        }
+      },
+      {
+        "id": "pi_card",
+        "type": "card",
+        "amount": 10342,
+        "billing_address": {
+          "street_address": "123 Main St",
+          "address_locality": "Austin",
+          "address_region": "TX",
+          "address_country": "US",
+          "postal_code": "78701"
+        },
+        "display": {
+          "brand": "visa",
+          "last_digits": "4242",
+          "description": "Visa ending in 4242"
+        }
       }
     ]
   },
