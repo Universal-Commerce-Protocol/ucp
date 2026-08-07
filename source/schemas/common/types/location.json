@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location.json",
+  "title": "Location",
+  "description": "The full, rich representation of a physical business location. Builds on top of the Base Location schema to include discovery-centric details such as geographic coordinates, operating hours, timezone, and amenities.",
+  "type": "object",
+  "additionalProperties": true,
+  "allOf": [
+    { "$ref": "location_base.json" },
+    {
+      "type": "object",
+      "properties": {
+        "geo": {
+          "$ref": "geo.json",
+          "description": "Geographic coordinates for the location.",
+          "ucp_request": "omit"
+        },
+        "amenities": {
+          "type": "array",
+          "description": "Static features of the location (e.g., 'free_wifi', 'wheelchair_accessible', 'parking', 'curbside_pickup').",
+          "items": {
+            "$ref": "amenity_type.json"
+          },
+          "ucp_request": "omit"
+        },
+        "hours": {
+          "type": "array",
+          "description": "Regular weekly operating hours. Support split hours through multiple entries on the same day and overnight hours (open > close). Omission of days implies full day closures.",
+          "items": {
+            "$ref": "daily_hour.json"
+          },
+          "ucp_request": "omit"
+        },
+        "exception_hours": {
+          "type": "array",
+          "description": "Exception hours for specific dates (holidays, closures, etc.). Support split hours through multiple entries on the same day and overnight hours (open > close). For full day closures, MUST explicitly set open and close to 00:00.",
+          "items": {
+            "$ref": "exception_hour.json"
+          },
+          "ucp_request": "omit"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone identifier (e.g., 'America/New_York'). MUST be set when hours or exception_hours are present. Required for correct interpretation.",
+          "ucp_request": "omit"
+        }
+      },
+      "additionalProperties": true
+    }
+  ],
+  "if": {
+    "anyOf": [
+      { "required": ["hours"] },
+      { "required": ["exception_hours"] }
+    ]
+  },
+  "then": {
+    "required": ["timezone"]
+  }
+}

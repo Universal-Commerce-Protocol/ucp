@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/exception_hour.json",
+  "title": "Exception Hour",
+  "description": "Operating hours for a specific date range that differs from normal ones (e.g., holiday or temporary change).",
+  "type": "object",
+  "required": ["from", "through"],
+  "allOf": [
+    { "$ref": "time_interval.json" },
+    {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date",
+          "description": "An ISO 8601 date representing the start of the date range."
+        },
+        "through": {
+          "type": "string",
+          "format": "date",
+          "description": "An ISO 8601 date representing the date after the end of the date range."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human readable explanation for the exception (e.g., 'Thanksgiving')."
+        }
+      }
+    }
+  ]
+}

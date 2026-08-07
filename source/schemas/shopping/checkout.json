@@ -47,7 +47,7 @@
       }
     },
     "context": {
-      "$ref": "types/context.json",
+      "$ref": "../common/types/context.json",
       "ucp_request": {
         "create": "optional",
         "update": "optional",
@@ -55,7 +55,7 @@
       }
     },
     "signals": {
-      "$ref": "types/signals.json",
+      "$ref": "../common/types/signals.json",
       "ucp_request": "optional"
     },
     "attribution": {

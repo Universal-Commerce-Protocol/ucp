@@ -227,7 +227,7 @@ Returns the current-state snapshot of an order.
 
 ## HTTP Headers
 
-{{ header_fields('get_order', 'rest.openapi.json') }}
+{{ header_fields('get_order', 'shopping/rest.openapi.json') }}
 
 ### Specific Header Requirements
 

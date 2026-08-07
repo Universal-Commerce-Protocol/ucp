@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/time_interval.json",
+  "title": "Time Interval",
+  "description": "An open time interval with 24-hour HH:MM format.",
+  "type": "object",
+  "required": ["open", "close"],
+  "properties": {
+    "open": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+      "description": "Start time (e.g., '09:00')."
+    },
+    "close": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+      "description": "End time (e.g., '18:00')."
+    }
+  }
+}

@@ -14,10 +14,10 @@
           "description": "Free-text search query."
         },
         "context": {
-          "$ref": "types/context.json"
+          "$ref": "../common/types/context.json"
         },
         "signals": {
-          "$ref": "types/signals.json"
+          "$ref": "../common/types/signals.json"
         },
         "attribution": {
           "$ref": "types/attribution.json"

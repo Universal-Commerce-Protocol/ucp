@@ -40,12 +40,13 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 
 ## Commerce
 
-| Term                         | Acronym | Definition                                                                                                                                            |
-| :--------------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order. |
-| **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                         |
-| **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                             |
-| **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                     |
+| Term                         | Acronym | Definition                                                                                                                                                                    |
+| :--------------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.                         |
+| **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                                                 |
+| **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                                     |
+| **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                                             |
+| **Location**                 | -       | A physical entity that can be found on a map. Identified by a stable, business-scoped string (id) and referenced across UCP for user contextualization and location discovery.|
 
 ## Payments
 
