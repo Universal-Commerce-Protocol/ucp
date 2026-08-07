@@ -41,6 +41,9 @@ This enables product discovery before checkout, supporting use cases like:
   Large"), price, and availability.
 * **Price**: Price values include both amount (in minor currency units) and
   currency code, enabling multi-currency catalogs.
+* **Sale basis**: How quantity is denominated—as whole items (`each`, the
+  default) or in a unit of measure such as weight, length, area, volume, or
+  time. See [Quantities and units](../overview.md#quantities-and-units).
 
 ### Relationship to Checkout
 
@@ -52,6 +55,120 @@ Catalog responses (pricing, availability, etc.) reflect the Business's current
 terms for the given request but are not transactional commitments — checkout
 is authoritative. Responses can be session-specific and **SHOULD NOT** be
 reused across sessions without re-validation.
+
+## Sale basis and quantity units
+
+`variants[].quantity_unit` advertises a variant's sale basis before a
+transaction. The descriptor follows the shared
+[quantities and units](../overview.md#quantities-and-units) contract. Its
+absence advertises the default `each` basis; the Business advertises a
+non-`each` basis by including the descriptor.
+
+The catalog is where the Platform learns the sale basis before transacting:
+`unit` and `scale` define how quantities are denominated, and an optional
+[`increment`](../overview.md#ordering-increment) advertises the ordering
+granularity the Business sells in, letting the Platform build quantity
+steppers and validate input before submission. A Business selling bananas by
+the pound in quarter-pound multiples advertises
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
+
+The sale basis is not limited to physical measure: metered offerings —
+parking by the minute, labor by the hour — use the same descriptor (`MIN`,
+`HUR`) with the same contract.
+
+`variants[].id` identifies the purchasable variant; `quantity_unit` defines the
+denomination and granularity used to order it.
+Bananas whose `quantity_unit` is
+`{ "unit": "LBR", "scale": 2, "display_text": "lb" }` are sold in
+hundredth-of-a-pound steps, so a `quantity` of `150` represents 1.50 lb.
+
+### Distinction from unit price
+
+`quantity_unit` and a variant's [`unit_price`](#variant) answer different
+questions and are set independently:
+
+* `quantity_unit` is the **sale basis** — the unit `quantity` is counted in and
+  `price` is quoted in.
+* `unit_price` is a **display comparator** — a derived "price per standard
+  measure" (for example, per 100 mL) for shelf-style comparison. Its `measure`
+  is the packaging or content quantity of the variant and its `reference` is the
+  comparison denominator.
+
+The unit fields in `quantity_unit`, `unit_price.measure`, and
+`unit_price.reference` follow the shared
+[quantities and units](../overview.md#quantities-and-units) contract. The two
+unit-price fields use the shared measure type, so their integer `value` fields
+are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`,
+both, or neither on a variant.
+
+To keep the display comparator defined, the Business **MUST** use a positive
+integer for both `unit_price.measure.value` and `unit_price.reference.value`.
+The Business **MUST** set `unit_price.currency` equal to `price.currency`.
+Within `unit_price`, the Business **MUST** use identical values for
+`measure.unit` and `reference.unit`. The Business **MAY** use different `scale`
+values for those measures. The Business **MUST NOT** perform cross-unit or
+currency conversion as part of the unit-price calculation. Each measure
+represents its integer `value × 10^-scale` in the common unit. The Business
+**MUST** compute the comparator from `price.amount` and those scaled values:
+
+```text
+(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)
+```
+
+The Business **MUST** round the result once to the currency's minor units
+according to its pricing rules and return it as `unit_price.amount`. The
+returned `unit_price.amount` is authoritative. The Platform **MUST NOT**
+recompute it or substitute its own result.
+
+The same-unit and same-currency rules are semantic invariants. JSON Schema
+validates the corresponding fields independently and does not enforce either
+equality.
+
+For example, a 50 m cable spool sold by `each` can omit `quantity_unit` while
+carrying a `unit_price` per metre. Its `measure` can be
+`{ "value": 5000, "unit": "MTR", "scale": 2, "display_text": "m" }` and its
+`reference` can be
+`{ "value": 1, "unit": "MTR", "display_text": "m" }`. Both measures use
+`MTR`; they represent 50 m and 1 m respectively without cross-unit conversion.
+
+On transaction lines, presence marks the role: the Business **MUST** echo
+`unit_price` on any line whose pricing basis differs from its sale basis (see
+[Checkout — pricing basis](../checkout.md#quantity-and-sale-basis)). A
+catalog-only `unit_price`, like this spool's per-metre figure, is a display
+comparator; a line-level one carries the rate the charge is computed from.
+
+### Example: a good sold by weight
+
+A `get_product` response for bananas sold by the pound. The variant advertises
+`quantity_unit`
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a
+`price` of `79` — $0.79 per whole pound, sold in 0.25-lb multiples:
+
+<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}" },
+  "product": {
+    "id": "prod_bananas",
+    "title": "Bananas",
+    "description": { "plain": "Fresh bananas sold by the pound." },
+    "price_range": {
+      "min": { "amount": 79, "currency": "USD" },
+      "max": { "amount": 79, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "description": { "plain": "Fresh bananas sold by the pound." },
+        "price": { "amount": 79, "currency": "USD" },
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 },
+        "availability": { "available": true }
+      }
+    ]
+  }
+}
+```
 
 ## Shared Entities
 
