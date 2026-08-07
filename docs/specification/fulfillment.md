@@ -197,7 +197,7 @@ human-readable fields that platforms render directly.
 
 **For `options[].description`:**
 
-* **MUST NOT** repeat `title` or `total`—provides supplementary context only
+* **MUST NOT** repeat `title` or pricing already conveyed in `totals`—provides supplementary context only
 * **SHOULD** include timing, carrier, or other decision-relevant details
 * **SHOULD** be a complete phrase (e.g., "Arrives Dec 12-15 via FedEx")
 * **MAY** be omitted if title is self-explanatory
@@ -220,7 +220,8 @@ human-readable fields that platforms render directly.
 
 Platforms **SHOULD** treat fulfillment as a generic, renderable structure:
 
-* Render each option as a card using `title`, `description`, and `total`
+* Render each option as a card using `title`, `description`, and pricing from `totals`
+* Present options in the order provided by the business
 * Present all methods returned—method selection is a buyer decision
 * Preserve the method and option structure—do not merge or de-duplicate;
     the platform chooses ordering
@@ -229,7 +230,7 @@ Platforms **SHOULD** treat fulfillment as a generic, renderable structure:
 Platforms **MAY** provide enhanced UX for recognized method types (store
 selectors
 for pickup, carrier logos for shipping), but this is optional. The baseline
-contract is: **`title` + `description` + `total` is sufficient to render any
+contract is: **`title` + `description` + `totals` together are sufficient to render any
 option.**
 
 When a buyer selects an option the platform cannot fully process, the
