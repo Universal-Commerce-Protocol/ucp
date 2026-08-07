@@ -42,6 +42,13 @@ repos:
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
         stages: [pre-commit, pre-push]
+      - id: ap2-mandate-pattern-tests
+        name: AP2 checkout_mandate pattern unit tests
+        entry: python3 scripts/test_ap2_mandate_pattern.py
+        language: system
+        pass_filenames: false
+        files: ^(source/schemas/shopping/ap2_mandate\.json|scripts/test_ap2_mandate_pattern\.py)$
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
