@@ -8,6 +8,8 @@
     "identity_optional",
     "signal",
     "free_shipping",
-    "not_found"
+    "not_found",
+    "wallet_state_required",
+    "wallet_state_optional"
   ]
 }
