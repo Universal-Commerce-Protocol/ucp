@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/product_addons.json",
+  "name": "dev.ucp.shopping.product_addons",
+  "title": "Product Addons Extension",
+  "description": "Extends Cart and Checkout with product addon selection on line items, allowing shoppers to select and change product addons (e.g., Warranty, Engraving, Gift Wrapping) at checkout time.",
+  "$defs": {
+    "addon_choice": {
+      "title": "Addon Choice",
+      "description": "A purchasable addon choice with availability and line item totals showing the cost if this addon were selected.",
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Addon item identifier. Used as selected_choice_id to select this choice."
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title (e.g., '2-Year Extended Warranty', 'Custom Text Engraving')."
+        },
+        "image_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Addon image URI."
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Whether this is the default selection for the addon when the platform does not specify a selected_choice_id."
+        },
+        "totals": {
+          "type": "array",
+          "items": {
+            "$ref": "types/total.json"
+          },
+          "description": "Totals for this specific addon choice. Enables the platform to display the addon cost and compute price differences between choices."
+        }
+      }
+    },
+    "item_addon": {
+      "title": "Item Addon",
+      "description": "A product addon on a line item with the current selection and available choices.",
+      "type": "object",
+      "required": ["name", "selected_choice_id"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Addon name (e.g., 'Warranty', 'Engraving', 'Gift Wrapping')."
+        },
+        "selected_choice_id": {
+          "type": "string",
+          "description": "ID of the selected addon choice. On create, may be omitted to let the server select the default. Always present in responses.",
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional"
+          }
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/addon_choice"
+          },
+          "minItems": 1,
+          "description": "Available addon choices with pricing and availability.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "item": {
+      "title": "Item with Product Addons",
+      "description": "Item extended with product addon selections.",
+      "allOf": [
+        {
+          "$ref": "types/item.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "addons": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_addon"
+              },
+              "description": "Product addon selections for this item. When present, the server resolves pricing based on the product and selected addons. May be omitted on create — the server returns addons with default selections in the response.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "line_item": {
+      "title": "Line Item with Product Addons",
+      "description": "Line item with product addon support on the item.",
+      "allOf": [
+        {
+          "$ref": "types/line_item.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "item": {
+              "$ref": "#/$defs/item"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Product Addons",
+      "description": "Checkout extended with product addon selection on line items.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line_item"
+              },
+              "ucp_request": {
+                "create": "required",
+                "update": "required",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Product Addons",
+      "description": "Cart extended with product addon selection on line items.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line_item"
+              },
+              "ucp_request": {
+                "create": "required",
+                "update": "required"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
