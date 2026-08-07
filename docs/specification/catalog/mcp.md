@@ -117,6 +117,11 @@ Maps to the [Catalog Search](search.md) capability.
   'catalog_search.json#/$defs/search_response', 'catalog/mcp'
 ) }}
 
+When the request cannot be served, the tool returns a successful JSON-RPC
+result carrying the standard error envelope (`ucp.status: "error"` with
+`messages`) instead of a search response payload, mirroring
+[Product Not Found](#product-not-found) for `get_product`.
+
 #### Search Example
 
 === "Request"
@@ -276,6 +281,11 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 {{ extension_schema_fields(
   'catalog_lookup.json#/$defs/lookup_response', 'catalog/mcp'
 ) }}
+
+When the request cannot be served, the tool returns a successful JSON-RPC
+result carrying the standard error envelope (`ucp.status: "error"` with
+`messages`) instead of a lookup response payload, mirroring
+[Product Not Found](#product-not-found) for `get_product`.
 
 #### Lookup Example
 
