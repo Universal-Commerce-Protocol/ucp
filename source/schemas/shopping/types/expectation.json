@@ -26,9 +26,20 @@
             "description": "Line item ID reference."
           },
           "quantity": {
-            "type": "integer",
-            "minimum": 1,
-            "description": "Quantity of this item in this expectation."
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Quantity of this item in this expectation."
+              },
+              {
+                "$ref": "../../common/types/measure.json",
+                "properties": {
+                  "value": { "exclusiveMinimum": 0 }
+                },
+                "description": "The precise fractional quantity and unit of the item in this expectation."
+              }
+            ]
           }
         }
       },

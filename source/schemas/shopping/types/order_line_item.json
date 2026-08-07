@@ -20,26 +20,58 @@
       "description": "Product data (id, title, price, image_url)."
     },
     "quantity": {
-      "type": "object",
-      "required": ["total", "fulfilled"],
-      "properties": {
-        "original": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Quantity from the original checkout."
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["total", "fulfilled"],
+          "properties": {
+            "original": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Quantity from the original checkout."
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
+            },
+            "fulfilled": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Quantity fulfilled so far."
+            }
+          },
+          "description": "Quantity tracking for the line item."
         },
-        "total": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
-        },
-        "fulfilled": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Quantity fulfilled so far."
+        {
+          "type": "object",
+          "required": ["total", "fulfilled"],
+          "properties": {
+            "original": {
+              "$ref": "../../common/types/measure.json",
+              "properties": {
+                "value": { "minimum": 0 }
+              },
+              "description": "The fractional quantity and unit of the item in the original checkout."
+            },
+            "total": {
+              "$ref": "../../common/types/measure.json",
+              "properties": {
+                "value": { "minimum": 0 }
+              },
+              "description": "Current total active fractional quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
+            },
+            "fulfilled": {
+              "$ref": "../../common/types/measure.json",
+              "properties": {
+                "value": { "minimum": 0 }
+              },
+              "description": "Fractional quantity fulfilled so far."
+            }
+          },
+          "description": "Precise fractional tracking for the line item."
         }
-      },
-      "description": "Quantity tracking for the line item."
+      ]
     },
     "totals": {
       "type": "array",
