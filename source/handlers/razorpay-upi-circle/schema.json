@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://razorpay.com/ucp/handlers/upi-circle/schema.json",
+  "title": "Razorpay UPI Circle Handler Schema",
+  "description": "Schema for the com.razorpay.upi_circle payment handler (UPI Circle / delegated payments flow). The platform collects the secondary user's delegate VPA and submits Complete Checkout with a upi_circle instrument and credential. The business calls Razorpay, creates an order, initiates a collect request using the delegate VPA, then returns requires_escalation with a upi_circle_credential (payment reference + expiry). The buyer authorizes in their PSP app; for partial delegation the primary account holder also approves. The business confirms via webhook.",
+  "name": "com.razorpay.upi_circle",
+  "version": "{{ ucp_version }}",
+
+  "$defs": {
+    "upi_circle_instrument": {
+      "$ref": "types/upi_circle_instrument.json"
+    },
+
+    "com.razorpay.upi_circle": {
+      "payment_instrument": {
+        "title": "Razorpay UPI Circle Payment Instrument",
+        "description": "UPI Circle instrument for com.razorpay.upi_circle.",
+        "$ref": "#/$defs/upi_circle_instrument"
+      },
+
+      "platform_schema": {
+        "title": "Razorpay UPI Circle (Platform)",
+        "description": "Platform-level handler declaration for discovery.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/platform_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/platform_config.json",
+                "description": "Platform configuration for com.razorpay.upi_circle."
+              }
+            }
+          }
+        ]
+      },
+
+      "business_schema": {
+        "title": "Razorpay UPI Circle (Business)",
+        "description": "Business-level handler declaration for discovery at /.well-known/ucp.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/business_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/business_config.json",
+                "description": "Business configuration for com.razorpay.upi_circle."
+              }
+            }
+          }
+        ]
+      },
+
+      "response_schema": {
+        "title": "Razorpay UPI Circle (Response)",
+        "description": "Runtime handler configuration in checkout responses.",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/payment_handler.json#/$defs/response_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/response_config.json",
+                "description": "Runtime configuration for this handler."
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
