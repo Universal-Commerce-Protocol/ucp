@@ -16,6 +16,14 @@
     "dev.ucp.user_agent": {
       "type": "string",
       "description": "Client's HTTP User-Agent header or equivalent."
+    },
+    "dev.ucp.user_id": {
+      "type": "string",
+      "description": "A stable, opaque identifier for the user represented by the platform. MUST be consistent across sessions for the same user."
+    },
+    "dev.ucp.user_location": {
+      "$ref": "../../common/types/locality.json",
+      "description": "User's geographic location. Platforms SHOULD populate at least region & country."
     }
   },
   "additionalProperties": true
