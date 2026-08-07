@@ -109,6 +109,19 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable
 `meta["idempotency-key"]` for retry safety. Platforms **MAY** include
 additional metadata fields.
 
+### Idempotency
+
+`complete_checkout` and `cancel_checkout` are state-changing operations and
+**MUST** carry `meta["idempotency-key"]` (see [Request Metadata](#request-metadata)).
+Servers **MUST** apply the same idempotency contract as the REST binding
+([Specific Header Requirements](checkout-rest.md#specific-header-requirements)):
+store the key with the operation result, return the cached result for a duplicate
+key whose request matches the original, and treat a key reused with a mismatched
+request as a conflict. Over MCP that conflict surfaces as the JSON-RPC error the
+[error registry](overview.md#error-handling) maps from HTTP `409` (`-32000`). See
+[Message Signatures — Replay Protection](signatures.md#replay-protection) for the
+full payload-matching contract.
+
 ## Tools
 
 UCP Capabilities map 1:1 to MCP Tools.
