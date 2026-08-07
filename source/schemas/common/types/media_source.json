@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_source.json",
+  "title": "Media Source",
+  "description": "A single encoded rendition of a parent Media item — one resolution/format of a video, or one file format of a 3D model. The Platform selects the best supported source.",
+  "type": "object",
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to this rendition's file or streaming manifest."
+    },
+    "mime_type": {
+      "type": "string",
+      "description": "IANA media type of this source. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `video/mp4`, `video/webm`, `application/vnd.apple.mpegurl` (HLS), `application/dash+xml` (DASH), `model/gltf-binary` (GLB), `model/gltf+json` (glTF), `model/vnd.usdz+zip` (USDZ)."
+    },
+    "format": {
+      "type": "string",
+      "description": "Short format token for display/selection. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `mp4`, `webm`, `m3u8`, `mpd`, `glb`, `gltf`, `usdz`."
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Pixel width of this rendition (video). Omitted for adaptive manifests and 3D models."
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Pixel height of this rendition (video). Omitted for adaptive manifests and 3D models."
+    },
+    "filesize": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "File size in bytes. Lets the Platform decide whether to prefetch a large asset (e.g. a multi-megabyte 3D model). Omitted for adaptive-streaming manifests, whose total size is not fixed."
+    }
+  }
+}
