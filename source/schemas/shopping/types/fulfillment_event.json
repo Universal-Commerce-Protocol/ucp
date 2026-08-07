@@ -4,12 +4,7 @@
   "title": "Fulfillment Event",
   "description": "Append-only fulfillment event representing an actual shipment. References line items by ID.",
   "type": "object",
-  "required": [
-    "id",
-    "occurred_at",
-    "type",
-    "line_items"
-  ],
+  "required": ["id", "occurred_at", "type", "line_items"],
   "properties": {
     "id": {
       "type": "string",
@@ -59,6 +54,30 @@
     "description": {
       "type": "string",
       "description": "Human-readable description of the shipment status or delivery information (e.g., 'Delivered to front door', 'Out for delivery')."
+    },
+    "fulfillment_method_id": {
+      "type": "string",
+      "description": "References the fulfillment method selected at checkout. Matches the id in fulfillment_method."
+    },
+    "fulfillment_option_id": {
+      "type": "string",
+      "description": "References the fulfillment option selected at checkout (e.g., 'express', 'standard'). Matches the id in fulfillment_option."
+    },
+    "estimated_delivery": {
+      "type": "object",
+      "description": "Estimated delivery window. Business MAY revise as the shipment progresses.",
+      "properties": {
+        "earliest": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Earliest estimated delivery date (RFC 3339)."
+        },
+        "latest": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Latest estimated delivery date (RFC 3339)."
+        }
+      }
     }
   }
 }
