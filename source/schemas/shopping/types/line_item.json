@@ -41,6 +41,15 @@
         "create": "omit",
         "update": "optional"
       }
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Buyer-supplied free-text note for this line item (e.g., gift wrapping instructions, dietary preferences, engraving text). Business echoes the value in responses and MAY include it in order webhook payloads for downstream fulfillment.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional"
+      }
     }
   }
 }
