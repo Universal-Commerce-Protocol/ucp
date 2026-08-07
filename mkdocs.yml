@@ -58,6 +58,7 @@ nav:
           - Discounts Extension: specification/discount.md
           - Fulfillment Extension: specification/fulfillment.md
           - Loyalty Extension: specification/loyalty.md
+          - Payment Render Artifact Extension: specification/payment-render-artifact.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
           - Overview: specification/cart.md
@@ -341,6 +342,12 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/payment-render-artifact.md: >-
+              Payment Render Artifact Extension, defining an in-session, out-of-band
+              payment Action (e.g., Pix) that surfaces an inert display artifact
+              (QR image, copy-and-paste code, hosted instructions) for the
+              Platform to render without redirect or continue_url, resolved by
+              polling Get Checkout, under a strict render and trust contract.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
