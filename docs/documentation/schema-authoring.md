@@ -420,6 +420,93 @@ typos in core metadata like the `ucp` block).
 }
 ```
 
+### Constraint Objects
+
+UCP uses `constraints` objects when a declaration or response needs to narrow
+what is acceptable without changing the base payload schema. Constraints are sparse runtime requirements on an already-typed target.
+UCP defines three composable primitive constraints:
+
+| Primitive | Target | Built-in vocabulary |
+| :-------- | :----- | :------------------ |
+| [`ObjectConstraint`](site:{{ ucp_version }}/schemas/shopping/types/object_constraint.json) | Object | `required` |
+| [`ValueConstraint`](site:{{ ucp_version }}/schemas/shopping/types/value_constraint.json) | Property value | `enum`, `const` |
+| [`TypeConstraint`](site:{{ ucp_version }}/schemas/shopping/types/type_constraint.json) | Typed branch | `type`, optional `constraints` |
+
+A concrete Object Constraint **MUST** extend `object_constraint.json` and define
+every supported key. The key's schema determines its meaning:
+
+- `ObjectConstraint` — recursively constrains a same-named object property.
+- `ValueConstraint` — constrains a same-named property's value.
+- `TypeConstraint` (or an array of them) — selects a typed branch.
+- Any other schema — defines a domain-specific literal operator whose semantics
+  the owning specification must document.
+
+Every name in `required` **MUST** be a property of the constrained object. The
+Object Constraint stays open so handler and extension schemas can compose with
+`allOf`; after negotiation, a key not defined by the concrete constraint schema
+is an authoring or compatibility error.
+
+This example defines all four key forms:
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+{
+  "$defs": {
+    "constraint": {
+      "allOf": [
+        { "$ref": "object_constraint.json" },
+        {
+          "properties": {
+            "billing_address": {
+              "allOf": [
+                { "$ref": "object_constraint.json" },
+                {
+                  "properties": {
+                    "address_country": { "$ref": "value_constraint.json" }
+                  }
+                }
+              ]
+            },
+            "credentials": {
+              "type": "array",
+              "items": { "$ref": "type_constraint.json" }
+            },
+            "brands": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+Its wire value remains local to the constrained fields:
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+{
+  "required": ["billing_address"],
+  "billing_address": {
+    "required": ["address_country"],
+    "address_country": { "enum": ["US", "CA"] }
+  },
+  "credentials": [{ "type": "token" }],
+  "brands": ["visa", "mastercard"]
+}
+```
+
+`ValueConstraint` is deliberately closed: unsupported assertions cannot be
+ignored safely. `ObjectConstraint` and `TypeConstraint.type` are extension
+points. To type-check a declaration, resolve its target and concrete constraint
+schemas, validate each key and value, and check `required` names against the
+target. Object and Value Constraints can compile into a JSON Schema overlay;
+literal domain operators are only type-checked, and their owner enforces their
+meaning. Declared constraints are an upfront minimum; dynamic requirements still
+use recoverable errors and [`message_error.path`](site:{{ ucp_version }}/schemas/common/types/message_error.json).
+
 ### Property-Count Constraints (`minProperties` / `maxProperties`)
 
 By default, UCP schemas do not set `minProperties` or `maxProperties` on
