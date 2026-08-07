@@ -542,6 +542,72 @@ HTTP 200 and the UCP envelope containing `messages`:
 }
 ```
 
+## Session Persistence
+
+!!! note "Non-normative"
+    This section provides implementation guidance and is not part of the normative specification.
+
+The cart capability defines `expires_at` but intentionally leaves session
+persistence details to implementers. The guidance below captures recommended
+patterns observed across early implementations.
+
+### Session Resumption
+
+The cart `id` is the canonical resumption handle. A buyer (or agent acting on
+their behalf) resumes a cart by providing its `id` to `GET /carts/{id}` or
+`PUT /carts/{id}`, regardless of how the cart was originally created.
+
+- **Cross-transport persistence**: A cart created over MCP SHOULD be retrievable
+  over REST, and vice versa. The cart `id` is transport-agnostic.
+- **Buyer binding** is a business decision. Some businesses scope carts to a
+  buyer identity; others (especially guest-friendly merchants) allow any session
+  with the cart `id` to resume.
+
+### Expiry Handling
+
+When a cart has expired, businesses SHOULD return a `cart_expired` error code
+rather than a generic `not_found`, so platforms can distinguish "this cart
+existed but expired" from "this cart ID was never valid":
+
+<!-- ucp:example schema=common/types/error_response op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "cart_expired",
+      "content": "Cart has expired",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+Platforms receiving a `cart_expired` error SHOULD offer to recreate the cart with
+the same items rather than silently failing. Businesses MAY implement grace
+periods (accepting updates to recently-expired carts) but this is not required.
+
+### Agent Reconnection
+
+Voice and chat agents may lose connectivity, or the buyer may return after a
+pause. The following patterns apply:
+
+- If the cart is still valid (`expires_at` in the future), the agent resumes by
+  calling `PUT /carts/{id}` with the existing cart ID.
+- If the cart has expired, the agent receives the `cart_expired` error and can
+  offer to recreate the cart with the buyer's previously selected items.
+- Agents SHOULD proactively check `expires_at` and warn the buyer when the cart
+  is close to expiring (e.g., "Your cart expires in 5 minutes, shall I complete
+  the order?").
+
 ## Security Considerations
 
 ### Authentication
