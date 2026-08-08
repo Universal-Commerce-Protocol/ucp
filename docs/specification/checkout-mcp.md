@@ -788,7 +788,7 @@ Response signatures are **OPTIONAL** for:
 HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
+Signature-Input: sig1=("@status" "@authority";req "@method";req "@path";req "content-digest";req "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
 Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"checkout_abc123","status":"completed"}}}
