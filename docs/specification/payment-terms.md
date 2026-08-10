@@ -282,9 +282,10 @@ are not projected.
 The accepted term is the agreement, not a running balance. When the Order is
 created, a Business **MUST** ensure its schedule `total` entries sum to the
 Order `total`. A Business **MUST NOT** modify the accepted term after the Order
-is created; post-purchase changes are recorded in `adjustments[]`. A refund can
-therefore leave the schedules summing to more than the Order currently owes: the
-term states what was agreed, and the adjustment states what happened after.
+is created; post-purchase changes are recorded in `adjustments[]`. The schedules
+can therefore sum to more than the Order currently owes after a refund, or less
+after an exchange: the term states what was agreed, and the adjustments state
+what happened after.
 
 {{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment_terms') }}
 
