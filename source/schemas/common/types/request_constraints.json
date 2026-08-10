@@ -2,16 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/request_constraints.json",
   "title": "Request Constraints",
-  "description": "Closed, bounded JSON Schema Draft 2020-12 fragment emitted and authoritatively enforced by the Business through registered `ucp.request_constraints` to narrow a corresponding representation in a later request.",
-  "$ref": "#/$defs/object_constraint",
+  "description": "Bounded JSON Schema Draft 2020-12 fragment emitted and authoritatively enforced by the Business through registered `ucp.request_constraints` to narrow a corresponding representation in a later request. The fragment is open: an adopting contract MAY declare additional domain constraint keys for scopes it owns by composing this schema with `allOf`.",
+  "$ref": "#/$defs/constraint",
   "$defs": {
-    "object_constraint": {
+    "constraint": {
       "type": "object",
-      "description": "A closed Object Constraint that applies standard Draft 2020-12 `required` and `properties` semantics to a corresponding submitted object.",
+      "description": "Applies standard Draft 2020-12 `required`, `properties`, `anyOf`, `enum` and `const` semantics to the corresponding submitted representation. Any other member is a domain constraint key defined by an adopting contract; a consumer that does not recognize one ignores it. Only monotonic assertions are admitted to this vocabulary, so ignoring an unrecognized member can only relax the constraint, never invert it.",
       "properties": {
         "required": {
           "type": "array",
-          "ucp_request": "omit",
           "description": "Names of fields required in the corresponding object of the later submitted representation.",
           "uniqueItems": true,
           "items": {
@@ -20,53 +19,29 @@
         },
         "properties": {
           "type": "object",
-          "ucp_request": "omit",
           "description": "Constraints for named fields of the corresponding object in the later submitted representation.",
           "additionalProperties": {
-            "oneOf": [
-              {"$ref": "#"},
-              {"$ref": "#/$defs/value_constraint"}
-            ]
+            "$ref": "#/$defs/constraint"
           }
         },
-        "title": {
-          "type": "string",
-          "ucp_request": "omit",
-          "description": "Optional short display label."
+        "anyOf": {
+          "type": "array",
+          "description": "Alternative constraints. The corresponding submitted representation MUST satisfy at least one alternative. Typed variants are discriminated by pinning a submitted discriminator field with `const` in each alternative; an alternative that pins only its discriminator accepts that variant with no further requirements.",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/constraint"
+          }
         },
-        "description": {
-          "type": "string",
-          "ucp_request": "omit",
-          "description": "Optional display explanation."
-        },
-        "$comment": {
-          "type": "string",
-          "ucp_request": "omit",
-          "description": "Inert JSON Schema Core comment."
-        }
-      },
-      "additionalProperties": false
-    },
-    "value_constraint": {
-      "type": "object",
-      "description": "A Value Constraint applies standard Draft 2020-12 `enum` and/or `const` semantics to the corresponding value in the later submitted representation. When both are present, both constraints apply.",
-      "anyOf": [
-        {"required": ["enum"]},
-        {"required": ["const"]}
-      ],
-      "properties": {
         "enum": {
           "type": "array",
-          "ucp_request": "omit",
           "description": "A non-empty set of JSON values permitted for the corresponding submitted value.",
           "minItems": 1,
           "uniqueItems": true
         },
         "const": {
-          "ucp_request": "omit"
+          "description": "The single JSON value required for the corresponding submitted value."
         }
-      },
-      "additionalProperties": false
+      }
     }
   }
 }
