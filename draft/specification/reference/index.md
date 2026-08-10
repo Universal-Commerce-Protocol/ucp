@@ -1510,7 +1510,7 @@ Full UCP metadata for platform-level configuration. Hosted at a URI advertised b
 
 | Name             | Type   | Requirement  | Description                                                                 |
 | ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | UCP version in YYYY-MM-DD format.                                           |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
 | status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | **Required** | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |
@@ -1527,7 +1527,7 @@ UCP metadata for business/merchant-level configuration. Subset of platform schem
 
 | Name               | Type   | Requirement  | Description                                                                                                                                                                                                                                                                                          |
 | ------------------ | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| version            | string | **Required** | UCP version in YYYY-MM-DD format.                                                                                                                                                                                                                                                                    |
+| version            | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                                                                                                                                                                             |
 | status             | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                                                                                                                                                                          |
 | services           | object | **Required** | Service registry keyed by reverse-domain name.                                                                                                                                                                                                                                                       |
 | capabilities       | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                                                                                                                                                                                    |
@@ -1545,7 +1545,7 @@ UCP metadata for checkout responses.
 
 | Name             | Type   | Requirement  | Description                                                                 |
 | ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | UCP version in YYYY-MM-DD format.                                           |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
 | status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | Optional     | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |
@@ -1562,7 +1562,7 @@ UCP metadata for cart responses. No payment handlers needed pre-checkout.
 
 | Name             | Type   | Requirement  | Description                                                                 |
 | ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | UCP version in YYYY-MM-DD format.                                           |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
 | status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | Optional     | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |
@@ -1577,7 +1577,7 @@ UCP metadata for catalog responses.
 
 | Name             | Type   | Requirement  | Description                                                                 |
 | ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | UCP version in YYYY-MM-DD format.                                           |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
 | status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | Optional     | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |
@@ -1592,7 +1592,7 @@ UCP metadata for order responses. No payment handlers needed post-purchase.
 
 | Name             | Type   | Requirement  | Description                                                                 |
 | ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | UCP version in YYYY-MM-DD format.                                           |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
 | status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
 | services         | object | Optional     | Service registry keyed by reverse-domain name.                              |
 | capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |

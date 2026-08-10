@@ -1802,15 +1802,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#version-discovery-and-negotiation" class="md-nav__link">
+  <a href="#versioned-profiles" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version Discovery and Negotiation
+        Versioned Profiles
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Version Discovery and Negotiation">
+    <nav class="md-nav" aria-label="Versioned Profiles">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1830,15 +1830,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#version-negotiation" class="md-nav__link">
+  <a href="#version-selection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version Negotiation
+        Version Selection
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Version Negotiation">
+    <nav class="md-nav" aria-label="Version Selection">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1947,33 +1947,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#independent-component-versioning" class="md-nav__link">
+  <a href="#component-versioning-and-release-snapshots" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Independent Component Versioning
+        Component Versioning and Release Snapshots
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Independent Component Versioning">
+    <nav class="md-nav" aria-label="Component Versioning and Release Snapshots">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ucp-capabilities-devucp" class="md-nav__link">
+  <a href="#third-party-extensions-comvendor-orgorg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        UCP Capabilities (dev.ucp.*)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#vendor-capabilities-comvendor" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Vendor Capabilities (com.{vendor}.*)
+        Third-party extensions (com.{vendor}.*, org.{org}.*)
       
     </span>
   </a>
@@ -4981,15 +4970,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#version-discovery-and-negotiation" class="md-nav__link">
+  <a href="#versioned-profiles" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version Discovery and Negotiation
+        Versioned Profiles
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Version Discovery and Negotiation">
+    <nav class="md-nav" aria-label="Versioned Profiles">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5009,15 +4998,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#version-negotiation" class="md-nav__link">
+  <a href="#version-selection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version Negotiation
+        Version Selection
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Version Negotiation">
+    <nav class="md-nav" aria-label="Version Selection">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5126,33 +5115,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#independent-component-versioning" class="md-nav__link">
+  <a href="#component-versioning-and-release-snapshots" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Independent Component Versioning
+        Component Versioning and Release Snapshots
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Independent Component Versioning">
+    <nav class="md-nav" aria-label="Component Versioning and Release Snapshots">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ucp-capabilities-devucp" class="md-nav__link">
+  <a href="#third-party-extensions-comvendor-orgorg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        UCP Capabilities (dev.ucp.*)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#vendor-capabilities-comvendor" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Vendor Capabilities (com.{vendor}.*)
+        Third-party extensions (com.{vendor}.*, org.{org}.*)
       
     </span>
   </a>
@@ -5392,21 +5370,14 @@ failure, or recovery model; and no callback, result, state, polling, or
 executor. Each concrete Action type adds only the machinery its own processing
 requires.</p>
 <h2 id="discovery-governance-and-negotiation">Discovery, Governance, and Negotiation<a class="headerlink" href="#discovery-governance-and-negotiation" title="Permanent link">&para;</a></h2>
-<p>UCP separates protocol version compatibility from capability negotiation.
-The business's profile at <code>/.well-known/ucp</code> describes capabilities for
-the protocol version it declares. Businesses that support older protocol
-versions <strong>SHOULD</strong> publish version-specific profiles and advertise them
-via the <code>supported_versions</code> field — a map from protocol version to
-profile URI, enabling platforms to discover the exact capabilities for a
-specific protocol version. Version lifecycle, including when to deprecate
-or remove older versions from <code>supported_versions</code>, is a business policy
-decision. The protocol does not prescribe a deprecation schedule.
-Capability negotiation follows a server-selects architecture where the
-business (server) determines the active capabilities from the
-intersection of both parties' declared capabilities. Both business and
-platform profiles can be cached by both parties, allowing efficient
-capability negotiation within the normal request/response flow between
-platform and business.</p>
+<p>UCP separates <a href="#protocol-version">protocol version selection</a> from
+<a href="#capability-versions">capability negotiation</a>. A Business advertises its current
+protocol version and links to profiles for older supported versions. After the
+Platform selects one exact version, the Business determines the active
+capabilities from the versions both parties advertise. Version lifecycle,
+including when to remove an older version, is a Business policy decision; UCP
+does not prescribe a deprecation schedule. Business and Platform profiles can be
+cached by both parties.</p>
 <h3 id="namespace-governance">Namespace Governance<a class="headerlink" href="#namespace-governance" title="Permanent link">&para;</a></h3>
 <p>UCP uses reverse-domain naming to encode governance authority directly into
 capability identifiers. This eliminates the need for a central registry.</p>
@@ -5661,6 +5632,14 @@ standard formats:</p>
 <li><strong>A2A</strong>: Agent Card Specification</li>
 <li><strong>EP(embedded)</strong>: OpenRPC (JSON format)</li>
 </ul>
+<p>A service is identified by its reverse-domain registry key (e.g.,
+<code>dev.ucp.shopping</code>). In a profile, services are keyed by that name, and each
+entry in <code>services[name][]</code> pairs the service with one transport binding and
+declares the service <code>version</code>: in release <code>D</code> that version is <code>D</code>. This is the
+service version, not a transport version — the binding has no separate version.
+The OpenAPI or OpenRPC artifact a binding references carries its own
+<code>info.version</code> as release metadata, not a separate version to negotiate. See
+<a href="#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a>.</p>
 <h4 id="service-definition">Service Definition<a class="headerlink" href="#service-definition" title="Permanent link">&para;</a></h4>
 <p>Full service declaration for platform-level discovery. All transports require <code>version</code>, <code>spec</code>, and <code>transport</code>. REST, MCP, and embedded additionally require <code>schema</code>.</p>
 <table>
@@ -5887,25 +5866,31 @@ deterministic schema resolution:</p>
     matching <code>$defs</code> key</li>
 </ul>
 <h5 id="version-requirements">Version Requirements<a class="headerlink" href="#version-requirements" title="Permanent link">&para;</a></h5>
-<p>Extension schemas <strong>SHOULD</strong> declare a <code>requires</code> object (alongside
-<code>name</code>, <code>title</code>, <code>description</code>) to indicate the protocol and
-capability versions required for correct operation:</p>
+<p>Extension authors <strong>SHOULD</strong> declare a <code>requires</code> object in the extension
+schema (alongside its <code>name</code>, <code>title</code>, and <code>description</code>) stating the versions
+the extension depends on. A third-party extension schema declares its own
+author-controlled <code>version</code>, which advances independently of <code>ucp.version</code>;
+a UCP-authored <code>dev.ucp.*</code> extension declares version <code>D</code> in release <code>D</code>.
+<code>requires.protocol</code> constrains the selected <code>ucp.version</code>, and
+<code>requires.capabilities</code> constrains the selected versions of the named
+capabilities:</p>
 <!-- ucp:example skip reason="schema definition" -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;$schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="p">,</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;$id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://acme.com/ucp/schemas/loyalty.json&quot;</span><span class="p">,</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.acme.shopping.loyalty&quot;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Loyalty Points&quot;</span><span class="p">,</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nt">&quot;requires&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-23&quot;</span><span class="w"> </span><span class="p">},</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;capabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="nt">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-01&quot;</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="nt">&quot;$defs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="nt">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="p">}</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-15&quot;</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Loyalty Points&quot;</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">&quot;requires&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-23&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">&quot;capabilities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">      </span><span class="nt">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-01&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">  </span><span class="nt">&quot;$defs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="nt">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>The schema author — not the profile publisher — declares version
 requirements. The profile publisher selects and advertises compatible
@@ -5922,13 +5907,16 @@ no upper bound:</p>
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Keys in <code>requires.capabilities</code> <strong>MUST</strong> be a subset of the
-extension's <code>$defs</code> keys. If <code>requires</code> is present, platforms and
-businesses <strong>MUST</strong> verify the negotiated protocol version and
-capability versions satisfy the declared constraints during schema
-resolution. Incompatible extensions are excluded from the active
-capability set (see <a href="#resolution-flow">Resolution Flow</a>). If
-<code>requires</code> is absent, the extension is assumed to be compatible
-with the versions declared by the profile.</p>
+extension's <code>$defs</code> keys. These ranges verify dependencies after exact
+versions are selected; they do not select versions. The <code>ucp.version</code> is
+fixed first by <a href="#protocol-version">profile selection</a> and capability versions
+by the <a href="#intersection-algorithm">intersection algorithm</a>; then, if <code>requires</code>
+is present, Platforms and Businesses <strong>MUST</strong> verify that the selected
+<code>ucp.version</code> and capability versions satisfy the declared constraints during
+schema resolution. Incompatible extensions are excluded from the active
+capability set (see <a href="#resolution-flow">Resolution Flow</a>). If <code>requires</code> is
+absent, the extension is assumed to be compatible with the versions declared
+by the profile.</p>
 <h4 id="schema-resolution-convention">Schema Resolution Convention<a class="headerlink" href="#schema-resolution-convention" title="Permanent link">&para;</a></h4>
 <p>To validate payloads, implementations resolve extension schemas as follows:</p>
 <ol>
@@ -6808,14 +6796,17 @@ and the Web Bot Auth interop signature shape, see
 <a href="../signatures/">Message Signatures</a>.</p>
 <h3 id="profile-requirements">Profile Requirements<a class="headerlink" href="#profile-requirements" title="Permanent link">&para;</a></h3>
 <h4 id="hosting">Hosting<a class="headerlink" href="#hosting" title="Permanent link">&para;</a></h4>
-<p>Both profiles must be reliably hosted. An unreliable or misconfigured
-profile endpoint may prevent the other party from processing requests.</p>
+<p>Profiles, and the schema and transport-description artifacts they reference,
+must be reliably hosted. An unreliable or misconfigured endpoint may prevent
+the other party from processing requests.</p>
 <ol>
-<li>Profiles <strong>MUST</strong> be served over HTTPS.</li>
+<li>Published artifacts <strong>MUST</strong> be served over HTTPS.</li>
 <li>Profile endpoints <strong>MUST NOT</strong> use redirects (3xx).</li>
-<li>Profile responses <strong>MUST</strong> include a <code>Cache-Control</code> header with
-   <code>public</code> and <code>max-age</code> of at least 60 seconds. Profiles <strong>MUST NOT</strong>
-   be served with <code>private</code>, <code>no-store</code>, or <code>no-cache</code> directives.</li>
+<li>Published artifacts <strong>MUST</strong> include a <code>Cache-Control</code> header with
+   <code>public</code> and <code>max-age</code> of at least 60 seconds, and <strong>MUST NOT</strong> be
+   served with <code>private</code>, <code>no-store</code>, or <code>no-cache</code> directives.</li>
+<li>Published artifacts <strong>SHOULD</strong> include a validator (<code>ETag</code> or
+   <code>Last-Modified</code>) so consumers can revalidate cached copies efficiently.</li>
 </ol>
 <p>Profiles represent a party's stable identity and capabilities. Profile
 URLs are expected to remain consistent across requests and not contain
@@ -7885,10 +7876,12 @@ implementation guide, and examples.</p>
 <h3 id="version-format">Version Format<a class="headerlink" href="#version-format" title="Permanent link">&para;</a></h3>
 <p>UCP uses date-based versioning in the format <code>YYYY-MM-DD</code>. This provides
 clear chronological ordering and unambiguous version comparison.</p>
-<h3 id="version-discovery-and-negotiation">Version Discovery and Negotiation<a class="headerlink" href="#version-discovery-and-negotiation" title="Permanent link">&para;</a></h3>
-<p>UCP prioritizes strong backwards compatibility. Businesses implementing a
-version <strong>SHOULD</strong> handle requests from platforms using that version or older.</p>
-<p>Both businesses and platforms declare a single version in their profiles:</p>
+<h3 id="versioned-profiles">Versioned Profiles<a class="headerlink" href="#versioned-profiles" title="Permanent link">&para;</a></h3>
+<p>UCP prioritizes strong backwards compatibility. Each profile document declares
+one core release version in <code>ucp.version</code>; its services, capabilities,
+extensions, and payment handlers also carry explicit versions. A Business
+advertises its current profile and links to profiles for older supported releases
+through <code>supported_versions</code>; see <a href="#protocol-version">Protocol Version</a>.</p>
 <h4 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h4>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="business-profile_1" name="__tabbed_2" type="radio" /><input id="platform-profile_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="business-profile_1">Business Profile</label><label for="platform-profile_1">Platform Profile</label></div>
 <div class="tabbed-content">
@@ -7918,14 +7911,13 @@ version <strong>SHOULD</strong> handle requests from platforms using that versio
 </div>
 </div>
 </div>
-<h3 id="version-negotiation">Version Negotiation<a class="headerlink" href="#version-negotiation" title="Permanent link">&para;</a></h3>
+<h3 id="version-selection">Version Selection<a class="headerlink" href="#version-selection" title="Permanent link">&para;</a></h3>
 <p><img alt="High-level resolution flow sequence diagram" src="/draft/specification/images/ucp-discovery-negotiation.png" /></p>
-<p>Version compatibility operates at two levels: the <strong>protocol version</strong>
-and <strong>capability versions</strong>. The protocol version (<code>ucp.version</code>)
-governs core protocol mechanisms — discovery, negotiation flow,
-transport bindings, and signature requirements. Capability versions
-govern the semantics of each feature independently, as defined in
-<a href="#independent-component-versioning">Independent Component Versioning</a>.</p>
+<p>Protocol version selection chooses one complete Business profile first.
+Capability negotiation then selects active capabilities and extensions by exact
+version intersection within that profile. The sections below define each step;
+see <a href="#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a>
+for release alignment and version ownership.</p>
 <h4 id="protocol-version">Protocol Version<a class="headerlink" href="#protocol-version" title="Permanent link">&para;</a></h4>
 <p>The <code>version</code> field declares the business's current protocol version.
 The profile at <code>/.well-known/ucp</code> describes the capabilities, services,
@@ -7933,9 +7925,9 @@ and payment handlers available at that version.</p>
 <p>Businesses that support older protocol versions <strong>SHOULD</strong> declare a
 <code>supported_versions</code> object mapping each older version to a profile
 URI. Each URI points to a complete, self-contained profile for that
-version — including its own capabilities, services, payment handlers,
-and signing keys. When <code>supported_versions</code> is omitted, only
-<code>version</code> is supported.</p>
+version — whose <code>ucp.version</code> equals its map key and which includes
+its own capabilities, services, payment handlers, and signing keys.
+When <code>supported_versions</code> is omitted, only <code>version</code> is supported.</p>
 <!-- ucp:example schema=profile def=business_schema -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="p">{</span>
 </span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="w">  </span><span class="nt">&quot;ucp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -7951,22 +7943,33 @@ and signing keys. When <code>supported_versions</code> is omitted, only
 <h5 id="initial-service-and-capability-discovery">Initial Service and Capability Discovery<a class="headerlink" href="#initial-service-and-capability-discovery" title="Permanent link">&para;</a></h5>
 <p>Platforms discover a business's capabilities through the following flow:</p>
 <ol>
-<li>Platform fetches <code>/.well-known/ucp</code> — this is the current version
+<li>The Platform fetches <code>/.well-known/ucp</code> — this is the current version
     profile.</li>
-<li>If the platform's protocol version matches <code>version</code>: use this
-    profile directly. Proceed to capability negotiation.</li>
-<li>If the platform's protocol version is a key in
-    <code>supported_versions</code>: fetch the profile at the mapped URI. This
-    profile describes the capabilities available at that protocol
-    version. Proceed to capability negotiation.</li>
-<li>Otherwise: the business does not support the platform's protocol
-    version. Platforms <strong>SHOULD NOT</strong> send requests with an incompatible
-    version; businesses <strong>MUST</strong> respond with a <code>version_unsupported</code>
-    error.</li>
+<li>The Platform selects a mutually supported protocol version from the
+    Business's <code>version</code> and <code>supported_versions</code> keys; Platforms <strong>SHOULD</strong>
+    prefer the most recent. If the selected version matches <code>version</code>, the
+    Platform uses this profile directly and proceeds to capability
+    negotiation.</li>
+<li>If the selected version is a key in
+    <code>supported_versions</code>: fetch the profile at the mapped URI. The
+    Platform <strong>MUST</strong> verify that the fetched profile's <code>ucp.version</code>
+    equals the <code>supported_versions</code> key it selected; on mismatch the
+    Platform <strong>MUST NOT</strong> use that profile. Otherwise this profile
+    describes the capabilities available at that protocol version —
+    proceed to capability negotiation.</li>
+<li>If no mutually supported version exists, the Business does not support
+    the Platform's protocol version. Platforms <strong>SHOULD NOT</strong> send requests
+    with an incompatible version; Businesses <strong>MUST</strong> respond with a
+    <code>version_unsupported</code> error.</li>
 </ol>
 <p>Version-specific profiles are leaf documents — they describe exactly
 one protocol version and <strong>MUST NOT</strong> contain a <code>supported_versions</code>
 field.</p>
+<p>A selected profile guarantees compatibility among its declared capabilities at
+its declared version; across versions, resource representations may differ.
+Platforms <strong>MAY</strong> run separate negotiations with the same Business at different
+supported versions, and <strong>SHOULD NOT</strong> combine or intersect capabilities across
+profiles within the same negotiation.</p>
 <h5 id="request-time-validation">Request-Time Validation<a class="headerlink" href="#request-time-validation" title="Permanent link">&para;</a></h5>
 <p>Businesses <strong>MUST</strong> validate the platform's protocol version on
 every request:</p>
@@ -8027,19 +8030,37 @@ public discovery. Such use carries no stability or compatibility
 guarantees — the underlying behavior may change at any time without
 notice.</p>
 <h4 id="capability-versions">Capability Versions<a class="headerlink" href="#capability-versions" title="Permanent link">&para;</a></h4>
-<p>Capability versions are negotiated independently of the protocol
-version. Each capability in the profile is an array. Multiple entries
-for the same capability, each with a different <code>version</code>, advertise
-support for multiple versions of that capability. The capability
-intersection algorithm considers only capability versions supported
-by both parties.</p>
+<p>Capability compatibility is established only by exact version equality, not by
+inferring compatibility from date order. Each capability in the profile is an
+array; multiple entries with different <code>version</code> values advertise support for
+multiple versions where the applicable publication policy permits it. When the
+exact shared set contains more than one version, the intersection algorithm
+orders those shared dates to select the latest one. Supported third-party
+extension versions advance independently of <code>ucp.version</code>. UCP-authored
+<code>dev.ucp.*</code> entries declare version <code>D</code> in release <code>D</code>: a profile for
+<code>ucp.version = D</code> advertises version <code>D</code> for those entries. Older <code>dev.ucp.*</code>
+versions are advertised only through <code>supported_versions</code> leaf profiles, never
+as additional entries in a newer profile: the registry mechanism supports
+multi-version arrays, but the core publication contract does not exercise them
+for <code>dev.ucp.*</code> entries. Multi-version arrays therefore arise for third-party
+extensions whose authors support multiple versions concurrently. The capability
+intersection algorithm considers only capability versions supported by both
+parties.</p>
 <p>Businesses <strong>MUST</strong> include only capabilities compatible with the
 negotiated protocol version in their response. A capability that
 depends on features introduced in a newer protocol version <strong>MUST
 NOT</strong> be included when processing at an older protocol version.</p>
 <h3 id="backwards-compatibility">Backwards Compatibility<a class="headerlink" href="#backwards-compatibility" title="Permanent link">&para;</a></h3>
+<p>UCP classifies changes as backwards-compatible or breaking and applies this
+classification to its own components to govern how a UCP release advances.
+Publication and backport policy for both classes is defined in
+<a href="#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a>.
+The lists below describe which changes preserve and which break conforming
+integrations; third-party extension and payment-handler authors control their own
+version policy and can apply the same distinction on their own cadence.</p>
 <h4 id="backwards-compatible-changes">Backwards-Compatible Changes<a class="headerlink" href="#backwards-compatible-changes" title="Permanent link">&para;</a></h4>
-<p>The following changes <strong>MAY</strong> be introduced without a new version:</p>
+<p>The following changes are <strong>backwards-compatible</strong>: they do not break conforming
+integrations.</p>
 <ul>
 <li>Adding new non-required fields to responses</li>
 <li>Adding new non-required parameters to requests</li>
@@ -8050,7 +8071,8 @@ NOT</strong> be included when processing at an older protocol version.</p>
 <li>Changing the length or format of opaque strings (IDs, tokens)</li>
 </ul>
 <h4 id="breaking-changes">Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h4>
-<p>The following changes <strong>MUST NOT</strong> be introduced without a new version:</p>
+<p>The following changes are <strong>breaking</strong>: they break conforming integrations and
+require a new component version.</p>
 <ul>
 <li>Removing or renaming existing fields</li>
 <li>Changing field types or semantics</li>
@@ -8060,23 +8082,77 @@ NOT</strong> be included when processing at an older protocol version.</p>
 <li>Modifying existing protocol flow or state machine</li>
 <li>Changing the meaning of existing error codes</li>
 </ul>
-<h3 id="independent-component-versioning">Independent Component Versioning<a class="headerlink" href="#independent-component-versioning" title="Permanent link">&para;</a></h3>
+<h3 id="component-versioning-and-release-snapshots">Component Versioning and Release Snapshots<a class="headerlink" href="#component-versioning-and-release-snapshots" title="Permanent link">&para;</a></h3>
+<p>A UCP release <code>D</code> is a snapshot of the core protocol — its services and transport
+bindings, capabilities, extensions, and shared schemas — published and certified
+together as internally compatible. Selecting <code>ucp.version</code> <code>D</code> selects that
+snapshot. For a release <code>D</code>:</p>
+<ol>
+<li><code>ucp.version</code> is <code>D</code>.</li>
+<li>Every UCP-defined service declares <code>version</code> <code>D</code>. Each service entry pairs the
+    service with one transport binding, so every entry under a service repeats
+    that service <code>version</code>; transport bindings have no separate version. The
+    referenced OpenAPI/OpenRPC artifacts are published under <code>D</code> as release
+    metadata.</li>
+<li>Every UCP-defined capability and extension declares <code>version</code> <code>D</code>, even when
+    its own schema did not change directly.</li>
+<li>Shared schemas are published as part of the same snapshot.</li>
+<li>UCP certifies the snapshot — components, bindings, and supported
+    compositions — together before publishing it.</li>
+</ol>
+<p>UCP <strong>MAY</strong> backport an approved backward-compatible change — a feature, or a
+security, correctness, or interoperability fix — to a supported release and its
+generated <code>D</code> artifacts. Breaking changes enter the next release and are not
+backported by default; in exceptional cases, the Governance Council <strong>MAY</strong>
+approve backporting a breaking change to a supported release, limited to
+defects that compromise the security, correctness, or interoperability of the
+release as published, and following the breaking-change notice process. UCP
+<strong>MUST</strong> re-certify the snapshot before publishing any updated artifacts.</p>
+<p>A dated release works like a long-term-support channel: the date names a
+compatibility line, and backported changes amend the published <code>D</code> snapshot in
+place — <code>D</code> stays the same while its contents change, so parties that fetched
+at different times can hold different copies of the same <code>D</code>. This skew is
+safe by construction: backports default to the backwards-compatible class, so
+an earlier copy is missing later additions, never in conflict with them.
+Parties that fetch artifacts at runtime <strong>SHOULD</strong> follow standard HTTP
+caching semantics, revalidating a cached copy once its <code>max-age</code> expires (see
+<a href="#hosting">Hosting</a>); refresh frequency is therefore controlled by the
+publisher. Parties that consume artifacts at build time pick up amendments on
+their own release cadence. An exceptional breaking backport
+is announced through the breaking-change notice process and enforced at
+request time by the amended contract; it invalidates earlier copies only
+because the release was defective as published.</p>
+<p>A Business or Platform that selects <code>ucp.version</code> <code>D</code> <strong>MUST</strong> declare version
+<code>D</code> on every <code>dev.ucp.*</code> service, capability, and extension entry in its
+profile. A Platform that encounters a <code>dev.ucp.*</code> entry whose <code>version</code>
+differs from the profile's <code>ucp.version</code> <strong>MUST</strong> reject that entry — treated
+as not present and never activated — and <strong>MAY</strong> continue with the remaining
+entries. An older release is selected only through a separate
+<code>supported_versions</code> leaf profile whose own <code>ucp.version</code> is that older release
+date (see <a href="#protocol-version">Protocol Version</a>). Payment-handler versions are
+controlled by their authors: UCP defines the shared declaration structure but
+currently no concrete handler, so no handler version is constrained to <code>D</code>.
+Declaring <code>version</code> <code>D</code> does not change negotiation: <code>dev.ucp.*</code>
+capabilities and extensions are still selected by exact-version intersection (see
+<a href="#capability-versions">Capability Versions</a>).</p>
+<h4 id="third-party-extensions-comvendor-orgorg">Third-party extensions (<code>com.{vendor}.*</code>, <code>org.{org}.*</code>)<a class="headerlink" href="#third-party-extensions-comvendor-orgorg" title="Permanent link">&para;</a></h4>
+<p>Third-party capabilities version independently of <code>ucp.version</code>: their authors
+control both the version and the release cadence. The common form is an
+<strong>extension</strong> over one or more UCP-defined root capabilities. A third-party
+extension:</p>
 <ul>
-<li>UCP protocol versions independently from capabilities.</li>
-<li>Each capability versions independently from other capabilities.</li>
-<li>Capabilities <strong>MUST</strong> follow the same backwards compatibility rules as the
-    protocol.</li>
-<li>Businesses <strong>MUST</strong> validate capability version compatibility using the same
-    logic as what's described above.</li>
-<li>Transports <strong>MAY</strong> define their own version handling mechanisms.</li>
+<li>declares <code>extends</code> over one or more UCP-defined root capabilities, composed
+    via <code>allOf</code> (see <a href="#extension-schema-pattern">Extension Schema Pattern</a>);</li>
+<li>uses the UCP-defined services and transport bindings selected by
+    <code>ucp.version</code>; and</li>
+<li>advertises exact extension versions in Business and Platform profiles and is
+    negotiated by exact-version intersection like every capability.</li>
 </ul>
-<h4 id="ucp-capabilities-devucp">UCP Capabilities (<code>dev.ucp.*</code>)<a class="headerlink" href="#ucp-capabilities-devucp" title="Permanent link">&para;</a></h4>
-<p>UCP-authored capabilities version with protocol releases by default. Individual
-capabilities <strong>MAY</strong> version independently when breaking changes are required
-outside the protocol release cycle.</p>
-<h4 id="vendor-capabilities-comvendor">Vendor Capabilities (<code>com.{vendor}.*</code>)<a class="headerlink" href="#vendor-capabilities-comvendor" title="Permanent link">&para;</a></h4>
-<p>Capabilities outside the <code>dev.ucp.*</code> namespace version fully independently.
-Vendors control their own release schedules and versioning strategy.</p>
+<p>A third-party extension's version is never tied to <code>ucp.version</code>. The author
+declares the UCP releases and capability versions the extension needs through
+<code>requires</code> (see <a href="#version-requirements">Version Requirements</a>); those ranges
+verify compatibility with the versions a profile selects, they do not select
+versions.</p>
 <h2 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">&para;</a></h2>
 <p>For definitions of acronyms and terms used throughout the UCP specification, see the <a href="../glossary/">Glossary</a>.</p>
 
