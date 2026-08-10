@@ -138,16 +138,19 @@ terms. A Business **MUST** return `selected_term_id` in every response. Where
 the Buyer has made no choice, the Business selects a default.
 
 When changing the selection, a Platform **MUST** set `selected_term_id` to an
-`id` from the latest `terms[]`. A Platform **MUST** omit it on create,
-because term IDs are scoped to a Checkout and no options exist yet — the create
-response establishes both the options and the default. A Business receiving a
-selection that no longer resolves — because the options changed — **MUST**
-report it in `messages[]` rather than silently substituting a term.
+`id` from the latest `terms[]`. A Platform **MUST** omit it on create, because
+term IDs are scoped to a Checkout and no options exist yet — the create response
+establishes both the options and the default. A Business receiving a selection
+that no longer resolves — because the options changed — **MUST NOT** silently
+substitute a term, and **MUST** report the change as a `payment_term_changed`
+warning in `messages[]`.
 
 Selecting a term can invalidate a selection previously accepted elsewhere in the
 Checkout — a deferred term may not be available with a same-day fulfillment
 option. The Business resolves the conflict, returns the authoritative state, and
-**MUST** report what changed in `messages[]`.
+**MUST** report the change as a `payment_term_changed` warning in `messages[]`.
+A Platform can therefore detect a changed selection from the code alone, rather
+than by comparing responses.
 
 ## Payment instruments and eligibility
 
@@ -201,12 +204,12 @@ cannot honor that contract — for example one that collapses a list of terms an
 so cannot preserve proximity for each — **MUST** escalate through `continue_url`
 rather than silently dropping the notice.
 
-An obligation disclosed at checkout does not end at checkout. Where a disclosure
-governed the term the Buyer accepted, the Business **MUST** return that
-disclosure on the Order with its `path` set to `$.payment.accepted_term`, and
-**MUST** use the same target in the `applies_to` of any policy paired with it. A
-Business **MUST NOT** return disclosures attached to terms the Buyer did not
-accept.
+An obligation disclosed at checkout does not end at checkout: it records money
+still owed, not context. Where a disclosure governed the term the Buyer
+accepted, the Business **MUST** return that disclosure on the Order with its
+`path` set to `$.payment.accepted_term`, and **MUST** use the same target in
+the `applies_to` of any policy paired with it. A Business **MUST NOT** return
+disclosures attached to terms the Buyer did not accept.
 
 `applies_to` and `path` resolve against the response they appear in, so a target
 that named the right node on the Checkout does not necessarily name it on the
@@ -273,9 +276,15 @@ terms and the selected term.
 
 ### Order Payment
 
-On the Order, `payment` carries the accepted term. A Business **MUST** ensure
-its schedule `total` entries sum to the Order `total`. The terms offered at
-checkout are not projected.
+On the Order, `payment` carries the accepted term. The terms offered at checkout
+are not projected.
+
+The accepted term is the agreement, not a running balance. When the Order is
+created, a Business **MUST** ensure its schedule `total` entries sum to the
+Order `total`. A Business **MUST NOT** modify the accepted term after the Order
+is created; post-purchase changes are recorded in `adjustments[]`. A refund can
+therefore leave the schedules summing to more than the Order currently owes: the
+term states what was agreed, and the adjustment states what happened after.
 
 {{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment_terms') }}
 
@@ -436,6 +445,21 @@ $1,200 — the sum of the selected term's two schedules. Had the Buyer selected
 the selected term is bound to the checkout total. `ucp.payment_handlers` in this
 response is the set resolved for the selected term.
 
+The deposit terms live in a policy that targets the term they apply to:
+
+<!-- ucp:example schema=shopping/checkout target=$.policies -->
+```json
+[
+  {
+    "type": "com.example.policy.deposit_forfeiture",
+    "applies_to": ["$.payment.terms[1]"],
+    "description": {
+      "plain": "The $300 deposit is non-refundable within 48 hours of arrival."
+    }
+  }
+]
+```
+
 On completion, the accepted term travels to the Order, so the Buyer can still
 see that $900 is due at check-in. The other terms do not travel, and the deposit
 disclosure moves with the term it governs:
@@ -478,21 +502,22 @@ disclosure moves with the term it governs:
   "payment": {
     "accepted_term": {
       "id": "pt_deposit_balance",
-      "title": "Reserve with a deposit",
+      "title": "First night now, balance at check-in",
+      "description": { "plain": "Hold your room with one night's rate." },
       "schedules": [
         {
-          "id": "sched_deposit",
+          "id": "sched_first_night",
           "type": "immediate",
-          "description": { "plain": "$300 deposit, charged today." },
+          "description": { "plain": "Due today when you book." },
           "totals": [{ "type": "total", "amount": 30000 }]
         },
         {
           "id": "sched_balance",
-          "type": "on_arrival",
+          "type": "deferred",
           "description": {
-            "plain": "$900 balance, charged at check-in on March 14."
+            "plain": "Due at check-in on September 1, 2026 at 3:00 PM PDT."
           },
-          "due_at": "2026-03-14T15:00:00-07:00",
+          "due_at": "2026-09-01T15:00:00-07:00",
           "totals": [{ "type": "total", "amount": 90000 }]
         }
       ]
