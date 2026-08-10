@@ -1476,15 +1476,17 @@ businesses.</p>
 <p>UCP revolves around three fundamental constructs that define how entities
 interact.</p>
 <h3 id="capabilities">Capabilities<a class="headerlink" href="#capabilities" title="Permanent link">&para;</a></h3>
-<p>Capabilities are standalone, independently versioned features that
-a business declares it supports. They are the "verbs" of the protocol —
-discrete units of functionality that platforms can discover, negotiate, and
-invoke.</p>
+<p>Capabilities are discrete, versioned features that a Business declares it
+supports. They are the "verbs" of the protocol — units of functionality that
+Platforms can discover, negotiate, and invoke.</p>
 <p>Each capability is identified by a reverse-domain name (e.g.,
 <code>dev.ucp.shopping.checkout</code>) and carries a date-based version. Capabilities
-are declared in the business's UCP profile at <code>/.well-known/ucp</code> and
-negotiated and confirmed in every response so that the platform always knows
-the active feature set for a given interaction.</p>
+are declared in the Business's UCP profile at <code>/.well-known/ucp</code>, negotiated
+by exact version, and confirmed in every response so that the Platform always
+knows the active feature set for a given interaction. UCP-authored <code>dev.ucp.*</code>
+capabilities and extensions are versioned in lockstep with the specification:
+each declares the date <code>D</code> of the UCP release it ships in. Third-party
+extensions publish versions on their own cadence.</p>
 <p>The following are examples of capabilities defined in UCP — see the
 <a href="/latest/specification/overview/">Specification</a> for the authoritative and
 up-to-date list.</p>
@@ -1583,9 +1585,9 @@ up-to-date list.</p>
 </table>
 <h3 id="services">Services<a class="headerlink" href="#services" title="Permanent link">&para;</a></h3>
 <p><strong>Services</strong> group the operations and events for a vertical under a
-reverse-domain namespace (e.g., <code>dev.ucp.shopping</code>).
-A service declares <em>what</em> functionality exists for that vertical; transport
-bindings declare <em>how</em> it is accessed on the wire.</p>
+reverse-domain registry key (e.g., <code>dev.ucp.shopping</code>). The key identifies the
+service: a service declares <em>what</em> functionality exists for that vertical, and
+each entry in its array declares <em>how</em> it is accessed over a transport binding.</p>
 <p>A single service can be accessed via multiple transport bindings:</p>
 <table>
 <thead>
@@ -1618,11 +1620,12 @@ bindings declare <em>how</em> it is accessed on the wire.</p>
 </tr>
 </tbody>
 </table>
-<p>A business declares which transport bindings it supports within each service;
-platforms pick whichever fits their context — an AI agent may prefer MCP, a
-traditional web app may use REST.</p>
-<p>Service namespaces are also UCP's extensibility mechanism for new
-verticals — e.g., <code>dev.ucp.hotels</code> may be introduced in the future.
+<p>A Business declares which transport bindings it supports within each service;
+Platforms pick whichever fits their context — an AI agent may prefer MCP, a
+traditional web app may use REST. Every UCP-defined service declares an explicit
+<code>version</code> equal to the selected <code>ucp.version</code>, repeated on every entry since they
+differ only by transport binding. Transport bindings have no separate version.</p>
+<p>Service namespaces are also UCP's extensibility mechanism for new verticals.
 Businesses opt in by declaring which services they support.</p>
 <h2 id="discovery-capability-negotiation">Discovery &amp; Capability Negotiation<a class="headerlink" href="#discovery-capability-negotiation" title="Permanent link">&para;</a></h2>
 <p>UCP uses a profile-based discovery model. Every business publishes a
@@ -1751,13 +1754,13 @@ reject entities that fail it. Identifiers carry no fetched URL, and the <code>sp
 <a href="/latest/specification/overview.md#authority-binding">Authority Binding</a> for the
 normative algorithm.</p>
 <p>The <code>dev.ucp.*</code> namespace is reserved exclusively for capabilities governed by
-the UCP Tech Council. Any vendor can define and publish capabilities under their
-own domain — <code>org.acme.*</code> — without UCP maintainer approval. Vendor
-capabilities follow the same extension model, meaning they can extend UCP base
-capabilities (e.g., <code>org.acme.loyalty</code> extending <code>dev.ucp.shopping.checkout</code>)
-or define entirely new ones. Because negotiation is always opt-in, vendor
-capabilities only activate when both parties declare them, keeping the protocol
-decentralized by design.</p>
+the UCP Tech Council responsible for the capability's domain. Any vendor can
+define and publish capabilities under their own domain — <code>org.acme.*</code> — without
+UCP maintainer approval. Vendor capabilities follow the same extension model,
+meaning they can extend UCP base capabilities (e.g., <code>org.acme.loyalty</code>
+extending <code>dev.ucp.shopping.checkout</code>) or define entirely new ones. Because
+negotiation is always opt-in, vendor capabilities only activate when both parties
+declare them, keeping the protocol decentralized by design.</p>
 <h2 id="payment-architecture">Payment Architecture<a class="headerlink" href="#payment-architecture" title="Permanent link">&para;</a></h2>
 <p>UCP decouples payment instrument acceptance from payment processing to solve
 the N-to-N complexity problem between platforms, businesses, and payment
@@ -1860,22 +1863,20 @@ loyalty benefits, personalized offers, wishlists, and authenticated checkouts.
 Businesses publish their OAuth 2.0 server metadata at
 <code>/.well-known/oauth-authorization-server</code>.</p>
 <h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h2>
-<p>UCP uses date-based version identifiers (<code>YYYY-MM-DD</code>). The version represents
-the date of the last backwards-incompatible change.</p>
-<ul>
-<li><strong>Non-breaking additions</strong> do not increment the date.</li>
-<li><strong>Breaking changes</strong> require a <code>!</code> prefix in the PR title and a 2-week
-  advance notice to the community before merging.</li>
-<li>Businesses that support older protocol versions <strong>SHOULD</strong> publish
-  version-specific profiles and advertise them via the <code>supported_versions</code>
-  field in their profile, enabling platforms to discover the exact capability
-  set for each supported version.</li>
-</ul>
-<p>Capability schemas carry their version inline, which enables independent
-versioning — a discount extension can version on a different cadence than
-the checkout capability it extends.</p>
-<p>See <a href="../../versioning/">Versioning</a> for the release branch process and the
-full breaking-change procedure.</p>
+<p>UCP uses date-based version identifiers (<code>YYYY-MM-DD</code>). A UCP release <code>D</code> is a
+snapshot of the core protocol — its services and transport bindings,
+capabilities, extensions, and shared schemas — published together as one
+internally compatible set. A profile's <code>ucp.version</code> selects that snapshot, and
+the match is exact: an older date is available only when the Business
+advertises it in <code>supported_versions</code>. A published snapshot can gain approved
+backwards-compatible additions over time; copies fetched earlier remain valid.</p>
+<p>Every UCP-defined service, capability, and extension in release <code>D</code> declares
+version <code>D</code>. Third-party extensions and payment handlers are versioned by their
+authors, independently of UCP releases.</p>
+<p>See <a href="/latest/specification/overview.md#protocol-version">Protocol Version</a> for version
+discovery, <a href="/latest/specification/overview.md#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a>
+for the normative release contract, and <a href="../../versioning/">Versioning</a> for the
+release-branch and backport process.</p>
 
 
 

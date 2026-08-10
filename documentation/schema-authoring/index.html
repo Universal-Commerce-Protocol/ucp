@@ -862,6 +862,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#ucp-services-devucp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UCP Services (dev.ucp.*)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#ucp-capabilities-devucp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -873,10 +884,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#vendor-capabilities-comvendor" class="md-nav__link">
+  <a href="#third-party-extensions-and-payment-handlers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Vendor Capabilities (com.{vendor}.*)
+        Third-Party Extensions and Payment Handlers
       
     </span>
   </a>
@@ -1542,6 +1553,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#ucp-services-devucp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UCP Services (dev.ucp.*)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#ucp-capabilities-devucp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1553,10 +1575,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#vendor-capabilities-comvendor" class="md-nav__link">
+  <a href="#third-party-extensions-and-payment-handlers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Vendor Capabilities (com.{vendor}.*)
+        Third-Party Extensions and Payment Handlers
       
     </span>
   </a>
@@ -1963,13 +1985,13 @@ the registry pattern, schema variants, and versioning.</p>
 <td><code>name</code></td>
 <td>UCP</td>
 <td>Reverse-domain identifier; doubles as registry key</td>
-<td>Capabilities, services, handlers</td>
+<td>Capabilities, extensions, payment handlers</td>
 </tr>
 <tr>
 <td><code>version</code></td>
 <td>UCP</td>
 <td>Entity version (<code>YYYY-MM-DD</code> format)</td>
-<td>Capabilities, services, payment handlers</td>
+<td>Capabilities, extensions, payment handlers</td>
 </tr>
 <tr>
 <td><code>id</code></td>
@@ -1979,14 +2001,18 @@ the registry pattern, schema variants, and versioning.</p>
 </tr>
 </tbody>
 </table>
+<p>This table lists top-level metadata embedded in published schema documents;
+profile registry declarations are covered in the sections below.</p>
 <h3 id="why-self-describing">Why Self-Describing?<a class="headerlink" href="#why-self-describing" title="Permanent link">&para;</a></h3>
-<p>Capability schemas <strong>must be self-describing</strong>: when a platform fetches a schema,
-it should determine exactly what capability and version it represents without
-cross-referencing other documents. This matters because:</p>
+<p>Capability and payment-handler schemas <strong>must be self-describing</strong>: when a
+Platform fetches a schema, it should determine exactly what entity and version
+it represents without cross-referencing other documents. This matters because:</p>
 <ol>
 <li>
-<p><strong>Independent versioning</strong>: Capabilities may version independently. The schema
-   must declare its version explicitly—you can't infer it from the URL.</p>
+<p><strong>Explicit version identity</strong>: Capabilities, extensions, and payment handlers
+   declare their version explicitly; it cannot be inferred from the URL.
+   UCP-authored <code>dev.ucp.*</code> capabilities and extensions declare version <code>D</code> in
+   each UCP release <code>D</code>. Payment handlers publish on their authors' own schedules.</p>
 </li>
 <li>
 <p><strong>Validation</strong>: Validators can cross-check that a capability declaration's
@@ -1995,12 +2021,13 @@ cross-referencing other documents. This matters because:</p>
 </li>
 <li>
 <p><strong>Developer experience</strong>: When reading a schema file, integrators immediately
-   see what capability it defines without reverse-engineering the <code>$id</code> URL.</p>
+   see what entity it defines without reverse-engineering the <code>$id</code> URL.</p>
 </li>
 <li>
 <p><strong>Compact namespace</strong>: The <code>name</code> field provides a standardized reverse-domain
    identifier (e.g., <code>dev.ucp.shopping.checkout</code>) that's more compact and semantic
-   than the full <code>$id</code> URL.</p>
+   than the full <code>$id</code> URL. Service registry keys provide the same stable
+   identity.</p>
 </li>
 </ol>
 <h3 id="why-both-id-and-name">Why Both <code>$id</code> and <code>name</code>?<a class="headerlink" href="#why-both-id-and-name" title="Permanent link">&para;</a></h3>
@@ -2039,9 +2066,10 @@ breaking capability negotiation.</p>
 <p>The <code>version</code> field uses date-based versioning (<code>YYYY-MM-DD</code>) to enable:</p>
 <ul>
 <li><strong>Capability negotiation</strong>: Platforms request specific versions they support</li>
-<li><strong>Breaking change management</strong>: New versions get new dates; old versions remain
-  valid and resolvable</li>
-<li><strong>Independent lifecycles</strong>: Extensions can release on their own schedule</li>
+<li><strong>Certified release identity</strong>: Each date identifies the entity's complete,
+  published schema closure</li>
+<li><strong>Independent author lifecycles</strong>: Third-party extensions and payment handlers
+  can release on their authors' own schedules</li>
 </ul>
 <h2 id="schema-categories">Schema Categories<a class="headerlink" href="#schema-categories" title="Permanent link">&para;</a></h2>
 <p>UCP schemas fall into six categories based on their role in the protocol.</p>
@@ -2056,7 +2084,14 @@ breaking capability negotiation.</p>
 <p>Define transport bindings that appear in <code>ucp.services{}</code> registries. Each transport
 (REST, MCP, A2A, Embedded) is a separate entry.</p>
 <ul>
-<li><strong>Top-level fields</strong>: <code>$schema</code>, <code>$id</code>, <code>title</code>, <code>description</code>, <code>name</code>, <code>version</code></li>
+<li><strong>Registry identity</strong>: Reverse-domain service name used as the registry key</li>
+<li><strong>Entry fields</strong>: <code>version</code>, <code>spec</code>, <code>schema</code>, <code>config</code>, and transport-specific fields</li>
+<li><strong>Versioning</strong>: Every service entry declares an explicit <code>version</code>; in release
+  <code>D</code> it is <code>D</code>. Because each entry pairs the service with one transport binding,
+  that service <code>version</code> repeats on each entry, and transport bindings have no
+  separate version. The referenced OpenAPI/OpenRPC artifact carries its own
+  <code>info.version</code> as artifact metadata, not a negotiated version. See
+  <a href="/latest/specification/overview.md#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a></li>
 <li><strong>Variants</strong>: <code>platform_schema</code>, <code>business_schema</code></li>
 <li><strong>Transport requirements</strong> (additional beyond the common base):<ul>
 <li>Platform profile (<code>platform_schema</code>): REST/MCP/Embedded require <code>schema</code> (OpenAPI/OpenRPC URL). A2A has no additional requirements.</li>
@@ -2126,26 +2161,30 @@ by <code>name</code> rather than arrays of objects with <code>name</code> fields
 <table>
 <thead>
 <tr>
-<th>Context</th>
-<th>Location</th>
-<th>Required Fields</th>
+<th>Registry</th>
+<th>Platform Profile</th>
+<th>Business Profile</th>
+<th>API Responses</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Platform Profile</td>
-<td>Advertised URI</td>
+<td>Services</td>
+<td><code>version</code>, <code>transport</code>, <code>spec</code>; <code>schema</code> for REST, MCP, and Embedded</td>
+<td><code>version</code>, <code>transport</code>; <code>endpoint</code> for REST, MCP, and A2A</td>
+<td><code>version</code>, <code>transport</code>; transport-specific <code>config</code> where applicable</td>
+</tr>
+<tr>
+<td>Capabilities/extensions</td>
 <td><code>version</code>, <code>spec</code>, <code>schema</code></td>
+<td><code>version</code>, <code>schema</code>; may add <code>config</code></td>
+<td><code>version</code></td>
 </tr>
 <tr>
-<td>Business Profile</td>
-<td><code>/.well-known/ucp</code></td>
-<td><code>version</code>; may add <code>config</code></td>
-</tr>
-<tr>
-<td>API Responses</td>
-<td>Checkout/order payloads</td>
-<td><code>version</code> (+ <code>id</code> for handlers)</td>
+<td>Payment handlers</td>
+<td><code>id</code>, <code>version</code>, <code>spec</code>, <code>schema</code></td>
+<td><code>id</code>, <code>version</code>; may add <code>config</code></td>
+<td><code>id</code>, <code>version</code></td>
 </tr>
 </tbody>
 </table>
@@ -2259,11 +2298,23 @@ fundamental protocol change (e.g., <code>checkout.status: open | completed | exp
 If the set might grow as new use cases emerge, use an open string with well-known
 values documented in the <code>description</code>.</p>
 <h2 id="versioning-strategy">Versioning Strategy<a class="headerlink" href="#versioning-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="ucp-services-devucp">UCP Services (<code>dev.ucp.*</code>)<a class="headerlink" href="#ucp-services-devucp" title="Permanent link">&para;</a></h3>
+<p>In each UCP release <code>D</code>, every UCP-defined service entry declares version <code>D</code>.
+See <a href="#service-schemas">Service Schemas</a> for how the flattened registry represents
+service versions and transport bindings.</p>
 <h3 id="ucp-capabilities-devucp">UCP Capabilities (<code>dev.ucp.*</code>)<a class="headerlink" href="#ucp-capabilities-devucp" title="Permanent link">&para;</a></h3>
-<p>UCP-authored capabilities version with protocol releases by default. Individual
-capabilities <strong>may</strong> version independently when needed.</p>
-<h3 id="vendor-capabilities-comvendor">Vendor Capabilities (<code>com.{vendor}.*</code>)<a class="headerlink" href="#vendor-capabilities-comvendor" title="Permanent link">&para;</a></h3>
-<p>Capabilities outside <code>dev.ucp.*</code> version fully independently:</p>
+<p>In each UCP release <code>D</code>, every UCP-defined capability and extension declares
+version <code>D</code>, even when its schema did not change directly. Declaring version <code>D</code>
+does not replace negotiation: capabilities and extensions are still selected by
+exact-version intersection.</p>
+<p>Profile selection, including profiles for older supported releases, is defined
+in <a href="/latest/specification/overview.md#protocol-version">Protocol Version</a>.</p>
+<h3 id="third-party-extensions-and-payment-handlers">Third-Party Extensions and Payment Handlers<a class="headerlink" href="#third-party-extensions-and-payment-handlers" title="Permanent link">&para;</a></h3>
+<p>Third-party extensions and payment handlers publish versions on their authors'
+own schedules. Their versions remain independent of the selected <code>ucp.version</code>
+and are not constrained to <code>D</code>. UCP's <code>payment_handler.json</code> defines the shared
+declaration shape, not a payment-handler implementation or its release cadence.</p>
+<p>Third-party extensions version independently:</p>
 <!-- ucp:example skip reason="schema authoring example" -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.shopify.loyalty&quot;</span><span class="p">,</span>
@@ -2272,7 +2323,9 @@ capabilities <strong>may</strong> version independently when needed.</p>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://shopify.dev/ucp/schemas/loyalty.json&quot;</span>
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Vendor schemas follow the same self-describing requirements.</p>
+<p>Extension version requirements belong in the extension schema document:
+<code>requires.protocol</code> constrains the selected <code>ucp.version</code>, and
+<code>requires.capabilities</code> constrains selected parent versions.</p>
 <h2 id="extensibility-and-forward-compatibility">Extensibility and Forward Compatibility<a class="headerlink" href="#extensibility-and-forward-compatibility" title="Permanent link">&para;</a></h2>
 <p>When designing schemas, you must account for how older clients will validate newer payloads. In serialization formats
 like Protobuf, adding a new field or enum value is generally a safe, forward-compatible change.</p>

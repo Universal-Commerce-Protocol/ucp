@@ -633,9 +633,9 @@ UCP revolves around three fundamental constructs that define how entities intera
 
 ### Capabilities
 
-Capabilities are standalone, independently versioned features that a business declares it supports. They are the "verbs" of the protocol — discrete units of functionality that platforms can discover, negotiate, and invoke.
+Capabilities are discrete, versioned features that a Business declares it supports. They are the "verbs" of the protocol — units of functionality that Platforms can discover, negotiate, and invoke.
 
-Each capability is identified by a reverse-domain name (e.g., `dev.ucp.shopping.checkout`) and carries a date-based version. Capabilities are declared in the business's UCP profile at `/.well-known/ucp` and negotiated and confirmed in every response so that the platform always knows the active feature set for a given interaction.
+Each capability is identified by a reverse-domain name (e.g., `dev.ucp.shopping.checkout`) and carries a date-based version. Capabilities are declared in the Business's UCP profile at `/.well-known/ucp`, negotiated by exact version, and confirmed in every response so that the Platform always knows the active feature set for a given interaction. UCP-authored `dev.ucp.*` capabilities and extensions are versioned in lockstep with the specification: each declares the date `D` of the UCP release it ships in. Third-party extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the [Specification](/latest/specification/overview/) for the authoritative and up-to-date list.
 
@@ -679,7 +679,7 @@ The following are examples of extensions defined in UCP — see the [Specificati
 
 ### Services
 
-**Services** group the operations and events for a vertical under a reverse-domain namespace (e.g., `dev.ucp.shopping`). A service declares *what* functionality exists for that vertical; transport bindings declare *how* it is accessed on the wire.
+**Services** group the operations and events for a vertical under a reverse-domain registry key (e.g., `dev.ucp.shopping`). The key identifies the service: a service declares *what* functionality exists for that vertical, and each entry in its array declares *how* it is accessed over a transport binding.
 
 A single service can be accessed via multiple transport bindings:
 
@@ -690,9 +690,9 @@ A single service can be accessed via multiple transport bindings:
 | **A2A**      | Agent Card    | Agent-to-Agent protocol integrations   |
 | **Embedded** | OpenRPC       | Embedded integrations                  |
 
-A business declares which transport bindings it supports within each service; platforms pick whichever fits their context — an AI agent may prefer MCP, a traditional web app may use REST.
+A Business declares which transport bindings it supports within each service; Platforms pick whichever fits their context — an AI agent may prefer MCP, a traditional web app may use REST. Every UCP-defined service declares an explicit `version` equal to the selected `ucp.version`, repeated on every entry since they differ only by transport binding. Transport bindings have no separate version.
 
-Service namespaces are also UCP's extensibility mechanism for new verticals — e.g., `dev.ucp.hotels` may be introduced in the future. Businesses opt in by declaring which services they support.
+Service namespaces are also UCP's extensibility mechanism for new verticals. Businesses opt in by declaring which services they support.
 
 ## Discovery & Capability Negotiation
 
@@ -778,7 +778,7 @@ Reverse-domain names are used both as collision-safe **identifiers** (keys and r
 
 Platforms **MUST** validate this binding for declared `schema` URLs and **MUST** reject entities that fail it. Identifiers carry no fetched URL, and the `spec` (documentation) URL is not authority-bound (any `https` origin). See [Authority Binding](/latest/specification/overview.md#authority-binding) for the normative algorithm.
 
-The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by the UCP Tech Council. Any vendor can define and publish capabilities under their own domain — `org.acme.*` — without UCP maintainer approval. Vendor capabilities follow the same extension model, meaning they can extend UCP base capabilities (e.g., `org.acme.loyalty` extending `dev.ucp.shopping.checkout`) or define entirely new ones. Because negotiation is always opt-in, vendor capabilities only activate when both parties declare them, keeping the protocol decentralized by design.
+The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by the UCP Tech Council responsible for the capability's domain. Any vendor can define and publish capabilities under their own domain — `org.acme.*` — without UCP maintainer approval. Vendor capabilities follow the same extension model, meaning they can extend UCP base capabilities (e.g., `org.acme.loyalty` extending `dev.ucp.shopping.checkout`) or define entirely new ones. Because negotiation is always opt-in, vendor capabilities only activate when both parties declare them, keeping the protocol decentralized by design.
 
 ## Payment Architecture
 
@@ -843,15 +843,11 @@ The `dev.ucp.common.identity_linking` capability enables a platform to obtain OA
 
 ## Versioning
 
-UCP uses date-based version identifiers (`YYYY-MM-DD`). The version represents the date of the last backwards-incompatible change.
+UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a snapshot of the core protocol — its services and transport bindings, capabilities, extensions, and shared schemas — published together as one internally compatible set. A profile's `ucp.version` selects that snapshot, and the match is exact: an older date is available only when the Business advertises it in `supported_versions`. A published snapshot can gain approved backwards-compatible additions over time; copies fetched earlier remain valid.
 
-- **Non-breaking additions** do not increment the date.
-- **Breaking changes** require a `!` prefix in the PR title and a 2-week advance notice to the community before merging.
-- Businesses that support older protocol versions **SHOULD** publish version-specific profiles and advertise them via the `supported_versions` field in their profile, enabling platforms to discover the exact capability set for each supported version.
+Every UCP-defined service, capability, and extension in release `D` declares version `D`. Third-party extensions and payment handlers are versioned by their authors, independently of UCP releases.
 
-Capability schemas carry their version inline, which enables independent versioning — a discount extension can version on a different cadence than the checkout capability it extends.
-
-See [Versioning](http://ucp.dev/versioning/index.md) for the release branch process and the full breaking-change procedure.
+See [Protocol Version](/latest/specification/overview.md#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.
 
 # UCP and AP2
 
@@ -925,24 +921,26 @@ This guide documents conventions for authoring UCP JSON schemas: metadata fields
 
 UCP schemas use standard JSON Schema fields plus UCP-specific metadata:
 
-| Field         | Standard    | Purpose                                                             | Required For                             |
-| ------------- | ----------- | ------------------------------------------------------------------- | ---------------------------------------- |
-| `$schema`     | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas                              |
-| `$id`         | JSON Schema | Schema's canonical URI for `$ref` resolution                        | All schemas                              |
-| `title`       | JSON Schema | Human-readable display name                                         | All schemas                              |
-| `description` | JSON Schema | Schema purpose and usage                                            | All schemas                              |
-| `name`        | UCP         | Reverse-domain identifier; doubles as registry key                  | Capabilities, services, handlers         |
-| `version`     | UCP         | Entity version (`YYYY-MM-DD` format)                                | Capabilities, services, payment handlers |
-| `id`          | UCP         | Instance identifier for multiple configurations                     | Payment handlers only                    |
+| Field         | Standard    | Purpose                                                             | Required For                               |
+| ------------- | ----------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| `$schema`     | JSON Schema | Declares JSON Schema draft version (**SHOULD** use `draft/2020-12`) | All schemas                                |
+| `$id`         | JSON Schema | Schema's canonical URI for `$ref` resolution                        | All schemas                                |
+| `title`       | JSON Schema | Human-readable display name                                         | All schemas                                |
+| `description` | JSON Schema | Schema purpose and usage                                            | All schemas                                |
+| `name`        | UCP         | Reverse-domain identifier; doubles as registry key                  | Capabilities, extensions, payment handlers |
+| `version`     | UCP         | Entity version (`YYYY-MM-DD` format)                                | Capabilities, extensions, payment handlers |
+| `id`          | UCP         | Instance identifier for multiple configurations                     | Payment handlers only                      |
+
+This table lists top-level metadata embedded in published schema documents; profile registry declarations are covered in the sections below.
 
 ### Why Self-Describing?
 
-Capability schemas **must be self-describing**: when a platform fetches a schema, it should determine exactly what capability and version it represents without cross-referencing other documents. This matters because:
+Capability and payment-handler schemas **must be self-describing**: when a Platform fetches a schema, it should determine exactly what entity and version it represents without cross-referencing other documents. This matters because:
 
-1. **Independent versioning**: Capabilities may version independently. The schema must declare its version explicitly—you can't infer it from the URL.
+1. **Explicit version identity**: Capabilities, extensions, and payment handlers declare their version explicitly; it cannot be inferred from the URL. UCP-authored `dev.ucp.*` capabilities and extensions declare version `D` in each UCP release `D`. Payment handlers publish on their authors' own schedules.
 1. **Validation**: Validators can cross-check that a capability declaration's `schema` URL points to a schema whose embedded `name`/`version` match the declaration. Mismatches are authoring errors caught at build time.
-1. **Developer experience**: When reading a schema file, integrators immediately see what capability it defines without reverse-engineering the `$id` URL.
-1. **Compact namespace**: The `name` field provides a standardized reverse-domain identifier (e.g., `dev.ucp.shopping.checkout`) that's more compact and semantic than the full `$id` URL.
+1. **Developer experience**: When reading a schema file, integrators immediately see what entity it defines without reverse-engineering the `$id` URL.
+1. **Compact namespace**: The `name` field provides a standardized reverse-domain identifier (e.g., `dev.ucp.shopping.checkout`) that's more compact and semantic than the full `$id` URL. Service registry keys provide the same stable identity.
 
 ### Why Both `$id` and `name`?
 
@@ -960,8 +958,8 @@ The reverse-domain format provides **namespace governance**: domain owners contr
 The `version` field uses date-based versioning (`YYYY-MM-DD`) to enable:
 
 - **Capability negotiation**: Platforms request specific versions they support
-- **Breaking change management**: New versions get new dates; old versions remain valid and resolvable
-- **Independent lifecycles**: Extensions can release on their own schedule
+- **Certified release identity**: Each date identifies the entity's complete, published schema closure
+- **Independent author lifecycles**: Third-party extensions and payment handlers can release on their authors' own schedules
 
 ## Schema Categories
 
@@ -980,7 +978,9 @@ Examples: `checkout.json`, `fulfillment.json`, `discount.json`, `order.json`
 
 Define transport bindings that appear in `ucp.services{}` registries. Each transport (REST, MCP, A2A, Embedded) is a separate entry.
 
-- **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
+- **Registry identity**: Reverse-domain service name used as the registry key
+- **Entry fields**: `version`, `spec`, `schema`, `config`, and transport-specific fields
+- **Versioning**: Every service entry declares an explicit `version`; in release `D` it is `D`. Because each entry pairs the service with one transport binding, that service `version` repeats on each entry, and transport bindings have no separate version. The referenced OpenAPI/OpenRPC artifact carries its own `info.version` as artifact metadata, not a negotiated version. See [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
   - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -1054,11 +1054,11 @@ UCP organizes capabilities, services, and handlers in **registries**—objects k
 
 The same registry structure appears in three contexts with different field requirements:
 
-| Context          | Location                | Required Fields                 |
-| ---------------- | ----------------------- | ------------------------------- |
-| Platform Profile | Advertised URI          | `version`, `spec`, `schema`     |
-| Business Profile | `/.well-known/ucp`      | `version`; may add `config`     |
-| API Responses    | Checkout/order payloads | `version` (+ `id` for handlers) |
+| Registry                | Platform Profile                                                     | Business Profile                                          | API Responses                                                        |
+| ----------------------- | -------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------- |
+| Services                | `version`, `transport`, `spec`; `schema` for REST, MCP, and Embedded | `version`, `transport`; `endpoint` for REST, MCP, and A2A | `version`, `transport`; transport-specific `config` where applicable |
+| Capabilities/extensions | `version`, `spec`, `schema`                                          | `version`, `schema`; may add `config`                     | `version`                                                            |
+| Payment handlers        | `id`, `version`, `spec`, `schema`                                    | `id`, `version`; may add `config`                         | `id`, `version`                                                      |
 
 ## The Entity Pattern
 
@@ -1154,13 +1154,21 @@ Prefer **open string vocabularies** with documented well-known values over close
 
 ## Versioning Strategy
 
+### UCP Services (`dev.ucp.*`)
+
+In each UCP release `D`, every UCP-defined service entry declares version `D`. See [Service Schemas](#service-schemas) for how the flattened registry represents service versions and transport bindings.
+
 ### UCP Capabilities (`dev.ucp.*`)
 
-UCP-authored capabilities version with protocol releases by default. Individual capabilities **may** version independently when needed.
+In each UCP release `D`, every UCP-defined capability and extension declares version `D`, even when its schema did not change directly. Declaring version `D` does not replace negotiation: capabilities and extensions are still selected by exact-version intersection.
 
-### Vendor Capabilities (`com.{vendor}.*`)
+Profile selection, including profiles for older supported releases, is defined in [Protocol Version](/latest/specification/overview.md#protocol-version).
 
-Capabilities outside `dev.ucp.*` version fully independently:
+### Third-Party Extensions and Payment Handlers
+
+Third-party extensions and payment handlers publish versions on their authors' own schedules. Their versions remain independent of the selected `ucp.version` and are not constrained to `D`. UCP's `payment_handler.json` defines the shared declaration shape, not a payment-handler implementation or its release cadence.
+
+Third-party extensions version independently:
 
 ```json
 {
@@ -1171,7 +1179,7 @@ Capabilities outside `dev.ucp.*` version fully independently:
 }
 ```
 
-Vendor schemas follow the same self-describing requirements.
+Extension version requirements belong in the extension schema document: `requires.protocol` constrains the selected `ucp.version`, and `requires.capabilities` constrains selected parent versions.
 
 ## Extensibility and Forward Compatibility
 
@@ -1577,22 +1585,23 @@ The pre-commit/pre-push split between "changed files only" and "full corpus" is 
 
 # Versioning
 
-UCP uses date-based version identifiers following the format `YYYY-MM-DD` to indicate the last date backwards incompatible changes were made.
+This guide defines UCP's release-branch and backport process. UCP uses date-based version identifiers in `YYYY-MM-DD` format; see [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots) for the normative release model and [Protocol Version](/latest/specification/overview.md#protocol-version) for profile selection.
 
-New development occurs on the `main` branch. We will maintain long-lived branches for all supported releases of the spec.
+New development occurs on the `main` branch. We maintain long-lived branches for all supported releases of the spec so that a published snapshot `D` stays available for reference and maintenance. Backport eligibility and approval — approved backwards-compatible changes by default, breaking changes only through exceptional Governance Council approval — are defined in [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots). A backported change lands on the maintained `release/D` branch, and UCP re-certifies the snapshot before publishing the updated artifacts.
 
 - When the Tech Council approves a new version of UCP, we will cut a new branch named `release/YYYY-MM-DD` directly from the current state of `main`.
-  - We will implement a code freeze on the release branch the moment a `release/YYYY-MM-DD` branch is cut. Only critical bug fixes should move during this window.
-  - Critical issues discovered after cutting a release branch should be fixed in one of two ways:
-  - The fix is made on the release branch and merged to `main`.
-  - The fix is made on `main` and cherry-picked to the release branch.
+  - We will implement a code freeze on the release branch the moment a `release/YYYY-MM-DD` branch is cut. Only changes permitted by the backport policy should move during this window.
+  - Approved backward-compatible changes discovered after cutting a release branch should be made in one of two ways:
+  - The change is made on the release branch and merged to `main`.
+  - The change is made on `main` and cherry-picked to the release branch.
 - Once finalized, we will merge the release branch into `main` and tag it (e.g., `git tag -a vYYYY-MM-DD`). We will use a GitHub Action to detect the new tag and automatically generate a release notes draft and upload artifacts.
-- Unlike temporary feature branches, release/YYYY-MM-DD branches are long-lived and correspond to specific versions of the spec for historical reference and maintenance.
+- Unlike temporary feature branches, `release/YYYY-MM-DD` branches are long-lived and correspond to specific versions of the spec for historical reference and maintenance.
 
 ## Breaking PRs
 
 - Breaking changes should include `!` in the PR title
 - Timing: We will announce the breaking change in Discussions 2 weeks before the change is merged.
+- Security-sensitive fixes are the exception: the Governance Council sets the disclosure timeline case by case, so a fix is not announced before it is safe to disclose.
 
 # Announcements
 

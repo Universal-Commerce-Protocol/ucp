@@ -817,35 +817,48 @@
 
 
 <h1 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h1>
-<p>UCP uses date-based version identifiers following the format <code>YYYY-MM-DD</code> to
-indicate the last date backwards incompatible changes were made.</p>
-<p>New development occurs on the <code>main</code> branch. We will maintain long-lived
-branches for all supported releases of the spec.</p>
+<p>This guide defines UCP's release-branch and backport process. UCP uses date-based
+version identifiers in <code>YYYY-MM-DD</code> format; see
+<a href="/latest/specification/overview.md#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a>
+for the normative release model and
+<a href="/latest/specification/overview.md#protocol-version">Protocol Version</a> for profile
+selection.</p>
+<p>New development occurs on the <code>main</code> branch. We maintain long-lived branches for
+all supported releases of the spec so that a published snapshot <code>D</code> stays
+available for reference and maintenance. Backport eligibility and approval —
+approved backwards-compatible changes by default, breaking changes only through
+exceptional Governance Council approval — are defined in
+<a href="/latest/specification/overview.md#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a>.
+A backported change lands on the maintained <code>release/D</code> branch, and UCP
+re-certifies the snapshot before publishing the updated artifacts.</p>
 <ul>
 <li>When the Tech Council approves a new version of UCP, we will cut a
   new branch named <code>release/YYYY-MM-DD</code> directly from the current state of
   <code>main</code>.<ul>
 <li>We will implement a code freeze on the release branch the moment a
-  <code>release/YYYY-MM-DD</code> branch is cut. Only critical bug fixes should move
-  during this window.</li>
-<li>Critical issues discovered after cutting a release branch should be fixed
+  <code>release/YYYY-MM-DD</code> branch is cut. Only changes permitted by the backport
+  policy should move during this window.</li>
+<li>Approved backward-compatible changes discovered after cutting a release branch should be made
   in one of two ways:</li>
-<li>The fix is made on the release branch and merged to <code>main</code>.</li>
-<li>The fix is made on <code>main</code> and cherry-picked to the release branch.</li>
+<li>The change is made on the release branch and merged to <code>main</code>.</li>
+<li>The change is made on <code>main</code> and cherry-picked to the release branch.</li>
 </ul>
 </li>
 <li>Once finalized, we will merge the release branch into <code>main</code> and tag it (e.g.,
   <code>git tag -a vYYYY-MM-DD</code>).  We will use a GitHub Action to detect the new tag
   and automatically generate a release notes draft and upload artifacts.</li>
-<li>Unlike temporary feature branches, release/YYYY-MM-DD branches are long-lived
-  and correspond to specific versions of the spec for historical reference and
-  maintenance.</li>
+<li>Unlike temporary feature branches, <code>release/YYYY-MM-DD</code> branches are
+  long-lived and correspond to specific versions of the spec for historical
+  reference and maintenance.</li>
 </ul>
 <h2 id="breaking-prs">Breaking PRs<a class="headerlink" href="#breaking-prs" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Breaking changes should include <code>!</code> in the PR title</li>
 <li>Timing: We will announce the breaking change in Discussions 2 weeks
   before the change is merged.</li>
+<li>Security-sensitive fixes are the exception: the Governance Council sets
+  the disclosure timeline case by case, so a fix is not announced before it
+  is safe to disclose.</li>
 </ul>
 
 
