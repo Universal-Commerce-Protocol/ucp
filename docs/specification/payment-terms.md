@@ -275,7 +275,7 @@ Businesses advertise payment terms support in their profile:
 When this capability is active, `checkout.payment` is extended with available
 terms and the selected term.
 
-{{ extension_schema_fields('payment_terms.json#/$defs/payment', 'payment_terms') }}
+{{ extension_schema_fields('payment_terms.json#/$defs/payment', 'payment-terms') }}
 
 ### Order Payment
 
@@ -290,17 +290,17 @@ can therefore sum to more than the Order currently owes after a refund, or less
 after an exchange: the term states what was agreed, and the adjustments state
 what happened after.
 
-{{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment_terms') }}
+{{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment-terms') }}
 
 ### Entities
 
 #### Payment Term
 
-{{ schema_fields('types/payment_term', 'payment_terms') }}
+{{ schema_fields('types/payment_term', 'payment-terms') }}
 
 #### Payment Schedule
 
-{{ schema_fields('types/payment_schedule', 'payment_terms') }}
+{{ schema_fields('types/payment_schedule', 'payment-terms') }}
 
 ## Examples
 
