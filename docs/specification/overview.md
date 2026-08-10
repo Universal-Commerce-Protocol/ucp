@@ -223,21 +223,14 @@ requires.
 
 ## Discovery, Governance, and Negotiation
 
-UCP separates protocol version compatibility from capability negotiation.
-The business's profile at `/.well-known/ucp` describes capabilities for
-the protocol version it declares. Businesses that support older protocol
-versions **SHOULD** publish version-specific profiles and advertise them
-via the `supported_versions` field — a map from protocol version to
-profile URI, enabling platforms to discover the exact capabilities for a
-specific protocol version. Version lifecycle, including when to deprecate
-or remove older versions from `supported_versions`, is a business policy
-decision. The protocol does not prescribe a deprecation schedule.
-Capability negotiation follows a server-selects architecture where the
-business (server) determines the active capabilities from the
-intersection of both parties' declared capabilities. Both business and
-platform profiles can be cached by both parties, allowing efficient
-capability negotiation within the normal request/response flow between
-platform and business.
+UCP separates [protocol version selection](#protocol-version) from
+[capability negotiation](#capability-versions). A Business advertises its current
+protocol version and links to profiles for older supported versions. After the
+Platform selects one exact version, the Business determines the active
+capabilities from the versions both parties advertise. Version lifecycle,
+including when to remove an older version, is a Business policy decision; UCP
+does not prescribe a deprecation schedule. Business and Platform profiles can be
+cached by both parties.
 
 ### Namespace Governance
 
@@ -414,6 +407,15 @@ standard formats:
 - **A2A**: Agent Card Specification
 - **EP(embedded)**: OpenRPC (JSON format)
 
+A service is identified by its reverse-domain registry key (e.g.,
+`dev.ucp.shopping`). In a profile, services are keyed by that name, and each
+entry in `services[name][]` pairs the service with one transport binding and
+declares the service `version`: in release `D` that version is `D`. This is the
+service version, not a transport version — the binding has no separate version.
+The OpenAPI or OpenRPC artifact a binding references carries its own
+`info.version` as release metadata, not a separate version to negotiate. See
+[Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots).
+
 #### Service Definition
 
 {{ extension_schema_fields('service.json#/$defs/platform_schema', 'overview') }}
@@ -568,9 +570,14 @@ This convention ensures:
 
 ##### Version Requirements
 
-Extension schemas **SHOULD** declare a `requires` object (alongside
-`name`, `title`, `description`) to indicate the protocol and
-capability versions required for correct operation:
+Extension authors **SHOULD** declare a `requires` object in the extension
+schema (alongside its `name`, `title`, and `description`) stating the versions
+the extension depends on. A third-party extension schema declares its own
+author-controlled `version`, which advances independently of `ucp.version`;
+a UCP-authored `dev.ucp.*` extension declares version `D` in release `D`.
+`requires.protocol` constrains the selected `ucp.version`, and
+`requires.capabilities` constrains the selected versions of the named
+capabilities:
 
 <!-- ucp:example skip reason="schema definition" -->
 ```json
@@ -578,6 +585,7 @@ capability versions required for correct operation:
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://acme.com/ucp/schemas/loyalty.json",
   "name": "com.acme.shopping.loyalty",
+  "version": "2026-06-15",
   "title": "Acme Loyalty Points",
   "requires": {
     "protocol": { "min": "2026-01-23" },
@@ -610,13 +618,16 @@ no upper bound:
 ```
 
 Keys in `requires.capabilities` **MUST** be a subset of the
-extension's `$defs` keys. If `requires` is present, platforms and
-businesses **MUST** verify the negotiated protocol version and
-capability versions satisfy the declared constraints during schema
-resolution. Incompatible extensions are excluded from the active
-capability set (see [Resolution Flow](#resolution-flow)). If
-`requires` is absent, the extension is assumed to be compatible
-with the versions declared by the profile.
+extension's `$defs` keys. These ranges verify dependencies after exact
+versions are selected; they do not select versions. The `ucp.version` is
+fixed first by [profile selection](#protocol-version) and capability versions
+by the [intersection algorithm](#intersection-algorithm); then, if `requires`
+is present, Platforms and Businesses **MUST** verify that the selected
+`ucp.version` and capability versions satisfy the declared constraints during
+schema resolution. Incompatible extensions are excluded from the active
+capability set (see [Resolution Flow](#resolution-flow)). If `requires` is
+absent, the extension is assumed to be compatible with the versions declared
+by the profile.
 
 #### Schema Resolution Convention
 
@@ -1458,14 +1469,17 @@ and the Web Bot Auth interop signature shape, see
 
 #### Hosting
 
-Both profiles must be reliably hosted. An unreliable or misconfigured
-profile endpoint may prevent the other party from processing requests.
+Profiles, and the schema and transport-description artifacts they reference,
+must be reliably hosted. An unreliable or misconfigured endpoint may prevent
+the other party from processing requests.
 
-1. Profiles **MUST** be served over HTTPS.
+1. Published artifacts **MUST** be served over HTTPS.
 2. Profile endpoints **MUST NOT** use redirects (3xx).
-3. Profile responses **MUST** include a `Cache-Control` header with
-   `public` and `max-age` of at least 60 seconds. Profiles **MUST NOT**
-   be served with `private`, `no-store`, or `no-cache` directives.
+3. Published artifacts **MUST** include a `Cache-Control` header with
+   `public` and `max-age` of at least 60 seconds, and **MUST NOT** be
+   served with `private`, `no-store`, or `no-cache` directives.
+4. Published artifacts **SHOULD** include a validator (`ETag` or
+   `Last-Modified`) so consumers can revalidate cached copies efficiently.
 
 Profiles represent a party's stable identity and capabilities. Profile
 URLs are expected to remain consistent across requests and not contain
@@ -2635,12 +2649,13 @@ implementation guide, and examples.
 UCP uses date-based versioning in the format `YYYY-MM-DD`. This provides
 clear chronological ordering and unambiguous version comparison.
 
-### Version Discovery and Negotiation
+### Versioned Profiles
 
-UCP prioritizes strong backwards compatibility. Businesses implementing a
-version **SHOULD** handle requests from platforms using that version or older.
-
-Both businesses and platforms declare a single version in their profiles:
+UCP prioritizes strong backwards compatibility. Each profile document declares
+one core release version in `ucp.version`; its services, capabilities,
+extensions, and payment handlers also carry explicit versions. A Business
+advertises its current profile and links to profiles for older supported releases
+through `supported_versions`; see [Protocol Version](#protocol-version).
 
 #### Example
 
@@ -2672,16 +2687,15 @@ Both businesses and platforms declare a single version in their profiles:
     }
     ```
 
-### Version Negotiation
+### Version Selection
 
 ![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
 
-Version compatibility operates at two levels: the **protocol version**
-and **capability versions**. The protocol version (`ucp.version`)
-governs core protocol mechanisms — discovery, negotiation flow,
-transport bindings, and signature requirements. Capability versions
-govern the semantics of each feature independently, as defined in
-[Independent Component Versioning](#independent-component-versioning).
+Protocol version selection chooses one complete Business profile first.
+Capability negotiation then selects active capabilities and extensions by exact
+version intersection within that profile. The sections below define each step;
+see [Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots)
+for release alignment and version ownership.
 
 #### Protocol Version
 
@@ -2692,9 +2706,9 @@ and payment handlers available at that version.
 Businesses that support older protocol versions **SHOULD** declare a
 `supported_versions` object mapping each older version to a profile
 URI. Each URI points to a complete, self-contained profile for that
-version — including its own capabilities, services, payment handlers,
-and signing keys. When `supported_versions` is omitted, only
-`version` is supported.
+version — whose `ucp.version` equals its map key and which includes
+its own capabilities, services, payment handlers, and signing keys.
+When `supported_versions` is omitted, only `version` is supported.
 
 <!-- ucp:example schema=profile def=business_schema -->
 ```json
@@ -2714,22 +2728,34 @@ and signing keys. When `supported_versions` is omitted, only
 
 Platforms discover a business's capabilities through the following flow:
 
-1. Platform fetches `/.well-known/ucp` — this is the current version
+1. The Platform fetches `/.well-known/ucp` — this is the current version
     profile.
-2. If the platform's protocol version matches `version`: use this
-    profile directly. Proceed to capability negotiation.
-3. If the platform's protocol version is a key in
-    `supported_versions`: fetch the profile at the mapped URI. This
-    profile describes the capabilities available at that protocol
-    version. Proceed to capability negotiation.
-4. Otherwise: the business does not support the platform's protocol
-    version. Platforms **SHOULD NOT** send requests with an incompatible
-    version; businesses **MUST** respond with a `version_unsupported`
-    error.
+2. The Platform selects a mutually supported protocol version from the
+    Business's `version` and `supported_versions` keys; Platforms **SHOULD**
+    prefer the most recent. If the selected version matches `version`, the
+    Platform uses this profile directly and proceeds to capability
+    negotiation.
+3. If the selected version is a key in
+    `supported_versions`: fetch the profile at the mapped URI. The
+    Platform **MUST** verify that the fetched profile's `ucp.version`
+    equals the `supported_versions` key it selected; on mismatch the
+    Platform **MUST NOT** use that profile. Otherwise this profile
+    describes the capabilities available at that protocol version —
+    proceed to capability negotiation.
+4. If no mutually supported version exists, the Business does not support
+    the Platform's protocol version. Platforms **SHOULD NOT** send requests
+    with an incompatible version; Businesses **MUST** respond with a
+    `version_unsupported` error.
 
 Version-specific profiles are leaf documents — they describe exactly
 one protocol version and **MUST NOT** contain a `supported_versions`
 field.
+
+A selected profile guarantees compatibility among its declared capabilities at
+its declared version; across versions, resource representations may differ.
+Platforms **MAY** run separate negotiations with the same Business at different
+supported versions, and **SHOULD NOT** combine or intersect capabilities across
+profiles within the same negotiation.
 
 ##### Request-Time Validation
 
@@ -2800,12 +2826,22 @@ notice.
 
 #### Capability Versions
 
-Capability versions are negotiated independently of the protocol
-version. Each capability in the profile is an array. Multiple entries
-for the same capability, each with a different `version`, advertise
-support for multiple versions of that capability. The capability
-intersection algorithm considers only capability versions supported
-by both parties.
+Capability compatibility is established only by exact version equality, not by
+inferring compatibility from date order. Each capability in the profile is an
+array; multiple entries with different `version` values advertise support for
+multiple versions where the applicable publication policy permits it. When the
+exact shared set contains more than one version, the intersection algorithm
+orders those shared dates to select the latest one. Supported third-party
+extension versions advance independently of `ucp.version`. UCP-authored
+`dev.ucp.*` entries declare version `D` in release `D`: a profile for
+`ucp.version = D` advertises version `D` for those entries. Older `dev.ucp.*`
+versions are advertised only through `supported_versions` leaf profiles, never
+as additional entries in a newer profile: the registry mechanism supports
+multi-version arrays, but the core publication contract does not exercise them
+for `dev.ucp.*` entries. Multi-version arrays therefore arise for third-party
+extensions whose authors support multiple versions concurrently. The capability
+intersection algorithm considers only capability versions supported by both
+parties.
 
 Businesses **MUST** include only capabilities compatible with the
 negotiated protocol version in their response. A capability that
@@ -2814,9 +2850,18 @@ NOT** be included when processing at an older protocol version.
 
 ### Backwards Compatibility
 
+UCP classifies changes as backwards-compatible or breaking and applies this
+classification to its own components to govern how a UCP release advances.
+Publication and backport policy for both classes is defined in
+[Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots).
+The lists below describe which changes preserve and which break conforming
+integrations; third-party extension and payment-handler authors control their own
+version policy and can apply the same distinction on their own cadence.
+
 #### Backwards-Compatible Changes
 
-The following changes **MAY** be introduced without a new version:
+The following changes are **backwards-compatible**: they do not break conforming
+integrations.
 
 - Adding new non-required fields to responses
 - Adding new non-required parameters to requests
@@ -2828,7 +2873,8 @@ The following changes **MAY** be introduced without a new version:
 
 #### Breaking Changes
 
-The following changes **MUST NOT** be introduced without a new version:
+The following changes are **breaking**: they break conforming integrations and
+require a new component version.
 
 - Removing or renaming existing fields
 - Changing field types or semantics
@@ -2838,26 +2884,82 @@ The following changes **MUST NOT** be introduced without a new version:
 - Modifying existing protocol flow or state machine
 - Changing the meaning of existing error codes
 
-### Independent Component Versioning
+### Component Versioning and Release Snapshots
 
-- UCP protocol versions independently from capabilities.
-- Each capability versions independently from other capabilities.
-- Capabilities **MUST** follow the same backwards compatibility rules as the
-    protocol.
-- Businesses **MUST** validate capability version compatibility using the same
-    logic as what's described above.
-- Transports **MAY** define their own version handling mechanisms.
+A UCP release `D` is a snapshot of the core protocol — its services and transport
+bindings, capabilities, extensions, and shared schemas — published and certified
+together as internally compatible. Selecting `ucp.version` `D` selects that
+snapshot. For a release `D`:
 
-#### UCP Capabilities (`dev.ucp.*`)
+1. `ucp.version` is `D`.
+2. Every UCP-defined service declares `version` `D`. Each service entry pairs the
+    service with one transport binding, so every entry under a service repeats
+    that service `version`; transport bindings have no separate version. The
+    referenced OpenAPI/OpenRPC artifacts are published under `D` as release
+    metadata.
+3. Every UCP-defined capability and extension declares `version` `D`, even when
+    its own schema did not change directly.
+4. Shared schemas are published as part of the same snapshot.
+5. UCP certifies the snapshot — components, bindings, and supported
+    compositions — together before publishing it.
 
-UCP-authored capabilities version with protocol releases by default. Individual
-capabilities **MAY** version independently when breaking changes are required
-outside the protocol release cycle.
+UCP **MAY** backport an approved backward-compatible change — a feature, or a
+security, correctness, or interoperability fix — to a supported release and its
+generated `D` artifacts. Breaking changes enter the next release and are not
+backported by default; in exceptional cases, the Governance Council **MAY**
+approve backporting a breaking change to a supported release, limited to
+defects that compromise the security, correctness, or interoperability of the
+release as published, and following the breaking-change notice process. UCP
+**MUST** re-certify the snapshot before publishing any updated artifacts.
 
-#### Vendor Capabilities (`com.{vendor}.*`)
+A dated release works like a long-term-support channel: the date names a
+compatibility line, and backported changes amend the published `D` snapshot in
+place — `D` stays the same while its contents change, so parties that fetched
+at different times can hold different copies of the same `D`. This skew is
+safe by construction: backports default to the backwards-compatible class, so
+an earlier copy is missing later additions, never in conflict with them.
+Parties that fetch artifacts at runtime **SHOULD** follow standard HTTP
+caching semantics, revalidating a cached copy once its `max-age` expires (see
+[Hosting](#hosting)); refresh frequency is therefore controlled by the
+publisher. Parties that consume artifacts at build time pick up amendments on
+their own release cadence. An exceptional breaking backport
+is announced through the breaking-change notice process and enforced at
+request time by the amended contract; it invalidates earlier copies only
+because the release was defective as published.
 
-Capabilities outside the `dev.ucp.*` namespace version fully independently.
-Vendors control their own release schedules and versioning strategy.
+A Business or Platform that selects `ucp.version` `D` **MUST** declare version
+`D` on every `dev.ucp.*` service, capability, and extension entry in its
+profile. A Platform that encounters a `dev.ucp.*` entry whose `version`
+differs from the profile's `ucp.version` **MUST** reject that entry — treated
+as not present and never activated — and **MAY** continue with the remaining
+entries. An older release is selected only through a separate
+`supported_versions` leaf profile whose own `ucp.version` is that older release
+date (see [Protocol Version](#protocol-version)). Payment-handler versions are
+controlled by their authors: UCP defines the shared declaration structure but
+currently no concrete handler, so no handler version is constrained to `D`.
+Declaring `version` `D` does not change negotiation: `dev.ucp.*`
+capabilities and extensions are still selected by exact-version intersection (see
+[Capability Versions](#capability-versions)).
+
+#### Third-party extensions (`com.{vendor}.*`, `org.{org}.*`)
+
+Third-party capabilities version independently of `ucp.version`: their authors
+control both the version and the release cadence. The common form is an
+**extension** over one or more UCP-defined root capabilities. A third-party
+extension:
+
+- declares `extends` over one or more UCP-defined root capabilities, composed
+    via `allOf` (see [Extension Schema Pattern](#extension-schema-pattern));
+- uses the UCP-defined services and transport bindings selected by
+    `ucp.version`; and
+- advertises exact extension versions in Business and Platform profiles and is
+    negotiated by exact-version intersection like every capability.
+
+A third-party extension's version is never tied to `ucp.version`. The author
+declares the UCP releases and capability versions the extension needs through
+`requires` (see [Version Requirements](#version-requirements)); those ranges
+verify compatibility with the versions a profile selects, they do not select
+versions.
 
 ## Glossary
 
