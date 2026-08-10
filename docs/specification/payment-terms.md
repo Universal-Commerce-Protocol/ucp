@@ -80,11 +80,11 @@ are sufficient.
 
 | Type | Meaning |
 | :--- | :------ |
-| `immediate` | The payment is captured when the checkout is completed. |
+| `immediate` | The payment is due when the checkout is completed. |
 
-Any other value means the payment is **not** captured at completion; the
+Any other value means the payment is **not** due at completion; the
 `description` states when it is due. A Platform **MUST** treat an unrecognized
-`type` as not captured at completion. Businesses **MAY** use additional values
+`type` as not due at completion. Businesses **MAY** use additional values
 such as `deferred` or `on_shipment`, but those values carry no protocol meaning
 beyond "not `immediate`".
 
@@ -137,13 +137,16 @@ a response without a selection would show an amount that matches no stated
 terms. A Business **MUST** return `selected_term_id` in every response. Where
 the Buyer has made no choice, the Business selects a default.
 
-When changing the selection, a Platform **MUST** set `selected_term_id` to an
-`id` from the latest `terms[]`. A Platform **MUST** omit it on create, because
-term IDs are scoped to a Checkout and no options exist yet — the create response
-establishes both the options and the default. A Business receiving a selection
-that no longer resolves — because the options changed — **MUST NOT** silently
-substitute a term, and **MUST** report the change as a `payment_term_changed`
-warning in `messages[]`.
+A Platform changes the selection through Update Checkout, setting
+`selected_term_id` to an `id` from the latest `terms[]`. A Platform **MUST**
+omit it on create, because term IDs are scoped to a Checkout and no options
+exist yet — the create response establishes both the options and the default. A
+Platform **MUST** omit it on complete, because the term is settled before a
+Checkout can reach `ready_for_complete`, and the instrument is authorized
+against the selected term's total. A Business receiving a selection that no
+longer resolves — because the options changed — **MUST NOT** silently substitute
+a term, and **MUST** report the change as a `payment_term_changed` warning in
+`messages[]`.
 
 Selecting a term can invalidate a selection previously accepted elsewhere in the
 Checkout — a deferred term may not be available with a same-day fulfillment
@@ -544,7 +547,7 @@ here. No representation of `pt_pay_now` survives.
 
 > Pay 25% today, then 25% every two weeks.
 
-Four payments and four schedules: one captured at completion, and three with
+Four payments and four schedules: one due at completion, and three with
 computed due dates. The Business does the calendar arithmetic; the Platform
 reads dates.
 
@@ -659,8 +662,8 @@ Platforms **MUST**:
   amount, formatted in the Checkout `currency`.
 * Re-render from the Business response after selecting a term, rather than
   reusing amounts read from `terms[]`.
-* Treat an unrecognized schedule `type` as not captured at completion, and
-  present the term regardless.
+* Treat an unrecognized schedule `type` as not due at completion, and present
+  the term regardless.
 * Process disclosures attached to terms per
   [Warning Presentation](checkout.md#warning-presentation), escalating through
   `continue_url` when the rendering contract cannot be honored.

@@ -18,7 +18,7 @@
     },
     "type": {
       "type": "string",
-      "description": "Timing class, drawn from an open vocabulary. `immediate` is the only value with defined meaning: the payment is captured when the checkout is completed. Any other value means the payment is not captured at completion, and `description` states when it is due. Businesses MAY use additional values (e.g. `deferred`, `on_shipment`); Platforms MUST treat unrecognized values as not captured at completion."
+      "description": "Timing class, drawn from an open vocabulary. `immediate` is the only value with defined meaning: the payment is due when the checkout is completed. Any other value means the payment is not due at completion, and `description` states when it is due. Whether a due payment is authorized, captured, or settled at that moment is payment-handler behavior and outside this extension. Businesses MAY use additional values (e.g. `deferred`, `on_shipment`); Platforms MUST treat unrecognized values as not due at completion."
     },
     "description": {
       "$ref": "../../common/types/description.json",
