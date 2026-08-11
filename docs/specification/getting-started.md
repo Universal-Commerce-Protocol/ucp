@@ -362,6 +362,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
       const ucpMetadata = {
         version: '2026-04-08',
         status: 'success' as const,
+        capabilities: {},
         payment_handlers: {
           'com.example.mock_pay': [
             {
@@ -485,7 +486,6 @@ You can test your server using `curl`.
 
 Send a `POST` request to create a checkout session with one item:
 
-```bash
 === "Python"
 
     ```bash
@@ -836,6 +836,7 @@ If you want to verify your code, expand the section below to see the complete fi
           const ucpMetadata = {
             version: '2026-04-08',
             status: 'success' as const,
+            capabilities: {},
             payment_handlers: {
               'com.example.mock_pay': [
                 {
