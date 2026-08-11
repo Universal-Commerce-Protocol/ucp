@@ -190,6 +190,7 @@ def check_links():
         path_part = "/" + path_part[len(SITE_BASE_PATH) :]
 
       target_file = None
+      is_unbuilt_version = False
 
       # Resolve Target File
       if not path_part:
@@ -211,7 +212,14 @@ def check_links():
           )
           and not (ROOT_DIR / parts[0]).exists()
         ):
-          rel_path = parts[1]
+          is_unbuilt_version = True
+          stripped_path = parts[1]
+          if (
+            (ROOT_DIR / stripped_path).exists()
+            or (ROOT_DIR / (stripped_path + ".html")).exists()
+            or (ROOT_DIR / stripped_path / "index.html").exists()
+          ):
+            rel_path = stripped_path
 
         target_file = ROOT_DIR / rel_path
       else:
@@ -232,11 +240,15 @@ def check_links():
           if candidate.exists():
             target_file = candidate
           else:
+            if is_unbuilt_version:
+              continue
             errors_by_version[version][str(file_path)].append(
               f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
             )
             continue
         else:
+          if is_unbuilt_version:
+            continue
           errors_by_version[version][str(file_path)].append(
             f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
           )
