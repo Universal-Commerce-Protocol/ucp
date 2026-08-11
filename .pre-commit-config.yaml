@@ -13,6 +13,8 @@ repos:
       # install with `cargo install ucp-schema`. CI runs the full-corpus
       # check on every PR as the mandatory backstop
       # (.github/workflows/docs.yml).
+      # Run through uv so local hooks use the project's Python version
+      # requirement from pyproject.toml instead of the system python3.
       #
       # Two-hook split for fast local feedback:
       #  - validate-examples-changed: doc edits validate only changed files
@@ -23,21 +25,21 @@ repos:
       #    invalidate examples across many docs (cross-file regression).
       - id: validate-examples-changed
         name: Validate JSON examples (changed docs)
-        entry: python3 scripts/validate_examples.py --schema-base source/schemas/ --file
+        entry: uv run python scripts/validate_examples.py --schema-base source/schemas/ --file
         language: system
         pass_filenames: true
         files: ^docs/.*\.md$
         stages: [pre-commit, pre-push]
       - id: validate-examples-full
         name: Validate JSON examples (full corpus)
-        entry: python3 scripts/validate_examples.py --schema-base source/schemas/
+        entry: uv run python scripts/validate_examples.py --schema-base source/schemas/
         language: system
         pass_filenames: false
         files: ^(source/schemas/|scripts/validate_examples\.py$)
         stages: [pre-commit, pre-push]
       - id: validate-examples-tests
         name: Validator unit tests
-        entry: python3 scripts/test_validate_examples.py
+        entry: uv run python scripts/test_validate_examples.py
         language: system
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
