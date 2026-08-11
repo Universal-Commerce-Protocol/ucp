@@ -160,17 +160,25 @@ def check_links():
         continue
 
       parsed = urlparse(link)
-      is_absolute_internal = False
       if parsed.scheme and parsed.scheme in ("http", "https"):
-        site_url_no_slash = SITE_URL.rstrip("/")
-        if not link.startswith(SITE_URL) and not link.startswith(site_url_no_slash):
-          continue  # External link
-        is_absolute_internal = True
-        if link.startswith(SITE_URL):
-          link = link[len(SITE_URL) - 1 :]
+        parsed_site = urlparse(SITE_URL)
+        if parsed.hostname == parsed_site.hostname:
+          path = parsed.path if parsed.path else "/"
+          site_path = parsed_site.path
+          site_path_no_slash = site_path.rstrip("/")
+          if (path == site_path_no_slash) or path.startswith(site_path):
+            if path.startswith(site_path):
+              rel_link_path = "/" + path[len(site_path) :]
+            else:
+              rel_link_path = "/"
+            query_part = f"?{parsed.query}" if parsed.query else ""
+            fragment_part = f"#{parsed.fragment}" if parsed.fragment else ""
+            link = rel_link_path + query_part + fragment_part
+            parsed = urlparse(link)
+          else:
+            continue  # External link
         else:
-          link = "/" + link[len(site_url_no_slash) :]
-        parsed = urlparse(link)
+          continue  # External link
 
       path_part = parsed.path
       anchor_part = parsed.fragment
@@ -185,7 +193,7 @@ def check_links():
 
       # Resolve Target File
       if not path_part:
-        target_file = ROOT_DIR / "index.html" if is_absolute_internal else file_path
+        target_file = file_path
       elif path_part.startswith("/"):
         # Absolute path from root
         rel_path = path_part[1:]
