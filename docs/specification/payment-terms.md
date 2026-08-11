@@ -34,11 +34,24 @@ This extension adds two properties to `checkout.payment`:
 
 * `terms[]` — the payment terms the Business offers for this checkout.
   Response-only.
-* `selected_term_id` — the selected term. Always present in a response;
-  a Platform writes it to change the selection.
+* `selected_term_id` — the selected term. Present in a response whenever `terms`
+  is; a Platform writes it to change the selection.
 
 A Buyer picks one of the options in `terms[]`, the same way they pick
 one [fulfillment option](fulfillment.md#platform-responsibilities).
+
+## When a Checkout carries terms
+
+Payment terms are optional. A Business offers them when a Checkout has something
+to say about payment timing — a choice between terms, or a single term whose
+schedules must be disclosed. Where payment is due in full at completion, a
+Business may omit `terms` and `selected_term_id` entirely, and the Checkout
+`total` is the amount due, as core Checkout already states.
+
+Where `terms` is present it **MUST** contain at least one term, and
+`selected_term_id` **MUST** name one of them. The Checkout `total` is the
+selected term's total, so a list of terms without a selection would show an
+amount matching no stated term.
 
 ## Presenting payment terms
 
@@ -47,7 +60,7 @@ installments, or trade credit to present a term meaningfully.
 
 Given the Checkout's `currency`, a Platform that recognizes no `type` value and
 reads no payment-term field other than `title`, `description`,
-`schedules[].description`, and `schedules[].totals` **MUST** be able to present
+`schedules[].description`, and `schedules[].amount` **MUST** be able to present
 what is owed and when, for every term. A Business **MUST** author terms so this
 holds.
 
@@ -61,18 +74,18 @@ Everything above that floor is supplementary. `type` and `due_at` let a Platform
 that wants to do more — split the checkout into due-now and due-later, sort
 schedules, drive a calendar reminder — without ever being required to.
 
+A Business offering exactly one term is disclosing rather than asking. A
+Platform **SHOULD** present that term without implying a choice.
+
 ## Payment schedules
 
-A schedule is **one payment**, not a timetable. A term that charges four times
-has four schedules.
+A schedule is **one payment**. A term that charges four times has four schedules.
 
 A Business **MUST** make each schedule's `description` a complete buyer-facing
 statement of when and how that payment is due, so that a Platform can render it
 verbatim. A Platform **MAY** use `type` and `due_at` for a richer presentation
 — a calendar view, a countdown, a reminder — but **MUST NOT** present derived
-timing that contradicts the `description`. Recognizing a `type` only enables
-optional enhancement; the baseline contract is that `description` and `total`
-are sufficient.
+timing that contradicts the `description`.
 
 ### Timing class
 
@@ -96,31 +109,28 @@ date depends on a future event — "due on delivery" has no date yet. `due_at`
 never replaces `description`; it restates in machine-readable form what the
 description already says.
 
-The protocol defines no calendar arithmetic. A Business that offers four
-biweekly payments emits four schedules with four computed dates, rather than a
-recurrence rule a Platform would have to expand. This keeps month-end, daylight
-saving, and rounding-residual decisions with the party that already makes them.
-
 ### Amounts
 
-Each schedule's `totals` states what this one payment costs. A Business **MUST**
-include exactly one `type: total` entry with a non-negative amount: the final
-amount charged when this payment is taken, inclusive of tax and every other
-charge. Unlike checkout totals, no `subtotal` is required, because the purchase
-is priced at the checkout rather than once per payment.
+Each schedule states a single `amount`: the amount charged when that payment is
+taken, inclusive of tax and every other charge, in the Checkout `currency`.
 
-A term's schedule `total` entries define the amount payable under that term. For
-the **selected** term, the Business **MUST** ensure that sum equals the checkout
+A term's schedule amounts sum to the amount payable under that term. For the
+**selected** term, the Business **MUST** ensure that sum equals the checkout
 `total`.
 
 Unselected terms are **indicative**. A term that discounts the purchase for
 paying today has a different payable amount than one that defers part of it, so
-at most one term can match the checkout total at any moment. Only the selected
-term is bound to it.
+only the selected term must match the checkout total at any moment.
+
+Where the selected term changes what the purchase costs — a discount for paying
+today, a finance charge for paying over time — that difference **MUST** appear
+as its own entry in `checkout.totals`, a negative `discount` or a positive
+`fee`. A Business **SHOULD** set `display_text` on that entry so the Buyer can understand what
+choosing the term contributed.
 
 ## Selecting a payment term
 
-Selecting a payment term is a **Checkout mutation**. A Platform sets
+Selecting a payment term is a **Checkout update**. A Platform sets
 `selected_term_id`; the Business returns a recomputed Checkout. That response is
 **authoritative for all derived state** — including `totals`, line item prices,
 discount eligibility, `policies[]`, `messages[]`, and the payment handlers
@@ -132,18 +142,16 @@ survive selection unchanged, and **MUST** re-render from the response.
 A Business **MUST** make `terms[].id` unique within a Checkout, so
 that a selection resolves to exactly one term.
 
-A term is always selected. The Checkout `total` is the selected term's total, so
-a response without a selection would show an amount that matches no stated
-terms. A Business **MUST** return `selected_term_id` in every response. Where
-the Buyer has made no choice, the Business selects a default.
+In every response that carries `terms`, one of them is selected. Where the Buyer
+has made no choice, the Business selects a default.
 
 A Platform changes the selection through Update Checkout, setting
 `selected_term_id` to an `id` from the latest `terms[]`. A Platform **MUST**
 omit it on create, because term IDs are scoped to a Checkout and no options
-exist yet — the create response establishes both the options and the default. A
-Platform **MUST** omit it on complete, because the term is settled before a
-Checkout can reach `ready_for_complete`, and the instrument is authorized
-against the selected term's total. A Business receiving a selection that no
+exist yet — the create response establishes the options, if any, and the default
+among them. A Platform **MUST** omit it on complete, because the term is settled
+before a Checkout can reach `ready_for_complete`, and the instrument is
+authorized against the checkout total. A Business receiving a selection that no
 longer resolves — because the options changed — **MUST NOT** silently substitute
 a term, and **MUST** report the change as a `payment_term_changed` warning in
 `messages[]`.
@@ -158,29 +166,29 @@ than by comparing responses.
 ## Payment instruments and eligibility
 
 This extension does not change how instruments are supplied. The Buyer's
-instruments fund the checkout under the selected term, and the Business
-allocates them across that term's schedules.
+instruments fund the checkout under the selected term.
 
-Checkout-specific handler and instrument eligibility is a **runtime result**.
-Profiles advertise broad support; the Business resolves that support against the
-Checkout context and any instruments already supplied, then returns the
-authoritative `ucp.payment_handlers` in the response. This covers cases a
-discovery-time predicate cannot express — a gift card whose balance is below the
-deposit, an issuer that will not support a delayed capture for this Business, a
-credential that expires before the balance comes due.
+This release of payment terms gives a Business no way to state, ahead of a selection, which payment handlers or
+instruments a term would permit, so a Platform cannot pre-compute the effect of
+a choice and **MUST** treat the set in each response as authoritative for that
+response alone. A handler that must be initialized with the amount and timing it
+will charge cannot be prepared before the term is settled, and **MAY** cease to
+be offered once it is.
 
-A Business **MUST NOT** publish payment-term identifiers in a discovery-time
-handler profile. Term IDs are scoped to one checkout; a cacheable,
-Buyer-independent profile cannot reference them.
+The instrument funding a term is charged once for each of that term's
+schedules, and **MUST** be capable of every one of them. A Business **MUST NOT**
+advertise an instrument that cannot fund every schedule of the selected term,
+and **MUST** reject one that is submitted. An instrument that can only be
+charged immediately therefore cannot be offered on a term that defers any part
+of the payment.
 
-Per-schedule funding — directing one instrument at one schedule and a different
-instrument at another — is not defined in this version. A Business that supports
-it does so outside the protocol.
+A term with more than one schedule **MUST** be funded by a single instrument.
+[Split Payments](split-payments.md) composes with a term that has exactly one
+schedule, and not otherwise.
 
 ## Disclosures
 
-Some terms carry display obligations. A subscription that renews, an
-installment plan with a finance charge, and a deposit that is forfeited on
+Some terms carry display obligations. An installment plan with a finance charge or a deposit that is forfeited on
 cancellation are all subject to consumer-protection rules about what must be
 shown, and when.
 
@@ -227,7 +235,7 @@ amount due at a stated time. Hotel incidentals, usage overages, and
 post-purchase true-ups are not payment schedules; they are authorizations and
 order adjustments.
 
-**Multiple currencies within one term.** Every schedule total is denominated in
+**Multiple currencies within one term.** Every schedule amount is denominated in
 the Checkout `currency`, so a term cannot express an obligation payable partly
 in another currency.
 
@@ -235,7 +243,7 @@ in another currency.
 create future purchases, renewals, or fulfillment obligations. A Business
 enrolling a Buyer in a subscription charges the first cycle through a payment
 term and discloses the ongoing arrangement through a policy and its paired
-disclosure. See [Subscription enrollment](#subscription-enrollment).
+disclosure.
 
 **Payment execution.** This extension discloses when money is due. It does not
 define credential storage, future-charge authorization, how a Business executes
@@ -283,8 +291,8 @@ On the Order, `payment` carries the accepted term. The terms offered at checkout
 are not projected.
 
 The accepted term is the agreement, not a running balance. When the Order is
-created, a Business **MUST** ensure its schedule `total` entries sum to the
-Order `total`. A Business **MUST NOT** modify the accepted term after the Order
+created, a Business **MUST** ensure its schedule amounts sum to the Order
+`total`. A Business **MUST NOT** modify the accepted term after the Order
 is created; post-purchase changes are recorded in `adjustments[]`. The schedules
 can therefore sum to more than the Order currently owes after a refund, or less
 after an exchange: the term states what was agreed, and the adjustments state
@@ -309,8 +317,9 @@ what happened after.
 > A $1,200 stay. Pay in full today for $1,150, or pay the first night now and
 > the balance at check-in.
 
-The two terms have **different payable amounts**. Their schedules sum to their
-own term's total, and only the selected one is bound to the checkout total.
+The two terms have **different payable amounts**. Each term's schedules sum to
+what that term is payable at, and only the selected one is bound to the checkout
+total.
 
 **Checkout response fragment — the terms on offer.** The Buyer has not chosen
 yet, so the Business defaults to paying now, and says so:
@@ -329,7 +338,7 @@ yet, so the Business defaults to paying now, and says so:
           "id": "sched_full",
           "type": "immediate",
           "description": { "plain": "Due today when you book." },
-          "totals": [{ "type": "total", "amount": 115000 }]
+          "amount": 115000
         }
       ]
     },
@@ -342,7 +351,7 @@ yet, so the Business defaults to paying now, and says so:
           "id": "sched_first_night",
           "type": "immediate",
           "description": { "plain": "Due today when you book." },
-          "totals": [{ "type": "total", "amount": 30000 }]
+          "amount": 30000
         },
         {
           "id": "sched_balance",
@@ -351,12 +360,24 @@ yet, so the Business defaults to paying now, and says so:
             "plain": "Due at check-in on September 1, 2026 at 3:00 PM PDT."
           },
           "due_at": "2026-09-01T15:00:00-07:00",
-          "totals": [{ "type": "total", "amount": 90000 }]
+          "amount": 90000
         }
       ]
     }
   ]
 }
+```
+
+The $50 the pay-now term saves is stated where the purchase is priced, as its
+own entry in `checkout.totals`:
+
+<!-- ucp:example schema=shopping/checkout target=$.totals -->
+```json
+[
+  { "type": "subtotal", "amount": 120000 },
+  { "type": "discount", "amount": -5000, "display_text": "Pay-now saving" },
+  { "type": "total", "amount": 115000 }
+]
 ```
 
 **Update request — the Buyer selects the deposit term:**
@@ -412,7 +433,7 @@ yet, so the Business defaults to paying now, and says so:
             "id": "sched_full",
             "type": "immediate",
             "description": { "plain": "Due today when you book." },
-            "totals": [{ "type": "total", "amount": 115000 }]
+            "amount": 115000
           }
         ]
       },
@@ -425,7 +446,7 @@ yet, so the Business defaults to paying now, and says so:
             "id": "sched_first_night",
             "type": "immediate",
             "description": { "plain": "Due today when you book." },
-            "totals": [{ "type": "total", "amount": 30000 }]
+            "amount": 30000
           },
           {
             "id": "sched_balance",
@@ -434,7 +455,7 @@ yet, so the Business defaults to paying now, and says so:
               "plain": "Due at check-in on September 1, 2026 at 3:00 PM PDT."
             },
             "due_at": "2026-09-01T15:00:00-07:00",
-            "totals": [{ "type": "total", "amount": 90000 }]
+            "amount": 90000
           }
         ]
       }
@@ -444,10 +465,12 @@ yet, so the Business defaults to paying now, and says so:
 ```
 
 Because the pay-now discount no longer applies, `checkout.totals` reports
-$1,200 — the sum of the selected term's two schedules. Had the Buyer selected
-`pt_pay_now`, the checkout total would be $1,150. The terms are unchanged; only
-the selected term is bound to the checkout total. `ucp.payment_handlers` in this
-response is the set resolved for the selected term.
+$1,200 — the sum of the selected term's two schedules — and the `discount` entry
+that carried the $50 saving is gone. Had the Buyer selected `pt_pay_now`, the
+checkout total would be $1,150, composed with that entry. The terms are
+unchanged; only the selected term is bound to the checkout total.
+`ucp.payment_handlers` in this response is the set resolved for the selected
+term.
 
 The deposit terms live in a policy that targets the term they apply to:
 
@@ -513,7 +536,7 @@ disclosure moves with the term it governs:
           "id": "sched_first_night",
           "type": "immediate",
           "description": { "plain": "Due today when you book." },
-          "totals": [{ "type": "total", "amount": 30000 }]
+          "amount": 30000
         },
         {
           "id": "sched_balance",
@@ -522,7 +545,7 @@ disclosure moves with the term it governs:
             "plain": "Due at check-in on September 1, 2026 at 3:00 PM PDT."
           },
           "due_at": "2026-09-01T15:00:00-07:00",
-          "totals": [{ "type": "total", "amount": 90000 }]
+          "amount": 90000
         }
       ]
     }
@@ -562,104 +585,39 @@ reads dates.
       "id": "sched_1",
       "type": "immediate",
       "description": { "plain": "Due today." },
-      "totals": [{ "type": "total", "amount": 2500 }]
+      "amount": 2500
     },
     {
       "id": "sched_2",
       "type": "deferred",
       "description": { "plain": "Due September 15, 2026." },
       "due_at": "2026-09-15T00:00:00Z",
-      "totals": [{ "type": "total", "amount": 2500 }]
+      "amount": 2500
     },
     {
       "id": "sched_3",
       "type": "deferred",
       "description": { "plain": "Due September 29, 2026." },
       "due_at": "2026-09-29T00:00:00Z",
-      "totals": [{ "type": "total", "amount": 2500 }]
+      "amount": 2500
     },
     {
       "id": "sched_4",
       "type": "deferred",
       "description": { "plain": "Due October 13, 2026." },
       "due_at": "2026-10-13T00:00:00Z",
-      "totals": [{ "type": "total", "amount": 2500 }]
+      "amount": 2500
     }
   ]
 }
 ```
-
-### Subscription enrollment
-
-> $29.99 per month, cancel anytime.
-
-The checkout charges the first cycle. The ongoing arrangement is **disclosed**,
-not scheduled: a later cycle is a future purchase the Buyer can decline by
-cancelling, so it is not an amount owed for this checkout.
-
-**Payment term — one immediate schedule for cycle one:**
-
-<!-- ucp:example schema=shopping/payment_terms def=payment_term -->
-```json
-{
-  "id": "pt_monthly",
-  "title": "Monthly",
-  "description": { "plain": "$29.99 today, then monthly until you cancel." },
-  "schedules": [
-    {
-      "id": "sched_cycle_1",
-      "type": "immediate",
-      "description": { "plain": "Due today. Covers your first month." },
-      "totals": [{ "type": "total", "amount": 2999 }]
-    }
-  ]
-}
-```
-
-**Policy — the durable terms.** The recurrence concerns the subscribed item
-rather than the payment timing, so it targets the line item — a node the Order
-also has, which is what makes the snapshot possible:
-
-<!-- ucp:example schema=shopping/checkout target=$.policies -->
-```json
-[
-  {
-    "type": "com.example.policy.subscription",
-    "description": {
-      "markdown": "Renews at **$29.99/month** on the 14th until cancelled. Cancel anytime at example.com/account."
-    },
-    "applies_to": ["$.line_items[0]"],
-    "url": "https://example.com/subscription-terms"
-  }
-]
-```
-
-**Disclosure — compelled display, paired to the policy by `code`:**
-
-<!-- ucp:example schema=shopping/checkout target=$.messages -->
-```json
-[
-  {
-    "type": "warning",
-    "code": "com.example.policy.subscription",
-    "path": "$.line_items[0]",
-    "presentation": "disclosure",
-    "content": "This subscription renews at $29.99/month on the 14th until you cancel. Cancel at https://example.com/account."
-  }
-]
-```
-
-A free trial works the same way: the schedule's `total` is `0`, and the
-disclosure carries the obligation. A checkout whose total is zero while an
-ongoing commitment is being authorized is precisely the case where compelled
-display matters most.
 
 ## Platform responsibilities
 
 Platforms **MUST**:
 
-* Present each term's `title`, and each schedule's `description` and `total`
-  amount, formatted in the Checkout `currency`.
+* Present each term's `title`, and each schedule's `description` and `amount`,
+  formatted in the Checkout `currency`.
 * Re-render from the Business response after selecting a term, rather than
   reusing amounts read from `terms[]`.
 * Treat an unrecognized schedule `type` as not due at completion, and present
@@ -681,12 +639,15 @@ Platforms **SHOULD**:
 
 Businesses **MUST**:
 
-* Offer at least one payment term when the extension is active, and report the
-  selected term in `selected_term_id` on every response.
+* Offer terms where a Checkout has a choice to present or schedules to disclose.
+* Name one of the offered terms in `selected_term_id` on every response that
+  carries `terms`.
 * Ensure every term's schedules state, in `description` alone, when each payment
   is due.
-* Ensure the selected term's schedule totals sum to the checkout total exactly
+* Ensure the selected term's schedule amounts sum to the checkout total exactly
   once.
+* State any difference the selected term makes to what the purchase costs as its
+  own entry in `checkout.totals`.
 * Return the recomputed Checkout after a selection, including any change to
   totals, policies, messages, or eligible payment handlers.
 * Place any content that must reach the Buyer in the disclosure `content`, not
