@@ -123,15 +123,18 @@ def _rewrite_version_urls(data, url_version):
 
 
 def _set_schema_version(data, version):
-  """Set version field for named entities (capabilities, services, handlers).
+  """Set versions for versioned entities and transport artifacts.
 
-  Named entities (schemas with top-level 'name' field) require version per
-  ucp.json#/$defs/entity. Build injects version so source files don't need it.
+  UCP-authored capability and extension schemas require version per
+  ucp.json#/$defs/entity. Build injects the release version only for dev.ucp.*
+  schemas published in the core release. Third-party extensions and payment
+  handlers retain their author-controlled versions; the UCP payment-handler
+  meta-schema has no name and defines only the shared declaration structure.
 
-  Additionally, for OpenAPI and OpenRPC transport specifications, set the
-  required info.version field.
+  For OpenAPI and OpenRPC transport specifications, set the required
+  info.version field as release artifact metadata.
   """
-  if "name" in data:
+  if str(data.get("name", "")).startswith("dev.ucp."):
     data["version"] = version
 
   if ("openapi" in data or "openrpc" in data) and isinstance(
@@ -430,7 +433,7 @@ def on_post_build(config):
       # Step 1: Resolve relative $ref to absolute URLs
       _process_refs(data, src_file.parent)
 
-      # Step 2: Inject version field for named entities
+      # Step 2: Inject versions for versioned entities and transport artifacts
       if schema_version:
         _set_schema_version(data, schema_version)
 
