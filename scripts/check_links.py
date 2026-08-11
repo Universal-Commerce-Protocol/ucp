@@ -160,11 +160,17 @@ def check_links():
         continue
 
       parsed = urlparse(link)
+      is_absolute_internal = False
       if parsed.scheme and parsed.scheme in ("http", "https"):
-        if not link.startswith(SITE_URL):
+        site_url_no_slash = SITE_URL.rstrip("/")
+        if not link.startswith(SITE_URL) and not link.startswith(site_url_no_slash):
           continue  # External link
-        # Internal absolute URL (e.g. https://ucp.dev/foo) -> /foo
-        link = link[len(SITE_URL) - 1 :]  # Keep the leading slash
+        is_absolute_internal = True
+        if link.startswith(SITE_URL):
+          link = link[len(SITE_URL) - 1 :]
+        else:
+          link = "/" + link[len(site_url_no_slash) :]
+        parsed = urlparse(link)
 
       path_part = parsed.path
       anchor_part = parsed.fragment
@@ -179,7 +185,7 @@ def check_links():
 
       # Resolve Target File
       if not path_part:
-        target_file = file_path
+        target_file = ROOT_DIR / "index.html" if is_absolute_internal else file_path
       elif path_part.startswith("/"):
         # Absolute path from root
         rel_path = path_part[1:]
