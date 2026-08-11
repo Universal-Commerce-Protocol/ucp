@@ -196,14 +196,14 @@ for the normative rules. For schema authors this means:
 - **Never mint a structured domain field named `ucp`.** Schema authors
   **MUST NOT** declare a domain field named `ucp` in a structured object; the
   name denotes the protocol namespace there.
-- **Never declare the ambient `ucp` member, either — with one exception,
-  below.** The member is UCP document grammar, defined centrally. A Business
-  or Platform **MAY** include it in any eligible structured scope without the
-  domain schema saying so, just as no schema declares the name reservation.
-  Schema authors **MUST NOT** add a `ucp` property to an open structured
-  domain object. Ordinary instance validation against an open UCP source
-  domain schema treats an ambient `ucp` member as an ignored unknown object;
-  validating its contents is a conformance-tooling concern.
+- **Do not declare ambient `ucp` in open nested objects.** The root `ucp`
+  envelope is not ambient placement; UCP root schemas already declare its
+  required protocol metadata. Below the root, the member is UCP document grammar
+  defined centrally, so schema authors **MUST NOT** declare it in an open nested
+  object. A Business or Platform **MAY** include it in an eligible open
+  structured scope without the domain schema saying so. Ordinary instance
+  validation against an open UCP source domain schema treats it as an ignored
+  unknown object; validating its contents is a conformance-tooling concern.
 - **Dictionary keys remain data.** A dictionary container cannot host the
   protocol namespace. Schema authors **MUST NOT** model a dictionary key named
   `ucp` as that namespace; the key is governed by the dictionary's key and
@@ -223,16 +223,13 @@ for the normative rules. For schema authors this means:
   This is why structural metadata about a registry map — such as `map_order`
   — sits in the parent structured scope's protocol namespace rather than
   inside the map itself.
-- **Closed structured objects must declare `ucp` explicitly.** Closing a
-  structured object does not exempt it from the protocol grammar. When a
-  schema author defines a structured object scope in a UCP payload with
-  `additionalProperties: false`, the author **MUST** declare an optional
-  `ucp` property referencing `ucp.json#/$defs/members` so the ambient member
-  remains representable there. This is the one exception to the
-  never-declare rule above — and one more reason to leave structured objects
-  open (see [Open Objects](#open-objects-additionalproperties)). This
-  exception applies only to structured object scopes; closing a dictionary
-  does not create an ambient namespace there.
+- **Closed nested structured objects must declare optional `ucp`
+  explicitly.** Closing a nested structured object does not exempt it from the
+  protocol grammar. A schema author defining one with
+  `additionalProperties: false` **MUST** declare an optional `ucp` property
+  referencing `ucp.json#/$defs/members`. This exception applies only to nested
+  structured objects; closing a dictionary does not create an ambient namespace
+  there.
 - **Declare member applicability.** Schema authors **MUST** annotate every
   property registered in `ucp.json#/$defs/members` with `ucp_request` (`omit`,
   `optional`, or `required`, as appropriate). They **MUST** repeat the

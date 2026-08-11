@@ -48,7 +48,7 @@
 
     "map_order": {
       "type": "object",
-      "description": "Preferred key-traversal order for map-valued fields in the scope annotated by the containing `ucp` member. In a nested scope, each key names a map-valued field on the object containing `ucp`; at the document root, each key names a sibling map-valued field inside the root `ucp` envelope. Each array lists its target map's keys in preferred order. Lists may be partial: unlisted keys remain valid and are appended using the field-defined fallback or lexicographic order. This member is not an allowlist; consumers ignore unknown or absent target fields. Repeated map keys in an order array do not invalidate the containing payload; consumers use the first occurrence and ignore later repetitions.",
+      "description": "Preferred key order for map-valued fields in the scope annotated by the containing `ucp` member. Each property names a target map, and its array lists target keys in preferred order. Lists may be partial and are not allowlists.",
       "additionalProperties": {
         "type": "array",
         "items": { "type": "string" }
@@ -57,7 +57,7 @@
 
     "members": {
       "type": "object",
-      "description": "Vocabulary and processing contract for the reserved `ucp` protocol-namespace member. Any structured UCP object scope—an object whose members are schema-defined fields—MAY carry a `ucp` member conforming to this definition. The reservation does not apply to dictionary scopes, where keys are data: a dictionary key named `ucp` is ordinary data. A structured object used as a dictionary value remains an eligible scope. Consumers process recognized members and MUST ignore unrecognized ones. At the document root, the `ucp` envelope additionally carries the handshake members defined by this schema. Open for forward compatibility; not an extension point — only UCP core registers members, and every member MUST be safe to ignore.",
+      "description": "Members defined inside the reserved `ucp` protocol object. The object is open for forward compatibility: consumers MUST ignore unrecognized members. Only UCP core defines members, and every defined member MUST be safe to ignore.",
       "properties": {
         "map_order": {
           "$ref": "#/$defs/map_order",

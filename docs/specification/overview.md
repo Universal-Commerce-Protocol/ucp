@@ -985,8 +985,10 @@ unrecognized member inside `ucp` means "defined by a newer UCP version,"
 never "extension data."
 
 **No direct recursion.** Producers **MUST NOT** emit a `ucp` member as a direct
-child of another `ucp` member (`ucp.ucp`). Structured objects beneath it, such
-as a capability's `config`, remain eligible for their own `ucp` member.
+child of another `ucp` member (`ucp.ucp`). If one is present, a receiving
+Business or Platform **MUST NOT** interpret it as another protocol namespace and
+**MUST** ignore that child. Structured objects beneath the namespace, such as a
+capability's `config`, remain eligible for their own `ucp` member.
 
 **Ambient vocabulary.** The protocol namespace is ambient within structured
 UCP objects: a Business or Platform **MAY** include a `ucp` member at any
@@ -1010,7 +1012,7 @@ for example, simply traverses the map unordered — the status quo before
 ordering existed.
 
 **Scope determines obligations.** At the root of profiles and responses, the
-`ucp` envelope additionally carries the required handshake members exactly as
+`ucp` envelope additionally carries the required protocol metadata exactly as
 specified elsewhere in this document — this section changes none of those
 obligations. A Business or Platform **MAY** omit the member at every other
 eligible structured scope. Dictionary containers are not eligible scopes and
@@ -1039,9 +1041,8 @@ JSON object members are unordered: member order is not guaranteed to survive
 parsing, and
 [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
 (JSON Canonicalization Scheme), which UCP signing relies on, sorts object
-member names while preserving array element order. An array
-value is therefore the only order carrier that survives canonicalization and
-signing — and `map_order` uses one.
+member names while preserving array element order. `map_order` uses an array
+so its declared order survives canonicalization and signing.
 
 `map_order` declares a preferred key-traversal order for map-valued fields in
 the scope annotated by its containing `ucp` member. At a nested scope, each
@@ -1063,12 +1064,16 @@ For a target map field `<field>` and its companion array `map_order.<field>`:
     array order.
 4. Unlisted map keys remain valid and available; consumers traverse them
     after the listed keys, using the field-defined fallback order or, if the
-    field defines none, lexicographic order.
+    field defines none, the
+    [property-name ordering defined by RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html#section-3.2.3){ target="_blank" }.
 5. The order array is not an allowlist: consumers **MUST NOT** interpret
     omission of a key as removal, ineligibility, or reduced support.
-6. Producers **SHOULD** list only keys present in the target map. Consumers
-    **SHOULD** ignore entries naming keys that are not present, and entries
-    whose target field is absent or is not a map.
+6. Producers **MUST** name a present, map-valued target and **MUST** list only
+    keys present in that target map. A receiving Business
+    or Platform **MUST NOT** reject the containing document solely because an
+    entry names an absent, unrecognized, or non-map target, or a key absent from
+    its target map. If it processes `map_order`, it **MUST** ignore the unusable
+    entry.
 7. Producers **MUST NOT** list the same map key more than once in an order
     array. Consumers **MUST NOT** reject the containing document solely because
     an order array repeats a map key. Consumers that process `map_order`
