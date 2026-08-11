@@ -167,8 +167,8 @@ core capabilities.
     {
       "version": "2026-04-08",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -275,9 +275,9 @@ authentication are resolved together.
       "dev.ucp.shopping": [
         {
           "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
@@ -285,13 +285,13 @@ authentication are resolved together.
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
         "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
         "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
