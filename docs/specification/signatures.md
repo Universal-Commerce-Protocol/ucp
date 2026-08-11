@@ -513,7 +513,7 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9q...:
 Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2026"
-Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {
   "line_items": [
@@ -531,7 +531,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 GET /checkout-sessions/chk_123 HTTP/1.1
 Host: merchant.example.com
 Signature-Input: sig1=("@method" "@authority" "@path");keyid="platform-2026"
-Signature: sig1=:MEQCIBx7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 ```
 
 ### REST Response Signing
@@ -561,7 +561,7 @@ HTTP/1.1 201 Created
 Content-Type: application/json
 Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
 Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
-Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {
   "id": "chk_123",
@@ -820,7 +820,7 @@ The `Idempotency-Key` header is included in the signed components:
 POST /checkout-sessions HTTP/1.1
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" ...);keyid="platform-2026"
-Signature: sig1=:MEUCIQD...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 ```
 
 **Idempotency Key Requirements:**
@@ -901,7 +901,7 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
 Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
-Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"chk_123","checkout":{...}}}}
 ```
