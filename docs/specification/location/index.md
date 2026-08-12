@@ -77,9 +77,8 @@ other capabilities (like Catalog, Cart, and Checkout in Shopping):
 ### Representation
 
 The hours filter's [`open_at`](search.md#hours-based-filter) value is an exact
-instant. By contrast, `day`, `opens`, `closes`, `valid_from`, and
-`valid_through` are canonical local civil values interpreted in the containing
-Location's `timezone`; they are not timestamps.
+instant. Operating hours use the Location's local date and clock time,
+interpreted using its IANA timezone.
 
 * `hours` is a list of regular weekly intervals. Each item contains `day`,
     `opens`, and `closes`. `day` is a stable UCP day-of-week identifier for the
@@ -114,7 +113,9 @@ current schedule shape cannot distinguish the two fold occurrences.
 Multiple `hours` items for the same `day` combine as split shifts. An omitted
 day means no regular interval begins that day, but an interval from the
 preceding day can carry into it. Absent `hours` means the regular schedule is
-unknown, not closed.
+unknown, not closed. To represent a temporary full closure, a Business retains
+its regular `hours` and adds an `exception_hours` entry for the affected dates
+without `opens` or `closes`.
 
 An exception schedule replaces the regular schedule on every covered local
 date. If an interval carries into a local date governed by an exception, that

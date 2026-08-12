@@ -25,7 +25,7 @@
         },
         "hours": {
           "type": "array",
-          "description": "Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts.",
+          "description": "Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown.",
           "items": {
             "$ref": "daily_hour.json"
           },

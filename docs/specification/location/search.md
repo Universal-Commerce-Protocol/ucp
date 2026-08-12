@@ -72,10 +72,11 @@ custom filters via `additionalProperties`.
 
 The standard `filters.hours` object requires `open_at`, an exact RFC 3339
 instant expressed with `Z` or a numeric offset, and can include
-extension-defined fields. Before sending a Buyer-local wall time, a Platform
-**MUST** resolve it to an exact instant for `open_at`. When asking which
-Locations are open now, a Platform **MUST** supply the current instant. No
-timezone field is needed in the standard `context` object because `open_at`
+extension-defined fields. `open_at` identifies the instant relevant to the
+request, such as an expected arrival or pickup time. Before sending a
+Buyer-local date and time, a Platform **MUST** resolve it to an exact instant.
+The Business evaluates the supplied instant against each Location's schedule.
+No timezone field is needed in the standard `context` object because `open_at`
 already identifies the instant.
 
 The `Z` or numeric offset identifies only that instant. Platforms and
