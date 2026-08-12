@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/discount.json",
   "name": "dev.ucp.shopping.discount",
   "title": "Discount Extension",
-  "description": "Extends Cart and Checkout with discount support, including discount codes, automatic discounts, and eligibility-triggered provisional discounts.",
+  "description": "Extends Catalog Lookup, Cart, and Checkout with discount support, including discoverable promotions, discount codes, automatic discounts, and eligibility-triggered provisional discounts.",
   "$defs": {
     "allocation": {
       "type": "object",
@@ -114,6 +114,26 @@
         }
       }
     },
+    "catalog_available_discount": {
+      "description": "A discoverable discount preview for a catalog product. Application state and cart-relative thresholds are not available in Catalog.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/available_discount"
+        },
+        {
+          "not": {
+            "anyOf": [
+              {
+                "required": ["applied"]
+              },
+              {
+                "required": ["remaining_amount"]
+              }
+            ]
+          }
+        }
+      ]
+    },
     "discounts_object": {
       "type": "object",
       "description": "Discount codes input and applied discounts output.",
@@ -140,6 +160,52 @@
           },
           "description": "Discounts available for this cart or checkout context. Business-optional. Includes both automatic promotions and discoverable code-based offers.",
           "ucp_request": "omit"
+        }
+      }
+    },
+    "catalog_discounts_object": {
+      "type": "object",
+      "description": "Publicly discoverable discounts for a catalog product detail response.",
+      "properties": {
+        "available": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalog_available_discount"
+          },
+          "description": "Promotions that may apply to the requested product. Cart or Checkout evaluation remains authoritative."
+        }
+      }
+    },
+    "discount_get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "discounts": {
+              "$ref": "#/$defs/catalog_discounts_object",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog Lookup composition with discoverable discounts on product detail responses.",
+      "$defs": {
+        "lookup_request": {
+          "$ref": "catalog_lookup.json#/$defs/lookup_request"
+        },
+        "lookup_response": {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        "get_product_request": {
+          "$ref": "catalog_lookup.json#/$defs/get_product_request"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/discount_get_product_response"
         }
       }
     },

@@ -18,25 +18,25 @@
 
 ## Overview
 
-Discount extension allows businesses to indicate that they support discount
-codes on cart and checkout sessions, and specifies how the discount codes are
-to be shared between the platform and the business.
+The Discount extension allows Businesses to surface discoverable promotions on
+product details and to support discount codes on Cart and Checkout sessions.
 
 **Key features:**
 
 - Submit one or more discount codes
+- Discover public promotion previews before Cart creation
 - Receive applied discounts with human-readable titles and amounts
 - Rejected codes communicated via `messages[]` with detailed error codes
 - Automatic discounts surfaced alongside code-based discounts
 
 **Dependencies:**
 
-- Cart Capability or Checkout Capability
+- Catalog Lookup, Cart, or Checkout Capability
 
 ## Discovery
 
 Businesses advertise discount support in their profile. The capability can
-extend cart, checkout, or both:
+extend Catalog Lookup, Cart, Checkout, or any combination of them:
 
 <!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
@@ -47,7 +47,11 @@ extend cart, checkout, or both:
       "dev.ucp.shopping.discount": [
         {
           "version": "{{ ucp_version }}",
-          "extends": ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
+          "extends": [
+            "dev.ucp.shopping.catalog.lookup",
+            "dev.ucp.shopping.cart",
+            "dev.ucp.shopping.checkout"
+          ],
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
         }
@@ -57,18 +61,28 @@ extend cart, checkout, or both:
 }
 ```
 
-Businesses MAY advertise discount support for cart only, checkout only, or
-both. Platforms SHOULD check which resources are extended before submitting
-discount codes.
+Businesses MAY advertise discount support for any subset of these capabilities.
+Platforms SHOULD check which resources are extended before presenting promotion
+previews or submitting discount codes.
 
 ## Schema
 
-When this capability is active, cart and/or checkout are extended with a
-`discounts` object.
+When this capability is active, the negotiated Catalog Lookup, Cart, and/or
+Checkout operations are extended with a `discounts` object. Catalog adds the
+object only to `get_product` responses; Cart and Checkout also accept discount
+codes in requests.
 
 ### Discounts Object
 
 {{ extension_schema_fields('discount.json#/$defs/discounts_object', 'discount') }}
+
+### Catalog Discounts Object
+
+{{ extension_schema_fields('discount.json#/$defs/catalog_discounts_object', 'discount') }}
+
+### Available Discount
+
+{{ extension_schema_fields('discount.json#/$defs/available_discount', 'discount') }}
 
 ### Applied Discount
 
@@ -77,6 +91,69 @@ When this capability is active, cart and/or checkout are extended with a
 ### Allocation
 
 {{ extension_schema_fields('discount.json#/$defs/allocation', 'discount') }}
+
+## Catalog Promotion Previews
+
+When the Discount extension is negotiated for Catalog Lookup, a Business MAY
+return `discounts.available` in a `get_product` response. These entries are
+public promotion previews. They allow a Platform to describe a potentially
+applicable offer before the buyer creates a Cart or Checkout.
+
+Catalog previews are advisory. Cart or Checkout evaluation is authoritative for
+eligibility, application, calculated amounts, and allocations. When a Business
+returns `conditions`, a Platform MUST present them and MUST NOT represent a
+preview as a final eligibility decision.
+
+The Catalog composition applies only to `get_product` responses:
+
+- `lookup_catalog` requests and responses are unchanged.
+- `get_product` requests are unchanged.
+- `discounts.codes` and `discounts.applied` are not available in Catalog.
+- `applied` and `remaining_amount` are omitted from Catalog preview entries.
+- For a promotion with `type: "code"`, the Business discloses that an offer
+  exists but does not disclose the code itself.
+
+<!-- ucp:example schema=shopping/discount def=discount_get_product_response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}"
+  },
+  "product": {
+    "id": "prod_jacket",
+    "title": "Unisex Jacket",
+    "description": { "plain": "A lightweight everyday jacket." },
+    "price_range": {
+      "min": { "amount": 7900, "currency": "USD" },
+      "max": { "amount": 7900, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_jacket_black",
+        "title": "Black",
+        "description": { "plain": "Black lightweight jacket." },
+        "price": { "amount": 7900, "currency": "USD" }
+      }
+    ]
+  },
+  "discounts": {
+    "available": [
+      {
+        "id": "promo_category_20",
+        "title": "20% off selected styles",
+        "type": "automatic",
+        "conditions": "Available on eligible styles for a limited time"
+      },
+      {
+        "id": "promo_member",
+        "title": "Member offer available",
+        "type": "code",
+        "conditions": "Eligible members can enter their offer code at checkout"
+      }
+    ]
+  }
+}
+```
 
 ## Allocation Details
 
