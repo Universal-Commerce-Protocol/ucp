@@ -219,7 +219,7 @@ explicit eligibility claim. In this case, the map key MUST be the same reverse-d
 identifier the business would accept as a claim value. This is a specific instance of
 the general pattern where identity linking lets a business return its own user state on a
 response; see
-[Business-Populated Response Values](identity-linking.md#business-populated-response-values).
+[Business-Populated Response Values](common/identity-linking/index.md#business-populated-response-values).
 
 * When a business verifies a membership claim or determines membership from
   authenticated identity, it MUST return `provisional: false`. It MUST populate the

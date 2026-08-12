@@ -186,9 +186,9 @@ when its specification explicitly adopts it and defines the parent-specific
 behavior: where Actions appear, the effect each Action type gates, how Messages
 apply, and how a later response reflects processing. Schema composition alone
 does not establish support. Cart, Checkout, and Catalog adopt this shape; see
-[Cart — Actions](shopping/cart/index.md#actions),
-[Checkout — Actions](shopping/checkout/index.md#actions), and
-[Catalog — Actions](shopping/catalog/index.md#actions) for their parent-specific
+[Cart — Actions](../shopping/cart/index.md#actions),
+[Checkout — Actions](../shopping/checkout/index.md#actions), and
+[Catalog — Actions](../shopping/catalog/index.md#actions) for their parent-specific
 contracts.
 
 Actions and Messages have different roles. An Action represents outstanding
@@ -231,7 +231,7 @@ explanatory Message (an illustrative, partial fragment):
 The Action identifies the outstanding work and carries extension-owned
 processing configuration under `config`. The Message's `path` selects the exact
 Action occurrence it explains. The
-[checkout eligibility example](shopping/checkout/index.md#eligibility-verification-at-completion)
+[checkout eligibility example](../shopping/checkout/index.md#eligibility-verification-at-completion)
 composes this pattern into a complete Student Verification flow.
 
 For a newly processed successful response from a capability that adopts Actions,
@@ -241,7 +241,7 @@ the Business **MUST** include every outstanding Action and **MUST** omit
 Cart and Checkout define request idempotency separately. Duplicate requests
 follow those existing rules and can return the original cached response,
 including its `actions` (see
-[Message Signatures — Replay Protection](signatures.md#replay-protection)).
+[Message Signatures — Replay Protection](../signatures.md#replay-protection)).
 
 An Action's gate and an operation-specific outcome are orthogonal. Neither a
 parent status nor a Message's type or severity determines whether an Action
@@ -262,7 +262,7 @@ contract.
 When an Action prevents a Cart or Checkout operation from succeeding,
 processing the Action does not repeat that operation. If the Platform wants to
 try again, it submits a new operation under the existing
-[Replay Protection](signatures.md#replay-protection) rules.
+[Replay Protection](../signatures.md#replay-protection) rules.
 
 Each Action key is a reverse-domain **Action type**: the name identifies the
 type of outstanding work, which is not necessarily the name of the extension
@@ -279,7 +279,7 @@ Action type keys follow existing [Namespace Governance](#namespace-governance)
 rules: an extension can declare only types within a reverse-domain namespace
 controlled by its schema authority. An extension can use its own name as the key
 for a single Action type — as the
-[Student Verification example](shopping/checkout/index.md#eligibility-verification-at-completion)
+[Student Verification example](../shopping/checkout/index.md#eligibility-verification-at-completion)
 does — or declare several Action types under distinct keys. Each value is a
 non-empty array of outstanding instances of that one Action type. The key
 identifies the type, so an instance carries no separate type discriminator; a
@@ -602,7 +602,7 @@ functionality is supported and where to find documentation and schemas.
 
 #### Capability Definition
 
-{{ extension_schema_fields('capability.json#/$defs/platform_schema', 'capability-schema') }}
+{{ extension_schema_fields('capability.json#/$defs/platform_schema', 'overview') }}
 
 #### Extensions
 
@@ -833,7 +833,7 @@ effectively revoked until it is absent from `keys[]`.
 UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and
 **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm
 vocabularies are open and verifiers skip keys they do not recognize.
-See [Message Signatures](signatures.md) for key format, algorithms,
+See [Message Signatures](../signatures.md) for key format, algorithms,
 lookup, and rotation.
 
 #### Business Profile
@@ -849,27 +849,27 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
         },
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "mcp",
           "endpoint": "https://business.example.com/ucp/mcp",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json"
         },
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "embedded",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/embedded.openrpc.json"
         }
@@ -902,7 +902,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.common.identity_linking": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
           "config": {
             "providers": {
@@ -986,7 +986,7 @@ it will not read `keys[]` from a static `/.well-known/ucp`. See
 
 This example uses two keys. Whether a deployment needs one or two depends
 on the algorithms its counterparties accept — many need only one; see
-[Signature Algorithms](signatures.md#signature-algorithms). The two keys
+[Signature Algorithms](../signatures.md#signature-algorithms). The two keys
 here:
 
 - An **Ed25519** key (OKP) for HTTP transport identity, WBA-compatible.
@@ -998,7 +998,7 @@ A business that does not interact with AP2 or WBA may publish a single
 ES256 key in `keys[]` (the universal baseline). See
 [Key Discovery](#key-discovery) for key lookup and resolution,
 [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop)
-for hosting choices, and [Message Signatures](signatures.md) for
+for hosting choices, and [Message Signatures](../signatures.md) for
 signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a
@@ -1022,7 +1022,7 @@ example:
       "dev.ucp.shopping": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "rest",
           "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://platform.example.com/ucp/v1"
@@ -1058,7 +1058,7 @@ example:
       "dev.ucp.common.identity_linking": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json"
         }
       ]
@@ -1429,7 +1429,7 @@ the result in the UCP response:
 | `digest_mismatch`      | Body digest doesn't match `Content-Digest` header      | 400  | -32600 |
 | `algorithm_unsupported`| Signature algorithm not supported                      | 400  | -32600 |
 
-See [Message Signatures](signatures.md) for signature verification details.
+See [Message Signatures](../signatures.md) for signature verification details.
 
 **Protocol Errors:**
 
@@ -1450,7 +1450,7 @@ responses.
 The Embedded Protocol uses the same JSON-RPC error codes for peer-to-peer
 communication between host and embedded context. Server-specific scenarios
 (rate limiting, idempotency) do not apply to the embedded transport. See
-[Embedded Protocol — Response Handling](embedded-protocol.md#response-handling)
+[Embedded Protocol — Response Handling](../embedded-protocol.md#response-handling)
 for the full error handling specification.
 
 ##### The `continue_url` Field
@@ -1722,7 +1722,7 @@ can interact with any business without prior registration.
 additionally emit a `Signature-Agent` header advertising their keys. See
 [Identity Resolution Algorithm](#identity-resolution-algorithm) for how
 verifiers resolve identity and
-[Message Signatures — WBA Interop](signatures.md#wba-interop) for the
+[Message Signatures — WBA Interop](../signatures.md#wba-interop) for the
 signature shape.
 
 ### Authentication Mechanisms
@@ -1735,7 +1735,7 @@ message integrity. UCP is compatible with multiple authentication mechanisms:
 - **mTLS** — Mutual TLS with client certificates
 - **HTTP Message Signatures** — Cryptographic signatures per
   [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see
-  [Message Signatures](signatures.md) for full specification)
+  [Message Signatures](../signatures.md) for full specification)
 
 HTTP Message Signatures enable permissionless onboarding — businesses can
 verify platforms by their advertised public keys without negotiating shared
@@ -1743,7 +1743,7 @@ secrets. The other mechanisms require prior credential exchange and imply a
 pre-established relationship.
 
 Business-to-platform webhooks **MUST** be signed. See
-[Message Signatures — When Signatures Apply](signatures.md#when-signatures-apply).
+[Message Signatures — When Signatures Apply](../signatures.md#when-signatures-apply).
 
 #### Identity Binding
 
@@ -1782,7 +1782,7 @@ profile fetching, and covered-component enforcement — see
 [Identity Resolution Algorithm](#identity-resolution-algorithm) below.
 For key format (JWK), supported algorithms, key rotation procedures,
 and the Web Bot Auth interop signature shape, see
-[Message Signatures](signatures.md).
+[Message Signatures](../signatures.md).
 
 ### Profile Requirements
 
@@ -1940,7 +1940,7 @@ below processes a single signature.
       need not implement Web Bot Auth key discovery. (Verifying a
       dual-audience signature does still require supporting the key's
       algorithm — whichever the signer used, per
-      [Signature Algorithms](signatures.md#signature-algorithms) — and
+      [Signature Algorithms](../signatures.md#signature-algorithms) — and
       RFC 9421 §2.1.2 Dictionary-member component selection to cover
       `signature-agent;key="<label>"`.) Signatures with tags
       other than `web-bot-auth` are skipped unless UCP defines
@@ -1949,11 +1949,11 @@ below processes a single signature.
       (WBA-aware verifiers).** For a signature carrying
       `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve
       via the `Signature-Agent` member, parsed per the
-      [Signature-Agent parsing rules](signatures.md#rest-request-verification).
+      [Signature-Agent parsing rules](../signatures.md#rest-request-verification).
       Such a signature **MUST** satisfy the WBA agent-signature
       requirements in
       [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/)
-      §4.2 (see [WBA Interop](signatures.md#wba-interop) for the
+      §4.2 (see [WBA Interop](../signatures.md#wba-interop) for the
       signer-side shape). The member value **MUST** be an HTTPS URL.
       Its `type` selects resolution: `jwks_uri` and `cimd` reach the
       keys through the signer's profile and are resolved by the steps
@@ -2027,7 +2027,7 @@ either suffices.
 This rule governs **HTTP transport identity**. Payload-layer
 assertions (e.g., AP2 mandate JWTs carried in the request body) have
 their own identity binding and key-resolution rules; see
-[AP2 Mandates](ap2-mandates.md).
+[AP2 Mandates](../ap2-mandates.md).
 
 ## Payment Architecture
 
@@ -2058,7 +2058,7 @@ autonomous AI agents), UCP supports the **AP2 Mandates Extension**
 non-repudiable authorization through verifiable digital credentials.
 
 See [Transaction Integrity](#transaction-integrity-and-non-repudiation)
-and [AP2 Mandates Extension](ap2-mandates.md) for details on when and how to
+and [AP2 Mandates Extension](../ap2-mandates.md) for details on when and how to
 use this extension.
 
 #### Credential Flow & PCI Scope
@@ -2132,14 +2132,14 @@ response. The platform's declaration (from its profile) signals what it can
 handle; the business intersects that with its own `business_schema` declaration
 and cart context, then returns the resolved result. Platforms **MUST** treat the
 `available_instruments` in the response as authoritative for that checkout. See
-the [Payment Handler Guide](payment-handler-guide.md#resolving-available_instruments)
+the [Payment Handler Guide](../payment/guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
 **Instrument Cardinality:** A checkout submission **MUST** contain exactly one
 payment instrument unless the `dev.ucp.shopping.split_payments` capability is
 active. Businesses **MUST** reject submissions that violate this constraint with
 a `payment_failed` error in `messages[]`. See
-[Split Payments](split-payments.md) for the extension that relaxes this
+[Split Payments](../payment/split-payments.md) for the extension that relaxes this
 constraint.
 
 ### Implementation Scenarios
@@ -2458,7 +2458,7 @@ certified and handle:
 5. Set appropriate credential timeouts
 6. For autonomous commerce scenarios requiring cryptographic proof, consider
     supporting the `dev.ucp.shopping.ap2_mandate` extension (see
-    [AP2 Mandates Extension](ap2-mandates.md))
+    [AP2 Mandates Extension](../ap2-mandates.md))
 
 **For Platforms:**
 
@@ -2469,7 +2469,7 @@ certified and handle:
 5. Handle credential expiration gracefully (re-acquire if needed)
 6. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate`
     extension for cryptographic proof of authorization (see
-    [AP2 Mandates Extension](ap2-mandates.md))
+    [AP2 Mandates Extension](../ap2-mandates.md))
 
 **For Payment Credential Providers:**
 
@@ -2504,11 +2504,11 @@ use cases:
 - **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds
     cryptographic proof of user authorization for autonomous commerce scenarios
     where non-repudiable evidence is required. See
-    [AP2 Mandates Extension](ap2-mandates.md).
+    [AP2 Mandates Extension](../ap2-mandates.md).
 
 - **Custom Handler Types**: Payment credential providers can define custom
     handlers to support new payment instruments. See
-    [Payment Handler Guide](payment-handler-guide.md) for details.
+    [Payment Handler Guide](../payment/guide.md) for details.
 
 The extension model ensures the core architecture remains simple while
 supporting advanced security and compliance requirements when needed.
@@ -2733,7 +2733,7 @@ item, a regulatory notice — it **MUST** emit a `messages[]` warning that:
 
 - sets `presentation: "disclosure"`, so the Platform displays the content and
   cannot hide or dismiss it (see
-  [Warning Presentation](shopping/checkout/index.md#warning-presentation));
+  [Warning Presentation](../shopping/checkout/index.md#warning-presentation));
 - sets `path` to the item the notice concerns; and
 - sets `code` to the policy's `type`, linking the notice to its policy.
 
@@ -2971,7 +2971,7 @@ This mechanism provides strong, end-to-end cryptographic assurances about
 transaction details and participant consent, significantly reducing risks of
 tampering and disputes.
 
-See [AP2 Mandates Extension](ap2-mandates.md) for complete specification,
+See [AP2 Mandates Extension](../ap2-mandates.md) for complete specification,
 implementation guide, and examples.
 
 ## Versioning
@@ -3295,4 +3295,4 @@ versions.
 
 ## Glossary
 
-For definitions of acronyms and terms used throughout the UCP specification, see the [Glossary](glossary.md).
+For definitions of acronyms and terms used throughout the UCP specification, see the [Glossary](../glossary.md).

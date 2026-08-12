@@ -35,7 +35,7 @@ We offer a range of examples to utilize forms of tokenization in UCP:
 | :------ | :------- |
 | [Processor Tokenizer](examples/processor-tokenizer-payment-handler.md) | Business or PSP runs tokenization and processing |
 | [Platform Tokenizer](examples/platform-tokenizer-payment-handler.md) | Platform tokenizes credentials for businesses/PSPs |
-| [Encrypted Credential Handler](examples/encrypted-credential-handler.md) | Platform encrypts credentials instead of tokenizing |
+| [Encrypted Credential Handler](examples/encrypted-credential-payment-handler.md) | Platform encrypts credentials instead of tokenizing |
 
 ---
 
@@ -277,5 +277,5 @@ A tokenizer handler conforms to this pattern if it:
 
 ## See Also
 
-- **[Encrypted Credential Handler](examples/encrypted-credential-handler.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](ap2-mandates.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[Encrypted Credential Handler](examples/encrypted-credential-payment-handler.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
+- **[AP2 Mandates Extension](../ap2-mandates.md)** — Add cryptographic proof of checkout agreement for PSP verification

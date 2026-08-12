@@ -17,7 +17,7 @@
 # Payment Device Data Collection Action
 
 This specification defines the device data collection Action type declared by
-the [Payment Authentication extension](../payment-authentication.md):
+the [Payment Authentication extension](../authentication.md):
 
 ```text
 dev.ucp.payment.device_data_collection
@@ -99,8 +99,8 @@ The Platform **MUST**:
    timeout.
 
 Mounting the surface **MUST** follow the shared
-[Payment Authentication rendering contract](../payment-authentication.md#surface-rendering-and-notifications)
-and [Embedded Protocol security requirements](../embedded-protocol.md#security).
+[Payment Authentication rendering contract](../authentication.md#surface-rendering-and-notifications)
+and [Embedded Protocol security requirements](../../embedded-protocol.md#security).
 
 On the web the surface is typically a hidden iframe. A native Platform may use
 an isolated webview or equivalent browser surface. It **MUST NOT** be visible to
@@ -113,9 +113,9 @@ whether an ACS method timed out, or whether 3DS authentication should proceed.
 ## Embedded Notifications
 
 After completing the shared
-[`action.ready` handshake](../payment-authentication.md#ready-handshake), the
+[`action.ready` handshake](../authentication.md#ready-handshake), the
 surface sends JSON-RPC 2.0 notifications defined by the
-[payment Action embedded contract](../payment-authentication.md#surface-rendering-and-notifications).
+[payment Action embedded contract](../authentication.md#surface-rendering-and-notifications).
 
 ### Done
 
@@ -164,7 +164,7 @@ it **MAY** send:
 ```
 
 Surface-level codes are the shared
-[well-known `action.error` codes](../payment-authentication.md#surface-rendering-and-notifications).
+[well-known `action.error` codes](../authentication.md#surface-rendering-and-notifications).
 They are not EMV 3DS or payment outcomes: a provider-domain timeout or
 unavailable method that the handler can safely continue past should normally
 result in `action.done`, with the Business and provider recording the domain
@@ -193,7 +193,7 @@ parent Checkout Actions fallback, handoff, and cancellation rules.
 
 ## Security
 
-The common [Payment Authentication security requirements](../payment-authentication.md#security-and-data-handling)
+The common [Payment Authentication security requirements](../authentication.md#security-and-data-handling)
 apply. In addition:
 
 - The handler's trust policy **MUST** authorize the initial and redirect origins

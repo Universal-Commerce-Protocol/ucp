@@ -104,13 +104,13 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 Businesses MAY surface a snapshot of the originating checkout's
 `attribution` on the order. Read-only on the order — agents do not write
-`order.attribution`. See [Attribution](../../overview.md#attribution) for the
+`order.attribution`. See [Attribution](../../overview/index.md#attribution) for the
 underlying contract.
 
 ### Policies
 
 Businesses MAY surface a snapshot of the policies that applied at checkout on
-the order. See [Policies](../../overview.md#policies) for the underlying contract.
+the order. See [Policies](../../overview/index.md#policies) for the underlying contract.
 
 ### Adjustments
 
@@ -547,7 +547,7 @@ user-authenticated access:
 | `dev.ucp.shopping.order:manage` | Post-purchase operations on the user's orders — cancellation, returns, and other modifications. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
 ## Operations
 
@@ -594,7 +594,7 @@ observed the order confirmation, and is retrieving the latest state of an
 order it already has context for.
 
 **Buyer authorization** - the platform obtains buyer authorization via
-[Identity Linking](../../identity-linking.md) with the necessary scopes, or a
+[Identity Linking](../../common/identity-linking/index.md) with the necessary scopes, or a
 similar mechanism. This grants access to the buyer's orders regardless of
 which platform originated them.
 

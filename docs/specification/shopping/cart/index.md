@@ -114,7 +114,7 @@ item count.
 ## Actions
 
 The cart surfaces outstanding Action instances in its response-only `actions`
-map, defined in [Overview — Actions](../../overview.md#actions).
+map, defined in [Overview — Actions](../../overview/index.md#actions).
 
 The cart has no status lifecycle. Each Action gates only the cart effect
 specified for its Action type. The Business **MUST NOT** treat an outstanding
@@ -134,7 +134,7 @@ user-authenticated access:
 | `dev.ucp.shopping.cart:manage` | All cart operations on behalf of the authenticated user — create, read, update, persist. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
 ## Guidelines
 
@@ -264,7 +264,7 @@ consistent data structures when converting a cart to a checkout session.
 
 Environment data provided by the platform to support authorization
 and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
-[Signals](../../overview.md#signals) for details and privacy
+[Signals](../../overview/index.md#signals) for details and privacy
 requirements.
 
 {{ schema_fields('types/signals', 'shopping/checkout') }}
@@ -273,7 +273,7 @@ requirements.
 
 Platform-provided referral and conversion-event context — campaign IDs,
 click identifiers, and source/medium markers communicated by the platform.
-See [Attribution](../../overview.md#attribution) for details and consent
+See [Attribution](../../overview/index.md#attribution) for details and consent
 requirements.
 
 {{ schema_fields('types/attribution', 'shopping/checkout') }}
@@ -314,6 +314,6 @@ are estimates; accurate taxes are computed at checkout.
 Policies (return/refund terms, warranty, and the like) that apply to the items
 in this cart. JSONPath targets in `applies_to` are relative to
 this response root (e.g., `$.line_items[0]`). See
-[Policies](../../overview.md#policies) for the full model.
+[Policies](../../overview/index.md#policies) for the full model.
 
 {{ schema_fields('types/policy', 'shopping/cart') }}

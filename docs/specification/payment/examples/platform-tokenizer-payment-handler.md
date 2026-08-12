@@ -413,7 +413,7 @@ Content-Type: application/json
 ## Runtime Payment Authentication Actions
 
 This handler supports both Action types from the negotiated
-[Payment Authentication extension](../payment-authentication.md):
+[Payment Authentication extension](../authentication.md):
 
 | Action type | Use |
 | :---------- | :-- |
@@ -514,6 +514,6 @@ The platform's payment credential provider verifies that:
 
 ## References
 
-* **Pattern:** [Tokenization Payment Handler](../payment-handler-guide.md)
+* **Pattern:** [Tokenization Payment Handler](../guide.md)
 * **API Pattern:** [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)
 * **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)

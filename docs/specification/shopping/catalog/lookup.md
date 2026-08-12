@@ -208,7 +208,7 @@ response-only `actions` map. Batch Lookup retains its required `products` array,
 which can be empty; successful Get Product retains its required `product`, and
 its existing error response is unchanged. See
 [Catalog — Actions](index.md#actions) for the parent contract and
-[Overview — Actions](../../overview.md#actions) for the common rules.
+[Overview — Actions](../../overview/index.md#actions) for the common rules.
 
 ## Transport Bindings
 

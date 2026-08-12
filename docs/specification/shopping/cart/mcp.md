@@ -89,7 +89,7 @@ protocol metadata:
 ```
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
-[capability negotiation](../../overview.md#negotiation-protocol). Platforms **MAY**
+[capability negotiation](../../overview/index.md#negotiation-protocol). Platforms **MAY**
 include additional metadata fields.
 
 ## Tools
@@ -600,7 +600,7 @@ Maps to the [Cancel Cart](index.md#cancel-cart) operation.
 ## Error Handling
 
 UCP distinguishes between protocol errors and business outcomes. See the
-[Core Specification](../../overview.md#error-handling) for the complete error code
+[Core Specification](../../overview/index.md#error-handling) for the complete error code
 registry and transport binding examples.
 
 * **Protocol errors**: Transport-level failures (authentication, rate limiting,
@@ -652,7 +652,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core cart tools defined in this specification.
-3. Return errors per the [Core Specification](../../overview.md#error-handling).
+3. Return errors per the [Core Specification](../../overview/index.md#error-handling).
 4. Return business outcomes as JSON-RPC `result` with UCP envelope and
     `messages` array.
 5. Validate tool inputs against UCP schemas.

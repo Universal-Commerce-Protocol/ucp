@@ -82,7 +82,7 @@ protocol metadata:
 ```
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
-[capability negotiation](../../overview.md#negotiation-protocol). Platforms **MAY**
+[capability negotiation](../../overview/index.md#negotiation-protocol). Platforms **MAY**
 include additional metadata fields.
 
 ## Tools

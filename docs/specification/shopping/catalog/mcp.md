@@ -639,7 +639,7 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 Transport-level failures (authentication, rate limiting, unavailability) that
 prevent request processing are returned as JSON-RPC `error`. See the
-[Core Specification](../../overview.md#error-codes) for the complete error code
+[Core Specification](../../overview/index.md#error-codes) for the complete error code
 registry and JSON-RPC error code mappings.
 
 ### Business Outcomes

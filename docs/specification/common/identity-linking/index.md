@@ -90,8 +90,8 @@ business **MAY** populate it from stored state on the response (for example,
 
 Identity linking provides the authenticated user context for these values.
 Subject to the scopes that gate the operation, a business **MAY** return the
-user's loyalty membership in `loyalty` (see [Loyalty](loyalty.md)), saved
-payment instruments in `payment.instruments[]` (see [Checkout](shopping/checkout/index.md)), or
+user's loyalty membership in `loyalty` (see [Loyalty](../../loyalty.md)), saved
+payment instruments in `payment.instruments[]` (see [Checkout](../../shopping/checkout/index.md)), or
 buyer profile data in `buyer`.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is
@@ -412,7 +412,7 @@ namespace; its value is an array of mechanism entries.
 
 A provider key is a reverse-domain **identifier**, not a schema-bearing entity:
 it declares no `schema` URL, so the
-[Authority Binding](overview.md#authority-binding) (which binds an entity's
+[Authority Binding](../../overview/index.md#authority-binding) (which binds an entity's
 `schema` URL to its namespace authority) does not apply here. A provider's trust
 anchor is its `auth_url`, governed by the discovery rules below; binding
 `auth_url` to the provider's namespace authority is a possible future hardening,
@@ -481,7 +481,7 @@ direct OAuth flows (always available via discovery):
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/specification/identity-linking",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
           "providers": {
@@ -1123,7 +1123,7 @@ operations gated:
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/specification/identity-linking",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
           "scopes": {
@@ -1161,7 +1161,7 @@ No guest checkout — every transaction requires an authenticated user:
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/specification/identity-linking",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
         "schema": "https://ucp.dev/schemas/common/identity_linking.json",
         "config": {
           "scopes": {

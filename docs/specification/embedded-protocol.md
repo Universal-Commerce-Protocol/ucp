@@ -128,7 +128,7 @@ Transport errors are protocol-level failures that prevent request processing.
 These are returned as JSON-RPC `error` using standard JSON-RPC error codes and
 indicate the message itself is invalid or could not be processed — not that
 executed business logic produced an error outcome. See the
-[Core Specification](overview.md#error-codes) for the complete error code
+[Core Specification](overview/index.md#error-codes) for the complete error code
 registry.
 
 For example, if a request cannot be processed (unknown method, malformed

@@ -52,7 +52,7 @@ the buyer selects it. The
 [create checkout REST example](rest.md#create-checkout) already returns
 this shape for a Shop Pay instrument. Returning user-specific saved state
 requires a user-authenticated request; see
-[Identity Linking](../../identity-linking.md#business-populated-response-values) for
+[Identity Linking](../../common/identity-linking/index.md#business-populated-response-values) for
 the access levels and scopes that gate it.
 
 The `display` fields let the platform present a saved instrument and let the
@@ -410,7 +410,7 @@ platform receives messages indicating what's needed to progress.
 When an active extension has outstanding work for the checkout, the Business
 surfaces instances under the Action types that extension declares in the
 response-only `actions` map. The common rules are defined in
-[Overview — Actions](../../overview.md#actions); this section states only how the
+[Overview — Actions](../../overview/index.md#actions); this section states only how the
 checkout status lifecycle interprets them.
 [Status Values](#status-values) is the authoritative home for the status
 invariants governing outstanding Actions.
@@ -429,7 +429,7 @@ identify an outstanding Action without reporting failure. A recoverable error
 Message can identify an Action to report that the requested effect was not
 applied because of it. In that case, the Business returns the current Checkout
 and sets the Message's `path` to the exact Action occurrence, as defined in
-[Overview — Actions](../../overview.md#actions). The Message does not turn the Action
+[Overview — Actions](../../overview/index.md#actions). The Message does not turn the Action
 into a lock on unrelated Checkout operations.
 
 If an Action prevents Complete Checkout from being accepted, the Business
@@ -861,7 +861,7 @@ downgrading to a notice.
 * **SHOULD** provide a `code` that identifies the disclosure category
   (e.g., `prop65`, `allergens`, `energy_label`). When the disclosure renders a
   structured `policies[]` entry, the `code` **MUST** equal that policy's `type`
-  to link the two (see [Policies](../../overview.md#policies)).
+  to link the two (see [Policies](../../overview/index.md#policies)).
 * **SHOULD** provide `image_url` when the disclosure has an associated
   visual element (e.g., warning symbol, energy class label).
 * **SHOULD** provide `url` when a reference link is available for the
@@ -991,7 +991,7 @@ user-authenticated access:
 | `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
 ## Guidelines
 
@@ -1170,7 +1170,7 @@ and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
 (self-reported identity), signal values MUST NOT be buyer-asserted claims —
 platforms provide signals based on direct observation or by relaying
 independently verifiable third-party attestations. See
-[Signals](../../overview.md#signals) for details and privacy
+[Signals](../../overview/index.md#signals) for details and privacy
 requirements.
 
 {{ schema_fields('types/signals', 'shopping/checkout') }}
@@ -1179,7 +1179,7 @@ requirements.
 
 Platform-provided referral and conversion-event context — campaign IDs,
 click identifiers, and source/medium markers communicated by the platform.
-See [Attribution](../../overview.md#attribution) for details and consent
+See [Attribution](../../overview/index.md#attribution) for details and consent
 requirements.
 
 {{ schema_fields('types/attribution', 'shopping/checkout') }}
@@ -1238,7 +1238,7 @@ field or omitting them.
 Policies (return/refund terms, warranty, and the like) that apply to the items
 in this checkout. JSONPath targets in `applies_to` are relative to
 this response root (e.g., `$.line_items[0]`). See
-[Policies](../../overview.md#policies) for the full model.
+[Policies](../../overview/index.md#policies) for the full model.
 
 {{ schema_fields('types/policy', 'shopping/checkout') }}
 

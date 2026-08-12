@@ -20,7 +20,7 @@
 
 The Payment Authentication extension defines browser-surface interactions that
 a Platform may need to process while a payment attempt is underway. It declares
-two concrete [Action types](overview.md#actions):
+two concrete [Action types](../overview/index.md#actions):
 
 | Action type | Platform interaction |
 | :---------- | :------------------- |
@@ -57,7 +57,7 @@ Businesses and Platforms advertise this extension in their profiles:
         {
           "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment-authentication",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/authentication/",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/payment_authentication.json"
         }
       ]
@@ -154,7 +154,7 @@ association cannot be resolved unambiguously.
 ## Checkout Lifecycle
 
 These Action types use the parent Checkout lifecycle defined in
-[Checkout — Actions](shopping/checkout/index.md#actions):
+[Checkout — Actions](../shopping/checkout/index.md#actions):
 
 - Every emitted Payment Authentication Action gates advancement of its associated
   payment attempt while the same Action type and `id` remain outstanding in the
@@ -222,8 +222,8 @@ for instruments that are no longer present in the Checkout.
 The individual Action specifications define type-specific timeout and fallback
 behavior:
 
-- [Payment Device Data Collection](payment-actions/device-data-collection.md)
-- [Payment 3DS Challenge](payment-actions/three-ds-challenge.md)
+- [Payment Device Data Collection](actions/device-data-collection.md)
+- [Payment 3DS Challenge](actions/three-ds-challenge.md)
 
 ## Surface Rendering and Notifications
 
@@ -238,7 +238,7 @@ before navigating so an immediately completing surface cannot race
 initialization.
 
 The `postMessage` and native-webview mechanics follow
-[Embedded Protocol — Communication Channels](embedded-protocol.md#communication-channels).
+[Embedded Protocol — Communication Channels](../embedded-protocol.md#communication-channels).
 Payment Authentication uses the Action methods below. It does not use a
 capability-specific Embedded Protocol `ready` method or `MessageChannel` upgrade;
 `action.ready` is its scoped handshake.
@@ -333,9 +333,9 @@ reconciliation path above.
 ## Security and Data Handling
 
 Web Platforms **MUST** follow the shared
-[Embedded Protocol security requirements](embedded-protocol.md#security) for
+[Embedded Protocol security requirements](../embedded-protocol.md#security) for
 CSP, iframe sandboxing, credentialless iframe evaluation, and strict origin
-validation. [Embedded Checkout security](shopping/checkout/embedded.md#security-for-web-based-hosts)
+validation. [Embedded Checkout security](../shopping/checkout/embedded.md#security-for-web-based-hosts)
 shows how a UCP capability applies those requirements. Payment Authentication
 uses its own `action.ready` handshake and terminal notification methods; it does
 not adopt the Embedded Protocol's capability lifecycle or delegation messages.

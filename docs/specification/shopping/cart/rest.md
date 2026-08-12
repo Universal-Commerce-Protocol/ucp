@@ -508,7 +508,7 @@ operations unless otherwise noted.
 
 ### Error Responses
 
-See the [Core Specification](../../overview.md#error-handling) for the complete error
+See the [Core Specification](../../overview/index.md#error-handling) for the complete error
 code registry and transport binding examples.
 
 * **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
@@ -553,7 +553,7 @@ authentication is required, the REST transport **MAY** use:
 2. **API Keys**: Via `X-API-Key` header.
 3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
    platform for agent-authenticated access, or both platform and user for
-   user-authenticated access (see [Identity Linking](../../identity-linking.md)).
+   user-authenticated access (see [Identity Linking](../../common/identity-linking/index.md)).
 4. **Mutual TLS**: For high-security environments.
 
 Businesses **MAY** require authentication for some operations while leaving

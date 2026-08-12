@@ -130,7 +130,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
-**→ See [Payment Handler Guide](../specification/payment-handler-guide.md)** for detailed
+**→ See [Payment Handler Guide](../specification/payment/guide.md)** for detailed
 guidance on handler structure, config/instrument/credential schemas, and the full
 specification template.
 
@@ -519,7 +519,7 @@ object fields:
 
 Every Action type is declared by an extension and becomes available only when
 that extension is negotiated, as defined in
-[Actions](../specification/overview.md#actions). Before advertising support,
+[Actions](../specification/overview/index.md#actions). Before advertising support,
 both the Business and the Platform should assess the extension's complete
 Action contract. Negotiation is pre-runtime agreement on that contract's
 semantics and support; it does not pre-approve every future `config` value or

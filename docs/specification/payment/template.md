@@ -110,7 +110,7 @@ Businesses advertise support for this handler in their UCP profile's
 **Schema URL:** `{schema_url}`
 
 The handler schema defines three config variants for different contexts. See
-[Payment Handler Guide: Defining the Schema](payment-handler-guide.md#defining-the-schema)
+[Payment Handler Guide: Defining the Schema](guide.md#defining-the-schema)
 for the full pattern.
 
 | Config Variant | Context | Purpose |
@@ -319,7 +319,7 @@ Content-Type: application/json
 
 {Include this section if the handler can cause Actions. Identify the negotiated
 Checkout extension that declares them. Use the standard
-[Payment Authentication extension](payment-authentication.md) for device data
+[Payment Authentication extension](authentication.md) for device data
 collection and 3DS challenges; link to the defining extension specification for
 custom Actions.}
 

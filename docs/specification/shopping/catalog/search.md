@@ -88,7 +88,7 @@ Search responses adopt the response-only `actions` map. The required `products`
 array can be empty; the Business decides whether it contains zero, some, or all
 otherwise relevant products under the Action-type contract. See
 [Catalog — Actions](index.md#actions) for the parent contract and example, and
-[Overview — Actions](../../overview.md#actions) for the common rules.
+[Overview — Actions](../../overview/index.md#actions) for the common rules.
 
 ## Transport Bindings
 

@@ -141,7 +141,7 @@ each declares the date `D` of the UCP release it ships in. Third-party
 extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Capability | Description |
@@ -179,7 +179,7 @@ intersection is automatically pruned. This ensures extension coherence —
 you never activate a discount extension without the checkout it extends.
 
 The following are examples of extensions defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Extension | Extends | Description |
@@ -275,7 +275,7 @@ authentication are resolved together.
       "dev.ucp.shopping": [
         {
           "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview",
+          "spec": "https://ucp.dev/2026-04-08/specification/overview/",
           "transport": "rest",
           "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
@@ -335,7 +335,7 @@ remains the client's decision.
 Platforms **MUST** validate this binding for declared `schema` URLs and **MUST**
 reject entities that fail it. Identifiers carry no fetched URL, and the `spec`
 (documentation) URL is not authority-bound (any `https` origin). See
-[Authority Binding](../specification/overview.md#authority-binding) for the
+[Authority Binding](../specification/overview/index.md#authority-binding) for the
 normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by

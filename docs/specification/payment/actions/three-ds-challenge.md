@@ -17,7 +17,7 @@
 # Payment 3DS Challenge Action
 
 This specification defines the 3DS challenge Action type declared by the
-[Payment Authentication extension](../payment-authentication.md):
+[Payment Authentication extension](../authentication.md):
 
 ```text
 dev.ucp.payment.three_ds_challenge
@@ -101,8 +101,8 @@ The Platform **MUST**:
    failure, or abandonment.
 
 Mounting the surface **MUST** follow the shared
-[Payment Authentication rendering contract](../payment-authentication.md#surface-rendering-and-notifications)
-and [Embedded Protocol security requirements](../embedded-protocol.md#security).
+[Payment Authentication rendering contract](../authentication.md#surface-rendering-and-notifications)
+and [Embedded Protocol security requirements](../../embedded-protocol.md#security).
 
 On the web the surface may be a full-page frame, modal frame, or separate window
 when the negotiated handler defines that presentation and its security policy.
@@ -117,9 +117,9 @@ URL changes, or notification diagnostics.
 ## Embedded Notifications
 
 After completing the shared
-[`action.ready` handshake](../payment-authentication.md#ready-handshake), the
+[`action.ready` handshake](../authentication.md#ready-handshake), the
 surface sends JSON-RPC 2.0 notifications defined by the
-[payment Action embedded contract](../payment-authentication.md#surface-rendering-and-notifications).
+[payment Action embedded contract](../authentication.md#surface-rendering-and-notifications).
 
 ### Done
 
@@ -177,7 +177,7 @@ If the surface cannot continue, it **MAY** send:
 ```
 
 Surface-level codes are the shared
-[well-known `action.error` codes](../payment-authentication.md#surface-rendering-and-notifications).
+[well-known `action.error` codes](../authentication.md#surface-rendering-and-notifications).
 Buyer abandonment and provider authentication outcomes may be unavailable to the
 surface or known only by the provider backend; the Business and payment provider
 remain authoritative for those distinctions. After either notification, the
@@ -221,7 +221,7 @@ fallback, handoff, and cancellation rules.
 
 ## Security
 
-The common [Payment Authentication security requirements](../payment-authentication.md#security-and-data-handling)
+The common [Payment Authentication security requirements](../authentication.md#security-and-data-handling)
 apply. In addition:
 
 - The handler's trust policy **MUST** authorize the initial and redirect origins

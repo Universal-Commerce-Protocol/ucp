@@ -735,7 +735,7 @@ Handler authors have two options:
 
 - **Use the standard Payment Authentication extension.** Handlers that need
   device data collection or a 3DS challenge use
-  [`dev.ucp.shopping.payment_authentication`](payment-authentication.md), which
+  [`dev.ucp.shopping.payment_authentication`](authentication.md), which
   defines the `dev.ucp.payment.device_data_collection` and
   `dev.ucp.payment.three_ds_challenge` Action types. The handler specification
   states which types it can cause and any provider-specific trust or fallback
@@ -750,7 +750,7 @@ its type gates, how the Platform processes its config, how the Business observes
 its completion, whether processing the same occurrence is ever safe to retry,
 and its trust, failure, abandonment, and fallback behavior.
 
-See [Overview — Actions](overview.md#actions) for the common envelope and
+See [Overview — Actions](../overview/index.md#actions) for the common envelope and
 [Schema Authoring — Extension-Declared Action Types](site:documentation/schema-authoring.html)
 for the extension schema pattern.
 
@@ -799,7 +799,7 @@ Handler specifications **SHOULD** use the standard template structure. Sections
 marked **[REQUIRED]** **MUST** be present; sections marked **[CONDITIONAL]**
 are required only when applicable.
 
-**→ [Payment Handler Template](payment-handler-template.md)**
+**→ [Payment Handler Template](template.md)**
 
 ## Conformance Checklist for Spec Authors
 
@@ -906,13 +906,13 @@ specifications:
 | :------------------------------ | :----------------------------------------------------------------------------------------------------- |
 | **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                          |
 | **Fail gracefully**             | Define clear error responses for common failure scenarios.                                             |
-| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](tokenization-guide.md) for common flows. |
+| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](tokenization.md) for common flows. |
 
 ---
 
 ## See Also
 
-- **[Tokenization Guide](tokenization-guide.md)** — Guide for building
+- **[Tokenization Guide](tokenization.md)** — Guide for building
   tokenization payment handlers
 - **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler){ target="_blank" }**
   — Handler for Google Pay integration

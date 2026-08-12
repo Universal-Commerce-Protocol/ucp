@@ -202,7 +202,7 @@ adjustment to a specific claim.
 
 Environment data provided by the platform to support authorization
 and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
-[Signals](../../overview.md#signals) for details and privacy requirements.
+[Signals](../../overview/index.md#signals) for details and privacy requirements.
 
 {{ schema_fields('types/signals', 'shopping/catalog') }}
 
@@ -210,7 +210,7 @@ and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
 
 Platform-provided referral and conversion-event context — campaign IDs,
 click identifiers, and source/medium markers communicated by the platform.
-See [Attribution](../../overview.md#attribution) for details and consent
+See [Attribution](../../overview/index.md#attribution) for details and consent
 requirements.
 
 {{ schema_fields('types/attribution', 'shopping/catalog') }}
@@ -272,7 +272,7 @@ as the first element. Platforms SHOULD treat the first element as featured.
 Policies (return/refund terms, warranty, and the like) that apply to the
 products in a catalog response. JSONPath targets in `applies_to` are
 relative to the response root — `$.products[N]` for search and batch lookup,
-`$.product` for get_product. See [Policies](../../overview.md#policies) for the full model.
+`$.product` for get_product. See [Policies](../../overview/index.md#policies) for the full model.
 
 {{ schema_fields('types/policy', 'shopping/catalog') }}
 
@@ -298,7 +298,7 @@ After processing an Action, the Platform performs a fresh Catalog operation and
 the later Business response is authoritative. Catalog defines no Action
 lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY**
 define those behaviors for processing its instances. The common shape and rules
-are defined in [Overview — Actions](../../overview.md#actions).
+are defined in [Overview — Actions](../../overview/index.md#actions).
 
 For example, this Search response returns no products and explains that age
 verification may affect the results:
@@ -519,7 +519,7 @@ well-known scopes for user-authenticated access:
 | `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
 ## Transport Bindings
 
