@@ -517,70 +517,43 @@ object fields:
 
 ## The `request_constraints` Protocol Member
 
-Canonical placement, correspondence, lifecycle, and evaluation behavior is
-defined in
-[Request Constraints](../specification/overview.md#request-constraints). This
-section defines how schema authors encode and adopt that behavior.
+Normative processing, scope, lifecycle, and invalid-member behavior are defined
+in [Request Constraints](../specification/overview.md#request-constraints).
+This section covers only the schema-authoring boundary.
 
-### Namespace and encoding
+### Local structure
 
-`request_constraints` is a response-only protocol member centrally registered
-in `ucp.json#/$defs/members`. Host domain schemas do not declare it. Its
-containing `ucp` object follows [The Reserved `ucp` Member](#the-reserved-ucp-member),
-including the rule that a closed host object explicitly declares an optional
-`ucp` property referencing `ucp.json#/$defs/members`. That declaration admits
-the centrally registered vocabulary; the host schema does not add an individual
-`request_constraints` property. Businesses and Platforms **MUST NOT** publish
-`ucp.request_constraints` in discovery profiles, and Platforms **MUST NOT**
-include it in requests.
+`request_constraints` is centrally registered in `ucp.json#/$defs/members` as a
+response-only protocol member with `ucp_request: "omit"`. Its value is
+constrained by the shared Request Constraints schema; host domain schemas do
+not redeclare it. A conforming UCP-aware resolver materializes the registered
+member into eligible response scopes so ordinary resolved-schema validation
+applies the shared schema.
 
-The shared `schemas/common/types/request_constraints.json` type has two closed
-constraint positions:
+The shared `schemas/common/types/request_constraints.json` schema defines a
+closed constraint language with two positions. An emitted value begins at an
+Object Constraint; Value Constraints occur only beneath its `properties` maps.
 
-| Position | Executable keywords | Inert members | Shape |
-| :-- | :-- | :-- | :-- |
-| Object Constraint | `required`, `properties` | `title`, `description`, `$comment` | Closed |
-| Value Constraint | `enum`, `const` | None | Closed |
+| Position | Admitted members | Shape |
+| :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
+| Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
 
-At an Object Constraint position, `required` is an array of unique strings and
-`properties` maps request field names to Object or Value Constraints. An empty
-Object Constraint is a valid no-op. Optional string `title` and `description`
-members provide Business-authored display text that a Platform **MAY** present;
-they never affect validity.
+Only the listed members are admitted in an emitted value. Keywords used by the
+shared schema to define this closed grammar do not become admitted members.
 
-`$comment` is separately permitted as an inert string. JSON Schema
-[Core §8.3](https://json-schema.org/draft/2020-12/json-schema-core#section-8.3)
-defines it as a reserved comment location that does not produce an annotation
-result. It is not display text and does not affect validity.
+### Embedded-language boundary
 
-At a Value Constraint position, `enum` is a non-empty array of values unique
-under JSON Schema equality and `const` is any JSON value. At least one is
-present, and both apply when both are present. No other member is valid.
+An emitted value and its nested constraint objects are embedded JSON Schema
+Draft 2020-12 language, not structured UCP domain objects. Do not add or
+materialize ambient `ucp` inside them. The `properties` value is a field-name
+dictionary whose keys name target request fields; those keys are not ambient
+members.
 
-### Adoption requirements
-
-For each adoption, document:
-
-- the authoritative Business response scopes eligible to carry
-  `ucp.request_constraints`;
-- the parent logical object's corresponding representation in a later request;
-- the target operation and operation-specific request schema; and
-- the lifecycle under which a later authoritative representation supersedes an
-  earlier one and omission removes the constraint.
-
-The `ucp` object containing `request_constraints` annotates its parent logical
-object, and the documented correspondence identifies that object's
-representation in the later request. Central registration supplies the protocol
-member at every eligible scope; host domain schemas do not redeclare it.
-
-Ensure that names in `required` and under `properties` exist at the
-corresponding level of the intended composed, operation-specific request schema.
-Before emission, a Business **MUST** validate the fragment against the shared
-type and **MUST** ensure that every target name is valid in the actual composed
-request schema. A Platform that chooses to evaluate the fragment **MUST** perform
-the same checks first. A composed extension field is a valid target; a field
-omitted from that request by `ucp_request`, including a response-only field, is
-not.
+The containing `ucp` object still follows
+[The Reserved `ucp` Member](#the-reserved-ucp-member). A closed host object
+admits that container through its optional reference to
+`ucp.json#/$defs/members`, not by declaring `request_constraints` itself.
 
 ## Extension-Declared Action Types
 

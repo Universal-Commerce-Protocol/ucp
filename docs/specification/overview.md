@@ -171,60 +171,114 @@ comparison.
 Request assertions, mismatch handling, response echo, off-increment request
 handling, pricing, and lifecycle behavior are defined by the capability that
 uses the shared representation.
+
 ## Request Constraints
 
-A static UCP request schema describes the inputs a Business generally accepts,
-but a Business can accept a narrower set for one transaction. For example, an
-agreed Line Item can be available only at quantity `100`, or a selected payment
-path can require `billing_address` even though the general request shape does
-not.
+After capabilities and extensions are negotiated, the resolved UCP request
+schema defines the fields and structure allowed for an operation. In an
+authoritative response, a Business can use `ucp.request_constraints` to signal
+additional rules it will apply when evaluating request data in a subsequent
+Platform request. For example, it can provide a constraint that an item be
+purchased as a 100-unit lot or require a submitted payment instrument to include
+`billing_address`. A Platform can evaluate these constraints before submission,
+avoiding a round trip for request data the Business has already indicated it
+will reject.
 
-`request_constraints` carries that transaction-specific restriction at
-`ucp.request_constraints`. It is a response-only protocol member registered in
-`ucp.json#/$defs/members`. Its value is the shared
-[Request Constraints](site:schemas/common/types/request_constraints.json) type,
-a bounded JSON Schema Draft 2020-12 fragment. The enclosing `ucp` object is the
-ambient protocol namespace; see [The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)
-for its general rules. Businesses and Platforms **MUST NOT** publish
-`ucp.request_constraints` in discovery profiles, and Platforms **MUST NOT**
-include it in requests.
+`ucp.request_constraints` is response-only. A Business or Platform **MUST NOT**
+publish it in a discovery profile, and a Platform **MUST NOT** include it in an
+operation request. A Business or Platform that encounters it in a discovery
+profile **MUST** ignore it; a Business that encounters it in an operation request
+**MUST** ignore it.
+
+### Validation model
+
+Request Constraints combine with the resolved request schema to form the
+effective rules for subsequently submitted request data:
+
+```text
+effective_request_schema = allOf(
+  resolved_request_schema,
+  request_constraints
+)
+
+validate(effective_request_schema, submitted_request_data)
+  = validate(resolved_request_schema, submitted_request_data)
+    AND validate(request_constraints, submitted_request_data)
+```
+
+An implementation can construct the effective schema with JSON Schema `allOf`
+and validate the submitted request data once, or run the two validations
+separately. Both validations must pass for authoritative Business evaluation.
+Request Constraints can narrow the inputs allowed by the resolved request
+schema, but cannot make an input valid when that schema rejects it.
+
+A Platform **MUST** validate the `ucp.request_constraints` value against the
+shared [Request Constraints](site:schemas/common/types/request_constraints.json)
+schema before using it for preflight. This is ordinary JSON Schema Draft 2020-12
+validation.
+
+### Constraint schema
+
+The `request_constraints` value and every nested constraint object use embedded
+JSON Schema Draft 2020-12 language; they are not UCP domain objects. The shared
+constraint schema does not admit `ucp` inside them. The value of `properties` is
+a field-name dictionary whose keys name target request fields.
+
+The constraint schema has two closed positions. A `request_constraints` value
+begins at an Object Constraint; Value Constraints occur only as values in an
+Object Constraint's `properties` map.
+
+| Position | Admitted members | Shape and behavior |
+| :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. An empty Object Constraint is a valid no-op at any Object Constraint position. |
+| Value Constraint | `enum`, `const` | `enum` is a non-empty array of unique JSON values. `const` is any JSON value. At least one member is present; when both are present, both apply. |
+
+No other member is admitted at either position.
 
 ### Guidelines
 
 #### Business
 
-A Business **MAY** emit `ucp.request_constraints` only in an authoritative
-response scope that has a corresponding representation in a later request.
-When it does, the Business **MUST** emit a fragment that conforms to the shared
-Request Constraints type and **MUST** enforce it.
+A Business **MAY** include `ucp.request_constraints` in an authoritative
+response to describe rules it will enforce against request data in a subsequent
+Platform request. The Business **MUST** emit Request Constraints that conform to
+the shared Request Constraints schema and **MUST** enforce every constraint it
+emits. If the submitted request data violates either the resolved request schema
+or the emitted constraints, the Business **MUST** treat it as invalid input and
+**MUST** report the failure through the operation's existing outcome and message
+contract.
 
 #### Platform
 
-A Platform **MAY** use `ucp.request_constraints` to form or validate the
-corresponding request input and to present its display text. A Platform **MAY**
-instead ignore `ucp.request_constraints`. Doing so loses only early request
-formation, validation, and display benefits. Business validation remains
-authoritative, so correctness does not depend on Platform processing.
+A Platform **MAY** use `ucp.request_constraints` for preflight before submitting
+request data. It **MAY** evaluate any supported subset of valid constraints; a
+successful preflight does not establish that the request data satisfies every
+constraint emitted by the Business. If the value does not conform to the shared
+Request Constraints schema, the Platform **MUST** ignore it. Business
+enforcement remains authoritative regardless of whether the Platform uses
+Request Constraints for preflight.
 
-### Correspondence and lifecycle
+### Scope and lifecycle
 
-The `ucp` object containing `request_constraints` annotates its parent logical
-object. The fragment applies to that object's corresponding representation in
-the later request, not to the response representation that carries it. The
-request representation can have a different shape because response-only fields
-are omitted by `ucp_request`. When existing operation semantics do not already
-establish the correspondence, the adopting contract defines the corresponding
-request representation, target operation, and operation-specific request
-schema.
+Each operation that uses Request Constraints defines which data in a subsequent
+Platform request the constraints apply to. A later authoritative response
+replaces earlier Request Constraints for the same request data. If the later
+response omits `ucp.request_constraints`, the earlier constraints no longer
+apply.
 
-For the same logical object, a later authoritative representation supersedes an
-earlier one. If the later representation omits `ucp.request_constraints`, the
-earlier constraint is removed.
+### Operation outcomes
 
-### Constraint language
+Passing validation against the effective request schema establishes only schema
+validity. The request can still fail other business rules. The containing
+operation's existing semantics, outcomes, and error contract apply; Request
+Constraints adds no outcome or error code.
 
-This Cart response shows a transaction-specific constraint in context. The
-Business offers the Line Item only as the negotiated lot of `100`:
+### Examples
+
+#### Fixed item quantity
+
+This Cart response constrains a Line Item's quantity in a subsequent Cart
+update.
 
 <!-- ucp:example schema=shopping/cart op=read direction=response -->
 ```json
@@ -248,8 +302,6 @@ Business offers the Line Item only as the negotiated lot of `100`:
       ],
       "ucp": {
         "request_constraints": {
-          "title": "Contract quantity",
-          "description": "This item is available only in the negotiated quantity.",
           "properties": {
             "quantity": {
               "const": 100
@@ -267,65 +319,14 @@ Business offers the Line Item only as the negotiated lot of `100`:
 }
 ```
 
-The static Line Item schema accepts many positive quantities. For this response,
-`properties` selects `quantity` in the corresponding request Line Item and
-`const` narrows its accepted value to `100`. `title` and `description` are
-optional display text and do not affect validity.
-
-The root is an **Object Constraint**. Under its `properties` member, each named
-field maps to another Object Constraint or to a **Value Constraint**. Both
-positions are closed:
-
-| Position | Executable members | Inert members | Shape and behavior |
-| :-- | :-- | :-- | :-- |
-| Object Constraint | `required`, `properties` | `title`, `description`, `$comment` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. An empty Object Constraint is a valid no-op. |
-| Value Constraint | `enum`, `const` | None | `enum` is a non-empty array of values unique under JSON Schema equality. `const` is any JSON value. At least one is present; when both appear, both apply. |
-
-A Platform **MAY** present Business-authored `title` and `description` text;
-neither member affects validity. `$comment` is an inert JSON Schema
-Core comment string, not display text, and does not affect validity.
-
-A Business **MUST** validate each fragment against the shared closed shape
-before emitting it. The Business **MUST** also ensure that every field name in
-`required` or under `properties` exists at the corresponding level of the
-actual composed, operation-specific request schema. A response-only field is
-not a valid target. A Business **MUST NOT** emit an invalid fragment.
-
-A Platform that chooses to evaluate a fragment **MUST** perform those checks
-first. If the fragment is invalid or cannot be processed safely, the Platform
-**MAY** ignore it and rely on Business validation. The Platform **MUST NOT**
-partially interpret a fragment.
-
-A Business **MUST** apply implementation-defined resource limits when validating
-a fragment before emission and when enforcing it. The Business **MUST** bound
-encoded size, nesting depth, node and member counts, and equality work such as
-checking `enum` uniqueness. If it cannot validate a fragment within those
-limits, the Business **MUST NOT** emit it. A Platform that chooses to evaluate a
-fragment **MUST** apply equivalent local limits. If a limit is exhausted, the
-Platform **MAY** ignore the fragment and rely on Business validation; it **MUST
-NOT** partially interpret the fragment.
-
-### Validation and evaluation
-
-A Business **MUST** validate the corresponding submitted representation against
-both the resolved request schema and the fragment, and **MUST** reject the
-representation if either validation fails. A Platform **MAY** perform the same
-two validations before submission.
-
-If `S` is the resolved request schema and `C` is the fragment, applying `C`
-alongside `S` is validity-equivalent to `{ "allOf": [S, C] }`; an implementation
-does not need to materialize a combined schema.
-
-The containing operation's existing outcomes and error contract apply.
-`request_constraints` defines no new outcome or error code.
-
-### Examples
+The subsequent Line Item satisfies the effective request schema only when it has
+quantity `100` and meets every other Cart update requirement.
 
 #### Locked negotiated discount codes
 
-This Checkout response has the Discount extension active. Its fragment locks
-the negotiated business-to-business discount-code array in the corresponding
-Checkout update.
+This Checkout response has the Discount extension active. Its Request
+Constraints lock the negotiated discount-code array in a subsequent Checkout
+update.
 
 <!-- ucp:example schema=shopping/discount def=dev.ucp.shopping.checkout op=update direction=response -->
 ```json
@@ -388,15 +389,15 @@ Checkout update.
 }
 ```
 
-Because `discounts.codes` exists in the resolved Checkout update schema when the
-Discount extension is active, it is a valid target. UCP centrally registers
-`request_constraints`; the Discount schema does not declare it.
+The subsequent Checkout update satisfies the effective request schema only when
+it meets every other Checkout update requirement, contains `discounts.codes`,
+and supplies exactly `["ACME-X7Q9-L2M4"]`.
 
 #### Billing address on a submitted card instrument
 
-In this example, a Business emits `ucp.request_constraints` on an available
-card instrument to require a field on the corresponding submitted card
-instrument:
+In this example, a Business emits `ucp.request_constraints` on an available card
+instrument to require `billing_address` on the card instrument submitted in a
+subsequent request:
 
 <!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
 ```json
@@ -410,11 +411,9 @@ instrument:
 }
 ```
 
-The adopting payment-handler contract defines the corresponding submitted
-instrument and its target request schema. The available instrument remains
-availability metadata; `request_constraints` applies to the submitted
-instrument. This illustration defines no card brands, credentials, availability
-or options model, or payment-resolution behavior.
+The payment-handler contract defines which submitted card instrument these
+constraints apply to. This example does not define card brands, credentials,
+support, availability, or payment policy.
 
 ## Actions
 
