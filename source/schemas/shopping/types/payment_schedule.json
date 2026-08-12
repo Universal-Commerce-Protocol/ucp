@@ -8,7 +8,7 @@
     "id",
     "type",
     "description",
-    "totals"
+    "amount"
   ],
   "additionalProperties": true,
   "properties": {
@@ -29,21 +29,9 @@
       "format": "date-time",
       "description": "Absolute RFC 3339 date-time when this payment is due, when the Business can determine one at checkout. Supplementary to `description`, never a replacement for it. Omitted when the due date depends on a future event (e.g. 'due on delivery'); the timing is then stated in `description` alone."
     },
-    "totals": {
-      "type": "array",
-      "items": {
-        "allOf": [
-          { "$ref": "total.json" },
-          {
-            "if": { "properties": { "type": { "const": "total" } }, "required": ["type"] },
-            "then": { "properties": { "amount": { "minimum": 0 } } }
-          }
-        ]
-      },
-      "contains": { "properties": { "type": { "const": "total" } }, "required": ["type"] },
-      "minContains": 1,
-      "maxContains": 1,
-      "description": "What this one payment costs. Businesses MUST include exactly one `total` entry with a non-negative amount: the final amount charged when this payment is taken, inclusive of tax and every other charge, in the checkout currency's minor units (ISO 4217). Unlike checkout totals, no `subtotal` is required, because the purchase is priced at the checkout rather than once per payment."
+    "amount": {
+      "$ref": "../../common/types/amount.json",
+      "description": "The amount charged when this payment is taken, inclusive of tax and every other charge, in the Checkout currency's minor units (ISO 4217). A schedule states an amount rather than a totals breakdown: the purchase is priced once at the Checkout, and a schedule moves part or all of that price. Where the selected term changes what the purchase costs, that difference appears in `checkout.totals`, not here."
     }
   }
 }
