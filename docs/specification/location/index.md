@@ -95,9 +95,10 @@ interpreted using its IANA timezone.
 
 ### Evaluation
 
-Timed intervals ordinarily include the opening time and exclude the closing
-time. If `closes` is earlier than `opens`, the interval continues into the next
-local date. As a reserved exception to those half-open semantics, the exact
+Timed intervals are open at `opens` and closed at `closes`. For example,
+`10:00`–`17:00` is open immediately before `17:00` and closed at `17:00`. If
+`closes` is earlier than `opens`, the interval continues into the next local
+date. As a reserved exception to this closing-boundary rule, the exact
 `00:00`–`23:59` pair represents the entire local civil date, including daylight
 saving time transitions. Every pair with equal `opens` and `closes` is invalid,
 including `00:00`–`00:00`.
@@ -169,8 +170,10 @@ to the requesting Platform's or Buyer's timezone. Because JSON Schema does not
 enforce every semantic constraint, a Business **MUST** emit only schedules that
 follow the rules above, including unequal `opens` and `closes`, a `valid_from`
 value no later than `valid_through`, and valid exception-range intersections.
-When a request provides a language preference, a Business **SHOULD** localize
-`title` accordingly, unless that language is unavailable.
+A Business **SHOULD** omit an `exception_hours` entry once it can no longer
+affect the schedule at any current or future instant. It **SHOULD** publish
+known future exceptions through the planning horizon for which its schedule is
+authoritative.
 
 #### Platform
 

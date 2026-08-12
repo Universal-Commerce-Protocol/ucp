@@ -70,24 +70,26 @@ custom filters via `additionalProperties`.
 
 ### Hours-Based Filter
 
-The standard `filters.hours` object requires `open_at`, an exact RFC 3339
-instant expressed with `Z` or a numeric offset, and can include
-extension-defined fields. `open_at` identifies the instant relevant to the
-request, such as an expected arrival or pickup time. Before sending a
-Buyer-local date and time, a Platform **MUST** resolve it to an exact instant.
-The Business evaluates the supplied instant against each Location's schedule.
-No timezone field is needed in the standard `context` object because `open_at`
-already identifies the instant.
+The standard `filters.hours` object requires `open_at`, an RFC 3339 instant
+expressed with `Z` or a numeric offset.
 
-The `Z` or numeric offset identifies only that instant. Platforms and
-Businesses **MUST NOT** treat the offset as the Internet Assigned Numbers
-Authority (IANA) Time Zone Database identifier of a Platform, Business, Buyer,
-or Location. For each candidate Location, a Business **MUST** use that
-Location's authoritative `timezone` to convert `open_at` to the local date,
-day of week, and time, then evaluate the effective schedule under
-[Operating Hours](index.md#operating-hours). A Business **MUST** treat absent,
-invalid, or otherwise unusable schedule data as not matching the supplied
-instant.
+A Platform selects `open_at` to represent the time relevant to the Buyer's
+intent. It can use its current time or choose another time, such as an expected
+arrival, pickup, or order-acceptance time. A Platform **MAY** round or adjust
+its selected time to the granularity appropriate to the interaction, but the
+value it sends identifies one specific instant.
+
+For each candidate Location, a Business **MUST** evaluate `open_at` exactly as
+supplied. It converts the instant to the local date, day of week, and time using
+the Location's authoritative `timezone`, then evaluates the effective schedule
+under [Operating Hours](index.md#operating-hours). The `Z` or numeric offset in
+`open_at` identifies the instant; it does not identify the Location's timezone.
+
+A Business **MUST** return a Location only when it can establish that the
+Location is open at `open_at`. If its schedule data is absent, invalid, outside
+the range for which it can evaluate authoritatively, or otherwise unusable, the
+Location does not match the filter. A Business **MUST NOT** round, shift, or
+otherwise reinterpret the supplied instant.
 
 ### Offerings-Based Filter
 
