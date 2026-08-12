@@ -13,7 +13,7 @@
         "day": {
           "type": "string",
           "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-          "description": "A stable UCP weekday identifier for the weekday on which this recurring local civil-time interval begins in the containing Location's `timezone`. It is not localized display text.",
+          "description": "A stable UCP day-of-week identifier for the day on which this recurring local civil-time interval begins in the containing Location's `timezone`. It is not localized display text.",
           "ucp_request": "omit"
         }
       }

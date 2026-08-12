@@ -82,8 +82,8 @@ instant. By contrast, `day`, `opens`, `closes`, `valid_from`, and
 Location's `timezone`; they are not timestamps.
 
 * `hours` is a list of regular weekly intervals. Each item contains `day`,
-    `opens`, and `closes`. `day` is a stable UCP weekday identifier for the day
-    on which the interval begins, not localized display text. A Platform
+    `opens`, and `closes`. `day` is a stable UCP day-of-week identifier for the
+    day on which the interval begins, not localized display text. A Platform
     **MAY** localize it for presentation. Times use 24-hour `HH:MM` form.
 * `exception_hours` is a list of date-specific timed intervals or full
     closures. Each item contains inclusive local-date bounds `valid_from` and
@@ -104,7 +104,7 @@ saving time transitions. Every pair with equal `opens` and `closes` is invalid,
 including `00:00`–`00:00`.
 
 Schedule evaluation is deterministic for each instant: convert the instant to
-the Location's local date, weekday, and time using `timezone`, then apply the
+the Location's local date, day of week, and time using `timezone`, then apply the
 effective schedule to those local values. During a forward daylight saving time
 (DST) transition, local clock labels in the gap correspond to no instants and
 are not shifted. During a backward DST transition, both instants in the fold
@@ -112,7 +112,7 @@ that map to the same repeated local time receive the same schedule result. The
 current schedule shape cannot distinguish the two fold occurrences.
 
 Multiple `hours` items for the same `day` combine as split shifts. An omitted
-weekday means no regular interval begins that day, but an interval from the
+day means no regular interval begins that day, but an interval from the
 preceding day can carry into it. Absent `hours` means the regular schedule is
 unknown, not closed.
 

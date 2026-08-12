@@ -83,7 +83,7 @@ Businesses **MUST NOT** treat the offset as the Internet Assigned Numbers
 Authority (IANA) Time Zone Database identifier of a Platform, Business, Buyer,
 or Location. For each candidate Location, a Business **MUST** use that
 Location's authoritative `timezone` to convert `open_at` to the local date,
-weekday, and time, then evaluate the effective schedule under
+day of week, and time, then evaluate the effective schedule under
 [Operating Hours](index.md#operating-hours). A Business **MUST** treat absent,
 invalid, or otherwise unusable schedule data as not matching the supplied
 instant.
