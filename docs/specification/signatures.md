@@ -553,7 +553,7 @@ Response signatures use `@status` instead of `@method`:
 The response body below is abbreviated for clarity — only the key fields
 used in signing are shown. A full checkout response includes additional
 required fields (`ucp`, `currency`, `line_items`, `totals`, `links`); see
-[Create Checkout response](checkout-rest.md#create-checkout) for the
+[Create Checkout response](shopping/checkout/rest.md#create-checkout) for the
 complete shape.
 
 ```http

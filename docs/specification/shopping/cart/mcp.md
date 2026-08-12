@@ -17,7 +17,7 @@
 # Cart Capability - MCP Binding
 
 This document specifies the Model Context Protocol (MCP) binding for the
-[Cart Capability](cart.md).
+[Cart Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -46,14 +46,14 @@ Businesses advertise MCP transport availability through their UCP profile at
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.cart": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/cart",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
         }
       ]
@@ -89,7 +89,7 @@ protocol metadata:
 ```
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
-[capability negotiation](overview.md#negotiation-protocol). Platforms **MAY**
+[capability negotiation](../../overview.md#negotiation-protocol). Platforms **MAY**
 include additional metadata fields.
 
 ## Tools
@@ -109,22 +109,22 @@ MCP tools separate resource identification from payload data:
 
 | Tool | Operation | Description |
 | :---- | :---- | :---- |
-| `create_cart` | [Create Cart](cart.md#create-cart) | Create a cart session. |
-| `get_cart` | [Get Cart](cart.md#get-cart) | Get a cart session. |
-| `update_cart` | [Update Cart](cart.md#update-cart) | Update a cart session. |
-| `cancel_cart` | [Cancel Cart](cart.md#cancel-cart) | Cancel a cart session. |
+| `create_cart` | [Create Cart](index.md#create-cart) | Create a cart session. |
+| `get_cart` | [Get Cart](index.md#get-cart) | Get a cart session. |
+| `update_cart` | [Update Cart](index.md#update-cart) | Update a cart session. |
+| `cancel_cart` | [Cancel Cart](index.md#cancel-cart) | Cancel a cart session. |
 
 ### `create_cart`
 
-Maps to the [Create Cart](cart.md#create-cart) operation.
+Maps to the [Create Cart](index.md#create-cart) operation.
 
 #### Input Schema
 
-{{ schema_fields('cart_create_req', 'cart') }}
+{{ schema_fields('cart_create_req', 'shopping/cart') }}
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -251,7 +251,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
 
 ### `get_cart`
 
-Maps to the [Get Cart](cart.md#get-cart) operation.
+Maps to the [Get Cart](index.md#get-cart) operation.
 
 #### Input Schema
 
@@ -259,7 +259,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -379,17 +379,17 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
 
 ### `update_cart`
 
-Maps to the [Update Cart](cart.md#update-cart) operation.
+Maps to the [Update Cart](index.md#update-cart) operation.
 
 #### Input Schema
 
 * `id` (String, required): The ID of the cart session to update.
 
-{{ schema_fields('cart_update_req', 'cart') }}
+{{ schema_fields('cart_update_req', 'shopping/cart') }}
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -507,7 +507,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
 
 ### `cancel_cart`
 
-Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
+Maps to the [Cancel Cart](index.md#cancel-cart) operation.
 
 #### Input Schema
 
@@ -515,7 +515,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -600,7 +600,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
 ## Error Handling
 
 UCP distinguishes between protocol errors and business outcomes. See the
-[Core Specification](overview.md#error-handling) for the complete error code
+[Core Specification](../../overview.md#error-handling) for the complete error code
 registry and transport binding examples.
 
 * **Protocol errors**: Transport-level failures (authentication, rate limiting,
@@ -652,7 +652,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core cart tools defined in this specification.
-3. Return errors per the [Core Specification](overview.md#error-handling).
+3. Return errors per the [Core Specification](../../overview.md#error-handling).
 4. Return business outcomes as JSON-RPC `result` with UCP envelope and
     `messages` array.
 5. Validate tool inputs against UCP schemas.

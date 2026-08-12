@@ -45,12 +45,12 @@ Businesses advertise MCP transport availability through their UCP profile at
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/search",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/search",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json"
       }],
       "dev.ucp.shopping.catalog.lookup": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
     },
@@ -108,13 +108,13 @@ Maps to the [Catalog Search](search.md) capability.
 #### Search Request
 
 {{ extension_schema_fields(
-  'catalog_search.json#/$defs/search_request', 'catalog/mcp'
+  'catalog_search.json#/$defs/search_request', 'shopping/catalog/mcp'
 ) }}
 
 ### Search Response
 
 {{ extension_schema_fields(
-  'catalog_search.json#/$defs/search_response', 'catalog/mcp'
+  'catalog_search.json#/$defs/search_response', 'shopping/catalog/mcp'
 ) }}
 
 #### Search Example
@@ -268,13 +268,13 @@ The `catalog.ids` parameter accepts an array of identifiers and optional context
 #### Lookup Request
 
 {{ extension_schema_fields(
-  'catalog_lookup.json#/$defs/lookup_request', 'catalog/mcp'
+  'catalog_lookup.json#/$defs/lookup_request', 'shopping/catalog/mcp'
 ) }}
 
 ### Lookup Response
 
 {{ extension_schema_fields(
-  'catalog_lookup.json#/$defs/lookup_response', 'catalog/mcp'
+  'catalog_lookup.json#/$defs/lookup_response', 'shopping/catalog/mcp'
 ) }}
 
 #### Lookup Example
@@ -458,13 +458,13 @@ Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Retu
 #### Get Product Request
 
 {{ extension_schema_fields(
-  'catalog_lookup.json#/$defs/get_product_request', 'catalog/mcp'
+  'catalog_lookup.json#/$defs/get_product_request', 'shopping/catalog/mcp'
 ) }}
 
 #### Get Product Response
 
 {{ extension_schema_fields(
-  'catalog_lookup.json#/$defs/get_product_response', 'catalog/mcp'
+  'catalog_lookup.json#/$defs/get_product_response', 'shopping/catalog/mcp'
 ) }}
 
 #### Get Product Example
@@ -639,7 +639,7 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 Transport-level failures (authentication, rate limiting, unavailability) that
 prevent request processing are returned as JSON-RPC `error`. See the
-[Core Specification](../overview.md#error-codes) for the complete error code
+[Core Specification](../../overview.md#error-codes) for the complete error code
 registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
@@ -690,11 +690,11 @@ results.
 
 ### Detail Product {: #detail-product }
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/mcp') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'shopping/catalog/mcp') }}
 
 ### Get Product Response {: #catalog-lookup-get-product-response }
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/mcp') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'shopping/catalog/mcp') }}
 
 ### Error Response {: #error-response }
 

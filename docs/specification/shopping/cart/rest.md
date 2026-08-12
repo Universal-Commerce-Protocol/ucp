@@ -16,7 +16,7 @@
 
 # Cart Capability - REST Binding
 
-This document specifies the REST binding for the [Cart Capability](cart.md).
+This document specifies the REST binding for the [Cart Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -45,14 +45,14 @@ Businesses advertise REST transport availability through their UCP profile at
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
       "dev.ucp.shopping.cart": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/cart",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/cart",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
         }
       ]
@@ -93,11 +93,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 #### Input Schema
 
-{{ schema_fields('cart_create_req', 'cart') }}
+{{ schema_fields('cart_create_req', 'shopping/cart') }}
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -205,7 +205,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -296,11 +296,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 * `id` (String, required): The cart session ID (path parameter).
 
-{{ schema_fields('cart_update_req', 'cart') }}
+{{ schema_fields('cart_update_req', 'shopping/cart') }}
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -406,7 +406,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 #### Output Schema
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 #### Example
 
@@ -485,7 +485,7 @@ operations unless otherwise noted.
     1. Store the key with the operation result for at least 24 hours.
     2. Return the cached result for duplicate keys whose request body matches the original.
     3. Return `409 Conflict` if the key is reused with a mismatched body.
-    See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
+    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)
     for the full payload-matching contract.
 
 ## Protocol Mechanics
@@ -508,7 +508,7 @@ operations unless otherwise noted.
 
 ### Error Responses
 
-See the [Core Specification](overview.md#error-handling) for the complete error
+See the [Core Specification](../../overview.md#error-handling) for the complete error
 code registry and transport binding examples.
 
 * **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
@@ -553,7 +553,7 @@ authentication is required, the REST transport **MAY** use:
 2. **API Keys**: Via `X-API-Key` header.
 3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
    platform for agent-authenticated access, or both platform and user for
-   user-authenticated access (see [Identity Linking](identity-linking.md)).
+   user-authenticated access (see [Identity Linking](../../identity-linking.md)).
 4. **Mutual TLS**: For high-security environments.
 
 Businesses **MAY** require authentication for some operations while leaving

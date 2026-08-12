@@ -75,7 +75,7 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],

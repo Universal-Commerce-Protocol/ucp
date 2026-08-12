@@ -156,7 +156,7 @@ distinguish ECaP parameters from business-specific query parameters:
 ## Transport & Messaging
 
 ECaP uses the shared EP transport layer. See
-[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport-messaging)
+[Embedded Protocol — Transport & Messaging](../../embedded-protocol.md#transport-messaging)
 for message format, message types, and response handling conventions.
 
 The `ucp.version` in all responses **MUST** echo the `ep_version` negotiated
@@ -167,7 +167,7 @@ of the ECaP session.
 ### Communication Channels
 
 ECaP follows the shared EP communication channel model. See
-[Embedded Protocol — Communication Channels](embedded-protocol.md#communication-channels)
+[Embedded Protocol — Communication Channels](../../embedded-protocol.md#communication-channels)
 for the general pattern.
 
 For native hosts, the cart-specific globals are:
@@ -307,7 +307,7 @@ messages after receiving a handshake error.
 #### `ep.cart.auth`
 
 `ep.cart.auth` implements the shared EP authentication pattern — see
-[Embedded Protocol — Authentication](embedded-protocol.md#authentication) for
+[Embedded Protocol — Authentication](../../embedded-protocol.md#authentication) for
 the request/response contract, examples, and error escalation flow.
 
 - **Method:** `ep.cart.auth`
@@ -315,12 +315,12 @@ the request/response contract, examples, and error escalation flow.
 
 When error escalation is required, Embedded Cart **MUST** issue an
 `ep.cart.error` notification per the
-[session error pattern](embedded-protocol.md#session-error).
+[session error pattern](../../embedded-protocol.md#session-error).
 
 ### Lifecycle Messages
 
 Lifecycle notifications follow the shared EP pattern — see
-[Embedded Protocol — Lifecycle](embedded-protocol.md#lifecycle). All lifecycle
+[Embedded Protocol — Lifecycle](../../embedded-protocol.md#lifecycle). All lifecycle
 notifications carry the full `cart` object as their payload.
 
 #### `ep.cart.start`
@@ -361,7 +361,7 @@ transitioned to the next stage of their purchase journey.
 This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is
 part of the negotiated capabilities during service discovery, host **MAY**
 proceed to initiate a checkout session based on the completed cart by issuing a
-[create checkout](checkout.md#create-checkout) operation.
+[create checkout](../checkout/index.md#create-checkout) operation.
 
 - **Direction:** Embedded Cart → Host
 - **Type:** Notification
@@ -391,7 +391,7 @@ proceed to initiate a checkout session based on the completed cart by issuing a
 ### State Change Messages
 
 State change notifications follow the shared EP pattern — see
-[Embedded Protocol — State Change](embedded-protocol.md#state-change). All state
+[Embedded Protocol — State Change](../../embedded-protocol.md#state-change). All state
 change notifications are sent from the Embedded Cart to the host and carry the
 full `cart` object as their payload.
 
@@ -491,7 +491,7 @@ informational notices about the cart state.
 #### `ep.cart.error`
 
 `ep.cart.error` implements the shared EP session error pattern — see
-[Embedded Protocol — Session Error](embedded-protocol.md#session-error) for the
+[Embedded Protocol — Session Error](../../embedded-protocol.md#session-error) for the
 payload specification and host handling requirements.
 
 ## Security & Error Handling
@@ -499,13 +499,13 @@ payload specification and host handling requirements.
 ### Error Codes
 
 ECaP uses the shared EP error code set — see
-[Embedded Protocol — Error Codes](embedded-protocol.md#error-codes).
+[Embedded Protocol — Error Codes](../../embedded-protocol.md#error-codes).
 
 ### Security for Web-Based Hosts
 
 ECaP inherits the shared EP security requirements for CSP, iframe sandboxing,
 credentialless iframes, and strict origin validation. See
-[Embedded Protocol — Security](embedded-protocol.md#security) for the full
+[Embedded Protocol — Security](../../embedded-protocol.md#security) for the full
 specification.
 
 ## Schema Definitions
@@ -518,4 +518,4 @@ Cart protocol.
 The core object representing the current state of the cart, including
 line items, totals, and buyer information.
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}

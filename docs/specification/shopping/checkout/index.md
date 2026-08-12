@@ -49,10 +49,10 @@ methods the authenticated buyer has saved with the business. Such an instrument
 carries no raw credential: it is a display-safe, business-scoped reference (an
 opaque `id` plus `display` fields) that the business resolves server-side when
 the buyer selects it. The
-[create checkout REST example](checkout-rest.md#create-checkout) already returns
+[create checkout REST example](rest.md#create-checkout) already returns
 this shape for a Shop Pay instrument. Returning user-specific saved state
 requires a user-authenticated request; see
-[Identity Linking](identity-linking.md#business-populated-response-values) for
+[Identity Linking](../../identity-linking.md#business-populated-response-values) for
 the access levels and scopes that gate it.
 
 The `display` fields let the platform present a saved instrument and let the
@@ -410,7 +410,7 @@ platform receives messages indicating what's needed to progress.
 When an active extension has outstanding work for the checkout, the Business
 surfaces instances under the Action types that extension declares in the
 response-only `actions` map. The common rules are defined in
-[Overview — Actions](overview.md#actions); this section states only how the
+[Overview — Actions](../../overview.md#actions); this section states only how the
 checkout status lifecycle interprets them.
 [Status Values](#status-values) is the authoritative home for the status
 invariants governing outstanding Actions.
@@ -429,7 +429,7 @@ identify an outstanding Action without reporting failure. A recoverable error
 Message can identify an Action to report that the requested effect was not
 applied because of it. In that case, the Business returns the current Checkout
 and sets the Message's `path` to the exact Action occurrence, as defined in
-[Overview — Actions](overview.md#actions). The Message does not turn the Action
+[Overview — Actions](../../overview.md#actions). The Message does not turn the Action
 into a lock on unrelated Checkout operations.
 
 If an Action prevents Complete Checkout from being accepted, the Business
@@ -448,7 +448,7 @@ following operation contract applies:
 | Operation | Contract |
 | :-------- | :------- |
 | Get Checkout | The Platform **MAY** invoke Get Checkout; the Business's response is authoritative. The Platform **MAY** repeat Get Checkout with bounded backoff set by the Action contract or Platform policy, and **MUST** stop repeated requests at `expires_at`. |
-| Update Checkout | The Platform **MUST NOT** start a new Update Checkout operation. Duplicate requests remain subject to [Replay Protection](signatures.md#replay-protection). If the Business receives a new Update Checkout request, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message. |
+| Update Checkout | The Platform **MUST NOT** start a new Update Checkout operation. Duplicate requests remain subject to [Replay Protection](../../signatures.md#replay-protection). If the Business receives a new Update Checkout request, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message. |
 | Complete Checkout | The Platform **MUST NOT** start a new Complete Checkout operation during `complete_in_progress`. See [Complete Checkout](#complete-checkout) for the narrow lost-response recovery retry. |
 | Cancel Checkout | The Platform **MUST** follow the fallback, handoff, and cancellation race rules below before attempting Cancel Checkout. |
 
@@ -536,8 +536,8 @@ items are unavailable:
 }
 ```
 
-See [REST](checkout-rest.md#create-checkout) and
-[MCP](checkout-mcp.md#create_checkout) binding examples.
+See [REST](rest.md#create-checkout) and
+[MCP](mcp.md#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -730,11 +730,11 @@ This example is illustrative. It uses a negotiated vendor extension,
 `com.example.identity.student_verification`, that declares a single Action type
 under a key of the same name in `actions` and defines the instance `config` and
 verification transport. It composes that extension with `context.eligibility`, a
-provisional [Discount](discount.md), an [Action](#actions), and
+provisional [Discount](../../discount.md), an [Action](#actions), and
 `messages`.
 
 The provisional discount fields (`provisional`, `eligibility`) belong to the
-[Discount extension](discount.md#eligibility-claims) and are available only when
+[Discount extension](../../discount.md#eligibility-claims) and are available only when
 that extension is active for the checkout.
 
 **1. Claim accepted, discount provisional, verification Action outstanding.**
@@ -861,7 +861,7 @@ downgrading to a notice.
 * **SHOULD** provide a `code` that identifies the disclosure category
   (e.g., `prop65`, `allergens`, `energy_label`). When the disclosure renders a
   structured `policies[]` entry, the `code` **MUST** equal that policy's `type`
-  to link the two (see [Policies](overview.md#policies)).
+  to link the two (see [Policies](../../overview.md#policies)).
 * **SHOULD** provide `image_url` when the disclosure has an associated
   visual element (e.g., warning symbol, energy class label).
 * **SHOULD** provide `url` when a reference link is available for the
@@ -978,7 +978,7 @@ this format to facilitate checkout handoff and accelerated entry—for example, 
 platform can prefill checkout state when initiating a buy-now flow.
 
 > **Note:** Checkout permalinks are a REST-specific construct that extends the
-> [REST transport binding](checkout-rest.md). Accessing a permalink returns a
+> [REST transport binding](rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
 ## Scopes
@@ -991,7 +991,7 @@ user-authenticated access:
 | `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
 
 ## Guidelines
 
@@ -1030,7 +1030,7 @@ custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#s
 
 ## Capability Schema Definition <span id="checkout"></span>
 
-{{ schema_fields('checkout_resp', 'checkout') }}
+{{ schema_fields('checkout_resp', 'shopping/checkout') }}
 
 ## Operations
 
@@ -1053,12 +1053,12 @@ To be invoked by the platform when the user has expressed purchase intent
 product data (price/title etc.) provided by the business through the feeds
 **SHOULD** match the actual attributes returned in the response.
 
-When the [Cart](cart.md) capability is negotiated, the request payload
+When the [Cart](../cart/index.md) capability is negotiated, the request payload
 should accept an additional `cart_id` field for cart-to-checkout conversion. See
-[Cart → Cart-to-Checkout Conversion](cart.md#cart-to-checkout-conversion) for
+[Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion) for
 the field contract.
 
-{{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
+{{ method_fields('create_checkout', 'rest.openapi.json', 'shopping/checkout') }}
 
 ### Get Checkout
 
@@ -1071,7 +1071,7 @@ checkout.
 The platform will honor the TTL provided by the business via `expires_at` at the
 time of checkout session creation.
 
-{{ method_fields('get_checkout', 'rest.openapi.json', 'checkout') }}
+{{ method_fields('get_checkout', 'rest.openapi.json', 'shopping/checkout') }}
 
 ### Update Checkout
 
@@ -1083,7 +1083,7 @@ general replacement rule does not apply during `complete_in_progress` because
 Update Checkout is not permitted; see
 [Accepted completion](#accepted-completion) for the frozen operation contract.
 
-{{ method_fields('update_checkout', 'rest.openapi.json', 'checkout') }}
+{{ method_fields('update_checkout', 'rest.openapi.json', 'shopping/checkout') }}
 
 ### Complete Checkout
 
@@ -1124,7 +1124,7 @@ to construct the order representation (i.e. information like `line_items`,
 After the order is placed, other details will be updated through subsequent
 events as the order, and its associated items, move through the supply chain.
 
-{{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
+{{ method_fields('complete_checkout', 'rest.openapi.json', 'shopping/checkout') }}
 
 ### Cancel Checkout
 
@@ -1134,23 +1134,23 @@ already canceled or completed), then businesses **SHOULD** send back an error
 indicating the operation is not allowed. Any checkout session with a status
 that is not equal to `completed` or `canceled` **SHOULD** be cancelable.
 
-{{ method_fields('cancel_checkout', 'rest.openapi.json', 'checkout') }}
+{{ method_fields('cancel_checkout', 'rest.openapi.json', 'shopping/checkout') }}
 
 ## Transport Bindings
 
 The abstract operations above are bound to specific transport protocols as
 defined below:
 
-* [REST Binding](checkout-rest.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-* [MCP Binding](checkout-mcp.md): Model Context Protocol mapping for agentic interaction.
-* [A2A Binding](checkout-a2a.md): Agent-to-Agent Protocol mapping for agentic interactions.
-* [Embedded Checkout Binding](embedded-checkout.md): JSON-RPC for powering embedded checkout.
+* [REST Binding](rest.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+* [MCP Binding](mcp.md): Model Context Protocol mapping for agentic interaction.
+* [A2A Binding](a2a.md): Agent-to-Agent Protocol mapping for agentic interactions.
+* [Embedded Checkout Binding](embedded.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 
 ### Buyer
 
-{{ schema_fields('buyer', 'checkout') }}
+{{ schema_fields('buyer', 'shopping/checkout') }}
 
 ### Context
 
@@ -1161,7 +1161,7 @@ ignore or down-rank them if inconsistent with higher-confidence signals
 controls). Eligibility and policy enforcement MUST occur at checkout time using
 binding transaction data.
 
-{{ schema_fields('context', 'checkout') }}
+{{ schema_fields('context', 'shopping/checkout') }}
 
 ### Signals
 
@@ -1170,51 +1170,51 @@ and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer`
 (self-reported identity), signal values MUST NOT be buyer-asserted claims —
 platforms provide signals based on direct observation or by relaying
 independently verifiable third-party attestations. See
-[Signals](overview.md#signals) for details and privacy
+[Signals](../../overview.md#signals) for details and privacy
 requirements.
 
-{{ schema_fields('types/signals', 'checkout') }}
+{{ schema_fields('types/signals', 'shopping/checkout') }}
 
 ### Attribution
 
 Platform-provided referral and conversion-event context — campaign IDs,
 click identifiers, and source/medium markers communicated by the platform.
-See [Attribution](overview.md#attribution) for details and consent
+See [Attribution](../../overview.md#attribution) for details and consent
 requirements.
 
-{{ schema_fields('types/attribution', 'checkout') }}
+{{ schema_fields('types/attribution', 'shopping/checkout') }}
 
 ### Item
 
 #### Item Create Request
 
-{{ schema_fields('types/item_create_req', 'checkout') }}
+{{ schema_fields('types/item_create_req', 'shopping/checkout') }}
 
 #### Item Update Request
 
-{{ schema_fields('types/item_update_req', 'checkout') }}
+{{ schema_fields('types/item_update_req', 'shopping/checkout') }}
 
 #### Item
 
-{{ schema_fields('types/item_resp', 'checkout') }}
+{{ schema_fields('types/item_resp', 'shopping/checkout') }}
 
 ### Line Item
 
 #### Line Item Create Request
 
-{{ schema_fields('types/line_item_create_req', 'checkout') }}
+{{ schema_fields('types/line_item_create_req', 'shopping/checkout') }}
 
 #### Line Item Update Request
 
-{{ schema_fields('types/line_item_update_req', 'checkout') }}
+{{ schema_fields('types/line_item_update_req', 'shopping/checkout') }}
 
 #### Line Item
 
-{{ schema_fields('types/line_item_resp', 'checkout') }}
+{{ schema_fields('types/line_item_resp', 'shopping/checkout') }}
 
 ### Link
 
-{{ schema_fields('types/link', 'checkout') }}
+{{ schema_fields('types/link', 'shopping/checkout') }}
 
 #### Well-Known Link Types
 
@@ -1238,53 +1238,53 @@ field or omitting them.
 Policies (return/refund terms, warranty, and the like) that apply to the items
 in this checkout. JSONPath targets in `applies_to` are relative to
 this response root (e.g., `$.line_items[0]`). See
-[Policies](overview.md#policies) for the full model.
+[Policies](../../overview.md#policies) for the full model.
 
-{{ schema_fields('types/policy', 'checkout') }}
+{{ schema_fields('types/policy', 'shopping/checkout') }}
 
 ### Message
 
-{{ schema_fields('message', 'checkout') }}
+{{ schema_fields('message', 'shopping/checkout') }}
 
 ### Message Error
 
-{{ schema_fields('types/message_error', 'checkout') }}
+{{ schema_fields('types/message_error', 'shopping/checkout') }}
 
 #### Error Code
 
-{{ schema_fields('types/error_code', 'checkout') }}
+{{ schema_fields('types/error_code', 'shopping/checkout') }}
 
 ### Message Info
 
-{{ schema_fields('types/message_info', 'checkout') }}
+{{ schema_fields('types/message_info', 'shopping/checkout') }}
 
 ### Message Warning
 
-{{ schema_fields('types/message_warning', 'checkout') }}
+{{ schema_fields('types/message_warning', 'shopping/checkout') }}
 
 ### Payment
 
-{{ schema_fields('payment', 'checkout') }}
+{{ schema_fields('payment', 'shopping/checkout') }}
 
 #### Selected Payment Instrument
 
-{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'checkout') }}
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'shopping/checkout') }}
 
 ### Payment Credential
 
-{{ schema_fields('payment_credential', 'checkout') }}
+{{ schema_fields('payment_credential', 'shopping/checkout') }}
 
 ### Postal Address
 
-{{ schema_fields('postal_address', 'checkout') }}
+{{ schema_fields('postal_address', 'shopping/checkout') }}
 
 ### Response
 
-{{ extension_schema_fields('capability.json#/$defs/response_schema', 'checkout') }}
+{{ extension_schema_fields('capability.json#/$defs/response_schema', 'shopping/checkout') }}
 
 ### Total {: #totals }
 
-{{ schema_fields('types/total_resp', 'checkout') }}
+{{ schema_fields('types/total_resp', 'shopping/checkout') }}
 
 #### Rendering Contract
 
@@ -1425,12 +1425,12 @@ when provided.
 
 ### UCP Response Checkout {: #ucp-response-checkout-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'shopping/checkout') }}
 
 ### Order Confirmation
 
-{{ schema_fields('order_confirmation', 'checkout') }}
+{{ schema_fields('order_confirmation', 'shopping/checkout') }}
 
 ### Error Response <span id="error-response"></span>
 
-{{ schema_fields('types/error_response', 'checkout') }}
+{{ schema_fields('types/error_response', 'shopping/checkout') }}

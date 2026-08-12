@@ -899,7 +899,7 @@ Manual invocation:
 
 ```bash
 python3 scripts/validate_examples.py --schema-base source/schemas/
-python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md docs/specification/cart.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/shopping/checkout/rest.md docs/specification/shopping/cart/index.md
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 

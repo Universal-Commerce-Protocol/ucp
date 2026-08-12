@@ -16,7 +16,7 @@
 
 # Order Capability - REST Binding
 
-This document specifies the REST binding for the [Order Capability](order.md).
+This document specifies the REST binding for the [Order Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -45,7 +45,7 @@ Businesses advertise REST transport availability through their UCP profile at
       "dev.ucp.shopping.order": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/order",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
@@ -79,7 +79,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 | [Get Order](#get-order) | `GET` | `/orders/{id}` | Get the current state of an order. |
 
 For the Order Event Webhook (business -> platform push), see the
-[Order Capability overview](order.md#order-event-webhook).
+[Order Capability overview](index.md#order-event-webhook).
 
 ### Get Order
 
@@ -91,7 +91,7 @@ Returns the current-state snapshot of an order.
 
 #### Output Schema
 
-{{ schema_fields('order', 'order') }}
+{{ schema_fields('order', 'shopping/order') }}
 
 #### Example
 
@@ -244,10 +244,10 @@ UCP-Agent: profile="https://platform.example/.well-known/ucp"
 ## Message Signing
 
 Request and response signatures follow the
-[Message Signatures](signatures.md) specification using RFC 9421 HTTP Message
+[Message Signatures](../../signatures.md) specification using RFC 9421 HTTP Message
 Signatures. See
-[REST Request Signing](signatures.md#rest-request-signing) and
-[REST Request Verification](signatures.md#rest-request-verification) for
+[REST Request Signing](../../signatures.md#rest-request-signing) and
+[REST Request Verification](../../signatures.md#rest-request-verification) for
 the complete algorithm.
 
 ## Conformance
@@ -264,7 +264,7 @@ Businesses implementing the REST binding:
 
 * **MUST** serve all endpoints over HTTPS with TLS 1.3+
 * **SHOULD** sign responses per the
-  [Message Signatures](signatures.md) specification
+  [Message Signatures](../../signatures.md) specification
 
-See [Order Capability - Guidelines](order.md#operations-guidelines) for
+See [Order Capability - Guidelines](index.md#operations-guidelines) for
 capability-level requirements that apply across all transports.

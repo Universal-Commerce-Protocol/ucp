@@ -17,7 +17,7 @@
 # Order Capability - MCP Binding
 
 This document specifies the Model Context Protocol (MCP) binding for the
-[Order Capability](order.md).
+[Order Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -46,7 +46,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       "dev.ucp.shopping.order": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/order",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
         }
       ]
@@ -82,7 +82,7 @@ protocol metadata:
 ```
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
-[capability negotiation](overview.md#negotiation-protocol). Platforms **MAY**
+[capability negotiation](../../overview.md#negotiation-protocol). Platforms **MAY**
 include additional metadata fields.
 
 ## Tools
@@ -91,11 +91,11 @@ UCP Capabilities map 1:1 to MCP Tools.
 
 | Tool | Operation | Description |
 | :---- | :---- | :---- |
-| `get_order` | [Get Order](order.md#get-order) | Get the current state of an order. |
+| `get_order` | [Get Order](index.md#get-order) | Get the current state of an order. |
 
 ### `get_order`
 
-Maps to the [Get Order](order.md#get-order) operation. Returns the
+Maps to the [Get Order](index.md#get-order) operation. Returns the
 current-state snapshot of an order.
 
 #### Input Schema
@@ -105,7 +105,7 @@ current-state snapshot of an order.
 
 #### Output Schema
 
-{{ schema_fields('order', 'order') }}
+{{ schema_fields('order', 'shopping/order') }}
 
 #### Example
 
@@ -299,5 +299,5 @@ Businesses implementing the MCP binding:
 * **MUST** implement the `get_order` tool per the
   [OpenRPC schema](https://ucp.dev/services/shopping/mcp.openrpc.json)
 
-See [Order Capability - Guidelines](order.md#operations-guidelines) for
+See [Order Capability - Guidelines](index.md#operations-guidelines) for
 capability-level requirements that apply across all transports.

@@ -43,12 +43,12 @@ nav:
   - Specification:
       - Overview: specification/overview.md
       - Checkout Capability:
-          - Overview: specification/checkout.md
+          - Overview: specification/shopping/checkout/index.md
           - Transports:
-              - REST: specification/checkout-rest.md
-              - MCP: specification/checkout-mcp.md
-              - A2A: specification/checkout-a2a.md
-              - Embedded: specification/embedded-checkout.md
+              - REST: specification/shopping/checkout/rest.md
+              - MCP: specification/shopping/checkout/mcp.md
+              - A2A: specification/shopping/checkout/a2a.md
+              - Embedded: specification/shopping/checkout/embedded.md
           - AP2 Mandates Extension: specification/ap2-mandates.md
           - Payment Authentication Extension:
               - Overview: specification/payment-authentication.md
@@ -60,24 +60,24 @@ nav:
           - Loyalty Extension: specification/loyalty.md
           - Split Payments Extension: specification/split-payments.md
       - Cart Capability:
-          - Overview: specification/cart.md
+          - Overview: specification/shopping/cart/index.md
           - Transports:
-              - REST: specification/cart-rest.md
-              - MCP: specification/cart-mcp.md
-              - Embedded: specification/embedded-cart.md
+              - REST: specification/shopping/cart/rest.md
+              - MCP: specification/shopping/cart/mcp.md
+              - Embedded: specification/shopping/cart/embedded.md
       - Permalink Capability: specification/permalink.md
       - Catalog Capability:
-          - Overview: specification/catalog/index.md
-          - Search: specification/catalog/search.md
-          - Lookup: specification/catalog/lookup.md
+          - Overview: specification/shopping/catalog/index.md
+          - Search: specification/shopping/catalog/search.md
+          - Lookup: specification/shopping/catalog/lookup.md
           - Transports:
-              - REST: specification/catalog/rest.md
-              - MCP: specification/catalog/mcp.md
+              - REST: specification/shopping/catalog/rest.md
+              - MCP: specification/shopping/catalog/mcp.md
       - Order Capability:
-          - Overview: specification/order.md
+          - Overview: specification/shopping/order/index.md
           - Transports:
-              - REST: specification/order-rest.md
-              - MCP: specification/order-mcp.md
+              - REST: specification/shopping/order/rest.md
+              - MCP: specification/shopping/order/mcp.md
       - Identity Linking Capability: specification/identity-linking.md
       - Payment Handlers:
           - Guide: specification/payment-handler-guide.md
@@ -224,6 +224,29 @@ plugins:
       on_error_fail: true
   - site-urls
   - social
+  - redirects:
+      redirect_maps:
+        # Cart
+        specification/cart.md: specification/shopping/cart/index.md
+        specification/cart-rest.md: specification/shopping/cart/rest.md
+        specification/cart-mcp.md: specification/shopping/cart/mcp.md
+        specification/embedded-cart.md: specification/shopping/cart/embedded.md
+        # Catalog
+        specification/catalog/index.md: specification/shopping/catalog/index.md
+        specification/catalog/search.md: specification/shopping/catalog/search.md
+        specification/catalog/lookup.md: specification/shopping/catalog/lookup.md
+        specification/catalog/rest.md: specification/shopping/catalog/rest.md
+        specification/catalog/mcp.md: specification/shopping/catalog/mcp.md
+        # Checkout
+        specification/checkout.md: specification/shopping/checkout/index.md
+        specification/checkout-rest.md: specification/shopping/checkout/rest.md
+        specification/checkout-mcp.md: specification/shopping/checkout/mcp.md
+        specification/checkout-a2a.md: specification/shopping/checkout/a2a.md
+        specification/embedded-checkout.md: specification/shopping/checkout/embedded.md
+        # Order
+        specification/order.md: specification/shopping/order/index.md
+        specification/order-rest.md: specification/shopping/order/rest.md
+        specification/order-mcp.md: specification/shopping/order/mcp.md
   - llmstxt:
       full_output: llms-full.txt
       markdown_description: |
@@ -288,19 +311,19 @@ plugins:
               RFC 9530 Content-Digests to achieve secure, transport-agnostic
               request authentication and replay protection.
         Checkout Capability:
-          - specification/checkout.md: >-
+          - specification/shopping/checkout/index.md: >-
               Core Checkout Capability specifications detailing session state
               lifecycles, totals calculation rules, and buyer input validation
               severity states.
-          - specification/checkout-rest.md: >-
+          - specification/shopping/checkout/rest.md: >-
               HTTP REST transport binding for Checkout operations, specifying
               standard headers, API endpoints, status codes, and payload
               structures.
-          - specification/checkout-mcp.md: >-
+          - specification/shopping/checkout/mcp.md: >-
               Model Context Protocol (MCP) transport binding for Checkout
               operations, mapping UCP capabilities to JSON-RPC tools with
               agent metadata rules.
-          - specification/checkout-a2a.md: >-
+          - specification/shopping/checkout/a2a.md: >-
               Agent2Agent Protocol (A2A) binding for Checkout Capability,
               detailing transport discovery, agent card profile advertisement,
               and message negotiation flows.
@@ -309,7 +332,7 @@ plugins:
               formats, handshake patterns, communication channels, security
               constraints, and shared error handling structures for
               iframe/webview integrations.
-          - specification/embedded-checkout.md: >-
+          - specification/shopping/checkout/embedded.md: >-
               Embedded Checkout Protocol (ECP) specification, detailing
               per-session delegation negotiation, URL parameters, native UI
               event mappings, W3C Payment Request conceptual alignment, and
@@ -353,15 +376,15 @@ plugins:
               per-instrument charge reporting, and all-or-nothing failure
               handling.
         Cart Capability:
-          - specification/cart.md: >-
+          - specification/shopping/cart/index.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
               modification, and seamless transition handoff to active checkout
               sessions.
-          - specification/cart-rest.md: >-
+          - specification/shopping/cart/rest.md: >-
               HTTP REST transport binding for Cart operations, including
               endpoints for session creation, modification, retrieval, and
               cancellation.
-          - specification/cart-mcp.md: >-
+          - specification/shopping/cart/mcp.md: >-
               Model Context Protocol (MCP) transport binding for
               Cart operations, mapping item management to JSON-RPC
               tools for AI shopping agents.
@@ -370,7 +393,7 @@ plugins:
               formats, handshake patterns, communication channels, security
               constraints, and shared error handling structures for
               iframe/webview integrations.
-          - specification/embedded-cart.md: >-
+          - specification/shopping/cart/embedded.md: >-
               Embedded Cart Protocol (ECaP), enabling secure, cross-origin
               iframe communication and synchronized event states between
               platform agents and business websites.
@@ -380,35 +403,35 @@ plugins:
               endpoint discovery, compact item paths, open query initialization
               fields, and redirect resolution.
         Catalog Capability:
-          - specification/catalog/index.md: >-
+          - specification/shopping/catalog/index.md: >-
               Core Catalog Capability, detailing high-level product discovery
               models, variant structures, merchant attribution, and real-time
               pricing context.
-          - specification/catalog/search.md: >-
+          - specification/shopping/catalog/search.md: >-
               Product discovery via the Search Catalog capability, specifying
               text queries, category browsing, and multi-attribute filtering
               contracts.
-          - specification/catalog/lookup.md: >-
+          - specification/shopping/catalog/lookup.md: >-
               Direct item retrieval via the Lookup Catalog capability,
               specifying variant resolution logic, batch identifiers,
               and interactive option selection.
-          - specification/catalog/rest.md: >-
+          - specification/shopping/catalog/rest.md: >-
               HTTP REST transport binding for the Catalog Capability,
               detailing search, batch lookup, and product detail
               endpoints with JSON payload examples.
-          - specification/catalog/mcp.md: >-
+          - specification/shopping/catalog/mcp.md: >-
               Model Context Protocol (MCP) transport binding for the Catalog
               Capability, mapping discovery operations to JSON-RPC tools with
               metadata validation rules.
         Other Capabilities:
-          - specification/order.md: >-
+          - specification/shopping/order/index.md: >-
               Post-purchase tracking via the Order Capability, detailing line
               item updates, fulfillment expectations, shipment events,
               adjustments, and webhook-based status updates.
-          - specification/order-rest.md: >-
+          - specification/shopping/order/rest.md: >-
               HTTP REST transport binding for the Order Capability, detailing
               endpoints, HTTP headers, payload schemas, and error structures.
-          - specification/order-mcp.md: >-
+          - specification/shopping/order/mcp.md: >-
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.

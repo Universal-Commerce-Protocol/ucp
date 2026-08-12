@@ -154,7 +154,7 @@ association cannot be resolved unambiguously.
 ## Checkout Lifecycle
 
 These Action types use the parent Checkout lifecycle defined in
-[Checkout — Actions](checkout.md#actions):
+[Checkout — Actions](shopping/checkout/index.md#actions):
 
 - Every emitted Payment Authentication Action gates advancement of its associated
   payment attempt while the same Action type and `id` remain outstanding in the
@@ -335,7 +335,7 @@ reconciliation path above.
 Web Platforms **MUST** follow the shared
 [Embedded Protocol security requirements](embedded-protocol.md#security) for
 CSP, iframe sandboxing, credentialless iframe evaluation, and strict origin
-validation. [Embedded Checkout security](embedded-checkout.md#security-for-web-based-hosts)
+validation. [Embedded Checkout security](shopping/checkout/embedded.md#security-for-web-based-hosts)
 shows how a UCP capability applies those requirements. Payment Authentication
 uses its own `action.ready` handshake and terminal notification methods; it does
 not adopt the Embedded Protocol's capability lifecycle or delegation messages.

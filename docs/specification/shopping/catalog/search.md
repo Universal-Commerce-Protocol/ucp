@@ -29,11 +29,11 @@ queries, filtering by category and price, and pagination.
 
 ### Request
 
-{{ extension_schema_fields('catalog_search.json#/$defs/search_request', 'catalog') }}
+{{ extension_schema_fields('catalog_search.json#/$defs/search_request', 'shopping/catalog') }}
 
 ### Response
 
-{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'catalog') }}
+{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'shopping/catalog') }}
 
 ## Search Inputs
 
@@ -55,11 +55,11 @@ empty `query` strings, or accepting filter-only requests for category browsing.
 Filter criteria for narrowing search results. Standard filters are defined below;
 merchants MAY support additional custom filters via `additionalProperties`.
 
-{{ schema_fields('types/search_filters', 'catalog') }}
+{{ schema_fields('types/search_filters', 'shopping/catalog') }}
 
 ### Price Filter
 
-{{ schema_fields('types/price_filter', 'catalog') }}
+{{ schema_fields('types/price_filter', 'shopping/catalog') }}
 
 ## Pagination
 
@@ -76,11 +76,11 @@ error. Clients MUST NOT assume the response size equals the requested limit.
 
 ### Pagination Request
 
-{{ extension_schema_fields('types/pagination.json#/$defs/request', 'catalog') }}
+{{ extension_schema_fields('types/pagination.json#/$defs/request', 'shopping/catalog') }}
 
 ### Pagination Response
 
-{{ extension_schema_fields('types/pagination.json#/$defs/response', 'catalog') }}
+{{ extension_schema_fields('types/pagination.json#/$defs/response', 'shopping/catalog') }}
 
 ## Actions
 
@@ -88,7 +88,7 @@ Search responses adopt the response-only `actions` map. The required `products`
 array can be empty; the Business decides whether it contains zero, some, or all
 otherwise relevant products under the Action-type contract. See
 [Catalog — Actions](index.md#actions) for the parent contract and example, and
-[Overview — Actions](../overview.md#actions) for the common rules.
+[Overview — Actions](../../overview.md#actions) for the common rules.
 
 ## Transport Bindings
 

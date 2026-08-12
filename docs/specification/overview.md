@@ -186,9 +186,9 @@ when its specification explicitly adopts it and defines the parent-specific
 behavior: where Actions appear, the effect each Action type gates, how Messages
 apply, and how a later response reflects processing. Schema composition alone
 does not establish support. Cart, Checkout, and Catalog adopt this shape; see
-[Cart — Actions](cart.md#actions),
-[Checkout — Actions](checkout.md#actions), and
-[Catalog — Actions](catalog/index.md#actions) for their parent-specific
+[Cart — Actions](shopping/cart/index.md#actions),
+[Checkout — Actions](shopping/checkout/index.md#actions), and
+[Catalog — Actions](shopping/catalog/index.md#actions) for their parent-specific
 contracts.
 
 Actions and Messages have different roles. An Action represents outstanding
@@ -231,7 +231,7 @@ explanatory Message (an illustrative, partial fragment):
 The Action identifies the outstanding work and carries extension-owned
 processing configuration under `config`. The Message's `path` selects the exact
 Action occurrence it explains. The
-[checkout eligibility example](checkout.md#eligibility-verification-at-completion)
+[checkout eligibility example](shopping/checkout/index.md#eligibility-verification-at-completion)
 composes this pattern into a complete Student Verification flow.
 
 For a newly processed successful response from a capability that adopts Actions,
@@ -279,7 +279,7 @@ Action type keys follow existing [Namespace Governance](#namespace-governance)
 rules: an extension can declare only types within a reverse-domain namespace
 controlled by its schema authority. An extension can use its own name as the key
 for a single Action type — as the
-[Student Verification example](checkout.md#eligibility-verification-at-completion)
+[Student Verification example](shopping/checkout/index.md#eligibility-verification-at-completion)
 does — or declare several Action types under distinct keys. Each value is a
 non-empty array of outstanding instances of that one Action type. The key
 identifies the type, so an instance carries no separate type discriminator; a
@@ -879,7 +879,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
@@ -1033,7 +1033,7 @@ example:
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
@@ -1048,7 +1048,7 @@ example:
       "dev.ucp.shopping.order": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/order",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
@@ -2733,7 +2733,7 @@ item, a regulatory notice — it **MUST** emit a `messages[]` warning that:
 
 - sets `presentation: "disclosure"`, so the Platform displays the content and
   cannot hide or dismiss it (see
-  [Warning Presentation](checkout.md#warning-presentation));
+  [Warning Presentation](shopping/checkout/index.md#warning-presentation));
 - sets `path` to the item the notice concerns; and
 - sets `code` to the policy's `type`, linking the notice to its policy.
 

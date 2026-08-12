@@ -17,7 +17,7 @@
 # Checkout Capability - REST Binding
 
 This document specifies the REST binding for the
-[Checkout Capability](checkout.md).
+[Checkout Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -46,7 +46,7 @@ Businesses advertise REST transport availability through their UCP profile at
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ]
@@ -80,11 +80,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 | Operation                                          | Method | Endpoint                           | Description                |
 | :------------------------------------------------- | :----- | :--------------------------------- | :------------------------- |
-| [Create Checkout](checkout.md#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](checkout.md#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](checkout.md#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](checkout.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](checkout.md#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| [Create Checkout](index.md#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](index.md#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](index.md#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](index.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](index.md#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 
@@ -233,7 +233,7 @@ entire Checkout resource, including any data updates to write-only fields; the
 supplied resource replaces the existing Checkout session state. The Platform
 **MUST NOT** start a new Update Checkout operation while the Checkout is
 `complete_in_progress`. Duplicate requests remain subject to
-[Replay Protection](signatures.md#replay-protection). If the Business receives a
+[Replay Protection](../../signatures.md#replay-protection). If the Business receives a
 new Update Checkout request in that state, it **MUST** leave the Checkout
 unchanged and return the current Checkout with a recoverable error Message.
 
@@ -777,7 +777,7 @@ addresses (i.e. `fulfillment_address`, `billing_address`), this is the right
 place to set these expectations via `messages`.
 
 The response is the Checkout object; the example below shows the synchronous
-`completed` case. See core [Complete Checkout](checkout.md#complete-checkout)
+`completed` case. See core [Complete Checkout](index.md#complete-checkout)
 for status and `order` semantics.
 
 === "Request"
@@ -1307,7 +1307,7 @@ operations unless otherwise noted.
     1. Store the key with the operation result for at least 24 hours.
     2. Return the cached result for duplicate keys whose request body matches the original.
     3. Return `409 Conflict` if the key is reused with a mismatched body.
-    See [Message Signatures — Idempotency Key Requirements](signatures.md#replay-protection)
+    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)
     for the full payload-matching contract.
 
 ## Protocol Mechanics
@@ -1333,7 +1333,7 @@ request.
 
 ### Error Responses
 
-See the [Core Specification](overview.md#error-handling) for the complete error
+See the [Core Specification](../../overview.md#error-handling) for the complete error
 code registry and transport binding examples.
 
 * **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
@@ -1409,7 +1409,7 @@ HTTP 200 and the UCP envelope containing `messages`
 Platforms **MAY** choose among authentication mechanisms (API keys, OAuth,
 mTLS, HTTP Message Signatures). When using
 HTTP Message Signatures, checkout operations follow the
-[Message Signatures](signatures.md) specification.
+[Message Signatures](../../signatures.md) specification.
 
 ### Request Signing
 
@@ -1440,7 +1440,7 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
 ```
 
-See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
+See [Message Signatures - REST Request Signing](../../signatures.md#rest-request-signing)
 for the complete signing algorithm.
 
 ### Response Signing
@@ -1465,7 +1465,7 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
 
-See [Message Signatures - REST Response Signing](signatures.md#rest-response-signing)
+See [Message Signatures - REST Response Signing](../../signatures.md#rest-response-signing)
 for the complete signing algorithm.
 
 ## Security Considerations
@@ -1479,7 +1479,7 @@ authentication is required, the REST transport **MAY** use:
 2. **API Keys**: Via `X-API-Key` header.
 3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
    platform for agent-authenticated access, or both platform and user for
-   user-authenticated access (see [Identity Linking](identity-linking.md)).
+   user-authenticated access (see [Identity Linking](../../identity-linking.md)).
 4. **Mutual TLS**: For high-security environments.
 5. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
     (see [Message Signing](#message-signing) above).

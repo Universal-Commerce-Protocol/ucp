@@ -403,7 +403,7 @@ completion.
 ## Transport & Messaging
 
 ECP uses the shared EP transport layer. See
-[Embedded Protocol — Transport & Messaging](embedded-protocol.md#transport-messaging)
+[Embedded Protocol — Transport & Messaging](../../embedded-protocol.md#transport-messaging)
 for message format, message types, and response handling conventions.
 
 The `ucp.version` in all responses **MUST** echo the `ec_version` negotiated
@@ -414,7 +414,7 @@ of the ECP session.
 ### Communication Channels
 
 ECP follows the shared EP communication channel model. See
-[Embedded Protocol — Communication Channels](embedded-protocol.md#communication-channels)
+[Embedded Protocol — Communication Channels](../../embedded-protocol.md#communication-channels)
 for the general pattern.
 
 For native hosts, the checkout-specific globals are:
@@ -659,7 +659,7 @@ messages after receiving a handshake error.
 #### `ec.auth`
 
 `ec.auth` implements the shared EP authentication pattern — see
-[Embedded Protocol — Authentication](embedded-protocol.md#authentication) for
+[Embedded Protocol — Authentication](../../embedded-protocol.md#authentication) for
 the request/response contract, examples, and error escalation flow.
 
 - **Method:** `ec.auth`
@@ -667,12 +667,12 @@ the request/response contract, examples, and error escalation flow.
 
 When error escalation is required, Embedded Checkout **MUST** issue an
 `ec.error` notification per the
-[session error pattern](embedded-protocol.md#session-error).
+[session error pattern](../../embedded-protocol.md#session-error).
 
 ### Lifecycle Messages
 
 Lifecycle notifications follow the shared EP pattern — see
-[Embedded Protocol — Lifecycle](embedded-protocol.md#lifecycle). All lifecycle
+[Embedded Protocol — Lifecycle](../../embedded-protocol.md#lifecycle). All lifecycle
 notifications carry the full `checkout` object as their payload.
 
 #### `ec.start`
@@ -748,7 +748,7 @@ Indicates successful checkout completion.
 ### State Change Messages
 
 State change notifications follow the shared EP pattern — see
-[Embedded Protocol — State Change](embedded-protocol.md#state-change). All state
+[Embedded Protocol — State Change](../../embedded-protocol.md#state-change). All state
 change notifications are sent from the Embedded Checkout to the host and carry
 the full `checkout` object as their payload.
 
@@ -918,7 +918,7 @@ Payment state has been updated. See the
 #### `ec.error`
 
 `ec.error` implements the shared EP session error pattern — see
-[Embedded Protocol — Session Error](embedded-protocol.md#session-error) for the
+[Embedded Protocol — Session Error](../../embedded-protocol.md#session-error) for the
 payload specification and host handling requirements.
 
 ## Payment Extension
@@ -1514,7 +1514,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 ### Error Codes
 
-See [Embedded Protocol — Error Codes](embedded-protocol.md#error-codes) for
+See [Embedded Protocol — Error Codes](../../embedded-protocol.md#error-codes) for
 the shared error codes. Embedded Checkout defines the following additional
 codes for delegation-specific scenarios:
 
@@ -1530,7 +1530,7 @@ gesture before re-attempting the delegation.
 
 ECP inherits the shared EP security requirements for CSP, iframe sandboxing,
 credentialless iframes, and strict origin validation. See
-[Embedded Protocol — Security](embedded-protocol.md#security) for the full
+[Embedded Protocol — Security](../../embedded-protocol.md#security) for the full
 specification.
 
 ### Prevention of Unsolicited Payment Requests
@@ -1554,14 +1554,14 @@ Checkout protocol and its extensions.
 The core object representing the current state of the transaction, including
 line items, totals, and buyer information.
 
-{{ schema_fields('checkout_resp', 'checkout') }}
+{{ schema_fields('checkout_resp', 'shopping/checkout') }}
 
 ### Order
 
 The object returned upon successful completion of a checkout, containing
 confirmation details.
 
-{{ schema_fields('order', 'order') }}
+{{ schema_fields('order', 'shopping/order') }}
 
 ### Payment
 

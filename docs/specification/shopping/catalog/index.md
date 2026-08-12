@@ -196,24 +196,24 @@ When `context.eligibility` claims are present, Businesses that accept them
 **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the
 adjustment to a specific claim.
 
-{{ schema_fields('types/context', 'catalog') }}
+{{ schema_fields('types/context', 'shopping/catalog') }}
 
 ### Signals
 
 Environment data provided by the platform to support authorization
 and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
-[Signals](../overview.md#signals) for details and privacy requirements.
+[Signals](../../overview.md#signals) for details and privacy requirements.
 
-{{ schema_fields('types/signals', 'catalog') }}
+{{ schema_fields('types/signals', 'shopping/catalog') }}
 
 ### Attribution
 
 Platform-provided referral and conversion-event context — campaign IDs,
 click identifiers, and source/medium markers communicated by the platform.
-See [Attribution](../overview.md#attribution) for details and consent
+See [Attribution](../../overview.md#attribution) for details and consent
 requirements.
 
-{{ schema_fields('types/attribution', 'catalog') }}
+{{ schema_fields('types/attribution', 'shopping/catalog') }}
 
 ### Product
 
@@ -223,7 +223,7 @@ A catalog item representing a sellable item with one or more purchasable variant
 relevant variant and image first—default for lookups, best match based on query
 and context for search. Platforms SHOULD treat the first element as featured.
 
-{{ schema_fields('types/product', 'catalog') }}
+{{ schema_fields('types/product', 'shopping/catalog') }}
 
 ### Variant
 
@@ -237,44 +237,44 @@ was `exact` or `featured` (server-selected). See
 `media` is an ordered array. Businesses SHOULD return the featured variant image
 as the first element. Platforms SHOULD treat the first element as featured.
 
-{{ schema_fields('types/variant', 'catalog') }}
+{{ schema_fields('types/variant', 'shopping/catalog') }}
 
 ### Price
 
-{{ schema_fields('types/price', 'catalog') }}
+{{ schema_fields('types/price', 'shopping/catalog') }}
 
 ### Price Range
 
-{{ schema_fields('types/price_range', 'catalog') }}
+{{ schema_fields('types/price_range', 'shopping/catalog') }}
 
 ### Media
 
-{{ schema_fields('types/media', 'catalog') }}
+{{ schema_fields('types/media', 'shopping/catalog') }}
 
 ### Product Option
 
-{{ schema_fields('types/product_option', 'catalog') }}
+{{ schema_fields('types/product_option', 'shopping/catalog') }}
 
 ### Option Value
 
-{{ schema_fields('types/option_value', 'catalog') }}
+{{ schema_fields('types/option_value', 'shopping/catalog') }}
 
 ### Selected Option
 
-{{ schema_fields('types/selected_option', 'catalog') }}
+{{ schema_fields('types/selected_option', 'shopping/catalog') }}
 
 ### Rating
 
-{{ schema_fields('types/rating', 'catalog') }}
+{{ schema_fields('types/rating', 'shopping/catalog') }}
 
 ### Policy
 
 Policies (return/refund terms, warranty, and the like) that apply to the
 products in a catalog response. JSONPath targets in `applies_to` are
 relative to the response root — `$.products[N]` for search and batch lookup,
-`$.product` for get_product. See [Policies](../overview.md#policies) for the full model.
+`$.product` for get_product. See [Policies](../../overview.md#policies) for the full model.
 
-{{ schema_fields('types/policy', 'catalog') }}
+{{ schema_fields('types/policy', 'shopping/catalog') }}
 
 ## Actions
 
@@ -298,7 +298,7 @@ After processing an Action, the Platform performs a fresh Catalog operation and
 the later Business response is authoritative. Catalog defines no Action
 lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY**
 define those behaviors for processing its instances. The common shape and rules
-are defined in [Overview — Actions](../overview.md#actions).
+are defined in [Overview — Actions](../../overview.md#actions).
 
 For example, this Search response returns no products and explains that age
 verification may affect the results:
@@ -347,7 +347,7 @@ Messages communicate business outcomes and provide context:
 
 Warnings with `presentation: "disclosure"` carry notices (e.g., allergen
 declarations, safety warnings) that platforms must not hide or dismiss. See
-[Warning Presentation](../checkout.md#warning-presentation) for the full
+[Warning Presentation](../checkout/index.md#warning-presentation) for the full
 rendering contract.
 
 **Note**: Most catalog errors use `severity: "recoverable"` - agents
@@ -359,15 +359,15 @@ examples).
 
 #### Message (Error)
 
-{{ schema_fields('types/message_error', 'catalog') }}
+{{ schema_fields('types/message_error', 'shopping/catalog') }}
 
 #### Message (Warning)
 
-{{ schema_fields('types/message_warning', 'catalog') }}
+{{ schema_fields('types/message_warning', 'shopping/catalog') }}
 
 #### Message (Info)
 
-{{ schema_fields('types/message_info', 'catalog') }}
+{{ schema_fields('types/message_info', 'shopping/catalog') }}
 
 ### Common Scenarios
 
@@ -505,7 +505,7 @@ disclosure applies to all of its variants.
 }
 ```
 
-See [Warning Presentation](../checkout.md#warning-presentation) for the
+See [Warning Presentation](../checkout/index.md#warning-presentation) for the
 full rendering contract.
 
 ## Scopes
@@ -519,7 +519,7 @@ well-known scopes for user-authenticated access:
 | `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](../identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
 
 ## Transport Bindings
 

@@ -104,13 +104,13 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 Businesses MAY surface a snapshot of the originating checkout's
 `attribution` on the order. Read-only on the order — agents do not write
-`order.attribution`. See [Attribution](overview.md#attribution) for the
+`order.attribution`. See [Attribution](../../overview.md#attribution) for the
 underlying contract.
 
 ### Policies
 
 Businesses MAY surface a snapshot of the policies that applied at checkout on
-the order. See [Policies](overview.md#policies) for the underlying contract.
+the order. See [Policies](../../overview.md#policies) for the underlying contract.
 
 ### Adjustments
 
@@ -131,13 +131,13 @@ fulfillment:
 
 ### Order
 
-{{ schema_fields('order', 'order') }}
+{{ schema_fields('order', 'shopping/order') }}
 
 ### Order Line Item
 
 Line items reflect what was purchased at checkout and their current state.
 
-{{ schema_fields('order_line_item', 'order') }}
+{{ schema_fields('order_line_item', 'shopping/order') }}
 
 **Quantity Structure:**
 
@@ -173,7 +173,7 @@ Expectations are buyer-facing groupings representing when/how items will be
 delivered. They represent the current promise to the buyer and can be
 split, merged, or adjusted post-order.
 
-{{ schema_fields('expectation', 'order') }}
+{{ schema_fields('expectation', 'shopping/order') }}
 
 ### Fulfillment Event
 
@@ -181,7 +181,7 @@ Events are append-only records tracking actual shipments. The `type` field is
 an open string - businesses can use any values that make sense for their
 fulfillment process.
 
-{{ schema_fields('fulfillment_event', 'order') }}
+{{ schema_fields('fulfillment_event', 'shopping/order') }}
 
 Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
 `canceled`, `undeliverable`, `returned_to_sender`, etc.
@@ -192,7 +192,7 @@ Adjustments are polymorphic events that exist independently of fulfillment.
 The `type` field is an open string - businesses can use any values that make
 sense to them.
 
-{{ schema_fields('adjustment', 'order') }}
+{{ schema_fields('adjustment', 'shopping/order') }}
 
 Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 `cancellation`, etc.
@@ -547,7 +547,7 @@ user-authenticated access:
 | `dev.ucp.shopping.order:manage` | Post-purchase operations on the user's orders — cancellation, returns, and other modifications. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
 
 ## Operations
 
@@ -566,8 +566,8 @@ cases.
 | :-------------------------------------- | :----- | :------------- | :-------------------------------------- |
 | [Get Order](#get-order)                 | `GET`  | `/orders/{id}` | Platform retrieves current order state. |
 
-For transport-specific details, see [REST Binding](order-rest.md), and
-[MCP Binding](order-mcp.md)
+For transport-specific details, see [REST Binding](rest.md), and
+[MCP Binding](mcp.md)
 
 ### Get Order
 
@@ -578,7 +578,7 @@ Returns the current-state snapshot of an order.
 The business **MUST** authenticate requests to order data before returning a
 response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual
 TLS, or HTTP Message Signatures (see
-[Identity and Authentication](checkout-rest.md#authentication)). The
+[Identity and Authentication](../checkout/rest.md#authentication)). The
 authentication method determines which orders are accessible to the
 caller:
 
@@ -594,7 +594,7 @@ observed the order confirmation, and is retrieving the latest state of an
 order it already has context for.
 
 **Buyer authorization** - the platform obtains buyer authorization via
-[Identity Linking](identity-linking.md) with the necessary scopes, or a
+[Identity Linking](../../identity-linking.md) with the necessary scopes, or a
 similar mechanism. This grants access to the buyer's orders regardless of
 which platform originated them.
 
@@ -687,7 +687,7 @@ during partner onboarding. The URL format is platform-specific.
 
 Headers follow **[Standard Webhooks](https://www.standardwebhooks.com/){ target="_blank" }**;
 except for request signing, which follows [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421).
-See [Message Signatures](signatures.md) for more details.
+See [Message Signatures](../../signatures.md) for more details.
 
 **Required Headers:**
 
@@ -696,7 +696,7 @@ See [Message Signatures](signatures.md) for more details.
 | `Webhook-Timestamp`  | Event occurrence timestamp (unix)           |
 | `Webhook-Id`         | Unique event identifier                     |
 
-{{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
+{{ method_fields('order_event_webhook', 'rest.openapi.json', 'shopping/order') }}
 
 ### Webhook URL Configuration
 
@@ -704,7 +704,7 @@ The platform provides its webhook URL in the order capability's `config` field
 during capability negotiation. The business discovers this URL from the
 platform's profile and uses it to send order lifecycle events.
 
-{{ extension_schema_fields('order.json#/$defs/platform_schema', 'order') }}
+{{ extension_schema_fields('order.json#/$defs/platform_schema', 'shopping/order') }}
 
 **Example:**
 
@@ -714,7 +714,7 @@ platform's profile and uses it to send order lifecycle events.
   "dev.ucp.shopping.order": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/order",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/order",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
       "config": {
         "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
@@ -728,7 +728,7 @@ platform's profile and uses it to send order lifecycle events.
 
 Webhook payloads **MUST** be signed by the business and verified by the platform
 to ensure authenticity and integrity. Signatures follow the
-[Message Signatures](signatures.md) specification using the REST binding
+[Message Signatures](../../signatures.md) specification using the REST binding
 (RFC 9421).
 
 **Required Headers:**
@@ -761,7 +761,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 3. Sign using a key from `keys` in the business's UCP profile
 4. Set `Signature-Input` and `Signature` headers
 
-See [Message Signatures - REST Request Signing](signatures.md#rest-request-signing)
+See [Message Signatures - REST Request Signing](../../signatures.md#rest-request-signing)
 for complete algorithm.
 
 #### Verification (Platform)
@@ -774,7 +774,7 @@ for complete algorithm.
 4. Verify `Content-Digest` matches SHA-256 of raw body
 5. Reconstruct signature base and verify signature
 
-See [Message Signatures - REST Request Verification](signatures.md#rest-request-verification)
+See [Message Signatures - REST Request Verification](../../signatures.md#rest-request-verification)
 for complete algorithm.
 
 **Authorization** (order ownership):
@@ -791,7 +791,7 @@ business's orders, even with a valid signature.
 
 #### Key Rotation
 
-See [Message Signatures - Key Rotation](signatures.md#key-rotation) for
+See [Message Signatures - Key Rotation](../../signatures.md#key-rotation) for
 zero-downtime key rotation procedures.
 
 ### Guidelines {: #events-guidelines }
@@ -805,7 +805,7 @@ zero-downtime key rotation procedures.
 
 * **MUST** include `UCP-Agent` header with profile URL for signer identification
 * **MUST** sign all webhook payloads per the
-  [Message Signatures](signatures.md) specification using RFC 9421 headers
+  [Message Signatures](../../signatures.md) specification using RFC 9421 headers
   (`Signature`, `Signature-Input`, `Content-Digest`)
 * **MUST** send "Order created" event with fully populated order entity
 * **MUST** send full order entity on updates (not incremental deltas)
@@ -815,20 +815,20 @@ zero-downtime key rotation procedures.
 
 ### Item
 
-{{ schema_fields('types/item_resp', 'order') }}
+{{ schema_fields('types/item_resp', 'shopping/order') }}
 
 ### Postal Address
 
-{{ schema_fields('postal_address', 'order') }}
+{{ schema_fields('postal_address', 'shopping/order') }}
 
 ### Response
 
-{{ extension_schema_fields('capability.json#/$defs/response_schema', 'order') }}
+{{ extension_schema_fields('capability.json#/$defs/response_schema', 'shopping/order') }}
 
 ### Total
 
-{{ schema_fields('types/total_resp', 'order') }}
+{{ schema_fields('types/total_resp', 'shopping/order') }}
 
 ### UCP Response Order Schema <span id="ucp"></span> {: #ucp-response-order-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'order') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'shopping/order') }}

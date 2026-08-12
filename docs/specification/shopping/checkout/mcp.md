@@ -17,7 +17,7 @@
 # Checkout Capability - MCP Binding
 
 This document specifies the Model Context Protocol (MCP) binding for the
-[Checkout Capability](checkout.md).
+[Checkout Capability](index.md).
 
 ## Protocol Fundamentals
 
@@ -46,7 +46,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
@@ -104,7 +104,7 @@ protocol metadata:
 ```
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
-[capability negotiation](overview.md#negotiation-protocol). The
+[capability negotiation](../../overview.md#negotiation-protocol). The
 `complete_checkout` and `cancel_checkout` operations also require
 `meta["idempotency-key"]` for retry safety. Platforms **MAY** include
 additional metadata fields.
@@ -126,29 +126,29 @@ MCP tools separate resource identification from payload data:
 
 | Tool                | Operation                                          | Description                |
 | :------------------ | :------------------------------------------------- | :------------------------- |
-| `create_checkout`   | [Create Checkout](checkout.md#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](checkout.md#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](checkout.md#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](checkout.md#cancel-checkout)     | Cancel a checkout session. |
+| `create_checkout`   | [Create Checkout](index.md#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](index.md#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](index.md#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](index.md#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](index.md#cancel-checkout)     | Cancel a checkout session. |
 
 ### `create_checkout`
 
-Maps to the [Create Checkout](checkout.md#create-checkout) operation.
+Maps to the [Create Checkout](index.md#create-checkout) operation.
 
 #### Input Schema
 
-* `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
+* `checkout` ([Checkout](index.md#create-checkout)): **Required**. Contains
     the initial checkout session data and optional extensions.
     * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
+        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../ap2-mandates.md)
 
 #### Output Schema
 
-* [Checkout](checkout.md#create-checkout) object.
+* [Checkout](index.md#create-checkout) object.
 
 #### Example
 
@@ -374,7 +374,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 ### `get_checkout`
 
-Maps to the [Get Checkout](checkout.md#get-checkout) operation.
+Maps to the [Get Checkout](index.md#get-checkout) operation.
 
 #### Input Schema
 
@@ -382,32 +382,32 @@ Maps to the [Get Checkout](checkout.md#get-checkout) operation.
 
 #### Output Schema
 
-* [Checkout](checkout.md#get-checkout) object.
+* [Checkout](index.md#get-checkout) object.
 
 ### `update_checkout`
 
-Maps to the [Update Checkout](checkout.md#update-checkout) operation.
+Maps to the [Update Checkout](index.md#update-checkout) operation.
 
 The Platform **MUST NOT** start a new `update_checkout` operation while the
 Checkout is `complete_in_progress`. Duplicate requests remain subject to
-[Replay Protection](signatures.md#replay-protection). If the Business receives a
+[Replay Protection](../../signatures.md#replay-protection). If the Business receives a
 new `update_checkout` request in that state, it **MUST** leave the Checkout
 unchanged and return the current Checkout with a recoverable error Message.
 
 #### Input Schema
 
 * `id` (String): **Required**. The ID of the checkout session to update.
-* `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
+* `checkout` ([Checkout](index.md#update-checkout)): **Required**.
     Contains the updated checkout session data.
     * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
+        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../ap2-mandates.md)
 
 #### Output Schema
 
-* [Checkout](checkout.md#update-checkout) object.
+* [Checkout](index.md#update-checkout) object.
 
 #### Example
 
@@ -603,7 +603,7 @@ unchanged and return the current Checkout with a recoverable error Message.
 
 ### `complete_checkout`
 
-Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
+Maps to the [Complete Checkout](index.md#complete-checkout) operation.
 
 #### Input Schema
 
@@ -611,18 +611,18 @@ Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
     * `ucp-agent` (Object): **Required**. Platform agent identification.
     * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
 * `id` (String): **Required**. The ID of the checkout session.
-* `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
+* `checkout` ([Checkout](index.md#complete-checkout)): **Required**.
     Contains payment credentials and other finalization data to execute the transaction.
 
 #### Output Schema
 
-* [Checkout](checkout.md#complete-checkout) object. See core
-   [Complete Checkout](checkout.md#complete-checkout) for status and `order`
+* [Checkout](index.md#complete-checkout) object. See core
+   [Complete Checkout](index.md#complete-checkout) for status and `order`
    semantics.
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
+Maps to the [Cancel Checkout](index.md#cancel-checkout) operation.
 
 #### Input Schema
 
@@ -633,12 +633,12 @@ Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
 
 #### Output Schema
 
-* [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
+* [Checkout](index.md#cancel-checkout) object with `status: canceled`.
 
 ## Error Handling
 
 UCP distinguishes between protocol errors and business outcomes. See the
-[Core Specification](overview.md#error-handling) for the complete error code
+[Core Specification](../../overview.md#error-handling) for the complete error code
 registry and transport binding examples.
 
 * **Protocol errors**: Transport-level failures (authentication, rate limiting,
@@ -734,7 +734,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
 
 Platforms **SHOULD** authenticate agents when using MCP transport. When using
 HTTP Message Signatures, all checkout operations follow the
-[Message Signatures](signatures.md) specification.
+[Message Signatures](../../signatures.md) specification.
 
 ### Request Signing
 
@@ -769,7 +769,7 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON
 canonicalization is required.
 
-See [Message Signatures - MCP Transport](signatures.md#mcp-transport)
+See [Message Signatures - MCP Transport](../../signatures.md#mcp-transport)
 for details.
 
 ### Response Signing
@@ -794,7 +794,7 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 {"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"checkout_abc123","status":"completed"}}}
 ```
 
-See [Message Signatures - REST Response Signing](signatures.md#rest-response-signing)
+See [Message Signatures - REST Response Signing](../../signatures.md#rest-response-signing)
 for the signing algorithm (identical for MCP over HTTP).
 
 ## Conformance
@@ -803,7 +803,7 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 2. Provide all core checkout tools defined in this specification.
-3. Return errors per the [Core Specification](overview.md#error-handling).
+3. Return errors per the [Core Specification](../../overview.md#error-handling).
 4. Return business outcomes as JSON-RPC `result` with UCP envelope and
     `messages` array.
 5. Validate tool inputs against UCP schemas.
@@ -812,7 +812,7 @@ A conforming MCP transport implementation **MUST**:
 A conforming implementation **SHOULD**:
 
 1. Authenticate agents using one of the supported mechanisms (API keys, OAuth,
-    mTLS, or HTTP Message Signatures per [Message Signatures](signatures.md)).
+    mTLS, or HTTP Message Signatures per [Message Signatures](../../signatures.md)).
 2. Verify authentication on incoming requests before processing.
 
 ## Implementation

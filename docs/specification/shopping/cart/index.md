@@ -21,7 +21,7 @@
 ## Overview
 
 The Cart capability enables basket building without the complexity of checkout.
-While [Checkout](checkout.md) manages payment handlers, status lifecycle, and
+While [Checkout](../checkout/index.md) manages payment handlers, status lifecycle, and
 order finalization, cart provides a lightweight CRUD interface for item
 collection before purchase intent is established.
 
@@ -114,7 +114,7 @@ item count.
 ## Actions
 
 The cart surfaces outstanding Action instances in its response-only `actions`
-map, defined in [Overview — Actions](overview.md#actions).
+map, defined in [Overview — Actions](../../overview.md#actions).
 
 The cart has no status lifecycle. Each Action gates only the cart effect
 specified for its Action type. The Business **MUST NOT** treat an outstanding
@@ -134,7 +134,7 @@ user-authenticated access:
 | `dev.ucp.shopping.cart:manage` | All cart operations on behalf of the authenticated user — create, read, update, persist. |
 
 Scope declaration, derivation, and rules for extending this set with
-custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#scopes).
+custom scopes are defined in [Identity Linking — Scopes](../../identity-linking.md#scopes).
 
 ## Guidelines
 
@@ -158,7 +158,7 @@ custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#s
 
 ## Cart Schema Definition
 
-{{ schema_fields('cart_resp', 'cart') }}
+{{ schema_fields('cart_resp', 'shopping/cart') }}
 
 ## Operations
 
@@ -197,16 +197,16 @@ indicator:
 }
 ```
 
-* [REST Binding](cart-rest.md#create-cart)
-* [MCP Binding](cart-mcp.md#create_cart)
+* [REST Binding](rest.md#create-cart)
+* [MCP Binding](mcp.md#create_cart)
 
 ### Get Cart
 
 Retrieves the latest state of a cart session. Returns `not_found` if the cart
 does not exist, has expired, or was canceled.
 
-* [REST Binding](cart-rest.md#get-cart)
-* [MCP Binding](cart-mcp.md#get_cart)
+* [REST Binding](rest.md#get-cart)
+* [MCP Binding](mcp.md#get_cart)
 
 ### Update Cart
 
@@ -214,106 +214,106 @@ Performs a full replacement of the cart session. The platform **MUST** send
 the entire cart resource. The provided resource replaces the existing cart
 state on the business side.
 
-* [REST Binding](cart-rest.md#update-cart)
-* [MCP Binding](cart-mcp.md#update_cart)
+* [REST Binding](rest.md#update-cart)
+* [MCP Binding](mcp.md#update_cart)
 
 ### Cancel Cart
 
 Cancels a cart session. Business MUST return the cart state before deletion.
 Subsequent operations for this cart ID SHOULD return `not_found`.
 
-* [REST Binding](cart-rest.md#cancel-cart)
-* [MCP Binding](cart-mcp.md#cancel_cart)
+* [REST Binding](rest.md#cancel-cart)
+* [MCP Binding](mcp.md#cancel_cart)
 
 ## Entities
 
-Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
+Cart reuses the same entity schemas as [Checkout](../checkout/index.md). This ensures
 consistent data structures when converting a cart to a checkout session.
 
 ### UCP Response Cart {: #ucp-response-cart-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'cart') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'shopping/cart') }}
 
 ### Line Item
 
 #### Line Item Create Request
 
-{{ schema_fields('types/line_item_create_req', 'checkout') }}
+{{ schema_fields('types/line_item_create_req', 'shopping/checkout') }}
 
 #### Line Item Update Request
 
-{{ schema_fields('types/line_item_update_req', 'checkout') }}
+{{ schema_fields('types/line_item_update_req', 'shopping/checkout') }}
 
 #### Line Item
 
-{{ schema_fields('types/line_item_resp', 'cart') }}
+{{ schema_fields('types/line_item_resp', 'shopping/cart') }}
 
 #### Item
 
-{{ schema_fields('types/item_resp', 'cart') }}
+{{ schema_fields('types/item_resp', 'shopping/cart') }}
 
 ### Buyer
 
-{{ schema_fields('buyer', 'checkout') }}
+{{ schema_fields('buyer', 'shopping/checkout') }}
 
 ### Context
 
-{{ schema_fields('context', 'checkout') }}
+{{ schema_fields('context', 'shopping/checkout') }}
 
 ### Signals
 
 Environment data provided by the platform to support authorization
 and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
-[Signals](overview.md#signals) for details and privacy
+[Signals](../../overview.md#signals) for details and privacy
 requirements.
 
-{{ schema_fields('types/signals', 'checkout') }}
+{{ schema_fields('types/signals', 'shopping/checkout') }}
 
 ### Attribution
 
 Platform-provided referral and conversion-event context — campaign IDs,
 click identifiers, and source/medium markers communicated by the platform.
-See [Attribution](overview.md#attribution) for details and consent
+See [Attribution](../../overview.md#attribution) for details and consent
 requirements.
 
-{{ schema_fields('types/attribution', 'checkout') }}
+{{ schema_fields('types/attribution', 'shopping/checkout') }}
 
 ### Total
 
 The same totals contract applies to cart and checkout. See
-[Checkout Totals](checkout.md#totals) for the rendering contract, accounting
+[Checkout Totals](../checkout/index.md#totals) for the rendering contract, accounting
 identity, well-known types, repeating types, and sub-line semantics.
 
-{{ schema_fields('types/total_resp', 'checkout') }}
+{{ schema_fields('types/total_resp', 'shopping/checkout') }}
 
 Taxes MAY be included where calculable. Platforms SHOULD assume cart totals
 are estimates; accurate taxes are computed at checkout.
 
 ### Message
 
-{{ schema_fields('message', 'checkout') }}
+{{ schema_fields('message', 'shopping/checkout') }}
 
 #### Message Error
 
-{{ schema_fields('types/message_error', 'checkout') }}
+{{ schema_fields('types/message_error', 'shopping/checkout') }}
 
 #### Message Info
 
-{{ schema_fields('types/message_info', 'checkout') }}
+{{ schema_fields('types/message_info', 'shopping/checkout') }}
 
 #### Message Warning
 
-{{ schema_fields('types/message_warning', 'checkout') }}
+{{ schema_fields('types/message_warning', 'shopping/checkout') }}
 
 ### Link
 
-{{ schema_fields('types/link', 'checkout') }}
+{{ schema_fields('types/link', 'shopping/checkout') }}
 
 ### Policy
 
 Policies (return/refund terms, warranty, and the like) that apply to the items
 in this cart. JSONPath targets in `applies_to` are relative to
 this response root (e.g., `$.line_items[0]`). See
-[Policies](overview.md#policies) for the full model.
+[Policies](../../overview.md#policies) for the full model.
 
-{{ schema_fields('types/policy', 'cart') }}
+{{ schema_fields('types/policy', 'shopping/cart') }}

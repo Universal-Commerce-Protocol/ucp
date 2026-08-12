@@ -45,12 +45,12 @@ Businesses advertise REST transport availability through their UCP profile at
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/search",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/search",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json"
       }],
       "dev.ucp.shopping.catalog.lookup": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
       }]
     },

@@ -63,7 +63,7 @@ resolve to the same product, it MUST be returned once.
 The response does not guarantee order. Each variant carries an `inputs`
 array identifying which request identifiers resolved to it, and how.
 
-{{ schema_fields('types/input_correlation', 'catalog') }}
+{{ schema_fields('types/input_correlation', 'shopping/catalog') }}
 
 Multiple request identifiers may resolve to the same variant (e.g., a
 product ID and one of its variant IDs). When this occurs, the variant's
@@ -101,11 +101,11 @@ from the response.
 
 ### Request
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_request', 'shopping/catalog') }}
 
 ### Response
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'shopping/catalog') }}
 
 ---
 
@@ -193,11 +193,11 @@ selection changes the availability map.
 
 ### Request
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_request', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_request', 'shopping/catalog') }}
 
 ### Response
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'shopping/catalog') }}
 
 ---
 
@@ -208,7 +208,7 @@ response-only `actions` map. Batch Lookup retains its required `products` array,
 which can be empty; successful Get Product retains its required `product`, and
 its existing error response is unchanged. See
 [Catalog — Actions](index.md#actions) for the parent contract and
-[Overview — Actions](../overview.md#actions) for the common rules.
+[Overview — Actions](../../overview.md#actions) for the common rules.
 
 ## Transport Bindings
 
