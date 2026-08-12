@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/media.json",
   "title": "Media",
-  "description": "Media item (image, video, etc.).",
+  "description": "A single logical media item: an image, video, or 3D model. `url` is the primary resource; when present, `sources` is the complete set of available renditions. When `sources` is present and `url` identifies a rendition, the Business SHOULD include that rendition.",
   "type": "object",
   "required": [
     "type",
@@ -11,12 +11,16 @@
   "properties": {
     "type": {
       "type": "string",
-      "description": "Media type. Well-known values: `image`, `video`, `model_3d`."
+      "description": "Media type. The Platform MUST ignore unknown values. Well-known values: `image`, `video`, `model_3d`."
     },
     "url": {
       "type": "string",
       "format": "uri",
-      "description": "URL to the media resource."
+      "description": "Primary/canonical URL for the item; interpretation depends on `type` (specialized per type)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable title or label for the media, distinct from `alt_text` (accessibility text). Often present for `video` and `model_3d`."
     },
     "alt_text": {
       "type": "string",
@@ -25,12 +29,65 @@
     "width": {
       "type": "integer",
       "minimum": 1,
-      "description": "Width in pixels (for images/video)."
+      "description": "Pixel width of the media."
     },
     "height": {
       "type": "integer",
       "minimum": 1,
-      "description": "Height in pixels (for images/video)."
+      "description": "Pixel height of the media."
+    },
+    "preview": {
+      "type": "object",
+      "description": "Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for `video` and `model_3d` unless no suitable still exists, and MAY provide it for `image` as a low-resolution placeholder. For externally hosted video, `preview.width` and `preview.height` provide the layout aspect ratio.",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the preview image."
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Actual pixel width of the preview image. The ratio of `preview.width` to `preview.height` is used to reserve embedded-video player layout."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Actual pixel height of the preview image. The ratio of `preview.width` to `preview.height` is used to reserve embedded-video player layout."
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "image" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_image.json"
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "video" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_video.json"
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "model_3d" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_model_3d.json"
+      }
+    }
+  ]
 }

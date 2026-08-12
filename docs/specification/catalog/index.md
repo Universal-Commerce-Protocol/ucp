@@ -132,7 +132,56 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 ### Media
 
+A single logical media item on a Product or Variant: an image, a video, or a
+3D model. `url` identifies the item's primary resource, and its interpretation
+depends on `type`. `preview` is a still image the Platform can render before —
+or instead of — loading that resource.
+
+`type` is an open string with three well-known values: `image`, `video`, and
+`model_3d`. A Platform **MUST** ignore a media item whose `type` it does not
+recognize.
+
+When present, `sources` contains the complete set of available renditions or
+encodings. A Business that provides `sources` **SHOULD** include a source whose
+`url` equals the media item's `url`, unless `url` is an externally hosted
+video's watch page rather than a rendition.
+
+For an image, a self-hosted video, or a 3D model, a Platform loads the
+renderable or loadable primary resource at `url`. For an externally hosted
+video with `embed_url`, `url` identifies the watch page and `embed_url`
+identifies third-party active player content. A Platform **MAY** decline to
+embed that content under its security, privacy, or presentation policy and use
+the watch-page `url` instead. For a thumbnail, a Platform can use `preview.url`
+and fall back to `url` for an image, which is directly displayable.
+
 {{ schema_fields('types/media', 'catalog') }}
+
+#### Image
+
+{{ schema_fields('types/media_image', 'catalog') }}
+
+#### Video
+
+A self-hosted video's `url` identifies its directly playable default rendition.
+An externally hosted video is distinguished by `embed_url`, which identifies
+the third-party active player content; its `url` identifies the watch page, not
+a playable rendition.
+
+A Platform that selects a rendition from `sources` **SHOULD** use the `width`
+and `height` of that entry rather than those on the media item, unless the
+entry omits them.
+
+For an externally hosted video, a Business **SHOULD** provide both
+`preview.width` and `preview.height` with a ratio that matches the intended
+player, unless it has no suitable preview. A Platform **SHOULD** reserve the
+initial player layout using that ratio, unless its presentation policy supplies
+another ratio.
+
+{{ schema_fields('types/media_video', 'catalog') }}
+
+#### 3D Model
+
+{{ schema_fields('types/media_model_3d', 'catalog') }}
 
 ### Product Option
 
