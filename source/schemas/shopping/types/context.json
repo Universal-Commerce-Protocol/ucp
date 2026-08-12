@@ -15,8 +15,7 @@
       "properties": {
         "location": {
           "type": "string",
-          "description": "Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability or extension defines its effects.",
-          "ucp_request": "optional"
+          "description": "Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability or extension defines its effects."
         },
         "intent": {
           "type": "string",
