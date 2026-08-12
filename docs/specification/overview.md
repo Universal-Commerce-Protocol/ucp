@@ -969,6 +969,184 @@ example:
 }
 ```
 
+### The `ucp` Protocol Namespace
+
+The member name `ucp` is reserved as the **protocol namespace** in every
+structured UCP object scope — an object whose members are schema-defined
+fields. The top-level `ucp` member that profiles and responses carry —
+described in [Profile Structure](#profile-structure) above — is not a special
+wrapper; it is the root manifestation of this reservation: a reserved member
+of the root object. The reservation does not apply to a dictionary container,
+whose keys are data rather than fields. A dictionary key named `ucp` is
+ordinary data. A structured object used as a dictionary value remains an
+eligible scope. Schema authors **MUST NOT** define a domain field named `ucp`
+in structured object schemas or extensions.
+
+At each eligible structured scope, `ucp` carries the protocol's statements
+about that scope: protocol metadata at the root (version, services,
+capabilities, payment handlers) and structural annotations such as
+[`map_order`](#map_order).
+
+**Openness.** The `ucp` container is open. Consumers **MUST** ignore members
+inside `ucp` that they do not recognize (tolerant reader). Openness exists so
+documents produced under a newer UCP version remain readable by older
+consumers — it is *not* extension space. Only UCP core defines members inside
+`ucp`, and extension authors **MUST NOT** place extension data there. An
+unrecognized member inside `ucp` means "defined by a newer UCP version,"
+never "extension data."
+
+**No direct recursion.** Producers **MUST NOT** emit a `ucp` member as a direct
+child of another `ucp` member (`ucp.ucp`). If one is present, a receiving
+Business or Platform **MUST NOT** interpret it as another protocol namespace and
+**MUST** ignore that child. Structured objects beneath the namespace, such as a
+capability's `config`, remain eligible for their own `ucp` member.
+
+**Ambient vocabulary.** The protocol namespace is ambient within structured
+UCP objects: a Business or Platform **MAY** include a `ucp` member at any
+eligible structured scope, and its contents are defined exclusively by UCP
+core's vocabulary — the member is part of the UCP document grammar, like the
+name reservation itself. The reservation stops at a dictionary container. A
+Business or Platform **MUST NOT** interpret a dictionary key named `ucp` as
+the protocol namespace; the key and its value are ordinary dictionary data.
+For example, `attribution` is a dictionary of string values, so an attribution
+key named `ucp` is ordinary attribution data, not a protocol-namespace member.
+Guidance for schema authors on working within this reservation lives in the
+Schema Authoring Guide's
+[The Reserved `ucp` Member](/documentation/schema-authoring/#the-reserved-ucp-member)
+section. A Business or Platform encountering a `ucp` member at an eligible
+structured scope processes the members it recognizes, each per its own
+definition, and **MUST** ignore unrecognized members (see *Openness* above).
+A member is admitted to the vocabulary only if it is safe to ignore: a
+Business or Platform that does not process it loses only that member's
+benefit, never correctness. A Business or Platform that ignores `map_order`,
+for example, simply traverses the map unordered — the status quo before
+ordering existed.
+
+**Scope determines obligations.** At the root of profiles and responses, the
+`ucp` envelope additionally carries the required protocol metadata exactly as
+specified elsewhere in this document — this section changes none of those
+obligations. A Business or Platform **MAY** omit the member at every other
+eligible structured scope. Dictionary containers are not eligible scopes and
+carry no protocol-namespace obligation. Conformance to the vocabulary is
+defined by this specification's processing rules, not by ordinary instance
+validation against open UCP source schemas; that validation treats ambient
+`ucp` members as ignored unknown objects.
+
+**Vocabulary applicability.** Each registered protocol-namespace member defines
+the document contexts and message directions where it applies.
+
+**Schema processing.** UCP source schemas are open by default, so ordinary
+validation against them may accept ambient `ucp` without applying the protocol
+vocabulary. For a selected message direction, a UCP-aware resolver **MUST**
+produce a resolved schema that recognizes and validates ambient `ucp` at every
+eligible structured scope against the central vocabulary in
+`ucp.json#/$defs/members`, subject to that vocabulary's applicability in the
+selected direction. The `ucp` namespace remains open to unrecognized members
+for forward compatibility, even if the resolved schema rejects other unknown
+domain fields. The result is ordinary JSON Schema that standard validators and
+code generators can consume.
+
+#### `map_order`
+
+JSON object members are unordered: member order is not guaranteed to survive
+parsing, and
+[RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
+(JSON Canonicalization Scheme), which UCP signing relies on, sorts object
+member names while preserving array element order. `map_order` uses an array
+so its declared order survives canonicalization and signing.
+
+`map_order` declares a preferred key-traversal order for map-valued fields in
+the scope annotated by its containing `ucp` member. At a nested scope, each
+key of `map_order` names a map field on the object that contains `ucp`. At the
+document root, each key instead names a sibling map field inside the root `ucp`
+envelope. Root domain fields outside `ucp`, such as a checkout response's
+`actions`, are not targets. Each value is an array of the target map's keys in
+preferred traversal order.
+
+`map_order` does not apply to UCP operation requests.
+
+For a target map field `<field>` and its companion array `map_order.<field>`:
+
+1. Producers **MUST NOT** rely on JSON object member order for UCP map-valued
+    registries; `map_order` is the order carrier.
+2. `map_order.<field>` contains keys from the target map field `<field>` in
+    preferred traversal order.
+3. The order array **MAY** be partial: listed keys are traversed first, in
+    array order.
+4. Unlisted map keys remain valid and available; consumers traverse them
+    after the listed keys, using the field-defined fallback order or, if the
+    field defines none, the
+    [property-name ordering defined by RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html#section-3.2.3){ target="_blank" }.
+5. The order array is not an allowlist: consumers **MUST NOT** interpret
+    omission of a key as removal, ineligibility, or reduced support.
+6. Producers **MUST** name a present, map-valued target and **MUST** list only
+    keys present in that target map. A receiving Business
+    or Platform **MUST NOT** reject the containing document solely because an
+    entry names an absent, unrecognized, or non-map target, or a key absent from
+    its target map. If it processes `map_order`, it **MUST** ignore the unusable
+    entry.
+7. Producers **MUST NOT** list the same map key more than once in an order
+    array. Consumers **MUST NOT** reject the containing document solely because
+    an order array repeats a map key. Consumers that process `map_order`
+    **MUST** honor the first occurrence and ignore later repetitions.
+8. If `map_order`, or its entry for a field, is absent, no order is declared;
+    consumers **MUST NOT** fall back to object member order.
+9. A field's own specification defines what ordered traversal *means* for it
+    (presentation, negotiation priority, and so on) — `map_order` carries
+    order and nothing else.
+
+Rules 3–5 are a deliberate divergence from conventions in which unlisted keys
+are an error or are dropped: partial lists are always valid, and unlisted
+keys are always retained.
+
+A business profile ordering its payment handlers:
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": { ... },
+    "payment_handlers": {
+      "com.google.pay": [
+        { "id": "gpay", "version": "{{ ucp_version }}" }
+      ],
+      "dev.shopify.shop_pay": [
+        { "id": "shop_pay", "version": "{{ ucp_version }}" }
+      ]
+    },
+    "map_order": {
+      "payment_handlers": ["dev.shopify.shop_pay", "com.google.pay"]
+    }
+  }
+}
+```
+
+`map_order` is scope-generic — the same mechanism orders sibling maps at any
+eligible structured scope, as when a Business orders the identity-provider
+registry inside a capability's `config`:
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "providers": {
+    "app.example.login": [
+      {"type": "oauth2", "auth_url": "https://login.example.app"}
+    ],
+    "com.google": [
+      {"type": "oauth2", "auth_url": "https://accounts.google.com"}
+    ]
+  },
+  "ucp": {
+    "map_order": {"providers": ["app.example.login", "com.google"]}
+  }
+}
+```
+
+What an order *means* remains per-field (rule 9); the one traversal semantics
+defined today is the business's presentation preference for
+`payment_handlers` — see [Payment Handlers](#payment-handlers).
+
 ### Platform Advertisement on Request
 
 Platforms **MUST** communicate their profile URI with each request to enable
@@ -1791,6 +1969,19 @@ governing body.
 **Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on
 the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
 items, or filtering regional methods based on shipping address).
+
+**Presentation Order:** Businesses **MAY** declare a preferred presentation
+order for their advertised handlers via `map_order.payment_handlers` in their
+profile and response envelopes (see
+[The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)). The preference
+is suggestive: it communicates the business's preferred presentation —
+typically a conversion or risk judgment — and platforms **SHOULD** take it
+into account but **MAY** apply their own ordering. The same suggestive
+preference applies within a handler: the order of the business's advertised
+`available_instruments` array communicates preferred instrument presentation,
+earliest first. It is distinct from, and does not override, the buyer-side
+preference a platform submits in `context.payment[]` (buyer-preferred
+handlers, on the request side); the platform arbitrates between the two.
 
 **Available Instrument Resolution:** Within each active handler, both the
 platform and the business independently advertise `available_instruments` — the
