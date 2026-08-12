@@ -15,7 +15,8 @@
       "properties": {
         "location": {
           "type": "string",
-          "description": "Reference to the specific location (e.g., physical store, property, or restaurant) associated with the user. A common example in retail shopping is the default home store selected and saved by the user on their profile when purchasing grocery."
+          "description": "Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability or extension defines its effects.",
+          "ucp_request": "optional"
         },
         "intent": {
           "type": "string",
