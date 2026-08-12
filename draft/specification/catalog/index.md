@@ -21,12 +21,75 @@ The Catalog capability allows platforms to search and browse business product ca
 - **Product**: A catalog item with title, description, media, and one or more variants.
 - **Variant**: A purchasable item with specific option selections (e.g., "Blue / Large"), price, and availability.
 - **Price**: Price values include both amount (in minor currency units) and currency code, enabling multi-currency catalogs.
+- **Sale basis**: How quantity is denominated—as whole items (`each`, the default) or in a unit of measure such as weight, length, area, volume, or time. See [Quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units).
 
 ### Relationship to Checkout
 
 Catalog operations return product and variant IDs that can be used directly in checkout `line_items[].item.id`. The variant ID from catalog retrieval should match the item ID expected by checkout.
 
 Catalog responses (pricing, availability, etc.) reflect the Business's current terms for the given request but are not transactional commitments — checkout is authoritative. Responses can be session-specific and **SHOULD NOT** be reused across sessions without re-validation.
+
+## Sale basis and quantity units
+
+`variants[].quantity_unit` advertises a variant's sale basis before a transaction. The descriptor follows the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract. Its absence advertises the default `each` basis; the Business advertises a non-`each` basis by including the descriptor.
+
+The catalog is where the Platform learns the sale basis before transacting: `unit` and `scale` define how quantities are denominated, and an optional [`increment`](http://ucp.dev/draft/specification/overview/#ordering-increment) advertises the ordering granularity the Business sells in, letting the Platform build quantity steppers and validate input before submission. A Business selling bananas by the pound in quarter-pound multiples advertises `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
+
+The sale basis is not limited to physical measure: metered offerings — parking by the minute, labor by the hour — use the same descriptor (`MIN`, `HUR`) with the same contract.
+
+`variants[].id` identifies the purchasable variant; `quantity_unit` defines the denomination and granularity used to order it. Bananas whose `quantity_unit` is `{ "unit": "LBR", "scale": 2, "display_text": "lb" }` are sold in hundredth-of-a-pound steps, so a `quantity` of `150` represents 1.50 lb.
+
+### Distinction from unit price
+
+`quantity_unit` and a variant's [`unit_price`](#variant) answer different questions and are set independently:
+
+- `quantity_unit` is the **sale basis** — the unit `quantity` is counted in and `price` is quoted in.
+- `unit_price` is a **display comparator** — a derived "price per standard measure" (for example, per 100 mL) for shelf-style comparison. Its `measure` is the packaging or content quantity of the variant and its `reference` is the comparison denominator.
+
+The unit fields in `quantity_unit`, `unit_price.measure`, and `unit_price.reference` follow the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract. The two unit-price fields use the shared measure type, so their integer `value` fields are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`, both, or neither on a variant.
+
+To keep the display comparator defined, the Business **MUST** use a positive integer for both `unit_price.measure.value` and `unit_price.reference.value`. The Business **MUST** set `unit_price.currency` equal to `price.currency`. Within `unit_price`, the Business **MUST** use identical values for `measure.unit` and `reference.unit`. The Business **MAY** use different `scale` values for those measures. The Business **MUST NOT** perform cross-unit or currency conversion as part of the unit-price calculation. Each measure represents its integer `value × 10^-scale` in the common unit. The Business **MUST** compute the comparator from `price.amount` and those scaled values:
+
+```text
+(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)
+```
+
+The Business **MUST** round the result once to the currency's minor units according to its pricing rules and return it as `unit_price.amount`. The returned `unit_price.amount` is authoritative. The Platform **MUST NOT** recompute it or substitute its own result.
+
+The same-unit and same-currency rules are semantic invariants. JSON Schema validates the corresponding fields independently and does not enforce either equality.
+
+For example, a 50 m cable spool sold by `each` can omit `quantity_unit` while carrying a `unit_price` per metre. Its `measure` can be `{ "value": 5000, "unit": "MTR", "scale": 2, "display_text": "m" }` and its `reference` can be `{ "value": 1, "unit": "MTR", "display_text": "m" }`. Both measures use `MTR`; they represent 50 m and 1 m respectively without cross-unit conversion.
+
+On transaction lines, presence marks the role: the Business **MUST** echo `unit_price` on any line whose pricing basis differs from its sale basis (see [Checkout — pricing basis](http://ucp.dev/draft/specification/checkout/#quantity-and-sale-basis)). A catalog-only `unit_price`, like this spool's per-metre figure, is a display comparator; a line-level one carries the rate the charge is computed from.
+
+### Example: a good sold by weight
+
+A `get_product` response for bananas sold by the pound. The variant advertises `quantity_unit` `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a `price` of `79` — $0.79 per whole pound, sold in 0.25-lb multiples:
+
+```json
+{
+  "ucp": { "version": "draft" },
+  "product": {
+    "id": "prod_bananas",
+    "title": "Bananas",
+    "description": { "plain": "Fresh bananas sold by the pound." },
+    "price_range": {
+      "min": { "amount": 79, "currency": "USD" },
+      "max": { "amount": 79, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "description": { "plain": "Fresh bananas sold by the pound." },
+        "price": { "amount": 79, "currency": "USD" },
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 },
+        "availability": { "available": true }
+      }
+    ]
+  }
+}
+```
 
 ## Shared Entities
 
@@ -97,26 +160,27 @@ In lookup responses, each variant carries an `inputs` array for correlation: whi
 
 `media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
 
-| Name         | Type                                                                        | Requirement  | Description                                                                               |
-| ------------ | --------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------- |
-| id           | string                                                                      | **Required** | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.           |
-| sku          | string                                                                      | Optional     | Business-assigned identifier for inventory and fulfillment.                               |
-| barcodes     | Array[object]                                                               | Optional     | Industry-standard product identifiers for cross-reference and correlation.                |
-| handle       | string                                                                      | Optional     | URL-safe variant handle/slug.                                                             |
-| title        | string                                                                      | **Required** | Variant display title (e.g., 'Blue / Large').                                             |
-| description  | [Description](/draft/specification/reference/#description)                  | **Required** | Variant description in one or more formats.                                               |
-| url          | string                                                                      | Optional     | Canonical variant page URL.                                                               |
-| categories   | Array\[[Category](/draft/specification/reference/#category)\]               | Optional     | Variant categories with optional taxonomy identifiers.                                    |
-| price        | [Price](/draft/specification/reference/#price)                              | **Required** | Current selling price.                                                                    |
-| list_price   | [Price](/draft/specification/reference/#price)                              | Optional     | List price before discounts (for strikethrough display).                                  |
-| unit_price   | object                                                                      | Optional     | Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.  |
-| availability | [Availability](/draft/specification/reference/#availability)                | Optional     | Variant availability for purchase.                                                        |
-| options      | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | Optional     | Option values that define this variant (e.g., Color: Blue, Size: Large).                  |
-| media        | Array\[[Media](/draft/specification/reference/#media)\]                     | Optional     | Variant media (images, videos, 3D models). First item is the featured media for listings. |
-| rating       | [Rating](/draft/specification/reference/#rating)                            | Optional     | Variant rating.                                                                           |
-| tags         | Array[string]                                                               | Optional     | Variant tags for categorization and search.                                               |
-| metadata     | object                                                                      | Optional     | Business-defined custom data extending the standard variant model.                        |
-| seller       | object                                                                      | Optional     | Optional seller context for this variant.                                                 |
+| Name          | Type                                                                        | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                               |
+| ------------- | --------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | string                                                                      | **Required** | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.                                                                                                                                                                                                                                                                                           |
+| sku           | string                                                                      | Optional     | Business-assigned identifier for inventory and fulfillment.                                                                                                                                                                                                                                                                                                               |
+| barcodes      | Array[object]                                                               | Optional     | Industry-standard product identifiers for cross-reference and correlation.                                                                                                                                                                                                                                                                                                |
+| handle        | string                                                                      | Optional     | URL-safe variant handle/slug.                                                                                                                                                                                                                                                                                                                                             |
+| title         | string                                                                      | **Required** | Variant display title (e.g., 'Blue / Large').                                                                                                                                                                                                                                                                                                                             |
+| description   | [Description](/draft/specification/reference/#description)                  | **Required** | Variant description in one or more formats.                                                                                                                                                                                                                                                                                                                               |
+| url           | string                                                                      | Optional     | Canonical variant page URL.                                                                                                                                                                                                                                                                                                                                               |
+| categories    | Array\[[Category](/draft/specification/reference/#category)\]               | Optional     | Variant categories with optional taxonomy identifiers.                                                                                                                                                                                                                                                                                                                    |
+| price         | [Price](/draft/specification/reference/#price)                              | **Required** | Current selling price. Price is the amount per one whole `quantity_unit.unit` (for example, per lb or per hour); when `quantity_unit` is absent, it is per `each`. Line total is `price × quantity × 10^-scale`, computed and rounded once by the Business; `totals` remain authoritative.                                                                                |
+| quantity_unit | [Quantity Unit](/draft/specification/reference/#quantity-unit)              | Optional     | Sale basis this variant's `quantity` is denominated in. The default sale basis is `each`, whose machine identity is (`C62`, 0); `C62` is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An `increment` advertises the ordering granularity in steps (for example, `scale` 2 with `increment` 25 sells in 0.25-unit multiples). |
+| list_price    | [Price](/draft/specification/reference/#price)                              | Optional     | List price before discounts (for strikethrough display).                                                                                                                                                                                                                                                                                                                  |
+| unit_price    | [Unit Price](/draft/specification/reference/#unit-price)                    | Optional     | Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.                                                                                                                                                                                                                                              |
+| availability  | [Availability](/draft/specification/reference/#availability)                | Optional     | Variant availability for purchase.                                                                                                                                                                                                                                                                                                                                        |
+| options       | Array\[[Selected Option](/draft/specification/reference/#selected-option)\] | Optional     | Option values that define this variant (e.g., Color: Blue, Size: Large).                                                                                                                                                                                                                                                                                                  |
+| media         | Array\[[Media](/draft/specification/reference/#media)\]                     | Optional     | Variant media (images, videos, 3D models). First item is the featured media for listings.                                                                                                                                                                                                                                                                                 |
+| rating        | [Rating](/draft/specification/reference/#rating)                            | Optional     | Variant rating.                                                                                                                                                                                                                                                                                                                                                           |
+| tags          | Array[string]                                                               | Optional     | Variant tags for categorization and search.                                                                                                                                                                                                                                                                                                                               |
+| metadata      | object                                                                      | Optional     | Business-defined custom data extending the standard variant model.                                                                                                                                                                                                                                                                                                        |
+| seller        | object                                                                      | Optional     | Optional seller context for this variant.                                                                                                                                                                                                                                                                                                                                 |
 
 ### Price
 

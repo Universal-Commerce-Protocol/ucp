@@ -2370,6 +2370,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#measure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#media" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2458,6 +2469,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#quantity-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantity Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#reverse-domain-name" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2473,6 +2495,17 @@
     <span class="md-ellipsis">
       
         Signed Amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit
       
     </span>
   </a>
@@ -3023,6 +3056,17 @@
     <span class="md-ellipsis">
       
         Totals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Price
       
     </span>
   </a>
@@ -4101,6 +4145,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#measure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#media" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4189,6 +4244,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#quantity-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantity Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#reverse-domain-name" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4204,6 +4270,17 @@
     <span class="md-ellipsis">
       
         Signed Amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit
       
     </span>
   </a>
@@ -4754,6 +4831,17 @@
     <span class="md-ellipsis">
       
         Totals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Price
       
     </span>
   </a>
@@ -6103,6 +6191,44 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
+<h3 id="measure">Measure<a class="headerlink" href="#measure" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">unit</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Stable machine identifier. The Business SHOULD use the exact UN/CEFACT Rec20 Common Code when one accurately identifies the unit. Otherwise, the Business MAY use a custom unit identifier and MUST use it consistently for the same unit. The Platform MUST treat an unrecognized identifier as opaque.</td>
+</tr>
+<tr>
+<td style="text-align: left;">scale</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">One step equals <code>10^-scale</code> of <code>unit</code>. When <code>unit</code> is <code>C62</code>, <code>scale</code>, if present, MUST be 0. The maximum of 15 is derived from the interoperable integer range: at scale 16 a single whole unit (10^16 steps) is no longer representable, so larger scales cannot denominate one unit of their own basis. Businesses needing finer granularity use a smaller unit.</td>
+</tr>
+<tr>
+<td style="text-align: left;">display_text</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Required printable unit label provided by the Business. The Platform MUST use it when it does not recognize <code>unit</code>; for a recognized UN/CEFACT Rec 20 Common Code, the Platform MAY substitute its own localized label. It does not participate in unit identity or mismatch comparison.</td>
+</tr>
+<tr>
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Integer count of <code>10^-scale</code> units of <code>unit</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="media">Media<a class="headerlink" href="#media" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6403,12 +6529,82 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
+<h3 id="quantity-unit">Quantity Unit<a class="headerlink" href="#quantity-unit" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">unit</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Stable machine identifier. The Business SHOULD use the exact UN/CEFACT Rec20 Common Code when one accurately identifies the unit. Otherwise, the Business MAY use a custom unit identifier and MUST use it consistently for the same unit. The Platform MUST treat an unrecognized identifier as opaque.</td>
+</tr>
+<tr>
+<td style="text-align: left;">scale</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">One step equals <code>10^-scale</code> of <code>unit</code>. When <code>unit</code> is <code>C62</code>, <code>scale</code>, if present, MUST be 0. The maximum of 15 is derived from the interoperable integer range: at scale 16 a single whole unit (10^16 steps) is no longer representable, so larger scales cannot denominate one unit of their own basis. Businesses needing finer granularity use a smaller unit.</td>
+</tr>
+<tr>
+<td style="text-align: left;">display_text</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Required printable unit label provided by the Business. The Platform MUST use it when it does not recognize <code>unit</code>; for a recognized UN/CEFACT Rec 20 Common Code, the Platform MAY substitute its own localized label. It does not participate in unit identity or mismatch comparison.</td>
+</tr>
+<tr>
+<td style="text-align: left;">increment</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Ordering granularity, denominated in steps: the Business sells this item in integer multiples of <code>increment</code> steps. Its effective value is the provided value or 1. Advisory merchandising policy, not a representational bound: Platform-authored quantities SHOULD be integer multiples of the effective increment; the Business MAY accept, revise, or reject an off-increment request with a recoverable business outcome and MUST NOT silently reinterpret it. Business-authored quantities (checkout revisions, fulfillment events, adjustments) are bounded only by <code>scale</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="reverse-domain-name">Reverse Domain Name<a class="headerlink" href="#reverse-domain-name" title="Permanent link">&para;</a></h3>
 <p>Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold'). Segments after the first are domain- or identifier-derived: they may contain interior hyphens, may start with a digit, and may contain underscores (e.g., 'com.example-shop.checkout', 'com.2example.cart', 'dev.ucp.common.identity_linking'), but must not start or end with a hyphen. The first segment (the reversed top-level domain) is letters and digits, and may contain interior hyphens to support internationalized (punycode) top-level domains such as 'xn--p1ai'.</p>
 <p><strong>Pattern:</strong> <code>^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+$</code></p>
 <hr />
 <h3 id="signed-amount">Signed Amount<a class="headerlink" href="#signed-amount" title="Permanent link">&para;</a></h3>
 <p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).</p>
+<hr />
+<h3 id="unit">Unit<a class="headerlink" href="#unit" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">unit</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Stable machine identifier. The Business SHOULD use the exact UN/CEFACT Rec20 Common Code when one accurately identifies the unit. Otherwise, the Business MAY use a custom unit identifier and MUST use it consistently for the same unit. The Platform MUST treat an unrecognized identifier as opaque.</td>
+</tr>
+<tr>
+<td style="text-align: left;">scale</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">One step equals <code>10^-scale</code> of <code>unit</code>. When <code>unit</code> is <code>C62</code>, <code>scale</code>, if present, MUST be 0. The maximum of 15 is derived from the interoperable integer range: at scale 16 a single whole unit (10^16 steps) is no longer representable, so larger scales cannot denominate one unit of their own basis. Businesses needing finer granularity use a smaller unit.</td>
+</tr>
+<tr>
+<td style="text-align: left;">display_text</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Required printable unit label provided by the Business. The Platform MUST use it when it does not recognize <code>unit</code>; for a recognized UN/CEFACT Rec 20 Common Code, the Platform MAY substitute its own localized label. It does not participate in unit identity or mismatch comparison.</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h3 id="warning-code_1">Warning Code<a class="headerlink" href="#warning-code_1" title="Permanent link">&para;</a></h3>
 <p>Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.</p>
@@ -7382,7 +7578,19 @@ within the UCP.</p>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
-<td style="text-align: left;">Unit price in ISO 4217 minor units.</td>
+<td style="text-align: left;">Unit price in ISO 4217 minor units. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity_unit</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#quantity-unit">Quantity Unit</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Sale basis this item's <code>quantity</code> is denominated in. On an authoritative Business response, absence encodes the default <code>each</code> machine identity (<code>C62</code>, 0); the Business MUST include this descriptor for every non-<code>each</code> response. On Platform requests, omission makes no assertion: the Business interprets <code>quantity</code> using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (<code>unit</code>, effective <code>scale</code>), ignore <code>display_text</code> and <code>increment</code>, and resolve a mismatch by conversion surfaced as a visible line revision with a warning, or by rejection with a recoverable business outcome; silent reinterpretation is forbidden. An explicit <code>C62</code> descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor.</td>
+</tr>
+<tr>
+<td style="text-align: left;">unit_price</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#unit-price">Unit Price</a></td>
+<td style="text-align: left;">Optional; omitted in requests</td>
+<td style="text-align: left;">Pricing basis for this item. On an authoritative Business response, the Business MUST include <code>unit_price</code> on every line whose pricing basis differs from its sale basis (for example, priced per pound but sold per <code>each</code>); presence on a line marks the rate as transactional rather than display-only. When the pricing basis is the sale basis, <code>item.price</code> fully denominates the charge and this field MAY be omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">image_url</td>
@@ -7420,7 +7628,7 @@ within the UCP.</p>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Quantity of the item being purchased.</td>
+<td style="text-align: left;">Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting <code>item.quantity_unit</code> makes no assertion and does not imply <code>each</code>. On Business responses, <code>item.quantity_unit</code> describes the basis; if absent, it encodes the <code>each</code> machine identity (<code>C62</code>, 0) and <code>quantity</code> counts whole items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
@@ -7516,13 +7724,13 @@ within the UCP.</p>
 <td style="text-align: left;">item</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#item">Item</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Product data (id, title, price, image_url).</td>
+<td style="text-align: left;">Purchased item data, including identity, price, and sale basis.</td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Quantity tracking for the line item.</td>
+<td style="text-align: left;">Tracks the line item's original, current active, and fulfilled quantities. All three values use the same inherited <code>item.quantity_unit</code>. When <code>item.quantity_unit</code> is absent on an authoritative order response, each step is one whole item (<code>each</code>) under the shared default.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
@@ -8164,6 +8372,44 @@ within the UCP.</p>
 <h3 id="totals">Totals<a class="headerlink" href="#totals" title="Permanent link">&para;</a></h3>
 <p>Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.</p>
 <hr />
+<h3 id="unit-price">Unit Price<a class="headerlink" href="#unit-price" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">amount</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Unit price in ISO 4217 minor units. After satisfying the same-unit invariant, the Business MUST compute the comparator as <code>(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)</code> and round it once to ISO 4217 minor units according to its pricing rules. The returned <code>unit_price.amount</code> is authoritative; the Platform MUST NOT recompute or substitute its own result.</td>
+</tr>
+<tr>
+<td style="text-align: left;">currency</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">ISO 4217 currency code.</td>
+</tr>
+<tr>
+<td style="text-align: left;">measure</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Product quantity in packaging/content (for example, a 750 mL bottle), distinct from <code>quantity_unit</code>, which defines the sale basis. Its integer <code>value</code> MUST be at least 1.</td>
+</tr>
+<tr>
+<td style="text-align: left;">reference</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Denominator for unit price display (for example, per 100 mL or per 1 kg). Its integer <code>value</code> MUST be at least 1.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="variant">Variant<a class="headerlink" href="#variant" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -8227,7 +8473,13 @@ within the UCP.</p>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#price">Price</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Current selling price.</td>
+<td style="text-align: left;">Current selling price. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>. Line total is <code>price × quantity × 10^-scale</code>, computed and rounded once by the Business; <code>totals</code> remain authoritative.</td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity_unit</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#quantity-unit">Quantity Unit</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Sale basis this variant's <code>quantity</code> is denominated in. The default sale basis is <code>each</code>, whose machine identity is (<code>C62</code>, 0); <code>C62</code> is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An <code>increment</code> advertises the ordering granularity in steps (for example, <code>scale</code> 2 with <code>increment</code> 25 sells in 0.25-unit multiples).</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price</td>
@@ -8237,9 +8489,9 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">unit_price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#unit-price">Unit Price</a></td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.</td>
+<td style="text-align: left;">Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
@@ -9651,7 +9903,13 @@ within the UCP.</p>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Current selling price.</td>
+<td style="text-align: left;">Current selling price. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>. Line total is <code>price × quantity × 10^-scale</code>, computed and rounded once by the Business; <code>totals</code> remain authoritative.</td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity_unit</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Sale basis this variant's <code>quantity</code> is denominated in. The default sale basis is <code>each</code>, whose machine identity is (<code>C62</code>, 0); <code>C62</code> is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An <code>increment</code> advertises the ordering granularity in steps (for example, <code>scale</code> 2 with <code>increment</code> 25 sells in 0.25-unit multiples).</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price</td>
@@ -9663,7 +9921,7 @@ within the UCP.</p>
 <td style="text-align: left;">unit_price</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.</td>
+<td style="text-align: left;">Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
@@ -9883,7 +10141,13 @@ within the UCP.</p>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Current selling price.</td>
+<td style="text-align: left;">Current selling price. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>. Line total is <code>price × quantity × 10^-scale</code>, computed and rounded once by the Business; <code>totals</code> remain authoritative.</td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity_unit</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Sale basis this variant's <code>quantity</code> is denominated in. The default sale basis is <code>each</code>, whose machine identity is (<code>C62</code>, 0); <code>C62</code> is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An <code>increment</code> advertises the ordering granularity in steps (for example, <code>scale</code> 2 with <code>increment</code> 25 sells in 0.25-unit multiples).</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price</td>
@@ -9895,7 +10159,7 @@ within the UCP.</p>
 <td style="text-align: left;">unit_price</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.</td>
+<td style="text-align: left;">Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>

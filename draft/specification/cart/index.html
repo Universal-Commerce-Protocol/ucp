@@ -1220,6 +1220,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quantity-and-sale-basis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantity and sale basis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#actions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2674,6 +2685,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quantity-and-sale-basis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantity and sale basis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#actions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3152,6 +3174,24 @@ SHOULD be linked for the duration of the checkout.</p>
     session with <code>create_cart</code>.</p>
 </li>
 </ul>
+<h2 id="quantity-and-sale-basis">Quantity and sale basis<a class="headerlink" href="#quantity-and-sale-basis" title="Permanent link">&para;</a></h2>
+<p>Cart line items apply the shared
+<a href="../overview/#quantities-and-units">quantities and units</a> contract. Each
+<code>line_items[].quantity</code> is an integer step count in the item's authoritative
+sale basis. On a Business response, an absent
+<code>line_items[].item.quantity_unit</code> encodes the default <code>each</code> basis, so
+<code>quantity</code> counts whole items.</p>
+<p>On a Platform request, omission of <code>line_items[].item.quantity_unit</code> makes no
+assertion. The Business interprets <code>quantity</code> using the item's authoritative
+sale basis, so a request for a measure-denominated item can omit the descriptor
+without asserting <code>each</code>. The Platform <strong>MAY</strong> include <code>item.quantity_unit</code> to
+assert the sale-basis identity.</p>
+<p>Cart follows <a href="../checkout/#quantity-and-sale-basis">Checkout — Quantity and sale basis</a>
+for sale-basis discovery, assertion matching, mismatch conversion or
+rejection, response echo, ordering-increment handling, and line pricing.
+Cart totals remain estimates (see <a href="#total">Total</a>). A measure-denominated line
+counts as one line item in cart summaries; its <code>quantity</code> is an amount, not an
+item count.</p>
 <h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
 <p>The cart surfaces outstanding Action instances in its response-only <code>actions</code>
 map, defined in <a href="../overview/#actions">Overview — Actions</a>.</p>
@@ -3458,7 +3498,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Quantity of the item being purchased.</td>
+<td style="text-align: left;">Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting <code>item.quantity_unit</code> makes no assertion and does not imply <code>each</code>. On Business responses, <code>item.quantity_unit</code> describes the basis; if absent, it encodes the <code>each</code> machine identity (<code>C62</code>, 0) and <code>quantity</code> counts whole items.</td>
 </tr>
 </tbody>
 </table>
@@ -3489,7 +3529,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Quantity of the item being purchased.</td>
+<td style="text-align: left;">Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting <code>item.quantity_unit</code> makes no assertion and does not imply <code>each</code>. On Business responses, <code>item.quantity_unit</code> describes the basis; if absent, it encodes the <code>each</code> machine identity (<code>C62</code>, 0) and <code>quantity</code> counts whole items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">parent_id</td>
@@ -3526,7 +3566,7 @@ consistent data structures when converting a cart to a checkout session.</p>
 <td style="text-align: left;">quantity</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Quantity of the item being purchased.</td>
+<td style="text-align: left;">Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting <code>item.quantity_unit</code> makes no assertion and does not imply <code>each</code>. On Business responses, <code>item.quantity_unit</code> describes the basis; if absent, it encodes the <code>each</code> machine identity (<code>C62</code>, 0) and <code>quantity</code> counts whole items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
@@ -3569,7 +3609,19 @@ consistent data structures when converting a cart to a checkout session.</p>
 <td style="text-align: left;">price</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Unit price in ISO 4217 minor units.</td>
+<td style="text-align: left;">Unit price in ISO 4217 minor units. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">quantity_unit</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#quantity-unit">Quantity Unit</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Sale basis this item's <code>quantity</code> is denominated in. On an authoritative Business response, absence encodes the default <code>each</code> machine identity (<code>C62</code>, 0); the Business MUST include this descriptor for every non-<code>each</code> response. On Platform requests, omission makes no assertion: the Business interprets <code>quantity</code> using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (<code>unit</code>, effective <code>scale</code>), ignore <code>display_text</code> and <code>increment</code>, and resolve a mismatch by conversion surfaced as a visible line revision with a warning, or by rejection with a recoverable business outcome; silent reinterpretation is forbidden. An explicit <code>C62</code> descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor.</td>
+</tr>
+<tr>
+<td style="text-align: left;">unit_price</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#unit-price">Unit Price</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Pricing basis for this item. On an authoritative Business response, the Business MUST include <code>unit_price</code> on every line whose pricing basis differs from its sale basis (for example, priced per pound but sold per <code>each</code>); presence on a line marks the rate as transactional rather than display-only. When the pricing basis is the sale basis, <code>item.price</code> fully denominates the charge and this field MAY be omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">image_url</td>

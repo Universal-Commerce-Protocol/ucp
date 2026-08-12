@@ -550,6 +550,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quantities-and-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantities and units
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quantities and units">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integer-range-and-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integer range and ingestion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Display text
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordering-increment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordering increment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#actions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3746,6 +3807,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quantities-and-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantities and units
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quantities and units">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integer-range-and-ingestion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integer range and ingestion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unit-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Display text
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordering-increment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ordering increment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#actions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5264,6 +5386,174 @@ document are to be interpreted as described in
     unless otherwise specified</li>
 <li>Amounts format: Minor units (cents)</li>
 </ul>
+<h2 id="quantities-and-units">Quantities and units<a class="headerlink" href="#quantities-and-units" title="Permanent link">&para;</a></h2>
+<p>UCP uses a shared quantity representation wherever a schema contains an integer
+<code>quantity</code>, a <code>quantity_unit</code>, or the shared measure type.</p>
+<p>A <code>quantity</code> is an integer count of <strong>steps</strong>. A unit descriptor consists of:</p>
+<ul>
+<li><code>unit</code> — a required, stable machine identifier.</li>
+<li><code>scale</code> — an optional nonnegative integer, at most 15 (a bound derived from
+    the integer range; see below). Its effective value is the provided value or
+    <code>0</code> when omitted.</li>
+<li><code>display_text</code> — a required printable label for the unit.</li>
+</ul>
+<p>One step is <code>10^-scale</code> of <code>unit</code>. The shared measure type adds a required
+integer <code>value</code>, which is also a count of those steps. Because these counts are
+integers, <code>scale</code> fixes the representation's granularity. A unit descriptor's
+machine identity is the (<code>unit</code>, effective <code>scale</code>) pair; <code>display_text</code> is not
+part of that identity. This identity applies only to the unit descriptor; it
+does not identify the purchasable item or exhaustively describe one sale unit.</p>
+<p>The default sale basis is <code>each</code>, with machine identity (<code>C62</code>, <code>0</code>). <code>C62</code> is
+the United Nations Centre for Trade Facilitation and Electronic Business
+(UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business
+<strong>MAY</strong> omit <code>quantity_unit</code> from an authoritative Business representation to
+encode this default. When a Business or Platform includes a
+descriptor whose <code>unit</code> is <code>C62</code>, it <strong>MUST</strong> use an effective <code>scale</code> of <code>0</code>;
+<code>scale</code> can only be omitted or explicitly set to <code>0</code>.</p>
+<p>UCP does not put floating-point numbers on the wire. Quantity arithmetic
+feeds money — <code>price × quantity × 10^-scale</code> prices a line, <code>fulfilled</code>
+accumulates across fulfillment events, and status derives from
+<code>fulfilled == total</code> — so quantities get money's representation: an integer
+count plus a declared interpretation, exactly as an <code>amount</code> relates to its
+<code>currency</code>. Integer counts keep every total and comparison exact in every
+language, and UCP therefore defines no rounding tolerances and no epsilon
+comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
+legitimately differs from the ordered quantity — a 1.90 lb pick against a
+2.00 lb order — is a commercial fact reconciled through
+<a href="../order/#adjustments">adjustments</a> that move money together with quantity,
+not a numeric error absorbed by comparison fuzz.</p>
+<p>Reading a quantity requires no arithmetic and no unit knowledge: shift the
+decimal point <code>scale</code> places and append <code>display_text</code>. <code>150</code> with
+<code>{ "scale": 2, "display_text": "kg" }</code> renders as <code>1.50 kg</code>, by the same code
+path for a Rec20 code and for a custom unit. Unlike a currency exponent,
+<code>scale</code> is per-item data rather than a static table — which is why
+authoritative responses always carry their own descriptor on every non-<code>each</code>
+line.</p>
+<h3 id="integer-range-and-ingestion">Integer range and ingestion<a class="headerlink" href="#integer-range-and-ingestion" title="Permanent link">&para;</a></h3>
+<p>Every integer-valued field in UCP — amounts, quantity step counts, measure
+values — is a JSON integer; each field's schema declares its sign and
+bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the
+range within which every JSON implementation agrees exactly on integer
+values
+(<a href="https://www.rfc-editor.org/rfc/rfc8259.html" target="_blank">RFC 8259</a>,
+Section 6) and within which
+<a href="https://www.rfc-editor.org/rfc/rfc8785.html" target="_blank">JCS</a>
+canonicalization, required for
+<a href="../ap2-mandates/#canonicalization">AP2 mandate signing</a>, is defined. The
+same cap derives <code>scale</code>'s maximum of 15: at scale 16, one whole unit
+(10^16 steps) would be unrepresentable. An out-of-range value is
+schema-invalid and is rejected like any other invalid payload.</p>
+<p>Arithmetic over these values <strong>MUST</strong> be exact. Within the wire range,
+IEEE 754 binary64 — a JavaScript <code>Number</code> from <code>JSON.parse</code> — holds every
+integer exactly; products such as <code>amount × quantity</code> can exceed 64 bits, so
+use wider or arbitrary-precision integers, or overflow checks. An
+implementation that cannot produce an exact, in-range result <strong>MUST</strong>
+surface an error rather than emit, display, or act on an approximate or
+wrapped value.</p>
+<p>When UCP data crosses into external systems, implementations <strong>SHOULD</strong>
+convert once at ingestion — apply the declared scale (or currency exponent)
+into an exact decimal type (SQL <code>NUMERIC</code>, Java <code>BigDecimal</code>, Python
+<code>Decimal</code>), or carry the (value, scale) pair unchanged — and <strong>SHOULD NOT</strong>
+perform scale application or value-bearing arithmetic in binary floating
+point.</p>
+<h3 id="unit-vocabulary">Unit vocabulary<a class="headerlink" href="#unit-vocabulary" title="Permanent link">&para;</a></h3>
+<p>The Business <strong>SHOULD</strong> use the exact Rec20 Common Code unless no code
+accurately identifies the unit. When no Rec20 code accurately identifies the
+unit, the Business <strong>MAY</strong> use a custom unit identifier. If it does, the Business
+<strong>MUST</strong> use that identifier consistently for the same unit. The Platform
+<strong>MUST</strong> treat an unrecognized <code>unit</code> value as opaque. The following table is
+non-exhaustive:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Code</th>
+<th style="text-align: left;">Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>C62</code></td>
+<td style="text-align: left;">one / <code>each</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>KGM</code></td>
+<td style="text-align: left;">kilogram</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>GRM</code></td>
+<td style="text-align: left;">gram</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>LBR</code></td>
+<td style="text-align: left;">pound</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>MLT</code></td>
+<td style="text-align: left;">millilitre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>LTR</code></td>
+<td style="text-align: left;">litre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>MTR</code></td>
+<td style="text-align: left;">metre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>INH</code></td>
+<td style="text-align: left;">inch</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>YRD</code></td>
+<td style="text-align: left;">yard</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FTK</code></td>
+<td style="text-align: left;">square foot</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>MTK</code></td>
+<td style="text-align: left;">square metre</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>HUR</code></td>
+<td style="text-align: left;">hour</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>MIN</code></td>
+<td style="text-align: left;">minute</td>
+</tr>
+</tbody>
+</table>
+<p>Rec20 includes X-prefixed package units derived from UN/CEFACT Recommendation
+21 (Rec21). UCP deliberately excludes those values from <code>quantity_unit</code>. The
+Business <strong>MUST</strong> make package form part of the purchasable variant's identity
+and count packages as <code>each</code>. The Business <strong>MUST NOT</strong> use an X-prefixed
+Rec21-derived package code as <code>quantity_unit</code>.</p>
+<h3 id="display-text">Display text<a class="headerlink" href="#display-text" title="Permanent link">&para;</a></h3>
+<p>When sending a unit descriptor, a Business or Platform <strong>MUST</strong> include
+<code>display_text</code>. The Platform <strong>MUST</strong> use that value when it does not recognize
+<code>unit</code>. For a recognized Rec20 code, the Platform <strong>MAY</strong> substitute its own
+localized label. The Business and Platform <strong>MUST NOT</strong> use <code>display_text</code> when
+matching machine identities or as an input to quantity conversion.</p>
+<h3 id="ordering-increment">Ordering increment<a class="headerlink" href="#ordering-increment" title="Permanent link">&para;</a></h3>
+<p>A sale-basis descriptor (<code>quantity_unit</code>) <strong>MAY</strong> declare an <code>increment</code>: an
+optional positive integer, denominated in steps, whose effective value is the
+provided value or <code>1</code> when omitted. Only the sale basis carries an increment;
+the bare unit descriptor and the shared measure type do not. It declares the
+ordering granularity the Business sells in — for example, an item sold by the
+pound with <code>scale</code> <code>2</code> and <code>increment</code> <code>25</code> is sold in 0.25 lb multiples.</p>
+<p><code>scale</code> and <code>increment</code> play different roles: <code>scale</code> bounds what any quantity
+can express; <code>increment</code> shapes what the Platform asks for. The increment is
+advisory merchandising policy, not a representational bound — Platform-authored
+quantities <strong>SHOULD</strong> be integer multiples of the line's effective increment,
+while Business-authored quantities (checkout revisions, fulfillment events,
+adjustments) are bounded only by <code>scale</code>. <code>increment</code> is not part of the
+unit-descriptor machine identity and <strong>MUST NOT</strong> participate in mismatch
+comparison.</p>
+<p>Request assertions, mismatch handling, response echo, off-increment request
+handling, pricing, and lifecycle behavior are defined by the capability that
+uses the shared representation.</p>
 <h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
 <p>An Action is an outstanding unit of extension-defined work for a Platform to
 process. Its presence means the effect defined by its Action type is gated.

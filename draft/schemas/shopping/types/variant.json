@@ -66,68 +66,19 @@
     },
     "price": {
       "$ref": "https://ucp.dev/draft/schemas/common/types/price.json",
-      "description": "Current selling price."
+      "description": "Current selling price. Price is the amount per one whole `quantity_unit.unit` (for example, per lb or per hour); when `quantity_unit` is absent, it is per `each`. Line total is `price × quantity × 10^-scale`, computed and rounded once by the Business; `totals` remain authoritative."
+    },
+    "quantity_unit": {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/quantity_unit.json",
+      "description": "Sale basis this variant's `quantity` is denominated in. The default sale basis is `each`, whose machine identity is (`C62`, 0); `C62` is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An `increment` advertises the ordering granularity in steps (for example, `scale` 2 with `increment` 25 sells in 0.25-unit multiples)."
     },
     "list_price": {
       "$ref": "https://ucp.dev/draft/schemas/common/types/price.json",
       "description": "List price before discounts (for strikethrough display)."
     },
     "unit_price": {
-      "type": "object",
-      "description": "Price per standard unit of measurement. MAY be omitted when unit pricing does not apply.",
-      "required": [
-        "amount",
-        "currency",
-        "measure",
-        "reference"
-      ],
-      "properties": {
-        "amount": {
-          "$ref": "https://ucp.dev/draft/schemas/common/types/amount.json",
-          "description": "Unit price in ISO 4217 minor units. Business MUST return precomputed unit price value: (variant.price / measure.value) * reference.value."
-        },
-        "currency": {
-          "type": "string",
-          "pattern": "^[A-Z]{3}$",
-          "description": "ISO 4217 currency code."
-        },
-        "measure": {
-          "type": "object",
-          "description": "Product quantity in packaging (e.g., 750ml bottle).",
-          "required": [
-            "value",
-            "unit"
-          ],
-          "properties": {
-            "value": {
-              "type": "number",
-              "description": "Package quantity."
-            },
-            "unit": {
-              "type": "string",
-              "description": "Unit of measurement."
-            }
-          }
-        },
-        "reference": {
-          "type": "object",
-          "description": "Denominator for unit price display (e.g., per 100ml, per 1kg).",
-          "required": [
-            "value",
-            "unit"
-          ],
-          "properties": {
-            "value": {
-              "type": "integer",
-              "description": "Reference quantity."
-            },
-            "unit": {
-              "type": "string",
-              "description": "Unit of measurement."
-            }
-          }
-        }
-      }
+      "$ref": "https://ucp.dev/draft/schemas/shopping/types/unit_price.json",
+      "description": "Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply."
     },
     "availability": {
       "$ref": "https://ucp.dev/draft/schemas/shopping/types/availability.json",

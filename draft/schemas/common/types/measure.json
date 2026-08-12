@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/types/measure.json",
+  "title": "Measure",
+  "description": "A measure composed of an integer value and a unit descriptor. Its value is the integer count of `10^-scale` units of `unit`.",
+  "allOf": [
+    {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/unit.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991,
+          "description": "Integer count of `10^-scale` units of `unit`."
+        }
+      }
+    }
+  ]
+}

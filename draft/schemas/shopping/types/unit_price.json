@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/shopping/types/unit_price.json",
+  "title": "Unit Price",
+  "description": "Price per standard unit of measurement. MAY be omitted when unit pricing does not apply. `unit_price.currency` MUST equal `price.currency`; the comparator MUST NOT perform currency conversion. `measure.unit` and `reference.unit` MUST be identical; cross-unit conversion is not permitted. Their scales MAY differ; each value represents `value × 10^-scale`.",
+  "type": "object",
+  "required": [
+    "amount",
+    "currency",
+    "measure",
+    "reference"
+  ],
+  "properties": {
+    "amount": {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/amount.json",
+      "description": "Unit price in ISO 4217 minor units. After satisfying the same-unit invariant, the Business MUST compute the comparator as `(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)` and round it once to ISO 4217 minor units according to its pricing rules. The returned `unit_price.amount` is authoritative; the Platform MUST NOT recompute or substitute its own result."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 currency code."
+    },
+    "measure": {
+      "description": "Product quantity in packaging/content (for example, a 750 mL bottle), distinct from `quantity_unit`, which defines the sale basis. Its integer `value` MUST be at least 1.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/measure.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "reference": {
+      "description": "Denominator for unit price display (for example, per 100 mL or per 1 kg). Its integer `value` MUST be at least 1.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/measure.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

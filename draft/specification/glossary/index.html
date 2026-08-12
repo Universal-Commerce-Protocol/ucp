@@ -2374,6 +2374,11 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 <td style="text-align: left;">The entity selling goods or services. In UCP, they act as the <strong>Merchant of Record (MoR)</strong>, retaining financial liability and ownership of the order.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><strong>Increment</strong></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">Optional <a href="../overview/#ordering-increment">ordering granularity</a> of a sale basis, a count of steps; advisory for Platform-authored quantities.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><strong>Merchant of Record</strong></td>
 <td style="text-align: left;">MoR</td>
 <td style="text-align: left;">The legal entity responsible for the sale, including financial liability and order ownership.</td>
@@ -2387,6 +2392,16 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 <td style="text-align: left;"><strong>Platform</strong></td>
 <td style="text-align: left;">-</td>
 <td style="text-align: left;">The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Quantity Unit</strong></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">A <a href="../overview/#quantities-and-units">sale-basis descriptor</a> with machine identity (<code>unit</code>, effective <code>scale</code>); excludes <code>display_text</code>/<code>increment</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Step</strong></td>
+<td style="text-align: left;">-</td>
+<td style="text-align: left;">One <a href="../overview/#quantities-and-units">integer increment</a> in the authoritative sale basis: <code>10^-scale</code> of <code>unit</code>.</td>
 </tr>
 </tbody>
 </table>

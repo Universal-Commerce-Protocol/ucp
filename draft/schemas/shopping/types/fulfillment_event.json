@@ -40,7 +40,8 @@
           "quantity": {
             "type": "integer",
             "minimum": 1,
-            "description": "Quantity fulfilled in this event."
+            "maximum": 9007199254740991,
+            "description": "Integer count of steps of the referenced line item's `quantity_unit` (`10^-scale` × `unit`); when `quantity_unit` is absent, it counts whole items (`each`)."
           }
         }
       },

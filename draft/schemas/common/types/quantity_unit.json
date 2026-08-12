@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/types/quantity_unit.json",
+  "title": "Quantity Unit",
+  "description": "Sale-basis descriptor for quantities: the shared unit descriptor plus the Business's ordering policy. Its unit-descriptor machine identity remains (`unit`, effective `scale`); `display_text` and `increment` are excluded from identity and mismatch comparison.",
+  "allOf": [
+    {
+      "$ref": "https://ucp.dev/draft/schemas/common/types/unit.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "increment": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Ordering granularity, denominated in steps: the Business sells this item in integer multiples of `increment` steps. Its effective value is the provided value or 1. Advisory merchandising policy, not a representational bound: Platform-authored quantities SHOULD be integer multiples of the effective increment; the Business MAY accept, revise, or reject an off-increment request with a recoverable business outcome and MUST NOT silently reinterpret it. Business-authored quantities (checkout revisions, fulfillment events, adjustments) are bounded only by `scale`."
+        }
+      }
+    }
+  ]
+}

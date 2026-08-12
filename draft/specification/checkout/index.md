@@ -26,6 +26,174 @@ Fulfillment is modelled as an extension in UCP to account for diverse use cases.
 
 Fulfillment is optional in the checkout object. This is done to enable a platform to perform checkout for digital goods without needing to furnish fulfillment details more relevant for physical goods.
 
+### Quantity and sale basis
+
+Checkout applies the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract, including the default (`C62`, `0`) identity. The Business determines each item's authoritative sale basis for the transaction. The Business's response is authoritative, and each `line_items[].quantity` is an integer step count in that basis.
+
+**Discovering the sale basis.** The sale basis is item data: the Platform **SHOULD** discover an item's `quantity_unit` — including `scale` and any `increment` — from the [catalog](http://ucp.dev/draft/specification/catalog/#sale-basis-and-quantity-units) before transacting. A Platform without catalog knowledge can omit the descriptor: the Business applies its authoritative basis and confirms it on the response line, and the Platform inspects the echoed descriptor and, if that interpretation is not what it intended, resubmits the quantity denominated in the now-known basis. Asserting `quantity_unit` on a request (below) is how the Platform checks that a basis it previously discovered still holds; a Platform that does not know the basis omits the descriptor rather than asserting a guess.
+
+**Requesting a quantity.** When a Platform request omits `line_items[].item.quantity_unit`, the Platform makes no assertion about the sale-basis identity. The Business interprets `quantity` using the item's authoritative sale basis. A request for a measure-denominated item can therefore omit the descriptor without asserting the default identity.
+
+The Platform **MAY** include `quantity_unit` on a request line to assert the basis it believes it is ordering in. When the Platform includes it, the Business **MUST** compare the asserted and authoritative [machine identities](http://ucp.dev/draft/specification/overview/#quantities-and-units). An explicit assertion with `unit: "C62"` and effective `scale` `0` matches the default identity represented by an absent descriptor; a `display_text` difference is not a mismatch.
+
+If an asserted `quantity_unit` does not match the item's authoritative sale basis, the requested quantity is denominated in a basis the Business does not sell in. Silent conversion is forbidden in both directions: neither party may reinterpret a quantity the other denominated without surfacing the change. The Business resolves the mismatch in one of two ways:
+
+- **Convert, visibly.** When the Business can convert the asserted basis to its authoritative basis (for example, pounds to kilograms), it **MAY** apply the request as a visible line revision: the line carries the authoritative descriptor and the converted quantity — rounded once to the authoritative `scale` according to its rules, with any ordering-increment policy applied after conversion — and the response includes a warning `messages[]` entry at the line. UCP defines no conversion factors or dimensions; whether to convert is the Business's own determination.
+- **Reject, recoverably.** When it cannot or chooses not to convert (for example, a quantity of fasteners denominated in litres), the Business **MUST** reject the request's effect on that line with a recoverable business outcome naming the authoritative basis. On update, the line remains at its previous authoritative state. On create, the line is not created and the message identifies the item in `content`; when no line can be created, the Business **MAY** return an error response instead.
+
+In both cases the response reflects authoritative state, never an echo of rejected input, and every line present carries its authoritative sale basis under the response-echo rule. The Platform recovers by reading the echoed descriptor — or re-reading the catalog — and resubmitting; the message `content` is explanatory text for humans, never the recovery input.
+
+For example, an industrial supplier sells loose fasteners by the kilogram, but stale data leads a Platform to believe they are sold by the pound. It submits an update asserting that basis:
+
+```json
+{
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb" }
+      },
+      "quantity": 275
+    }
+  ]
+}
+```
+
+A Business that converts applies the update as a visible revision. The line is denominated in the authoritative basis — the requested 2.75 lb converts to 1.25 kg, rounded once to `scale` 2 — and a warning marks the revision:
+
+```json
+{
+  "ucp": { "version": "draft", "status": "success", "payment_handlers": {} },
+  "id": "chk_fasteners_1",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
+      },
+      "quantity": 125,
+      "totals": [
+        { "type": "subtotal", "amount": 1624 },
+        { "type": "total", "amount": 1624 }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "quantity_unit_converted",
+      "path": "$.line_items[0].quantity",
+      "content": "This item is sold by the kilogram. The requested 2.75 lb was converted to 1.25 kg."
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1624 },
+    { "type": "total", "amount": 1624 }
+  ],
+  "links": []
+}
+```
+
+A Business that does not convert rejects the update instead. The line remains unchanged — `quantity` stays `150` (1.50 kg), not a reinterpretation of the requested `275` — and the error names the authoritative basis:
+
+```json
+{
+  "ucp": { "version": "draft", "status": "success", "payment_handlers": {} },
+  "id": "chk_fasteners_1",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_fasteners",
+      "item": {
+        "id": "var_fasteners",
+        "title": "Stainless Steel Fasteners",
+        "price": 1299,
+        "quantity_unit": { "unit": "KGM", "scale": 2, "display_text": "kg" }
+      },
+      "quantity": 150,
+      "totals": [
+        { "type": "subtotal", "amount": 1949 },
+        { "type": "total", "amount": 1949 }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "error",
+      "code": "quantity_unit_mismatch",
+      "severity": "recoverable",
+      "path": "$.line_items[0].item.quantity_unit",
+      "content": "This item is sold by the kilogram, not by the pound. Resubmit the quantity as a count of 0.01-kg steps."
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1949 },
+    { "type": "total", "amount": 1949 }
+  ],
+  "links": []
+}
+```
+
+**Ordering increment.** The sale basis **MAY** declare an [`increment`](http://ucp.dev/draft/specification/overview/#ordering-increment) — the ordering granularity, in steps, the Business sells in. The declaration lets the Platform build quantity steppers and validate input before submission. Platform-authored quantities **SHOULD** be integer multiples of the line's effective increment. The increment is merchandising policy, not a representational bound, and schema validation does not enforce it: on receiving an off-increment quantity, the Business **MAY** accept it, revise the line to an increment multiple, or reject it with a recoverable business outcome. A revision **MUST** be returned as a revised line `quantity` with an explanatory `messages[]` entry; the Business **MUST NOT** silently reinterpret the requested quantity. The Business **MAY** also revise a quantity for its own reasons (for example, limited stock); such revisions **SHOULD** stay on the increment grid so subsequent Platform stepper edits from the revised value remain on-grid.
+
+For example, bananas sold by the pound in quarter-pound multiples (`increment` `25` at `scale` `2`). A request for `quantity` `137` (1.37 lb) is off-increment; a Business that snaps it returns the line revised to `125` with a warning:
+
+```json
+[
+  {
+    "type": "warning",
+    "code": "quantity_increment_revised",
+    "path": "$.line_items[0].quantity",
+    "content": "This item is sold in 0.25 lb increments. Your requested 1.37 lb was adjusted to 1.25 lb."
+  }
+]
+```
+
+**Echoing the sale basis.** The Business **MAY** omit `quantity_unit` from a response line whose effective sale-basis identity is the default identity. The Business **MUST** include `quantity_unit` on the item in every Cart, Checkout, and Order line response whenever the effective identity differs from the default identity. Omission would otherwise make a measure-denominated line read as a count of whole items.
+
+**Pricing a line.** `item.price` is the amount per one whole `quantity_unit.unit` (for example, per kg or per hour); when `quantity_unit` is absent, it is the price per `each`. Other characteristics of a sale unit may affect the quoted `item.price`, but do not change its sale-basis denominator. The Business **MUST** compute the line total as `price × quantity × 10^-scale` and round once at the line. The presented `totals[]` remain authoritative (see [Totals](http://ucp.dev/draft/specification/checkout/#totals)). The Platform **MUST NOT** recompute a line total from the fractional quantity and substitute its own rounding.
+
+**Pricing basis.** `item.price` is always denominated against the sale basis, but the Business MAY quote it from a different measurement basis — for example, apples priced per pound and sold per `each`. On authoritative responses the Business **MUST** include `item.unit_price` on every cart, checkout, and order line whose pricing basis differs from its sale basis: the rate that determines the charge travels with the line, exactly as the sale basis itself does. When the pricing basis is the sale basis, `unit_price` remains a catalog display comparator and MAY be omitted from lines. Presence on a line is the marker: a line-level `unit_price` is transactional; a catalog-only one is display.
+
+For example, a Business sells bananas by the pound with `quantity_unit` `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a `price` of `79` ($0.79/lb). A Buyer orders 1.50 lb, so the Platform sends `quantity` `150` — 150 hundredth-of-a-pound steps. The line total is `79 × 150 × 10^-2 = 118.5`, rounded once per its pricing rules to `119` ($1.19):
+
+```json
+{
+  "ucp": { "version": "draft", "status": "success", "payment_handlers": {} },
+  "id": "chk_bananas_1",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_bananas",
+      "item": {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "price": 79,
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }
+      },
+      "quantity": 150,
+      "totals": [
+        { "type": "subtotal", "amount": 119 },
+        { "type": "total", "amount": 119 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 119 },
+    { "type": "total", "amount": 119 }
+  ],
+  "links": []
+}
+```
+
 ### Checkout Status Lifecycle
 
 The checkout `status` field indicates the current phase of the session and determines what processing is required next. The business sets the status; the platform receives messages indicating what's needed to progress.
@@ -680,52 +848,56 @@ Platform-emitted referral and conversion-event context — campaign identifiers,
 
 #### Item Create Request
 
-| Name | Type   | Requirement  | Description                                                                                                                                                                 |
-| ---- | ------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Required** | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+| Name          | Type                                                           | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------- | -------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | string                                                         | **Required** | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| quantity_unit | [Quantity Unit](/draft/specification/reference/#quantity-unit) | Optional     | Sale basis this item's `quantity` is denominated in. On an authoritative Business response, absence encodes the default `each` machine identity (`C62`, 0); the Business MUST include this descriptor for every non-`each` response. On Platform requests, omission makes no assertion: the Business interprets `quantity` using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (`unit`, effective `scale`), ignore `display_text` and `increment`, and resolve a mismatch by conversion surfaced as a visible line revision with a warning, or by rejection with a recoverable business outcome; silent reinterpretation is forbidden. An explicit `C62` descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor. |
 
 #### Item Update Request
 
-| Name | Type   | Requirement  | Description                                                                                                                                                                 |
-| ---- | ------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id   | string | **Required** | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
+| Name          | Type                                                           | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------- | -------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | string                                                         | **Required** | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| quantity_unit | [Quantity Unit](/draft/specification/reference/#quantity-unit) | Optional     | Sale basis this item's `quantity` is denominated in. On an authoritative Business response, absence encodes the default `each` machine identity (`C62`, 0); the Business MUST include this descriptor for every non-`each` response. On Platform requests, omission makes no assertion: the Business interprets `quantity` using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (`unit`, effective `scale`), ignore `display_text` and `increment`, and resolve a mismatch by conversion surfaced as a visible line revision with a warning, or by rejection with a recoverable business outcome; silent reinterpretation is forbidden. An explicit `C62` descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor. |
 
 #### Item
 
-| Name      | Type                                             | Requirement  | Description                                                                                                                                                                 |
-| --------- | ------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string                                           | **Required** | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business. |
-| title     | string                                           | **Required** | Product title.                                                                                                                                                              |
-| price     | [Amount](/draft/specification/reference/#amount) | **Required** | Unit price in ISO 4217 minor units.                                                                                                                                         |
-| image_url | string                                           | Optional     | Product image URI.                                                                                                                                                          |
+| Name          | Type                                                           | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------- | -------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | string                                                         | **Required** | The product identifier, often the SKU, required to resolve the product details associated with this line item. Should be recognized by both the Platform, and the Business.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| title         | string                                                         | **Required** | Product title.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| price         | [Amount](/draft/specification/reference/#amount)               | **Required** | Unit price in ISO 4217 minor units. Price is the amount per one whole `quantity_unit.unit` (for example, per lb or per hour); when `quantity_unit` is absent, it is per `each`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| quantity_unit | [Quantity Unit](/draft/specification/reference/#quantity-unit) | Optional     | Sale basis this item's `quantity` is denominated in. On an authoritative Business response, absence encodes the default `each` machine identity (`C62`, 0); the Business MUST include this descriptor for every non-`each` response. On Platform requests, omission makes no assertion: the Business interprets `quantity` using the item's authoritative sale basis. If the Platform includes this descriptor, it asserts the unit-descriptor machine identity. The Business MUST compare that machine identity (`unit`, effective `scale`), ignore `display_text` and `increment`, and resolve a mismatch by conversion surfaced as a visible line revision with a warning, or by rejection with a recoverable business outcome; silent reinterpretation is forbidden. An explicit `C62` descriptor at effective scale 0 matches an authoritative basis represented by an absent descriptor. |
+| unit_price    | [Unit Price](/draft/specification/reference/#unit-price)       | Optional     | Pricing basis for this item. On an authoritative Business response, the Business MUST include `unit_price` on every line whose pricing basis differs from its sale basis (for example, priced per pound but sold per `each`); presence on a line marks the rate as transactional rather than display-only. When the pricing basis is the sale basis, `item.price` fully denominates the charge and this field MAY be omitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| image_url     | string                                                         | Optional     | Product image URI.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Line Item
 
 #### Line Item Create Request
 
-| Name     | Type                                         | Requirement  | Description                           |
-| -------- | -------------------------------------------- | ------------ | ------------------------------------- |
-| item     | [Item](/draft/specification/reference/#item) | **Required** |                                       |
-| quantity | integer                                      | **Required** | Quantity of the item being purchased. |
+| Name     | Type                                         | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
+| -------- | -------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| item     | [Item](/draft/specification/reference/#item) | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| quantity | integer                                      | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
 
 #### Line Item Update Request
 
-| Name      | Type                                         | Requirement  | Description                                            |
-| --------- | -------------------------------------------- | ------------ | ------------------------------------------------------ |
-| id        | string                                       | Optional     |                                                        |
-| item      | [Item](/draft/specification/reference/#item) | **Required** |                                                        |
-| quantity  | integer                                      | **Required** | Quantity of the item being purchased.                  |
-| parent_id | string                                       | Optional     | Parent line item identifier for any nested structures. |
+| Name      | Type                                         | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------- | -------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                       | Optional     |                                                                                                                                                                                                                                                                                                                                                          |
+| item      | [Item](/draft/specification/reference/#item) | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| quantity  | integer                                      | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
+| parent_id | string                                       | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
 
 #### Line Item
 
-| Name      | Type                                                    | Requirement  | Description                                            |
-| --------- | ------------------------------------------------------- | ------------ | ------------------------------------------------------ |
-| id        | string                                                  | **Required** |                                                        |
-| item      | [Item](/draft/specification/reference/#item)            | **Required** |                                                        |
-| quantity  | integer                                                 | **Required** | Quantity of the item being purchased.                  |
-| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                            |
-| parent_id | string                                                  | Optional     | Parent line item identifier for any nested structures. |
+| Name      | Type                                                    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------- | ------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                                  | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| item      | [Item](/draft/specification/reference/#item)            | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| quantity  | integer                                                 | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
+| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                                                                                              |
+| parent_id | string                                                  | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
 
 ### Link
 
