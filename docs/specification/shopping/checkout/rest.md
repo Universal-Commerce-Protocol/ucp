@@ -80,11 +80,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 | Operation                                          | Method | Endpoint                           | Description                |
 | :------------------------------------------------- | :----- | :--------------------------------- | :------------------------- |
-| [Create Checkout](index.md#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](index.md#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](index.md#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](index.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](index.md#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| [Create Checkout](index.md#create-checkout)        | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](index.md#get-checkout)              | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](index.md#update-checkout)        | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](index.md#complete-checkout)    | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](index.md#cancel-checkout)        | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 

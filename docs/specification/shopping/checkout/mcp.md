@@ -126,11 +126,11 @@ MCP tools separate resource identification from payload data:
 
 | Tool                | Operation                                          | Description                |
 | :------------------ | :------------------------------------------------- | :------------------------- |
-| `create_checkout`   | [Create Checkout](index.md#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](index.md#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](index.md#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](index.md#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](index.md#cancel-checkout)     | Cancel a checkout session. |
+| `create_checkout`   | [Create Checkout](index.md#create-checkout)        | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](index.md#get-checkout)              | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](index.md#update-checkout)        | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](index.md#complete-checkout)    | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](index.md#cancel-checkout)        | Cancel a checkout session. |
 
 ### `create_checkout`
 

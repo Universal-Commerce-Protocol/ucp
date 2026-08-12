@@ -906,7 +906,7 @@ specifications:
 | :------------------------------ | :----------------------------------------------------------------------------------------------------- |
 | **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                          |
 | **Fail gracefully**             | Define clear error responses for common failure scenarios.                                             |
-| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](tokenization.md) for common flows. |
+| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](tokenization.md) for common flows.       |
 
 ---
 
