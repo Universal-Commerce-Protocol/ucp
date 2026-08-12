@@ -568,11 +568,12 @@ Capability reference in responses. Only name/version required to confirm active 
 
 UCP metadata for order responses. No payment handlers needed post-purchase.
 
-| Name             | Type   | Requirement  | Description                                                                 |
-| ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
-| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
-| services         | object | Optional     | Service registry keyed by reverse-domain name.                              |
-| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | Optional     | Payment handler registry keyed by reverse-domain name.                      |
-| capabilities     | any    | Optional     |                                                                             |
+| Name             | Type   | Requirement  | Description                                                                                                                                    |
+| ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
+| map_order        | object | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
+| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
+| services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
+| payment_handlers | object | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| capabilities     | any    | Optional     |                                                                                                                                                |

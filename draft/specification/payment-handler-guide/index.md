@@ -144,7 +144,7 @@ The handler declaration conforms to the [`PaymentHandler`](/draft/schemas/paymen
 }
 ```
 
-**`available_instruments`** is optional. When absent, the handler places no restrictions on instrument types or constraints — it supports the full set of instrument types defined by its handler schema. When present, it narrows the advertised types and/or applies additional constraints (e.g., limiting card brands to `["visa", "mastercard"]`).
+**`available_instruments`** is optional. When absent, the handler places no restrictions on instrument types or constraints — it supports the full set of instrument types defined by its handler schema. When present, it narrows the advertised types and/or applies additional constraints (e.g., limiting card brands to `["visa", "mastercard"]`). In a Business profile and authoritative response, array order communicates preferred instrument presentation, earliest first.
 
 ______________________________________________________________________
 

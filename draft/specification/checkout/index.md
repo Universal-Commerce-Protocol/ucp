@@ -942,16 +942,17 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 
 UCP metadata for checkout responses.
 
-| Name             | Type   | Requirement  | Description                                                                 |
-| ---------------- | ------ | ------------ | --------------------------------------------------------------------------- |
-| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                    |
-| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error` |
-| services         | object | Optional     | Service registry keyed by reverse-domain name.                              |
-| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                           |
-| payment_handlers | object | **Required** | Payment handler registry keyed by reverse-domain name.                      |
-| services         | any    | Optional     |                                                                             |
-| capabilities     | any    | Optional     |                                                                             |
-| payment_handlers | any    | **Required** |                                                                             |
+| Name             | Type   | Requirement  | Description                                                                                                                                    |
+| ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
+| map_order        | object | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
+| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
+| services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
+| payment_handlers | object | **Required** | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| services         | any    | Optional     |                                                                                                                                                |
+| capabilities     | any    | Optional     |                                                                                                                                                |
+| payment_handlers | any    | **Required** |                                                                                                                                                |
 
 ### Order Confirmation
 
