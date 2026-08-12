@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/digital_delivery.json",
+  "name": "com.mercadopago.shopping.digital_delivery",
+  "title": "Digital Delivery Extension",
+  "description": "Extends Order with delivered artifacts for digital / intangible goods (gift-card codes, vouchers, top-up PINs, license keys, and access entitlements). The Order carries a durable reference to each artifact plus a defined way to query the issuer for its current state; mutable redemption state (balance, validity) is never stored as authoritative on the Order. The record lives on the durable Order so it outlives the checkout session.",
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "title": "Delivered Artifact",
+      "description": "One digital artifact delivered by the order. Carries the inert data the buyer acts on plus a durable issuer reference; it does not carry authoritative mutable state.",
+      "required": ["id", "kind", "reference", "delivered_at"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for this delivered artifact within the order."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["redeemable_artifact", "entitlement"],
+          "description": "Delivery shape. 'redeemable_artifact' is a bearer value drawn down/redeemed at an issuer (gift card, voucher, top-up PIN, license key) — the standing question is 'how much is left?'. 'entitlement' is a granted right whose standing question is 'is this still valid, and until when?' (course, platform/SaaS access, download)."
+        },
+        "reference": {
+          "type": "string",
+          "description": "Durable, opaque issuer reference for this artifact — the pointer the Platform uses to query the issuer. Not buyer-facing; it is neither the balance nor a credential to spend."
+        },
+        "lookup": {
+          "$ref": "#/$defs/lookup"
+        },
+        "display": {
+          "$ref": "#/$defs/display"
+        },
+        "delivered_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when the artifact was delivered to the buyer. Delivery is neither settlement nor redemption (see the specification)."
+        }
+      }
+    },
+    "lookup": {
+      "type": "object",
+      "title": "Issuer Status Lookup",
+      "description": "How a Platform asks the issuer for the artifact's current state. The issuer is the single source of truth; the Platform MUST NOT treat a stored snapshot as authoritative.",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "HTTPS endpoint the Platform queries (GET) for current artifact state, keyed by 'reference'. MUST be constrained to an 'https:' origin allowlist advertised for the handler."
+        }
+      }
+    },
+    "display": {
+      "type": "object",
+      "title": "Delivered Artifact Display",
+      "description": "Public, inert data the buyer acts on to use the artifact (the code to enter, a QR image, or hosted instructions). Display data only. Render fields are non-executable — 'image' is shown as a static image (never HTML or script), 'code' is display text, and 'instructions_url' is the only loadable field.",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The redeemable code / PIN / license key as display text. The Platform SHOULD offer a copy affordance. MUST NOT be interpreted as a URL or executed."
+        },
+        "image": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional QR (or equivalent) image encoding the artifact, as a 'data:' or 'https:' URI. The Platform MUST render it as a static image only and MUST NOT execute, parse, or fetch it as anything other than image bytes."
+        },
+        "instructions_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional hosted, human-readable redemption instructions. The ONLY loadable field; the Platform MUST constrain it to an 'https:' origin allowlist advertised for the handler and MUST NOT auto-submit or pass buyer data to it."
+        }
+      }
+    },
+    "digital_delivery": {
+      "type": "array",
+      "title": "Digital Delivery",
+      "description": "Delivered digital artifacts for this order. Typically one; more when a single order fulfils multiple digital line items.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Digital Delivery",
+      "description": "Order whose delivered digital artifacts (codes, vouchers, entitlements) persist on the durable order and are resolved against the issuer, not by holding the checkout session open.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "digital_delivery": {
+              "$ref": "#/$defs/digital_delivery"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

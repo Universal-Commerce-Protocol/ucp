@@ -79,6 +79,7 @@ nav:
           - Transports:
               - REST: specification/order-rest.md
               - MCP: specification/order-mcp.md
+          - Digital Delivery Extension: specification/digital-delivery.md
       - Identity Linking Capability: specification/identity-linking.md
       - Payment Handlers:
           - Guide: specification/payment-handler-guide.md
@@ -417,6 +418,12 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
+          - specification/digital-delivery.md: >-
+              Digital Delivery Extension on the Order Capability, recording
+              delivered digital / intangible goods (gift-card codes, vouchers,
+              top-up PINs, license keys, and access entitlements) as durable
+              artifacts with an issuer reference and lookup, a delivered vs
+              redeemed lifecycle, and append-only partial-redemption draws.
           - specification/identity-linking.md: >-
               User authentication via the Identity Linking Capability,
               specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
