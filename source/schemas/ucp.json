@@ -46,6 +46,27 @@
       "additionalProperties": true
     },
 
+    "map_order": {
+      "type": "object",
+      "description": "Preferred key order for map-valued fields in the scope annotated by the containing `ucp` member. Each property names a target map, and its array lists target keys in preferred order. Lists may be partial and are not allowlists.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+
+    "members": {
+      "type": "object",
+      "description": "Members defined inside the reserved `ucp` protocol object. The object is open for forward compatibility: consumers MUST ignore unrecognized members. Only UCP core defines members, and every defined member MUST be safe to ignore.",
+      "properties": {
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "ucp_request": "omit"
+        }
+      },
+      "additionalProperties": true
+    },
+
     "entity": {
       "type": "object",
       "description": "Shared foundation for all UCP entities.",
@@ -83,6 +104,11 @@
       "required": ["version"],
       "properties": {
         "version": { "$ref": "#/$defs/version" },
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "description": "Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`).",
+          "ucp_request": "omit"
+        },
         "status": {
           "type": "string",
           "enum": ["success", "error"],
