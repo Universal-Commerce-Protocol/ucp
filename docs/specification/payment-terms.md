@@ -79,7 +79,8 @@ Platform **SHOULD** present that term without implying a choice.
 
 ## Payment schedules
 
-A schedule is **one payment**. A term that charges four times has four schedules.
+A schedule is **one payment**. A term that charges four times has four
+schedules.
 
 A Business **MUST** make each schedule's `description` a complete buyer-facing
 statement of when and how that payment is due, so that a Platform can render it
@@ -125,8 +126,8 @@ only the selected term must match the checkout total at any moment.
 Where the selected term changes what the purchase costs — a discount for paying
 today, a finance charge for paying over time — that difference **MUST** appear
 as its own entry in `checkout.totals`, a negative `discount` or a positive
-`fee`. A Business **SHOULD** set `display_text` on that entry so the Buyer can understand what
-choosing the term contributed.
+`fee`. A Business **SHOULD** set `display_text` on that entry so the Buyer can
+understand what choosing the term contributed.
 
 ## Selecting a payment term
 
@@ -168,12 +169,19 @@ than by comparing responses.
 This extension does not change how instruments are supplied. The Buyer's
 instruments fund the checkout under the selected term.
 
-This release of payment terms gives a Business no way to state, ahead of a selection, which payment handlers or
-instruments a term would permit, so a Platform cannot pre-compute the effect of
-a choice and **MUST** treat the set in each response as authoritative for that
-response alone. A handler that must be initialized with the amount and timing it
-will charge cannot be prepared before the term is settled, and **MAY** cease to
-be offered once it is.
+Checkout-specific handler and instrument eligibility is a **runtime result**.
+Profiles advertise broad support; the Business resolves that support against the
+Checkout context and any instruments already supplied, then returns the
+authoritative `ucp.payment_handlers` in the response. This covers cases a
+discovery-time predicate cannot express — a gift card whose balance is below the
+deposit, an issuer that will not support a delayed capture for this Business, a
+credential that expires before the balance comes due.
+
+A Platform therefore cannot pre-compute the effect of a choice, and **MUST**
+treat the set in each response as authoritative for that response alone. A
+handler that must be initialized with the amount and timing it will charge
+cannot be prepared before the term is settled, and **MAY** cease to be offered
+once it is.
 
 The instrument funding a term is charged once for each of that term's
 schedules, and **MUST** be capable of every one of them. A Business **MUST NOT**
@@ -188,9 +196,9 @@ schedule, and not otherwise.
 
 ## Disclosures
 
-Some terms carry display obligations. An installment plan with a finance charge or a deposit that is forfeited on
-cancellation are all subject to consumer-protection rules about what must be
-shown, and when.
+Some terms carry display obligations. An installment plan with a finance charge
+and a deposit that is forfeited on cancellation are both subject to
+consumer-protection rules about what must be shown, and when.
 
 This extension does not define a private disclosure channel. It uses the two
 that already exist:
@@ -240,10 +248,7 @@ the Checkout `currency`, so a term cannot express an obligation payable partly
 in another currency.
 
 **Recurring commerce.** Schedules settle the current checkout. They do not
-create future purchases, renewals, or fulfillment obligations. A Business
-enrolling a Buyer in a subscription charges the first cycle through a payment
-term and discloses the ongoing arrangement through a policy and its paired
-disclosure.
+create future purchases, renewals, or fulfillment obligations.
 
 **Payment execution.** This extension discloses when money is due. It does not
 define credential storage, future-charge authorization, how a Business executes
