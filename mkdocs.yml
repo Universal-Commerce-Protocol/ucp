@@ -77,6 +77,7 @@ nav:
               - Transports:
                   - REST: specification/shopping/order/rest.md
                   - MCP: specification/shopping/order/mcp.md
+              - Digital Delivery Extension: specification/digital-delivery.md
           - Playground: specification/shopping/playground.md
       - Payment:
           - Payment Authentication:
@@ -479,6 +480,12 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
+          - specification/digital-delivery.md: >-
+              Digital Delivery Extension on the Order Capability, recording
+              delivered digital / intangible goods (gift-card codes, vouchers,
+              top-up PINs, license keys, and access entitlements) as durable
+              artifacts with an issuer reference and lookup, a delivered vs
+              redeemed lifecycle, and append-only partial-redemption draws.
         Payment:
           - specification/payment/authentication.md: >-
               Payment Authentication Extension, defining negotiation,
