@@ -354,7 +354,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-01-11", "status": "error" },
+          "ucp": { "version": "{{ ucp_version }}", "status": "error" },
           "messages": [
             {
               "type": "error",
@@ -711,7 +711,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
