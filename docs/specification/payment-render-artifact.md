@@ -16,7 +16,7 @@
 
 # Payment Render Artifact Extension
 
-* **Capability Name:** `com.mercadopago.payment.render_artifact`
+* **Capability Name:** `com.mercadopago.shopping.render_artifact`
 * **Schema:** `https://ucp.dev/schemas/shopping/payment_render_artifact.json`
 
 ## Overview
@@ -29,9 +29,12 @@ copy-and-paste code, and/or hosted instructions) as an outstanding Action on the
 checkout. The Platform renders it, the buyer pays in their bank app, and the
 **same** Complete Checkout operation resolves once payment is confirmed.
 
-This is a concrete, vendor-namespaced Action type stacked on the generic
-[Actions](overview.md#actions) primitive. It defines the Action type
-`com.mercadopago.payment.render_artifact` and the shape of its `config`.
+This is a vendor-namespaced capability stacked on the generic
+[Actions](overview.md#actions) primitive. The **capability** is
+`com.mercadopago.shopping.render_artifact`; it declares the **Action type**
+`com.mercadopago.payment.render_artifact` and the shape of its `config`. Keeping
+the capability and the Action type distinct lets the capability declare further
+Action types later without overloading a single name.
 
 **Key features:**
 
@@ -59,7 +62,7 @@ capability:
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "com.mercadopago.payment.render_artifact": [
+      "com.mercadopago.shopping.render_artifact": [
         {
           "version": "{{ ucp_version }}",
           "extends": ["dev.ucp.shopping.checkout"],
@@ -103,9 +106,11 @@ render on any surface. Implementations MUST honor the following:
   MUST constrain it to an `https:` origin allowlist advertised for the handler,
   MUST open it as a plain document, and MUST NOT auto-submit forms or forward
   buyer data to it.
-* **`expires_at` bounds the artifact.** After it passes, the Platform stops
-  rendering the artifact and re-fetches checkout state rather than continuing to
-  show a stale QR/code.
+* **`expires_at` is required and bounds the artifact.** It bounds Platform
+  polling (see [Polling](#polling)) and MUST NOT exceed the checkout-level
+  `expires_at`; where both are present, this Action-level value takes precedence
+  for the Action. After it passes, the Platform stops rendering the artifact and
+  re-fetches checkout state rather than continuing to show a stale QR/code.
 
 ## Resolution Flow
 
@@ -130,6 +135,18 @@ error [Message](overview.md#messages) whose `path` points at the exact Action
 occurrence, e.g. `$.actions['com.mercadopago.payment.render_artifact'][0]`. The Platform
 surfaces the recovery path (for example, refreshing the artifact) rather than
 re-driving Complete.
+
+## Polling
+
+The outcome of a render-artifact Action is observed by the Platform polling Get
+Checkout; the Platform never re-drives Complete. Absent a contract here, backoff
+falls through to Platform policy and conforming implementations diverge, so this
+Action defines it:
+
+* The Platform MUST NOT poll Get Checkout more than once every **2 seconds**.
+* The Platform SHOULD apply exponential backoff between attempts.
+* The Platform MUST stop polling at the Action-level `expires_at` and re-fetch
+  checkout state once, rather than continuing to poll a stale artifact.
 
 ## Scope: In-Session vs. Out-of-Session Settlement
 

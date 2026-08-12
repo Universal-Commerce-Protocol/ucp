@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/payment_render_artifact.json",
-  "name": "com.mercadopago.payment.render_artifact",
+  "name": "com.mercadopago.shopping.render_artifact",
   "title": "Payment Render Artifact Extension",
   "description": "Extends Checkout with a render-artifact Action for in-session, out-of-band payment methods (e.g., Pix). The Business surfaces an inert display artifact (QR image, copy-and-paste code, hosted instructions) that the Platform renders so the buyer can complete payment in a separate app; the same Complete Checkout operation resolves afterward via polling Get Checkout, with no redirect or continue_url handoff. Declares the Action type 'com.mercadopago.payment.render_artifact' on top of the common Actions primitive.",
   "$defs": {
@@ -9,7 +9,7 @@
       "type": "object",
       "title": "Payment Render Artifact Config",
       "description": "Public, inert display artifact for one outstanding payment method. Contains display data only: no PAN, OTP, credential, or other secret ever transits this artifact. Render fields are non-executable — 'image' is shown as a static image (never as HTML or script), 'code' is display text, and 'instructions_url' is the only loadable field.",
-      "required": ["type"],
+      "required": ["type", "expires_at"],
       "properties": {
         "type": {
           "type": "string",
@@ -38,7 +38,7 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "RFC 3339 timestamp after which this artifact is no longer valid. On expiry the Platform stops rendering it and re-fetches checkout state."
+          "description": "RFC 3339 timestamp after which this artifact is no longer valid. Required; it bounds Platform polling and MUST NOT exceed the checkout-level 'expires_at'. On expiry the Platform stops rendering it and re-fetches checkout state."
         }
       },
       "anyOf": [
