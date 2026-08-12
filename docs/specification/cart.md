@@ -89,6 +89,28 @@ SHOULD be linked for the duration of the checkout.
     on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
+## Quantity and sale basis
+
+Cart line items apply the shared
+[quantities and units](overview.md#quantities-and-units) contract. Each
+`line_items[].quantity` is an integer step count in the item's authoritative
+sale basis. On a Business response, an absent
+`line_items[].item.quantity_unit` encodes the default `each` basis, so
+`quantity` counts whole items.
+
+On a Platform request, omission of `line_items[].item.quantity_unit` makes no
+assertion. The Business interprets `quantity` using the item's authoritative
+sale basis, so a request for a measure-denominated item can omit the descriptor
+without asserting `each`. The Platform **MAY** include `item.quantity_unit` to
+assert the sale-basis identity.
+
+Cart follows [Checkout — Quantity and sale basis](checkout.md#quantity-and-sale-basis)
+for sale-basis discovery, assertion matching, mismatch conversion or
+rejection, response echo, ordering-increment handling, and line pricing.
+Cart totals remain estimates (see [Total](#total)). A measure-denominated line
+counts as one line item in cart summaries; its `quantity` is an amount, not an
+item count.
+
 ## Actions
 
 The cart surfaces outstanding Action instances in its response-only `actions`
