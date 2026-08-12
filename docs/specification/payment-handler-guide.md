@@ -190,7 +190,9 @@ and desired configuration.
 restrictions on instrument types or constraints — it supports the full set of
 instrument types defined by its handler schema. When present, it narrows the
 advertised types and/or applies additional constraints (e.g., limiting card
-brands to `["visa", "mastercard"]`).
+brands to `["visa", "mastercard"]`). In a Business profile and authoritative
+response, array order communicates preferred instrument presentation, earliest
+first.
 
 ---
 
