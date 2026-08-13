@@ -44,6 +44,7 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 | Term                         | Acronym | Definition                                                                                                                                            |
 | :--------------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order. |
+| **Location**                 | -       | A physical place (e.g., store, restaurant, property, pickup point) identified by a stable, opaque string in a Business's namespace.                   |
 | **Increment**                | -       | Optional [ordering granularity](overview.md#ordering-increment) of a sale basis, a count of steps; advisory for Platform-authored quantities.         |
 | **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                         |
 | **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                             |
