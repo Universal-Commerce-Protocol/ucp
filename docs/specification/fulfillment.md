@@ -19,22 +19,20 @@
 ## Overview
 
 The fulfillment extension enables businesses to advertise support for physical
-goods fulfillment (shipping, pickup, etc). Each parent capability opts in
-independently, with a parent-specific projection:
+goods fulfillment (shipping, pickup, etc).
 
-* **Checkout** (`dev.ucp.shopping.checkout`) — location-aware context plus
-    selection and cost: which items go where, by which method, at what price
-    and ETA.
-* **Cart** (`dev.ucp.shopping.cart`) — location-aware context only; it does not
-    add methods, destinations, groups, options, or selection IDs.
+This extension adds a `fulfillment` field to Checkout and/or Catalog:
+
+* **Checkout** (`dev.ucp.shopping.checkout`) — selection and cost: which
+    items go where, by which method, at what price and ETA.
 * **Catalog** (`dev.ucp.shopping.catalog.search` and
-    `dev.ucp.shopping.catalog.lookup`) — location-aware request context and
-    discovery: a variant advertises the fulfillment options available for it.
-    See [Catalog Discovery](#catalog-discovery).
+    `dev.ucp.shopping.catalog.lookup`) — discovery: a variant advertises the
+    fulfillment options available for it, based on the provided buyer
+    context. See [Catalog Discovery](#catalog-discovery).
 
 On Checkout, the `fulfillment` field contains:
 
-* `methods[]` — fulfillment methods applicable to line items (shipping, pickup, etc.)
+* `methods[]` — fulfillment methods applicable to cart items (shipping, pickup, etc.)
     * `line_item_ids` — which items this method fulfills
     * `destinations[]` — where to fulfill (address, store location)
     * `groups[]` — business-generated packages, each with selectable `options[]`
@@ -55,54 +53,48 @@ On Checkout, the `fulfillment` field contains:
         * `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
         * `options[1]` 🔘 Curbside Pickup
 
-### Location Context
+## Location Context
 
-Fulfillment adds an optional `location` to the parent `context`. `location` is
-accepted on Catalog requests and on Cart and Checkout Create and Update
-requests.
+Base [Context](catalog/index.md#context) defines an optional `location`: a
+stable, opaque [Location](glossary.md#commerce) identifier in the Business's
+namespace. The field appears on Catalog requests and on Cart and Checkout
+create and update requests (see [Checkout Context](checkout.md#context)).
+Fulfillment does not add or redefine the field; when the Fulfillment
+extension is active, it defines the field's effects.
 
-These fields have distinct semantic roles; they are not precision levels of the
-same location:
+When Fulfillment extends Catalog or Checkout, `context.location` on a request
+to that capability names the provisional Business Location that the Business
+evaluates fulfillment availability against, and generates initial fulfillment
+choices for. It does not select a fulfillment destination.
+
+These fields carry distinct roles, not precision levels of one value:
 
 | Field | Role |
 | --- | --- |
-| `context.location` | Provisional, non-binding Business-location anchor for location-scoped pricing, availability, estimates, or initial options—roughly, “evaluate this experience at this Business location.” |
-| Catalog `filters.fulfills_to` | Explicit fulfillment destination and filter: “can this be fulfilled to here?” |
-| Catalog response `variants[].fulfillment.methods[].location` | Business location for which the availability of a place-based method was resolved. |
-| Checkout `selected_destination_id` or authoritative fulfillment address | Explicit destination for the affected fulfillment scope; it supersedes `context.location` there. |
+| `context.location` | Provisional Business Location to evaluate fulfillment against. |
+| Catalog `filters.fulfills_to` | Explicit destination the order is fulfilled to, and a filter on results. |
+| Catalog `methods[].location` | The Business Location resolved for a place-based method (e.g. `pickup`) on a variant. |
+| Checkout `methods[].selected_destination_id` | The destination selected from that method's `destinations[]`. |
 
-**Continuity example.** The same Business-scoped Location Identifier can appear
-in different fields without collapsing their roles. Catalog may report a
-place-based method at `loc_123`. A Platform continuing that location-scoped
-experience can carry `loc_123` as Cart `context.location`. Cart-to-Checkout
-conversion carries `context.location` into Checkout, allowing the Business to
-surface that location as the initial fulfillment choice. Once the Platform
-selects it through `selected_destination_id`, it becomes the explicit
-destination for the affected fulfillment scope.
+Precedence is scoped to what each field governs:
 
-#### Platform
+* When Catalog `filters.fulfills_to` is present, a Business **MUST** resolve
+    the fulfillment destination and method `availability` from it rather than
+    from `context.address_country`, `context.address_region`,
+    `context.postal_code`, or `context.location`.
+* Once a Platform sets `selected_destination_id` on a Checkout method, a
+    Business **MUST** use the referenced destination rather than
+    `context.location` for that method's fulfillment scope. Other methods are
+    unaffected.
 
-* A Platform **MUST NOT** send a location ID established by one Business to a
-    different Business. It **MAY** provide an ID learned from a Fulfillment
-    response or another mechanism operated by the same Business.
-* A Platform **MUST NOT** treat `context.location` as a binding fulfillment
-    destination.
-
-#### Business
-
-* A Business **MUST** ignore an unknown or inapplicable `context.location` and
-    return a successful response for an otherwise valid request. It **MAY**
-    report the ignored value through a warning in `messages[]`.
-* Catalog confirms resolution through the applicable
-    `variants[].fulfillment.methods[].location`; top-level response context is
-    not part of this extension's Catalog response contract.
-* For Catalog fulfillment destination and availability resolution, a Business
-    **MUST** use explicit `filters.fulfills_to` instead of
-    `context.address_country`, `context.address_region`, `context.postal_code`,
-    or `context.location`. For the Checkout scope governed by an
-    explicit `selected_destination_id` or authoritative fulfillment address,
-    the Business **MUST** use that destination or address instead of
-    `context.location`.
+**Carrying a Location forward.** The same identifier can appear in several of
+these fields without collapsing their roles. A Catalog response can report a
+place-based method at `loc_123`. Because base Cart Context already includes
+`location`, `loc_123` can travel forward as `context.location` on a Cart
+request. [Cart-to-Checkout conversion](cart.md#cart-to-checkout-conversion)
+initializes the Checkout from the Cart's `context`, so the Business **MAY**
+use `loc_123` to generate an initial Checkout fulfillment destination. Once
+the Platform sets `selected_destination_id`, that explicit selection governs.
 
 ## Schema
 
@@ -119,10 +111,6 @@ method.
 #### Fulfillment
 
 {{ schema_fields('types/fulfillment_resp', 'fulfillment') }}
-
-#### Fulfillment Context
-
-{{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_context', 'fulfillment') }}
 
 #### Fulfillment Method
 
@@ -366,12 +354,11 @@ method has:
     renderable; see [Rendering](#rendering).
 * `availability` — whether the variant is available via this method at the
     specified or inferred location.
-* `location` — for place-based methods (e.g. `pickup`), the resolved
-    [Location Identifier](glossary.md#commerce) for that method. Across UCP
-    surfaces exposed by the same Business, the same value identifies the same
-    location; the containing field defines that location's role. A Business
-    that advertises pickup at a `location` **MUST** accept that same ID as
-    `selected_destination_id` for that method in Checkout.
+* `location` — for place-based methods (e.g. `pickup`), the
+    [Location](glossary.md#commerce) resolved for that method: the Business's
+    stable identifier for that place. A Business that advertises pickup at a
+    `location` **MUST** accept that same ID as `selected_destination_id` for
+    that method in Checkout.
 * `options` — concrete fulfillment choices within this method (e.g.
     Standard, Express); see [Options](#options). Optional.
 
@@ -388,10 +375,10 @@ variant-level value.
 ### Options
 
 A method MAY carry `options[]`, a representative subset of its fulfillment
-options — not an exhaustive list. Without a destination or full cart,
-catalog SHOULD preview meaningful boundary options for the buyer (e.g.
-cheapest, fastest); the full, high-resolution set is negotiated in checkout
-once the line items and destination are known.
+options — not an exhaustive list. Without a destination or full cart, a
+Business **SHOULD** preview meaningful boundary options for the Buyer (e.g.
+cheapest, fastest); more specific options are negotiated in Checkout once the
+line items and destination are known.
 
 Each option carries an `id` and a `title` (a short label distinguishing it
 from siblings), plus an optional renderable `description` for context. These
@@ -402,11 +389,11 @@ none, surfacing only `type`, `description`, and `availability`; options are
 nested directly under the method, with no group layer (unlike checkout
 `methods[].groups[].options[]`).
 
-A discovered option `id` lets a buyer's choice carry forward to Checkout: a
-Business **SHOULD** accept the same ID as `selected_option_id` unless other
-products, quantities, or combined fulfillment change the available options.
-The ID is a best-effort handle, not a guaranteed match. Cart does not carry
-option IDs or other full Fulfillment structures.
+A discovered option `id` lets a Buyer's choice carry forward: a Business
+**SHOULD** accept the same ID as `methods[].groups[].selected_option_id` in
+Checkout. The ID is a best-effort handle, not a guaranteed match — an option
+discovered for a single product may differ at Checkout, where other products,
+quantities, and combined fulfillment modify the options.
 
 ### Shapes
 
@@ -432,14 +419,13 @@ option IDs or other full Fulfillment structures.
 
 ### Location and method: `context` and `filters`
 
-* **`context`** provides non-binding hints that a Business uses to report
-    `availability`. Its coarse locality fields (`address_country` /
-    `address_region` / `postal_code`) describe the Buyer's locality. Its
-    `location` is a provisional Business-location anchor for store-scoped
-    pricing, availability, or initial fulfillment options; it need not be the
-    Buyer's physical location. On a market-scoped Catalog, the Business
-    **MAY** use context to narrow results; otherwise, context annotates rather
-    than removes them.
+* **`context`** carries non-binding hints the Business uses to report
+    `availability`: coarse locality fields (`address_country` /
+    `address_region` / `postal_code`) for where the *Buyer* is, and `location`
+    for a provisional Business Location (see
+    [Location Context](#location-context)). On a market-scoped Catalog a
+    Business **MAY** narrow results with these hints; otherwise they annotate
+    results rather than remove them.
 * **`filters.fulfills_to`** is where the order is *fulfilled to* — a single
     destination, named by value (a coarse address: `address_country` /
     `address_region` / `postal_code`) or by reference (a `location` id — a
@@ -451,11 +437,10 @@ option IDs or other full Fulfillment structures.
 * **`filters.methods`** restricts results to specific method types (e.g.
     `["pickup"]`).
 
-`context` carries non-binding Buyer locality or a provisional
-Business-location anchor; `fulfills_to` names an explicit destination. When
-both are present, `fulfills_to` supersedes `context.address_country`,
-`context.address_region`, `context.postal_code`, or `context.location` for
-fulfillment destination and availability resolution.
+`context` only hints; `fulfills_to` names the destination. When both are
+present, `fulfills_to` governs the fulfillment destination and method
+`availability`; see [Location Context](#location-context) for the precedence
+rule.
 
 ### Example
 
@@ -529,17 +514,10 @@ carries none — `options` is optional.
 Businesses and platforms declare fulfillment constraints in their profiles.
 Businesses fetch platform profiles to adapt responses accordingly.
 
-The `extends` array lists the parent capabilities to which this extension
-applies. Checkout is the authoritative, transactional surface; catalog is for
-discovery; Cart receives only location-aware context. Each parent is an
-independent opt-in, so advertising fulfillment for one parent does not activate
-it for another.
-
-A Platform or Business that advertises Cart and extends either Catalog
-capability with Fulfillment **SHOULD** also extend Cart with Fulfillment to
-preserve `context.location` across the Catalog → Cart → Checkout journey.
-Omitting the Cart projection means location-scoped Cart continuity is not
-provided.
+The `extends` array lists the capabilities this extension adds fulfillment
+to. Checkout is the authoritative, transactional surface; catalog is for
+discovery. A business lists the catalog capabilities in `extends` to expose
+fulfillment on catalog, or omits them to scope itself to checkout only.
 
 ### Platform Profile
 
@@ -552,8 +530,8 @@ single-group responses. The response shape is always
 `methods[].groups[]`—the difference is whether `groups.length` can exceed 1
 within each method.
 
-Default declaration (single group per Checkout method; fulfillment surfaced on
-Checkout and Catalog, with location context on Cart):
+Default declaration (single group per method; fulfillment surfaced on
+checkout and on catalog discovery):
 
 <!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
 ```json
@@ -565,7 +543,6 @@ Checkout and Catalog, with location context on Cart):
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
-        "dev.ucp.shopping.cart",
         "dev.ucp.shopping.catalog.search",
         "dev.ucp.shopping.catalog.lookup"
       ]
@@ -574,8 +551,8 @@ Checkout and Catalog, with location context on Cart):
 }
 ```
 
-A Platform or Business **MAY** narrow `extends` to any parent or set of parents
-it supports, using the string form for one parent or an array for several.
+A party that does not expose catalog discovery MAY narrow `extends` to
+`"dev.ucp.shopping.checkout"` (string form) or to a single-element array.
 
 Opt-in declaration (business MAY return multiple groups per method):
 
@@ -589,7 +566,6 @@ Opt-in declaration (business MAY return multiple groups per method):
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
-        "dev.ucp.shopping.cart",
         "dev.ucp.shopping.catalog.search",
         "dev.ucp.shopping.catalog.lookup"
       ],
@@ -616,7 +592,6 @@ Businesses declare what fulfillment configurations they support using
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
-        "dev.ucp.shopping.cart",
         "dev.ucp.shopping.catalog.search",
         "dev.ucp.shopping.catalog.lookup"
       ],
@@ -631,7 +606,7 @@ Businesses declare what fulfillment configurations they support using
 }
 ```
 
-This example says: shipping can go to multiple addresses, and checkout can mix
+This example says: shipping can go to multiple addresses, and carts can mix
 shipping+pickup.
 
 ### Business Response Behavior
@@ -685,7 +660,7 @@ needed. Emit the value directly as the `type` on catalog and checkout, and
 filter with `filters.methods: ["home_installation"]`. For checkout
 negotiation, declare its behavior in the business profile `config` — e.g.
 include `["shipping", "home_installation"]` in `method_combinations`
-so a checkout can mix shipped and installed items (see
+so a cart can mix shipped and installed items (see
 [Business Profile](#business-profile)). On a catalog variant's method:
 
 <!-- ucp:example schema=shopping/fulfillment def=catalog_fulfillment_method op=read -->
