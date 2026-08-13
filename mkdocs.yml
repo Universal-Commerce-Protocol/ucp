@@ -341,6 +341,12 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/split-payments.md: >-
+              Split Payments Extension, enabling a single checkout to be paid
+              with multiple instruments by defining business-declared allowed
+              combinations, specified- and open-amount contributions,
+              per-instrument charge reporting, and all-or-nothing failure
+              handling.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
