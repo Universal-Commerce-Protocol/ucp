@@ -62,7 +62,7 @@ We will implement a simple checkout server that allows a platform to initiate a 
 
     ```bash
     npm install express uuid @ucp-js/sdk
-    npm install --save-dev typescript @types/express @types/node ts-node
+    npm install --save-dev typescript @types/express @types/node tsx
     ```
 
     Initialize TypeScript configuration:
@@ -156,7 +156,7 @@ Initialize the application and define an in-memory database to store sessions.
     import {
       CheckoutCreateRequestSchema,
       CheckoutResponseSchema,
-      CheckoutResponse
+      type CheckoutResponse
     } from '@ucp-js/sdk';
 
     // Initialize Express app
@@ -464,7 +464,7 @@ Implement the retrieval route so the platform can fetch the checkout state.
     <!-- ucp:example skip reason="package.json snippet" -->
     ```json
     "scripts": {
-      "start": "ts-node server.ts"
+      "start": "tsx server.ts"
     }
     ```
 
@@ -767,7 +767,7 @@ If you want to verify your code, expand the section below to see the complete fi
         import {
           CheckoutCreateRequestSchema,
           CheckoutResponseSchema,
-          CheckoutResponse
+          type CheckoutResponse
         } from '@ucp-js/sdk';
 
         // Initialize Express app
