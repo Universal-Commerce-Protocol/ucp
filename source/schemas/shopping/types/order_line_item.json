@@ -17,7 +17,7 @@
     },
     "item": {
       "$ref": "item.json",
-      "description": "Product data (id, title, price, image_url)."
+      "description": "Purchased item data, including identity, price, and sale basis."
     },
     "quantity": {
       "type": "object",
@@ -26,20 +26,23 @@
         "original": {
           "type": "integer",
           "minimum": 0,
-          "description": "Quantity from the original checkout."
+          "maximum": 9007199254740991,
+          "description": "Quantity from the original checkout, expressed as an integer step count."
         },
         "total": {
           "type": "integer",
           "minimum": 0,
-          "description": "Current total active quantity. May differ from original due to post-order modifications (e.g., returns or cancellations)."
+          "maximum": 9007199254740991,
+          "description": "Current active quantity after returns, cancellations, or other order changes, expressed as an integer step count."
         },
         "fulfilled": {
           "type": "integer",
           "minimum": 0,
-          "description": "Quantity fulfilled so far."
+          "maximum": 9007199254740991,
+          "description": "Quantity fulfilled so far, expressed as an integer step count."
         }
       },
-      "description": "Quantity tracking for the line item."
+      "description": "Tracks the line item's original, current active, and fulfilled quantities. All three values use the same inherited `item.quantity_unit`. When `item.quantity_unit` is absent on an authoritative order response, each step is one whole item (`each`) under the shared default."
     },
     "totals": {
       "type": "array",
