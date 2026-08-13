@@ -1108,7 +1108,7 @@ image: assets/banner.png
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container-step-icon">
         </div>
-        <h3><a href="latest/specification/playground/" target="_blank">Experiment</a></h3>
+        <h3><a href="latest/specification/shopping/playground/" target="_blank">Experiment</a></h3>
         <p>Experiment with the protocol and its different agent roles</p>
       </div>
       <div class="get-started-container-step">

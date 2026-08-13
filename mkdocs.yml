@@ -42,7 +42,7 @@ nav:
       - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview/index.md
-      - Common Capabilities:
+      - Common:
           - Identity Linking: specification/common/identity-linking/index.md
       - Shopping:
           - Checkout Capability:
@@ -76,6 +76,7 @@ nav:
               - Transports:
                   - REST: specification/shopping/order/rest.md
                   - MCP: specification/shopping/order/mcp.md
+          - Playground: specification/shopping/playground.md
       - Payment:
           - Payment Authentication:
               - Overview: specification/payment/authentication.md
@@ -92,7 +93,6 @@ nav:
                   - Encrypted Credential: specification/payment/examples/encrypted-credential-payment-handler.md
       - Signatures: specification/signatures.md
       - Reference: specification/reference.md
-      - Playground: specification/playground.md
 
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
 repo_url: https://github.com/Universal-Commerce-Protocol/ucp
@@ -247,7 +247,9 @@ plugins:
         specification/order.md: specification/shopping/order/index.md
         specification/order-rest.md: specification/shopping/order/rest.md
         specification/order-mcp.md: specification/shopping/order/mcp.md
-        # Common Capabilities
+        # Playground
+        specification/playground.md: specification/shopping/playground.md
+        # Common
         specification/identity-linking.md: specification/common/identity-linking/index.md
         # Payment
         specification/payment-authentication.md: specification/payment/authentication.md
@@ -318,7 +320,7 @@ plugins:
               standards terms and acronyms used throughout the specification,
               including Capability, Extension, Action, Platform, Business, and
               Merchant of Record.
-        Common Capabilities:
+        Common:
           - specification/common/identity-linking/index.md: >-
               User authentication via the Identity Linking Capability,
               specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
@@ -486,7 +488,7 @@ plugins:
               Complete reference directory of all core UCP, type, and extension
               JSON schemas, including platform/business profiles and metadata
               objects.
-          - specification/playground.md: >-
+          - specification/shopping/playground.md: >-
               Interactive, browser-based UCP Playground simulator for walking
               through step-by-step checkout sessions, payment handling, and
               backend webhooks.
