@@ -13,6 +13,10 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "location": {
+          "type": "string",
+          "description": "Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries."
+        },
         "intent": {
           "type": "string",
           "description": "Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization."
