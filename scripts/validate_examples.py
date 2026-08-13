@@ -641,7 +641,7 @@ def resolve_schema(
   schema_base: Path,
 ) -> dict:
   """Resolve a schema via ucp-schema, with caching."""
-  key = (schema_path, direction, op)
+  key = (schema_base.resolve(), schema_path, direction, op)
   if key in _schema_cache:
     return _schema_cache[key]
 
