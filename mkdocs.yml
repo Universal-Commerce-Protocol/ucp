@@ -277,6 +277,11 @@ plugins:
           - specification/overview.md: >-
               Master technical specification of UCP, discovery mechanisms,
               secure transports, and error taxonomies.
+          - specification/glossary.md: >-
+              Definitions of the protocol, commerce, payment, regulatory, and
+              standards terms and acronyms used throughout the specification,
+              including Capability, Extension, Action, Platform, Business, and
+              Merchant of Record.
         Message Signatures:
           - specification/signatures.md: >-
               Implementation details for RFC 9421 HTTP Message Signatures and
@@ -341,6 +346,12 @@ plugins:
               memberships, tiers, benefits, and reward earning forecasts while
               managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/split-payments.md: >-
+              Split Payments Extension, enabling a single checkout to be paid
+              with multiple instruments by defining business-declared allowed
+              combinations, specified- and open-amount contributions,
+              per-instrument charge reporting, and all-or-nothing failure
+              handling.
         Cart Capability:
           - specification/cart.md: >-
               Pre-purchase Cart Capability, detailing item collection, state

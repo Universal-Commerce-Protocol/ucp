@@ -4,6 +4,14 @@ Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we pos
 
 ---
 
+## August 11, 2026: Lodging Technical Council (Lodging TC) Formed
+
+The nomination process for the Lodging Technical Council (Lodging TC) has officially closed. We are excited to welcome inaugural members Amadeus, Booking.com, Expedia, Google, Hilton, Marriott, and Trip.com to the Lodging TC.
+
+For more details, read the full announcement in the [GitHub Discussion #714](https://github.com/Universal-Commerce-Protocol/ucp/discussions/714).
+
+---
+
 ## July 16, 2026: Food Technical Council (Food TC) Formed
 
 The UCP Governing Council finalized the foundational members of the newly formed Food Technical Council (Food TC). Initial members include Block (Square), DoorDash, Google, Toast, and Uber Eats.
