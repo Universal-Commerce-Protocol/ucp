@@ -51,7 +51,6 @@ On Checkout, the `fulfillment` field contains:
     * `selected_destination_id` = `destinations[0].id` 🔘✅ Uptown Store
     * `groups[0]` 📦👞
         * `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
-        * `options[1]` 🔘 Curbside Pickup
 
 ## Schema
 
@@ -187,18 +186,19 @@ authors `destinations[]` and MAY define a default destination shape when
 `type` is omitted.
 
 Destination authorship — whether the Platform may write entries into a
-method's `destinations[]` — is keyed by the method's `type`:
+method's `destinations[]` — is Business-authored by default; a contract keyed
+on the method's `type` **MAY** override that default:
 
 | Method `type` | Request `destinations[]` |
 | --- | --- |
 | `shipping` | Platform-writable. The Platform writes the Buyer's shipping-address facts. |
-| `pickup` | Not Platform-writable (schema-enforced). The Business enumerates locations in its response; the Platform selects one by ID (see [Selection and Location Identity](#selection-and-location-identity)). |
-| other method type | The method's defining contract specifies the destination shape and whether it is Platform-writable. |
+| `pickup` | Not Platform-writable (schema-enforced). The Business enumerates locations in its response; the Platform selects a location by its Business-scoped ID (see [Selection and Location Identity](#selection-and-location-identity)). |
+| any other method `type` | Not Platform-writable (the base default). The Business enumerates destinations in its response; the Platform selects one via `selected_destination_id`. |
 
 Destination `type` is **required in responses and optional in requests**. In
 responses, every destination carries a required, open `type`, so destinations
-remain self-describing wherever they appear. In requests, the method's
-contract defines the destination shape:
+remain self-describing wherever they appear. In requests, `destinations[]` is
+absent unless a method-specific contract opts into a Platform-writable shape:
 
 * Under a well-known `shipping` method, every destination is a Shipping
     Destination: a destination that omits `type` defaults to
@@ -206,9 +206,13 @@ contract defines the destination shape:
 * Under a well-known `pickup` method, destinations are response-only; the
     Platform selects a location via `selected_destination_id` (see
     [Selection and Location Identity](#selection-and-location-identity)).
-* Under any other method type, the method's defining contract — a future
-    revision of this specification or a negotiated extension — specifies the
-    request destination shape and whether it is Platform-writable.
+* Under any other method type, the base default applies: `destinations[]` is
+    response-only, each response destination self-describes through its
+    required `type` and `id`, and the Platform selects one via
+    `selected_destination_id`. That method's defining contract — a future
+    revision of this specification or a negotiated extension — **MAY** narrow
+    the response destination shape or opt into a Platform-writable request
+    shape.
 
 A request that includes `destinations[]` MUST also include the method's
 `type`. The well-known values are:
@@ -302,16 +306,41 @@ return its Postal Address in `address`.
 
 `selected_destination_id` identifies the selected destination in a method by
 its `id`, and is the sole channel for selecting a Business Location. It accepts
-any stable, Business-scoped Location ID the Business recognizes for that
-method, including IDs the Business has not (yet) enumerated in that method's
-`destinations[]` — for example an ID discovered through Catalog or a separately
-negotiated Location capability. When Catalog represents a location as
-applicable to a particular fulfillment method, the Business **MUST** recognize
-the same Business-scoped ID when the Platform submits it in Checkout for that
-method, including as `selected_destination_id`, and **MUST** return the
-corresponding typed destination in `destinations[]` in its response. The
-Business **MUST** revalidate current availability and terms during Checkout;
-recognition does not reserve inventory or guarantee eligibility.
+any stable, Business-scoped ID the Business recognizes for that method,
+including an ID the Business has not (yet) enumerated in that method's
+`destinations[]`.
+
+Selection is source-agnostic. A non-null `selected_destination_id` **MAY**
+carry an ID the Platform obtained from a Catalog response, a Location search
+or lookup, an earlier Checkout, or any other source the Business recognizes
+for that method. Where the ID came from does not change the contract below.
+
+When the Business accepts a non-null `selected_destination_id`, its response:
+
+* **MUST** carry that same `selected_destination_id` value on the method; and
+* **MUST** include exactly one destination in that same method's
+    `destinations[]` whose `id` equals it, typed as specified in
+    [Destinations](#destinations) — so the response is self-describing whatever
+    the ID's source.
+
+The Business **MUST** revalidate the selected destination's current
+availability and terms; recognizing an ID neither reserves inventory nor
+guarantees eligibility. The Business **MUST NOT** silently substitute another
+destination: it **MUST NOT** return a different `selected_destination_id`, and
+**MUST NOT** keep the submitted ID while returning a destination that
+describes another location. A Business that cannot honor the submitted
+selection rejects it rather than replacing it.
+
+When the Business cannot accept a `selected_destination_id` submitted on
+[Update Checkout](checkout.md#update-checkout) — the ID is not recognized for
+that method, or revalidation fails — it follows the general behavior for a
+rejected Update: it **MUST** leave the current Checkout unchanged and
+**MUST** return that Checkout with an error Message with
+`severity: "recoverable"` whose `path` selects the attempted method's
+`selected_destination_id` (for example
+`$.fulfillment.methods[0].selected_destination_id`). See
+[Error Handling](checkout.md#error-handling) and
+[The `path` Field](checkout.md#the-path-field).
 
 ## Rendering
 
@@ -454,13 +483,12 @@ method has:
 * `availability` — whether the variant is available via this method at the
     specified or inferred location.
 * `location` — when the method is scoped to a specific Business Location,
-    that location's stable, opaque, Business-scoped identifier. When Catalog
-    represents the location as applicable to a particular method, the Business
-    **MUST** recognize the same ID when the Platform submits it for that
-    method, including as `selected_destination_id`. Recognition is
-    method-scoped and does not reserve inventory or guarantee eligibility; the
-    Business revalidates current availability and terms during Checkout. See
-    [Selection and Location Identity](#selection-and-location-identity).
+    that location's stable, opaque, Business-scoped identifier. The Platform
+    **MAY** submit that ID as `selected_destination_id` on a Checkout method of
+    the same `type`. Discovery neither reserves inventory nor guarantees
+    eligibility; Catalog is one source of such an ID, and whether the Business
+    accepts it — and what its response must then contain — is source-agnostic.
+    See [Selection and Location Identity](#selection-and-location-identity).
 * `options` — concrete fulfillment choices within this method (e.g.
     Standard, Express); see [Options](#options). Optional.
 
