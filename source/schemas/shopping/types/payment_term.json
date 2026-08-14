@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/payment_term.json",
+  "title": "Payment Term",
+  "description": "A way of paying for the checkout: one or more payment schedules that together cover its total.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "schedules"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this payment term within the checkout. Referenced by `payment.selected_term_id`."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short label that distinguishes this term from its siblings (e.g. 'Pay now', 'Pay in 4', 'Deposit + balance at check-in')."
+    },
+    "description": {
+      "$ref": "../../common/types/description.json",
+      "description": "Supplementary context for the title (e.g. 'Save 5% by paying today'). Directly renderable; MUST NOT repeat the title."
+    },
+    "schedules": {
+      "type": "array",
+      "items": {
+        "$ref": "payment_schedule.json"
+      },
+      "minItems": 1,
+      "description": "Payment schedules that settle this checkout under this term, in the order they come due."
+    }
+  }
+}
