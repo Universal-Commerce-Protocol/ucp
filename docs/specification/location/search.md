@@ -146,9 +146,9 @@ Supports two distinct, industry-agnostic spatial search models:
 > **Contextual Fallback**: If the `serves` filter is not explicitly specified in
 > the request, the business **MAY** use the user's contextual location hints passed in the
 > request `context` object to implicitly apply a `serves` filter, returning only locations
-> that can service the user. Similarly to the callout above, if `context` is omitted or
-> business is unable to resolve the provided address hint, then business **MUST** return
-> an error message with `code: "location_geo_filter_resolution_failed"`.
+> that can service the user. If `context` is omitted or business is unable to resolve the
+> provided address hint, unlike the treatment above for `distance`, business **SHOULD**
+> interpret this unqualified filter predicate as "serves any location target".
 
 ## Pagination
 
