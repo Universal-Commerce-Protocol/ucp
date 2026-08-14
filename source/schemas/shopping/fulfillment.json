@@ -141,7 +141,7 @@
           "properties": {
             "fulfills_to": {
               "$ref": "types/fulfillment_destination_filter.json",
-              "description": "Explicit destination where the order is fulfilled. It may differ from the locality or Business Location supplied in `context` (e.g. for a gift) and can be specified by a `location` identifier or a coarse locality (`address_country`/`address_region`/`postal_code`). The filter restricts results to what can be fulfilled there and seeds method `availability`. It supersedes `context.address_country`, `context.address_region`, `context.postal_code`, and `context.location` only for fulfillment destination and availability resolution."
+              "description": "Explicit destination where items are fulfilled. It may differ from the locality or Business Location supplied in `context` (e.g. a gift delivered directly to the recipient). The filter restricts results to what can be fulfilled there and seeds method `availability`. It supersedes `context` only for fulfillment destination and availability resolution."
             },
             "methods": {
               "type": "array",

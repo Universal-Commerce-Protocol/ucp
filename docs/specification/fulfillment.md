@@ -72,7 +72,7 @@ These fields carry distinct roles, not precision levels of one value:
 | Field | Role |
 | --- | --- |
 | `context.location` | Provisional Business Location to evaluate fulfillment against. |
-| Catalog `filters.fulfills_to` | Explicit destination the order is fulfilled to, and a filter on results. |
+| Catalog `filters.fulfills_to` | Explicit destination items are fulfilled to, and a filter on results. |
 | Catalog `methods[].location` | The Business Location resolved for a place-based method (e.g. `pickup`) on a variant. |
 | Checkout `methods[].selected_destination_id` | The destination selected from that method's `destinations[]`. |
 
@@ -80,8 +80,7 @@ Precedence is scoped to what each field governs:
 
 * When Catalog `filters.fulfills_to` is present, a Business **MUST** resolve
     the fulfillment destination and method `availability` from it rather than
-    from `context.address_country`, `context.address_region`,
-    `context.postal_code`, or `context.location`.
+    from `context`. Other `context` fields are unaffected.
 * Once a Platform sets `selected_destination_id` on a Checkout method, a
     Business **MUST** use the referenced destination rather than
     `context.location` for that method's fulfillment scope. Other methods are
@@ -420,15 +419,15 @@ quantities, and combined fulfillment modify the options.
 ### Location and method: `context` and `filters`
 
 * **`context`** carries non-binding hints the Business uses to report
-    `availability`: coarse locality fields (`address_country` /
-    `address_region` / `postal_code`) for where the *Buyer* is, and `location`
-    for a provisional Business Location (see
+    `availability`: coarse locality fields for where the *Buyer* is, and
+    `location` for a provisional Business Location (see
     [Location Context](#location-context)). On a market-scoped Catalog a
     Business **MAY** narrow results with these hints; otherwise they annotate
     results rather than remove them.
-* **`filters.fulfills_to`** is where the order is *fulfilled to* — a single
-    destination, named by value (a coarse address: `address_country` /
-    `address_region` / `postal_code`) or by reference (a `location` id — a
+* **`filters.fulfills_to`** is where items are *fulfilled to* — a single
+    destination
+    ([Fulfillment Destination Filter](#fulfillment-destination-filter)),
+    named by value (a coarse locality) or by reference (a `location` id — a
     store, pickup point, or saved address). Platforms **SHOULD** provide one
     or the other, not both; if both are present, a business **SHOULD** use
     the more specific — typically `location`. It restricts results to what
@@ -437,10 +436,8 @@ quantities, and combined fulfillment modify the options.
 * **`filters.methods`** restricts results to specific method types (e.g.
     `["pickup"]`).
 
-`context` only hints; `fulfills_to` names the destination. When both are
-present, `fulfills_to` governs the fulfillment destination and method
-`availability`; see [Location Context](#location-context) for the precedence
-rule.
+`context` only hints; `fulfills_to` names the destination. See
+[Location Context](#location-context) for the precedence rule.
 
 ### Example
 
