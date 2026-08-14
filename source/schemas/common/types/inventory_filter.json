@@ -8,7 +8,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "The unique identifier of the item (e.g., product or variant ID in shopping, or dish ID in food ordering)."
+      "description": "The stable, opaque identifier of the item that MUST be Business-resolved (e.g., product or variant ID in shopping, or dish ID in food ordering)."
     },
     "availability_status": {
       "type": "string",

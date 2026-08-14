@@ -102,13 +102,29 @@ Separates static location characteristics from dynamic availability:
     the location. Some industry specific use cases include:
     * *Shopping*: Checking stock availability for specific products or variants.
     * *Food Ordering*: Checking offering availability of specific dishes or menu items.
-    Each inventory filter requires an `id` (e.g., product/dish ID) and can optionally specify
-    a coarse `availability_status` value.
+    Each inventory filter requires an stable, opaque `id` (e.g., product/dish ID) and
+    can optionally specify a coarse `availability_status` value.
 
 #### Amenity Vocabulary
 
 UCP defines an open string vocabulary for amenities via `amenity_type.json` to ensure cross-business
 interoperability. Implementations **SHOULD** map their internal features to the well-known types where applicable.
+
+#### Inventory Filter Evaluation Rules
+
+* **Omission Semantics**: When `availability_status` is omitted for an item `id`,
+  the business **MUST** treat the predicate as requiring that the item is currently orderable/fulfillable
+  at that location (equivalent to `in_stock`, or active `preorder`/`backorder` with available capacity).
+* **Conjunctive Matching**: Multiple entries in `filters.inventory` combine with logical **AND**.
+  A location matches only if all item predicates are simultaneously satisfied.
+* **Contradictory / Impossible Predicates**: If contradictory predicates are supplied
+  for the same item `id` (e.g., requesting both `in_stock` and `backorder` availability status), the
+  business **MUST** evaluate the conjunction strictly, returning an empty result set rather than throwing an error.
+  Business **MAY** include an info message with `code: "contradictory_filters"` to indicate the reason behind the
+  empty result.
+* **Nonexistent Item IDs**: If an item `id` does not exist in the business's domain, that item's
+  availability predicate is always evaluated as `false`. Business **MUST** return an empty result set and **MAY** append
+  an info message with `code: "item_not_found"`.
 
 ### Geographic & Geofencing Filter
 

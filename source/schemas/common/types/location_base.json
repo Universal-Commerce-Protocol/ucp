@@ -13,8 +13,8 @@
       "ucp_request": {
         "transition": {
           "from": "omit",
-          "to": "optional",
-          "description": "Location ids MAY be specified by platforms in requests."
+          "to": "required",
+          "description": "Location ids must be specified by platforms in requests."
         }
       }
     },
@@ -31,7 +31,14 @@
     },
     "address": {
       "$ref": "postal_address.json",
-      "description": "Physical address of the location."
+      "description": "Physical address of the location.",
+      "ucp_request": {
+        "transition": {
+          "from": "optional",
+          "to": "omit",
+          "description": "Location address should not be specified by platforms."
+        }
+      }
     }
   }
 }
