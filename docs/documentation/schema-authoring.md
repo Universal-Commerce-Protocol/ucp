@@ -152,6 +152,11 @@ Reusable definitions referenced by other schemas. Do **not** appear in registrie
 
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version`
+- **Embedded-language grammars**: A type schema that defines an embedded
+  language — grammar syntax rather than independently placeable UCP fields —
+  is direction-agnostic. Its grammar properties carry no `ucp_request`
+  annotation; each UCP property that exposes the grammar declares its own
+  applicability. Example: `common/types/constraint_expression.json`.
 
 Examples: `types/buyer.json`, `types/line_item.json`, `types/postal_address.json`
 
@@ -524,23 +529,50 @@ This section covers only the schema-authoring boundary.
 ### Local structure
 
 `request_constraints` is centrally registered in `ucp.json#/$defs/members` as a
-response-only protocol member with `ucp_request: "omit"`. Its value is
-constrained by the shared Request Constraints schema; host domain schemas do
-not redeclare it. A conforming UCP-aware resolver materializes the registered
+response-only protocol member with `ucp_request: "omit"`. Host domain schemas
+do not redeclare it. A conforming UCP-aware resolver materializes the registered
 member into eligible response scopes so ordinary resolved-schema validation
 applies the shared schema.
 
-The shared `schemas/common/types/request_constraints.json` schema defines a
-closed constraint language with two positions. An emitted value begins at an
-Object Constraint; Value Constraints occur only beneath its `properties` maps.
+The member's value is defined in two layers.
+`schemas/common/types/constraint_expression.json` defines the closed Constraint
+Expression grammar with two positions.
+`schemas/common/types/request_constraints.json` is the stable wrapper that binds
+that grammar to data in a subsequent UCP request; it is the schema the
+registered member references and the schema an emitted value is validated
+against. An emitted value begins at an Object Constraint; Value Constraints
+occur only beneath its `properties` maps.
 
 | Position | Admitted members | Shape |
 | :-- | :-- | :-- |
 | Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
 | Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
 
-Only the listed members are admitted in an emitted value. Keywords used by the
-shared schema to define this closed grammar do not become admitted members.
+Only the listed members are admitted in an emitted value. Keywords the grammar
+uses to define this closed language do not become admitted members.
+
+Syntax changes belong in `constraint_expression.json`. Its internal references
+recur to the grammar root, so every nested Object and Value Constraint is
+evaluated against that file. `request_constraints.json` is a target-binding
+wrapper: syntax added there applies only at the outermost position, so do not
+use it for a change that has to hold at nested positions.
+
+### Annotations and applicability
+
+`constraint_expression.json` carries no `ucp_request` annotations. Its
+`required`, `properties`, `enum`, and `const` properties are the syntax of an
+embedded language, not independently placeable UCP fields, so the grammar has no
+direction of its own.
+
+Applicability belongs to the containing UCP property. Each UCP property that
+exposes a Constraint Expression owns whichever direction-specific applicability
+annotations that carrier calls for, and those annotations alone determine when
+the grammar is reachable. For `request_constraints`, the containing property is
+the member registered in `ucp.json#/$defs/members`; it remains
+`ucp_request: "omit"` and is the only place that member's response-only
+visibility is declared. Because the grammar is direction-agnostic, the same
+file can be referenced from a request-applicable property and from a
+response-only one without change.
 
 ### Embedded-language boundary
 

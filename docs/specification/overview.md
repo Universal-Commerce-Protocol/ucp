@@ -217,16 +217,21 @@ shared [Request Constraints](site:schemas/common/types/request_constraints.json)
 schema before using it for preflight. This is ordinary JSON Schema Draft 2020-12
 validation.
 
-### Constraint schema
+### Constraint Expression
 
-The `request_constraints` value and every nested constraint object use embedded
-JSON Schema Draft 2020-12 language; they are not UCP domain objects. The shared
-constraint schema does not admit `ucp` inside them. The value of `properties` is
-a field-name dictionary whose keys name target request fields.
+The Request Constraints schema binds the shared
+[Constraint Expression](site:schemas/common/types/constraint_expression.json)
+grammar to data in a subsequent UCP request. The grammar defines the closed
+constraint language used by a `request_constraints` value.
 
-The constraint schema has two closed positions. A `request_constraints` value
-begins at an Object Constraint; Value Constraints occur only as values in an
-Object Constraint's `properties` map.
+A `request_constraints` value and every nested constraint object use embedded
+JSON Schema Draft 2020-12 language; they are not UCP domain objects. The grammar
+does not admit `ucp` inside them. The value of `properties` is a field-name
+dictionary whose keys name target request fields.
+
+The grammar has two closed positions. A `request_constraints` value begins at an
+Object Constraint; Value Constraints occur only as values in an Object
+Constraint's `properties` map.
 
 | Position | Admitted members | Shape and behavior |
 | :-- | :-- | :-- |

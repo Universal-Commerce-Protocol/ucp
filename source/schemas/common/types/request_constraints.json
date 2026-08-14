@@ -2,56 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/request_constraints.json",
   "title": "Request Constraints",
-  "description": "A closed JSON Schema Draft 2020-12 constraint language with Object and Value Constraints.",
-  "$ref": "#/$defs/object_constraint",
-  "$defs": {
-    "object_constraint": {
-      "type": "object",
-      "description": "An Object Constraint containing only `required` and `properties` keywords.",
-      "properties": {
-        "required": {
-          "type": "array",
-          "ucp_request": "omit",
-          "description": "Property names required by the constrained object.",
-          "uniqueItems": true,
-          "items": {
-            "type": "string"
-          }
-        },
-        "properties": {
-          "type": "object",
-          "ucp_request": "omit",
-          "description": "Constraints keyed by property name.",
-          "additionalProperties": {
-            "oneOf": [
-              {"$ref": "#"},
-              {"$ref": "#/$defs/value_constraint"}
-            ]
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "value_constraint": {
-      "type": "object",
-      "description": "A Value Constraint containing `enum`, `const`, or both.",
-      "anyOf": [
-        {"required": ["enum"]},
-        {"required": ["const"]}
-      ],
-      "properties": {
-        "enum": {
-          "type": "array",
-          "ucp_request": "omit",
-          "description": "A non-empty array of unique JSON values.",
-          "minItems": 1,
-          "uniqueItems": true
-        },
-        "const": {
-          "ucp_request": "omit"
-        }
-      },
-      "additionalProperties": false
-    }
-  }
+  "description": "Binds the shared Constraint Expression grammar to data in a subsequent UCP request.",
+  "$ref": "constraint_expression.json"
 }
