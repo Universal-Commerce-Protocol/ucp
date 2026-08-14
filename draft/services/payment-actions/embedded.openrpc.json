@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Payment Authentication Action Embedded Protocol",
     "description": "Embedded handshake and terminal notifications for standard UCP payment authentication Action surfaces. A Platform loads an Action config URL in an isolated browser-capable surface. The surface establishes the negotiated version with an action.ready JSON-RPC request, then sends action.done or action.error notifications through postMessage or an equivalent native bridge. Terminal notifications are advisory: the Business remains authoritative for payment and Checkout outcomes.",
-    "version": "2026-08-13"
+    "version": "2026-08-14"
   },
   "servers": [],
   "methods": [
