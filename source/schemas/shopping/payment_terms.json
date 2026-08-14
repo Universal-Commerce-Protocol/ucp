@@ -29,7 +29,7 @@
         },
         "selected_term_id": {
           "type": "string",
-          "description": "ID of the selected payment term. MUST match one `terms[].id` from the latest Checkout response. Present in a response whenever `terms` is, and absent when it is not: the Checkout total is the selected term's total, so a list of terms without a selection would show an amount that matches no stated term. Where the Buyer has made no choice, the Business selects a default. Omitted on create requests because term IDs are checkout-scoped and no terms exist yet, and on complete requests because the term is already settled by then. Selecting a term is an Update Checkout mutation: the Business response is authoritative for all derived state.",
+          "description": "ID of the selected payment term. MUST match one `terms[].id` from the latest Checkout response. Present in a response whenever `terms` is, and absent when it is not: the Checkout total is the selected term's total, so a list of terms without a selection would show an amount that matches no stated term. Where the Buyer has made no choice, the Business selects a default. Omitted on create requests because term IDs are checkout-scoped and no terms exist yet, and on complete requests because the term is already agreed by then. Selecting a term is an Update Checkout mutation: the Business response is authoritative for all derived state.",
           "ucp_request": {
             "create": "omit",
             "update": "optional",

@@ -150,9 +150,9 @@ A Platform changes the selection through Update Checkout, setting
 `selected_term_id` to an `id` from the latest `terms[]`. A Platform **MUST**
 omit it on create, because term IDs are scoped to a Checkout and no options
 exist yet — the create response establishes the options, if any, and the default
-among them. A Platform **MUST** omit it on complete, because the term is settled
-before a Checkout can reach `ready_for_complete`, and the instrument is
-authorized against the checkout total. A Business receiving a selection that no
+among them. A Platform **MUST** omit it on complete, because the term is already
+agreed before a Checkout can reach `ready_for_complete`, and the amount due at
+completion follows from it. A Business receiving a selection that no
 longer resolves — because the options changed — **MUST NOT** silently substitute
 a term, and **MUST** report the change as a `payment_term_changed` warning in
 `messages[]`.
@@ -161,6 +161,9 @@ Selecting a term can invalidate a selection previously accepted elsewhere in the
 Checkout — a deferred term may not be available with a same-day fulfillment
 option. The Business resolves the conflict, returns the authoritative state, and
 **MUST** report the change as a `payment_term_changed` warning in `messages[]`.
+A Business **MUST** also report that warning when changing the selected term
+in place, by altering its schedules, due dates, or amounts, without naming a
+different term.
 A Platform can therefore detect a changed selection from the code alone, rather
 than by comparing responses.
 
@@ -180,7 +183,7 @@ credential that expires before the balance comes due.
 A Platform therefore cannot pre-compute the effect of a choice, and **MUST**
 treat the set in each response as authoritative for that response alone. A
 handler that must be initialized with the amount and timing it will charge
-cannot be prepared before the term is settled, and **MAY** cease to be offered
+cannot be prepared before the term is agreed, and **MAY** cease to be offered
 once it is.
 
 The instrument funding a term is charged once for each of that term's
@@ -655,6 +658,9 @@ Businesses **MUST**:
   own entry in `checkout.totals`.
 * Return the recomputed Checkout after a selection, including any change to
   totals, policies, messages, or eligible payment handlers.
+* Report a `payment_term_changed` warning whenever a response changes the term
+  in effect, whether by naming a different term or by rewriting the selected one
+  in place.
 * Place any content that must reach the Buyer in the disclosure `content`, not
   only in the paired policy `description`.
 * Carry the accepted term onto the Order as `payment.accepted_term`, along with
