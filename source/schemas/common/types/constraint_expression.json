@@ -3,33 +3,29 @@
   "$id": "https://ucp.dev/schemas/common/types/constraint_expression.json",
   "title": "Constraint Expression",
   "description": "A closed JSON Schema Draft 2020-12 constraint expression with Object and Value Constraint positions.",
-  "$ref": "#/$defs/object_constraint",
-  "$defs": {
-    "object_constraint": {
-      "type": "object",
-      "description": "An Object Constraint containing only `required` and `properties` keywords.",
-      "properties": {
-        "required": {
-          "type": "array",
-          "description": "Property names required by the constrained object.",
-          "uniqueItems": true,
-          "items": {
-            "type": "string"
-          }
-        },
-        "properties": {
-          "type": "object",
-          "description": "Constraints keyed by property name.",
-          "additionalProperties": {
-            "oneOf": [
-              {"$ref": "#"},
-              {"$ref": "#/$defs/value_constraint"}
-            ]
-          }
-        }
-      },
-      "additionalProperties": false
+  "type": "object",
+  "properties": {
+    "required": {
+      "type": "array",
+      "description": "Property names required by the constrained object.",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
     },
+    "properties": {
+      "type": "object",
+      "description": "Constraints keyed by property name.",
+      "additionalProperties": {
+        "oneOf": [
+          {"$ref": "#"},
+          {"$ref": "#/$defs/value_constraint"}
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
     "value_constraint": {
       "type": "object",
       "description": "A Value Constraint containing `enum`, `const`, or both.",
