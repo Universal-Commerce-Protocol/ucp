@@ -62,7 +62,7 @@
       "items": {
         "$ref": "amenity_type.json"
       },
-      "description": "Filter by static services, amenities, or capabilities of the location (e.g., 'free_wifi', 'wheelchair_accessible', 'parking', 'curbside_pickup'). Matches locations that have ALL the listed amenities (AND logic)."
+      "description": "Filter by static services, amenities, or capabilities of the location. Matches locations that have all the listed amenities (AND logic)."
     },
     "inventory": {
       "type": "array",

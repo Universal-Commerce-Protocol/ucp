@@ -107,7 +107,7 @@ Separates static location characteristics from dynamic availability:
 
 #### Amenity Vocabulary
 
-UCP defines an open string vocabulary for amenities via `amenity_type.json` to ensure cross-business
+UCP defines an open reverse-DNS vocabulary for amenities via `amenity_type.json` to ensure cross-business
 interoperability. Implementations **SHOULD** map their internal features to the well-known types where applicable.
 
 #### Inventory Filter Evaluation Rules

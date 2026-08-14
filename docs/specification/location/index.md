@@ -40,8 +40,8 @@ This is vertical-agnostic and enables key commerce flows such as:
     address, operating hours, and **geographic context** (geographic coordinates).
 * **Offerings**: Features, capabilities, and inventory provided by the location.
     This is split into two distinct concepts to ensure tooling compatibility and semantic clarity:
-    * **Amenities**: Static features, services, or capabilities of the location
-        (e.g., `free_wifi`, `parking`, `outdoor_seating`, `curbside_pickup`).
+    * **Amenities**: Static features, services, or capabilities of the location. Modeled as a flat reverse-DNS array to avoid
+      semantic ambiguity across diverse industries (e.g., food drive-through vs. pharmacy drive-through).
     * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
 * **Geofencing & Service Area**: Locations implicitly carry a geofence boundary around their coordinates.
     This is used to determine if a location can serve a specific user (e.g., delivery area check).
