@@ -43,7 +43,7 @@ This enables product discovery before checkout, supporting use cases like:
   currency code, enabling multi-currency catalogs.
 * **Sale basis**: How quantity is denominated—as whole items (`each`, the
   default) or in a unit of measure such as weight, length, area, volume, or
-  time. See [Quantities and units](../overview.md#quantities-and-units).
+  time. See [Quantities and units](../../overview/index.md#quantities-and-units).
 
 ### Relationship to Checkout
 
@@ -60,13 +60,13 @@ reused across sessions without re-validation.
 
 `variants[].quantity_unit` advertises a variant's sale basis before a
 transaction. The descriptor follows the shared
-[quantities and units](../overview.md#quantities-and-units) contract. Its
+[quantities and units](../../overview/index.md#quantities-and-units) contract. Its
 absence advertises the default `each` basis; the Business advertises a
 non-`each` basis by including the descriptor.
 
 The catalog is where the Platform learns the sale basis before transacting:
 `unit` and `scale` define how quantities are denominated, and an optional
-[`increment`](../overview.md#ordering-increment) advertises the ordering
+[`increment`](../../overview/index.md#ordering-increment) advertises the ordering
 granularity the Business sells in, letting the Platform build quantity
 steppers and validate input before submission. A Business selling bananas by
 the pound in quarter-pound multiples advertises
@@ -96,7 +96,7 @@ questions and are set independently:
 
 The unit fields in `quantity_unit`, `unit_price.measure`, and
 `unit_price.reference` follow the shared
-[quantities and units](../overview.md#quantities-and-units) contract. The two
+[quantities and units](../../overview/index.md#quantities-and-units) contract. The two
 unit-price fields use the shared measure type, so their integer `value` fields
 are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`,
 both, or neither on a variant.
@@ -133,7 +133,7 @@ carrying a `unit_price` per metre. Its `measure` can be
 
 On transaction lines, presence marks the role: the Business **MUST** echo
 `unit_price` on any line whose pricing basis differs from its sale basis (see
-[Checkout — pricing basis](../checkout.md#quantity-and-sale-basis)). A
+[Checkout — pricing basis](../checkout/index.md#quantity-and-sale-basis)). A
 catalog-only `unit_price`, like this spool's per-metre figure, is a display
 comparator; a line-level one carries the rate the charge is computed from.
 

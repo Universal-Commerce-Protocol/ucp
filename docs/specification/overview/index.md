@@ -69,7 +69,7 @@ language, and UCP therefore defines no rounding tolerances and no epsilon
 comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
 legitimately differs from the ordered quantity — a 1.90 lb pick against a
 2.00 lb order — is a commercial fact reconciled through
-[adjustments](order.md#adjustments) that move money together with quantity,
+[adjustments](../shopping/order/index.md#adjustments) that move money together with quantity,
 not a numeric error absorbed by comparison fuzz.
 
 Reading a quantity requires no arithmetic and no unit knowledge: shift the
@@ -91,7 +91,7 @@ values
 Section 6) and within which
 [JCS](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
 canonicalization, required for
-[AP2 mandate signing](ap2-mandates.md#canonicalization), is defined. The
+[AP2 mandate signing](../ap2-mandates.md#canonicalization), is defined. The
 same cap derives `scale`'s maximum of 15: at scale 16, one whole unit
 (10^16 steps) would be unrepresentable. An out-of-range value is
 schema-invalid and is rejected like any other invalid payload.

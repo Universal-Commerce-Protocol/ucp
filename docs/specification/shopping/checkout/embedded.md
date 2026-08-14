@@ -1391,7 +1391,7 @@ rather than attempting to merge the new data with existing state.
 ### Address Format
 
 The address object uses the UCP
-[PostalAddress](site:specification/checkout/#postal-address) format:
+[PostalAddress](site:specification/reference/#postal-address) format:
 
 ### Postal Address
 

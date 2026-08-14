@@ -113,7 +113,7 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
   that service `version` repeats on each entry, and transport bindings have no
   separate version. The referenced OpenAPI/OpenRPC artifact carries its own
   `info.version` as artifact metadata, not a negotiated version. See
-  [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+  [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
     - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -204,7 +204,7 @@ The member name `ucp` is reserved at every structured UCP object scope — an
 object whose members are schema-defined fields — for the protocol namespace.
 The top-level envelope is its root manifestation. Dictionary containers are
 excluded because their keys are data rather than fields. See
-[The `ucp` Protocol Namespace](../specification/overview.md#the-ucp-protocol-namespace)
+[The `ucp` Protocol Namespace](../specification/overview/index.md#the-ucp-protocol-namespace)
 for the normative rules. For schema authors this means:
 
 - **Never mint a structured domain field named `ucp`.** Schema authors
@@ -369,7 +369,7 @@ does not replace negotiation: capabilities and extensions are still selected by
 exact-version intersection.
 
 Profile selection, including profiles for older supported releases, is defined
-in [Protocol Version](../specification/overview.md#protocol-version).
+in [Protocol Version](../specification/overview/index.md#protocol-version).
 
 ### Third-Party Extensions and Payment Handlers
 

@@ -72,7 +72,7 @@ fulfillment details more relevant for physical goods.
 ### Quantity and sale basis
 
 Checkout applies the shared
-[quantities and units](overview.md#quantities-and-units) contract, including the
+[quantities and units](../../overview/index.md#quantities-and-units) contract, including the
 default (`C62`, `0`) identity. The Business determines each item's authoritative
 sale basis for the transaction. The Business's response is authoritative, and
 each `line_items[].quantity` is an integer step count in that basis.
@@ -80,7 +80,7 @@ each `line_items[].quantity` is an integer step count in that basis.
 **Discovering the sale basis.** The sale basis is item data: the Platform
 **SHOULD** discover an item's `quantity_unit` — including `scale` and any
 `increment` — from the
-[catalog](catalog/index.md#sale-basis-and-quantity-units) before transacting.
+[catalog](../catalog/index.md#sale-basis-and-quantity-units) before transacting.
 A Platform without catalog knowledge can omit the descriptor: the Business
 applies its authoritative basis and confirms it on the response line, and the
 Platform inspects the echoed descriptor and, if that interpretation is not
@@ -98,7 +98,7 @@ omit the descriptor without asserting the default identity.
 The Platform **MAY** include `quantity_unit` on a request line to assert the
 basis it believes it is ordering in. When the Platform includes it, the Business
 **MUST** compare the asserted and authoritative
-[machine identities](overview.md#quantities-and-units). An explicit assertion
+[machine identities](../../overview/index.md#quantities-and-units). An explicit assertion
 with `unit: "C62"` and effective `scale` `0` matches the default identity
 represented by an absent descriptor; a `display_text` difference is not a
 mismatch.
@@ -240,7 +240,7 @@ requested `275` — and the error names the authoritative basis:
 ```
 
 **Ordering increment.** The sale basis **MAY** declare an
-[`increment`](overview.md#ordering-increment) — the ordering granularity, in
+[`increment`](../../overview/index.md#ordering-increment) — the ordering granularity, in
 steps, the Business sells in. The declaration lets the Platform build quantity
 steppers and validate input before submission. Platform-authored quantities
 **SHOULD** be integer multiples of the line's effective increment. The
@@ -284,7 +284,7 @@ absent, it is the price per `each`. Other characteristics of a sale unit may
 affect the quoted `item.price`, but do not change its sale-basis denominator.
 The Business **MUST** compute the line total as
 `price × quantity × 10^-scale` and round once at the line. The presented
-`totals[]` remain authoritative (see [Totals](checkout.md#totals)). The Platform
+`totals[]` remain authoritative (see [Totals](#totals)). The Platform
 **MUST NOT** recompute a line total from the fractional quantity and substitute
 its own rounding.
 

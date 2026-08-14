@@ -453,7 +453,7 @@ Every UCP-defined service, capability, and extension in release `D` declares
 version `D`. Third-party extensions and payment handlers are versioned by their
 authors, independently of UCP releases.
 
-See [Protocol Version](../specification/overview.md#protocol-version) for version
-discovery, [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+See [Protocol Version](../specification/overview/index.md#protocol-version) for version
+discovery, [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 for the normative release contract, and [Versioning](../versioning.md) for the
 release-branch and backport process.

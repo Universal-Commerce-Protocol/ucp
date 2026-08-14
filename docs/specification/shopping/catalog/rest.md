@@ -582,19 +582,19 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 ### UCP Response Catalog {: #ucp-response-catalog-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'catalog/rest') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'shopping/catalog/rest') }}
 
 ### Detail Product {: #detail-product }
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'catalog/rest') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'shopping/catalog/rest') }}
 
 ### Get Product Response {: #catalog-lookup-get-product-response }
 
-{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'catalog/rest') }}
+{{ extension_schema_fields('catalog_lookup.json#/$defs/get_product_response', 'shopping/catalog/rest') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'catalog/rest') }}
+{{ schema_fields('types/error_response', 'shopping/catalog/rest') }}
 
 ## Conformance
 

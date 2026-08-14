@@ -58,7 +58,7 @@ Line items reflect what was purchased at checkout and their current state:
 * Item details (product, price, quantity ordered)
 * Quantity counts and fulfillment status — `original`, `total`, and `fulfilled`
   are integer step counts of the item's inherited `quantity_unit` under the
-  shared [quantities and units](overview.md#quantities-and-units) contract; an
+  shared [quantities and units](../../overview/index.md#quantities-and-units) contract; an
   absent `quantity_unit` means the quantities count whole items (`each`) at
   `scale` 0
 
@@ -66,7 +66,7 @@ All order lifecycle arithmetic over quantities operates on sale-basis step
 counts inherited from the item; other item characteristics do not enter that
 arithmetic. Business-recorded quantities — fulfillment events, adjustments, and
 revised totals — are bounded only by `scale`: a declared ordering
-[`increment`](overview.md#ordering-increment) binds Platform requests at cart
+[`increment`](../../overview/index.md#ordering-increment) binds Platform requests at cart
 and checkout and does not constrain what the Business records (a 0.25-lb
 ordering increment does not prevent recording an actual picked weight of
 1.90 lb).
@@ -375,7 +375,7 @@ Some items are sold by count but priced by measurement — apples at $2.00/lb,
 sold per `each`, with a nominal per-apple weight. Two bases are in play, and
 both travel: the sale basis governs `quantity` (whole apples, lifecycle
 arithmetic untouched), and the pricing basis — the line's echoed
-[`unit_price`](checkout.md#quantity-and-sale-basis) — carries the rate and
+[`unit_price`](../checkout/index.md#quantity-and-sale-basis) — carries the rate and
 nominal measure the charge is computed from. When the price settles against an
 actual measurement, the adjustment **MUST** carry the settled `measure`; its
 unit identity **MUST** match the pricing basis (no conversion), and a pure
@@ -473,7 +473,7 @@ counts throughout.
 A Buyer orders 2.00 lb of the same bananas at $0.79/lb, sold in quarter-pound
 increments (`quantity` `200`, line total `79 × 2.00 = 158`). The picker weighs
 out 1.90 lb — an off-increment fact, recorded as-is, because the
-[`increment`](overview.md#ordering-increment) binds Platform ordering, not
+[`increment`](../../overview/index.md#ordering-increment) binds Platform ordering, not
 Business records. The fulfillment event records the actual `190` steps, and a
 `price_adjustment` of `-10` steps reconciles `total` to the actual pick with
 its price delta (`79 × 0.10 = 7.9`, rounded once to `8`). `fulfilled == total`
