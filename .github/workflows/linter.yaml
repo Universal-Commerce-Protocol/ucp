@@ -21,7 +21,6 @@ on:
       - 'release/**'
     paths:
       - ".github/workflows/linter.yaml"
-      - ".github/workflows/schema-validation.yml"
       - ".github/linters/**"
       - ".pre-commit-config.yaml"
       - "pyproject.toml"

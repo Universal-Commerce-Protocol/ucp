@@ -255,6 +255,12 @@ immediately over the same HTTP connection. Mandates are different:
 JCS ensures that semantically identical JSON produces byte-identical output,
 making signatures reproducible across implementations and time.
 
+Verification and mandate construction operate on the complete checkout JSON,
+not a projection of schema-recognized fields; removing any member covered by
+`merchant_authorization` changes the JCS payload and invalidates the signature.
+This coverage includes `ucp` protocol-namespace members present in the checkout;
+only the `ap2` field is excluded as specified below.
+
 **AP2-Specific Rule:** When computing the business's `merchant_authorization`
 signature, exclude the `ap2` field entirely. This ensures future AP2 fields
 are automatically handled.

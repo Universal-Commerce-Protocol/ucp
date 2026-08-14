@@ -45,7 +45,13 @@
           },
           "quantity": {
             "type": "integer",
-            "description": "Signed quantity affected by this adjustment. Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Signed integer count of steps of the referenced line item's `quantity_unit` (`10^-scale` × `unit`); when `quantity_unit` is absent, it counts whole items (`each`). Negative values represent reductions (e.g. returns); positive values represent additions (e.g. exchanges)."
+          },
+          "measure": {
+            "$ref": "../../common/types/measure.json",
+            "description": "The settled measurement this adjustment reconciles (for example, actual picked weight), present when the line's price settles by measurement. Its unit identity MUST match the line's pricing basis (`item.unit_price` measure/reference unit); no unit conversion. A pure price settlement uses `quantity: 0` together with `measure` and a totals delta."
           }
         }
       },

@@ -31,6 +31,147 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
+## Quantities and units
+
+UCP uses a shared quantity representation wherever a schema contains an integer
+`quantity`, a `quantity_unit`, or the shared measure type.
+
+A `quantity` is an integer count of **steps**. A unit descriptor consists of:
+
+- `unit` — a required, stable machine identifier.
+- `scale` — an optional nonnegative integer, at most 15 (a bound derived from
+    the integer range; see below). Its effective value is the provided value or
+    `0` when omitted.
+- `display_text` — a required printable label for the unit.
+
+One step is `10^-scale` of `unit`. The shared measure type adds a required
+integer `value`, which is also a count of those steps. Because these counts are
+integers, `scale` fixes the representation's granularity. A unit descriptor's
+machine identity is the (`unit`, effective `scale`) pair; `display_text` is not
+part of that identity. This identity applies only to the unit descriptor; it
+does not identify the purchasable item or exhaustively describe one sale unit.
+
+The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is
+the United Nations Centre for Trade Facilitation and Electronic Business
+(UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business
+**MAY** omit `quantity_unit` from an authoritative Business representation to
+encode this default. When a Business or Platform includes a
+descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`;
+`scale` can only be omitted or explicitly set to `0`.
+
+UCP does not put floating-point numbers on the wire. Quantity arithmetic
+feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled`
+accumulates across fulfillment events, and status derives from
+`fulfilled == total` — so quantities get money's representation: an integer
+count plus a declared interpretation, exactly as an `amount` relates to its
+`currency`. Integer counts keep every total and comparison exact in every
+language, and UCP therefore defines no rounding tolerances and no epsilon
+comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
+legitimately differs from the ordered quantity — a 1.90 lb pick against a
+2.00 lb order — is a commercial fact reconciled through
+[adjustments](order.md#adjustments) that move money together with quantity,
+not a numeric error absorbed by comparison fuzz.
+
+Reading a quantity requires no arithmetic and no unit knowledge: shift the
+decimal point `scale` places and append `display_text`. `150` with
+`{ "scale": 2, "display_text": "kg" }` renders as `1.50 kg`, by the same code
+path for a Rec20 code and for a custom unit. Unlike a currency exponent,
+`scale` is per-item data rather than a static table — which is why
+authoritative responses always carry their own descriptor on every non-`each`
+line.
+
+### Integer range and ingestion
+
+Every integer-valued field in UCP — amounts, quantity step counts, measure
+values — is a JSON integer; each field's schema declares its sign and
+bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the
+range within which every JSON implementation agrees exactly on integer
+values
+([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html){ target="_blank" },
+Section 6) and within which
+[JCS](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
+canonicalization, required for
+[AP2 mandate signing](ap2-mandates.md#canonicalization), is defined. The
+same cap derives `scale`'s maximum of 15: at scale 16, one whole unit
+(10^16 steps) would be unrepresentable. An out-of-range value is
+schema-invalid and is rejected like any other invalid payload.
+
+Arithmetic over these values **MUST** be exact. Within the wire range,
+IEEE 754 binary64 — a JavaScript `Number` from `JSON.parse` — holds every
+integer exactly; products such as `amount × quantity` can exceed 64 bits, so
+use wider or arbitrary-precision integers, or overflow checks. An
+implementation that cannot produce an exact, in-range result **MUST**
+surface an error rather than emit, display, or act on an approximate or
+wrapped value.
+
+When UCP data crosses into external systems, implementations **SHOULD**
+convert once at ingestion — apply the declared scale (or currency exponent)
+into an exact decimal type (SQL `NUMERIC`, Java `BigDecimal`, Python
+`Decimal`), or carry the (value, scale) pair unchanged — and **SHOULD NOT**
+perform scale application or value-bearing arithmetic in binary floating
+point.
+
+### Unit vocabulary
+
+The Business **SHOULD** use the exact Rec20 Common Code unless no code
+accurately identifies the unit. When no Rec20 code accurately identifies the
+unit, the Business **MAY** use a custom unit identifier. If it does, the Business
+**MUST** use that identifier consistently for the same unit. The Platform
+**MUST** treat an unrecognized `unit` value as opaque. The following table is
+non-exhaustive:
+
+| Code  | Unit         |
+| :---- | :----------- |
+| `C62` | one / `each` |
+| `KGM` | kilogram     |
+| `GRM` | gram         |
+| `LBR` | pound        |
+| `MLT` | millilitre   |
+| `LTR` | litre        |
+| `MTR` | metre        |
+| `INH` | inch         |
+| `YRD` | yard         |
+| `FTK` | square foot  |
+| `MTK` | square metre |
+| `HUR` | hour         |
+| `MIN` | minute       |
+
+Rec20 includes X-prefixed package units derived from UN/CEFACT Recommendation
+21 (Rec21). UCP deliberately excludes those values from `quantity_unit`. The
+Business **MUST** make package form part of the purchasable variant's identity
+and count packages as `each`. The Business **MUST NOT** use an X-prefixed
+Rec21-derived package code as `quantity_unit`.
+
+### Display text
+
+When sending a unit descriptor, a Business or Platform **MUST** include
+`display_text`. The Platform **MUST** use that value when it does not recognize
+`unit`. For a recognized Rec20 code, the Platform **MAY** substitute its own
+localized label. The Business and Platform **MUST NOT** use `display_text` when
+matching machine identities or as an input to quantity conversion.
+
+### Ordering increment
+
+A sale-basis descriptor (`quantity_unit`) **MAY** declare an `increment`: an
+optional positive integer, denominated in steps, whose effective value is the
+provided value or `1` when omitted. Only the sale basis carries an increment;
+the bare unit descriptor and the shared measure type do not. It declares the
+ordering granularity the Business sells in — for example, an item sold by the
+pound with `scale` `2` and `increment` `25` is sold in 0.25 lb multiples.
+
+`scale` and `increment` play different roles: `scale` bounds what any quantity
+can express; `increment` shapes what the Platform asks for. The increment is
+advisory merchandising policy, not a representational bound — Platform-authored
+quantities **SHOULD** be integer multiples of the line's effective increment,
+while Business-authored quantities (checkout revisions, fulfillment events,
+adjustments) are bounded only by `scale`. `increment` is not part of the
+unit-descriptor machine identity and **MUST NOT** participate in mismatch
+comparison.
+
+Request assertions, mismatch handling, response echo, off-increment request
+handling, pricing, and lifecycle behavior are defined by the capability that
+uses the shared representation.
+
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to
@@ -223,21 +364,14 @@ requires.
 
 ## Discovery, Governance, and Negotiation
 
-UCP separates protocol version compatibility from capability negotiation.
-The business's profile at `/.well-known/ucp` describes capabilities for
-the protocol version it declares. Businesses that support older protocol
-versions **SHOULD** publish version-specific profiles and advertise them
-via the `supported_versions` field — a map from protocol version to
-profile URI, enabling platforms to discover the exact capabilities for a
-specific protocol version. Version lifecycle, including when to deprecate
-or remove older versions from `supported_versions`, is a business policy
-decision. The protocol does not prescribe a deprecation schedule.
-Capability negotiation follows a server-selects architecture where the
-business (server) determines the active capabilities from the
-intersection of both parties' declared capabilities. Both business and
-platform profiles can be cached by both parties, allowing efficient
-capability negotiation within the normal request/response flow between
-platform and business.
+UCP separates [protocol version selection](#protocol-version) from
+[capability negotiation](#capability-versions). A Business advertises its current
+protocol version and links to profiles for older supported versions. After the
+Platform selects one exact version, the Business determines the active
+capabilities from the versions both parties advertise. Version lifecycle,
+including when to remove an older version, is a Business policy decision; UCP
+does not prescribe a deprecation schedule. Business and Platform profiles can be
+cached by both parties.
 
 ### Namespace Governance
 
@@ -414,6 +548,15 @@ standard formats:
 - **A2A**: Agent Card Specification
 - **EP(embedded)**: OpenRPC (JSON format)
 
+A service is identified by its reverse-domain registry key (e.g.,
+`dev.ucp.shopping`). In a profile, services are keyed by that name, and each
+entry in `services[name][]` pairs the service with one transport binding and
+declares the service `version`: in release `D` that version is `D`. This is the
+service version, not a transport version — the binding has no separate version.
+The OpenAPI or OpenRPC artifact a binding references carries its own
+`info.version` as release metadata, not a separate version to negotiate. See
+[Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots).
+
 #### Service Definition
 
 {{ extension_schema_fields('service.json#/$defs/platform_schema', 'overview') }}
@@ -568,9 +711,14 @@ This convention ensures:
 
 ##### Version Requirements
 
-Extension schemas **SHOULD** declare a `requires` object (alongside
-`name`, `title`, `description`) to indicate the protocol and
-capability versions required for correct operation:
+Extension authors **SHOULD** declare a `requires` object in the extension
+schema (alongside its `name`, `title`, and `description`) stating the versions
+the extension depends on. A third-party extension schema declares its own
+author-controlled `version`, which advances independently of `ucp.version`;
+a UCP-authored `dev.ucp.*` extension declares version `D` in release `D`.
+`requires.protocol` constrains the selected `ucp.version`, and
+`requires.capabilities` constrains the selected versions of the named
+capabilities:
 
 <!-- ucp:example skip reason="schema definition" -->
 ```json
@@ -578,6 +726,7 @@ capability versions required for correct operation:
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://acme.com/ucp/schemas/loyalty.json",
   "name": "com.acme.shopping.loyalty",
+  "version": "2026-06-15",
   "title": "Acme Loyalty Points",
   "requires": {
     "protocol": { "min": "2026-01-23" },
@@ -610,13 +759,16 @@ no upper bound:
 ```
 
 Keys in `requires.capabilities` **MUST** be a subset of the
-extension's `$defs` keys. If `requires` is present, platforms and
-businesses **MUST** verify the negotiated protocol version and
-capability versions satisfy the declared constraints during schema
-resolution. Incompatible extensions are excluded from the active
-capability set (see [Resolution Flow](#resolution-flow)). If
-`requires` is absent, the extension is assumed to be compatible
-with the versions declared by the profile.
+extension's `$defs` keys. These ranges verify dependencies after exact
+versions are selected; they do not select versions. The `ucp.version` is
+fixed first by [profile selection](#protocol-version) and capability versions
+by the [intersection algorithm](#intersection-algorithm); then, if `requires`
+is present, Platforms and Businesses **MUST** verify that the selected
+`ucp.version` and capability versions satisfy the declared constraints during
+schema resolution. Incompatible extensions are excluded from the active
+capability set (see [Resolution Flow](#resolution-flow)). If `requires` is
+absent, the extension is assumed to be compatible with the versions declared
+by the profile.
 
 #### Schema Resolution Convention
 
@@ -957,6 +1109,184 @@ example:
   ]
 }
 ```
+
+### The `ucp` Protocol Namespace
+
+The member name `ucp` is reserved as the **protocol namespace** in every
+structured UCP object scope — an object whose members are schema-defined
+fields. The top-level `ucp` member that profiles and responses carry —
+described in [Profile Structure](#profile-structure) above — is not a special
+wrapper; it is the root manifestation of this reservation: a reserved member
+of the root object. The reservation does not apply to a dictionary container,
+whose keys are data rather than fields. A dictionary key named `ucp` is
+ordinary data. A structured object used as a dictionary value remains an
+eligible scope. Schema authors **MUST NOT** define a domain field named `ucp`
+in structured object schemas or extensions.
+
+At each eligible structured scope, `ucp` carries the protocol's statements
+about that scope: protocol metadata at the root (version, services,
+capabilities, payment handlers) and structural annotations such as
+[`map_order`](#map_order).
+
+**Openness.** The `ucp` container is open. Consumers **MUST** ignore members
+inside `ucp` that they do not recognize (tolerant reader). Openness exists so
+documents produced under a newer UCP version remain readable by older
+consumers — it is *not* extension space. Only UCP core defines members inside
+`ucp`, and extension authors **MUST NOT** place extension data there. An
+unrecognized member inside `ucp` means "defined by a newer UCP version,"
+never "extension data."
+
+**No direct recursion.** Producers **MUST NOT** emit a `ucp` member as a direct
+child of another `ucp` member (`ucp.ucp`). If one is present, a receiving
+Business or Platform **MUST NOT** interpret it as another protocol namespace and
+**MUST** ignore that child. Structured objects beneath the namespace, such as a
+capability's `config`, remain eligible for their own `ucp` member.
+
+**Ambient vocabulary.** The protocol namespace is ambient within structured
+UCP objects: a Business or Platform **MAY** include a `ucp` member at any
+eligible structured scope, and its contents are defined exclusively by UCP
+core's vocabulary — the member is part of the UCP document grammar, like the
+name reservation itself. The reservation stops at a dictionary container. A
+Business or Platform **MUST NOT** interpret a dictionary key named `ucp` as
+the protocol namespace; the key and its value are ordinary dictionary data.
+For example, `attribution` is a dictionary of string values, so an attribution
+key named `ucp` is ordinary attribution data, not a protocol-namespace member.
+Guidance for schema authors on working within this reservation lives in the
+Schema Authoring Guide's
+[The Reserved `ucp` Member](/documentation/schema-authoring/#the-reserved-ucp-member)
+section. A Business or Platform encountering a `ucp` member at an eligible
+structured scope processes the members it recognizes, each per its own
+definition, and **MUST** ignore unrecognized members (see *Openness* above).
+A member is admitted to the vocabulary only if it is safe to ignore: a
+Business or Platform that does not process it loses only that member's
+benefit, never correctness. A Business or Platform that ignores `map_order`,
+for example, simply traverses the map unordered — the status quo before
+ordering existed.
+
+**Scope determines obligations.** At the root of profiles and responses, the
+`ucp` envelope additionally carries the required protocol metadata exactly as
+specified elsewhere in this document — this section changes none of those
+obligations. A Business or Platform **MAY** omit the member at every other
+eligible structured scope. Dictionary containers are not eligible scopes and
+carry no protocol-namespace obligation. Conformance to the vocabulary is
+defined by this specification's processing rules, not by ordinary instance
+validation against open UCP source schemas; that validation treats ambient
+`ucp` members as ignored unknown objects.
+
+**Vocabulary applicability.** Each registered protocol-namespace member defines
+the document contexts and message directions where it applies.
+
+**Schema processing.** UCP source schemas are open by default, so ordinary
+validation against them may accept ambient `ucp` without applying the protocol
+vocabulary. For a selected message direction, a UCP-aware resolver **MUST**
+produce a resolved schema that recognizes and validates ambient `ucp` at every
+eligible structured scope against the central vocabulary in
+`ucp.json#/$defs/members`, subject to that vocabulary's applicability in the
+selected direction. The `ucp` namespace remains open to unrecognized members
+for forward compatibility, even if the resolved schema rejects other unknown
+domain fields. The result is ordinary JSON Schema that standard validators and
+code generators can consume.
+
+#### `map_order`
+
+JSON object members are unordered: member order is not guaranteed to survive
+parsing, and
+[RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
+(JSON Canonicalization Scheme), which UCP signing relies on, sorts object
+member names while preserving array element order. `map_order` uses an array
+so its declared order survives canonicalization and signing.
+
+`map_order` declares a preferred key-traversal order for map-valued fields in
+the scope annotated by its containing `ucp` member. At a nested scope, each
+key of `map_order` names a map field on the object that contains `ucp`. At the
+document root, each key instead names a sibling map field inside the root `ucp`
+envelope. Root domain fields outside `ucp`, such as a checkout response's
+`actions`, are not targets. Each value is an array of the target map's keys in
+preferred traversal order.
+
+`map_order` does not apply to UCP operation requests.
+
+For a target map field `<field>` and its companion array `map_order.<field>`:
+
+1. Producers **MUST NOT** rely on JSON object member order for UCP map-valued
+    registries; `map_order` is the order carrier.
+2. `map_order.<field>` contains keys from the target map field `<field>` in
+    preferred traversal order.
+3. The order array **MAY** be partial: listed keys are traversed first, in
+    array order.
+4. Unlisted map keys remain valid and available; consumers traverse them
+    after the listed keys, using the field-defined fallback order or, if the
+    field defines none, the
+    [property-name ordering defined by RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html#section-3.2.3){ target="_blank" }.
+5. The order array is not an allowlist: consumers **MUST NOT** interpret
+    omission of a key as removal, ineligibility, or reduced support.
+6. Producers **MUST** name a present, map-valued target and **MUST** list only
+    keys present in that target map. A receiving Business
+    or Platform **MUST NOT** reject the containing document solely because an
+    entry names an absent, unrecognized, or non-map target, or a key absent from
+    its target map. If it processes `map_order`, it **MUST** ignore the unusable
+    entry.
+7. Producers **MUST NOT** list the same map key more than once in an order
+    array. Consumers **MUST NOT** reject the containing document solely because
+    an order array repeats a map key. Consumers that process `map_order`
+    **MUST** honor the first occurrence and ignore later repetitions.
+8. If `map_order`, or its entry for a field, is absent, no order is declared;
+    consumers **MUST NOT** fall back to object member order.
+9. A field's own specification defines what ordered traversal *means* for it
+    (presentation, negotiation priority, and so on) — `map_order` carries
+    order and nothing else.
+
+Rules 3–5 are a deliberate divergence from conventions in which unlisted keys
+are an error or are dropped: partial lists are always valid, and unlisted
+keys are always retained.
+
+A business profile ordering its payment handlers:
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": { ... },
+    "payment_handlers": {
+      "com.google.pay": [
+        { "id": "gpay", "version": "{{ ucp_version }}" }
+      ],
+      "dev.shopify.shop_pay": [
+        { "id": "shop_pay", "version": "{{ ucp_version }}" }
+      ]
+    },
+    "map_order": {
+      "payment_handlers": ["dev.shopify.shop_pay", "com.google.pay"]
+    }
+  }
+}
+```
+
+`map_order` is scope-generic — the same mechanism orders sibling maps at any
+eligible structured scope, as when a Business orders the identity-provider
+registry inside a capability's `config`:
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "providers": {
+    "app.example.login": [
+      {"type": "oauth2", "auth_url": "https://login.example.app"}
+    ],
+    "com.google": [
+      {"type": "oauth2", "auth_url": "https://accounts.google.com"}
+    ]
+  },
+  "ucp": {
+    "map_order": {"providers": ["app.example.login", "com.google"]}
+  }
+}
+```
+
+What an order *means* remains per-field (rule 9); the one traversal semantics
+defined today is the business's presentation preference for
+`payment_handlers` — see [Payment Handlers](#payment-handlers).
 
 ### Platform Advertisement on Request
 
@@ -1458,14 +1788,17 @@ and the Web Bot Auth interop signature shape, see
 
 #### Hosting
 
-Both profiles must be reliably hosted. An unreliable or misconfigured
-profile endpoint may prevent the other party from processing requests.
+Profiles, and the schema and transport-description artifacts they reference,
+must be reliably hosted. An unreliable or misconfigured endpoint may prevent
+the other party from processing requests.
 
-1. Profiles **MUST** be served over HTTPS.
+1. Published artifacts **MUST** be served over HTTPS.
 2. Profile endpoints **MUST NOT** use redirects (3xx).
-3. Profile responses **MUST** include a `Cache-Control` header with
-   `public` and `max-age` of at least 60 seconds. Profiles **MUST NOT**
-   be served with `private`, `no-store`, or `no-cache` directives.
+3. Published artifacts **MUST** include a `Cache-Control` header with
+   `public` and `max-age` of at least 60 seconds, and **MUST NOT** be
+   served with `private`, `no-store`, or `no-cache` directives.
+4. Published artifacts **SHOULD** include a validator (`ETag` or
+   `Last-Modified`) so consumers can revalidate cached copies efficiently.
 
 Profiles represent a party's stable identity and capabilities. Profile
 URLs are expected to remain consistent across requests and not contain
@@ -1777,6 +2110,19 @@ governing body.
 **Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on
 the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
 items, or filtering regional methods based on shipping address).
+
+**Presentation Order:** Businesses **MAY** declare a preferred presentation
+order for their advertised handlers via `map_order.payment_handlers` in their
+profile and response envelopes (see
+[The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)). The preference
+is suggestive: it communicates the business's preferred presentation —
+typically a conversion or risk judgment — and platforms **SHOULD** take it
+into account but **MAY** apply their own ordering. The same suggestive
+preference applies within a handler: the order of the business's advertised
+`available_instruments` array communicates preferred instrument presentation,
+earliest first. It is distinct from, and does not override, the buyer-side
+preference a platform submits in `context.payment[]` (buyer-preferred
+handlers, on the request side); the platform arbitrates between the two.
 
 **Available Instrument Resolution:** Within each active handler, both the
 platform and the business independently advertise `available_instruments` — the
@@ -2635,12 +2981,13 @@ implementation guide, and examples.
 UCP uses date-based versioning in the format `YYYY-MM-DD`. This provides
 clear chronological ordering and unambiguous version comparison.
 
-### Version Discovery and Negotiation
+### Versioned Profiles
 
-UCP prioritizes strong backwards compatibility. Businesses implementing a
-version **SHOULD** handle requests from platforms using that version or older.
-
-Both businesses and platforms declare a single version in their profiles:
+UCP prioritizes strong backwards compatibility. Each profile document declares
+one core release version in `ucp.version`; its services, capabilities,
+extensions, and payment handlers also carry explicit versions. A Business
+advertises its current profile and links to profiles for older supported releases
+through `supported_versions`; see [Protocol Version](#protocol-version).
 
 #### Example
 
@@ -2672,16 +3019,15 @@ Both businesses and platforms declare a single version in their profiles:
     }
     ```
 
-### Version Negotiation
+### Version Selection
 
 ![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
 
-Version compatibility operates at two levels: the **protocol version**
-and **capability versions**. The protocol version (`ucp.version`)
-governs core protocol mechanisms — discovery, negotiation flow,
-transport bindings, and signature requirements. Capability versions
-govern the semantics of each feature independently, as defined in
-[Independent Component Versioning](#independent-component-versioning).
+Protocol version selection chooses one complete Business profile first.
+Capability negotiation then selects active capabilities and extensions by exact
+version intersection within that profile. The sections below define each step;
+see [Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots)
+for release alignment and version ownership.
 
 #### Protocol Version
 
@@ -2692,9 +3038,9 @@ and payment handlers available at that version.
 Businesses that support older protocol versions **SHOULD** declare a
 `supported_versions` object mapping each older version to a profile
 URI. Each URI points to a complete, self-contained profile for that
-version — including its own capabilities, services, payment handlers,
-and signing keys. When `supported_versions` is omitted, only
-`version` is supported.
+version — whose `ucp.version` equals its map key and which includes
+its own capabilities, services, payment handlers, and signing keys.
+When `supported_versions` is omitted, only `version` is supported.
 
 <!-- ucp:example schema=profile def=business_schema -->
 ```json
@@ -2714,22 +3060,34 @@ and signing keys. When `supported_versions` is omitted, only
 
 Platforms discover a business's capabilities through the following flow:
 
-1. Platform fetches `/.well-known/ucp` — this is the current version
+1. The Platform fetches `/.well-known/ucp` — this is the current version
     profile.
-2. If the platform's protocol version matches `version`: use this
-    profile directly. Proceed to capability negotiation.
-3. If the platform's protocol version is a key in
-    `supported_versions`: fetch the profile at the mapped URI. This
-    profile describes the capabilities available at that protocol
-    version. Proceed to capability negotiation.
-4. Otherwise: the business does not support the platform's protocol
-    version. Platforms **SHOULD NOT** send requests with an incompatible
-    version; businesses **MUST** respond with a `version_unsupported`
-    error.
+2. The Platform selects a mutually supported protocol version from the
+    Business's `version` and `supported_versions` keys; Platforms **SHOULD**
+    prefer the most recent. If the selected version matches `version`, the
+    Platform uses this profile directly and proceeds to capability
+    negotiation.
+3. If the selected version is a key in
+    `supported_versions`: fetch the profile at the mapped URI. The
+    Platform **MUST** verify that the fetched profile's `ucp.version`
+    equals the `supported_versions` key it selected; on mismatch the
+    Platform **MUST NOT** use that profile. Otherwise this profile
+    describes the capabilities available at that protocol version —
+    proceed to capability negotiation.
+4. If no mutually supported version exists, the Business does not support
+    the Platform's protocol version. Platforms **SHOULD NOT** send requests
+    with an incompatible version; Businesses **MUST** respond with a
+    `version_unsupported` error.
 
 Version-specific profiles are leaf documents — they describe exactly
 one protocol version and **MUST NOT** contain a `supported_versions`
 field.
+
+A selected profile guarantees compatibility among its declared capabilities at
+its declared version; across versions, resource representations may differ.
+Platforms **MAY** run separate negotiations with the same Business at different
+supported versions, and **SHOULD NOT** combine or intersect capabilities across
+profiles within the same negotiation.
 
 ##### Request-Time Validation
 
@@ -2800,12 +3158,22 @@ notice.
 
 #### Capability Versions
 
-Capability versions are negotiated independently of the protocol
-version. Each capability in the profile is an array. Multiple entries
-for the same capability, each with a different `version`, advertise
-support for multiple versions of that capability. The capability
-intersection algorithm considers only capability versions supported
-by both parties.
+Capability compatibility is established only by exact version equality, not by
+inferring compatibility from date order. Each capability in the profile is an
+array; multiple entries with different `version` values advertise support for
+multiple versions where the applicable publication policy permits it. When the
+exact shared set contains more than one version, the intersection algorithm
+orders those shared dates to select the latest one. Supported third-party
+extension versions advance independently of `ucp.version`. UCP-authored
+`dev.ucp.*` entries declare version `D` in release `D`: a profile for
+`ucp.version = D` advertises version `D` for those entries. Older `dev.ucp.*`
+versions are advertised only through `supported_versions` leaf profiles, never
+as additional entries in a newer profile: the registry mechanism supports
+multi-version arrays, but the core publication contract does not exercise them
+for `dev.ucp.*` entries. Multi-version arrays therefore arise for third-party
+extensions whose authors support multiple versions concurrently. The capability
+intersection algorithm considers only capability versions supported by both
+parties.
 
 Businesses **MUST** include only capabilities compatible with the
 negotiated protocol version in their response. A capability that
@@ -2814,9 +3182,18 @@ NOT** be included when processing at an older protocol version.
 
 ### Backwards Compatibility
 
+UCP classifies changes as backwards-compatible or breaking and applies this
+classification to its own components to govern how a UCP release advances.
+Publication and backport policy for both classes is defined in
+[Component Versioning and Release Snapshots](#component-versioning-and-release-snapshots).
+The lists below describe which changes preserve and which break conforming
+integrations; third-party extension and payment-handler authors control their own
+version policy and can apply the same distinction on their own cadence.
+
 #### Backwards-Compatible Changes
 
-The following changes **MAY** be introduced without a new version:
+The following changes are **backwards-compatible**: they do not break conforming
+integrations.
 
 - Adding new non-required fields to responses
 - Adding new non-required parameters to requests
@@ -2828,7 +3205,8 @@ The following changes **MAY** be introduced without a new version:
 
 #### Breaking Changes
 
-The following changes **MUST NOT** be introduced without a new version:
+The following changes are **breaking**: they break conforming integrations and
+require a new component version.
 
 - Removing or renaming existing fields
 - Changing field types or semantics
@@ -2838,26 +3216,82 @@ The following changes **MUST NOT** be introduced without a new version:
 - Modifying existing protocol flow or state machine
 - Changing the meaning of existing error codes
 
-### Independent Component Versioning
+### Component Versioning and Release Snapshots
 
-- UCP protocol versions independently from capabilities.
-- Each capability versions independently from other capabilities.
-- Capabilities **MUST** follow the same backwards compatibility rules as the
-    protocol.
-- Businesses **MUST** validate capability version compatibility using the same
-    logic as what's described above.
-- Transports **MAY** define their own version handling mechanisms.
+A UCP release `D` is a snapshot of the core protocol — its services and transport
+bindings, capabilities, extensions, and shared schemas — published and certified
+together as internally compatible. Selecting `ucp.version` `D` selects that
+snapshot. For a release `D`:
 
-#### UCP Capabilities (`dev.ucp.*`)
+1. `ucp.version` is `D`.
+2. Every UCP-defined service declares `version` `D`. Each service entry pairs the
+    service with one transport binding, so every entry under a service repeats
+    that service `version`; transport bindings have no separate version. The
+    referenced OpenAPI/OpenRPC artifacts are published under `D` as release
+    metadata.
+3. Every UCP-defined capability and extension declares `version` `D`, even when
+    its own schema did not change directly.
+4. Shared schemas are published as part of the same snapshot.
+5. UCP certifies the snapshot — components, bindings, and supported
+    compositions — together before publishing it.
 
-UCP-authored capabilities version with protocol releases by default. Individual
-capabilities **MAY** version independently when breaking changes are required
-outside the protocol release cycle.
+UCP **MAY** backport an approved backward-compatible change — a feature, or a
+security, correctness, or interoperability fix — to a supported release and its
+generated `D` artifacts. Breaking changes enter the next release and are not
+backported by default; in exceptional cases, the Governance Council **MAY**
+approve backporting a breaking change to a supported release, limited to
+defects that compromise the security, correctness, or interoperability of the
+release as published, and following the breaking-change notice process. UCP
+**MUST** re-certify the snapshot before publishing any updated artifacts.
 
-#### Vendor Capabilities (`com.{vendor}.*`)
+A dated release works like a long-term-support channel: the date names a
+compatibility line, and backported changes amend the published `D` snapshot in
+place — `D` stays the same while its contents change, so parties that fetched
+at different times can hold different copies of the same `D`. This skew is
+safe by construction: backports default to the backwards-compatible class, so
+an earlier copy is missing later additions, never in conflict with them.
+Parties that fetch artifacts at runtime **SHOULD** follow standard HTTP
+caching semantics, revalidating a cached copy once its `max-age` expires (see
+[Hosting](#hosting)); refresh frequency is therefore controlled by the
+publisher. Parties that consume artifacts at build time pick up amendments on
+their own release cadence. An exceptional breaking backport
+is announced through the breaking-change notice process and enforced at
+request time by the amended contract; it invalidates earlier copies only
+because the release was defective as published.
 
-Capabilities outside the `dev.ucp.*` namespace version fully independently.
-Vendors control their own release schedules and versioning strategy.
+A Business or Platform that selects `ucp.version` `D` **MUST** declare version
+`D` on every `dev.ucp.*` service, capability, and extension entry in its
+profile. A Platform that encounters a `dev.ucp.*` entry whose `version`
+differs from the profile's `ucp.version` **MUST** reject that entry — treated
+as not present and never activated — and **MAY** continue with the remaining
+entries. An older release is selected only through a separate
+`supported_versions` leaf profile whose own `ucp.version` is that older release
+date (see [Protocol Version](#protocol-version)). Payment-handler versions are
+controlled by their authors: UCP defines the shared declaration structure but
+currently no concrete handler, so no handler version is constrained to `D`.
+Declaring `version` `D` does not change negotiation: `dev.ucp.*`
+capabilities and extensions are still selected by exact-version intersection (see
+[Capability Versions](#capability-versions)).
+
+#### Third-party extensions (`com.{vendor}.*`, `org.{org}.*`)
+
+Third-party capabilities version independently of `ucp.version`: their authors
+control both the version and the release cadence. The common form is an
+**extension** over one or more UCP-defined root capabilities. A third-party
+extension:
+
+- declares `extends` over one or more UCP-defined root capabilities, composed
+    via `allOf` (see [Extension Schema Pattern](#extension-schema-pattern));
+- uses the UCP-defined services and transport bindings selected by
+    `ucp.version`; and
+- advertises exact extension versions in Business and Platform profiles and is
+    negotiated by exact-version intersection like every capability.
+
+A third-party extension's version is never tied to `ucp.version`. The author
+declares the UCP releases and capability versions the extension needs through
+`requires` (see [Version Requirements](#version-requirements)); those ranges
+verify compatibility with the versions a profile selects, they do not select
+versions.
 
 ## Glossary
 

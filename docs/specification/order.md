@@ -56,7 +56,20 @@ Orders have three main components:
 Line items reflect what was purchased at checkout and their current state:
 
 * Item details (product, price, quantity ordered)
-* Quantity counts and fulfillment status
+* Quantity counts and fulfillment status — `original`, `total`, and `fulfilled`
+  are integer step counts of the item's inherited `quantity_unit` under the
+  shared [quantities and units](overview.md#quantities-and-units) contract; an
+  absent `quantity_unit` means the quantities count whole items (`each`) at
+  `scale` 0
+
+All order lifecycle arithmetic over quantities operates on sale-basis step
+counts inherited from the item; other item characteristics do not enter that
+arithmetic. Business-recorded quantities — fulfillment events, adjustments, and
+revised totals — are bounded only by `scale`: a declared ordering
+[`increment`](overview.md#ordering-increment) binds Platform requests at cart
+and checkout and does not constrain what the Business records (a 0.25-lb
+ordering increment does not prevent recording an actual picked weight of
+1.90 lb).
 
 ### Fulfillment
 
@@ -109,8 +122,8 @@ fulfillment:
   `price_adjustment`, `dispute`, `cancellation`)
 * Can be any post-order change
 * Optionally link to line items (or order-level for things like shipping refunds)
-* Quantities and amounts are signed—negative for reductions (returns, refunds),
-  positive for additions (exchanges)
+* Quantities are signed step counts and amounts are signed—negative for
+  reductions (returns, refunds), positive for additions (exchanges)
 * Include totals breakdown when relevant
 * Can happen at any time regardless of fulfillment status
 
@@ -137,7 +150,15 @@ Line items reflect what was purchased at checkout and their current state.
 }
 ```
 
+When the item is measure-denominated these are step counts — for an
+`item.quantity_unit` of
+`{ "unit": "LBR", "scale": 2, "display_text": "lb" }`, `fulfilled: 50` means
+0.50 lb fulfilled.
+
 **Status Derivation:**
+
+`total` and `fulfilled` are step counts in the same inherited
+`item.quantity_unit`; the derivation operates on those counts:
 
 ```text
 if (total == 0) → "removed"
@@ -274,6 +295,243 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     { "type": "fulfillment", "amount": 1200 },
     { "type": "tax", "amount": 1142 },
     { "type": "total", "amount": 15342 }
+  ]
+}
+```
+
+## Example: goods sold by measure
+
+An order for bananas sold by the pound (`item.quantity_unit`
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`).
+Quantities are step counts: the Buyer ordered 1.50 lb (`total: 150`), of which
+0.50 lb has shipped (`fulfilled: 50`), so the line is `partial`. A later
+return of 0.25 lb is recorded as an adjustment of `-25` steps. Amounts are
+priced at $0.79/lb and rounded once — the line total is `79 × 1.50 = 118.5`,
+rounded to `119`, and the return credits `79 × 0.25 = 19.75`, rounded to
+`20`:
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
+  },
+  "id": "order_bananas_1",
+  "checkout_id": "chk_bananas_1",
+  "permalink_url": "https://business.example.com/orders/bananas1",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_bananas",
+      "item": {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "price": 79,
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }
+      },
+      "quantity": { "original": 150, "total": 150, "fulfilled": 50 },
+      "totals": [
+        { "type": "subtotal", "amount": 119 },
+        { "type": "total", "amount": 119 }
+      ],
+      "status": "partial"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-08T10:30:00Z",
+        "type": "shipped",
+        "line_items": [{ "id": "li_bananas", "quantity": 50 }],
+        "tracking_number": "123456789",
+        "tracking_url": "https://carrier.example/track/123456789",
+        "description": "0.50 lb shipped"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "return",
+      "occurred_at": "2026-01-10T14:30:00Z",
+      "status": "completed",
+      "line_items": [{ "id": "li_bananas", "quantity": -25 }],
+      "totals": [{ "type": "total", "amount": -20 }],
+      "description": "Returned 0.25 lb"
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 119 },
+    { "type": "total", "amount": 119 }
+  ]
+}
+```
+
+## Example: count-sold, measure-priced settlement
+
+Some items are sold by count but priced by measurement — apples at $2.00/lb,
+sold per `each`, with a nominal per-apple weight. Two bases are in play, and
+both travel: the sale basis governs `quantity` (whole apples, lifecycle
+arithmetic untouched), and the pricing basis — the line's echoed
+[`unit_price`](checkout.md#quantity-and-sale-basis) — carries the rate and
+nominal measure the charge is computed from. When the price settles against an
+actual measurement, the adjustment **MUST** carry the settled `measure`; its
+unit identity **MUST** match the pricing basis (no conversion), and a pure
+price settlement uses `quantity: 0` so the count is untouched. (A settled
+`measure` is Business-recorded fact; Buyer-configured measurements that define
+item identity are a separate negotiated extension.)
+
+A Buyer orders 3 apples at $0.80 each (nominal 0.40 lb × $2.00/lb; line total
+`240`). The picker weighs the three apples at 1.14 lb against the nominal
+1.20 lb, and the settlement is fully verifiable from the order alone:
+nominal steps `3 × 40 = 120`, settled `114`, delta `6` steps
+`× 200 × 10^-2 = 12` — the `-12` adjustment checks out in integer arithmetic:
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
+  },
+  "id": "order_apples_1",
+  "checkout_id": "chk_apples_1",
+  "permalink_url": "https://business.example.com/orders/apples1",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_apples",
+      "item": {
+        "id": "var_apple",
+        "title": "Honeycrisp Apple",
+        "price": 80,
+        "unit_price": {
+          "amount": 200,
+          "currency": "USD",
+          "measure": { "value": 40, "scale": 2, "unit": "LBR", "display_text": "lb" },
+          "reference": { "value": 1, "unit": "LBR", "display_text": "lb" }
+        }
+      },
+      "quantity": { "original": 3, "total": 3, "fulfilled": 3 },
+      "totals": [
+        { "type": "subtotal", "amount": 240 },
+        { "type": "total", "amount": 240 }
+      ],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-14T09:15:00Z",
+        "type": "shipped",
+        "line_items": [{ "id": "li_apples", "quantity": 3 }],
+        "description": "Picked 3 apples, 1.14 lb total"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "price_adjustment",
+      "occurred_at": "2026-01-14T09:15:00Z",
+      "status": "completed",
+      "line_items": [
+        {
+          "id": "li_apples",
+          "quantity": 0,
+          "measure": { "value": 114, "scale": 2, "unit": "LBR", "display_text": "lb" }
+        }
+      ],
+      "totals": [{ "type": "total", "amount": -12 }],
+      "description": "Settled to actual picked weight of 1.14 lb"
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 240 },
+    { "type": "total", "amount": 240 }
+  ]
+}
+```
+
+The count lifecycle never moves — `fulfilled == total` holds on whole apples —
+while the money reconciles to the measured reality, and every number needed to
+verify the credit is on the order itself.
+
+## Example: catch-weight reconciliation
+
+For weighed goods, the picked weight routinely differs from the ordered
+weight. The difference is a commercial fact, not a numeric error: the Business
+records the actual pick and reconciles the difference with an
+[adjustment](#adjustments) that moves money together with quantity. No
+tolerance comparison is involved; the status derivation operates on exact step
+counts throughout.
+
+A Buyer orders 2.00 lb of the same bananas at $0.79/lb, sold in quarter-pound
+increments (`quantity` `200`, line total `79 × 2.00 = 158`). The picker weighs
+out 1.90 lb — an off-increment fact, recorded as-is, because the
+[`increment`](overview.md#ordering-increment) binds Platform ordering, not
+Business records. The fulfillment event records the actual `190` steps, and a
+`price_adjustment` of `-10` steps reconciles `total` to the actual pick with
+its price delta (`79 × 0.10 = 7.9`, rounded once to `8`). `fulfilled == total`
+then holds exactly (`190 == 190`) and the line derives `fulfilled`:
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": { "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}] }
+  },
+  "id": "order_bananas_2",
+  "checkout_id": "chk_bananas_2",
+  "permalink_url": "https://business.example.com/orders/bananas2",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_bananas",
+      "item": {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "price": 79,
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }
+      },
+      "quantity": { "original": 200, "total": 190, "fulfilled": 190 },
+      "totals": [
+        { "type": "subtotal", "amount": 158 },
+        { "type": "total", "amount": 158 }
+      ],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-12T09:15:00Z",
+        "type": "shipped",
+        "line_items": [{ "id": "li_bananas", "quantity": 190 }],
+        "description": "Picked 1.90 lb"
+      }
+    ]
+  },
+  "adjustments": [
+    {
+      "id": "adj_1",
+      "type": "price_adjustment",
+      "occurred_at": "2026-01-12T09:15:00Z",
+      "status": "completed",
+      "line_items": [{ "id": "li_bananas", "quantity": -10 }],
+      "totals": [{ "type": "total", "amount": -8 }],
+      "description": "Adjusted to actual picked weight of 1.90 lb"
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 158 },
+    { "type": "total", "amount": 158 }
   ]
 }
 ```
