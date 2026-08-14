@@ -192,7 +192,7 @@ The following requests and responses are transport-neutral UCP payloads.
         "hours": {
           "open_at": "2026-05-18T17:00:00Z"
         },
-        "amenities": ["curbside_pickup"],
+        "amenities": ["dev.ucp.amenity.shopping.curbside_pickup"],
         "geo": {
           "serves": {
             "point": {
@@ -233,7 +233,7 @@ The following requests and responses are transport-neutral UCP payloads.
             "latitude": 37.420,
             "longitude": -122.080
           },
-          "amenities": ["curbside_pickup", "in_store_pickup", "parking"],
+          "amenities": ["dev.ucp.amenity.shopping.curbside_pickup", "dev.ucp.amenity.shopping.in_store_pickup", "dev.ucp.amenity.parking"],
           "timezone": "America/Los_Angeles",
           "hours": [
             {"day": "monday", "opens": "08:00", "closes": "21:00"}
@@ -303,7 +303,7 @@ rules.
             "latitude": 40.709,
             "longitude": -74.008
           },
-          "amenities": ["curbside_pickup", "in_store_pickup"]
+          "amenities": ["dev.ucp.amenity.shopping.curbside_pickup", "dev.ucp.amenity.shopping.in_store_pickup"]
         }
       ]
     }
