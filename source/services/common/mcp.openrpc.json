@@ -41,18 +41,6 @@
             "type": "string",
             "format": "uuid",
             "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header (optional for read-only operations)."
-          },
-          "signature": {
-            "type": "string",
-            "description": "RFC 9421 HTTP message signature."
-          },
-          "signature_input": {
-            "type": "string",
-            "description": "RFC 9421 Signature-Input header. Format: `sig1=(\"@method\" \"@path\" ...);created=<timestamp>;keyid=\"<key-id>\"`."
-          },
-          "content-digest": {
-            "type": "string",
-            "description": "Body digest per RFC 9530. Format: `sha-256=:<base64-digest>:`."
           }
         }
       }
