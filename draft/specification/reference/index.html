@@ -10113,13 +10113,13 @@ within the UCP.</p>
 <td style="text-align: left;">location</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.</td>
+<td style="text-align: left;">Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout.</td>
+<td style="text-align: left;">Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.</td>
 </tr>
 </tbody>
 </table>
@@ -10685,7 +10685,7 @@ within the UCP.</p>
 <td style="text-align: left;">fulfills_to</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Where the order is fulfilled to — may differ from the buyer's <code>context</code> location (e.g. a gift). A <code>location</code> id, or a coarse address (<code>address_country</code>/<code>address_region</code>/<code>postal_code</code>). Restricts results to what can be fulfilled there and seeds method <code>availability</code>. Supersedes <code>context</code>.</td>
+<td style="text-align: left;">Explicit destination where items are fulfilled. It may differ from the locality or Business Location supplied in <code>context</code> (e.g. a gift delivered directly to the recipient). The filter restricts results to what can be fulfilled there and seeds method <code>availability</code>. It supersedes <code>context</code> only for fulfillment destination and availability resolution.</td>
 </tr>
 <tr>
 <td style="text-align: left;">methods</td>

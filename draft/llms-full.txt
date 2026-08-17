@@ -10226,6 +10226,28 @@ On Checkout, the `fulfillment` field contains:
     - `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
     - `options[1]` 🔘 Curbside Pickup
 
+## Location Context
+
+Base [Context](http://ucp.dev/draft/specification/catalog/#context) defines an optional `location`: a stable, opaque [Location](http://ucp.dev/draft/specification/glossary/#commerce) identifier in the Business's namespace. The field appears on Catalog requests and on Cart and Checkout create and update requests (see [Checkout Context](http://ucp.dev/draft/specification/checkout/#context)). Fulfillment does not add or redefine the field; when the Fulfillment extension is active, it defines the field's effects.
+
+When Fulfillment extends Catalog or Checkout, `context.location` on a request to that capability names the provisional Business Location that the Business evaluates fulfillment availability against, and generates initial fulfillment choices for. It does not select a fulfillment destination.
+
+These fields carry distinct roles, not precision levels of one value:
+
+| Field                                        | Role                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `context.location`                           | Provisional Business Location to evaluate fulfillment against.                        |
+| Catalog `filters.fulfills_to`                | Explicit destination items are fulfilled to, and a filter on results.                 |
+| Catalog `methods[].location`                 | The Business Location resolved for a place-based method (e.g. `pickup`) on a variant. |
+| Checkout `methods[].selected_destination_id` | The destination selected from that method's `destinations[]`.                         |
+
+Precedence is scoped to what each field governs:
+
+- When Catalog `filters.fulfills_to` is present, a Business **MUST** resolve the fulfillment destination and method `availability` from it rather than from `context`. Other `context` fields are unaffected.
+- Once a Platform sets `selected_destination_id` on a Checkout method, a Business **MUST** use the referenced destination rather than `context.location` for that method's fulfillment scope. Other methods are unaffected.
+
+**Carrying a Location forward.** The same identifier can appear in several of these fields without collapsing their roles. A Catalog response can report a place-based method at `loc_123`. Because base Cart Context already includes `location`, `loc_123` can travel forward as `context.location` on a Cart request. [Cart-to-Checkout conversion](http://ucp.dev/draft/specification/cart/#cart-to-checkout-conversion) initializes the Checkout from the Cart's `context`, so the Business **MAY** use `loc_123` to generate an initial Checkout fulfillment destination. Once the Platform sets `selected_destination_id`, that explicit selection governs.
+
 ## Schema
 
 Fulfillment applies only to items requiring physical delivery. Items not requiring fulfillment (e.g., digital goods) do not need to be assigned to a method.
@@ -10504,7 +10526,7 @@ When the fulfillment extension extends the Catalog capability, each variant in a
 - `type` — the fulfillment method (e.g. `shipping`, `pickup`); see [Method Types](#method-types).
 - `description` — short, buyer-facing summary of how the variant is fulfilled via this method (e.g. "Ships in 2–4 business days"). Directly renderable; see [Rendering](#rendering).
 - `availability` — whether the variant is available via this method at the specified or inferred location.
-- `location` — for place-based methods (e.g. `pickup`), the resolved location id, and the business's stable identifier for that location. A business that advertises pickup at a `location` MUST accept the same id as `selected_destination_id` for that method, so a discovered location can be used in cart and checkout.
+- `location` — for place-based methods (e.g. `pickup`), the [Location](http://ucp.dev/draft/specification/glossary/#commerce) resolved for that method: the Business's stable identifier for that place. A Business that advertises pickup at a `location` **MUST** accept that same ID as `selected_destination_id` for that method in Checkout.
 - `options` — concrete fulfillment choices within this method (e.g. Standard, Express); see [Options](#options). Optional.
 
 Catalog reports availability for a single location per method — the one specified via `fulfills_to` or inferred from `context`; discovering and comparing other locations is handled separately.
@@ -10513,11 +10535,11 @@ The variant-level `availability` indicates whether the variant is obtainable via
 
 ### Options
 
-A method MAY carry `options[]`, a representative subset of its fulfillment options — not an exhaustive list. Without a destination or full cart, catalog SHOULD preview meaningful boundary options for the buyer (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout once those are known.
+A method MAY carry `options[]`, a representative subset of its fulfillment options — not an exhaustive list. Without a destination or full cart, a Business **SHOULD** preview meaningful boundary options for the Buyer (e.g. cheapest, fastest); more specific options are negotiated in Checkout once the line items and destination are known.
 
 Each option carries an `id` and a `title` (a short label distinguishing it from siblings), plus an optional renderable `description` for context. These are a shared base: at checkout the same option is composed with cost and timing (`totals`, carrier, fulfillment times). The option is open, so a business MAY annotate it with additional fields. A method MAY also carry none, surfacing only `type`, `description`, and `availability`; options are nested directly under the method, with no group layer (unlike checkout `methods[].groups[].options[]`).
 
-A discovered option `id` lets a buyer's choice carry forward: a business SHOULD accept the same id as `selected_option_id` in cart and checkout. The id is a best-effort handle, not a guaranteed match — an option discovered for a single product may differ in a cart, where other products, quantities, and combined fulfillment modify the options.
+A discovered option `id` lets a Buyer's choice carry forward: a Business **SHOULD** accept the same ID as `methods[].groups[].selected_option_id` in Checkout. The ID is a best-effort handle, not a guaranteed match — an option discovered for a single product may differ at Checkout, where other products, quantities, and combined fulfillment modify the options.
 
 ### Shapes
 
@@ -10533,13 +10555,13 @@ How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.
 
 A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.
 
-| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                  |
-| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                                                      |
-| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                                                              |
-| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                                                          |
-| location     | string        | Optional     | The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.                                                                                                                                                                                                                              |
-| options      | Array[object] | Optional     | Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout. |
+| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                  |
+| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                      |
+| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                              |
+| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                          |
+| location     | string        | Optional     | Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.                                                                                                                                                                                        |
+| options      | Array[object] | Optional     | Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known. |
 
 #### Fulfillment Option Base
 
@@ -10567,11 +10589,11 @@ A fulfillment method on a catalog variant: how the variant can be fulfilled, and
 
 ### Location and method: `context` and `filters`
 
-- **`context`** (`address_country` / `address_region` / `postal_code`) is where the *buyer* is — a non-binding hint the business uses to report `availability`. On a market-scoped catalog it MAY narrow results; otherwise it annotates rather than removes them.
-- **`filters.fulfills_to`** is where the order is *fulfilled to* — a single destination, named by value (a coarse address: `address_country` / `address_region` / `postal_code`) or by reference (a `location` id — a store, pickup point, or saved address). Platforms **SHOULD** provide one or the other, not both; if both are present, a business **SHOULD** use the more specific — typically `location`. It restricts results to what can be fulfilled there and seeds method `availability`, and may differ from `context` (e.g. a gift).
+- **`context`** carries non-binding hints the Business uses to report `availability`: coarse locality fields for where the *Buyer* is, and `location` for a provisional Business Location (see [Location Context](#location-context)). On a market-scoped Catalog a Business **MAY** narrow results with these hints; otherwise they annotate results rather than remove them.
+- **`filters.fulfills_to`** is where items are *fulfilled to* — a single destination ([Fulfillment Destination Filter](#fulfillment-destination-filter)), named by value (a coarse locality) or by reference (a `location` id — a store, pickup point, or saved address). Platforms **SHOULD** provide one or the other, not both; if both are present, a business **SHOULD** use the more specific — typically `location`. It restricts results to what can be fulfilled there and seeds method `availability`, and may differ from `context` (e.g. a gift).
 - **`filters.methods`** restricts results to specific method types (e.g. `["pickup"]`).
 
-Provide location once: `context` for where the buyer is, `fulfills_to` for an explicit destination. When both are present, `fulfills_to` supersedes `context`.
+`context` only hints; `fulfills_to` names the destination. See [Location Context](#location-context) for the precedence rule.
 
 ### Example
 
@@ -10752,7 +10774,7 @@ A method is identified by its `type` and its fulfillment scope (what it fulfills
 
 **Adding method types.** Because `type` is an open string, a business MAY introduce a new value at any time with no consumer change: it advertises the value (and filters on it via `filters.methods`), and consumers present it like any other method.
 
-**Example — adding `home_installation`.** No schema change or registration is needed. Emit the value directly as the `type` on catalog and checkout, and filter with `filters.methods: ["home_installation"]`. For cart and checkout negotiation, declare its behavior in the business profile `config` — e.g. include `["shipping", "home_installation"]` in `method_combinations` so a cart can mix shipped and installed items (see [Business Profile](#business-profile)). On a catalog variant's method:
+**Example — adding `home_installation`.** No schema change or registration is needed. Emit the value directly as the `type` on catalog and checkout, and filter with `filters.methods: ["home_installation"]`. For checkout negotiation, declare its behavior in the business profile `config` — e.g. include `["shipping", "home_installation"]` in `method_combinations` so a cart can mix shipped and installed items (see [Business Profile](#business-profile)). On a catalog variant's method:
 
 ```json
 {
@@ -23207,13 +23229,13 @@ Container for fulfillment methods and availability.
 
 A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.
 
-| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                  |
-| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                                                      |
-| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                                                              |
-| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                                                          |
-| location     | string        | Optional     | The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.                                                                                                                                                                                                                              |
-| options      | Array[object] | Optional     | Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout. |
+| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                  |
+| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                      |
+| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                              |
+| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                          |
+| location     | string        | Optional     | Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.                                                                                                                                                                                        |
+| options      | Array[object] | Optional     | Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known. |
 
 #### Catalog Fulfillment
 
@@ -23340,7 +23362,7 @@ Catalog filters extended with a fulfillment destination filter and a method-type
 | ----------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | categories  | Array[string] | Optional    | Filter by product categories (OR logic — matches products in any listed categories). Values match against the value field in product category entries. Valid values can be discovered from the categories field in search results, merchant documentation, or standard taxonomies that businesses may align with.                                                                                                                                                |
 | price       | object        | Optional    | Price range filter denominated in context.currency. When context.currency matches the presentment currency, businesses apply the filter directly. When it differs, businesses SHOULD convert filter values to the presentment currency before applying; if conversion is not supported, businesses MAY ignore the filter and SHOULD indicate this via a message. When context.currency is absent, filter denomination is ambiguous and businesses MAY ignore it. |
-| fulfills_to | object        | Optional    | Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context`.                                                                                                                                                                 |
+| fulfills_to | object        | Optional    | Explicit destination where items are fulfilled. It may differ from the locality or Business Location supplied in `context` (e.g. a gift delivered directly to the recipient). The filter restricts results to what can be fulfilled there and seeds method `availability`. It supersedes `context` only for fulfillment destination and availability resolution.                                                                                                 |
 | methods     | Array[string] | Optional    | Restrict results to these fulfillment method types (e.g. ["pickup"]). Well-known values: `shipping`, `pickup`.                                                                                                                                                                                                                                                                                                                                                   |
 
 #### Fulfillment Search Request

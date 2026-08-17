@@ -1056,6 +1056,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#location-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2780,6 +2791,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#location-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#schema" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3332,6 +3354,62 @@ goods fulfillment (shipping, pickup, etc).</p>
 </ul>
 </li>
 </ul>
+<h2 id="location-context">Location Context<a class="headerlink" href="#location-context" title="Permanent link">&para;</a></h2>
+<p>Base <a href="../catalog/#context">Context</a> defines an optional <code>location</code>: a
+stable, opaque <a href="../glossary/#commerce">Location</a> identifier in the Business's
+namespace. The field appears on Catalog requests and on Cart and Checkout
+create and update requests (see <a href="../checkout/#context">Checkout Context</a>).
+Fulfillment does not add or redefine the field; when the Fulfillment
+extension is active, it defines the field's effects.</p>
+<p>When Fulfillment extends Catalog or Checkout, <code>context.location</code> on a request
+to that capability names the provisional Business Location that the Business
+evaluates fulfillment availability against, and generates initial fulfillment
+choices for. It does not select a fulfillment destination.</p>
+<p>These fields carry distinct roles, not precision levels of one value:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>context.location</code></td>
+<td>Provisional Business Location to evaluate fulfillment against.</td>
+</tr>
+<tr>
+<td>Catalog <code>filters.fulfills_to</code></td>
+<td>Explicit destination items are fulfilled to, and a filter on results.</td>
+</tr>
+<tr>
+<td>Catalog <code>methods[].location</code></td>
+<td>The Business Location resolved for a place-based method (e.g. <code>pickup</code>) on a variant.</td>
+</tr>
+<tr>
+<td>Checkout <code>methods[].selected_destination_id</code></td>
+<td>The destination selected from that method's <code>destinations[]</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Precedence is scoped to what each field governs:</p>
+<ul>
+<li>When Catalog <code>filters.fulfills_to</code> is present, a Business <strong>MUST</strong> resolve
+    the fulfillment destination and method <code>availability</code> from it rather than
+    from <code>context</code>. Other <code>context</code> fields are unaffected.</li>
+<li>Once a Platform sets <code>selected_destination_id</code> on a Checkout method, a
+    Business <strong>MUST</strong> use the referenced destination rather than
+    <code>context.location</code> for that method's fulfillment scope. Other methods are
+    unaffected.</li>
+</ul>
+<p><strong>Carrying a Location forward.</strong> The same identifier can appear in several of
+these fields without collapsing their roles. A Catalog response can report a
+place-based method at <code>loc_123</code>. Because base Cart Context already includes
+<code>location</code>, <code>loc_123</code> can travel forward as <code>context.location</code> on a Cart
+request. <a href="../cart/#cart-to-checkout-conversion">Cart-to-Checkout conversion</a>
+initializes the Checkout from the Cart's <code>context</code>, so the Business <strong>MAY</strong>
+use <code>loc_123</code> to generate an initial Checkout fulfillment destination. Once
+the Platform sets <code>selected_destination_id</code>, that explicit selection governs.</p>
 <h2 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
 <p>Fulfillment applies only to items requiring physical delivery. Items not
 requiring fulfillment (e.g., digital goods) do not need to be assigned to a
@@ -3916,11 +3994,11 @@ method has:</p>
     renderable; see <a href="#rendering">Rendering</a>.</li>
 <li><code>availability</code> — whether the variant is available via this method at the
     specified or inferred location.</li>
-<li><code>location</code> — for place-based methods (e.g. <code>pickup</code>), the resolved
-    location id, and the business's stable identifier for that location. A
-    business that advertises pickup at a <code>location</code> MUST accept the same id
-    as <code>selected_destination_id</code> for that method, so a discovered location
-    can be used in cart and checkout.</li>
+<li><code>location</code> — for place-based methods (e.g. <code>pickup</code>), the
+    <a href="../glossary/#commerce">Location</a> resolved for that method: the Business's
+    stable identifier for that place. A Business that advertises pickup at a
+    <code>location</code> <strong>MUST</strong> accept that same ID as <code>selected_destination_id</code> for
+    that method in Checkout.</li>
 <li><code>options</code> — concrete fulfillment choices within this method (e.g.
     Standard, Express); see <a href="#options">Options</a>. Optional.</li>
 </ul>
@@ -3934,10 +4012,10 @@ it for that method and MUST NOT infer per-method availability from the
 variant-level value.</p>
 <h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
 <p>A method MAY carry <code>options[]</code>, a representative subset of its fulfillment
-options — not an exhaustive list. Without a destination or full cart,
-catalog SHOULD preview meaningful boundary options for the buyer (e.g.
-cheapest, fastest); the full, high-resolution set is negotiated in cart and
-checkout once those are known.</p>
+options — not an exhaustive list. Without a destination or full cart, a
+Business <strong>SHOULD</strong> preview meaningful boundary options for the Buyer (e.g.
+cheapest, fastest); more specific options are negotiated in Checkout once the
+line items and destination are known.</p>
 <p>Each option carries an <code>id</code> and a <code>title</code> (a short label distinguishing it
 from siblings), plus an optional renderable <code>description</code> for context. These
 are a shared base: at checkout the same option is composed with cost and
@@ -3946,11 +4024,11 @@ business MAY annotate it with additional fields. A method MAY also carry
 none, surfacing only <code>type</code>, <code>description</code>, and <code>availability</code>; options are
 nested directly under the method, with no group layer (unlike checkout
 <code>methods[].groups[].options[]</code>).</p>
-<p>A discovered option <code>id</code> lets a buyer's choice carry forward: a business
-SHOULD accept the same id as <code>selected_option_id</code> in cart and checkout.
-The id is a best-effort handle, not a guaranteed match — an option
-discovered for a single product may differ in a cart, where other
-products, quantities, and combined fulfillment modify the options.</p>
+<p>A discovered option <code>id</code> lets a Buyer's choice carry forward: a Business
+<strong>SHOULD</strong> accept the same ID as <code>methods[].groups[].selected_option_id</code> in
+Checkout. The ID is a best-effort handle, not a guaranteed match — an option
+discovered for a single product may differ at Checkout, where other products,
+quantities, and combined fulfillment modify the options.</p>
 <h3 id="shapes">Shapes<a class="headerlink" href="#shapes" title="Permanent link">&para;</a></h3>
 <h4 id="catalog-fulfillment">Catalog Fulfillment<a class="headerlink" href="#catalog-fulfillment" title="Permanent link">&para;</a></h4>
 <p>How a catalog variant can be fulfilled. Mirrors checkout <code>fulfillment</code>.</p>
@@ -4006,13 +4084,13 @@ products, quantities, and combined fulfillment modify the options.</p>
 <td style="text-align: left;">location</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id.</td>
+<td style="text-align: left;">Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout.</td>
+<td style="text-align: left;">Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.</td>
 </tr>
 </tbody>
 </table>
@@ -4111,13 +4189,16 @@ products, quantities, and combined fulfillment modify the options.</p>
 </table>
 <h3 id="location-and-method-context-and-filters">Location and method: <code>context</code> and <code>filters</code><a class="headerlink" href="#location-and-method-context-and-filters" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong><code>context</code></strong> (<code>address_country</code> / <code>address_region</code> / <code>postal_code</code>) is
-    where the <em>buyer</em> is — a non-binding hint the business uses to report
-    <code>availability</code>. On a market-scoped catalog it MAY narrow results;
-    otherwise it annotates rather than removes them.</li>
-<li><strong><code>filters.fulfills_to</code></strong> is where the order is <em>fulfilled to</em> — a single
-    destination, named by value (a coarse address: <code>address_country</code> /
-    <code>address_region</code> / <code>postal_code</code>) or by reference (a <code>location</code> id — a
+<li><strong><code>context</code></strong> carries non-binding hints the Business uses to report
+    <code>availability</code>: coarse locality fields for where the <em>Buyer</em> is, and
+    <code>location</code> for a provisional Business Location (see
+    <a href="#location-context">Location Context</a>). On a market-scoped Catalog a
+    Business <strong>MAY</strong> narrow results with these hints; otherwise they annotate
+    results rather than remove them.</li>
+<li><strong><code>filters.fulfills_to</code></strong> is where items are <em>fulfilled to</em> — a single
+    destination
+    (<a href="#fulfillment-destination-filter">Fulfillment Destination Filter</a>),
+    named by value (a coarse locality) or by reference (a <code>location</code> id — a
     store, pickup point, or saved address). Platforms <strong>SHOULD</strong> provide one
     or the other, not both; if both are present, a business <strong>SHOULD</strong> use
     the more specific — typically <code>location</code>. It restricts results to what
@@ -4126,9 +4207,8 @@ products, quantities, and combined fulfillment modify the options.</p>
 <li><strong><code>filters.methods</code></strong> restricts results to specific method types (e.g.
     <code>["pickup"]</code>).</li>
 </ul>
-<p>Provide location once: <code>context</code> for where the buyer is, <code>fulfills_to</code> for
-an explicit destination. When both are present, <code>fulfills_to</code> supersedes
-<code>context</code>.</p>
+<p><code>context</code> only hints; <code>fulfills_to</code> names the destination. See
+<a href="#location-context">Location Context</a> for the precedence rule.</p>
 <h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h3>
 <p>A variant exposes two fulfillment methods: shipping to the buyer's ship-to
 and pickup today at a named store. Each method carries its own availability,
@@ -4369,7 +4449,7 @@ value (and filters on it via <code>filters.methods</code>), and consumers presen
 like any other method.</p>
 <p><strong>Example — adding <code>home_installation</code>.</strong> No schema change or registration is
 needed. Emit the value directly as the <code>type</code> on catalog and checkout, and
-filter with <code>filters.methods: ["home_installation"]</code>. For cart and checkout
+filter with <code>filters.methods: ["home_installation"]</code>. For checkout
 negotiation, declare its behavior in the business profile <code>config</code> — e.g.
 include <code>["shipping", "home_installation"]</code> in <code>method_combinations</code>
 so a cart can mix shipped and installed items (see
