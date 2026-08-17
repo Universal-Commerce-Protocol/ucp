@@ -371,10 +371,10 @@ include all previously set fields it intends to retain.
 
 #### Update Fulfillment
 
-Fulfillment is an extension to the checkout capability. The Business provides
-most fields based on Buyer inputs, including desired fulfillment method types
-and typed destinations such as shipping addresses and Business Location
-references.
+Fulfillment is an extension to the checkout capability. The Platform submits
+Buyer inputs such as desired fulfillment method types, shipping addresses, and
+Business Location selections; the Business returns the resulting fulfillment
+state.
 
 === "Request"
 
