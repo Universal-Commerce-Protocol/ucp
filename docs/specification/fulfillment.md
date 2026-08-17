@@ -52,6 +52,48 @@ On Checkout, the `fulfillment` field contains:
     * `groups[0]` 📦👞
         * `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
 
+## Location Context
+
+Base [Context](catalog/index.md#context) defines an optional `location`: a
+stable, opaque [Location](glossary.md#commerce) identifier in the Business's
+namespace. The field appears on Catalog requests and on Cart and Checkout
+create and update requests (see [Checkout Context](checkout.md#context)).
+Fulfillment does not add or redefine the field; when the Fulfillment
+extension is active, it defines the field's effects.
+
+When Fulfillment extends Catalog or Checkout, `context.location` on a request
+to that capability names the provisional Business Location that the Business
+evaluates fulfillment availability against, and generates initial fulfillment
+choices for. It does not select a fulfillment destination.
+
+These fields carry distinct roles, not precision levels of one value:
+
+| Field | Role |
+| --- | --- |
+| `context.location` | Provisional Business Location to evaluate fulfillment against. |
+| Catalog `filters.fulfills_to` | Explicit destination items are fulfilled to, and a filter on results. |
+| Catalog `methods[].location` | The Business Location resolved for a place-based method (e.g. `pickup`) on a variant. |
+| Checkout `methods[].selected_destination_id` | The destination selected from that method's `destinations[]`. |
+
+Precedence is scoped to what each field governs:
+
+* When Catalog `filters.fulfills_to` is present, a Business **MUST** resolve
+    the fulfillment destination and method `availability` from it rather than
+    from `context`. Other `context` fields are unaffected.
+* Once a Platform sets `selected_destination_id` on a Checkout method, a
+    Business **MUST** use the referenced destination rather than
+    `context.location` for that method's fulfillment scope. Other methods are
+    unaffected.
+
+**Carrying a Location forward.** The same identifier can appear in several of
+these fields without collapsing their roles. A Catalog response can report a
+place-based method at `loc_123`. Because base Cart Context already includes
+`location`, `loc_123` can travel forward as `context.location` on a Cart
+request. [Cart-to-Checkout conversion](cart.md#cart-to-checkout-conversion)
+initializes the Checkout from the Cart's `context`, so the Business **MAY**
+use `loc_123` to generate an initial Checkout fulfillment destination. Once
+the Platform sets `selected_destination_id`, that explicit selection governs.
+
 ## Schema
 
 Fulfillment applies only to items requiring physical delivery. Items not
@@ -193,7 +235,7 @@ shape:
 | Method `type` | Request `destinations[]` |
 | --- | --- |
 | `shipping` | Platform-writable. The Platform writes the Buyer's shipping-address facts. |
-| `pickup` | Not Platform-writable (schema-enforced). The Business enumerates locations in its response; the Platform selects a location by its Business-scoped ID (see [Selection and Location Identity](#selection-and-location-identity)). |
+| `pickup` | Not Platform-writable. The Business enumerates locations in its response; the Platform selects a location by its Business-scoped ID (see [Selection and Location Identity](#selection-and-location-identity)). |
 | any other method `type` | Not Platform-writable (the base default). The Business enumerates destinations in its response; the Platform selects one via `selected_destination_id`. |
 
 Destination `type` is **required in responses and optional in requests**. In
@@ -480,13 +522,15 @@ method has:
     renderable; see [Rendering](#rendering).
 * `availability` — whether the variant is available via this method at the
     specified or inferred location.
-* `location` — when the method is scoped to a specific Business Location,
-    that location's stable, opaque, Business-scoped identifier. The Platform
-    **MAY** submit that ID as `selected_destination_id` on a Checkout method of
-    the same `type`. Discovery neither reserves inventory nor guarantees
-    eligibility; Catalog is one source of such an ID, and whether the Business
-    accepts it — and what its response must then contain — is source-agnostic.
-    See [Selection and Location Identity](#selection-and-location-identity).
+* `location` — for place-based methods such as `pickup`, the
+    [Location](glossary.md#commerce) resolved for that method and the
+    Business's stable identifier for that place. A Business that advertises
+    pickup at a `location` **MUST** accept that same ID as
+    `selected_destination_id` for that method in Checkout. The Business
+    revalidates current availability and terms; discovery neither reserves
+    inventory nor guarantees eligibility. The selection contract is
+    source-agnostic; see
+    [Selection and Location Identity](#selection-and-location-identity).
 * `options` — concrete fulfillment choices within this method (e.g.
     Standard, Express); see [Options](#options). Optional.
 
@@ -503,10 +547,10 @@ variant-level value.
 ### Options
 
 A method MAY carry `options[]`, a representative subset of its fulfillment
-options — not an exhaustive list. Without a destination or full cart,
-catalog SHOULD preview meaningful boundary options for the buyer (e.g.
-cheapest, fastest); the full, high-resolution set is negotiated in cart and
-checkout once those are known.
+options — not an exhaustive list. Without a destination or full cart, a
+Business **SHOULD** preview meaningful boundary options for the Buyer (e.g.
+cheapest, fastest); more specific options are negotiated in Checkout once the
+line items and destination are known.
 
 Each option carries an `id` and a `title` (a short label distinguishing it
 from siblings), plus an optional renderable `description` for context. These
@@ -517,11 +561,11 @@ none, surfacing only `type`, `description`, and `availability`; options are
 nested directly under the method, with no group layer (unlike checkout
 `methods[].groups[].options[]`).
 
-A discovered option `id` lets a buyer's choice carry forward: a business
-SHOULD accept the same id as `selected_option_id` in cart and checkout.
-The id is a best-effort handle, not a guaranteed match — an option
-discovered for a single product may differ in a cart, where other
-products, quantities, and combined fulfillment modify the options.
+A discovered option `id` lets a Buyer's choice carry forward: a Business
+**SHOULD** accept the same ID as `methods[].groups[].selected_option_id` in
+Checkout. The ID is a best-effort handle, not a guaranteed match — an option
+discovered for a single product may differ at Checkout, where other products,
+quantities, and combined fulfillment modify the options.
 
 ### Shapes
 
@@ -547,13 +591,16 @@ products, quantities, and combined fulfillment modify the options.
 
 ### Location and method: `context` and `filters`
 
-* **`context`** (`address_country` / `address_region` / `postal_code`) is
-    where the *buyer* is — a non-binding hint the business uses to report
-    `availability`. On a market-scoped catalog it MAY narrow results;
-    otherwise it annotates rather than removes them.
-* **`filters.fulfills_to`** is where the order is *fulfilled to* — a single
-    destination, named by value (a coarse address: `address_country` /
-    `address_region` / `postal_code`) or by reference (a `location` id — a
+* **`context`** carries non-binding hints the Business uses to report
+    `availability`: coarse locality fields for where the *Buyer* is, and
+    `location` for a provisional Business Location (see
+    [Location Context](#location-context)). On a market-scoped Catalog a
+    Business **MAY** narrow results with these hints; otherwise they annotate
+    results rather than remove them.
+* **`filters.fulfills_to`** is where items are *fulfilled to* — a single
+    destination
+    ([Fulfillment Destination Filter](#fulfillment-destination-filter)),
+    named by value (a coarse locality) or by reference (a `location` id — a
     store, pickup point, or saved address). Platforms **SHOULD** provide one
     or the other, not both; if both are present, a business **SHOULD** use
     the more specific — typically `location`. It restricts results to what
@@ -562,9 +609,8 @@ products, quantities, and combined fulfillment modify the options.
 * **`filters.methods`** restricts results to specific method types (e.g.
     `["pickup"]`).
 
-Provide location once: `context` for where the buyer is, `fulfills_to` for
-an explicit destination. When both are present, `fulfills_to` supersedes
-`context`.
+`context` only hints; `fulfills_to` names the destination. See
+[Location Context](#location-context) for the precedence rule.
 
 ### Example
 
@@ -781,7 +827,7 @@ like any other method.
 
 **Example — adding `home_installation`.** No schema change or registration is
 needed. Emit the value directly as the `type` on catalog and checkout, and
-filter with `filters.methods: ["home_installation"]`. For cart and checkout
+filter with `filters.methods: ["home_installation"]`. For checkout
 negotiation, declare its behavior in the business profile `config` — e.g.
 include `["shipping", "home_installation"]` in `method_combinations`
 so a cart can mix shipped and installed items (see
