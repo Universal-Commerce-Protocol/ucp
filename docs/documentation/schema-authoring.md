@@ -152,11 +152,11 @@ Reusable definitions referenced by other schemas. Do **not** appear in registrie
 
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version`
-- **Embedded-language grammars**: A type schema that defines an embedded
-  language — grammar syntax rather than independently placeable UCP fields —
-  is direction-agnostic. Its grammar properties carry no `ucp_request`
-  annotation; each UCP property that exposes the grammar declares its own
-  applicability. Example: `common/types/constraint_expression.json`.
+- **Expression grammars**: A type schema that defines expression syntax rather
+  than independently placeable UCP fields is direction-agnostic. Its grammar
+  properties carry no `ucp_request` annotation; each UCP property that exposes
+  the grammar declares its own applicability. Example:
+  `common/types/constraint_expression.json`.
 
 Examples: `types/buyer.json`, `types/line_item.json`, `types/postal_address.json`
 
@@ -529,19 +529,16 @@ This section covers only the schema-authoring boundary.
 ### Local structure
 
 `request_constraints` is centrally registered in `ucp.json#/$defs/members` as a
-response-only protocol member with `ucp_request: "omit"`. Host domain schemas
-do not redeclare it. A conforming UCP-aware resolver materializes the registered
-member into eligible response scopes so ordinary resolved-schema validation
-applies the shared schema.
+response-only protocol member with `ucp_request: "omit"`. Capability, extension,
+and shared type schemas do not redeclare it. A conforming UCP-aware resolver
+materializes the registered member into eligible response scopes so ordinary
+resolved-schema validation applies the shared schema.
 
-The member's value is defined in two layers.
 `schemas/common/types/constraint_expression.json` defines the closed Constraint
-Expression grammar with two positions.
-`schemas/common/types/request_constraints.json` is the stable wrapper that binds
-that grammar to data in a subsequent UCP request; it is the schema the
-registered member references and the schema an emitted value is validated
-against. An emitted value begins at an Object Constraint; Value Constraints
-occur only beneath its `properties` maps.
+Expression grammar. `schemas/common/types/request_constraints.json` binds that
+grammar to data in a subsequent UCP request and is the schema referenced by the
+registered member. An emitted value begins at an Object Constraint; Value
+Constraints occur only beneath its `properties` maps.
 
 | Position | Admitted members | Shape |
 | :-- | :-- | :-- |
@@ -551,18 +548,15 @@ occur only beneath its `properties` maps.
 Only the listed members are admitted in an emitted value. Keywords the grammar
 uses to define this closed language do not become admitted members.
 
-Syntax changes belong in `constraint_expression.json`. Its internal references
-recur to the grammar root, so every nested Object and Value Constraint is
-evaluated against that file. `request_constraints.json` is a target-binding
-wrapper: syntax added there applies only at the outermost position, so do not
-use it for a change that has to hold at nested positions.
+Add or change grammar members in `constraint_expression.json`.
+`request_constraints.json` defines only the binding to subsequent request data.
 
 ### Annotations and applicability
 
 `constraint_expression.json` carries no `ucp_request` annotations. Its
-`required`, `properties`, `enum`, and `const` properties are the syntax of an
-embedded language, not independently placeable UCP fields, so the grammar has no
-direction of its own.
+`required`, `properties`, `enum`, and `const` properties are Constraint
+Expression grammar syntax, not independently placeable UCP fields, so the
+grammar has no direction of its own.
 
 Applicability belongs to the containing UCP property. Each UCP property that
 exposes a Constraint Expression owns whichever direction-specific applicability
@@ -574,16 +568,16 @@ visibility is declared. Because the grammar is direction-agnostic, the same
 file can be referenced from a request-applicable property and from a
 response-only one without change.
 
-### Embedded-language boundary
+### Constraint Expression grammar
 
-An emitted value and its nested constraint objects are embedded JSON Schema
-Draft 2020-12 language, not structured UCP domain objects. Do not add or
+An emitted value and its nested constraint objects are JSON Schema Draft 2020-12
+Constraint Expression syntax, not structured UCP domain objects. Do not add or
 materialize ambient `ucp` inside them. The `properties` value is a field-name
 dictionary whose keys name target request fields; those keys are not ambient
 members.
 
 The containing `ucp` object still follows
-[The Reserved `ucp` Member](#the-reserved-ucp-member). A closed host object
+[The Reserved `ucp` Member](#the-reserved-ucp-member). A closed structured object
 admits that container through its optional reference to
 `ucp.json#/$defs/members`, not by declaring `request_constraints` itself.
 

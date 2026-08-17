@@ -178,17 +178,15 @@ After capabilities and extensions are negotiated, the resolved UCP request
 schema defines the fields and structure allowed for an operation. In an
 authoritative response, a Business can use `ucp.request_constraints` to signal
 additional rules it will apply when evaluating request data in a subsequent
-Platform request. For example, it can provide a constraint that an item be
-purchased as a 100-unit lot or require a submitted payment instrument to include
+Platform request. For example, it can constrain a Line Item quantity to exactly
+`100` sale-basis steps or require a submitted payment instrument to include
 `billing_address`. A Platform can evaluate these constraints before submission,
 avoiding a round trip for request data the Business has already indicated it
 will reject.
 
-`ucp.request_constraints` is response-only. A Business or Platform **MUST NOT**
-publish it in a discovery profile, and a Platform **MUST NOT** include it in an
-operation request. A Business or Platform that encounters it in a discovery
-profile **MUST** ignore it; a Business that encounters it in an operation request
-**MUST** ignore it.
+`ucp.request_constraints` applies only to authoritative operation responses. A
+Business or Platform **MUST** ignore the member if it receives it in a discovery
+profile or operation request.
 
 ### Validation model
 
@@ -253,6 +251,12 @@ or the emitted constraints, the Business **MUST** treat it as invalid input and
 **MUST** report the failure through the operation's existing outcome and message
 contract.
 
+A Business **SHOULD NOT** emit Request Constraints for rules that may change
+before the subsequent request unless it can continue to enforce the advertised
+constraint. Execution-time conditions such as inventory availability, fraud
+decisions, and payment authorization remain governed by the operation's existing
+outcomes and `messages`.
+
 #### Platform
 
 A Platform **MAY** use `ucp.request_constraints` for preflight before submitting
@@ -273,10 +277,12 @@ apply.
 
 ### Operation outcomes
 
-Passing validation against the effective request schema establishes only schema
-validity. The request can still fail other business rules. The containing
-operation's existing semantics, outcomes, and error contract apply; Request
-Constraints adds no outcome or error code.
+Request Constraints provide proactive, machine-evaluable preflight for a
+subsequent request; `messages` report outcomes from a submitted request,
+including runtime outcomes. Passing validation against the effective request
+schema establishes only schema validity, and the request can still fail other
+business rules. The containing operation's existing semantics, outcomes, and
+error contract apply; Request Constraints adds no outcome or error code.
 
 ### Examples
 
