@@ -1,6 +1,6 @@
 [project]
 name = "ucp"
-version = "2026.04.08"
+version = "2026.01.23"
 description = "Universal Commerce Protocol"
 readme = "README.md"
 requires-python = ">=3.10"
