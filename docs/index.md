@@ -490,7 +490,7 @@ image: assets/banner.png
         "description": "Defective item"
       }
     ],
-    "totals": [ ... ]
+    "totals": { ... }
   }
   ```
 

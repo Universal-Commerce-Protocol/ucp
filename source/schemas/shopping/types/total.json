@@ -22,6 +22,28 @@
     "amount": {
       "$ref": "../../common/types/signed_amount.json",
       "ucp_request": "omit"
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "display_text",
+          "amount"
+        ],
+        "properties": {
+          "display_text": {
+            "type": "string",
+            "description": "Human-readable label for this sub-line."
+          },
+          "amount": {
+            "$ref": "../../common/types/signed_amount.json"
+          }
+        },
+        "description": "Sub-line entry. Additional metadata MAY be included."
+      },
+      "description": "Optional itemized breakdown. The parent entry is always rendered; lines are supplementary. Sum of line amounts MUST equal the parent entry amount.",
+      "ucp_request": "omit"
     }
   },
   "allOf": [

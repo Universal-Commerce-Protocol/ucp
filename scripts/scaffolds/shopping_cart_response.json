@@ -16,8 +16,8 @@
       ]
     }
   ],
-  "totals": [
-    { "type": "subtotal", "amount": 1000 },
-    { "type": "total", "amount": 1000 }
-  ]
+  "totals": {
+    "subtotal": { "display_text": "Subtotal", "amount": 1000 },
+    "total": { "display_text": "Total", "amount": 1000 }
+  }
 }

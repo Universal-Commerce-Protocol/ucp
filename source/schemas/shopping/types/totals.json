@@ -2,61 +2,47 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/totals.json",
   "title": "Totals",
-  "description": "Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.",
-  "type": "array",
-  "items": {
-    "allOf": [
-      {
-        "$ref": "total.json"
-      },
-      {
-        "type": "object",
-        "properties": {
-          "lines": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "display_text",
-                "amount"
-              ],
-              "properties": {
-                "display_text": {
-                  "type": "string",
-                  "description": "Human-readable label for this sub-line."
-                },
-                "amount": {
-                  "$ref": "../../common/types/signed_amount.json"
-                }
-              },
-              "description": "Sub-line entry. Additional metadata MAY be included."
-            },
-            "description": "Optional itemized breakdown. The parent entry is always rendered; lines are supplementary. Sum of line amounts MUST equal the parent entry amount.",
-            "ucp_request": "omit"
-          }
-        }
-      },
-      {
-        "if": {
-          "properties": {
-            "type": { "not": { "enum": ["subtotal", "items_discount", "discount", "fulfillment", "tax", "fee", "total"] } }
-          },
-          "required": ["type"]
-        },
-        "then": { "required": ["display_text"] }
-      }
-    ]
-  },
-  "allOf": [
-    {
-      "contains": { "properties": { "type": { "const": "subtotal" } }, "required": ["type"] },
-      "minContains": 1,
-      "maxContains": 1
+  "description": "Pricing breakdown provided by the business. MUST contain subtotal and total entries. Detail types (tax, fee, discount, fulfillment) MAY be included. Platforms render entries according to display_order or standard receipt hierarchy.",
+  "type": "object",
+  "required": [
+    "subtotal",
+    "total"
+  ],
+  "properties": {
+    "subtotal": {
+      "$ref": "total.json",
+      "description": "Subtotal entry representing total item cost before taxes, shipping, or discounts."
     },
-    {
-      "contains": { "properties": { "type": { "const": "total" } }, "required": ["type"] },
-      "minContains": 1,
-      "maxContains": 1
+    "total": {
+      "$ref": "total.json",
+      "description": "Final total amount due for the order."
+    },
+    "discount": {
+      "$ref": "total.json",
+      "description": "Order-level discount entry."
+    },
+    "fulfillment": {
+      "$ref": "total.json",
+      "description": "Shipping, delivery, or pickup fulfillment cost entry."
+    },
+    "tax": {
+      "$ref": "total.json",
+      "description": "Total tax entry. May contain itemized sub-line breakdown in lines."
+    },
+    "fee": {
+      "$ref": "total.json",
+      "description": "Service or regulatory fee entry."
+    },
+    "display_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional ordering hint specifying exact top-to-bottom display sequence for UI receipt rendering.",
+      "ucp_request": "omit"
     }
-  ]
+  },
+  "additionalProperties": {
+    "$ref": "total.json"
+  }
 }
