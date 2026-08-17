@@ -166,7 +166,8 @@ including spec versions:
 ./scripts/build_local.sh
 ```
 
-This will build the site and start a local server. You can use the
+This will build the full site into `local_preview/` and print the command to
+serve it (see below) — it does not start a server itself. You can use the
 `--draft-only` flag to skip release branches and only build the current draft:
 
 ```bash

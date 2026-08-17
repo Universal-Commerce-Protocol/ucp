@@ -49,7 +49,6 @@ Validate your changes locally using these commands before considering a task com
 Then validate your changes with:
 
 * **Lint Schemas:** `ucp-schema lint source/` (after schema changes)
-* **Regenerate SDK Models:** `bash sdk/python/generate_models.sh` (after schema changes)
 * **Run Pre-commit Checks:** `pre-commit run --all-files` (after all changes)
 * **Execute Local Super-Linter:** `./scripts/super_linter_local.py` (requires docker or podman)
 
