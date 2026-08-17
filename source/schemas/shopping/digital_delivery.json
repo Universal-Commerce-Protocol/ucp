@@ -9,7 +9,7 @@
       "type": "object",
       "title": "Delivered Artifact",
       "description": "One digital artifact delivered by the order. Carries the inert data the buyer acts on plus a durable issuer reference; it does not carry authoritative mutable state.",
-      "required": ["id", "kind", "reference", "delivered_at"],
+      "required": ["id", "kind", "reference", "lookup", "delivered_at"],
       "properties": {
         "id": {
           "type": "string",
@@ -40,14 +40,49 @@
     "lookup": {
       "type": "object",
       "title": "Issuer Status Lookup",
-      "description": "How a Platform asks the issuer for the artifact's current state. The issuer is the single source of truth; the Platform MUST NOT treat a stored snapshot as authoritative.",
+      "description": "How a Platform asks the issuer for the artifact's current state. The issuer is the single source of truth; the Platform obtains state only by querying here and MUST NOT store or trust a snapshot. The issuer MUST authenticate the caller — 'reference' identifies the artifact but is not an authorization credential, so an unauthenticated GET keyed by 'reference' MUST NOT be used to disclose state. The issuer's answer conforms to '#/$defs/lookup_response'.",
       "required": ["url"],
       "properties": {
         "url": {
           "type": "string",
           "format": "uri",
-          "description": "HTTPS endpoint the Platform queries (GET) for current artifact state, keyed by 'reference'. MUST be constrained to an 'https:' origin allowlist advertised for the handler."
+          "description": "HTTPS endpoint the Platform queries for current artifact state, keyed by 'reference'. MUST be constrained to an 'https:' origin allowlist advertised for the handler, and MUST require caller authentication."
         }
+      }
+    },
+    "lookup_response": {
+      "type": "object",
+      "title": "Issuer Lookup Response",
+      "description": "The normative shape the issuer returns from 'lookup.url'. This is the authoritative state; it is queried live and never stored on the Order. It MUST carry 'as_of' so a Platform can distinguish a live issuer answer from a stale/cached one.",
+      "required": ["status", "as_of"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "partially_redeemed", "redeemed", "expired", "revoked"],
+          "description": "Current artifact status at the issuer. 'partially_redeemed' MUST be expressible so redemption history is not collapsed into a redeemed/not-redeemed boolean."
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp at which the issuer computed this answer. A Platform MUST use it to reject stale responses; without it a live answer is indistinguishable from a cached one."
+        },
+        "remaining": {
+          "$ref": "../common/types/amount.json",
+          "description": "For 'redeemable_artifact': remaining balance in ISO 4217 minor units. Together with 'currency', expresses partial redemption. Omitted for 'entitlement'."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "For 'redeemable_artifact': ISO 4217 currency code of 'remaining'."
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time",
+          "description": "For 'entitlement': end of the current validity window. The issuer MAY shorten it (revocation) at any time. Omitted for 'redeemable_artifact'."
+        }
+      },
+      "dependentRequired": {
+        "remaining": ["currency"]
       }
     },
     "display": {

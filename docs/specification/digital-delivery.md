@@ -46,9 +46,9 @@ to the Order and the shape of its artifacts.
   at an issuer) and an **`entitlement`** (a granted, revocable right)
 * Durable **issuer reference** plus a defined **lookup** — the Order stores the
   pointer, never the balance
-* Redemption — including **partial** redemption — resolved against the issuer,
-  which models it as an append-only ledger; the Order never keeps a copy or
-  collapses it into a status flag
+* Redemption — including **partial** redemption — reported through a typed
+  issuer lookup response (never stored on the Order), so partial state stays
+  expressible and is not collapsed into a boolean
 * Inert display data (code / QR image / hosted instructions) under the same
   render/trust rules as other display artifacts
 
@@ -97,6 +97,13 @@ one entry per delivered artifact. Each artifact is described below.
 
 {{ extension_schema_fields('digital_delivery.json#/$defs/artifact', 'digital_delivery') }}
 
+### Issuer Lookup Response
+
+The shape the issuer returns from `lookup.url`. This is the authoritative,
+live-queried state — it is never stored on the Order.
+
+{{ extension_schema_fields('digital_delivery.json#/$defs/lookup_response', 'digital_delivery') }}
+
 ## State and Trust Contract
 
 The Order carries **a pointer, never the authoritative state.** Redemption state
@@ -105,14 +112,23 @@ the issuer and changes without the order ever being touched — a chargeback, a
 ToS termination, the issuer sunsetting a product. Storing it on the order would
 turn every integrator into a reader of a stale copy. Implementations MUST honor:
 
-* **`reference` is the durable pointer.** It identifies the artifact at the
-  issuer for lookup. It is not the balance and not a credential to spend.
-* **`lookup` is how you ask.** Current state is obtained *only* by querying the
-  issuer via `lookup.url` (an `https:` origin allowlist), keyed by `reference`.
+* **`reference` is the durable pointer, not a credential.** It identifies the
+  artifact at the issuer for lookup; it is not the balance and not a credential
+  to spend. Because it is opaque but not necessarily unguessable, the issuer
+  MUST authenticate the caller of `lookup.url`; disclosing state to any holder of
+  `reference` is not acceptable unless the extension explicitly says so.
+* **`lookup` is required, and it is how you ask.** Every artifact carries a
+  `lookup`; current state is obtained *only* by querying the issuer via
+  `lookup.url` (an `https:` origin allowlist), keyed by `reference`. The answer
+  conforms to the [Issuer Lookup Response](#issuer-lookup-response) shape and MUST
+  carry `as_of`, so a Platform can tell a live answer from a stale or cached one.
 * **No cached state on the Order.** The Order carries no balance, validity, or
   redemption status — not even as an advisory copy — so there is nothing stale
   to trust. A Platform MUST NOT release funds, grant access, or deny a
   redemption without a fresh issuer answer.
+* **Fail closed when the issuer is unreachable.** If a fresh answer cannot be
+  obtained, the Platform MUST NOT act (no release, grant, or denial) and MUST NOT
+  fall back to a cached copy — the absence of an answer is not a state.
 * **Display data is inert.** `code` is display text, `image` is a static image
   only (`data:`/`https:`), and `instructions_url` is the only loadable field
   (`https:` origin allowlist, opened as a plain document).
@@ -121,17 +137,24 @@ turn every integrator into a reader of a stale copy. Implementations MUST honor:
 
 **Delivery is not terminal, and it is not settlement.**
 
-* `delivered` means the buyer received the artifact (the code/entitlement is
-  usable). It does **not** mean the artifact was redeemed, and it does **not**
-  mean funds settled. A settlement rail MUST NOT wire "delivered" to "release
-  funds": a delivered code may never be redeemed, or may be revoked later.
-* **`redeemable_artifact`** is drawn down at the issuer. The issuer models
-  redemption — including **partial** redemption — as an append-only ledger,
-  never a single terminal flag, so the history a dispute needs is preserved.
-  "How much is left" is answered by querying the issuer via `lookup`.
+* The presence of `delivered_at` means the buyer received the artifact (the
+  code/entitlement is usable). It does **not** mean the artifact was redeemed,
+  and it does **not** mean funds settled. This extension records the delivery
+  timestamp; it does not define a core Order state named `delivered`.
+* **Delivery does not release funds.** A settlement rail MUST NOT wire delivery
+  to "release funds": a delivered code may never be redeemed, or may be revoked
+  later. The release trigger is agreed by the rail out of band — a redemption
+  event, a dispute window expiring, an issuer attestation — and this extension's
+  contribution is the `lookup` that makes such a trigger checkable.
+* **`redeemable_artifact`** is drawn down at the issuer. Redemption — including
+  **partial** redemption — is expressed through the [lookup
+  response](#issuer-lookup-response), which MUST be able to report partial state
+  (`status: partially_redeemed` with a `remaining` balance), not merely redeemed
+  or not, so the history a dispute needs is not collapsed. "How much is left" is
+  answered by querying the issuer.
 * **`entitlement`** is a granted right with a validity window. It can be revoked
   by the issuer for reasons the order never sees; "is this still valid, until
-  when" is answered by querying the issuer via `lookup`.
+  when" is answered by the lookup response's `valid_until`.
 
 ## Out of Scope
 
