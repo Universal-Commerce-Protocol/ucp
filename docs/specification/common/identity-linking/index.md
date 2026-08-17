@@ -94,6 +94,15 @@ user's loyalty membership in `loyalty` (see [Loyalty](../extensions/loyalty.md))
 payment instruments in `payment.instruments[]` (see [Checkout](../../shopping/checkout/index.md)), or
 buyer profile data in `buyer`.
 
+Scalar profile fields connected to the authenticated user, such as
+`buyer.email`, `buyer.phone_number`, `buyer.first_name`, and `buyer.last_name`,
+use their normal schema-defined values; the base buyer schema does not define
+separate selectable ids for email addresses or phone numbers. Fulfillment
+destination selection remains governed by the
+[Fulfillment](../../shopping/extensions/fulfillment.md) contract; identity
+linking alone does not authorize proactive disclosure of precise saved-address
+or contact fields before the platform selects a destination.
+
 Businesses **MUST NOT** return stored user-specific state unless the request is
 user-authenticated and authorized for the operation. They **MUST** only return
 values that belong to the authenticated user and are appropriate for the
