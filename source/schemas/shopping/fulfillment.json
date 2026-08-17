@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/fulfillment.json",
   "name": "dev.ucp.shopping.fulfillment",
   "title": "Fulfillment Extension",
-  "description": "Extends Checkout with fulfillment support using methods, destinations, and groups.",
+  "description": "Extends Catalog with fulfillment discovery and Checkout with hierarchical fulfillment.",
   "$defs": {
     "fulfillment_option": {
       "$ref": "types/fulfillment_option.json"
@@ -41,11 +41,11 @@
         },
         "location": {
           "type": "string",
-          "description": "The location resolved for this method, where appropriate (e.g. the pickup store or location), as a location id."
+          "description": "Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method."
         },
         "options": {
           "type": "array",
-          "description": "Fulfillment options for this method (e.g. Standard, Express) to describe per-choice details such as cost, time estimates, etc. Optional and selective: without a destination or full cart, a business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); the full, high-resolution set is negotiated in cart and checkout.",
+          "description": "Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.",
           "items": { "$ref": "types/fulfillment_option_base.json" }
         }
       }
@@ -141,7 +141,7 @@
           "properties": {
             "fulfills_to": {
               "$ref": "types/fulfillment_destination_filter.json",
-              "description": "Where the order is fulfilled to — may differ from the buyer's `context` location (e.g. a gift). A `location` id, or a coarse address (`address_country`/`address_region`/`postal_code`). Restricts results to what can be fulfilled there and seeds method `availability`. Supersedes `context`."
+              "description": "Explicit destination where items are fulfilled. It may differ from the locality or Business Location supplied in `context` (e.g. a gift delivered directly to the recipient). The filter restricts results to what can be fulfilled there and seeds method `availability`. It supersedes `context` only for fulfillment destination and availability resolution."
             },
             "methods": {
               "type": "array",
