@@ -92,7 +92,22 @@ Identity linking provides the authenticated user context for these values.
 Subject to the scopes that gate the operation, a business **MAY** return the
 user's loyalty membership in `loyalty` (see [Loyalty](loyalty.md)), saved
 payment instruments in `payment.instruments[]` (see [Checkout](checkout.md)), or
-buyer profile data in `buyer`.
+buyer profile data in `buyer`. Where the relevant capability permits it, the
+business **MAY** also return saved or otherwise transaction-eligible fulfillment
+destinations in `fulfillment.methods[].destinations[]`; see
+[Fulfillment Location Context](fulfillment.md#location-context) for how
+fulfillment destination selection interacts with location context.
+
+Business-owned values remain connected to the authenticated identity-linked
+user, but selection follows the id-bearing surfaces already defined by the
+relevant schema. For example, a saved payment instrument can be selected by its
+`payment.instruments[].id`, and a saved fulfillment destination returned for a
+checkout method can be selected by setting that method's
+`selected_destination_id` to the returned destination `id`. Scalar profile
+fields connected to the authenticated user, such as `buyer.email`,
+`buyer.phone_number`, `buyer.first_name`, and `buyer.last_name`, use their
+normal schema-defined values; the base buyer schema does not define separate
+selectable ids for email addresses or phone numbers.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is
 user-authenticated and authorized for the operation. They **MUST** only return

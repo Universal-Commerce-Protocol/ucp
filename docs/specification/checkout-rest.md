@@ -375,6 +375,10 @@ Fulfillment is an extension to the checkout capability. Most fields are provided
 by the business based on buyer inputs, which includes desired fulfillment
 type & addresses.
 
+For selecting business-returned saved fulfillment destinations by id in
+identity-linked sessions, see
+[Business-Populated Response Values](identity-linking.md#business-populated-response-values).
+
 === "Request"
 
     <!-- ucp:example schema=shopping/checkout op=update direction=request -->
