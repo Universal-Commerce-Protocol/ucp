@@ -176,7 +176,7 @@ platform's handler specification (referenced via `spec`) documents the
 `/detokenize` endpoint URL exposed by the platform's
 **payment credential provider**.
 
-The handler accepts [PanCredential](site:schemas/shopping/types/pan_credential.json) and [NetworkTokenCredential](site:schemas/shopping/types/network_token_credential.json) for tokenization and produces [TokenCredential](site:schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [PanCredential](site:schemas/shopping/types/pan_credential.json) and [NetworkTokenCredential](site:schemas/shopping/types/network_token_credential.json) for tokenization and produces [TokenCredential](site:schemas/common/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**.
 Both the sender (platform's credential provider) and receiver
@@ -519,4 +519,4 @@ The platform's payment credential provider verifies that:
 
 * **Pattern:** [Tokenization Payment Handler](../guide.md)
 * **API Pattern:** [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)
-* **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)
+* **Identity Schema:** [schemas/common/types/payment_identity.json](site:schemas/common/types/payment_identity.json)

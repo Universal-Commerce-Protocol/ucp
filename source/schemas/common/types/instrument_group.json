@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/instrument_group.json",
+  "$id": "https://ucp.dev/schemas/common/types/instrument_group.json",
   "title": "Instrument Group",
   "description": "A constraint within an allowed combination that defines which instrument types can fill this group and how many are permitted.",
   "type": "object",

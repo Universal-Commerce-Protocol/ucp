@@ -81,7 +81,7 @@ context established by the payment attempt, and Platform policy.
 Actions are keyed by type in the Checkout response. For example, a device data
 collection step can be followed by a challenge in a later response:
 
-<!-- ucp:example schema=shopping/payment_authentication def=dev.ucp.shopping.checkout op=read -->
+<!-- ucp:example schema=common/payment_authentication def=dev.ucp.shopping.checkout op=read -->
 ```json
 {
   "ucp": {

@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/split_payments.json",
-  "name": "dev.ucp.shopping.split_payments",
+  "$id": "https://ucp.dev/schemas/common/split_payments.json",
+  "name": "dev.ucp.common.split_payments",
   "title": "Split Payments Extension",
-  "description": "Enables buyers to use multiple payment instruments for a single checkout.",
+  "description": "Enables users to use multiple payment instruments for a single session.",
   "requires": {
     "protocol": { "min": "2026-01-23" },
     "capabilities": {
@@ -23,8 +23,8 @@
           "type": "object",
           "properties": {
             "amount": {
-              "$ref": "../common/types/amount.json",
-              "description": "Contribution amount for this instrument in `checkout.currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
+              "$ref": "types/amount.json",
+              "description": "Contribution amount for this instrument in `currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
             }
           }
         }
@@ -34,7 +34,7 @@
       "title": "Checkout with Split Payments",
       "description": "Checkout extended with split payment instrument amounts.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        { "$ref": "../shopping/checkout.json" },
         {
           "type": "object",
           "properties": {
@@ -59,7 +59,7 @@
         }
       ]
     },
-    "dev.ucp.shopping.split_payments": {
+    "dev.ucp.common.split_payments": {
       "business_schema": {
         "title": "Split Payments Capability (Business)",
         "description": "Business-level split payments capability configuration.",

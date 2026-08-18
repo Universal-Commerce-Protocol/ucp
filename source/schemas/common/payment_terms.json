@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/payment_terms.json",
-  "name": "dev.ucp.shopping.payment_terms",
+  "$id": "https://ucp.dev/schemas/common/payment_terms.json",
+  "name": "dev.ucp.common.payment_terms",
   "title": "Payment Terms Extension",
-  "description": "Extends Checkout with selectable payment terms, letting a Business offer alternative schedules for when payment for the checkout is due, and projects the accepted term onto the resulting Order.",
+  "description": "Extends capabilities (e.g., checkout in retail shopping) with selectable payment terms, letting a Business offer alternative schedules for when payment for the checkout is due, and projects the accepted term onto the resulting Order.",
   "requires": {
     "protocol": { "min": "2026-04-08" },
     "capabilities": {
@@ -54,7 +54,7 @@
       "title": "Checkout with Payment Terms",
       "description": "Checkout extended with selectable payment terms.",
       "allOf": [
-        { "$ref": "checkout.json" },
+        { "$ref": "../shopping/checkout.json" },
         {
           "type": "object",
           "properties": {
@@ -75,7 +75,7 @@
       "title": "Order with Accepted Payment Term",
       "description": "Order extended with the payment term accepted at checkout.",
       "allOf": [
-        { "$ref": "order.json" },
+        { "$ref": "../shopping/order.json" },
         {
           "type": "object",
           "properties": {

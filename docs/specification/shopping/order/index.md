@@ -696,7 +696,7 @@ See [Message Signatures](../../signatures.md) for more details.
 | `Webhook-Timestamp`  | Event occurrence timestamp (unix)           |
 | `Webhook-Id`         | Unique event identifier                     |
 
-{{ method_fields('order_event_webhook', 'rest.openapi.json', 'shopping/order') }}
+{{ method_fields('order_event_webhook', 'shopping/rest.openapi.json', 'shopping/order') }}
 
 ### Webhook URL Configuration
 

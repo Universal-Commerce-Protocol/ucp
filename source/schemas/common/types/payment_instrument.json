@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/payment_instrument.json",
+  "$id": "https://ucp.dev/schemas/common/types/payment_instrument.json",
   "title": "Payment Instrument",
   "description": "The base definition for any payment instrument. It links the instrument to a specific payment handler.",
   "type": "object",
@@ -23,7 +23,7 @@
       "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
     },
     "billing_address": {
-      "$ref": "../../common/types/postal_address.json",
+      "$ref": "postal_address.json",
       "description": "The billing address associated with this payment method."
     },
     "credential": {
