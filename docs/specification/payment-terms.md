@@ -268,7 +268,7 @@ Businesses advertise payment terms support in their profile:
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.payment_terms": [
+      "dev.ucp.common.payment_terms": [
         {
           "version": "{{ ucp_version }}",
           "extends": [
@@ -276,7 +276,7 @@ Businesses advertise payment terms support in their profile:
             "dev.ucp.shopping.order"
           ],
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment-terms",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/payment_terms.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_terms.json"
         }
       ]
     }
@@ -406,7 +406,7 @@ own entry in `checkout.totals`:
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }],
-      "dev.ucp.shopping.payment_terms": [{ "version": "{{ ucp_version }}" }]
+      "dev.ucp.common.payment_terms": [{ "version": "{{ ucp_version }}" }]
     },
     "payment_handlers": {
       "com.example.card_handler": [
@@ -506,7 +506,7 @@ disclosure moves with the term it governs:
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.payment_terms": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.payment_terms": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "order_9f2",

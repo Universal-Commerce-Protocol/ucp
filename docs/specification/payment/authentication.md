@@ -30,7 +30,7 @@ two concrete [Action types](../overview/index.md#actions):
 The extension is named:
 
 ```text
-dev.ucp.shopping.payment_authentication
+dev.ucp.common.payment_authentication
 ```
 
 It extends `dev.ucp.shopping.checkout`. Negotiating this extension activates the
@@ -53,12 +53,12 @@ Businesses and Platforms advertise this extension in their profiles:
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.payment_authentication": [
+      "dev.ucp.common.payment_authentication": [
         {
           "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.checkout",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/authentication/",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/payment_authentication.json"
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_authentication.json"
         }
       ]
     }
@@ -88,7 +88,7 @@ collection step can be followed by a challenge in a later response:
     "version": "{{ ucp_version }}",
     "status": "success",
     "capabilities": {
-      "dev.ucp.shopping.payment_authentication": [
+      "dev.ucp.common.payment_authentication": [
         {
           "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.checkout"
