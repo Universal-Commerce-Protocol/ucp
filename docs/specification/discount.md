@@ -262,6 +262,7 @@ stacking and allocation details:
     {
       "ucp": { ... },
       "id": "...",
+      "status": "active",
       "currency": "...",
       "line_items": [ ... ],
       "discounts": {
@@ -354,6 +355,7 @@ proceeding to checkout.
     {
       "ucp": { ... },
       "id": "cart_abc123",
+      "status": "active",
       "currency": "USD",
       "line_items": [
         {
@@ -418,6 +420,7 @@ to the order as a whole and uses `type: "discount"` in totals.
     {
       "ucp": { ... },
       "id": "...",
+      "status": "active",
       "currency": "...",
       "line_items": [ ... ],
       "discounts": {
@@ -463,6 +466,7 @@ to line items, and an automatic shipping discount at the order level.
     {
       "ucp": { ... },
       "id": "...",
+      "status": "active",
       "currency": "...",
       "line_items": [
         {
@@ -534,6 +538,7 @@ but not in `discounts.applied`.
     {
       "ucp": { ... },
       "id": "...",
+      "status": "active",
       "currency": "...",
       "line_items": [ ... ],
       "discounts": {
@@ -573,6 +578,7 @@ Multiple discounts applied with full allocation breakdown:
     {
       "ucp": { ... },
       "id": "...",
+      "status": "active",
       "currency": "...",
       "line_items": [
         {

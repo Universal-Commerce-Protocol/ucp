@@ -39,6 +39,8 @@ Carts support:
 * **Incremental building**: Add/remove items across sessions
 * **Localized estimates**: Context-aware pricing without full checkout overhead
 * **Sharing**: `continue_url` enables cart sharing and recovery
+* **Outcome observability**: `status` lets a platform learn how a cart ended,
+  including after a one-way handoff it does not otherwise participate in
 
 ## Cart vs Checkout
 
@@ -46,9 +48,121 @@ Carts support:
 | ------ | ---- | -------- |
 | **Purpose** | Pre-purchase exploration | Purchase finalization |
 | **Payment** | None | Required (handlers, instruments) |
-| **Status** | Binary (exists/not found) | Lifecycle (`incomplete` → `completed`) |
+| **Status** | Terminal disposition only (`active` → `ordered`) | Full lifecycle (`incomplete` → `completed`) |
 | **Complete Operation** | No | Yes |
 | **Totals** | Estimates (may be partial) | Final pricing |
+
+Cart defines no intermediate states. Every state between purchase intent and
+order placement belongs to Checkout. Cart carries only a terminal disposition,
+so that how a cart ended is reported rather than inferred.
+
+## Cart Status
+
+The cart `status` field indicates the cart's disposition. The business sets the
+status. `active` is the only non-terminal value; the remaining values are
+terminal and **MUST NOT** change once reached.
+
+* **`active`**: Cart accepts reads and updates. This is the state a cart is
+    created in.
+
+* **`ordered`**: Cart contents were purchased. Terminal. Independent of the flow
+    that placed the order — a UCP checkout session, the business's own web
+    checkout following a `continue_url` handoff, or any other flow the business
+    supports. The business sets it from its own record of the purchase; no UCP
+    checkout session need exist.
+
+* **`canceled`**: Cart was canceled via [Cancel Cart](#cancel-cart) or by the
+    business. Terminal.
+
+* **`expired`**: Cart passed `expires_at` without being ordered. Terminal.
+
+```text
+                                            +-----------+
+                    +---------------------->|  ordered  |
+                    | contents purchased    +-----------+
+                    |
+                    |                       +-----------+
+   +----------+     |                       | canceled  |
+   |  active  |-----+---------------------->|           |
+   +----------+     |   Cancel Cart         +-----------+
+                    |
+                    |                       +-----------+
+                    +---------------------->|  expired  |
+                        past expires_at     +-----------+
+
+                    (terminal states are immutable)
+```
+
+Operations that would mutate a cart in a terminal state **MUST** fail. The
+platform can start a fresh session with Create Cart. Cancel Cart on a cart that
+is already `canceled` **SHOULD** succeed and return the canceled cart, so that
+cancellation remains idempotent.
+
+| Code | Meaning |
+| :--- | :--- |
+| `cart_not_active` | A mutating operation was called on a cart whose `status` is terminal. |
+
+### Expiry and Retention
+
+Expiry and retention are separate concerns. Cart defines the first only.
+
+* **Expiry** — `expires_at` is the RFC 3339 deadline after which the cart is no
+    longer usable. Passing it transitions `status` to `expired`. Businesses
+    **MAY** set `expires_at`; cart defines no default TTL.
+
+* **Retention** — how long the business keeps the record after the cart reaches
+    a terminal state, and therefore how long that `status` stays observable.
+    Cart defines no field and no default for retention. Once the record is
+    discarded, Get Cart returns `not_found`.
+
+A terminal `status` is therefore readable for a bounded, business-specific
+window. Platforms **MUST NOT** assume a terminal `status` remains retrievable
+indefinitely.
+
+### Relationship to `not_found`
+
+A terminal `status` and `not_found` are different answers. `not_found` reports
+that no record exists; it does not report how a cart ended. It covers ordered,
+canceled, expired, and never-existed alike, so a platform cannot use it to tell
+a purchase from an abandonment.
+
+Businesses **SHOULD** report the terminal `status` in preference to `not_found`
+for carts they still hold. `not_found` remains correct for cart IDs that never
+existed and for records already discarded.
+
+## Detecting Outcome After Handoff
+
+Cart handoff via `continue_url` is one-way. The buyer completes the purchase in
+the business UI, and the platform does not participate in that flow — it may
+hold no checkout session and issue no further calls. The platform is still
+surfacing the cart, so it needs to know whether to continue doing so.
+
+Platforms **SHOULD** poll [Get Cart](#get-cart) after a handoff and act on
+`status`:
+
+| `status` | Meaning | Platform Action |
+| :--- | :--- | :--- |
+| `active` | Buyer has not finished | Continue surfacing the cart, subject to `expires_at` |
+| `ordered` | Cart contents were purchased | Stop surfacing the cart as pending; stop prompting the buyer to complete it |
+| `canceled` | Cart was canceled | Release the cart; **MAY** offer to rebuild |
+| `expired` | Cart passed `expires_at` without a purchase | Release the cart; **MAY** offer to rebuild |
+| `not_found` | No record retained | Outcome unknown; **MUST NOT** be read as purchased or as abandoned |
+
+`ordered` and `canceled`/`expired` prescribe opposite handling, which is why
+`not_found` is not a substitute for `status`. Because terminal values are
+immutable, a platform that observes one **MAY** stop polling; no later reversal
+occurs at this layer.
+
+### Scope of `ordered`
+
+`ordered` reports that cart contents were purchased. It does not identify the
+resulting order and carries no fulfillment information.
+
+Platforms requiring the order itself — for reconciliation, attribution, or
+post-purchase support — **MUST** obtain it from the [Checkout](checkout.md)
+capability, whose `order_confirmation` carries the order `id` and
+`permalink_url`, and track delivery through the [Order](order.md) capability.
+Cart `status` is a cart lifecycle signal, not an order handle.
 
 ## Cart-to-Checkout Conversion
 
@@ -79,15 +193,25 @@ ensures a single active checkout per cart and prevents conflicting sessions.
 When checkout is initialized via `cart_id`, the cart and checkout sessions
 SHOULD be linked for the duration of the checkout.
 
-* **During active checkout** — Business SHOULD maintain the cart and reflect
-    relevant checkout modifications (quantity changes, item removals) back to
-    the cart. This supports back-to-storefront flows when buyers transition
-    between checkout and storefront.
+* **During active checkout** — Cart `status` remains `active`. Business SHOULD
+    maintain the cart and reflect relevant checkout modifications (quantity
+    changes, item removals) back to the cart. This supports back-to-storefront
+    flows when buyers transition between checkout and storefront.
 
-* **After checkout completion** — Business MAY clear the cart based on TTL,
-    completion of the checkout, or other business logic. Subsequent operations
-    on a cleared cart ID return `not_found`; the platform can start a new
-    session with `create_cart`.
+* **After checkout completion** — Business **MUST** set cart `status` to
+    `ordered`. Business **MAY** subsequently discard the cart based on TTL or
+    other business logic, after which operations on that cart ID return
+    `not_found`; the platform can start a new session with `create_cart`.
+
+Conversion is one path to `ordered`, not the only one. A business whose buyers
+finish on its own web checkout after a `continue_url` handoff sets `ordered`
+from that flow. See [Cart Status](#cart-status).
+
+> **Note:** Cart defines no retention window — see
+> [Expiry and Retention](#expiry-and-retention). A cart discarded before the
+> platform polls is indistinguishable from one that was never ordered, so
+> businesses supporting handoff **SHOULD** retain terminal carts long enough for
+> the outcome to be read.
 
 ## Quantity and sale basis
 
@@ -116,10 +240,13 @@ item count.
 The cart surfaces outstanding Action instances in its response-only `actions`
 map, defined in [Overview — Actions](overview.md#actions).
 
-The cart has no status lifecycle. Each Action gates only the cart effect
-specified for its Action type. The Business **MUST NOT** treat an outstanding
-Action as a reason to reject an unrelated cart operation. The Platform **MAY**
-continue to add, remove, and update items while an Action is outstanding.
+The cart has no intermediate status lifecycle to advance; `status` records only a
+terminal disposition (see [Cart Status](#cart-status)). Actions **MUST NOT**
+change `status`, and an outstanding Action does not prevent a cart from remaining
+`active`. Each Action gates only the cart effect specified for its Action type.
+The Business **MUST NOT** treat an outstanding Action as a reason to reject an
+unrelated cart operation. The Platform **MAY** continue to add, remove, and
+update items while an Action is outstanding.
 
 After processing an Action, the Platform **SHOULD** use [Get Cart](#get-cart)
 or a subsequent update response to obtain the latest Cart.
@@ -143,12 +270,27 @@ custom scopes are defined in [Identity Linking — Scopes](identity-linking.md#s
 * **MAY** use carts for pre-purchase exploration and session persistence.
 * **SHOULD** convert cart to checkout when user expresses purchase intent.
 * **MAY** display `continue_url` for handoff to business UI.
-* **SHOULD** handle `not_found` gracefully when cart expires or is canceled.
+* **SHOULD** poll Get Cart after a `continue_url` handoff to observe `status`
+    rather than inferring the outcome from `not_found`.
+* **MUST NOT** treat `not_found` as evidence that an order was or was not
+    placed.
+* **SHOULD** stop surfacing a cart as pending once `status` is terminal.
+* **MUST NOT** assume a terminal `status` remains retrievable indefinitely.
+* **MUST NOT** rely on cart `status` to identify or track the resulting order;
+    use the [Checkout](checkout.md) and [Order](order.md) capabilities instead.
+* **SHOULD** handle `not_found` gracefully when the business retains no record.
 
 ### Business
 
 * **SHOULD** provide `continue_url` for cart handoff and session recovery.
 * TODO: discuss `continue_url` destination - cart vs checkout.
+* **MUST** set `status` = `ordered` once cart contents have been purchased,
+    regardless of which flow placed the order.
+* **MUST NOT** change `status` once it holds a terminal value.
+* **SHOULD** return the terminal `status` in preference to `not_found` for carts
+    they still hold.
+* **SHOULD** retain terminal carts long enough for a handed-off platform to read
+    the outcome.
 * **SHOULD** provide estimated totals when calculable.
 * **MAY** omit fulfillment totals until checkout when address is unknown.
 * **SHOULD** return informational messages for validation warnings.
@@ -202,8 +344,13 @@ indicator:
 
 ### Get Cart
 
-Retrieves the latest state of a cart session. Returns `not_found` if the cart
-does not exist, has expired, or was canceled.
+Retrieves the latest state of a cart session, including its `status`. This is the
+operation a platform polls to
+[detect the outcome of a handoff](#detecting-outcome-after-handoff).
+
+Carts that have reached a terminal state are still returned, carrying the
+terminal `status`. Returns `not_found` only when the business holds no record
+for the cart ID.
 
 * [REST Binding](cart-rest.md#get-cart)
 * [MCP Binding](cart-mcp.md#get_cart)
@@ -214,13 +361,21 @@ Performs a full replacement of the cart session. The platform **MUST** send
 the entire cart resource. The provided resource replaces the existing cart
 state on the business side.
 
+Only carts with `status` = `active` are updatable. Updating a cart in a
+terminal state **MUST** fail with `cart_not_active`.
+
 * [REST Binding](cart-rest.md#update-cart)
 * [MCP Binding](cart-mcp.md#update_cart)
 
 ### Cancel Cart
 
-Cancels a cart session. Business MUST return the cart state before deletion.
-Subsequent operations for this cart ID SHOULD return `not_found`.
+Cancels a cart session. Business **MUST** return the cart with `status` set to
+`canceled`, and **SHOULD** return the same for a cart that is already
+`canceled`, keeping the operation idempotent.
+
+Cancel Cart on a cart that is `ordered` **MUST** fail with `cart_not_active` —
+the order has been placed, and cancellation at that point is an
+[Order](order.md) concern, not a cart one.
 
 * [REST Binding](cart-rest.md#cancel-cart)
 * [MCP Binding](cart-mcp.md#cancel_cart)

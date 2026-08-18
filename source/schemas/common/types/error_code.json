@@ -6,6 +6,7 @@
   "type": "string",
   "examples": [
     "not_found",
+    "cart_not_active",
     "out_of_stock",
     "item_unavailable",
     "address_undeliverable",

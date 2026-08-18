@@ -4,6 +4,7 @@
     "status": "success"
   },
   "id": "cart_scaffold",
+  "status": "active",
   "currency": "USD",
   "line_items": [
     {

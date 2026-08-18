@@ -157,6 +157,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           ]
         }
       ],
+      "status": "active",
       "currency": "USD",
       "totals": [
         {
@@ -247,6 +248,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           ]
         }
       ],
+      "status": "active",
       "currency": "USD",
       "totals": [
         {
@@ -263,7 +265,61 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     }
     ```
 
+=== "Ordered"
+
+    The buyer completed the purchase in the business UI after a `continue_url`
+    handoff. The platform reads `ordered` and stops surfacing the cart as
+    pending:
+
+    <!-- ucp:example schema=shopping/cart op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+          "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+        }
+      },
+      "id": "cart_abc123",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "status": "ordered",
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "total",
+          "amount": 5000
+        }
+      ]
+    }
+    ```
+
 === "Not Found"
+
+    The business holds no record for this cart ID. `not_found` does not indicate
+    whether an order was placed; a retained cart reports a terminal `status`
+    instead:
 
     <!-- ucp:example schema=common/types/error_response op=read -->
     ```json
@@ -382,6 +438,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           ]
         }
       ],
+      "status": "active",
       "currency": "USD",
       "totals": [
         {
@@ -452,6 +509,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
           ]
         }
       ],
+      "status": "canceled",
       "currency": "USD",
       "totals": [
         {
@@ -541,6 +599,9 @@ HTTP 200 and the UCP envelope containing `messages`:
   "continue_url": "https://merchant.com/"
 }
 ```
+
+Update Cart and Cancel Cart on a cart whose `status` is terminal return
+`cart_not_active` in the same form.
 
 ## Security Considerations
 
