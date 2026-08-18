@@ -111,7 +111,7 @@ gift cards alone, and (c) two credit cards:
 ```json
 {
   "capabilities": [{
-    "dev.ucp.shopping.split_payments": [
+    "dev.ucp.common.split_payments": [
       {
         "version": "2026-01-23",
         "config": {
