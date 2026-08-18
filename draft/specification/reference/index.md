@@ -157,6 +157,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Location Summary
+
+| Name    | Type                                                             | Requirement                       | Description                                          |
+| ------- | ---------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------- |
+| id      | string                                                           | **Required**                      | Stable, opaque, Business-scoped Location identifier. |
+| name    | string                                                           | **Required**; omitted in requests | Buyer-facing, Business-owned display name.           |
+| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional; omitted in requests     | Physical address of the location.                    |
+
+______________________________________________________________________
+
 ### Measure
 
 | Name         | Type    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                        |
@@ -482,7 +492,10 @@ ______________________________________________________________________
 
 ### Fulfillment Destination
 
-This object MUST be one of the following types: [Shipping Destination](/draft/specification/reference/#shipping-destination), [Retail Location](/draft/specification/reference/#retail-location).
+| Name | Type   | Requirement                        | Description                                                                                                                                                                                                                                                                                                       |
+| ---- | ------ | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type | string | **Required**; optional in requests | Destination contract discriminator. Required in Business responses and optional in Platform requests. Well-known values: `shipping_address`, `business_location`. The enclosing method contract defines request defaults and which fields the Platform may write; negotiated extensions define additional values. |
+| id   | string | **Required**; optional in requests | Fulfillment destination identifier.                                                                                                                                                                                                                                                                               |
 
 ______________________________________________________________________
 
@@ -525,14 +538,14 @@ ______________________________________________________________________
 
 ### Fulfillment Method
 
-| Name                    | Type                                                                                        | Requirement                                         | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                      | **Required**; omitted on create, optional on update | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                      | **Required**; optional on update                    | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
-| line_item_ids           | Array[string]                                                                               | **Required**; optional on create                    | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | Optional                                            | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                          | Optional                                            | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | Optional                                            | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                    | Type                                                                                        | Requirement                                         | Description                                                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                      | string                                                                                      | **Required**; omitted on create, optional on update | Unique fulfillment method identifier.                                                                                                                                        |
+| type                    | string                                                                                      | **Required**; optional on update                    | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                      |
+| line_item_ids           | Array[string]                                                                               | **Required**; optional on create                    | Line item IDs fulfilled via this method.                                                                                                                                     |
+| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | Optional; omitted in requests                       | Available destinations for this method. In Business responses, each destination carries a `type` and `id`.                                                                   |
+| selected_destination_id | ['string', 'null']                                                                          | Optional                                            | ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`. |
+| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | Optional                                            | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.                                                                 |
 
 ______________________________________________________________________
 
@@ -601,6 +614,17 @@ ______________________________________________________________________
 | quantity  | integer                                                 | **Required**                                        | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
 | totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required**; omitted in requests                   | Line item totals breakdown.                                                                                                                                                                                                                                                                                                                              |
 | parent_id | string                                                  | Optional; omitted on create                         | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
+
+______________________________________________________________________
+
+### Business Location Destination
+
+| Name    | Type                                                             | Requirement                       | Description                                                                      |
+| ------- | ---------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| id      | string                                                           | **Required**                      | Stable, opaque, Business-scoped Location identifier.                             |
+| name    | string                                                           | **Required**; omitted in requests | Buyer-facing, Business-owned display name.                                       |
+| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional; omitted in requests     | Physical address of the location.                                                |
+| type    | string                                                           | **Required**; omitted in requests | **Constant = business_location**. Destination type discriminator. Response-only. |
 
 ______________________________________________________________________
 
@@ -766,16 +790,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Retail Location
-
-| Name    | Type                                                             | Requirement                       | Description                       |
-| ------- | ---------------------------------------------------------------- | --------------------------------- | --------------------------------- |
-| id      | string                                                           | **Required**; omitted in requests | Unique location identifier.       |
-| name    | string                                                           | **Required**                      | Location name (e.g., store name). |
-| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional                          | Physical address of the location. |
-
-______________________________________________________________________
-
 ### Search Filters
 
 | Name       | Type                                                         | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -809,6 +823,7 @@ ______________________________________________________________________
 | last_name        | string | Optional                           | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
 | phone_number     | string | Optional                           | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 | id               | string | **Required**; optional in requests | ID specific to this shipping destination.                                                                                                                                                                                                 |
+| type             | string | **Required**; optional in requests | **Constant = shipping_address**. Destination type discriminator.                                                                                                                                                                          |
 
 ______________________________________________________________________
 
@@ -1205,14 +1220,14 @@ A merchant-generated package/group of line items with fulfillment options.
 
 A fulfillment method with destinations and groups.
 
-| Name                    | Type               | Requirement  | Description                                                                                                  |
-| ----------------------- | ------------------ | ------------ | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string             | **Required** | Unique fulfillment method identifier.                                                                        |
-| type                    | string             | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
-| line_item_ids           | Array[string]      | **Required** | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array[object]      | Optional     | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null'] | Optional     | ID of the selected destination.                                                                              |
-| groups                  | Array[object]      | Optional     | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                    | Type               | Requirement  | Description                                                                                                                                                                  |
+| ----------------------- | ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                      | string             | **Required** | Unique fulfillment method identifier.                                                                                                                                        |
+| type                    | string             | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                      |
+| line_item_ids           | Array[string]      | **Required** | Line item IDs fulfilled via this method.                                                                                                                                     |
+| destinations            | Array[object]      | Optional     | Available destinations for this method. In Business responses, each destination carries a `type` and `id`.                                                                   |
+| selected_destination_id | ['string', 'null'] | Optional     | ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`. |
+| groups                  | Array[object]      | Optional     | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.                                                                 |
 
 #### Fulfillment Available Method
 
@@ -1238,13 +1253,13 @@ Container for fulfillment methods and availability.
 
 A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.
 
-| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                  |
-| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                      |
-| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                              |
-| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                          |
-| location     | string        | Optional     | Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.                                                                                                                                                                                        |
-| options      | Array[object] | Optional     | Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known. |
+| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                |
+| ------------ | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                    |
+| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                            |
+| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                        |
+| location     | string        | Optional     | Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method. The Business recognizes the same ID when submitted as `selected_destination_id` for that method; recognition does not reserve inventory or guarantee eligibility, and current terms are revalidated. |
+| options      | Array[object] | Optional     | Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.               |
 
 #### Catalog Fulfillment
 

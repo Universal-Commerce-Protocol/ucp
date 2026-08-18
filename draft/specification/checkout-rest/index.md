@@ -322,7 +322,7 @@ Content-Type: application/json
 
 #### Update Fulfillment
 
-Fulfillment is an extension to the checkout capability. Most fields are provided by the business based on buyer inputs, which includes desired fulfillment type & addresses.
+Fulfillment is an extension to the checkout capability. The Platform submits Buyer inputs such as desired fulfillment method types, shipping addresses, and Business Location selections; the Business returns the resulting fulfillment state.
 
 ```json
 PUT /checkout-sessions/{id} HTTP/1.1
@@ -456,6 +456,7 @@ Content-Type: application/json
         "selected_destination_id": "dest_home",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_home",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -649,6 +650,7 @@ Content-Type: application/json
         "selected_destination_id": "dest_home",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_home",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -840,6 +842,7 @@ Content-Type: application/json
         "selected_destination_id": "dest_home",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_home",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -993,6 +996,7 @@ Content-Type: application/json
         "selected_destination_id": "dest_home",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_home",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -1144,6 +1148,7 @@ Content-Type: application/json
         "selected_destination_id": "dest_home",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_home",
             "street_address": "123 Main St",
             "address_locality": "Springfield",

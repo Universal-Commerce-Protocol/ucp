@@ -30,7 +30,6 @@ On Checkout, the `fulfillment` field contains:
   - `selected_destination_id` = `destinations[0].id` 🔘✅ Uptown Store
   - `groups[0]` 📦👞
     - `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
-    - `options[1]` 🔘 Curbside Pickup
 
 ## Location Context
 
@@ -75,18 +74,21 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 #### Fulfillment Method
 
-| Name                    | Type                                                                                        | Requirement  | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
-| id                      | string                                                                                      | **Required** | Unique fulfillment method identifier.                                                                        |
-| type                    | string                                                                                      | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.      |
-| line_item_ids           | Array[string]                                                                               | **Required** | Line item IDs fulfilled via this method.                                                                     |
-| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | Optional     | Available destinations. For shipping: addresses. For pickup: retail locations.                               |
-| selected_destination_id | ['string', 'null']                                                                          | Optional     | ID of the selected destination.                                                                              |
-| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | Optional     | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method. |
+| Name                    | Type                                                                                        | Requirement  | Description                                                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                      | string                                                                                      | **Required** | Unique fulfillment method identifier.                                                                                                                                        |
+| type                    | string                                                                                      | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                      |
+| line_item_ids           | Array[string]                                                                               | **Required** | Line item IDs fulfilled via this method.                                                                                                                                     |
+| destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | Optional     | Available destinations for this method. In Business responses, each destination carries a `type` and `id`.                                                                   |
+| selected_destination_id | ['string', 'null']                                                                          | Optional     | ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`. |
+| groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | Optional     | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.                                                                 |
 
 #### Fulfillment Destination
 
-This object MUST be one of the following types: [Shipping Destination](/draft/specification/reference/#shipping-destination), [Retail Location](/draft/specification/reference/#retail-location).
+| Name | Type   | Requirement  | Description                                                                                                                                                                                                                                                                                                       |
+| ---- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type | string | **Required** | Destination contract discriminator. Required in Business responses and optional in Platform requests. Well-known values: `shipping_address`, `business_location`. The enclosing method contract defines request defaults and which fields the Platform may write; negotiated extensions define additional values. |
+| id   | string | **Required** | Fulfillment destination identifier.                                                                                                                                                                                                                                                                               |
 
 #### Shipping Destination
 
@@ -102,14 +104,20 @@ This object MUST be one of the following types: [Shipping Destination](/draft/sp
 | last_name        | string | Optional     | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
 | phone_number     | string | Optional     | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 | id               | string | **Required** | ID specific to this shipping destination.                                                                                                                                                                                                 |
+| type             | string | **Required** | **Constant = shipping_address**. Destination type discriminator.                                                                                                                                                                          |
 
-#### Retail Location
+#### Business Location Destination
 
-| Name    | Type                                                             | Requirement  | Description                       |
-| ------- | ---------------------------------------------------------------- | ------------ | --------------------------------- |
-| id      | string                                                           | **Required** | Unique location identifier.       |
-| name    | string                                                           | **Required** | Location name (e.g., store name). |
-| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional     | Physical address of the location. |
+| Name    | Type                                                             | Requirement  | Description                                                                      |
+| ------- | ---------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------- |
+| id      | string                                                           | **Required** | Stable, opaque, Business-scoped Location identifier.                             |
+| name    | string                                                           | **Required** | Buyer-facing, Business-owned display name.                                       |
+| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional     | Physical address of the location.                                                |
+| type    | string                                                           | **Required** | **Constant = business_location**. Destination type discriminator. Response-only. |
+
+#### Location Summary
+
+See [Location Summary](/draft/specification/reference/#location-summary) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
 
 #### Fulfillment Group
 
@@ -173,6 +181,7 @@ See [Postal Address](/draft/specification/reference/#postal-address) in the [Sch
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -217,6 +226,109 @@ See [Postal Address](/draft/specification/reference/#postal-address) in the [Sch
   }
 }
 ```
+
+## Destinations
+
+A fulfillment method's `type` describes how items are fulfilled, for example by shipping or pickup. A destination's `type` describes where fulfillment occurs, for example at a shipping address or Business Location. The two discriminators play different roles by direction: in Business responses, every destination carries a required `type`, so responses are self-describing; in Platform requests, the method's contract determines who authors `destinations[]` and MAY define a default destination shape when `type` is omitted.
+
+By default, the Platform does not write a method's `destinations[]`; a contract keyed on the method's `type` **MAY** opt into a Platform-writable request shape:
+
+| Method `type`           | Request `destinations[]`                                                                                                                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shipping`              | Platform-writable. The Platform writes the Buyer's shipping-address facts.                                                                                                                                     |
+| `pickup`                | Not Platform-writable. The Business enumerates locations in its response; the Platform selects a location by its Business-scoped ID (see [Selection and Location Identity](#selection-and-location-identity)). |
+| any other method `type` | Not Platform-writable (the base default). The Business enumerates destinations in its response; the Platform selects one via `selected_destination_id`.                                                        |
+
+Destination `type` is **required in responses and optional in requests**. In responses, every destination carries `type`, so destinations remain self-describing wherever they appear. In requests, `destinations[]` is omitted unless a method-specific contract opts into a Platform-writable shape:
+
+- Under a well-known `shipping` method, every destination is a Shipping Destination: a destination that omits `type` defaults to `shipping_address`.
+- Under a well-known `pickup` method, destinations are response-only; the Platform selects a location via `selected_destination_id` (see [Selection and Location Identity](#selection-and-location-identity)).
+- Under any other method type, the base default applies: `destinations[]` is response-only, each response destination self-describes through its required `type` and `id`, and the Platform selects one via `selected_destination_id`. That method's defining contract — a future revision of this specification or a negotiated extension — **MAY** narrow the response destination shape or opt into a Platform-writable request shape.
+
+A request that includes `destinations[]` MUST also include the method's `type`. The well-known values are:
+
+| Value               | Meaning                                                               |
+| ------------------- | --------------------------------------------------------------------- |
+| `shipping_address`  | A Shipping Destination with flat Postal Address fields.               |
+| `business_location` | A Business Location Destination identified by a Business-scoped `id`. |
+
+Additional values are defined by negotiated extensions. Destination fields specific to such a value are validated by the negotiated extension's schema.
+
+### Shipping Destination
+
+A Shipping Destination can contain the address itself or an `id` that references a saved address. The Business can resolve that `id` from its own records or through a trusted Credential Provider, such as a digital wallet or identity provider.
+
+#### Platform Request
+
+```json
+{
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
+
+#### Business Response
+
+```json
+{
+  "type": "shipping_address",
+  "id": "dest_1",
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
+
+### Business Location Destination
+
+Business Location Destinations appear only in responses; `destinations[]` on a `pickup` method is not a request field. The Platform **MUST NOT** write Business Location Destinations into `destinations[]`; it selects a location by submitting its stable, opaque, Business-scoped ID as `selected_destination_id`. The Business **MUST** return `type: "business_location"`, `id`, and its Buyer-facing `name`, and **MAY** return its Postal Address in `address`.
+
+#### Platform Request
+
+```json
+{
+  "type": "pickup",
+  "line_item_ids": ["shirt", "pants"],
+  "selected_destination_id": "loc_downtown"
+}
+```
+
+#### Business Response
+
+```json
+{
+  "type": "business_location",
+  "id": "loc_downtown",
+  "name": "Downtown Store",
+  "address": {
+    "street_address": "123 Main St",
+    "address_locality": "Springfield",
+    "address_region": "IL",
+    "postal_code": "62701",
+    "address_country": "US"
+  }
+}
+```
+
+### Selection and Location Identity
+
+`selected_destination_id` identifies the selected destination in a method by its `id`, and is the sole channel for selecting a Business Location. It accepts any stable, Business-scoped ID the Business recognizes for that method, including an ID the Business has not (yet) enumerated in that method's `destinations[]`.
+
+Selection is source-agnostic. A non-null `selected_destination_id` **MAY** carry an ID the Platform obtained from a Catalog response, a Location search or lookup, an earlier Checkout, or any other source the Business recognizes for that method. Where the ID came from does not change the contract below.
+
+When the Business accepts a non-null `selected_destination_id`, its response:
+
+- **MUST** carry that same `selected_destination_id` value on the method; and
+- **MUST** include exactly one destination in that same method's `destinations[]` whose `id` equals it, typed as specified in [Destinations](#destinations) — so the response is self-describing whatever the ID's source.
+
+The Business **MUST** revalidate the selected destination's current availability and terms; recognizing an ID neither reserves inventory nor guarantees eligibility. The Business **MUST NOT** silently substitute another destination: it **MUST NOT** return a different `selected_destination_id`, and **MUST NOT** keep the submitted ID while returning a destination that describes another location. A Business that cannot honor the submitted selection rejects it rather than replacing it.
+
+When the Business cannot accept a `selected_destination_id` submitted on [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) — the ID is not recognized for that method, or revalidation fails — it follows the general behavior for a rejected Update: it **MUST** leave the current Checkout unchanged and **MUST** return that Checkout with an error Message with `severity: "recoverable"` whose `path` selects the attempted method's `selected_destination_id` (for example `$.fulfillment.methods[0].selected_destination_id`). See [Error Handling](http://ucp.dev/draft/specification/checkout/#error-handling) and [The `path` Field](http://ucp.dev/draft/specification/checkout/#the-path-field).
 
 ## Rendering
 
@@ -332,7 +444,7 @@ When the fulfillment extension extends the Catalog capability, each variant in a
 - `type` — the fulfillment method (e.g. `shipping`, `pickup`); see [Method Types](#method-types).
 - `description` — short, buyer-facing summary of how the variant is fulfilled via this method (e.g. "Ships in 2–4 business days"). Directly renderable; see [Rendering](#rendering).
 - `availability` — whether the variant is available via this method at the specified or inferred location.
-- `location` — for place-based methods (e.g. `pickup`), the [Location](http://ucp.dev/draft/specification/glossary/#commerce) resolved for that method: the Business's stable identifier for that place. A Business that advertises pickup at a `location` **MUST** accept that same ID as `selected_destination_id` for that method in Checkout.
+- `location` — for place-based methods such as `pickup`, the [Location](http://ucp.dev/draft/specification/glossary/#commerce) resolved for that method and the Business's stable identifier for that place. A Business that advertises pickup at a `location` **MUST** accept that same ID as `selected_destination_id` for that method in Checkout. The Business revalidates current availability and terms; discovery neither reserves inventory nor guarantees eligibility. The selection contract is source-agnostic; see [Selection and Location Identity](#selection-and-location-identity).
 - `options` — concrete fulfillment choices within this method (e.g. Standard, Express); see [Options](#options). Optional.
 
 Catalog reports availability for a single location per method — the one specified via `fulfills_to` or inferred from `context`; discovering and comparing other locations is handled separately.
@@ -361,13 +473,13 @@ How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.
 
 A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.
 
-| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                  |
-| ------------ | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                      |
-| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                              |
-| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                          |
-| location     | string        | Optional     | Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.                                                                                                                                                                                        |
-| options      | Array[object] | Optional     | Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known. |
+| Name         | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                |
+| ------------ | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string        | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                                                                                                                                                    |
+| description  | object        | Optional     | Short buyer-facing summary (e.g. 'Ships in 2–4 business days').                                                                                                                                                                                                                                            |
+| availability | object        | Optional     | Availability of this variant via this method at the specified or inferred location.                                                                                                                                                                                                                        |
+| location     | string        | Optional     | Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method. The Business recognizes the same ID when submitted as `selected_destination_id` for that method; recognition does not reserve inventory or guarantee eligibility, and current terms are revalidated. |
+| options      | Array[object] | Optional     | Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.               |
 
 #### Fulfillment Option Base
 
@@ -616,6 +728,7 @@ A method is identified by its `type` and its fulfillment scope (what it fulfills
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -685,6 +798,7 @@ Business splits items into multiple packages; buyer selects shipping rate per pa
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -759,6 +873,7 @@ Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the s
         "selected_destination_id": "dest_mom",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_mom",
             "street_address": "123 Mom St",
             "address_locality": "Springfield",
@@ -804,6 +919,7 @@ Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the s
         "selected_destination_id": "dest_grandma",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_grandma",
             "street_address": "88 Queensway",
             "address_locality": "Hong Kong",

@@ -243,6 +243,7 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/checkout/#creat
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",
@@ -487,6 +488,7 @@ The Platform **MUST NOT** start a new `update_checkout` operation while the Chec
             "selected_destination_id": "dest_home",
             "destinations": [
               {
+                "type": "shipping_address",
                 "id": "dest_home",
                 "street_address": "123 Main St",
                 "address_locality": "Springfield",

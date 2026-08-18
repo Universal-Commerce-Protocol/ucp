@@ -9,7 +9,6 @@
     "type",
     "line_item_ids"
   ],
-  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",
@@ -40,7 +39,8 @@
     },
     "destinations": {
       "type": "array",
-      "description": "Available destinations. For shipping: addresses. For pickup: retail locations.",
+      "description": "Available destinations for this method. In Business responses, each destination carries a `type` and `id`.",
+      "ucp_request": "omit",
       "items": {
         "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_destination.json"
       }
@@ -50,7 +50,7 @@
         "string",
         "null"
       ],
-      "description": "ID of the selected destination."
+      "description": "ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`."
     },
     "groups": {
       "type": "array",
@@ -59,5 +59,60 @@
         "$ref": "https://ucp.dev/draft/schemas/shopping/types/fulfillment_group.json"
       }
     }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "shipping"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "destinations": {
+            "type": "array",
+            "description": "Platform-authored shipping addresses for this method.",
+            "ucp_request": "optional",
+            "items": {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/shipping_destination.json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "pickup"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "destinations": {
+            "type": "array",
+            "description": "Business-authored business locations able to fulfill this method. Response-only: the Platform selects one via `selected_destination_id`, never writes one.",
+            "ucp_request": "omit",
+            "items": {
+              "$ref": "https://ucp.dev/draft/schemas/shopping/types/location_destination.json"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "dependentRequired": {
+    "destinations": [
+      "type"
+    ]
   }
 }

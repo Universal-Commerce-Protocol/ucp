@@ -2398,6 +2398,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#location-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#measure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2860,6 +2871,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#business-location-destination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business Location Destination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#option-value" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3018,17 +3040,6 @@
     <span class="md-ellipsis">
       
         Rating
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#retail-location" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Retail Location
       
     </span>
   </a>
@@ -4267,6 +4278,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#location-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#measure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4729,6 +4751,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#business-location-destination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business Location Destination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#option-value" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4887,17 +4920,6 @@
     <span class="md-ellipsis">
       
         Rating
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#retail-location" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Retail Location
       
     </span>
   </a>
@@ -6407,6 +6429,38 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
+<h3 id="location-summary">Location Summary<a class="headerlink" href="#location-summary" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Stable, opaque, Business-scoped Location identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
+<td style="text-align: left;">Buyer-facing, Business-owned display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#postal-address">Postal Address</a></td>
+<td style="text-align: left;">Optional; omitted in requests</td>
+<td style="text-align: left;">Physical address of the location.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="measure">Measure<a class="headerlink" href="#measure" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -7437,7 +7491,30 @@ within the UCP.</p>
 </table>
 <hr />
 <h3 id="fulfillment-destination">Fulfillment Destination<a class="headerlink" href="#fulfillment-destination" title="Permanent link">&para;</a></h3>
-<p>This object MUST be one of the following types: <a href="/draft/specification/reference/#shipping-destination">Shipping Destination</a>, <a href="/draft/specification/reference/#retail-location">Retail Location</a>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong>; optional in requests</td>
+<td style="text-align: left;">Destination contract discriminator. Required in Business responses and optional in Platform requests. Well-known values: <code>shipping_address</code>, <code>business_location</code>. The enclosing method contract defines request defaults and which fields the Platform may write; negotiated extensions define additional values.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong>; optional in requests</td>
+<td style="text-align: left;">Fulfillment destination identifier.</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h3 id="fulfillment-destination-filter">Fulfillment Destination Filter<a class="headerlink" href="#fulfillment-destination-filter" title="Permanent link">&para;</a></h3>
 <table>
@@ -7609,14 +7686,14 @@ within the UCP.</p>
 <tr>
 <td style="text-align: left;">destinations</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-destination">Fulfillment Destination</a>]</td>
-<td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Available destinations. For shipping: addresses. For pickup: retail locations.</td>
+<td style="text-align: left;">Optional; omitted in requests</td>
+<td style="text-align: left;">Available destinations for this method. In Business responses, each destination carries a <code>type</code> and <code>id</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;">selected_destination_id</td>
 <td style="text-align: left;">['string', 'null']</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">ID of the selected destination.</td>
+<td style="text-align: left;">ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in <code>destinations</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;">groups</td>
@@ -7863,6 +7940,44 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Optional; omitted on create</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="business-location-destination">Business Location Destination<a class="headerlink" href="#business-location-destination" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Stable, opaque, Business-scoped Location identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
+<td style="text-align: left;">Buyer-facing, Business-owned display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#postal-address">Postal Address</a></td>
+<td style="text-align: left;">Optional; omitted in requests</td>
+<td style="text-align: left;">Physical address of the location.</td>
+</tr>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
+<td style="text-align: left;"><strong>Constant = business_location</strong>. Destination type discriminator. Response-only.</td>
 </tr>
 </tbody>
 </table>
@@ -8419,38 +8534,6 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
-<h3 id="retail-location">Retail Location<a class="headerlink" href="#retail-location" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Requirement</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Required</strong>; omitted in requests</td>
-<td style="text-align: left;">Unique location identifier.</td>
-</tr>
-<tr>
-<td style="text-align: left;">name</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Location name (e.g., store name).</td>
-</tr>
-<tr>
-<td style="text-align: left;">address</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#postal-address">Postal Address</a></td>
-<td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Physical address of the location.</td>
-</tr>
-</tbody>
-</table>
-<hr />
 <h3 id="search-filters">Search Filters<a class="headerlink" href="#search-filters" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -8579,6 +8662,12 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong>; optional in requests</td>
 <td style="text-align: left;">ID specific to this shipping destination.</td>
+</tr>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong>; optional in requests</td>
+<td style="text-align: left;"><strong>Constant = shipping_address</strong>. Destination type discriminator.</td>
 </tr>
 </tbody>
 </table>
@@ -9999,13 +10088,13 @@ within the UCP.</p>
 <td style="text-align: left;">destinations</td>
 <td style="text-align: left;">Array[object]</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Available destinations. For shipping: addresses. For pickup: retail locations.</td>
+<td style="text-align: left;">Available destinations for this method. In Business responses, each destination carries a <code>type</code> and <code>id</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;">selected_destination_id</td>
 <td style="text-align: left;">['string', 'null']</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">ID of the selected destination.</td>
+<td style="text-align: left;">ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in <code>destinations</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;">groups</td>
@@ -10113,7 +10202,7 @@ within the UCP.</p>
 <td style="text-align: left;">location</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method.</td>
+<td style="text-align: left;">Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method. The Business recognizes the same ID when submitted as <code>selected_destination_id</code> for that method; recognition does not reserve inventory or guarantee eligibility, and current terms are revalidated.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>

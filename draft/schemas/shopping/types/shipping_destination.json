@@ -16,10 +16,17 @@
           "type": "string",
           "description": "ID specific to this shipping destination.",
           "ucp_request": "optional"
+        },
+        "type": {
+          "type": "string",
+          "const": "shipping_address",
+          "description": "Destination type discriminator.",
+          "ucp_request": "optional"
         }
       },
       "required": [
-        "id"
+        "id",
+        "type"
       ]
     }
   ]
