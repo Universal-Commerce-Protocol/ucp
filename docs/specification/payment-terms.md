@@ -332,7 +332,7 @@ total.
 **Checkout response fragment — the terms on offer.** The Buyer has not chosen
 yet, so the Business defaults to paying now, and says so:
 
-<!-- ucp:example schema=shopping/payment_terms def=payment op=read direction=response -->
+<!-- ucp:example schema=common/payment_terms def=payment op=read direction=response -->
 ```json
 {
   "selected_term_id": "pt_pay_now",
@@ -390,7 +390,7 @@ own entry in `checkout.totals`:
 
 **Update request — the Buyer selects the deposit term:**
 
-<!-- ucp:example schema=shopping/payment_terms def=payment op=update direction=request -->
+<!-- ucp:example schema=common/payment_terms def=payment op=update direction=request -->
 ```json
 {
   "selected_term_id": "pt_deposit_balance"
@@ -399,7 +399,7 @@ own entry in `checkout.totals`:
 
 **Checkout response — recomputed and authoritative:**
 
-<!-- ucp:example schema=shopping/payment_terms def=dev.ucp.shopping.checkout op=update direction=response -->
+<!-- ucp:example schema=common/payment_terms def=dev.ucp.shopping.checkout op=update direction=response -->
 ```json
 {
   "ucp": {
@@ -499,7 +499,7 @@ On completion, the accepted term travels to the Order, so the Buyer can still
 see that $900 is due at check-in. The other terms do not travel, and the deposit
 disclosure moves with the term it governs:
 
-<!-- ucp:example schema=shopping/payment_terms def=dev.ucp.shopping.order op=read direction=response -->
+<!-- ucp:example schema=common/payment_terms def=dev.ucp.shopping.order op=read direction=response -->
 ```json
 {
   "ucp": {
@@ -582,7 +582,7 @@ Four payments and four schedules: one due at completion, and three with
 computed due dates. The Business does the calendar arithmetic; the Platform
 reads dates.
 
-<!-- ucp:example schema=shopping/payment_terms def=payment_term -->
+<!-- ucp:example schema=common/payment_terms def=payment_term -->
 ```json
 {
   "id": "pt_pay_in_4",

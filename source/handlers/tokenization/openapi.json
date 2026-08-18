@@ -20,7 +20,7 @@
                 "required": ["credential", "binding"],
                 "properties": {
                   "credential": {
-                    "$ref": "../../schemas/shopping/types/payment_credential.json",
+                    "$ref": "../../schemas/common/types/payment_credential.json",
                     "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
                   },
                   "binding": {
@@ -176,7 +176,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "../../schemas/shopping/types/payment_credential.json"
+                  "$ref": "../../schemas/common/types/payment_credential.json"
                 },
                 "examples": {
                   "card_credential_fpan": {

@@ -56,7 +56,7 @@ will not wait for, the Business **MUST NOT** emit an Action.
 
 The Action is emitted under its type key:
 
-<!-- ucp:example schema=shopping/payment_authentication def=dev.ucp.shopping.checkout extract=$.actions target=$.actions op=read -->
+<!-- ucp:example schema=common/payment_authentication def=dev.ucp.shopping.checkout extract=$.actions target=$.actions op=read -->
 ```json
 {
   "actions": {
@@ -74,7 +74,7 @@ The Action is emitted under its type key:
 ```
 
 The config shape is defined inline by the
-[Payment Authentication extension schema](site:schemas/shopping/payment_authentication.json).
+[Payment Authentication extension schema](site:schemas/common/payment_authentication.json).
 
 | Field | Type | Required | Notes |
 | :---- | :--- | :------- | :---- |
