@@ -165,10 +165,10 @@ core capabilities.
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-04-08",
+      "version": "{{ ucp_version }}",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -270,35 +270,35 @@ authentication are resolved together.
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview/",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [{
         "id": "processor_tokenizer",
-        "version": "2026-04-08",
+        "version": "{{ ucp_version }}",
         "spec": "https://example.com/specs/payments/processor_tokenizer",
         "schema": "https://example.com/specs/payments/merchant_tokenizer.json"
       }]

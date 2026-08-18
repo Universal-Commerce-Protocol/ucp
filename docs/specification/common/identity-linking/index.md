@@ -17,7 +17,7 @@
 # Identity Linking Capability
 
 * **Capability Name:** `dev.ucp.common.identity_linking`
-* **Schema:** `https://ucp.dev/schemas/common/identity_linking.json`
+* **Schema:** `https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json`
 
 ## Overview
 
@@ -482,7 +482,7 @@ direct OAuth flows (always available via discovery):
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
-        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
         "config": {
           "providers": {
             "app.example.login": [
@@ -1124,7 +1124,7 @@ operations gated:
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
-        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
         "config": {
           "scopes": {
             "dev.ucp.shopping.order:read":    {},
@@ -1162,7 +1162,7 @@ No guest checkout — every transaction requires an authenticated user:
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity-linking/",
-        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
         "config": {
           "scopes": {
             "dev.ucp.shopping.checkout:manage":  {},

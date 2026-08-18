@@ -698,7 +698,7 @@ results.
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'catalog/mcp') }}
+{{ schema_fields('types/error_response', 'shopping/catalog/mcp') }}
 
 ## Conformance
 
