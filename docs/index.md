@@ -355,6 +355,7 @@ image: assets/banner.png
           "selected_destination_id": "dest_1",
           "destinations": [
             {
+              "type": "shipping_address",
               "id": "dest_1",
               "first_name": "Elisa",
               "last_name": "Beckett",
