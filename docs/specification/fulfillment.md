@@ -51,7 +51,48 @@ On Checkout, the `fulfillment` field contains:
     * `selected_destination_id` = `destinations[0].id` 🔘✅ Uptown Store
     * `groups[0]` 📦👞
         * `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
-        * `options[1]` 🔘 Curbside Pickup
+
+## Location Context
+
+Base [Context](catalog/index.md#context) defines an optional `location`: a
+stable, opaque [Location](glossary.md#commerce) identifier in the Business's
+namespace. The field appears on Catalog requests and on Cart and Checkout
+create and update requests (see [Checkout Context](checkout.md#context)).
+Fulfillment does not add or redefine the field; when the Fulfillment
+extension is active, it defines the field's effects.
+
+When Fulfillment extends Catalog or Checkout, `context.location` on a request
+to that capability names the provisional Business Location that the Business
+evaluates fulfillment availability against, and generates initial fulfillment
+choices for. It does not select a fulfillment destination.
+
+These fields carry distinct roles, not precision levels of one value:
+
+| Field | Role |
+| --- | --- |
+| `context.location` | Provisional Business Location to evaluate fulfillment against. |
+| Catalog `filters.fulfills_to` | Explicit destination items are fulfilled to, and a filter on results. |
+| Catalog `methods[].location` | The Business Location resolved for a place-based method (e.g. `pickup`) on a variant. |
+| Checkout `methods[].selected_destination_id` | The destination selected from that method's `destinations[]`. |
+
+Precedence is scoped to what each field governs:
+
+* When Catalog `filters.fulfills_to` is present, a Business **MUST** resolve
+    the fulfillment destination and method `availability` from it rather than
+    from `context`. Other `context` fields are unaffected.
+* Once a Platform sets `selected_destination_id` on a Checkout method, a
+    Business **MUST** use the referenced destination rather than
+    `context.location` for that method's fulfillment scope. Other methods are
+    unaffected.
+
+**Carrying a Location forward.** The same identifier can appear in several of
+these fields without collapsing their roles. A Catalog response can report a
+place-based method at `loc_123`. Because base Cart Context already includes
+`location`, `loc_123` can travel forward as `context.location` on a Cart
+request. [Cart-to-Checkout conversion](cart.md#cart-to-checkout-conversion)
+initializes the Checkout from the Cart's `context`, so the Business **MAY**
+use `loc_123` to generate an initial Checkout fulfillment destination. Once
+the Platform sets `selected_destination_id`, that explicit selection governs.
 
 ## Schema
 
@@ -81,9 +122,13 @@ method.
 
 {{ schema_fields('types/shipping_destination_resp', 'fulfillment') }}
 
-#### Retail Location
+#### Business Location Destination
 
-{{ schema_fields('types/retail_location_resp', 'fulfillment') }}
+{{ schema_fields('types/location_destination_resp', 'fulfillment') }}
+
+#### Location Summary
+
+{{ schema_fields('location_summary', 'fulfillment') }}
 
 #### Fulfillment Group
 
@@ -126,6 +171,7 @@ method.
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -170,6 +216,171 @@ method.
   }
 }
 ```
+
+## Destinations
+
+A fulfillment method's `type` describes how items are fulfilled, for example
+by shipping or pickup. A destination's `type` describes where fulfillment
+occurs, for example at a shipping address or Business Location. The two
+discriminators play different roles by direction: in Business responses,
+every destination carries a required `type`, so responses are
+self-describing; in Platform requests, the method's contract determines who
+authors `destinations[]` and MAY define a default destination shape when
+`type` is omitted.
+
+By default, the Platform does not write a method's `destinations[]`; a contract
+keyed on the method's `type` **MAY** opt into a Platform-writable request
+shape:
+
+| Method `type` | Request `destinations[]` |
+| --- | --- |
+| `shipping` | Platform-writable. The Platform writes the Buyer's shipping-address facts. |
+| `pickup` | Not Platform-writable. The Business enumerates locations in its response; the Platform selects a location by its Business-scoped ID (see [Selection and Location Identity](#selection-and-location-identity)). |
+| any other method `type` | Not Platform-writable (the base default). The Business enumerates destinations in its response; the Platform selects one via `selected_destination_id`. |
+
+Destination `type` is **required in responses and optional in requests**. In
+responses, every destination carries `type`, so destinations remain
+self-describing wherever they appear. In requests, `destinations[]` is omitted
+unless a method-specific contract opts into a Platform-writable shape:
+
+* Under a well-known `shipping` method, every destination is a Shipping
+    Destination: a destination that omits `type` defaults to
+    `shipping_address`.
+* Under a well-known `pickup` method, destinations are response-only; the
+    Platform selects a location via `selected_destination_id` (see
+    [Selection and Location Identity](#selection-and-location-identity)).
+* Under any other method type, the base default applies: `destinations[]` is
+    response-only, each response destination self-describes through its
+    required `type` and `id`, and the Platform selects one via
+    `selected_destination_id`. That method's defining contract — a future
+    revision of this specification or a negotiated extension — **MAY** narrow
+    the response destination shape or opt into a Platform-writable request
+    shape.
+
+A request that includes `destinations[]` MUST also include the method's
+`type`. The well-known values are:
+
+| Value | Meaning |
+| --- | --- |
+| `shipping_address` | A Shipping Destination with flat Postal Address fields. |
+| `business_location` | A Business Location Destination identified by a Business-scoped `id`. |
+
+Additional values are defined by negotiated extensions. Destination fields
+specific to such a value are validated by the negotiated extension's schema.
+
+### Shipping Destination
+
+A Shipping Destination can contain the address itself or an `id` that
+references a saved address. The Business can resolve that `id` from its own
+records or through a trusted Credential Provider, such as a digital wallet or
+identity provider.
+
+#### Platform Request
+
+<!-- ucp:example schema=shopping/types/shipping_destination op=update direction=request -->
+```json
+{
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
+
+#### Business Response
+
+<!-- ucp:example schema=shopping/types/shipping_destination op=read direction=response -->
+```json
+{
+  "type": "shipping_address",
+  "id": "dest_1",
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
+
+### Business Location Destination
+
+Business Location Destinations appear only in responses; `destinations[]` on a
+`pickup` method is not a request field. The Platform **MUST NOT** write
+Business Location Destinations into `destinations[]`; it selects a location by
+submitting its stable, opaque, Business-scoped ID as
+`selected_destination_id`. The Business **MUST** return
+`type: "business_location"`, `id`, and its Buyer-facing `name`, and **MAY**
+return its Postal Address in `address`.
+
+#### Platform Request
+
+<!-- ucp:example schema=shopping/types/fulfillment_method op=update direction=request -->
+```json
+{
+  "type": "pickup",
+  "line_item_ids": ["shirt", "pants"],
+  "selected_destination_id": "loc_downtown"
+}
+```
+
+#### Business Response
+
+<!-- ucp:example schema=shopping/types/location_destination op=read direction=response -->
+```json
+{
+  "type": "business_location",
+  "id": "loc_downtown",
+  "name": "Downtown Store",
+  "address": {
+    "street_address": "123 Main St",
+    "address_locality": "Springfield",
+    "address_region": "IL",
+    "postal_code": "62701",
+    "address_country": "US"
+  }
+}
+```
+
+### Selection and Location Identity
+
+`selected_destination_id` identifies the selected destination in a method by
+its `id`, and is the sole channel for selecting a Business Location. It accepts
+any stable, Business-scoped ID the Business recognizes for that method,
+including an ID the Business has not (yet) enumerated in that method's
+`destinations[]`.
+
+Selection is source-agnostic. A non-null `selected_destination_id` **MAY**
+carry an ID the Platform obtained from a Catalog response, a Location search
+or lookup, an earlier Checkout, or any other source the Business recognizes
+for that method. Where the ID came from does not change the contract below.
+
+When the Business accepts a non-null `selected_destination_id`, its response:
+
+* **MUST** carry that same `selected_destination_id` value on the method; and
+* **MUST** include exactly one destination in that same method's
+    `destinations[]` whose `id` equals it, typed as specified in
+    [Destinations](#destinations) — so the response is self-describing whatever
+    the ID's source.
+
+The Business **MUST** revalidate the selected destination's current
+availability and terms; recognizing an ID neither reserves inventory nor
+guarantees eligibility. The Business **MUST NOT** silently substitute another
+destination: it **MUST NOT** return a different `selected_destination_id`, and
+**MUST NOT** keep the submitted ID while returning a destination that
+describes another location. A Business that cannot honor the submitted
+selection rejects it rather than replacing it.
+
+When the Business cannot accept a `selected_destination_id` submitted on
+[Update Checkout](checkout.md#update-checkout) — the ID is not recognized for
+that method, or revalidation fails — it follows the general behavior for a
+rejected Update: it **MUST** leave the current Checkout unchanged and
+**MUST** return that Checkout with an error Message with
+`severity: "recoverable"` whose `path` selects the attempted method's
+`selected_destination_id` (for example
+`$.fulfillment.methods[0].selected_destination_id`). See
+[Error Handling](checkout.md#error-handling) and
+[The `path` Field](checkout.md#the-path-field).
 
 ## Rendering
 
@@ -311,11 +522,15 @@ method has:
     renderable; see [Rendering](#rendering).
 * `availability` — whether the variant is available via this method at the
     specified or inferred location.
-* `location` — for place-based methods (e.g. `pickup`), the resolved
-    location id, and the business's stable identifier for that location. A
-    business that advertises pickup at a `location` MUST accept the same id
-    as `selected_destination_id` for that method, so a discovered location
-    can be used in cart and checkout.
+* `location` — for place-based methods such as `pickup`, the
+    [Location](glossary.md#commerce) resolved for that method and the
+    Business's stable identifier for that place. A Business that advertises
+    pickup at a `location` **MUST** accept that same ID as
+    `selected_destination_id` for that method in Checkout. The Business
+    revalidates current availability and terms; discovery neither reserves
+    inventory nor guarantees eligibility. The selection contract is
+    source-agnostic; see
+    [Selection and Location Identity](#selection-and-location-identity).
 * `options` — concrete fulfillment choices within this method (e.g.
     Standard, Express); see [Options](#options). Optional.
 
@@ -332,10 +547,10 @@ variant-level value.
 ### Options
 
 A method MAY carry `options[]`, a representative subset of its fulfillment
-options — not an exhaustive list. Without a destination or full cart,
-catalog SHOULD preview meaningful boundary options for the buyer (e.g.
-cheapest, fastest); the full, high-resolution set is negotiated in cart and
-checkout once those are known.
+options — not an exhaustive list. Without a destination or full cart, a
+Business **SHOULD** preview meaningful boundary options for the Buyer (e.g.
+cheapest, fastest); more specific options are negotiated in Checkout once the
+line items and destination are known.
 
 Each option carries an `id` and a `title` (a short label distinguishing it
 from siblings), plus an optional renderable `description` for context. These
@@ -346,11 +561,11 @@ none, surfacing only `type`, `description`, and `availability`; options are
 nested directly under the method, with no group layer (unlike checkout
 `methods[].groups[].options[]`).
 
-A discovered option `id` lets a buyer's choice carry forward: a business
-SHOULD accept the same id as `selected_option_id` in cart and checkout.
-The id is a best-effort handle, not a guaranteed match — an option
-discovered for a single product may differ in a cart, where other
-products, quantities, and combined fulfillment modify the options.
+A discovered option `id` lets a Buyer's choice carry forward: a Business
+**SHOULD** accept the same ID as `methods[].groups[].selected_option_id` in
+Checkout. The ID is a best-effort handle, not a guaranteed match — an option
+discovered for a single product may differ at Checkout, where other products,
+quantities, and combined fulfillment modify the options.
 
 ### Shapes
 
@@ -376,13 +591,16 @@ products, quantities, and combined fulfillment modify the options.
 
 ### Location and method: `context` and `filters`
 
-* **`context`** (`address_country` / `address_region` / `postal_code`) is
-    where the *buyer* is — a non-binding hint the business uses to report
-    `availability`. On a market-scoped catalog it MAY narrow results;
-    otherwise it annotates rather than removes them.
-* **`filters.fulfills_to`** is where the order is *fulfilled to* — a single
-    destination, named by value (a coarse address: `address_country` /
-    `address_region` / `postal_code`) or by reference (a `location` id — a
+* **`context`** carries non-binding hints the Business uses to report
+    `availability`: coarse locality fields for where the *Buyer* is, and
+    `location` for a provisional Business Location (see
+    [Location Context](#location-context)). On a market-scoped Catalog a
+    Business **MAY** narrow results with these hints; otherwise they annotate
+    results rather than remove them.
+* **`filters.fulfills_to`** is where items are *fulfilled to* — a single
+    destination
+    ([Fulfillment Destination Filter](#fulfillment-destination-filter)),
+    named by value (a coarse locality) or by reference (a `location` id — a
     store, pickup point, or saved address). Platforms **SHOULD** provide one
     or the other, not both; if both are present, a business **SHOULD** use
     the more specific — typically `location`. It restricts results to what
@@ -391,9 +609,8 @@ products, quantities, and combined fulfillment modify the options.
 * **`filters.methods`** restricts results to specific method types (e.g.
     `["pickup"]`).
 
-Provide location once: `context` for where the buyer is, `fulfills_to` for
-an explicit destination. When both are present, `fulfills_to` supersedes
-`context`.
+`context` only hints; `fulfills_to` names the destination. See
+[Location Context](#location-context) for the precedence rule.
 
 ### Example
 
@@ -610,7 +827,7 @@ like any other method.
 
 **Example — adding `home_installation`.** No schema change or registration is
 needed. Emit the value directly as the `type` on catalog and checkout, and
-filter with `filters.methods: ["home_installation"]`. For cart and checkout
+filter with `filters.methods: ["home_installation"]`. For checkout
 negotiation, declare its behavior in the business profile `config` — e.g.
 include `["shipping", "home_installation"]` in `method_combinations`
 so a cart can mix shipped and installed items (see
@@ -652,6 +869,7 @@ so a cart can mix shipped and installed items (see
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -723,6 +941,7 @@ package.
         "selected_destination_id": "dest_1",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_1",
             "street_address": "123 Main St",
             "address_locality": "Springfield",
@@ -799,6 +1018,7 @@ same type, each with its own destination.
         "selected_destination_id": "dest_mom",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_mom",
             "street_address": "123 Mom St",
             "address_locality": "Springfield",
@@ -844,6 +1064,7 @@ same type, each with its own destination.
         "selected_destination_id": "dest_grandma",
         "destinations": [
           {
+            "type": "shipping_address",
             "id": "dest_grandma",
             "street_address": "88 Queensway",
             "address_locality": "Hong Kong",
