@@ -16,7 +16,7 @@
 
 # Payment Terms Extension
 
-* **Capability Name:** `dev.ucp.shopping.payment_terms`
+* **Capability Name:** `dev.ucp.common.payment_terms`
 
 ## Overview
 
