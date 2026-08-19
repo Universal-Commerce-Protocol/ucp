@@ -19,6 +19,18 @@ export SPEC_URL="/latest/specification/overview/"
 # Also add ucp-schema binary from sibling directory
 export PATH="$PROJECT_ROOT/.venv/bin:$PROJECT_ROOT/../ucp-schema/target/release:$PATH:$HOME/.cargo/bin"
 
+if ! command -v cargo >/dev/null 2>&1; then
+	echo "Error: cargo executable not found in PATH." >&2
+	echo "Install Rust from https://rustup.rs/ before building the local site." >&2
+	exit 1
+fi
+
+if ! command -v ucp-schema >/dev/null 2>&1; then
+	echo "Error: ucp-schema executable not found in PATH." >&2
+	echo "Install it with 'cargo install ucp-schema' or build the sibling ucp-schema repository." >&2
+	exit 1
+fi
+
 echo "Syncing dependencies with uv..."
 uv sync
 
