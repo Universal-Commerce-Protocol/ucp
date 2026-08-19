@@ -196,6 +196,7 @@ Maps to the [Create Cart](cart.md#create-cart) operation.
               ]
             }
           ],
+          "status": "active",
           "currency": "USD",
           "totals": [
             {
@@ -317,6 +318,7 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
               ]
             }
           ],
+          "status": "active",
           "currency": "USD",
           "totals": [
             {
@@ -341,7 +343,70 @@ Maps to the [Get Cart](cart.md#get-cart) operation.
     }
     ```
 
+=== "Ordered"
+
+    The buyer completed the purchase in the business UI after a `continue_url`
+    handoff. The platform reads `ordered` and stops surfacing the cart as
+    pending:
+
+    <!-- ucp:example schema=shopping/cart op=read direction=response extract=$.result.structuredContent -->
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "structuredContent": {
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}],
+              "dev.ucp.shopping.cart": [{"version": "{{ ucp_version }}"}]
+            }
+          },
+          "id": "cart_abc123",
+          "line_items": [
+            {
+              "id": "li_1",
+              "item": {
+                "id": "item_123",
+                "title": "Red T-Shirt",
+                "price": 2500
+              },
+              "quantity": 2,
+              "totals": [
+                {"type": "subtotal", "amount": 5000},
+                {"type": "total", "amount": 5000}
+              ]
+            }
+          ],
+          "status": "ordered",
+          "currency": "USD",
+          "totals": [
+            {
+              "type": "subtotal",
+              "amount": 5000
+            },
+            {
+              "type": "total",
+              "amount": 5000
+            }
+          ]
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"ucp\":{…},…}"
+          }
+        ]
+      }
+    }
+    ```
+
 === "Not Found"
+
+    The business holds no record for this cart ID. `not_found` does not indicate
+    whether an order was placed; a retained cart reports a terminal `status`
+    instead:
 
     <!-- ucp:example schema=common/types/error_response op=read direction=response extract=$.result.structuredContent -->
     ```json
@@ -481,6 +546,7 @@ Maps to the [Update Cart](cart.md#update-cart) operation.
               ]
             }
           ],
+          "status": "active",
           "currency": "USD",
           "totals": [
             {
@@ -574,6 +640,7 @@ Maps to the [Cancel Cart](cart.md#cancel-cart) operation.
               ]
             }
           ],
+          "status": "canceled",
           "currency": "USD",
           "totals": [
             {
@@ -645,6 +712,9 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and
   }
 }
 ```
+
+`update_cart` and `cancel_cart` on a cart whose `status` is terminal return
+`cart_not_active` in the same form.
 
 ## Conformance
 

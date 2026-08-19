@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/cart.json",
   "name": "dev.ucp.shopping.cart",
   "title": "Cart",
-  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states.",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info and no intermediate status lifecycle — only a terminal disposition.",
   "$defs": {
     "checkout": {
       "title": "Checkout with Cart",
@@ -33,6 +33,7 @@
     "ucp",
     "id",
     "line_items",
+    "status",
     "currency",
     "totals"
   ],
@@ -96,6 +97,17 @@
         "create": "optional",
         "update": "optional"
       }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "ordered",
+        "canceled",
+        "expired"
+      ],
+      "description": "Cart disposition. `active` is the only non-terminal value and the only one in which the cart accepts updates. `ordered` means the cart's contents were purchased, by any flow the business supports. `ordered`, `canceled`, and `expired` are terminal and immutable. See Cart Status lifecycle documentation for transition details.",
+      "ucp_request": "omit"
     },
     "currency": {
       "type": "string",
