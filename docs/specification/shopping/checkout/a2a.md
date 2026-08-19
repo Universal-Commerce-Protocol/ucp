@@ -358,7 +358,7 @@ the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of
 [AP2 Mandates Extension](../../ap2-mandates.md) documentation for more details about
 verification and processing of the mandates to complete the checkout.
 
-### Request format
+#### Request format
 
 <!-- ucp:example schema=transports/a2a_message def=message_request direction=request -->
 ```json

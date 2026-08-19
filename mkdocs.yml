@@ -81,17 +81,22 @@ nav:
       - Payment:
           - Payment Authentication:
               - Overview: specification/payment/authentication.md
-              - Device Data Collection: specification/payment/actions/device-data-collection.md
-              - 3DS Challenge: specification/payment/actions/three-ds-challenge.md
+              - Device Data Collection:
+                  specification/payment/actions/device-data-collection.md
+              - 3DS Challenge:
+                  specification/payment/actions/three-ds-challenge.md
           - Split Payments: specification/payment/split-payments.md
           - Payment Handlers:
               - Guide: specification/payment/guide.md
               - Template: specification/payment/template.md
               - Tokenization Guide: specification/payment/tokenization.md
               - Examples:
-                  - Processor Tokenizer: specification/payment/examples/processor-tokenizer-payment-handler.md
-                  - Platform Tokenizer: specification/payment/examples/platform-tokenizer-payment-handler.md
-                  - Encrypted Credential: specification/payment/examples/encrypted-credential-payment-handler.md
+                  - Processor Tokenizer:
+                      specification/payment/examples/processor-tokenizer-payment-handler.md
+                  - Platform Tokenizer:
+                      specification/payment/examples/platform-tokenizer-payment-handler.md
+                  - Encrypted Credential:
+                      specification/payment/examples/encrypted-credential-payment-handler.md
       - Signatures: specification/signatures.md
       - Reference: specification/reference.md
 
@@ -228,41 +233,70 @@ plugins:
   - redirects:
       redirect_maps:
         # Cart
-        specification/cart.md: specification/shopping/cart/index.md
-        specification/cart-rest.md: specification/shopping/cart/rest.md
-        specification/cart-mcp.md: specification/shopping/cart/mcp.md
-        specification/embedded-cart.md: specification/shopping/cart/embedded.md
+        specification/cart.md:
+          specification/shopping/cart/index.md
+        specification/cart-rest.md:
+          specification/shopping/cart/rest.md
+        specification/cart-mcp.md:
+          specification/shopping/cart/mcp.md
+        specification/embedded-cart.md:
+          specification/shopping/cart/embedded.md
         # Catalog
-        specification/catalog/index.md: specification/shopping/catalog/index.md
-        specification/catalog/search.md: specification/shopping/catalog/search.md
-        specification/catalog/lookup.md: specification/shopping/catalog/lookup.md
-        specification/catalog/rest.md: specification/shopping/catalog/rest.md
-        specification/catalog/mcp.md: specification/shopping/catalog/mcp.md
+        specification/catalog/index.md:
+          specification/shopping/catalog/index.md
+        specification/catalog/search.md:
+          specification/shopping/catalog/search.md
+        specification/catalog/lookup.md:
+          specification/shopping/catalog/lookup.md
+        specification/catalog/rest.md:
+          specification/shopping/catalog/rest.md
+        specification/catalog/mcp.md:
+          specification/shopping/catalog/mcp.md
         # Checkout
-        specification/checkout.md: specification/shopping/checkout/index.md
-        specification/checkout-rest.md: specification/shopping/checkout/rest.md
-        specification/checkout-mcp.md: specification/shopping/checkout/mcp.md
-        specification/checkout-a2a.md: specification/shopping/checkout/a2a.md
-        specification/embedded-checkout.md: specification/shopping/checkout/embedded.md
+        specification/checkout.md:
+          specification/shopping/checkout/index.md
+        specification/checkout-rest.md:
+          specification/shopping/checkout/rest.md
+        specification/checkout-mcp.md:
+          specification/shopping/checkout/mcp.md
+        specification/checkout-a2a.md:
+          specification/shopping/checkout/a2a.md
+        specification/embedded-checkout.md:
+          specification/shopping/checkout/embedded.md
         # Order
-        specification/order.md: specification/shopping/order/index.md
-        specification/order-rest.md: specification/shopping/order/rest.md
-        specification/order-mcp.md: specification/shopping/order/mcp.md
+        specification/order.md:
+          specification/shopping/order/index.md
+        specification/order-rest.md:
+          specification/shopping/order/rest.md
+        specification/order-mcp.md:
+          specification/shopping/order/mcp.md
         # Playground
-        specification/playground.md: specification/shopping/playground.md
+        specification/playground.md:
+          specification/shopping/playground.md
         # Common
-        specification/identity-linking.md: specification/common/identity-linking/index.md
+        specification/identity-linking.md:
+          specification/common/identity-linking/index.md
         # Payment
-        specification/payment-authentication.md: specification/payment/authentication.md
-        specification/payment-handler-guide.md: specification/payment/guide.md
-        specification/payment-handler-template.md: specification/payment/template.md
-        specification/split-payments.md: specification/payment/split-payments.md
-        specification/tokenization-guide.md: specification/payment/tokenization.md
-        specification/payment-actions/device-data-collection.md: specification/payment/actions/device-data-collection.md
-        specification/payment-actions/three-ds-challenge.md: specification/payment/actions/three-ds-challenge.md
-        specification/examples/processor-tokenizer-payment-handler.md: specification/payment/examples/processor-tokenizer-payment-handler.md
-        specification/examples/platform-tokenizer-payment-handler.md: specification/payment/examples/platform-tokenizer-payment-handler.md
-        specification/examples/encrypted-credential-handler.md: specification/payment/examples/encrypted-credential-payment-handler.md
+        specification/payment-authentication.md:
+          specification/payment/authentication.md
+        specification/payment-handler-guide.md:
+          specification/payment/guide.md
+        specification/payment-handler-template.md:
+          specification/payment/template.md
+        specification/split-payments.md:
+          specification/payment/split-payments.md
+        specification/tokenization-guide.md:
+          specification/payment/tokenization.md
+        specification/payment-actions/device-data-collection.md:
+          specification/payment/actions/device-data-collection.md
+        specification/payment-actions/three-ds-challenge.md:
+          specification/payment/actions/three-ds-challenge.md
+        specification/examples/processor-tokenizer-payment-handler.md:
+          specification/payment/examples/processor-tokenizer-payment-handler.md
+        specification/examples/platform-tokenizer-payment-handler.md:
+          specification/payment/examples/platform-tokenizer-payment-handler.md
+        specification/examples/encrypted-credential-handler.md:
+          specification/payment/examples/encrypted-credential-payment-handler.md
   - llmstxt:
       full_output: llms-full.txt
       markdown_description: |
@@ -376,10 +410,10 @@ plugins:
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
           - specification/loyalty.md: >-
-              Loyalty Extension, enabling high-fidelity member benefit recognition
-              during catalog, cart, and checkout by defining schemas for
-              memberships, tiers, benefits, and reward earning forecasts while
-              managing provisional eligibility claims and enforcing
+              Loyalty Extension, enabling high-fidelity member benefit
+              recognition during catalog, cart, and checkout by defining schemas
+              for memberships, tiers, benefits, and reward earning forecasts
+              while managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
           - specification/payment-terms.md: >-
               Payment Terms Extension, enabling checkout payment schedules for
