@@ -1,0 +1,1494 @@
+<!--
+   Copyright 2026 UCP Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# Checkout Capability - REST Binding
+
+This document specifies the REST binding for the
+[Checkout Capability](index.md).
+
+## Protocol Fundamentals
+
+### Discovery
+
+Businesses advertise REST transport availability through their UCP profile at
+`/.well-known/ucp`.
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp/v1"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+### Base URL
+
+All UCP REST endpoints are relative to the business's base URL, which is
+discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
+checkout capability is defined in the `rest.endpoint` field of the
+business profile.
+
+### Content Types
+
+* **Request**: `application/json`
+* **Response**: `application/json`
+
+All request and response bodies **MUST** be valid JSON as specified in
+[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }.
+
+### Transport Security
+
+All REST endpoints **MUST** be served over HTTPS with minimum TLS version
+1.3.
+
+## Operations
+
+| Operation                                          | Method | Endpoint                           | Description                |
+| :------------------------------------------------- | :----- | :--------------------------------- | :------------------------- |
+| [Create Checkout](index.md#create-checkout)        | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](index.md#get-checkout)              | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](index.md#update-checkout)        | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](index.md#complete-checkout)    | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](index.md#cancel-checkout)        | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+
+## Examples
+
+### Create Checkout
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=create direction=request -->
+    ```json
+    POST /checkout-sessions HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {
+      "line_items": [
+        {
+          "item": {
+            "id": "item_123"
+          },
+          "quantity": 2
+        }
+      ]
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 201 Created
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.shopify.shop_pay": [
+            {
+              "id": "shop_pay_1234",
+              "version": "{{ ucp_version }}",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
+              "config": {
+                "merchant_id": "shop_merchant_123"
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_1234567890",
+      "status": "incomplete",
+      "messages": [
+        {
+          "type": "error",
+          "code": "missing",
+          "path": "$.buyer.email",
+          "content": "Buyer email is required",
+          "severity": "recoverable"
+        }
+      ],
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://business.example.com/terms"
+        }
+      ],
+      "payment": {
+        "instruments": [
+          {
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay_1234",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+=== "Error Response"
+
+    All items out of stock — no checkout resource is created:
+
+    <!-- ucp:example schema=common/types/error_response op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": { "version": "2026-01-11", "status": "error" },
+      "messages": [
+        {
+          "type": "error",
+          "code": "out_of_stock",
+          "content": "All requested items are currently out of stock",
+          "severity": "unrecoverable"
+        }
+      ],
+      "continue_url": "https://merchant.com/"
+    }
+    ```
+
+### Update Checkout
+
+Update Checkout is a full replacement operation. The Platform **MUST** send the
+entire Checkout resource, including any data updates to write-only fields; the
+supplied resource replaces the existing Checkout session state. The Platform
+**MUST NOT** start a new Update Checkout operation while the Checkout is
+`complete_in_progress`. Duplicate requests remain subject to
+[Replay Protection](../../signatures.md#replay-protection). If the Business receives a
+new Update Checkout request in that state, it **MUST** leave the Checkout
+unchanged and return the current Checkout with a recoverable error Message.
+
+#### Update Buyer Info
+
+All fields in `buyer` are optional, allowing the Platform to progressively build
+the Checkout state across multiple calls. Outside `complete_in_progress`, each
+Update Checkout replaces the entire Checkout session, so the Platform **MUST**
+include all previously set fields it intends to retain.
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
+    ```json
+    PUT /checkout-sessions/{id} HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {
+      "id": "chk_123456789", // deprecated: id is provided in URL path
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "item_123"
+          },
+          "id": "li_1",
+          "quantity": 2
+        }
+      ]
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.shopify.shop_pay": [
+            {
+              "id": "shop_pay_1234",
+              "version": "{{ ucp_version }}",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
+              "config": {
+                "merchant_id": "shop_merchant_123"
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_1234567890",
+      "status": "incomplete",
+      "messages": [
+        {
+          "type": "error",
+          "code": "missing",
+          "path": "$.fulfillment.methods[0].selected_destination_id",
+          "content": "Fulfillment address is required",
+          "severity": "recoverable"
+        }
+      ],
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://business.example.com/terms"
+        }
+      ],
+      "payment": {
+        "instruments": [
+          {
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay_1234",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+#### Update Fulfillment
+
+Fulfillment is an extension to the checkout capability. The Platform submits
+Buyer inputs such as desired fulfillment method types, shipping addresses, and
+Business Location selections; the Business returns the resulting fulfillment
+state.
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
+    ```json
+    PUT /checkout-sessions/{id} HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {
+      "id": "chk_123456789", // deprecated: id is provided in URL path
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "item_123"
+          },
+          "id": "li_1",
+          "quantity": 2
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "type": "shipping",
+            "destinations": [
+              {
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.google.pay": [
+            {
+              "id": "gpay_1234",
+              "version": "{{ ucp_version }}",
+              "config": {
+                "allowed_payment_methods": [
+                  {
+                    "type": "CARD",
+                    "parameters": {
+                      "allowed_card_networks": ["VISA", "MASTERCARD", "AMEX"]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_1234567890",
+      "status": "incomplete",
+      "messages": [
+        {
+          "type": "error",
+          "code": "missing",
+          "path": "$.selected_fulfillment_option",
+          "content": "Please select a fulfillment option",
+          "severity": "recoverable"
+        }
+      ],
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://merchant.com/terms"
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "type": "shipping_address",
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "standard",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "gpay_1234",
+            "type": "card",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "rich_text_description": "Google Pay •••• 5678"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+#### Update Fulfillment Selection
+
+Follow-up calls after initial `fulfillment` data to update selection.
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=update direction=request -->
+    ```json
+    PUT /checkout-sessions/{id} HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {
+      "id": "chk_123456789", // deprecated: id is provided in URL path
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "line_items": [
+        {
+          "item": {
+            "id": "item_123"
+          },
+          "id": "li_1",
+          "quantity": 2
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "selected_option_id": "express"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.shopify.shop_pay": [
+            {
+              "id": "shop_pay_1234",
+              "version": "{{ ucp_version }}",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
+              "config": {
+                "merchant_id": "shop_merchant_123"
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_1234567890",
+      "status": "ready_for_complete",
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://merchant.com/terms"
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "type": "shipping_address",
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "express",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay_1234",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+### Complete Checkout
+
+If businesses have specific logic to enforce field existence in `buyer` and
+addresses (i.e. `fulfillment_address`, `billing_address`), this is the right
+place to set these expectations via `messages`.
+
+The response is the Checkout object; the example below shows the synchronous
+`completed` case. See core [Complete Checkout](index.md#complete-checkout)
+for status and `order` semantics.
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=complete direction=request -->
+    ```json
+    POST /checkout-sessions/{id}/complete
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "gpay_1234",
+            "type": "card",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "card_art": "https://cart-art-1.html",
+              "description": "Google Pay •••• 5678"
+            },
+            "billing_address": {
+              "street_address": "123 Main St",
+              "address_locality": "Anytown",
+              "address_region": "CA",
+              "address_country": "US",
+              "postal_code": "12345"
+            },
+            "credential": {
+              "type": "PAYMENT_GATEWAY",
+              "token": "examplePaymentMethodToken"
+            }
+          }
+        ]
+      },
+      "signals": {
+        "dev.ucp.buyer_ip": "203.0.113.42",
+        "dev.ucp.user_agent": "Mozilla/5.0 ..."
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.google.pay": [
+            {
+              "id": "gpay_1234",
+              "version": "{{ ucp_version }}",
+              "config": {
+                "allowed_payment_methods": [
+                  {
+                    "type": "CARD",
+                    "parameters": {
+                      "allowed_card_networks": ["VISA", "MASTERCARD", "AMEX"]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_123456789",
+      "status": "completed",
+      "currency": "USD",
+      "order": {
+        "id": "ord_99887766",
+        "permalink_url": "https://merchant.com/orders/ord_99887766"
+      },
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://merchant.com/terms"
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "type": "shipping_address",
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "express",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "gpay_1234",
+            "type": "card",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "rich_text_description": "Google Pay •••• 5678"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+### Get Checkout
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=read direction=request -->
+    ```json
+    GET /checkout-sessions/{id}
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {}
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.shopify.shop_pay": [
+            {
+              "id": "shop_pay_1234",
+              "version": "{{ ucp_version }}",
+              "available_instruments": [
+                {"type": "shop_pay"}
+              ],
+              "config": {
+                "merchant_id": "shop_merchant_123"
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_123456789",
+      "status": "completed",
+      "currency": "USD",
+      "order": {
+        "id": "ord_99887766",
+        "permalink_url": "https://merchant.com/orders/ord_99887766"
+      },
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://merchant.com/terms"
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "type": "shipping_address",
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "express",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "instr_shop_pay_1",
+            "handler_id": "shop_pay_1234",
+            "type": "shop_pay",
+            "selected": true,
+            "display": {
+              "email": "buyer@example.com"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+### Cancel Checkout
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/checkout op=cancel direction=request -->
+    ```json
+    POST /checkout-sessions/{id}/cancel
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+
+    {}
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/checkout op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.checkout": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.google.pay": [
+            {
+              "id": "gpay_1234",
+              "version": "{{ ucp_version }}",
+              "config": {
+                "allowed_payment_methods": [
+                  {
+                    "type": "CARD",
+                    "parameters": {
+                      "allowed_card_networks": ["VISA", "MASTERCARD", "AMEX"]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "chk_123456789",
+      "status": "canceled", // Status is updated to canceled.
+      "currency": "USD",
+      "line_items": [
+        {
+          "id": "li_1",
+          "item": {
+            "id": "item_123",
+            "title": "Red T-Shirt",
+            "price": 2500
+          },
+          "quantity": 2,
+          "totals": [
+            {"type": "subtotal", "amount": 5000},
+            {"type": "total", "amount": 5000}
+          ]
+        }
+      ],
+      "buyer": {
+        "email": "jane@example.com",
+        "first_name": "Jane",
+        "last_name": "Doe"
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 5000
+        },
+        {
+          "type": "tax",
+          "amount": 400
+        },
+        {
+          "type": "total",
+          "amount": 5400
+        }
+      ],
+      "links": [
+        {
+          "type": "terms_of_service",
+          "url": "https://merchant.com/terms"
+        }
+      ],
+      "fulfillment": {
+        "methods": [
+          {
+            "id": "shipping_1",
+            "type": "shipping",
+            "line_item_ids": ["li_1"],
+            "selected_destination_id": "dest_home",
+            "destinations": [
+              {
+                "type": "shipping_address",
+                "id": "dest_home",
+                "street_address": "123 Main St",
+                "address_locality": "Springfield",
+                "address_region": "IL",
+                "postal_code": "62701",
+                "address_country": "US"
+              }
+            ],
+            "groups": [
+              {
+                "id": "package_1",
+                "line_item_ids": ["li_1"],
+                "selected_option_id": "express",
+                "options": [
+                  {
+                    "id": "standard",
+                    "title": "Standard Shipping",
+                    "description": "Arrives in 5-7 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 500
+                      }
+                    ]
+                  },
+                  {
+                    "id": "express",
+                    "title": "Express Shipping",
+                    "description": "Arrives in 2-3 business days",
+                    "totals": [
+                      {
+                        "type": "total",
+                        "amount": 1000
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "pi_gpay_5678",
+            "handler_id": "gpay_1234",
+            "type": "card",
+            "selected": true,
+            "display": {
+              "brand": "mastercard",
+              "last_digits": "5678",
+              "rich_text_description": "Google Pay •••• 5678"
+            }
+          }
+        ]
+      }
+    }
+    ```
+
+## HTTP Headers
+
+The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.
+
+{{ header_fields('create_checkout', 'rest.openapi.json') }}
+
+### Specific Header Requirements
+
+* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
+    containing the platform profile URI using Dictionary Structured Field syntax
+    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
+    Format: `profile="https://platform.example/profile"`.
+* **Idempotency-Key**: Operations that modify state **SHOULD** support
+    idempotency. When provided, the server **MUST**:
+    1. Store the key with the operation result for at least 24 hours.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)
+    for the full payload-matching contract.
+
+## Protocol Mechanics
+
+### Status Codes
+
+UCP uses standard HTTP status codes to indicate the success or failure of an API
+request.
+
+| Status Code                 | Description                                                                        |
+| :-------------------------- | :--------------------------------------------------------------------------------- |
+| `200 OK`                    | The request was successful.                                                        |
+| `201 Created`               | The resource was successfully created.                                             |
+| `400 Bad Request`           | The request was invalid or cannot be served.                                       |
+| `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
+| `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
+| `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
+| `422 Unprocessable Entity`  | The profile content is malformed (discovery failure).                              |
+| `424 Failed Dependency`     | The profile URL is valid but fetch failed (discovery failure).                     |
+| `429 Too Many Requests`     | Rate limit exceeded.                                                               |
+| `503 Service Unavailable`   | Temporary unavailability.                                                          |
+| `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
+
+### Error Responses
+
+See the [Core Specification](../../overview/index.md#error-handling) for the complete error
+code registry and transport binding examples.
+
+* **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
+    503) with JSON body containing `code` and `content`.
+* **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
+
+#### Business Outcomes
+
+Business outcomes (including errors like unavailable merchandise) are returned
+with HTTP 200 and the UCP envelope containing `messages`:
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "payment_handlers": { ... },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "id": "checkout_abc123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+        "item": {
+          "id": "item_123",
+          "title": "Blue Jeans",
+          "price": 5000
+        },
+      "quantity": 12,
+      "totals": [...]
+    }
+  ],
+  "totals": [...],
+  "links": [...],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "quantity_adjusted",
+      "content": "Quantity adjusted, requested 100 units but only 12 available",
+      "path": "$.line_items[0].quantity"
+    }
+  ],
+  "continue_url": "https://merchant.com/checkout/checkout_abc123"
+}
+```
+
+For `create_checkout`, when all items unavailable and no checkout can be created, returns
+HTTP 200 and the UCP envelope containing `messages`
+
+<!-- ucp:example schema=common/types/error_response op=read -->
+```json
+{
+  "ucp": { "version": "2026-01-11", "status": "error" },
+  "messages": [
+    {
+      "type": "error",
+      "code": "item_unavailable",
+      "content": "All items are not available for purchase",
+      "severity": "unrecoverable"
+    }
+  ],
+  "continue_url": "https://merchant.com/"
+}
+```
+
+## Message Signing
+
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth,
+mTLS, HTTP Message Signatures). When using
+HTTP Message Signatures, checkout operations follow the
+[Message Signatures](../../signatures.md) specification.
+
+### Request Signing
+
+When HTTP Message Signatures are used, requests **MUST** include valid
+`Signature-Input` and `Signature` headers (and `Content-Digest` when a body
+is present) per RFC 9421:
+
+| Header                   | Required | Description                              |
+| :----------------------- | :------- | :--------------------------------------- |
+| `Signature-Input`        | Yes      | Describes signed components              |
+| `Signature`              | Yes      | Contains the signature value             |
+| `Content-Digest`         | Cond.*   | SHA-256 hash of request body             |
+
+\* Required for requests with a body (POST, PUT)
+
+**Example Signed Request:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:X48E9q...:
+Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+See [Message Signatures - REST Request Signing](../../signatures.md#rest-request-signing)
+for the complete signing algorithm.
+
+### Response Signing
+
+Response signatures are **RECOMMENDED** for:
+
+* `complete_checkout` responses (order confirmation)
+
+Response signatures are **OPTIONAL** for:
+
+* `create_checkout`, `get_checkout`, `update_checkout`, `cancel_checkout`
+
+**Example Signed Response:**
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+
+{"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
+```
+
+See [Message Signatures - REST Response Signing](../../signatures.md#rest-response-signing)
+for the complete signing algorithm.
+
+## Security Considerations
+
+### Authentication
+
+Authentication is optional and depends on business requirements. When
+authentication is required, the REST transport **MAY** use:
+
+1. **Open API**: No authentication required for public operations.
+2. **API Keys**: Via `X-API-Key` header.
+3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
+   platform for agent-authenticated access, or both platform and user for
+   user-authenticated access (see [Identity Linking](../../common/identity-linking/index.md)).
+4. **Mutual TLS**: For high-security environments.
+5. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+    (see [Message Signing](#message-signing) above).
+
+Businesses **MAY** require authentication for some operations while leaving
+others open (e.g., public checkout without authentication).

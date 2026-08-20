@@ -113,7 +113,7 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
   that service `version` repeats on each entry, and transport bindings have no
   separate version. The referenced OpenAPI/OpenRPC artifact carries its own
   `info.version` as artifact metadata, not a negotiated version. See
-  [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+  [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
     - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -130,7 +130,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
-**→ See [Payment Handler Guide](../specification/payment-handler-guide.md)** for detailed
+**→ See [Payment Handler Guide](../specification/payment/guide.md)** for detailed
 guidance on handler structure, config/instrument/credential schemas, and the full
 specification template.
 
@@ -209,7 +209,7 @@ The member name `ucp` is reserved at every structured UCP object scope — an
 object whose members are schema-defined fields — for the protocol namespace.
 The top-level envelope is its root manifestation. Dictionary containers are
 excluded because their keys are data rather than fields. See
-[The `ucp` Protocol Namespace](../specification/overview.md#the-ucp-protocol-namespace)
+[The `ucp` Protocol Namespace](../specification/overview/index.md#the-ucp-protocol-namespace)
 for the normative rules. For schema authors this means:
 
 - **Never mint a structured domain field named `ucp`.** Schema authors
@@ -374,7 +374,7 @@ does not replace negotiation: capabilities and extensions are still selected by
 exact-version intersection.
 
 Profile selection, including profiles for older supported releases, is defined
-in [Protocol Version](../specification/overview.md#protocol-version).
+in [Protocol Version](../specification/overview/index.md#protocol-version).
 
 ### Third-Party Extensions and Payment Handlers
 
@@ -523,7 +523,7 @@ object fields:
 ## The `request_constraints` Protocol Member
 
 Normative processing, scope, lifecycle, and invalid-member behavior are defined
-in [Request Constraints](../specification/overview.md#request-constraints).
+in [Request Constraints](../specification/overview/index.md#request-constraints).
 This section covers only the schema-authoring boundary.
 
 ### Local structure
@@ -583,7 +583,7 @@ admits that container through its optional reference to
 
 Every Action type is declared by an extension and becomes available only when
 that extension is negotiated, as defined in
-[Actions](../specification/overview.md#actions). Before advertising support,
+[Actions](../specification/overview/index.md#actions). Before advertising support,
 both the Business and the Platform should assess the extension's complete
 Action contract. Negotiation is pre-runtime agreement on that contract's
 semantics and support; it does not pre-approve every future `config` value or
@@ -963,7 +963,7 @@ Manual invocation:
 
 ```bash
 python3 scripts/validate_examples.py --schema-base source/schemas/
-python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md docs/specification/cart.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/shopping/checkout/rest.md docs/specification/shopping/cart/index.md
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 

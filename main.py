@@ -360,11 +360,11 @@ def define_env(env):
     # Refer to checkout.json for ap2-mandates.json entities that are not
     # explicitly defined in ap2-mandates.json.
     if (
-      spec_file_name == "ap2-mandates"
+      spec_file_name in ("ap2-mandates", "shopping/checkout/ap2-mandates")
       and "ap2_mandate" not in ref_string
       and not ref_string.startswith("#")
     ):
-      spec_file_name = "checkout"
+      spec_file_name = "shopping/checkout"
 
     # Extract fragment identifier if present (e.g., #/$defs/response)
     # This handles cases like "types/pagination.json#/$defs/response"

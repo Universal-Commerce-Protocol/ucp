@@ -330,8 +330,8 @@ Some consent states depend on additional buyer or checkout data. For example,
 SMS marketing consent requires a buyer phone number. When the
 platform confirms a consent value whose required dependency is missing,
 businesses surface the gap through the standard [Checkout Status
-Lifecycle](checkout.md#checkout-status-lifecycle) and [Error
-Handling](checkout.md#error-handling) mechanisms.
+Lifecycle](shopping/checkout/index.md#checkout-status-lifecycle) and [Error
+Handling](shopping/checkout/index.md#error-handling) mechanisms.
 
 On `create_cart`, `update_cart`, `create_checkout`, and `update_checkout`,
 businesses SHOULD surface missing dependencies as `warning` messages so the
@@ -354,7 +354,7 @@ consent decisions remain valid; the warning is informational.
 On `complete_checkout`, businesses MUST NOT transition the checkout to
 `completed` while a confirmed consent decision has unmet data dependencies.
 Missing dependencies MUST be surfaced via the standard [Error
-Handling](checkout.md#error-handling) flow.
+Handling](shopping/checkout/index.md#error-handling) flow.
 
 ## Normative requirements
 

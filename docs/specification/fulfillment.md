@@ -54,10 +54,10 @@ On Checkout, the `fulfillment` field contains:
 
 ## Location Context
 
-Base [Context](catalog/index.md#context) defines an optional `location`: a
+Base [Context](shopping/catalog/index.md#context) defines an optional `location`: a
 stable, opaque [Location](glossary.md#commerce) identifier in the Business's
 namespace. The field appears on Catalog requests and on Cart and Checkout
-create and update requests (see [Checkout Context](checkout.md#context)).
+create and update requests (see [Checkout Context](shopping/checkout/index.md#context)).
 Fulfillment does not add or redefine the field; when the Fulfillment
 extension is active, it defines the field's effects.
 
@@ -89,7 +89,7 @@ Precedence is scoped to what each field governs:
 these fields without collapsing their roles. A Catalog response can report a
 place-based method at `loc_123`. Because base Cart Context already includes
 `location`, `loc_123` can travel forward as `context.location` on a Cart
-request. [Cart-to-Checkout conversion](cart.md#cart-to-checkout-conversion)
+request. [Cart-to-Checkout conversion](shopping/cart/index.md#cart-to-checkout-conversion)
 initializes the Checkout from the Cart's `context`, so the Business **MAY**
 use `loc_123` to generate an initial Checkout fulfillment destination. Once
 the Platform sets `selected_destination_id`, that explicit selection governs.
@@ -372,15 +372,15 @@ describes another location. A Business that cannot honor the submitted
 selection rejects it rather than replacing it.
 
 When the Business cannot accept a `selected_destination_id` submitted on
-[Update Checkout](checkout.md#update-checkout) — the ID is not recognized for
+[Update Checkout](shopping/checkout/index.md#update-checkout) — the ID is not recognized for
 that method, or revalidation fails — it follows the general behavior for a
 rejected Update: it **MUST** leave the current Checkout unchanged and
 **MUST** return that Checkout with an error Message with
 `severity: "recoverable"` whose `path` selects the attempted method's
 `selected_destination_id` (for example
 `$.fulfillment.methods[0].selected_destination_id`). See
-[Error Handling](checkout.md#error-handling) and
-[The `path` Field](checkout.md#the-path-field).
+[Error Handling](shopping/checkout/index.md#error-handling) and
+[The `path` Field](shopping/checkout/index.md#the-path-field).
 
 ## Rendering
 

@@ -141,7 +141,7 @@ each declares the date `D` of the UCP release it ships in. Third-party
 extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Capability | Description |
@@ -165,10 +165,10 @@ core capabilities.
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-04-08",
+      "version": "{{ ucp_version }}",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -179,7 +179,7 @@ intersection is automatically pruned. This ensures extension coherence —
 you never activate a discount extension without the checkout it extends.
 
 The following are examples of extensions defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Extension | Extends | Description |
@@ -270,35 +270,35 @@ authentication are resolved together.
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [{
         "id": "processor_tokenizer",
-        "version": "2026-04-08",
+        "version": "{{ ucp_version }}",
         "spec": "https://example.com/specs/payments/processor_tokenizer",
         "schema": "https://example.com/specs/payments/merchant_tokenizer.json"
       }]
@@ -335,7 +335,7 @@ remains the client's decision.
 Platforms **MUST** validate this binding for declared `schema` URLs and **MUST**
 reject entities that fail it. Identifiers carry no fetched URL, and the `spec`
 (documentation) URL is not authority-bound (any `https` origin). See
-[Authority Binding](../specification/overview.md#authority-binding) for the
+[Authority Binding](../specification/overview/index.md#authority-binding) for the
 normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
@@ -453,7 +453,7 @@ Every UCP-defined service, capability, and extension in release `D` declares
 version `D`. Third-party extensions and payment handlers are versioned by their
 authors, independently of UCP releases.
 
-See [Protocol Version](../specification/overview.md#protocol-version) for version
-discovery, [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+See [Protocol Version](../specification/overview/index.md#protocol-version) for version
+discovery, [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 for the normative release contract, and [Versioning](../versioning.md) for the
 release-branch and backport process.
