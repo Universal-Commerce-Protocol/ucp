@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/location_distance.json",
   "title": "Location Distance",
-  "description": "An explicit-center inclusive-radius predicate. The Business compares the unrounded shortest WGS 84 ellipsoidal geodesic distance in meters from `center` to the Location's authoritative `geo`; a value less than or equal to `max` matches. Implementations MAY use any algorithm that produces the WGS 84 inverse-geodesic result at sufficient precision such that the match outcome agrees with this unrounded comparison. A matching Location includes the `geo` used for evaluation. No context, signals, IP, or `serves` fallback, radius clamping, tolerance, or operand substitution is permitted.",
+  "description": "An explicit-center inclusive-radius predicate. The Business compares the unrounded shortest WGS 84 ellipsoidal geodesic distance in meters from `center` to the Location's authoritative `geo`; a value less than or equal to `max` matches. Implementations MAY use any algorithm that produces the WGS 84 inverse-geodesic result at sufficient precision such that the match outcome agrees with this unrounded comparison. No context, signals, IP, or `serves` fallback, radius clamping, tolerance, or operand substitution is permitted.",
   "type": "object",
   "required": ["center", "max"],
   "additionalProperties": true,

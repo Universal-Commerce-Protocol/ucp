@@ -142,8 +142,6 @@ Matching semantics are closed:
     applies to `distance.max`.
 * A Location without a usable authoritative `geo` does not match; exclusion
     is a non-match, not an error.
-* A Business **MUST** return each matching Location with the `geo` value
-    used in the evaluation.
 
 The relation is a hard restriction; it neither requests nor implies distance
 ordering. Ranking remains separate Business behavior unless another
@@ -406,10 +404,6 @@ schedule evaluation rules.
             "address_country": "US",
             "postal_code": "10005"
           },
-          "geo": {
-            "latitude": 40.709,
-            "longitude": -74.008
-          },
           "amenities": ["dev.ucp.amenity.shopping.curbside_pickup", "dev.ucp.amenity.shopping.in_store_pickup"]
         }
       ]
@@ -417,7 +411,8 @@ schedule evaluation rules.
     ```
 
 Each returned Location satisfies both the `distance` relation and the
-inventory predicate, and includes the `geo` used in the distance evaluation.
+inventory predicate. The `distance` relation does not require the Business to
+disclose the Location coordinate used in the evaluation.
 
 ## Transport Bindings
 
