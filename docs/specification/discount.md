@@ -122,7 +122,10 @@ JSONPath to identify targets:
 This enables platforms to explain exactly how much each discount contributed to
 each line item, even when multiple discounts stack.
 
-**Invariant:** Sum of `allocations[].amount` equals `applied_discount.amount`.
+**Invariant:** When `allocations` is present, the sum of `allocations[].amount`
+equals `applied_discount.amount`. `allocations` is optional — a discount that
+applies to the order as a whole, rather than to identifiable targets, omits it
+and is reported in `totals[]` as a single `discount` entry.
 
 ## Operations
 
@@ -501,9 +504,9 @@ to line items, and an automatic shipping discount at the order level.
       "totals": [
         {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
         {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
-        {"type": "discount", "display_text": "Order Discounts", "amount": -599},
-        {"type": "fulfillment", "display_text": "Shipping", "amount": 0},
-        {"type": "total", "display_text": "Total", "amount": 2601}
+        {"type": "discount", "display_text": "Free shipping on orders over $30", "amount": -599},
+        {"type": "fulfillment", "display_text": "Shipping", "amount": 599},
+        {"type": "total", "display_text": "Total", "amount": 3200}
       ]
     }
     ```
