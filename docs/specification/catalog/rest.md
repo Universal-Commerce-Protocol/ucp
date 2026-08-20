@@ -52,6 +52,11 @@ Businesses advertise REST transport availability through their UCP profile at
         "version": "{{ ucp_version }}",
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_lookup.json"
+      }],
+      "dev.ucp.shopping.catalog.list": [{
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/catalog/list",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_list.json"
       }]
     },
     "payment_handlers": {}
@@ -66,6 +71,7 @@ Businesses advertise REST transport availability through their UCP profile at
 | `/catalog/search` | POST | [Search](search.md) | Search for products. |
 | `/catalog/lookup` | POST | [Lookup](lookup.md) | Lookup one or more products by ID. |
 | `/catalog/product` | POST | [Lookup](lookup.md#get-product-get_product) | Get full product detail by identifier. |
+| `/catalog/list` | POST | [List](list.md) | Paginate through the full product catalog. |
 
 ### `POST /catalog/search`
 
@@ -508,6 +514,60 @@ Unlike `/catalog/lookup` (which returns partial results for batch requests),
 `/catalog/product` is a single-resource operation. A missing product is an
 application error with `unrecoverable` severity — the agent should not retry
 with the same identifier.
+
+### `POST /catalog/list`
+
+Maps to the [Catalog List](list.md) capability.
+
+#### Example
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/catalog_list op=list direction=request -->
+    ```json
+    {
+      "filters": {
+        "modified_since": "2026-07-01T00:00:00Z"
+      },
+      "pagination": {
+        "limit": 100
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/catalog_list op=list direction=response -->
+    ```json
+    {
+      "ucp": {},
+      "products": [
+        {
+          "id": "prod_abc123",
+          "title": "Classic Running Shoe",
+          "description": { "plain": "Lightweight running shoe with cushioned sole." },
+          "price_range": {
+            "min": { "amount": 8900, "currency": "USD" },
+            "max": { "amount": 12900, "currency": "USD" }
+          },
+          "variants": [
+            {
+              "id": "var_001",
+              "title": "Black / Size 10",
+              "description": { "plain": "Black colorway, men's size 10." },
+              "price": { "amount": 8900, "currency": "USD" },
+              "availability": { "available": true, "status": "in_stock" }
+            }
+          ]
+        }
+      ],
+      "pagination": {
+        "cursor": "eyJsYXN0X2lkIjoicHJvZF9hYmMxMjMifQ==",
+        "has_next_page": true,
+        "total_count": 5420
+      }
+    }
+    ```
 
 ## HTTP Headers
 
