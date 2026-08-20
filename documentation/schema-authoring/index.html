@@ -2213,7 +2213,7 @@ breaking capability negotiation.</p>
   that service <code>version</code> repeats on each entry, and transport bindings have no
   separate version. The referenced OpenAPI/OpenRPC artifact carries its own
   <code>info.version</code> as artifact metadata, not a negotiated version. See
-  <a href="/latest/specification/overview.md#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a></li>
+  <a href="/latest/specification/overview/index.md#component-versioning-and-release-snapshots">Component Versioning and Release Snapshots</a></li>
 <li><strong>Variants</strong>: <code>platform_schema</code>, <code>business_schema</code></li>
 <li><strong>Transport requirements</strong> (additional beyond the common base):<ul>
 <li>Platform profile (<code>platform_schema</code>): REST/MCP/Embedded require <code>schema</code> (OpenAPI/OpenRPC URL). A2A has no additional requirements.</li>
@@ -2230,7 +2230,7 @@ breaking capability negotiation.</p>
 <li><strong><code>available_instruments</code></strong>: Optional. Array of supported instrument types with type-specific constraints (e.g., brands for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.</li>
 </ul>
 <p>Examples: <code>com.google.pay</code>, <code>dev.shopify.shop_pay</code>, <code>dev.ucp.processor_tokenizer</code></p>
-<p><strong>→ See <a href="/latest/specification/payment-handler-guide/">Payment Handler Guide</a></strong> for detailed
+<p><strong>→ See <a href="/latest/specification/payment/guide/">Payment Handler Guide</a></strong> for detailed
 guidance on handler structure, config/instrument/credential schemas, and the full
 specification template.</p>
 <h3 id="component-schemas">Component Schemas<a class="headerlink" href="#component-schemas" title="Permanent link">&para;</a></h3>
@@ -2320,7 +2320,7 @@ by <code>name</code> rather than arrays of objects with <code>name</code> fields
 object whose members are schema-defined fields — for the protocol namespace.
 The top-level envelope is its root manifestation. Dictionary containers are
 excluded because their keys are data rather than fields. See
-<a href="/latest/specification/overview.md#the-ucp-protocol-namespace">The <code>ucp</code> Protocol Namespace</a>
+<a href="/latest/specification/overview/index.md#the-ucp-protocol-namespace">The <code>ucp</code> Protocol Namespace</a>
 for the normative rules. For schema authors this means:</p>
 <ul>
 <li><strong>Never mint a structured domain field named <code>ucp</code>.</strong> Schema authors
@@ -2487,7 +2487,7 @@ version <code>D</code>, even when its schema did not change directly. Declaring 
 does not replace negotiation: capabilities and extensions are still selected by
 exact-version intersection.</p>
 <p>Profile selection, including profiles for older supported releases, is defined
-in <a href="/latest/specification/overview.md#protocol-version">Protocol Version</a>.</p>
+in <a href="/latest/specification/overview/index.md#protocol-version">Protocol Version</a>.</p>
 <h3 id="third-party-extensions-and-payment-handlers">Third-Party Extensions and Payment Handlers<a class="headerlink" href="#third-party-extensions-and-payment-handlers" title="Permanent link">&para;</a></h3>
 <p>Third-party extensions and payment handlers publish versions on their authors'
 own schedules. Their versions remain independent of the selected <code>ucp.version</code>
@@ -2603,7 +2603,7 @@ object fields:</p>
 </ul>
 <h2 id="the-request_constraints-protocol-member">The <code>request_constraints</code> Protocol Member<a class="headerlink" href="#the-request_constraints-protocol-member" title="Permanent link">&para;</a></h2>
 <p>Normative processing, scope, lifecycle, and invalid-member behavior are defined
-in <a href="/latest/specification/overview.md#request-constraints">Request Constraints</a>.
+in <a href="/latest/specification/overview/index.md#request-constraints">Request Constraints</a>.
 This section covers only the schema-authoring boundary.</p>
 <h3 id="local-structure">Local structure<a class="headerlink" href="#local-structure" title="Permanent link">&para;</a></h3>
 <p><code>request_constraints</code> is centrally registered in <code>ucp.json#/$defs/members</code> as a
@@ -2666,7 +2666,7 @@ admits that container through its optional reference to
 <h2 id="extension-declared-action-types">Extension-Declared Action Types<a class="headerlink" href="#extension-declared-action-types" title="Permanent link">&para;</a></h2>
 <p>Every Action type is declared by an extension and becomes available only when
 that extension is negotiated, as defined in
-<a href="/latest/specification/overview.md#actions">Actions</a>. Before advertising support,
+<a href="/latest/specification/overview/index.md#actions">Actions</a>. Before advertising support,
 both the Business and the Platform should assess the extension's complete
 Action contract. Negotiation is pre-runtime agreement on that contract's
 semantics and support; it does not pre-approve every future <code>config</code> value or
@@ -3040,7 +3040,7 @@ binary for schema resolution and payload validation. First-time setup:</p>
 hooks as a safety net. Pass both to opt into the full enforcement story.</p>
 <p>Manual invocation:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--file<span class="w"> </span>docs/specification/checkout-rest.md<span class="w"> </span>docs/specification/cart.md
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--file<span class="w"> </span>docs/specification/shopping/checkout/rest.md<span class="w"> </span>docs/specification/shopping/cart/index.md
 </span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>python3<span class="w"> </span>scripts/validate_examples.py<span class="w"> </span>--schema-base<span class="w"> </span>source/schemas/<span class="w"> </span>--audit
 </span></code></pre></div>
 <p>The <code>--audit</code> mode lists blocks without validating them — useful for counting

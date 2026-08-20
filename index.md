@@ -108,7 +108,7 @@ Checkout Identity Linking Order
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Get Started](/latest/specification/checkout/)
+[Get Started](http://ucp.dev/latest/specification/shopping/checkout/index.md)
 
 ```json
 {
@@ -180,7 +180,7 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Get Started](http://ucp.dev/latest/specification/identity-linking/index.md)
+[Get Started](http://ucp.dev/latest/specification/common/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -211,7 +211,7 @@ Sample of /.well-known/oauth-authorization-server
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Get Started](http://ucp.dev/latest/specification/order/index.md)
+[Get Started](http://ucp.dev/latest/specification/shopping/order/index.md)
 
 ```json
 {
@@ -287,13 +287,13 @@ Detailed specifications coming soon
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[Get Started](http://ucp.dev/latest/specification/checkout-rest/index.md)
+[Get Started](http://ucp.dev/latest/specification/shopping/checkout/rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[See how it works](http://ucp.dev/latest/specification/embedded-checkout/index.md)
+[See how it works](http://ucp.dev/latest/specification/shopping/checkout/embedded/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -533,7 +533,7 @@ The complete technical specification, documentation, and reference implementatio
 
 Download and run our code samples
 
-### [Experiment](http://ucp.dev/latest/specification/playground/index.md)
+### [Experiment](http://ucp.dev/latest/specification/shopping/playground/index.md)
 
 Experiment with the protocol and its different agent roles
 

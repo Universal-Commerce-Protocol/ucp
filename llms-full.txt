@@ -136,7 +136,7 @@ Checkout Identity Linking Order
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Get Started](/latest/specification/checkout/)
+[Get Started](http://ucp.dev/latest/specification/shopping/checkout/index.md)
 
 ```json
 {
@@ -208,7 +208,7 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Get Started](http://ucp.dev/latest/specification/identity-linking/index.md)
+[Get Started](http://ucp.dev/latest/specification/common/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -239,7 +239,7 @@ Sample of /.well-known/oauth-authorization-server
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Get Started](http://ucp.dev/latest/specification/order/index.md)
+[Get Started](http://ucp.dev/latest/specification/shopping/order/index.md)
 
 ```json
 {
@@ -315,13 +315,13 @@ Detailed specifications coming soon
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[Get Started](http://ucp.dev/latest/specification/checkout-rest/index.md)
+[Get Started](http://ucp.dev/latest/specification/shopping/checkout/rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[See how it works](http://ucp.dev/latest/specification/embedded-checkout/index.md)
+[See how it works](http://ucp.dev/latest/specification/shopping/checkout/embedded/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -561,7 +561,7 @@ The complete technical specification, documentation, and reference implementatio
 
 Download and run our code samples
 
-### [Experiment](http://ucp.dev/latest/specification/playground/index.md)
+### [Experiment](http://ucp.dev/latest/specification/shopping/playground/index.md)
 
 Experiment with the protocol and its different agent roles
 
@@ -657,10 +657,10 @@ Extensions optionally augment a base capability. They use the `extends` field to
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-04-08",
+      "version": "draft",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -723,35 +723,35 @@ Both business and platform profiles share a common base structure — a `ucp` ob
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "draft",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview",
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview/",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/shopping/checkout",
+        "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/fulfillment",
+        "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [{
         "id": "processor_tokenizer",
-        "version": "2026-04-08",
+        "version": "draft",
         "spec": "https://example.com/specs/payments/processor_tokenizer",
         "schema": "https://example.com/specs/payments/merchant_tokenizer.json"
       }]
@@ -777,7 +777,7 @@ UCP uses reverse-domain naming to embed governance authority directly into its r
 
 Reverse-domain names are used both as collision-safe **identifiers** (keys and references) and by **entities** — capabilities, services, and payment handlers — that declare a `schema` URL. An entity's `schema` URL must originate from its namespace authority domain. This guarantees **provenance** — that the reverse-domain name is controlled by the domain owner — not that the entity is trustworthy; whether to trust or support it remains the client's decision.
 
-Platforms **MUST** validate this binding for declared `schema` URLs and **MUST** reject entities that fail it. Identifiers carry no fetched URL, and the `spec` (documentation) URL is not authority-bound (any `https` origin). See [Authority Binding](/latest/specification/overview.md#authority-binding) for the normative algorithm.
+Platforms **MUST** validate this binding for declared `schema` URLs and **MUST** reject entities that fail it. Identifiers carry no fetched URL, and the `spec` (documentation) URL is not authority-bound (any `https` origin). See [Authority Binding](/latest/specification/overview/index.md#authority-binding) for the normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by the UCP Tech Council responsible for the capability's domain. Any vendor can define and publish capabilities under their own domain — `org.acme.*` — without UCP maintainer approval. Vendor capabilities follow the same extension model, meaning they can extend UCP base capabilities (e.g., `org.acme.loyalty` extending `dev.ucp.shopping.checkout`) or define entirely new ones. Because negotiation is always opt-in, vendor capabilities only activate when both parties declare them, keeping the protocol decentralized by design.
 
@@ -848,7 +848,7 @@ UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a s
 
 Every UCP-defined service, capability, and extension in release `D` declares version `D`. Third-party extensions and payment handlers are versioned by their authors, independently of UCP releases.
 
-See [Protocol Version](/latest/specification/overview.md#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.
+See [Protocol Version](/latest/specification/overview/index.md#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/index.md#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.
 
 # UCP and AP2
 
@@ -981,7 +981,7 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
 
 - **Registry identity**: Reverse-domain service name used as the registry key
 - **Entry fields**: `version`, `spec`, `schema`, `config`, and transport-specific fields
-- **Versioning**: Every service entry declares an explicit `version`; in release `D` it is `D`. Because each entry pairs the service with one transport binding, that service `version` repeats on each entry, and transport bindings have no separate version. The referenced OpenAPI/OpenRPC artifact carries its own `info.version` as artifact metadata, not a negotiated version. See [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots)
+- **Versioning**: Every service entry declares an explicit `version`; in release `D` it is `D`. Because each entry pairs the service with one transport binding, that service `version` repeats on each entry, and transport bindings have no separate version. The referenced OpenAPI/OpenRPC artifact carries its own `info.version` as artifact metadata, not a negotiated version. See [Component Versioning and Release Snapshots](/latest/specification/overview/index.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
   - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -998,7 +998,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
-**→ See [Payment Handler Guide](/latest/specification/payment-handler-guide/)** for detailed guidance on handler structure, config/instrument/credential schemas, and the full specification template.
+**→ See [Payment Handler Guide](/latest/specification/payment/guide/)** for detailed guidance on handler structure, config/instrument/credential schemas, and the full specification template.
 
 ### Component Schemas
 
@@ -1064,7 +1064,7 @@ The same registry structure appears in three contexts with different field requi
 
 ## The Reserved `ucp` Member
 
-The member name `ucp` is reserved at every structured UCP object scope — an object whose members are schema-defined fields — for the protocol namespace. The top-level envelope is its root manifestation. Dictionary containers are excluded because their keys are data rather than fields. See [The `ucp` Protocol Namespace](/latest/specification/overview.md#the-ucp-protocol-namespace) for the normative rules. For schema authors this means:
+The member name `ucp` is reserved at every structured UCP object scope — an object whose members are schema-defined fields — for the protocol namespace. The top-level envelope is its root manifestation. Dictionary containers are excluded because their keys are data rather than fields. See [The `ucp` Protocol Namespace](/latest/specification/overview/index.md#the-ucp-protocol-namespace) for the normative rules. For schema authors this means:
 
 - **Never mint a structured domain field named `ucp`.** Schema authors **MUST NOT** declare a domain field named `ucp` in a structured object; the name denotes the protocol namespace there.
 - **Do not declare ambient `ucp` in open nested objects.** The root `ucp` envelope is not ambient placement; UCP root schemas already declare its required protocol metadata. Below the root, the member is UCP document grammar defined centrally, so schema authors **MUST NOT** declare it in an open nested object. A Business or Platform **MAY** include it in an eligible open structured scope without the domain schema saying so. Ordinary instance validation against an open UCP source domain schema treats it as an ignored unknown object; validating its contents is a conformance-tooling concern.
@@ -1176,7 +1176,7 @@ In each UCP release `D`, every UCP-defined service entry declares version `D`. S
 
 In each UCP release `D`, every UCP-defined capability and extension declares version `D`, even when its schema did not change directly. Declaring version `D` does not replace negotiation: capabilities and extensions are still selected by exact-version intersection.
 
-Profile selection, including profiles for older supported releases, is defined in [Protocol Version](/latest/specification/overview.md#protocol-version).
+Profile selection, including profiles for older supported releases, is defined in [Protocol Version](/latest/specification/overview/index.md#protocol-version).
 
 ### Third-Party Extensions and Payment Handlers
 
@@ -1290,7 +1290,7 @@ By default, UCP schemas do not set `minProperties` or `maxProperties` on object 
 
 ## The `request_constraints` Protocol Member
 
-Normative processing, scope, lifecycle, and invalid-member behavior are defined in [Request Constraints](/latest/specification/overview.md#request-constraints). This section covers only the schema-authoring boundary.
+Normative processing, scope, lifecycle, and invalid-member behavior are defined in [Request Constraints](/latest/specification/overview/index.md#request-constraints). This section covers only the schema-authoring boundary.
 
 ### Local structure
 
@@ -1321,7 +1321,7 @@ The containing `ucp` object still follows [The Reserved `ucp` Member](#the-reser
 
 ## Extension-Declared Action Types
 
-Every Action type is declared by an extension and becomes available only when that extension is negotiated, as defined in [Actions](/latest/specification/overview.md#actions). Before advertising support, both the Business and the Platform should assess the extension's complete Action contract. Negotiation is pre-runtime agreement on that contract's semantics and support; it does not pre-approve every future `config` value or delegate. Each concrete instance still needs to conform to the composed schema, the Action-type contract's runtime rules, and Platform policy.
+Every Action type is declared by an extension and becomes available only when that extension is negotiated, as defined in [Actions](/latest/specification/overview/index.md#actions). Before advertising support, both the Business and the Platform should assess the extension's complete Action contract. Negotiation is pre-runtime agreement on that contract's semantics and support; it does not pre-approve every future `config` value or delegate. Each concrete instance still needs to conform to the composed schema, the Action-type contract's runtime rules, and Platform policy.
 
 When they apply to the Action type, extension authors should define:
 
@@ -1602,7 +1602,7 @@ Manual invocation:
 
 ```bash
 python3 scripts/validate_examples.py --schema-base source/schemas/
-python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md docs/specification/cart.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/shopping/checkout/rest.md docs/specification/shopping/cart/index.md
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 
@@ -1630,9 +1630,9 @@ The pre-commit/pre-push split between "changed files only" and "full corpus" is 
 
 # Versioning
 
-This guide defines UCP's release-branch and backport process. UCP uses date-based version identifiers in `YYYY-MM-DD` format; see [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots) for the normative release model and [Protocol Version](/latest/specification/overview.md#protocol-version) for profile selection.
+This guide defines UCP's release-branch and backport process. UCP uses date-based version identifiers in `YYYY-MM-DD` format; see [Component Versioning and Release Snapshots](/latest/specification/overview/index.md#component-versioning-and-release-snapshots) for the normative release model and [Protocol Version](/latest/specification/overview/index.md#protocol-version) for profile selection.
 
-New development occurs on the `main` branch. We maintain long-lived branches for all supported releases of the spec so that a published snapshot `D` stays available for reference and maintenance. Backport eligibility and approval — approved backwards-compatible changes by default, breaking changes only through exceptional Governance Council approval — are defined in [Component Versioning and Release Snapshots](/latest/specification/overview.md#component-versioning-and-release-snapshots). A backported change lands on the maintained `release/D` branch, and UCP re-certifies the snapshot before publishing the updated artifacts.
+New development occurs on the `main` branch. We maintain long-lived branches for all supported releases of the spec so that a published snapshot `D` stays available for reference and maintenance. Backport eligibility and approval — approved backwards-compatible changes by default, breaking changes only through exceptional Governance Council approval — are defined in [Component Versioning and Release Snapshots](/latest/specification/overview/index.md#component-versioning-and-release-snapshots). A backported change lands on the maintained `release/D` branch, and UCP re-certifies the snapshot before publishing the updated artifacts.
 
 - When the Tech Council approves a new version of UCP, we will cut a new branch named `release/YYYY-MM-DD` directly from the current state of `main`.
   - We will implement a code freeze on the release branch the moment a `release/YYYY-MM-DD` branch is cut. Only changes permitted by the backport policy should move during this window.
