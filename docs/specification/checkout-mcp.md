@@ -278,6 +278,7 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
                 "selected_destination_id": "dest_home",
                 "destinations": [
                   {
+                    "type": "shipping_address",
                     "id": "dest_home",
                     "street_address": "123 Main St",
                     "address_locality": "Springfield",
@@ -536,6 +537,7 @@ unchanged and return the current Checkout with a recoverable error Message.
                 "selected_destination_id": "dest_home",
                 "destinations": [
                   {
+                    "type": "shipping_address",
                     "id": "dest_home",
                     "street_address": "123 Main St",
                     "address_locality": "Springfield",

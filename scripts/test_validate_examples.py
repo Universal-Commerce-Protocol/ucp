@@ -594,6 +594,38 @@ def test_process_block_integration() -> None:
   )
 
 
+def test_resolve_schema_cache_key() -> None:
+  """Resolved schemas are cached per schema root as well as schema identity."""
+  original_run = v.subprocess.run
+  calls: list[Path] = []
+
+  def fake_run(*args: object, **kwargs: object) -> object:
+    cwd = Path(str(kwargs["cwd"]))
+    calls.append(cwd)
+    return v.subprocess.CompletedProcess(
+      args[0], 0, stdout=json.dumps({"schema_root": cwd.name}), stderr=""
+    )
+
+  v._schema_cache.clear()
+  v.subprocess.run = fake_run
+  try:
+    with tempfile.TemporaryDirectory() as tmp:
+      base_a = Path(tmp, "a", "schemas")
+      base_b = Path(tmp, "b", "schemas")
+      base_a.mkdir(parents=True)
+      base_b.mkdir(parents=True)
+
+      first = v.resolve_schema("shopping/checkout", "response", "read", base_a)
+      cached = v.resolve_schema("shopping/checkout", "response", "read", base_a)
+      second = v.resolve_schema("shopping/checkout", "response", "read", base_b)
+
+    _check("schema_cache_same_base_hits", first == cached and len(calls) == 2)
+    _check("schema_cache_separates_bases", first != second, f"got {second!r}")
+  finally:
+    v.subprocess.run = original_run
+    v._schema_cache.clear()
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -610,6 +642,7 @@ def main() -> int:
   test_annotation_parsing()
   test_extract_blocks()
   test_scaffold_resolution()
+  test_resolve_schema_cache_key()
   test_process_block_integration()
   return _report()
 
