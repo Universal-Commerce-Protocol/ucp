@@ -45,6 +45,7 @@ Lowe's
 Macy's
 Marriott
 Mastercard
+MDES
 OKP
 Paymentech
 Paypal
