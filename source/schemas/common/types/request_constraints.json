@@ -13,13 +13,7 @@
       "$ref": "constraint_expression.json#/properties/required"
     },
     "properties": {
-      "type": "object",
-      "description": "Constraints keyed by property name.",
-      "additionalProperties": {
-        "oneOf": [
-          {"$ref": "constraint_expression.json"},
-          {"$ref": "constraint_expression.json#/$defs/value_constraint"}
-        ]
+      "$ref": "constraint_expression.json#/properties/properties"
       }
     }
   },
