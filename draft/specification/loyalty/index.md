@@ -68,28 +68,28 @@ Businesses can follow the standard advertising mechanism to advertise loyalty su
       "dev.ucp.shopping.catalog.search": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/catalog/search",
+          "spec": "https://ucp.dev/draft/specification/shopping/catalog/search",
           "schema": "https://ucp.dev/draft/schemas/shopping/catalog_search.json"
         }
       ],
       "dev.ucp.shopping.catalog.lookup": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/catalog/lookup",
+          "spec": "https://ucp.dev/draft/specification/shopping/catalog/lookup",
           "schema": "https://ucp.dev/draft/schemas/shopping/catalog_lookup.json"
         }
       ],
       "dev.ucp.shopping.cart": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/cart",
+          "spec": "https://ucp.dev/draft/specification/shopping/cart",
           "schema": "https://ucp.dev/draft/schemas/shopping/cart.json"
         }
       ],
       "dev.ucp.shopping.checkout": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/checkout",
+          "spec": "https://ucp.dev/draft/specification/shopping/checkout",
           "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
         }
       ],
@@ -207,13 +207,13 @@ The loyalty extension holds a key-value map whose keys are reverse-domain identi
 
 Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by their reverse-domain naming.
 
-Platforms MAY send buyer loyalty membership claims via `context.eligibility` in the request to activate the loyalty extension and claim loyalty benefits. Alternatively, when the buyer is authenticated and the business can determine loyalty membership from the authenticated identity, businesses MAY populate the loyalty extension without an explicit eligibility claim. In this case, the map key MUST be the same reverse-domain identifier the business would accept as a claim value. This is a specific instance of the general pattern where identity linking lets a business return its own user state on a response; see [Business-Populated Response Values](http://ucp.dev/draft/specification/identity-linking/#business-populated-response-values).
+Platforms MAY send buyer loyalty membership claims via `context.eligibility` in the request to activate the loyalty extension and claim loyalty benefits. Alternatively, when the buyer is authenticated and the business can determine loyalty membership from the authenticated identity, businesses MAY populate the loyalty extension without an explicit eligibility claim. In this case, the map key MUST be the same reverse-domain identifier the business would accept as a claim value. This is a specific instance of the general pattern where identity linking lets a business return its own user state on a response; see [Business-Populated Response Values](http://ucp.dev/draft/specification/common/identity-linking/#business-populated-response-values).
 
 - When a business verifies a membership claim or determines membership from authenticated identity, it MUST return `provisional: false`. It MUST populate the active tier(s) the buyer holds within the `tiers` array **when the program has tier structure** — for programs with no tier concept (flat-rate cashback, single-status memberships), businesses MAY omit `tiers`. It also SHOULD set `display_id` as a masked unique identifier for the buyer.
 - When a membership claim in the request is recognized and accepted but not verified by the business, the business MUST return `provisional: true`. It MAY return display-safe tier context for the state accepted during the session, and MUST NOT return `display_id` until the membership is verified.
 - When a membership claim in the request is accepted but cannot be verified, the business MUST communicate the failure via a recoverable `message` with `type: "error"` and `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim and proceed through checkout without loyalty benefits applied.
 
-At checkout completion, all accepted but unverified loyalty claims MUST be resolved per the [Eligibility Verification at Completion](http://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion) contract defined in the checkout capability.
+At checkout completion, all accepted but unverified loyalty claims MUST be resolved per the [Eligibility Verification at Completion](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) contract defined in the checkout capability.
 
 ### Monetary loyalty benefits
 
@@ -236,7 +236,7 @@ When loyalty membership claims are accepted, businesses MAY use `type: "info"` t
 
 The examples below are abbreviated to focus on loyalty and discount extension fields; complete cart and checkout responses also include base required fields such as `ucp`, `id`, `currency`, and `totals`.
 
-Building on the store loyalty card example from [Eligibility Verification at Completion](http://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion), assume the card offers one unconditional product discount and one conditional discount that the current checkout cart fails to satisfy. The platform can surface the first provisional discount with disclaimers like "verified at purchase" and additionally show a warning message to disclose the inapplicability of the second discount.
+Building on the store loyalty card example from [Eligibility Verification at Completion](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion), assume the card offers one unconditional product discount and one conditional discount that the current checkout cart fails to satisfy. The platform can surface the first provisional discount with disclaimers like "verified at purchase" and additionally show a warning message to disclose the inapplicability of the second discount.
 
 ```json
 {

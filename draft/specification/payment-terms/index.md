@@ -87,7 +87,7 @@ A Platform therefore cannot pre-compute the effect of a choice, and **MUST** tre
 
 The instrument funding a term is charged once for each of that term's schedules, and **MUST** be capable of every one of them. A Business **MUST NOT** advertise an instrument that cannot fund every schedule of the selected term, and **MUST** reject one that is submitted. An instrument that can only be charged immediately therefore cannot be offered on a term that defers any part of the payment.
 
-A term with more than one schedule **MUST** be funded by a single instrument. [Split Payments](http://ucp.dev/draft/specification/split-payments/index.md) composes with a term that has exactly one schedule, and not otherwise.
+A term with more than one schedule **MUST** be funded by a single instrument. [Split Payments](http://ucp.dev/draft/specification/payment/split-payments/index.md) composes with a term that has exactly one schedule, and not otherwise.
 
 ## Disclosures
 
@@ -100,7 +100,7 @@ This extension does not define a private disclosure channel. It uses the two tha
 
 These mechanisms carry durable terms and compel their display. The Business remains responsible for the required content, its applicability, its timing, and any affirmative Buyer acknowledgment. In particular, presenting a policy is optional for a Platform, so any content that **must** reach the Buyer belongs in the warning `content`, not only in the policy `description`.
 
-Disclosure display is unconditional. Under [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation) a Platform **MUST** display every returned disclosure, **MUST** keep it in proximity to the node named by `path`, and **MUST NOT** hide, collapse, or auto-dismiss it. A Platform that cannot honor that contract — for example one that collapses a list of terms and so cannot preserve proximity for each — **MUST** escalate through `continue_url` rather than silently dropping the notice.
+Disclosure display is unconditional. Under [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) a Platform **MUST** display every returned disclosure, **MUST** keep it in proximity to the node named by `path`, and **MUST NOT** hide, collapse, or auto-dismiss it. A Platform that cannot honor that contract — for example one that collapses a list of terms and so cannot preserve proximity for each — **MUST** escalate through `continue_url` rather than silently dropping the notice.
 
 An obligation disclosed at checkout does not end at checkout: it records money still owed, not context. Where a disclosure governed the term the Buyer accepted, the Business **MUST** return that disclosure on the Order with its `path` set to `$.payment.accepted_term`, and **MUST** use the same target in the `applies_to` of any policy paired with it. A Business **MUST NOT** return disclosures attached to terms the Buyer did not accept.
 
@@ -472,7 +472,7 @@ Platforms **MUST**:
 - Present each term's `title`, and each schedule's `description` and `amount`, formatted in the Checkout `currency`.
 - Re-render from the Business response after selecting a term, rather than reusing amounts read from `terms[]`.
 - Treat an unrecognized schedule `type` as not due at completion, and present the term regardless.
-- Process disclosures attached to terms per [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation), escalating through `continue_url` when the rendering contract cannot be honored.
+- Process disclosures attached to terms per [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation), escalating through `continue_url` when the rendering contract cannot be honored.
 
 Platforms **MAY** use `type` and `due_at` for enhanced presentation — calendar views, countdowns, reminders. This is optional; recognizing a `type` never changes what a Platform is required to render.
 

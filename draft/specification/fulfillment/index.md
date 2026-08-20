@@ -33,7 +33,7 @@ On Checkout, the `fulfillment` field contains:
 
 ## Location Context
 
-Base [Context](http://ucp.dev/draft/specification/catalog/#context) defines an optional `location`: a stable, opaque [Location](http://ucp.dev/draft/specification/glossary/#commerce) identifier in the Business's namespace. The field appears on Catalog requests and on Cart and Checkout create and update requests (see [Checkout Context](http://ucp.dev/draft/specification/checkout/#context)). Fulfillment does not add or redefine the field; when the Fulfillment extension is active, it defines the field's effects.
+Base [Context](http://ucp.dev/draft/specification/shopping/catalog/#context) defines an optional `location`: a stable, opaque [Location](http://ucp.dev/draft/specification/glossary/#commerce) identifier in the Business's namespace. The field appears on Catalog requests and on Cart and Checkout create and update requests (see [Checkout Context](http://ucp.dev/draft/specification/shopping/checkout/#context)). Fulfillment does not add or redefine the field; when the Fulfillment extension is active, it defines the field's effects.
 
 When Fulfillment extends Catalog or Checkout, `context.location` on a request to that capability names the provisional Business Location that the Business evaluates fulfillment availability against, and generates initial fulfillment choices for. It does not select a fulfillment destination.
 
@@ -51,7 +51,7 @@ Precedence is scoped to what each field governs:
 - When Catalog `filters.fulfills_to` is present, a Business **MUST** resolve the fulfillment destination and method `availability` from it rather than from `context`. Other `context` fields are unaffected.
 - Once a Platform sets `selected_destination_id` on a Checkout method, a Business **MUST** use the referenced destination rather than `context.location` for that method's fulfillment scope. Other methods are unaffected.
 
-**Carrying a Location forward.** The same identifier can appear in several of these fields without collapsing their roles. A Catalog response can report a place-based method at `loc_123`. Because base Cart Context already includes `location`, `loc_123` can travel forward as `context.location` on a Cart request. [Cart-to-Checkout conversion](http://ucp.dev/draft/specification/cart/#cart-to-checkout-conversion) initializes the Checkout from the Cart's `context`, so the Business **MAY** use `loc_123` to generate an initial Checkout fulfillment destination. Once the Platform sets `selected_destination_id`, that explicit selection governs.
+**Carrying a Location forward.** The same identifier can appear in several of these fields without collapsing their roles. A Catalog response can report a place-based method at `loc_123`. Because base Cart Context already includes `location`, `loc_123` can travel forward as `context.location` on a Cart request. [Cart-to-Checkout conversion](http://ucp.dev/draft/specification/shopping/cart/#cart-to-checkout-conversion) initializes the Checkout from the Cart's `context`, so the Business **MAY** use `loc_123` to generate an initial Checkout fulfillment destination. Once the Platform sets `selected_destination_id`, that explicit selection governs.
 
 ## Schema
 
@@ -328,7 +328,7 @@ When the Business accepts a non-null `selected_destination_id`, its response:
 
 The Business **MUST** revalidate the selected destination's current availability and terms; recognizing an ID neither reserves inventory nor guarantees eligibility. The Business **MUST NOT** silently substitute another destination: it **MUST NOT** return a different `selected_destination_id`, and **MUST NOT** keep the submitted ID while returning a destination that describes another location. A Business that cannot honor the submitted selection rejects it rather than replacing it.
 
-When the Business cannot accept a `selected_destination_id` submitted on [Update Checkout](http://ucp.dev/draft/specification/checkout/#update-checkout) — the ID is not recognized for that method, or revalidation fails — it follows the general behavior for a rejected Update: it **MUST** leave the current Checkout unchanged and **MUST** return that Checkout with an error Message with `severity: "recoverable"` whose `path` selects the attempted method's `selected_destination_id` (for example `$.fulfillment.methods[0].selected_destination_id`). See [Error Handling](http://ucp.dev/draft/specification/checkout/#error-handling) and [The `path` Field](http://ucp.dev/draft/specification/checkout/#the-path-field).
+When the Business cannot accept a `selected_destination_id` submitted on [Update Checkout](http://ucp.dev/draft/specification/shopping/checkout/#update-checkout) — the ID is not recognized for that method, or revalidation fails — it follows the general behavior for a rejected Update: it **MUST** leave the current Checkout unchanged and **MUST** return that Checkout with an error Message with `severity: "recoverable"` whose `path` selects the attempted method's `selected_destination_id` (for example `$.fulfillment.methods[0].selected_destination_id`). See [Error Handling](http://ucp.dev/draft/specification/shopping/checkout/#error-handling) and [The `path` Field](http://ucp.dev/draft/specification/shopping/checkout/#the-path-field).
 
 ## Rendering
 

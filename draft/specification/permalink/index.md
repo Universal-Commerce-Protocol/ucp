@@ -1,7 +1,7 @@
 # Permalink Capability
 
 - **Capability Name:** `dev.ucp.shopping.permalink`
-- **Schema:** `https://ucp.dev/schemas/shopping/permalink.json`
+- **Schema:** `https://ucp.dev/draft/schemas/shopping/permalink.json`
 
 ## Overview
 

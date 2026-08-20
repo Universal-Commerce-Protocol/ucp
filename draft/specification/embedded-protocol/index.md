@@ -8,8 +8,8 @@ Each capability implements EP methods under its own method prefix. For example, 
 
 Capability-specific details — discovery, URL parameters, delegation contracts, message payloads, and schema definitions — are defined in each capability's EP binding specification:
 
-- [Checkout Capability — EP Binding](http://ucp.dev/draft/specification/embedded-checkout/index.md)
-- [Cart Capability — EP Binding](http://ucp.dev/draft/specification/embedded-cart/index.md)
+- [Checkout Capability — EP Binding](http://ucp.dev/draft/specification/shopping/checkout/embedded/index.md)
+- [Cart Capability — EP Binding](http://ucp.dev/draft/specification/shopping/cart/embedded/index.md)
 
 ## Terminology & Actors
 

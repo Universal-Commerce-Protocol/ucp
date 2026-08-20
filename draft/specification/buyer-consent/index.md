@@ -258,7 +258,7 @@ Here, the buyer opted in to marketing on email and SMS; other choices are echoed
 
 ## Data dependencies
 
-Some consent states depend on additional buyer or checkout data. For example, SMS marketing consent requires a buyer phone number. When the platform confirms a consent value whose required dependency is missing, businesses surface the gap through the standard [Checkout Status Lifecycle](http://ucp.dev/draft/specification/checkout/#checkout-status-lifecycle) and [Error Handling](http://ucp.dev/draft/specification/checkout/#error-handling) mechanisms.
+Some consent states depend on additional buyer or checkout data. For example, SMS marketing consent requires a buyer phone number. When the platform confirms a consent value whose required dependency is missing, businesses surface the gap through the standard [Checkout Status Lifecycle](http://ucp.dev/draft/specification/shopping/checkout/#checkout-status-lifecycle) and [Error Handling](http://ucp.dev/draft/specification/shopping/checkout/#error-handling) mechanisms.
 
 On `create_cart`, `update_cart`, `create_checkout`, and `update_checkout`, businesses SHOULD surface missing dependencies as `warning` messages so the platform can collect the data on a subsequent operation. The advertised consent decisions remain valid; the warning is informational.
 
@@ -273,7 +273,7 @@ On `create_cart`, `update_cart`, `create_checkout`, and `update_checkout`, busin
 ]
 ```
 
-On `complete_checkout`, businesses MUST NOT transition the checkout to `completed` while a confirmed consent decision has unmet data dependencies. Missing dependencies MUST be surfaced via the standard [Error Handling](http://ucp.dev/draft/specification/checkout/#error-handling) flow.
+On `complete_checkout`, businesses MUST NOT transition the checkout to `completed` while a confirmed consent decision has unmet data dependencies. Missing dependencies MUST be surfaced via the standard [Error Handling](http://ucp.dev/draft/specification/shopping/checkout/#error-handling) flow.
 
 ## Normative requirements
 

@@ -23,7 +23,7 @@ One step is `10^-scale` of `unit`. The shared measure type adds a required integ
 
 The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is the United Nations Centre for Trade Facilitation and Electronic Business (UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business **MAY** omit `quantity_unit` from an authoritative Business representation to encode this default. When a Business or Platform includes a descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`; `scale` can only be omitted or explicitly set to `0`.
 
-UCP does not put floating-point numbers on the wire. Quantity arithmetic feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled` accumulates across fulfillment events, and status derives from `fulfilled == total` — so quantities get money's representation: an integer count plus a declared interpretation, exactly as an `amount` relates to its `currency`. Integer counts keep every total and comparison exact in every language, and UCP therefore defines no rounding tolerances and no epsilon comparisons anywhere in the quantity lifecycle. A fulfilled quantity that legitimately differs from the ordered quantity — a 1.90 lb pick against a 2.00 lb order — is a commercial fact reconciled through [adjustments](http://ucp.dev/draft/specification/order/#adjustments) that move money together with quantity, not a numeric error absorbed by comparison fuzz.
+UCP does not put floating-point numbers on the wire. Quantity arithmetic feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled` accumulates across fulfillment events, and status derives from `fulfilled == total` — so quantities get money's representation: an integer count plus a declared interpretation, exactly as an `amount` relates to its `currency`. Integer counts keep every total and comparison exact in every language, and UCP therefore defines no rounding tolerances and no epsilon comparisons anywhere in the quantity lifecycle. A fulfilled quantity that legitimately differs from the ordered quantity — a 1.90 lb pick against a 2.00 lb order — is a commercial fact reconciled through [adjustments](http://ucp.dev/draft/specification/shopping/order/#adjustments) that move money together with quantity, not a numeric error absorbed by comparison fuzz.
 
 Reading a quantity requires no arithmetic and no unit knowledge: shift the decimal point `scale` places and append `display_text`. `150` with `{ "scale": 2, "display_text": "kg" }` renders as `1.50 kg`, by the same code path for a Rec20 code and for a custom unit. Unlike a currency exponent, `scale` is per-item data rather than a static table — which is why authoritative responses always carry their own descriptor on every non-`each` line.
 
@@ -319,7 +319,7 @@ This fragment assumes its containing authoritative response payment-handler decl
 
 An Action is an outstanding unit of extension-defined work for a Platform to process. Its presence means the effect defined by its Action type is gated. Actions appear only in responses, under the `actions` map. The common fields identify the work but do not define how to process it; the active extension does.
 
-This section defines the common Actions shape and the invariants every adopting response shares. The shape is reusable, but a capability supports Actions only when its specification explicitly adopts it and defines the parent-specific behavior: where Actions appear, the effect each Action type gates, how Messages apply, and how a later response reflects processing. Schema composition alone does not establish support. Cart, Checkout, and Catalog adopt this shape; see [Cart — Actions](http://ucp.dev/draft/specification/cart/#actions), [Checkout — Actions](http://ucp.dev/draft/specification/checkout/#actions), and [Catalog — Actions](http://ucp.dev/draft/specification/catalog/#actions) for their parent-specific contracts.
+This section defines the common Actions shape and the invariants every adopting response shares. The shape is reusable, but a capability supports Actions only when its specification explicitly adopts it and defines the parent-specific behavior: where Actions appear, the effect each Action type gates, how Messages apply, and how a later response reflects processing. Schema composition alone does not establish support. Cart, Checkout, and Catalog adopt this shape; see [Cart — Actions](http://ucp.dev/draft/specification/shopping/cart/#actions), [Checkout — Actions](http://ucp.dev/draft/specification/shopping/checkout/#actions), and [Catalog — Actions](http://ucp.dev/draft/specification/shopping/catalog/#actions) for their parent-specific contracts.
 
 Actions and Messages have different roles. An Action represents outstanding work: it carries an identity and extension-owned processing configuration. A Message communicates explanatory or diagnostic context about the current response and can identify an exact Action occurrence through its RFC 9535 `path`. When a Message includes `path`, the Business **MUST** make it an RFC 9535 JSONPath expression relative to the root of the containing UCP response object. Messages do not define how an Action is processed or determine its outcome, and neither an Action nor a Message requires the other.
 
@@ -348,7 +348,7 @@ For example, a Business can surface one outstanding Action beside an explanatory
 }
 ```
 
-The Action identifies the outstanding work and carries extension-owned processing configuration under `config`. The Message's `path` selects the exact Action occurrence it explains. The [checkout eligibility example](http://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion) composes this pattern into a complete Student Verification flow.
+The Action identifies the outstanding work and carries extension-owned processing configuration under `config`. The Message's `path` selects the exact Action occurrence it explains. The [checkout eligibility example](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) composes this pattern into a complete Student Verification flow.
 
 For a newly processed successful response from a capability that adopts Actions, the Business **MUST** include every outstanding Action and **MUST** omit `actions` when none are outstanding.
 
@@ -362,7 +362,7 @@ When an Action prevents a Cart or Checkout operation from succeeding, processing
 
 Each Action key is a reverse-domain **Action type**: the name identifies the type of outstanding work, which is not necessarily the name of the extension that declares it. An active extension declares each Action type and defines its `config`, how a Platform processes it, its trust and fallback, and its outcomes. A single extension can declare more than one Action type. Each declaring extension contributes its Action-type keys to the containing capability's schema through `allOf` composition (see [Schema Composition](#schema-composition)), and capability negotiation selects which extensions are active. Negotiating an extension activates the whole contract it declares, including every Action type within it.
 
-Action type keys follow existing [Namespace Governance](#namespace-governance) rules: an extension can declare only types within a reverse-domain namespace controlled by its schema authority. An extension can use its own name as the key for a single Action type — as the [Student Verification example](http://ucp.dev/draft/specification/checkout/#eligibility-verification-at-completion) does — or declare several Action types under distinct keys. Each value is a non-empty array of outstanding instances of that one Action type. The key identifies the type, so an instance carries no separate type discriminator; a Business surfaces multiple outstanding instances of the same type as multiple entries in that array.
+Action type keys follow existing [Namespace Governance](#namespace-governance) rules: an extension can declare only types within a reverse-domain namespace controlled by its schema authority. An extension can use its own name as the key for a single Action type — as the [Student Verification example](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) does — or declare several Action types under distinct keys. Each value is a non-empty array of outstanding instances of that one Action type. The key identifies the type, so an instance carries no separate type discriminator; a Business surfaces multiple outstanding instances of the same type as multiple entries in that array.
 
 The `actions` map does not define a processing order across Action types. Within a single type's array, JSON preserves the order of its instances, and the extension that declares the type defines whether that order carries processing meaning. When ordering across Action types matters, the declaring extension defines the sequencing and which Action types become outstanding at each step.
 
@@ -739,27 +739,27 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/overview",
+          "spec": "https://ucp.dev/draft/specification/overview/",
           "transport": "rest",
           "endpoint": "https://business.example.com/ucp/v1",
           "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json"
         },
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/overview",
+          "spec": "https://ucp.dev/draft/specification/overview/",
           "transport": "mcp",
           "endpoint": "https://business.example.com/ucp/mcp",
           "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json"
         },
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/overview",
+          "spec": "https://ucp.dev/draft/specification/overview/",
           "transport": "a2a",
           "endpoint": "https://business.example.com/.well-known/agent-card.json"
         },
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/overview",
+          "spec": "https://ucp.dev/draft/specification/overview/",
           "transport": "embedded",
           "schema": "https://ucp.dev/draft/services/shopping/embedded.openrpc.json"
         }
@@ -769,7 +769,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.checkout": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/checkout",
+          "spec": "https://ucp.dev/draft/specification/shopping/checkout",
           "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
         }
       ],
@@ -792,7 +792,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.common.identity_linking": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/identity-linking",
+          "spec": "https://ucp.dev/draft/specification/common/identity-linking/",
           "schema": "https://ucp.dev/draft/schemas/common/identity_linking.json",
           "config": {
             "providers": {
@@ -883,7 +883,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.shopping": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/overview",
+          "spec": "https://ucp.dev/draft/specification/overview/",
           "transport": "rest",
           "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
           "endpoint": "https://platform.example.com/ucp/v1"
@@ -894,7 +894,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.shopping.checkout": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/checkout",
+          "spec": "https://ucp.dev/draft/specification/shopping/checkout",
           "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
         }
       ],
@@ -909,7 +909,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.shopping.order": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/order",
+          "spec": "https://ucp.dev/draft/specification/shopping/order",
           "schema": "https://ucp.dev/draft/schemas/shopping/order.json",
           "config": {
             "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
@@ -919,7 +919,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
       "dev.ucp.common.identity_linking": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/identity-linking",
+          "spec": "https://ucp.dev/draft/specification/common/identity-linking/",
           "schema": "https://ucp.dev/draft/schemas/common/identity_linking.json"
         }
       ]
@@ -1591,9 +1591,9 @@ Payment handlers allow for a variety of different payment instruments and token-
 
 **Presentation Order:** Businesses **MAY** declare a preferred presentation order for their advertised handlers via `map_order.payment_handlers` in their profile and response envelopes (see [The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)). The preference is suggestive: it communicates the business's preferred presentation — typically a conversion or risk judgment — and platforms **SHOULD** take it into account but **MAY** apply their own ordering. The same suggestive preference applies within a handler: the order of the business's advertised `available_instruments` array communicates preferred instrument presentation, earliest first. It is distinct from, and does not override, the buyer-side preference a platform submits in `context.payment[]` (buyer-preferred handlers, on the request side); the platform arbitrates between the two.
 
-**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/#resolving-available_instruments) for the full resolution semantics.
+**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment/guide/#resolving-available_instruments) for the full resolution semantics.
 
-**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.shopping.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](http://ucp.dev/draft/specification/split-payments/index.md) for the extension that relaxes this constraint.
+**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.shopping.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](http://ucp.dev/draft/specification/payment/split-payments/index.md) for the extension that relaxes this constraint.
 
 ### Implementation Scenarios
 
@@ -1916,7 +1916,7 @@ UCP supports fraud prevention through [Signals](#signals) and the payment archit
 The core payment architecture described above can be extended for specialized use cases:
 
 - **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md).
-- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/draft/specification/payment-handler-guide/index.md) for details.
+- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/draft/specification/payment/guide/index.md) for details.
 
 The extension model ensures the core architecture remains simple while supporting advanced security and compliance requirements when needed.
 
@@ -2060,7 +2060,7 @@ Policies describe the business rules applied to the items. A Platform **MAY** re
 
 When a Business **requires** a policy to be shown to the Buyer — a final-sale item, a regulatory notice — it **MUST** emit a `messages[]` warning that:
 
-- sets `presentation: "disclosure"`, so the Platform displays the content and cannot hide or dismiss it (see [Warning Presentation](http://ucp.dev/draft/specification/checkout/#warning-presentation));
+- sets `presentation: "disclosure"`, so the Platform displays the content and cannot hide or dismiss it (see [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation));
 - sets `path` to the item the notice concerns; and
 - sets `code` to the policy's `type`, linking the notice to its policy.
 
