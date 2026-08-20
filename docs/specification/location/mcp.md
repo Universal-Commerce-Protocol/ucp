@@ -70,7 +70,7 @@ request in `location`.
 | Tool | Capability | Description |
 | :--- | :--- | :--- |
 | `search_locations` | [Search](search.md) | Search for locations using text, spatial relations, and filters. |
-| `lookup_locations` | [Lookup](lookup.md) | Batch lookup one or multiple location(s) by ID. |
+| `lookup_locations` | [Lookup](lookup.md) | Batch lookup one or more Locations by identifier. |
 
 ### `search_locations`
 
@@ -198,6 +198,9 @@ Maps to the [Location Lookup](lookup.md) capability. See the
           "locations": [
             {
               "id": "loc_downtown",
+              "inputs": [
+                {"id": "loc_downtown"}
+              ],
               "name": "Downtown Store"
             }
           ]
@@ -264,5 +267,8 @@ A conforming MCP transport implementation **MUST**:
     [Pagination](search.md#pagination)).
 6. Return a successful JSON-RPC result for lookup requests; unknown identifiers result in fewer or no locations
     returned (**MAY** include informational `not_found` messages in the `messages` array).
-7. Validate tool inputs against UCP schemas.
-8. Return `-32602` (Invalid params) for requests exceeding batch size limits.
+7. Return a successful JSON-RPC result when a lookup request exceeds the
+    Business's batch maximum, process the first maximum number of distinct
+    identifiers in request order, and include an informational
+    `batch_limit_applied` message.
+8. Validate tool inputs against UCP schemas.

@@ -71,7 +71,7 @@
     {
       "name": "lookup_locations",
       "summary": "Batch lookup locations by identifier",
-      "description": "Batch lookup of physical locations by their stable identifiers. Returns matching locations and warnings.",
+      "description": "Batch lookup of physical Locations by supported identifiers. Returns matching Locations and warnings.",
       "params": [
         {
           "name": "meta",

@@ -65,7 +65,7 @@
       "post": {
         "operationId": "lookup_locations",
         "summary": "Batch Lookup Locations",
-        "description": "Lookup one or more physical locations by their stable identifiers.",
+        "description": "Lookup one or more physical Locations by supported identifiers.",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },

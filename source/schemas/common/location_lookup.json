@@ -6,6 +6,35 @@
   "description": "Location lookup by identifier. Supports batch retrieval (lookup_locations) and single-location detail (get_location).",
   "type": "object",
   "$defs": {
+    "lookup_location": {
+      "description": "Location with required correlation metadata for lookup responses.",
+      "allOf": [
+        { "$ref": "types/location.json" },
+        {
+          "type": "object",
+          "required": ["inputs"],
+          "properties": {
+            "inputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The identifier exactly as supplied in the lookup request.",
+                    "ucp_request": "omit"
+                  }
+                }
+              },
+              "minItems": 1,
+              "description": "Which request identifiers resolved to this Location. Each entry preserves one identifier exactly as supplied in the request.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
     "lookup_request": {
       "type": "object",
       "description": "Request body for batch location lookup. The Business resolves and deduplicates `ids` before applying `distance`, `serves`, and every supplied `filters` predicate; all structured predicates combine with AND.",
@@ -15,7 +44,7 @@
           "type": "array",
           "items": { "type": "string" },
           "minItems": 1,
-          "description": "Identifiers of the locations to lookup. Implementations MUST support location ID."
+          "description": "Identifiers of the Locations to look up. The Business MUST support canonical `Location.id` values and MAY support secondary or alias identifiers."
         },
         "distance": {
           "$ref": "types/location_distance.json",
@@ -52,16 +81,16 @@
         "locations": {
           "type": "array",
           "items": {
-            "$ref": "types/location.json"
+            "$ref": "#/$defs/lookup_location"
           },
-          "description": "Locations matching the requested identifiers and filters. May contain fewer locations if some identifiers are not found."
+          "description": "Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries."
         },
         "messages": {
           "type": "array",
           "items": {
             "$ref": "types/message.json"
           },
-          "description": "Errors, warnings, or informational messages about the requested locations."
+          "description": "Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers."
         }
       }
     }

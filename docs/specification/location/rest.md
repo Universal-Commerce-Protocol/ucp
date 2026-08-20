@@ -63,7 +63,7 @@ Location capabilities through their UCP profile at `/.well-known/ucp`.
 | Endpoint | Method | Capability | Description |
 | :--- | :--- | :--- | :--- |
 | `/locations/search` | POST | [Search](search.md) | Search for physical locations. |
-| `/locations/lookup` | POST | [Lookup](lookup.md) | Lookup single or multiple location(s) by known ID. |
+| `/locations/lookup` | POST | [Lookup](lookup.md) | Lookup one or more Locations by identifier. |
 
 ### `POST /locations/search`
 
@@ -158,6 +158,9 @@ Maps to the [Location Lookup](lookup.md) capability. See the
       "locations": [
         {
           "id": "loc_downtown",
+          "inputs": [
+            {"id": "loc_downtown"}
+          ],
           "name": "Downtown Store"
         }
       ]
@@ -232,4 +235,6 @@ A conforming REST transport implementation **MUST**:
     [Pagination](search.md#pagination)).
 5. Return HTTP 200 for lookup requests; unknown identifiers result in fewer or no locations
     returned (**MAY** include informational `not_found` messages).
-6. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.
+6. Return HTTP 200 when a lookup request exceeds the Business's batch maximum,
+    process the first maximum number of distinct identifiers in request order,
+    and include an informational `batch_limit_applied` message.
