@@ -84,6 +84,7 @@
         {
           "name": "checkout",
           "required": true,
+          "description": "Initial checkout session data. The object may include negotiated extension fields according to operation-specific request rules.",
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
@@ -130,6 +131,7 @@
         {
           "name": "checkout",
           "required": true,
+          "description": "Replacement checkout session data. The object may include negotiated extension fields according to operation-specific request rules.",
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
@@ -160,6 +162,7 @@
         {
           "name": "checkout",
           "required": true,
+          "description": "Completion input. Use negotiated extension fields according to operation-specific request rules.",
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],

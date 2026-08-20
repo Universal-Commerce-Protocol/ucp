@@ -235,6 +235,24 @@ def define_env(env):
     """Resolve a schema using ucp-schema CLI (delegates to module-level fn)."""
     return _resolve_schema(schema_path, direction, operation, bundle=False)
 
+  def _operation_from_context(context):
+    """Return the ucp-schema operation name for a render context."""
+    if not context:
+      return "read"
+
+    io_type = context.get("io_type")
+    op_id = context.get("operation_id", "").lower()
+
+    if io_type == "request":
+      if "create" in op_id:
+        return "create"
+      if "update" in op_id or "patch" in op_id:
+        return "update"
+      if "complete" in op_id:
+        return "complete"
+
+    return "read"
+
   def _load_json_file(entity_name):
     """Try loading a JSON file from the configured directories."""
     for schemas_dir in schemas_dirs:
@@ -245,6 +263,61 @@ def define_env(env):
       except FileNotFoundError:
         continue
     return None
+
+  def _extension_target_properties(entity_name, target="checkout", context=None):
+    """Return the schema fragment an extension contributes to a target schema."""
+    full_path = SHOPPING_SCHEMAS_DIR / (entity_name + ".json")
+
+    def _inherit_local_ref_descriptions(schema_fragment, root):
+      for details in schema_fragment.get("properties", {}).values():
+        if not isinstance(details, dict) or details.get("description"):
+          continue
+        ref = details.get("$ref")
+        if not ref or not ref.startswith("#/"):
+          continue
+        resolved = _resolve_json_pointer(ref, root)
+        if isinstance(resolved, dict) and resolved.get("description"):
+          details["description"] = resolved["description"]
+      return schema_fragment
+
+    try:
+      if context:
+        data = _resolve_schema(
+          full_path,
+          context.get("io_type", "response"),
+          _operation_from_context(context),
+          bundle=False,
+        )
+      else:
+        with full_path.open(encoding="utf-8") as f:
+          data = json.load(f)
+
+      defs = data.get("$defs", {})
+
+      target_def = None
+      for key, schema_def in defs.items():
+        if (key == target or key.endswith("." + target)) and (
+          isinstance(schema_def, dict) and "allOf" in schema_def
+        ):
+          target_def = schema_def
+          break
+
+      if target_def:
+        for item in target_def["allOf"]:
+          if "properties" in item:
+            return _inherit_local_ref_descriptions(item, data)
+
+      for schema_def in defs.values():
+        if isinstance(schema_def, dict) and "allOf" in schema_def:
+          for item in schema_def["allOf"]:
+            if "properties" in item:
+              return _inherit_local_ref_descriptions(item, data)
+
+      return None
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+      raise RuntimeError(
+        f"Error loading extension '{entity_name}': {e}{get_error_context()}"
+      ) from e
 
   def _load_schema_variant(entity_name, context):
     """Load and resolve a schema for a specific operation.
@@ -265,7 +338,6 @@ def define_env(env):
       return _load_json_file(entity_name)
 
     io_type = context.get("io_type")
-    op_id = context.get("operation_id", "").lower()
 
     # Find the schema file
     schema_path = None
@@ -280,17 +352,7 @@ def define_env(env):
 
     # Determine direction and operation for ucp-schema
     direction = io_type  # "request" or "response"
-    operation = "read"  # default for responses
-
-    if io_type == "request":
-      if "create" in op_id:
-        operation = "create"
-      elif "update" in op_id or "patch" in op_id:
-        operation = "update"
-      elif "complete" in op_id:
-        operation = "complete"
-    elif io_type == "response":
-      operation = "read"
+    operation = _operation_from_context(context)
 
     # Resolve using ucp-schema (no fallback - fail loudly if unavailable)
     resolved = _resolve_with_ucp_schema(schema_path, direction, operation)
@@ -410,7 +472,9 @@ def define_env(env):
       fragment_text = (
         fragment.replace("_", " ").replace(".", " ").replace("-", " ").title()
       )
-      link_text = f"{base_text} {fragment_text}"
+      link_text = (
+        f"{base_text} {fragment_text}" if base_text else fragment_text
+      )
     else:
       link_text = (
         raw_name.replace("_", " ").replace(".", " ").replace("-", " ").title()
@@ -1337,51 +1401,25 @@ def define_env(env):
         "checkout", "cart"). Defaults to "checkout".
 
     """
-    # Construct full path based on new structure
-    full_path = SHOPPING_SCHEMAS_DIR / (entity_name + ".json")
-    try:
-      with full_path.open(encoding="utf-8") as f:
-        data = json.load(f)
+    properties = _extension_target_properties(entity_name, target)
+    if properties:
+      return _render_table_from_schema(properties, spec_file_name)
 
-      # Extension schemas have their composed type in $defs.checkout
-      # or $defs.order_line_item.
-      defs = data.get("$defs", {})
-
-      # Try to find the specific target first (e.g. dev.ucp.shopping.checkout)
-      # We look for a key that ends with target.
-      target_def = None
-      for key, schema_def in defs.items():
-        if (key == target or key.endswith("." + target)) and (
-          isinstance(schema_def, dict) and "allOf" in schema_def
-        ):
-          target_def = schema_def
-          break
-
-      if target_def:
-        for item in target_def["allOf"]:
-          if "properties" in item:
-            return _render_table_from_schema(item, spec_file_name)
-
-      # Fallback to dynamically finding the composed type (old behavior)
-      for schema_def in defs.values():
-        if isinstance(schema_def, dict) and "allOf" in schema_def:
-          for item in schema_def["allOf"]:
-            if "properties" in item:
-              return _render_table_from_schema(item, spec_file_name)
-
-      raise RuntimeError(
-        f"Could not find extension properties for target '{target}' "
-        f"in '{entity_name}'"
-        f"{get_error_context()}"
-      )
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-      raise RuntimeError(
-        f"Error loading extension '{entity_name}': {e}{get_error_context()}"
-      ) from e
+    raise RuntimeError(
+      f"Could not find extension properties for target '{target}' "
+      f"in '{entity_name}'"
+      f"{get_error_context()}"
+    )
 
   # --- MACRO 3: For Transport Operations ---
   @env.macro
-  def method_fields(operation_id, file_name, spec_file_name, io_type=None):
+  def method_fields(
+    operation_id,
+    file_name,
+    spec_file_name,
+    io_type=None,
+    extensions=None,
+  ):
     """Extract Request/Response schemas for a specific OpenAPI operationId.
 
     Args:
@@ -1392,6 +1430,8 @@ def define_env(env):
         should be rendered (e.g., "checkout", "fulfillment").
       io_type: Optional. Specifies whether to render 'request', 'response', or
         both (if None).
+      extensions: Optional. Extension schema names whose target fields should
+        be appended to the request table.
 
     """
     full_path = OPENAPI_DIR / file_name
@@ -1537,6 +1577,20 @@ def define_env(env):
           combined_schema = param_schema
         elif req_schema:
           combined_schema = req_schema
+
+        if extensions and combined_schema:
+          extension_schemas = []
+          for extension_name in extensions:
+            extension_schema = _extension_target_properties(
+              extension_name,
+              "checkout",
+              req_context,
+            )
+            if extension_schema and extension_schema.get("properties"):
+              extension_schemas.append(extension_schema)
+
+          if extension_schemas:
+            combined_schema = {"allOf": [combined_schema, *extension_schemas]}
 
         if combined_schema:
           output += "**Inputs**\n\n"

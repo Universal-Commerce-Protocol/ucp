@@ -1058,7 +1058,20 @@ should accept an additional `cart_id` field for cart-to-checkout conversion. See
 [Cart → Cart-to-Checkout Conversion](cart.md#cart-to-checkout-conversion) for
 the field contract.
 
-{{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
+When extensions are negotiated, Create Checkout can also accept extension-owned
+inputs. The generated table below includes extension fields that add new
+top-level inputs; extensions that specialize an existing field are summarized
+here:
+
+| Extension | Input | Create Checkout behavior |
+| --- | --- | --- |
+| [Discount](discount.md) | `discounts` | Optional discount codes or identifiers to evaluate with the checkout. |
+| [Fulfillment](fulfillment.md) | `fulfillment` | Optional fulfillment method and selection inputs. The Business response remains authoritative for generated destinations, groups, options, costs, timing, and availability. |
+| [Buyer Consent](buyer-consent.md) | `buyer` | Optional consent details alongside the base buyer information. |
+| [Payment Terms](payment-terms.md) | `payment` | Optional selected payment-term inputs when payment terms are available. |
+| [Split Payments](split-payments.md) | `payment.instruments[]` | Optional allocation-aware payment instruments. |
+
+{{ method_fields('create_checkout', 'rest.openapi.json', 'checkout', extensions=['discount', 'fulfillment']) }}
 
 ### Get Checkout
 
