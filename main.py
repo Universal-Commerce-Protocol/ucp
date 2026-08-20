@@ -1039,7 +1039,7 @@ def define_env(env):
     basename collision, the rule here will need explicit
     disambiguation.
     """
-    name = ref_path.split("/")[-1]
+    name = Path(str(ref_path).split("#", 1)[0]).stem
     candidate = COMMON_TYPES_DIR / (name + ".json")
     return candidate if candidate.exists() else None
 
@@ -1178,11 +1178,10 @@ def define_env(env):
 
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
-    When the embedded schema lives under `common/types/`, the macro looks
-    at the additional `render_inline` args to understand whether it should
-    emit a link to the canonical entry on `reference.md` or
-    render the table inline. Vertical-namespaced extensions always render
-    inline.
+    When the embedded schema lives under `common/types/` and `render_inline` is
+    False, the macro emits a link to the canonical entry on `reference.md`
+    instead of render the table inline. Vertical-namespaced extensions
+    always render inline.
 
     Args:
     ----
@@ -1197,7 +1196,7 @@ def define_env(env):
     """
     # entity_name has the form `<file>.json#/$defs/<def>`. Redirect to
     # reference.md only when `<file>.json` resolves to a
-    # `common/types/` schema and `render_inline = False`; vertical-namespaced
+    # `common/types/` schema and `render_inline` is False; vertical-namespaced
     # extensions keep their inline render so same-page `$defs` anchors
     # continue to resolve. file_part preserves any `types/` prefix from
     # the caller so the lookup is unambiguous against the basename namespace.
