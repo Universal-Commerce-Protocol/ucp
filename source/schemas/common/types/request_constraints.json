@@ -14,7 +14,6 @@
     },
     "properties": {
       "$ref": "constraint_expression.json#/properties/properties"
-      }
     }
   },
   "additionalProperties": false
