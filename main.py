@@ -1021,22 +1021,13 @@ def define_env(env):
     """Return path if ref_path identifies a `common/types/` primitive.
 
     Scope is intentionally narrow: only schemas under
-    `source/schemas/common/types/` get redirected to `reference.md`.
-    These are cross-vertical primitives -- types reused as
-    interchangeable building blocks across capabilities -- where an
-    integrator reading a capability page does not need their fields
-    enumerated inline, and a link to the canonical entry preserves
-    enough context.
+    `source/schemas/common/types/` have canonical entries eligible for
+    link-only rendering on capability pages. Callers render fields inline by
+    default and use this lookup only when they explicitly opt out.
 
-    Vertical-namespaced types under `<vertical>/types/` intentionally
-    retain inline rendering on capability pages. They carry
-    vertical-specific semantics that integrators expect to read in
-    situ, including operation-filtered variants (per-operation
-    request shapes and the response shape) that `reference.md` cannot
-    express because it renders a single canonical heading per schema
-    file. The resulting render duplication across capability pages is
-    acceptable because every render is generated from the same JSON
-    source, so drift between them is structurally impossible.
+    Vertical-namespaced types under `<vertical>/types/` always render inline
+    because they have no canonical shared-type entry. Render duplication is
+    safe because every table is generated from the same JSON source.
 
     Cross-references emitted inside any rendered table continue to
     route to `reference.md` via `create_link` (the redirect rule

@@ -592,7 +592,7 @@ A capability schema defines both payload structure and declaration variants:
     "status": {"type": "string", "enum": ["open", "completed", "expired"]},
     "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
     "totals": {"$ref": "../common/types/totals.json"},
-    "links": {"$ref": "../common/types/links.json"}
+    "links": {"type": "array", "items": {"$ref": "../common/types/link.json"}}
   }
 }
 ```
