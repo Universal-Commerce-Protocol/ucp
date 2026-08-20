@@ -983,6 +983,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-request_constraints-protocol-member" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The request_constraints Protocol Member
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The request_constraints Protocol Member">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotations-and-applicability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Annotations and applicability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-expression-grammar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraint Expression grammar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#extension-declared-action-types" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1685,6 +1735,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-request_constraints-protocol-member" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The request_constraints Protocol Member
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The request_constraints Protocol Member">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotations-and-applicability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Annotations and applicability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-expression-grammar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraint Expression grammar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#extension-declared-action-types" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2149,6 +2249,11 @@ Do <strong>not</strong> appear in registries.</p>
 <ul>
 <li><strong>Top-level fields</strong>: <code>$schema</code>, <code>$id</code>, <code>title</code>, <code>description</code></li>
 <li><strong>Omit</strong>: <code>name</code>, <code>version</code></li>
+<li><strong>Expression grammars</strong>: A type schema that defines expression syntax rather
+  than independently placeable UCP fields is direction-agnostic. Its grammar
+  properties carry no <code>ucp_request</code> annotation; each UCP property that exposes
+  the grammar declares its own applicability. Example:
+  <code>common/types/constraint_expression.json</code>.</li>
 </ul>
 <p>Examples: <code>types/buyer.json</code>, <code>types/line_item.json</code>, <code>types/postal_address.json</code></p>
 <h3 id="meta-schemas">Meta Schemas<a class="headerlink" href="#meta-schemas" title="Permanent link">&para;</a></h3>
@@ -2496,6 +2601,68 @@ object fields:</p>
 <li><strong><code>minProperties</code></strong> — Empty objects (<code>{}</code>) are well-formed and harmless.
   Implementers should accept and process them as a no-op.</li>
 </ul>
+<h2 id="the-request_constraints-protocol-member">The <code>request_constraints</code> Protocol Member<a class="headerlink" href="#the-request_constraints-protocol-member" title="Permanent link">&para;</a></h2>
+<p>Normative processing, scope, lifecycle, and invalid-member behavior are defined
+in <a href="/latest/specification/overview.md#request-constraints">Request Constraints</a>.
+This section covers only the schema-authoring boundary.</p>
+<h3 id="local-structure">Local structure<a class="headerlink" href="#local-structure" title="Permanent link">&para;</a></h3>
+<p><code>request_constraints</code> is centrally registered in <code>ucp.json#/$defs/members</code> as a
+response-only protocol member with <code>ucp_request: "omit"</code>. Capability, extension,
+handler, and shared type schemas do not redeclare it. A conforming UCP-aware
+resolver materializes the registered member into eligible response scopes so
+ordinary resolved-schema validation applies the shared schema.</p>
+<p><code>schemas/common/types/constraint_expression.json</code> defines the closed Constraint
+Expression grammar. <code>schemas/common/types/request_constraints.json</code> binds that
+grammar to data in the next UCP request and is the schema referenced by the
+registered member.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Position</th>
+<th style="text-align: left;">Admitted members</th>
+<th style="text-align: left;">Shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Object Constraint</td>
+<td style="text-align: left;"><code>required</code>, <code>properties</code></td>
+<td style="text-align: left;"><code>required</code> contains unique field names; <code>properties</code> maps field names to Object or Value Constraints; an empty object is a no-op.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Value Constraint</td>
+<td style="text-align: left;"><code>enum</code>, <code>const</code></td>
+<td style="text-align: left;"><code>enum</code> is non-empty and unique; at least one member is present; both apply when present together.</td>
+</tr>
+</tbody>
+</table>
+<p>The listed members define the grammar. A <code>request_constraints</code> value may
+additionally contain <code>path</code> at the top level.</p>
+<p>Grammar changes belong in <code>constraint_expression.json</code>, and changes to the root
+Object Constraint must also be reflected in <code>request_constraints.json</code>.</p>
+<h3 id="annotations-and-applicability">Annotations and applicability<a class="headerlink" href="#annotations-and-applicability" title="Permanent link">&para;</a></h3>
+<p><code>constraint_expression.json</code> carries no <code>ucp_request</code> annotations. Its
+properties are Constraint Expression syntax, not independently placeable UCP
+fields, so the grammar has no direction of its own.</p>
+<p>Applicability belongs to the containing UCP property. Each UCP property that
+exposes a Constraint Expression owns whichever direction-specific applicability
+annotations that property requires, and those annotations alone determine when
+the grammar is reachable. For <code>request_constraints</code>, the containing property is
+the member registered in <code>ucp.json#/$defs/members</code>; it remains
+<code>ucp_request: "omit"</code> and is the only place that member's response-only
+visibility is declared. Because the grammar is direction-agnostic, the same
+file can be referenced from a request-applicable property and from a
+response-only one without change.</p>
+<h3 id="constraint-expression-grammar">Constraint Expression grammar<a class="headerlink" href="#constraint-expression-grammar" title="Permanent link">&para;</a></h3>
+<p>Except for the outer <code>path</code> member, an emitted value and its nested constraint
+objects are JSON Schema Draft 2020-12 Constraint Expression syntax, not
+structured UCP domain objects. Do not add or materialize ambient <code>ucp</code> inside
+them. The keys in a <code>properties</code> map name fields on a selected request object
+and are data, not ambient members.</p>
+<p>The containing <code>ucp</code> object still follows
+<a href="#the-reserved-ucp-member">The Reserved <code>ucp</code> Member</a>. A closed structured object
+admits that container through its optional reference to
+<code>ucp.json#/$defs/members</code>, not by declaring <code>request_constraints</code> itself.</p>
 <h2 id="extension-declared-action-types">Extension-Declared Action Types<a class="headerlink" href="#extension-declared-action-types" title="Permanent link">&para;</a></h2>
 <p>Every Action type is declared by an extension and becomes available only when
 that extension is negotiated, as defined in
