@@ -84,6 +84,7 @@ nav:
           - Guide: specification/payment-handler-guide.md
           - Template: specification/payment-handler-template.md
           - Tokenization Guide: specification/tokenization-guide.md
+          - Shared Payment Token: specification/shared-payment-token-payment-handler.md
           - Examples:
               - Processor Tokenizer: "specification/examples/\
                   processor-tokenizer-payment-handler.md"
@@ -432,6 +433,10 @@ plugins:
               Shared API, security requirements, and lifecycle policies
               (single-use, TTL, session-scoped) for building compliant
               tokenization payment handlers.
+          - specification/shared-payment-token-payment-handler.md: >-
+              Proposed Shared Payment Token payment handler specification for
+              issuing and redeeming short-lived checkout credentials bound to a
+              checkout, business, amount, currency, and processor route.
           - specification/examples/processor-tokenizer-payment-handler.md: >-
               Concrete payment handler example utilizing a 'Tokenize to Process'
               flow, where a single enterprise vault or PSP tokenizes
