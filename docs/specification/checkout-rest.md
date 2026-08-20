@@ -376,6 +376,10 @@ Buyer inputs such as desired fulfillment method types, shipping addresses, and
 Business Location selections; the Business returns the resulting fulfillment
 state.
 
+For selecting business-returned saved fulfillment destinations by id in
+identity-linked sessions, see
+[Business-Populated Response Values](identity-linking.md#business-populated-response-values).
+
 === "Request"
 
     <!-- ucp:example schema=shopping/checkout op=update direction=request -->

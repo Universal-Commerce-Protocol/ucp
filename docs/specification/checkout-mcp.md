@@ -395,6 +395,10 @@ Checkout is `complete_in_progress`. Duplicate requests remain subject to
 new `update_checkout` request in that state, it **MUST** leave the Checkout
 unchanged and return the current Checkout with a recoverable error Message.
 
+For selecting business-returned saved fulfillment destinations by id in
+identity-linked sessions, see
+[Business-Populated Response Values](identity-linking.md#business-populated-response-values).
+
 #### Input Schema
 
 * `id` (String): **Required**. The ID of the checkout session to update.
