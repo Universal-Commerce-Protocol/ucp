@@ -24,6 +24,10 @@
       "type": "string",
       "description": "Product title."
     },
+    "brand": {
+      "type": "string",
+      "description": "Brand or manufacturer name (e.g., 'Nike', 'Sony')."
+    },
     "description": {
       "$ref": "../../common/types/description.json",
       "description": "Product description in one or more formats."
