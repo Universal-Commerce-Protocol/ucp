@@ -490,14 +490,14 @@ const UcpData = {
     "dev.ucp.shopping.checkout": [
       {
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }
     ],
     "dev.ucp.shopping.order": [
       {
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/order",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/order",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json"
       }
     ],

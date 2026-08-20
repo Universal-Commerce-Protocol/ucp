@@ -681,7 +681,7 @@ verify_rest_request(request):
     components = sig_input.components
 
     // 2. Resolve signer's public key (capability-based; see
-    // overview.md#identity-resolution-algorithm).
+    // overview/index.md#identity-resolution-algorithm).
     key_set = resolve_signer_key_set(request.headers)
     // sig_capable skips keys not usable for verification: use:"enc", or
     // key_ops present without "verify" (RFC 7517 §4.2, §4.3)
@@ -689,12 +689,12 @@ verify_rest_request(request):
     if not public_key:
         return skip_signature("key_not_found")
 
-   // pre-2a. WBA-shape signatures bind key identity to key bytes:
-   // keyid MUST equal the matched JWK's RFC 7638 thumbprint
-   // (see IRA step 4 / WBA architecture draft §4.2).
-   if sig_input.tag == "web-bot-auth":
-       if keyid != rfc7638_thumbprint(public_key):
-           return skip_signature("signature_invalid")
+    // pre-2a. WBA-shape signatures bind key identity to key bytes:
+    // keyid MUST equal the matched JWK's RFC 7638 thumbprint
+    // (see IRA step 4 / WBA architecture draft §4.2).
+    if sig_input.tag == "web-bot-auth":
+        if keyid != rfc7638_thumbprint(public_key):
+            return skip_signature("signature_invalid")
     // 2a. Skip keys whose algorithm this verifier does not support.
     // The kty/crv/alg vocabularies are open (see Signature Algorithms);
     // an unsupported key never invalidates the whole key set.
