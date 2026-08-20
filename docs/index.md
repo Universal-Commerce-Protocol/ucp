@@ -312,7 +312,7 @@ image: assets/banner.png
             <div class="pane-text">
               <h3>Checkout</h3>
               <p>Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.</p>
-              <a href="/latest/specification/shopping/checkout/" class="learn-more-btn">Get Started</a>
+              <a href="latest/specification/shopping/checkout/" class="learn-more-btn">Get Started</a>
             </div>
             <div class="pane-visuals">
               <div class="image-container">

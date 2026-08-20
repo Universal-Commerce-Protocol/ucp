@@ -281,7 +281,7 @@ requirements.
 ### Total
 
 The same totals contract applies to cart and checkout. See
-[Checkout Totals](../checkout/index.md#total) for the rendering contract, accounting
+[Checkout Totals](../checkout/index.md#totals) for the rendering contract, accounting
 identity, well-known types, repeating types, and sub-line semantics.
 
 {{ schema_fields('types/total_resp', 'shopping/checkout') }}

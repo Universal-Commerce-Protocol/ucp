@@ -284,7 +284,7 @@ absent, it is the price per `each`. Other characteristics of a sale unit may
 affect the quoted `item.price`, but do not change its sale-basis denominator.
 The Business **MUST** compute the line total as
 `price × quantity × 10^-scale` and round once at the line. The presented
-`totals[]` remain authoritative (see [Total](#total)). The Platform
+`totals[]` remain authoritative (see [Totals](index.md#totals)). The Platform
 **MUST NOT** recompute a line total from the fractional quantity and substitute
 its own rounding.
 
@@ -1282,7 +1282,7 @@ this response root (e.g., `$.line_items[0]`). See
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'shopping/checkout') }}
 
-### Total
+### Total {: #totals }
 
 {{ schema_fields('types/total_resp', 'shopping/checkout') }}
 

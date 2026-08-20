@@ -285,7 +285,7 @@ authentication are resolved together.
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
