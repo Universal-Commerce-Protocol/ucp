@@ -172,6 +172,368 @@ Request assertions, mismatch handling, response echo, off-increment request
 handling, pricing, and lifecycle behavior are defined by the capability that
 uses the shared representation.
 
+## Request Constraints
+
+After capabilities and extensions are negotiated, the resolved UCP request
+schema defines the fields and structure allowed for an operation. In an
+authoritative response, a Business can use `ucp.request_constraints` to signal
+additional rules it will apply when evaluating request data in the next
+Platform request. For example, it can constrain a Line Item quantity to exactly
+`100` sale-basis steps or require a submitted payment instrument to include
+`billing_address`. A Platform can evaluate these constraints before submission,
+avoiding a round trip for request data the Business has already indicated it
+will reject.
+
+`ucp.request_constraints` is used only in authoritative operation responses and
+has no effect in discovery profiles or operation requests.
+
+### Validation model
+
+A submitted request is valid under Request Constraints only if it satisfies the
+resolved request schema and every object selected by Request Constraints
+satisfies the corresponding Constraint Expression. Request Constraints only
+narrow the resolved request schema; they cannot make a request valid when that
+schema rejects it. A Business evaluates the request as follows:
+
+```text
+valid = validate(resolved_request_schema, request)
+
+for each constraint:
+  objects = select(request, effective_path(constraint))
+  valid = valid AND validate_all(
+    constraint_expression(constraint),
+    objects
+  )
+
+return valid
+```
+
+A Platform **MAY** perform the same checks as preflight. For each chosen value,
+the Platform **MUST** use its effective path and complete Constraint Expression.
+The Platform **MAY** submit the request regardless of the preflight result;
+Business evaluation is authoritative.
+
+### Constraint Expression
+
+A `request_constraints` value and every nested constraint object use embedded
+JSON Schema Draft 2020-12 language. The outer value may additionally contain an
+optional `path`; nested constraint objects may not. The grammar does not admit
+`ucp`. Keys in `properties` name fields on selected request objects.
+
+The constraint begins at an Object Constraint. Object Constraints may nest
+through `properties`; Value Constraints occur only as values in an Object
+Constraint's `properties` map.
+
+| Position | Admitted members | Shape and behavior |
+| :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. An empty Object Constraint is a valid no-op at any Object Constraint position. |
+| Value Constraint | `enum`, `const` | `enum` is a non-empty array of unique JSON values. `const` is any JSON value. At least one member is present; when both are present, both apply. |
+
+No other member is admitted at either grammar position.
+
+### Path
+
+Every `request_constraints` value has exactly one effective path. When `path`
+is omitted, the effective path is the
+[RFC 9535](https://www.rfc-editor.org/rfc/rfc9535.html){ target="_blank" }
+Normalized Path from the authoritative response root to the structured response
+object whose `ucp` member contains `request_constraints`. When the Business
+provides `path`, that value becomes the effective path and supersedes the
+Normalized Path that would otherwise be derived; the Business **MUST** make it
+a complete RFC 9535 JSONPath query. In both cases, the effective path is
+evaluated against the next logical UCP request to that resource. The effective
+path therefore differs from response-targeting paths elsewhere in UCP, such as
+`messages[].path`, which are evaluated against the response that carries them.
+
+An omitted path establishes positional correspondence for the next request, not
+stable identity: an array index still identifies that position if items reorder
+before that request. A Business **MUST** provide an explicit `path` when the
+Normalized Path of that structured response object does not identify the
+intended request objects. When a constraint must follow a stable identity into
+the next request, the Business **MUST** use an explicit query that encodes that
+association.
+
+A Business that constructs a query from data **MUST** serialize and escape each
+dynamic value as a valid RFC 9535 literal and **MUST NOT** use unsafe string
+concatenation.
+
+Before emitting a value, a Business **MUST** validate the complete value against
+the shared
+[Request Constraints](site:schemas/common/types/request_constraints.json)
+schema, and a Platform **MUST** do the same before using that value for
+preflight; `path` selects the objects and the remaining members form the
+[Constraint Expression](site:schemas/common/types/constraint_expression.json).
+
+A constraint is not tied to an operation name; it applies to every object its
+path selects. A path that selects zero objects has no effect. When
+`request_constraints` is in the response root's `ucp` member and `path` is
+omitted, the effective path is `$`.
+
+If multiple paths select the same object, every corresponding Constraint
+Expression applies. The shared Request Constraints schema validates each value
+independently and cannot guarantee that expressions across overlapping paths can
+all be satisfied. A Business **MUST** ensure expressions that can apply to the
+same object are jointly satisfiable. Contradictory requirements on the same
+property are a Business authoring error.
+
+A Platform that performs preflight on overlapping values evaluates every value
+it chose; if any chosen value fails for the concrete request, preflight fails.
+There is no precedence or override.
+
+### Guidelines
+
+#### Business
+
+A Business **MAY** include `ucp.request_constraints` in an authoritative
+response to describe rules it will enforce against request data in the next
+Platform request. The Business **MUST** emit Request Constraints that conform to
+the shared Request Constraints schema, **MUST** use valid effective paths that
+select only objects, and **MUST** enforce every constraint it emits against that
+next request.
+
+A Business **SHOULD NOT** emit Request Constraints for rules that may change
+before the next request unless it can continue to enforce the advertised
+constraint. Execution-time conditions such as inventory availability, fraud
+decisions, and payment authorization remain governed by the operation's existing
+outcomes and `messages`.
+
+#### Platform
+
+A Platform **MAY** use `ucp.request_constraints` for preflight before submitting
+request data. It **MAY** evaluate any supported subset of values. This preflight
+is optional and advisory.
+
+A malformed or unsupported value, a value whose path selects a non-object, or a
+value the Platform cannot evaluate within its resource limits is unavailable
+for preflight, not a pass or failure. A Platform performing preflight **MUST**
+skip the whole unavailable value and continue with any other chosen values. If
+complete evaluation finds a violation, that value fails preflight.
+
+A successful preflight result covers only the values the Platform evaluated.
+UCP defines no new wire status or issue-marker field for preflight results.
+
+### Scope and lifecycle
+
+Each authoritative resource response from the Business supplies Request
+Constraints for the next request to that resource. The authoritative response
+to that request supplies the constraints for the following request and replaces
+the prior set. Omission clears the set. Invalid values in the new set do not
+preserve stale values, and sets are not merged by `path`.
+
+Only `request_constraints` values attached to eligible structured response
+objects under the [Reserved `ucp` Member](#the-ucp-protocol-namespace) rules
+make up the set; dictionary keys are data.
+
+A response without an authoritative resource supplies no Request Constraints
+set for a following request. A response containing an authoritative resource
+supplies the set even when it reports an application error. A partial
+authoritative resource representation supplies a set only when the resource
+contract defines its scope.
+
+### Operation outcomes
+
+Request Constraints provide proactive, machine-evaluable preflight for the next
+request; `messages` report outcomes from a submitted request, including runtime
+outcomes. Passing validation against both the resolved request schema and
+Request Constraints establishes only schema validity; the request can still
+fail other Business rules. The containing operation's existing semantics and
+outcome/error contract, including `messages`, continue to govern
+submitted-request and runtime outcomes. Request Constraints add no outcome or
+error code.
+
+### Examples
+
+#### Basket-wide and targeted quantities
+
+The following Cart responses are alternatives that illustrate different scopes.
+
+=== "Basket-wide"
+
+    <!-- ucp:example schema=shopping/cart op=read direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "request_constraints": {
+          "path": "$['line_items'][*]",
+          "properties": {
+            "quantity": {"const": 1}
+          }
+        }
+      },
+      "id": "cart_123",
+      "line_items": [
+        {
+          "id": "line_123",
+          "item": {
+            "id": "sku_123",
+            "title": "Bulk screws",
+            "price": 1200
+          },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 1200},
+            {"type": "total", "amount": 1200}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {"type": "subtotal", "amount": 1200},
+        {"type": "total", "amount": 1200}
+      ]
+    }
+    ```
+
+=== "Targeted"
+
+    <!-- ucp:example schema=shopping/cart op=read direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}"
+      },
+      "id": "cart_123",
+      "line_items": [
+        {
+          "id": "line_123",
+          "item": {
+            "id": "sku_123",
+            "title": "Bulk screws",
+            "price": 1200
+          },
+          "quantity": 100,
+          "totals": [
+            {"type": "subtotal", "amount": 120000},
+            {"type": "total", "amount": 120000}
+          ],
+          "ucp": {
+            "request_constraints": {
+              "path": "$['line_items'][?@['id'] == 'line_123']",
+              "properties": {
+                "quantity": {"const": 100}
+              }
+            }
+          }
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {"type": "subtotal", "amount": 120000},
+        {"type": "total", "amount": 120000}
+      ]
+    }
+    ```
+
+The basket-wide response emits a root constraint that applies quantity `1` to
+every Line Item in the next request. The targeted response uses ambient local
+authoring and a stable-ID path to apply quantity `100` only to the Line Item
+whose `id` is `line_123`; stable-ID rebinding survives reorder. If that path
+finds no match, it selects zero objects and has no effect. These are separate
+responses and alternatives. Combining them as written would create
+contradictory constraints for `line_123` and is a Business authoring error.
+
+#### Locked negotiated discount codes
+
+This Checkout response has the Discount extension active and advertises Request
+Constraints for the next Checkout Update request. Because `request_constraints`
+is in the Checkout response root's `ucp`, omitting `path` derives that
+structured response object's Normalized Path. For this root placement, the
+derived path is `$`, which selects the next request root.
+
+<!-- ucp:example schema=shopping/discount def=dev.ucp.shopping.checkout op=update direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {"version": "{{ ucp_version }}"}
+      ],
+      "dev.ucp.shopping.discount": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    },
+    "payment_handlers": {},
+    "request_constraints": {
+      "required": ["discounts"],
+      "properties": {
+        "discounts": {
+          "required": ["codes"],
+          "properties": {
+            "codes": {"const": ["ACME-X7Q9-L2M4"]}
+          }
+        }
+      }
+    }
+  },
+  "id": "checkout_123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "line_123",
+      "item": {
+        "id": "sku_123",
+        "title": "Bulk screws",
+        "price": 1200
+      },
+      "quantity": 24,
+      "totals": [
+        {"type": "subtotal", "amount": 28800},
+        {"type": "total", "amount": 28800}
+      ]
+    }
+  ],
+  "totals": [
+    {"type": "subtotal", "amount": 28800},
+    {"type": "total", "amount": 28800}
+  ],
+  "links": [
+    {
+      "type": "terms_of_service",
+      "url": "https://business.example/terms"
+    }
+  ],
+  "discounts": {
+    "codes": ["ACME-X7Q9-L2M4"]
+  }
+}
+```
+
+The next Checkout Update request is valid only if it satisfies the resolved
+request schema, contains `discounts.codes`, and supplies exactly
+`["ACME-X7Q9-L2M4"]`.
+
+#### Billing address on a submitted card instrument
+
+In this example, a Business emits `ucp.request_constraints` on an available card
+instrument to require `billing_address` in the next request if it contains a
+matching submitted card instrument:
+
+<!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
+```json
+{
+  "type": "card",
+  "ucp": {
+    "request_constraints": {
+      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
+      "required": ["billing_address"]
+    }
+  }
+}
+```
+
+This fragment assumes its containing authoritative response payment-handler
+declaration has `id: processor_1`. The explicit `path` crosses from the
+response's `available_instruments[]` shape to submitted `payment.instruments[]`
+and matches instruments by `handler_id` and `type`. If the next request contains
+a match, the constraint requires `billing_address` on every matching instrument.
+The payment-handler or instrument contract defines any stronger association.
+This example does not define card brands, credentials, support, availability, or
+payment policy.
+
 ## Actions
 
 An Action is an outstanding unit of extension-defined work for a Platform to

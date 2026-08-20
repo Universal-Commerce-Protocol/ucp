@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/constraint_expression.json",
+  "title": "Constraint Expression",
+  "description": "A closed JSON Schema Draft 2020-12 constraint expression with Object and Value Constraint positions.",
+  "type": "object",
+  "properties": {
+    "required": {
+      "type": "array",
+      "description": "Property names required by the constrained object.",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "type": "object",
+      "description": "Constraints keyed by property name.",
+      "additionalProperties": {
+        "oneOf": [
+          {"$ref": "#"},
+          {"$ref": "#/$defs/value_constraint"}
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "value_constraint": {
+      "type": "object",
+      "description": "A Value Constraint containing `enum`, `const`, or both.",
+      "anyOf": [
+        {"required": ["enum"]},
+        {"required": ["const"]}
+      ],
+      "properties": {
+        "enum": {
+          "type": "array",
+          "description": "A non-empty array of unique JSON values.",
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "const": {}
+      },
+      "additionalProperties": false
+    }
+  }
+}

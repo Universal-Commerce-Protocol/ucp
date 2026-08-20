@@ -62,6 +62,10 @@
         "map_order": {
           "$ref": "#/$defs/map_order",
           "ucp_request": "omit"
+        },
+        "request_constraints": {
+          "$ref": "common/types/request_constraints.json",
+          "ucp_request": "omit"
         }
       },
       "additionalProperties": true
