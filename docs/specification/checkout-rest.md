@@ -213,7 +213,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -1397,7 +1397,7 @@ HTTP 200 and the UCP envelope containing `messages`
 <!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "error" },
   "messages": [
     {
       "type": "error",

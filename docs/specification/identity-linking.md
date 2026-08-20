@@ -17,7 +17,7 @@
 # Identity Linking Capability
 
 * **Capability Name:** `dev.ucp.common.identity_linking`
-* **Schema:** `https://ucp.dev/schemas/common/identity_linking.json`
+* **Schema:** `https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json`
 
 ## Overview
 
@@ -481,8 +481,8 @@ direct OAuth flows (always available via discovery):
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/specification/identity-linking",
-        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
         "config": {
           "providers": {
             "app.example.login": [
@@ -1123,8 +1123,8 @@ operations gated:
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/specification/identity-linking",
-        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
         "config": {
           "scopes": {
             "dev.ucp.shopping.order:read":    {},
@@ -1161,8 +1161,8 @@ No guest checkout — every transaction requires an authenticated user:
     "capabilities": {
       "dev.ucp.common.identity_linking": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/specification/identity-linking",
-        "schema": "https://ucp.dev/schemas/common/identity_linking.json",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/identity-linking",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity_linking.json",
         "config": {
           "scopes": {
             "dev.ucp.shopping.checkout:manage":  {},

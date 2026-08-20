@@ -3493,11 +3493,11 @@ Version unsupported error — no resource is created:
 <!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "error" },
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
-    "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
+    "content": "Version 2026-01-12 is not supported. This business implements version {{ ucp_version }}.",
     "severity": "unrecoverable"
   }],
   "continue_url": "https://merchant.com/"
