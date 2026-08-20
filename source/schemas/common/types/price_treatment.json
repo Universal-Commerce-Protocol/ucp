@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/price_treatment.json",
+  "title": "Price Treatment",
+  "description": "How a price amount should be interpreted for display and downstream calculation.",
+  "type": "object",
+  "properties": {
+    "tax": {
+      "$ref": "tax_treatment.json",
+      "description": "Tax treatment of the amount."
+    }
+  }
+}
