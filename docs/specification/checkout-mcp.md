@@ -139,7 +139,9 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 #### Input Schema
 
 * `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
-    the initial checkout session data and optional extensions.
+    the initial checkout session data and negotiated extension inputs. See
+    [Create Checkout](checkout.md#create-checkout) for the extension input
+    summary.
     * Extensions (Optional):
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
