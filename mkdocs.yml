@@ -42,6 +42,7 @@ nav:
       - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview.md
+      - Getting Started: specification/getting-started.md
       - Checkout Capability:
           - Overview: specification/checkout.md
           - Transports:
