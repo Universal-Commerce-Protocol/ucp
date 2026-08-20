@@ -3365,6 +3365,14 @@ advertised types and/or applies additional constraints (e.g., limiting card
 brands to <code>["visa", "mastercard"]</code>). In a Business profile and authoritative
 response, array order communicates preferred instrument presentation, earliest
 first.</p>
+<p>When an authoritative response includes <code>ucp.request_constraints</code> on an
+available instrument, the Business <strong>MUST</strong> include an explicit <code>path</code> because
+the available instrument's response Normalized Path does not identify submitted
+instruments. The path matches the containing handler's <code>id</code>
+to submitted <code>handler_id</code> and the available instrument's <code>type</code> to submitted
+<code>type</code>, and applies when the next request contains matching instruments.
+Payment-handler and instrument specifications define any stronger association
+the query needs. See <a href="../overview/#request-constraints">Request Constraints</a>.</p>
 <hr />
 <h4 id="handler-declaration-variants">Handler Declaration Variants<a class="headerlink" href="#handler-declaration-variants" title="Permanent link">&para;</a></h4>
 <p>The <code>PaymentHandler</code> schema defines three variants for different contexts. While only

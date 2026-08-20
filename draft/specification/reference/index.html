@@ -2332,6 +2332,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#constraint-expression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraint Expression
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#description" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2512,6 +2523,17 @@
     <span class="md-ellipsis">
       
         Quantity Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Constraints
       
     </span>
   </a>
@@ -4212,6 +4234,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#constraint-expression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraint Expression
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#description" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4392,6 +4425,17 @@
     <span class="md-ellipsis">
       
         Quantity Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Constraints
       
     </span>
   </a>
@@ -6295,6 +6339,32 @@ within the UCP.</p>
 <h3 id="amount">Amount<a class="headerlink" href="#amount" title="Permanent link">&para;</a></h3>
 <p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).</p>
 <hr />
+<h3 id="constraint-expression">Constraint Expression<a class="headerlink" href="#constraint-expression" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">required</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Property names required by the constrained object.</td>
+</tr>
+<tr>
+<td style="text-align: left;">properties</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Constraints keyed by property name.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -6833,6 +6903,38 @@ within the UCP.</p>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Ordering granularity, denominated in steps: the Business sells this item in integer multiples of <code>increment</code> steps. Its effective value is the provided value or 1. Advisory merchandising policy, not a representational bound: Platform-authored quantities SHOULD be integer multiples of the effective increment; the Business MAY accept, revise, or reject an off-increment request with a recoverable business outcome and MUST NOT silently reinterpret it. Business-authored quantities (checkout revisions, fulfillment events, adjustments) are bounded only by <code>scale</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="request-constraints">Request Constraints<a class="headerlink" href="#request-constraints" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">A complete RFC 9535 JSONPath query evaluated against the next logical UCP request to the same resource.</td>
+</tr>
+<tr>
+<td style="text-align: left;">required</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Property names required by the constrained object.</td>
+</tr>
+<tr>
+<td style="text-align: left;">properties</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Constraints keyed by property name.</td>
 </tr>
 </tbody>
 </table>

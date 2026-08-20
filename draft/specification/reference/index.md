@@ -105,6 +105,15 @@ Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to th
 
 ______________________________________________________________________
 
+### Constraint Expression
+
+| Name       | Type          | Requirement | Description                                        |
+| ---------- | ------------- | ----------- | -------------------------------------------------- |
+| required   | Array[string] | Optional    | Property names required by the constrained object. |
+| properties | object        | Optional    | Constraints keyed by property name.                |
+
+______________________________________________________________________
+
 ### Description
 
 | Name     | Type   | Requirement | Description                                                                                                                                                               |
@@ -275,6 +284,16 @@ ______________________________________________________________________
 | scale        | integer | Optional     | One step equals `10^-scale` of `unit`. When `unit` is `C62`, `scale`, if present, MUST be 0. The maximum of 15 is derived from the interoperable integer range: at scale 16 a single whole unit (10^16 steps) is no longer representable, so larger scales cannot denominate one unit of their own basis. Businesses needing finer granularity use a smaller unit.                                                                                                                                                                                                                  |
 | display_text | string  | **Required** | Required printable unit label provided by the Business. The Platform MUST use it when it does not recognize `unit`; for a recognized UN/CEFACT Rec 20 Common Code, the Platform MAY substitute its own localized label. It does not participate in unit identity or mismatch comparison.                                                                                                                                                                                                                                                                                            |
 | increment    | integer | Optional     | Ordering granularity, denominated in steps: the Business sells this item in integer multiples of `increment` steps. Its effective value is the provided value or 1. Advisory merchandising policy, not a representational bound: Platform-authored quantities SHOULD be integer multiples of the effective increment; the Business MAY accept, revise, or reject an off-increment request with a recoverable business outcome and MUST NOT silently reinterpret it. Business-authored quantities (checkout revisions, fulfillment events, adjustments) are bounded only by `scale`. |
+
+______________________________________________________________________
+
+### Request Constraints
+
+| Name       | Type          | Requirement | Description                                                                                             |
+| ---------- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| path       | string        | Optional    | A complete RFC 9535 JSONPath query evaluated against the next logical UCP request to the same resource. |
+| required   | Array[string] | Optional    | Property names required by the constrained object.                                                      |
+| properties | object        | Optional    | Constraints keyed by property name.                                                                     |
 
 ______________________________________________________________________
 
