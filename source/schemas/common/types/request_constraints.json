@@ -2,6 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/request_constraints.json",
   "title": "Request Constraints",
-  "description": "Binds the shared Constraint Expression grammar to data in a subsequent UCP request.",
-  "$ref": "constraint_expression.json"
+  "description": "Binds the shared Constraint Expression grammar to data in the next UCP request to the same resource.",
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "A complete RFC 9535 JSONPath query evaluated against the next logical UCP request to the same resource."
+    },
+    "required": {
+      "$ref": "constraint_expression.json#/properties/required"
+    },
+    "properties": {
+      "$ref": "constraint_expression.json#/properties/properties"
+      }
+    }
+  },
+  "additionalProperties": false
 }

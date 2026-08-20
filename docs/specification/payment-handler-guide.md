@@ -194,6 +194,15 @@ brands to `["visa", "mastercard"]`). In a Business profile and authoritative
 response, array order communicates preferred instrument presentation, earliest
 first.
 
+When an authoritative response includes `ucp.request_constraints` on an
+available instrument, the Business **MUST** include an explicit `path` because
+the available instrument's response Normalized Path does not identify submitted
+instruments. The path matches the containing handler's `id`
+to submitted `handler_id` and the available instrument's `type` to submitted
+`type`, and applies when the next request contains matching instruments.
+Payment-handler and instrument specifications define any stronger association
+the query needs. See [Request Constraints](overview.md#request-constraints).
+
 ---
 
 #### Handler Declaration Variants

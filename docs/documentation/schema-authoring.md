@@ -530,37 +530,35 @@ This section covers only the schema-authoring boundary.
 
 `request_constraints` is centrally registered in `ucp.json#/$defs/members` as a
 response-only protocol member with `ucp_request: "omit"`. Capability, extension,
-and shared type schemas do not redeclare it. A conforming UCP-aware resolver
-materializes the registered member into eligible response scopes so ordinary
-resolved-schema validation applies the shared schema.
+handler, and shared type schemas do not redeclare it. A conforming UCP-aware
+resolver materializes the registered member into eligible response scopes so
+ordinary resolved-schema validation applies the shared schema.
 
 `schemas/common/types/constraint_expression.json` defines the closed Constraint
 Expression grammar. `schemas/common/types/request_constraints.json` binds that
-grammar to data in a subsequent UCP request and is the schema referenced by the
-registered member. An emitted value begins at an Object Constraint; Value
-Constraints occur only beneath its `properties` maps.
+grammar to data in the next UCP request and is the schema referenced by the
+registered member.
 
 | Position | Admitted members | Shape |
 | :-- | :-- | :-- |
 | Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
 | Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
 
-Only the listed members are admitted in an emitted value. Keywords the grammar
-uses to define this closed language do not become admitted members.
+The listed members define the grammar. A `request_constraints` value may
+additionally contain `path` at the top level.
 
-Add or change grammar members in `constraint_expression.json`.
-`request_constraints.json` defines only the binding to subsequent request data.
+Grammar changes belong in `constraint_expression.json`, and changes to the root
+Object Constraint must also be reflected in `request_constraints.json`.
 
 ### Annotations and applicability
 
 `constraint_expression.json` carries no `ucp_request` annotations. Its
-`required`, `properties`, `enum`, and `const` properties are Constraint
-Expression grammar syntax, not independently placeable UCP fields, so the
-grammar has no direction of its own.
+properties are Constraint Expression syntax, not independently placeable UCP
+fields, so the grammar has no direction of its own.
 
 Applicability belongs to the containing UCP property. Each UCP property that
 exposes a Constraint Expression owns whichever direction-specific applicability
-annotations that carrier calls for, and those annotations alone determine when
+annotations that property requires, and those annotations alone determine when
 the grammar is reachable. For `request_constraints`, the containing property is
 the member registered in `ucp.json#/$defs/members`; it remains
 `ucp_request: "omit"` and is the only place that member's response-only
@@ -570,11 +568,11 @@ response-only one without change.
 
 ### Constraint Expression grammar
 
-An emitted value and its nested constraint objects are JSON Schema Draft 2020-12
-Constraint Expression syntax, not structured UCP domain objects. Do not add or
-materialize ambient `ucp` inside them. The `properties` value is a field-name
-dictionary whose keys name target request fields; those keys are not ambient
-members.
+Except for the outer `path` member, an emitted value and its nested constraint
+objects are JSON Schema Draft 2020-12 Constraint Expression syntax, not
+structured UCP domain objects. Do not add or materialize ambient `ucp` inside
+them. The keys in a `properties` map name fields on a selected request object
+and are data, not ambient members.
 
 The containing `ucp` object still follows
 [The Reserved `ucp` Member](#the-reserved-ucp-member). A closed structured object
