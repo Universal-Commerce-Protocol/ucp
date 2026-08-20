@@ -50,7 +50,7 @@
     {
       "name": "search_locations",
       "summary": "Search for physical locations",
-      "description": "Search for physical locations (e.g., retail stores, restaurants) using query text, filters, and geo proximity.",
+      "description": "Search for physical locations (e.g., retail stores, restaurants) using query text, explicit `distance` and `serves` relations, and structured filters (e.g., hours, amenities, inventory).",
       "params": [
         {
           "name": "meta",

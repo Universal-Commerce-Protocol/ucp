@@ -201,6 +201,14 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 {{ schema_fields('types/location_filter', 'location/rest') }}
 
+### Location Distance {: #location-distance-schema }
+
+{{ schema_fields('types/location_distance', 'location/rest') }}
+
+### Location Serves {: #location-serves-schema }
+
+{{ schema_fields('types/location_serves', 'location/rest') }}
+
 ### Error Response {: #error-response }
 
 {{ schema_fields('types/error_response', 'location/rest') }}
@@ -212,9 +220,16 @@ A conforming REST transport implementation **MUST**:
 1. Implement endpoints for each location capability advertised in the business's UCP profile,
     per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)).
     Each capability **MAY** be adopted independently.
-2. Default to business-derived coordinates based on user location hint provided in `context.json`
-    for proximity (`distance`) filters when explicit coordinates are omitted by the platform in the request.
-3. Support cursor-based pagination with a default limit of 10 for search results.
-4. Return HTTP 200 for lookup requests; unknown identifiers result in fewer or no locations
+2. Evaluate the `distance` relation only against the explicit Platform-supplied
+    `distance.center`, and the `serves` relation only against the explicit
+    Platform-supplied target; never derive either operand from `context`,
+    `signals`, or an IP address, and never apply an implicit serviceability
+    check when `serves` is absent.
+3. Apply `distance`, `serves`, and every supplied `filters` predicate
+    conjunctively (AND).
+4. Support cursor-based pagination for search results with a default limit
+    of 10; an omitted `pagination.limit` means 10, never all records (see
+    [Pagination](search.md#pagination)).
+5. Return HTTP 200 for lookup requests; unknown identifiers result in fewer or no locations
     returned (**MAY** include informational `not_found` messages).
-5. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.
+6. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.

@@ -8,7 +8,7 @@
   "$defs": {
     "lookup_request": {
       "type": "object",
-      "description": "Request body for batch location lookup.",
+      "description": "Request body for batch location lookup. The Business resolves and deduplicates `ids` before applying `distance`, `serves`, and every supplied `filters` predicate; all structured predicates combine with AND.",
       "required": ["ids"],
       "properties": {
         "ids": {
@@ -16,6 +16,16 @@
           "items": { "type": "string" },
           "minItems": 1,
           "description": "Identifiers of the locations to lookup. Implementations MUST support location ID."
+        },
+        "distance": {
+          "$ref": "types/location_distance.json",
+          "description": "Optional explicit-center radius predicate applied after ID resolution. It combines with `serves` and every supplied `filters` predicate using AND.",
+          "ucp_request": "optional"
+        },
+        "serves": {
+          "$ref": "types/location_serves.json",
+          "description": "Optional authoritative service-target predicate applied after ID resolution. It combines with `distance` and every supplied `filters` predicate using AND.",
+          "ucp_request": "optional"
         },
         "filters": {
           "$ref": "types/location_filter.json",

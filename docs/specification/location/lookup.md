@@ -31,16 +31,17 @@ or retrieval of a single location (useful for a dedicated location detail page).
 ## Supported Identifiers
 
 The `ids` parameter accepts an array of identifiers. Implementations **MUST**
-support lookup by the business's stable location ID.
+support lookup by the Business's stable location ID.
 
-Duplicate identifiers in the request **MUST** be deduplicated by the server.
-When multiple identifiers resolve to the same physical location,
-it **MUST** be returned only once in the response.
+A Business **MUST** deduplicate duplicate identifiers in the request. When
+multiple identifiers resolve to the same physical Location, the Business
+**MUST** return it only once in the response.
 
-### Client Correlation
+### Platform Correlation
 
-The response does not guarantee order. Clients correlate returned locations
-simply by matching the returned `id` field against their requested `ids`.
+The response does not guarantee order. A Platform correlates returned
+Locations simply by matching the returned `id` field against its requested
+`ids`.
 
 ### Batch Size
 
@@ -49,20 +50,29 @@ Implementations **MAY** enforce a maximum batch size and **MUST** reject
 requests exceeding their limit with an appropriate error (HTTP 400
 `request_too_large` for REST, JSON-RPC `-32602` for MCP).
 
-### Filters
+### Refinement
 
-Optional `filters` (hours, offerings/inventory, geo) are accepted
-to narrow down the returned locations.
-Filters use the same schema and AND semantics as [Search Filters](search.md#search-filters).
+The Business first resolves the canonical `ids` and deduplicates repeated
+IDs. Optional root `distance` and `serves` relations and `filters` predicates
+then refine the resolved set. All supplied criteria combine with AND: a
+resolved Location is returned only when it satisfies `distance` (when
+present), `serves` (when present), and every supplied `filters` predicate.
+The relations and predicates use the same schemas and semantics as Search —
+see [Spatial Relations](search.md#spatial-relations) and
+[Search Filters](search.md#search-filters).
 
-Filters apply **after** identifier resolution. For example, if a Platform
-requests `["loc_downtown", "loc_uptown"]` with an hours filter of
-`{"open_at": "2026-05-18T17:00:00Z"}`:
+For example, if a Platform requests `["loc_downtown", "loc_uptown"]` with an
+hours filter of `{"open_at": "2026-05-18T17:00:00Z"}`:
 
 1. The Business first resolves both identifiers to their respective Locations.
 2. The Business evaluates the supplied instant against each resolved Location.
 3. If `loc_uptown` is closed at that instant, the Business excludes it and
     returns only `loc_downtown`.
+
+A requested ID is absent from the response when it does not resolve or when
+the resolved Location fails any supplied criterion. The request still
+succeeds. The Business **MAY** attach an informational message (for example,
+`not_found`), but no per-ID explanation is guaranteed.
 
 ### Request
 

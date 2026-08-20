@@ -69,7 +69,7 @@ request in `location`.
 
 | Tool | Capability | Description |
 | :--- | :--- | :--- |
-| `search_locations` | [Search](search.md) | Search for locations using text, coordinates, and filters. |
+| `search_locations` | [Search](search.md) | Search for locations using text, spatial relations, and filters. |
 | `lookup_locations` | [Lookup](lookup.md) | Batch lookup one or multiple location(s) by ID. |
 
 ### `search_locations`
@@ -232,6 +232,14 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 
 {{ schema_fields('types/location_filter', 'location/mcp') }}
 
+### Location Distance {: #location-distance-schema }
+
+{{ schema_fields('types/location_distance', 'location/mcp') }}
+
+### Location Serves {: #location-serves-schema }
+
+{{ schema_fields('types/location_serves', 'location/mcp') }}
+
 ### Error Response {: #error-response }
 
 {{ schema_fields('types/error_response', 'location/mcp') }}
@@ -244,9 +252,17 @@ A conforming MCP transport implementation **MUST**:
 2. Implement tools for each location capability advertised in the business's UCP profile, per their respective
     capability requirements ([Search](search.md), [Lookup](lookup.md)).
     Each capability may be adopted independently.
-3. Default to business-derived coordinates based on user location hint provided in `context.json`
-    for proximity (`distance`) filters when explicit coordinates are omitted by the platform in the request.
-4. Return a successful JSON-RPC result for lookup requests; unknown identifiers result in fewer or no locations
+3. Evaluate the `distance` relation only against the explicit Platform-supplied
+    `distance.center`, and the `serves` relation only against the explicit
+    Platform-supplied target; never derive either operand from `context`,
+    `signals`, or an IP address, and never apply an implicit serviceability
+    check when `serves` is absent.
+4. Apply `distance`, `serves`, and every supplied `filters` predicate
+    conjunctively (AND).
+5. Support cursor-based pagination for search results with a default limit
+    of 10; an omitted `pagination.limit` means 10, never all records (see
+    [Pagination](search.md#pagination)).
+6. Return a successful JSON-RPC result for lookup requests; unknown identifiers result in fewer or no locations
     returned (**MAY** include informational `not_found` messages in the `messages` array).
-5. Validate tool inputs against UCP schemas.
-6. Return `-32602` (Invalid params) for requests exceeding batch size limits.
+7. Validate tool inputs against UCP schemas.
+8. Return `-32602` (Invalid params) for requests exceeding batch size limits.
