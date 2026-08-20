@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/gift.json",
+  "name": "dev.ucp.shopping.gift",
+  "title": "Gift Extension",
+  "description": "Extends Checkout with recipient-based gift purchases.",
+  "requires": {
+    "protocol": { "min": "2026-04-08" },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": { "min": "2026-04-08" }
+    }
+  },
+  "$defs": {
+    "recipient_display": {
+      "type": "object",
+      "description": "Business-provided buyer-facing presentation of a selected recipient.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Buyer-facing recipient name, relationship name, or other merchant-approved display value, such as 'Mom'."
+        }
+      }
+    },
+    "recipient": {
+      "type": "object",
+      "description": "Business-provided buyer-facing presentation of the recipient selected for a gift checkout. The Business remains authoritative for recipient identity, eligibility, and fulfillment details.",
+      "required": ["display"],
+      "properties": {
+        "display": {
+          "$ref": "#/$defs/recipient_display",
+          "description": "Buyer-facing presentation of the recipient, supplied by the Business. This is presentation data, not a verified identity or authorization credential.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "gift": {
+      "type": "object",
+      "description": "Gift checkout context. An empty object is a no-op; recipient-based gifting is requested by `recipient_required: true`.",
+      "properties": {
+        "recipient_required": {
+          "type": "boolean",
+          "const": true,
+          "description": "When `true`, requests a recipient-based gift checkout. The Business MUST require a selected, eligible recipient before accepting Complete Checkout. This field does not prescribe how the Business collects recipient input."
+        },
+        "recipient": {
+          "$ref": "#/$defs/recipient",
+          "description": "The selected recipient's Business-provided presentation.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Gift",
+      "description": "Checkout extended with recipient-based gift support.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "gift": {
+              "$ref": "#/$defs/gift",
+              "description": "Gift context for this checkout.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
