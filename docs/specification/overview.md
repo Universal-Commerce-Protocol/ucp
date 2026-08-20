@@ -233,12 +233,17 @@ No other member is admitted at either grammar position.
 
 ### Path
 
-`path` is optional. When omitted, the effective path is the
+Every `request_constraints` value has exactly one effective path. When `path`
+is omitted, the effective path is the
 [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535.html){ target="_blank" }
 Normalized Path from the authoritative response root to the structured response
 object whose `ucp` member contains `request_constraints`. When the Business
-provides `path`, the Business **MUST** use a complete RFC 9535 JSONPath query
-evaluated against the next logical UCP request to that resource.
+provides `path`, that value becomes the effective path and supersedes the
+Normalized Path that would otherwise be derived; the Business **MUST** make it
+a complete RFC 9535 JSONPath query. In both cases, the effective path is
+evaluated against the next logical UCP request to that resource. The effective
+path therefore differs from response-targeting paths elsewhere in UCP, such as
+`messages[].path`, which are evaluated against the response that carries them.
 
 An omitted path establishes positional correspondence for the next request, not
 stable identity: an array index still identifies that position if items reorder
@@ -259,12 +264,10 @@ schema, and a Platform **MUST** do the same before using that value for
 preflight; `path` selects the objects and the remaining members form the
 [Constraint Expression](site:schemas/common/types/constraint_expression.json).
 
-The effective path is evaluated against the next request to the resource. A
-constraint is not tied to an operation name; it applies to every object its path
-selects. A path that selects zero objects has no effect. When
+A constraint is not tied to an operation name; it applies to every object its
+path selects. A path that selects zero objects has no effect. When
 `request_constraints` is in the response root's `ucp` member and `path` is
-omitted, that structured response object is the response root, so the effective
-path is `$`; the constraint applies only to the next request.
+omitted, the effective path is `$`.
 
 If multiple paths select the same object, every corresponding Constraint
 Expression applies. The shared Request Constraints schema validates each value
