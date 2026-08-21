@@ -92,6 +92,14 @@ def check_links():
     except Exception as e:
       print(f"Warning: Could not read .linkignore: {e}")
 
+  # When checking isolated specification builds (DOCS_MODE=spec), ignore links
+  # to documentation pages which only exist on the root site.
+  docs_mode = os.environ.get("DOCS_MODE", "root")
+  if docs_mode == "spec":
+    ignore_patterns.append(
+      re.compile(r"^(?:/|https?://[^/]+/|(?:\.\./)+)?documentation/.*")
+    )
+
   print(f"Scanning {ROOT_DIR} for broken links (Site URL: {SITE_URL})...")
 
   html_files = list(ROOT_DIR.rglob("*.html"))
