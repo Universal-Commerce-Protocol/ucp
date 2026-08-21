@@ -194,7 +194,7 @@ segment, or promotional rules:
 ## Eligibility Claims
 
 Eligibility claims are buyer claims about eligible benefits (see
-[Context](checkout.md#context)) such as loyalty membership, payment instrument
+[Context](shopping/checkout/index.md#context)) such as loyalty membership, payment instrument
 perks, and similar. When the discount extension is active, Businesses that
 choose to accept eligibility claims **MUST** surface their effect on pricing
 as provisional discounts in the `applied` array. Platforms **MUST** display
@@ -203,7 +203,7 @@ provisional discounts to the buyer.
 ### Discount Behavior
 
 Platforms send buyer claims via `context.eligibility` on cart or checkout
-requests (see [Context](checkout.md#context)). When a Business recognizes a
+requests (see [Context](shopping/checkout/index.md#context)). When a Business recognizes a
 claim and it affects pricing, it **MUST** surface a corresponding provisional
 discount in the `discounts.applied` array. This gives the Platform structured
 attribution to display to the buyer.
@@ -226,12 +226,12 @@ Discounts from accepted but unverified claims carry `provisional: true`.
 Provisional discounts remain until the claim is verified, rescinded, or
 replaced during the session. At checkout completion, all remaining provisional
 claims **MUST** be resolved (see
-[Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion)).
+[Eligibility Verification at Completion](shopping/checkout/index.md#eligibility-verification-at-completion)).
 
 ### Example: Provisional Discount with Attribution
 
 Using the same claim-resolution pattern described in
-[Eligibility Verification at Completion](checkout.md#eligibility-verification-at-completion),
+[Eligibility Verification at Completion](shopping/checkout/index.md#eligibility-verification-at-completion),
 the discount extension provides structured attribution. The Platform claims a
 store card benefit; the Business surfaces the provisional discount with full
 stacking and allocation details:

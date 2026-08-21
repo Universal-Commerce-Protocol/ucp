@@ -1,0 +1,385 @@
+<!--
+   Copyright 2026 UCP Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# {Handler Name} Payment Handler
+
+* **Handler Name:** `{reverse-dns.name}`
+* **Version:** `{YYYY-MM-DD}`
+
+## Introduction
+
+{Brief description of what this handler enables and the payment flow it
+supports.}
+
+### Key Benefits
+
+* {Benefit 1}
+* {Benefit 2}
+* {Benefit 3}
+
+### Integration Guide
+
+| Participant  | Integration Section                           |
+| :----------- | :-------------------------------------------- |
+| **Business** | [Business Integration](#business-integration) |
+| **Platform** | [Platform Integration](#platform-integration) |
+
+---
+
+## Participants
+
+{Describe all participants in this handler and their roles.}
+
+> **Note on Terminology:**
+> While this specification refers to the participant as the **"business,"**
+> technical schema fields may retain the standard industry nomenclature
+> **`merchant_*`** (e.g., `merchant_id`). Mappings are documented below.
+
+| Participant             | Role               | Prerequisites                |
+| :---------------------- | :----------------- | :--------------------------- |
+| **Business**            | {role description} | {Yes/No — brief description} |
+| **Platform**            | {role description} | {Yes/No — brief description} |
+| **{Other Participant}** | {role description} | {Yes/No — brief description} |
+
+{Optional: ASCII diagram showing participant relationships}
+
+```text
++---------+     +---------------+     +------------+
+|Platform |     |   {Provider}  |     |  Business  |
++----+----+     +-------+-------+     +------+-----+
+     |                  |                    |
+     |  {step 1}        |                    |
+     |----------------->|                    |
+     |                  |                    |
+     |  {step 2}        |                    |
+     |<-----------------|                    |
+     |                  |                    |
+     |  {step 3}                             |
+     |-------------------------------------->|
+```
+
+---
+
+<!--
+  PARTICIPANT INTEGRATION SECTIONS
+
+  Include one section per participant. Each section follows the same structure:
+  - Prerequisites (onboarding, setup)
+  - Configuration or Protocol (what they need to do)
+  - Examples
+
+  Number sections starting from 3. Add more sections as needed for additional participants.
+-->
+
+## Business Integration
+
+### Prerequisites
+
+Before advertising this handler, businesses **MUST** complete:
+
+1. {Prerequisite 1, e.g., "Register with {provider} to obtain a business identifier"}
+2. {Prerequisite 2}
+
+**Prerequisites Output:**
+
+| Field                   | Description                                      |
+| :---------------------- | :----------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned, e.g., business_id} |
+| {additional config}     | {any additional configuration from onboarding}   |
+
+### Handler Configuration
+
+Businesses advertise support for this handler in their UCP profile's
+`payment_handlers` registry.
+
+#### Handler Schema
+
+**Schema URL:** `{schema_url}`
+
+The handler schema defines three config variants for different contexts. See
+[Payment Handler Guide: Defining the Schema](guide.md#defining-the-schema)
+for the full pattern.
+
+| Config Variant | Context | Purpose |
+| :------------- | :------ | :------ |
+| `business_config` | Business discovery | {describe business-specific fields} |
+| `platform_config` | Platform discovery | {describe platform-specific fields} |
+| `response_config` | Checkout responses | {describe runtime fields} |
+
+#### Business Config Fields
+
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
+| {field} | {type} | {Yes/No} | {description} |
+
+#### Response Config Fields
+
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
+| {field} | {type} | {Yes/No} | {description} |
+
+#### Example Handler Declaration
+
+<!-- ucp:example skip reason="handler config template" -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "payment_handlers": {
+      "{handler_name}": [
+        {
+          "id": "{handler_id}",
+          "version": "{version}",
+          "spec": "{spec_url}",
+          "schema": "{schema_url}",
+          "available_instruments": [
+            {
+              "type": "{instrument_type}",
+              "constraints": {
+                // Type-specific constraints
+              }
+            }
+          ],
+          "config": {
+            // Handler-specific configuration
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+### Processing Payments
+
+Upon receiving a payment with this handler's instrument, businesses **MUST**:
+
+1. **Validate Handler:** Confirm `instrument.handler_id` matches an advertised handler.
+2. **Ensure Idempotency:** If the request is a retry (matches a previous
+  `checkout_id` or idempotency key), return the previous result immediately
+  without re-processing funds.
+3. **{Step 3}:** {description}
+4. **{Step 4}:** {description}
+5. **Return Response:** Respond with the finalized checkout state.
+
+{Include example request/response if the business calls an external service}
+
+---
+
+## Platform Integration
+
+### Prerequisites
+
+Before using this handler, Platforms **MUST** complete:
+
+1. {Prerequisite 1, e.g., "Register with {provider} to obtain a Platform identifier"}
+2. {Prerequisite 2}
+
+**Prerequisites Output:**
+
+| Field                   | Description                                    |
+| :---------------------- | :--------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned}                  |
+| {additional config}     | {any additional configuration from onboarding} |
+
+### Handler Configuration
+
+Platforms advertise support for this handler in their UCP profile's
+`payment_handlers` registry using `platform_config`.
+
+#### Platform Config Fields
+
+| Field   | Type   | Required | Description   |
+| :------ | :----- | :------- | :------------ |
+| {field} | {type} | {Yes/No} | {description} |
+
+#### Example Platform Handler Declaration
+
+<!-- ucp:example skip reason="handler config template" -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "payment_handlers": {
+      "{handler_name}": [
+        {
+          "id": "{handler_id}",
+          "version": "{version}",
+          "spec": "{spec_url}",
+          "schema": "{schema_url}",
+          "available_instruments": [
+            {
+              "type": "{instrument_type}",
+              "constraints": {
+                // Type-specific constraints the platform supports
+              }
+            }
+          ],
+          "config": {
+            // Platform-specific configuration
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+### Payment Protocol
+
+Platforms **MUST** follow this flow to acquire a payment instrument:
+
+#### Step 1: Discover Handler
+
+The Platform identifies `{handler_name}` in the business's UCP profile
+`payment_handlers` registry (from `/.well-known/ucp`).
+
+<!-- ucp:example skip reason="handler config template" -->
+```json
+{
+  "ucp": {
+    "payment_handlers": {
+      "{handler_name}": [
+        {
+          "id": "{handler_id}",
+          "version": "{version}",
+          "available_instruments": [
+            {"type": "{instrument_type}"}
+          ],
+          "config": {
+            // Business's configuration
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+#### Step 2: {Action Name}
+
+{Description of what the Platform does in this step.}
+
+{Code example if applicable:}
+
+```javascript
+// Example SDK usage or API call
+```
+
+#### Step 3: {Action Name}
+
+{Continue for all steps...}
+
+#### Step N: Complete Checkout
+
+The Platform submits the checkout with the constructed payment instrument.
+
+<!-- ucp:example skip reason="handler config template" -->
+```json
+POST /checkout-sessions/{checkout_id}/complete
+Content-Type: application/json
+
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "{instrument_id}",
+        "handler_id": "{handler_id}",
+        "type": "{instrument_type}",
+        "credential": {
+          "type": "{credential_type}",
+          // Credential fields
+        }
+        // Additional instrument fields
+      }
+    ]
+  },
+  "signals": {
+    // Platform-observed signals (buyer connection and device)
+  }
+}
+```
+
+---
+
+## Payment Actions [CONDITIONAL]
+
+{Include this section if the handler can cause Actions. Identify the negotiated
+Checkout extension that declares them. Use the standard
+[Payment Authentication extension](authentication.md) for device data
+collection and 3DS challenges; link to the defining extension specification for
+custom Actions.}
+
+| Action type | When emitted | Gated effect | Handler-specific requirements |
+| :---------- | :----------- | :----------- | :---------------------------- |
+| `{action_type}` | {conditions} | {effect} | {provider-specific trust, fallback, retry, or cleanup behavior} |
+
+For standard Payment Authentication Actions, document only the behavior specific
+to this handler, such as which types it can cause, trusted URL rules, how the
+Action is associated with its payment instrument, and how the Business observes
+provider state. For custom Actions, also document or link to their config and
+Platform processing contract.
+
+---
+
+<!--
+  ADDITIONAL PARTICIPANT SECTIONS
+
+  Add one section per additional participant (PSP, Tokenizer, Wallet Provider, etc.)
+  following the same pattern as Business and Platform integration.
+-->
+
+## {Participant} Integration
+
+### Prerequisites
+
+Before participating in this handler's flow, {participants} **MUST** complete:
+
+1. {Prerequisite 1}
+2. {Prerequisite 2}
+
+**Prerequisites Output:**
+
+| Field                   | Description                                    |
+| :---------------------- | :--------------------------------------------- |
+| `identity.access_token` | {what identifier is assigned}                  |
+| {additional config}     | {any additional configuration from onboarding} |
+
+### {Action or Configuration}
+
+{Describe what this participant needs to do.}
+
+{Include examples as appropriate.}
+
+---
+
+## Security Considerations
+
+| Requirement                  | Description                                                                                                                                                           |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse.                                                                                       |
+| **Binding placement**        | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
+| **Binding verified**         | The processing participant **MUST** verify binding matches before processing.                                                                                         |
+| **Token Expiry**             | {If using tokens: Tokens **MUST** expire after {duration} or single-use.}                                                                                             |
+| **Data Residency**           | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}                                                |
+| **{Additional requirement}** | {description}                                                                                                                                                         |
+
+---
+
+## References
+
+* **Handler Spec:** `{spec_url}`
+* **Handler Schema:** `{schema_url}` (defines config, instrument, and credential shapes)

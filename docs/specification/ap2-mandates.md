@@ -75,7 +75,7 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
@@ -137,7 +137,7 @@ This extension uses the cryptographic primitives defined in the
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
 * **Key Discovery:** `keys[]` in `/.well-known/ucp` (see
-  [Key Discovery](overview.md#key-discovery))
+  [Key Discovery](overview/index.md#key-discovery))
 
 See [Message Signatures](signatures.md) for key format and rotation.
 
@@ -254,6 +254,12 @@ immediately over the same HTTP connection. Mandates are different:
 
 JCS ensures that semantically identical JSON produces byte-identical output,
 making signatures reproducible across implementations and time.
+
+Verification and mandate construction operate on the complete checkout JSON,
+not a projection of schema-recognized fields; removing any member covered by
+`merchant_authorization` changes the JCS payload and invalidates the signature.
+This coverage includes `ucp` protocol-namespace members present in the checkout;
+only the `ap2` field is excluded as specified below.
 
 **AP2-Specific Rule:** When computing the business's `merchant_authorization`
 signature, exclude the `ap2` field entirely. This ensures future AP2 fields
