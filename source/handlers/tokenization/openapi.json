@@ -29,7 +29,7 @@
                   },
                   "identity": {
                     "$ref": "../../schemas/common/types/payment_identity.json",
-                    "description": "The participant this token is bound to. Required when acting on behalf of another participant, for example an agent tokenizing for a business. Omit when the authenticated caller is the binding target."
+                    "description": "The participant this token is issued to. Required when acting on behalf of another participant, for example an agent tokenizing for a business. Omit when the authenticated caller is that participant."
                   }
                 }
               },
@@ -151,7 +151,7 @@
                   },
                   "identity": {
                     "$ref": "../../schemas/common/types/payment_identity.json",
-                    "description": "Participant identity that must match the original tokenization request. Omit when it was omitted at tokenization."
+                    "description": "Participant whose token is being retrieved. Required when the caller acts on behalf of another participant; omit when the authenticated caller is that participant."
                   }
                 }
               },
