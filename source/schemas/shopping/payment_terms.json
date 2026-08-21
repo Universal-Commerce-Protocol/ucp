@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/payment_terms.json",
+  "name": "dev.ucp.shopping.payment_terms",
+  "title": "Payment Terms Extension",
+  "description": "Extends Checkout with selectable payment terms, letting a Business offer alternative schedules for when payment for the checkout is due, and projects the accepted term onto the resulting Order.",
+  "requires": {
+    "protocol": { "min": "2026-04-08" },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": { "min": "2026-04-08" },
+      "dev.ucp.shopping.order": { "min": "2026-04-08" }
+    }
+  },
+  "$defs": {
+    "payment_term": {
+      "$ref": "types/payment_term.json"
+    },
+    "payment": {
+      "title": "Payment with Terms",
+      "description": "Payment object extended with selectable payment terms.",
+      "type": "object",
+      "properties": {
+        "terms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/payment_term" },
+          "minItems": 1,
+          "description": "Payment terms the Buyer can choose from. An unselected term's amounts are indicative; the selected term's schedule amounts sum to the checkout total.",
+          "ucp_request": "omit"
+        },
+        "selected_term_id": {
+          "type": "string",
+          "description": "ID of the selected payment term. MUST match one `terms[].id` from the latest Checkout response. Present in a response whenever `terms` is, and absent when it is not: the Checkout total is the selected term's total, so a list of terms without a selection would show an amount that matches no stated term. Where the Buyer has made no choice, the Business selects a default. Omitted on create requests because term IDs are checkout-scoped and no terms exist yet, and on complete requests because the term is already agreed by then. Selecting a term is an Update Checkout mutation: the Business response is authoritative for all derived state.",
+          "ucp_request": {
+            "create": "omit",
+            "update": "optional",
+            "complete": "omit"
+          },
+          "ucp_response": "optional"
+        }
+      }
+    },
+    "order_payment": {
+      "title": "Order Payment with Accepted Term",
+      "description": "Order payment details carrying the term the Buyer accepted at checkout.",
+      "type": "object",
+      "properties": {
+        "accepted_term": {
+          "$ref": "#/$defs/payment_term",
+          "description": "The payment term the Buyer accepted at checkout. Businesses MUST carry it forward so the Order states the amounts owed and when, and MUST ensure its schedule amounts sum to the Order total. The available terms are checkout state and are not projected."
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Payment Terms",
+      "description": "Checkout extended with selectable payment terms.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "$ref": "#/$defs/payment",
+              "description": "Payment details with available and selected payment terms.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "required"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Accepted Payment Term",
+      "description": "Order extended with the payment term accepted at checkout.",
+      "allOf": [
+        { "$ref": "order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "$ref": "#/$defs/order_payment",
+              "description": "Payment details for the Order, including the accepted payment term.",
+              "ucp_response": "optional"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

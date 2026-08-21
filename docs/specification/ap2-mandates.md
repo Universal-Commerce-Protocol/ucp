@@ -75,7 +75,7 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
       "dev.ucp.shopping.checkout": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
@@ -137,7 +137,7 @@ This extension uses the cryptographic primitives defined in the
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
 * **Key Discovery:** `keys[]` in `/.well-known/ucp` (see
-  [Key Discovery](overview.md#key-discovery))
+  [Key Discovery](overview/index.md#key-discovery))
 
 See [Message Signatures](signatures.md) for key format and rotation.
 

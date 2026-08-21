@@ -25,7 +25,7 @@ This specification defines how to sign and verify UCP messages using
 [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) HTTP Message Signatures.
 For UCP's identity model, supported authentication mechanisms, and key
 discovery protocol, see
-[Identity & Authentication](overview.md#identity-authentication).
+[Identity & Authentication](overview/index.md#identity-authentication).
 
 HTTP Message Signatures protect against:
 
@@ -105,7 +105,7 @@ additive option that unlocks Web Bot Auth (WBA) interop.
   remains unusable to that verifier. A signature that references such a
   key fails with `algorithm_unsupported` (and, in a multi-signature
   request, is skipped per the [Identity Resolution
-  Algorithm](overview.md#identity-resolution-algorithm)).
+  Algorithm](overview/index.md#identity-resolution-algorithm)).
 
 **Usage guidance:**
 
@@ -132,7 +132,7 @@ algorithm constraints — for example, a WBA verifier that accepts only
 Ed25519 together with an AP2 mandate algorithm requirement that excludes
 it (see [AP2 Mandates](ap2-mandates.md)). When one algorithm satisfies
 every audience, a single key serves all of them. See
-[Business Profile](overview.md#business-profile) for a two-key example.
+[Business Profile](overview/index.md#business-profile) for a two-key example.
 
 For on-the-wire signature encoding details, see
 [REST Request Signing — Signature Encoding](#rest-request-signing).
@@ -211,8 +211,8 @@ opaque identifier (RFC 7517) and MAY be any stable value.
 ### Key Discovery
 
 Public keys are published in the signer's UCP profile. See
-[Profile Structure](overview.md#profile-structure) for the publishing
-contract and [Key Discovery](overview.md#key-discovery) for the
+[Profile Structure](overview/index.md#profile-structure) for the publishing
+contract and [Key Discovery](overview/index.md#key-discovery) for the
 verifier lookup rule (which key list to read for each resolution
 mechanism).
 
@@ -288,7 +288,7 @@ One signature on the wire, two audiences. UCP-shape verifiers resolve via
 key. Here both headers point at the same `/.well-known/ucp` URL
 (`type=jwks_uri`, so WBA verifiers read the profile's `keys[]` as the JWK
 Set — see
-[Deployment Patterns](overview.md#deployment-patterns-for-wba-interop)),
+[Deployment Patterns](overview/index.md#deployment-patterns-for-wba-interop)),
 but `Signature-Agent` MAY point elsewhere.
 
 The three `sig1` labels are bound together — the `Signature-Agent`
@@ -312,7 +312,7 @@ signature. Items marked **MUST** are required by
    is an HTTPS URL and whose `type` parameter selects the discovery
    mechanism; the member key matches the `Signature-Input` signature
    label. See
-   [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop)
+   [Deployment Patterns](overview/index.md#deployment-patterns-for-wba-interop)
    for the `jwks_uri`/`cimd`/`directory` variants and how each can reuse
    the UCP profile. (`data:` URI inline form is out of scope.)
 3. **MUST sign the `signature-agent` component with `;key="<label>"`**
@@ -345,7 +345,7 @@ signature does (the Required set in the
 "additional components" per
 [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/)
 §4.2.4. The verifier enforces this regardless of `tag` per the
-[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm),
+[Identity Resolution Algorithm](overview/index.md#identity-resolution-algorithm),
 so opting into Web Bot Auth never widens what UCP authenticates.
 
 **Interop is one-way.** A UCP signer satisfies a Web Bot Auth
@@ -377,7 +377,7 @@ UCP verifiers see the same signature with three new things:
 
 **Identity resolution.** WBA opt-in does not change default UCP
 verification; see
-[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm).
+[Identity Resolution Algorithm](overview/index.md#identity-resolution-algorithm).
 
 **Tags.** UCP does not define its own `tag` (RFC 9421 §2.3). UCP
 verifiers identify their signatures via the `UCP-Agent` header,
@@ -553,7 +553,7 @@ Response signatures use `@status` instead of `@method`:
 The response body below is abbreviated for clarity — only the key fields
 used in signing are shown. A full checkout response includes additional
 required fields (`ucp`, `currency`, `line_items`, `totals`, `links`); see
-[Create Checkout response](checkout-rest.md#create-checkout) for the
+[Create Checkout response](shopping/checkout/rest.md#create-checkout) for the
 complete shape.
 
 ```http
@@ -606,7 +606,7 @@ sign_rest_response(status, body_bytes, private_key, kid):
 **Resolving the Signer's Keys:**
 
 See
-[Identity Resolution Algorithm](overview.md#identity-resolution-algorithm)
+[Identity Resolution Algorithm](overview/index.md#identity-resolution-algorithm)
 for the key-resolution rule (chosen by verifier capability and the
 headers present, not by the signature's `tag`). This section specifies
 header parsing only — `UCP-Agent` for the default UCP regime,
@@ -633,7 +633,7 @@ header parsing only — `UCP-Agent` for the default UCP regime,
    Set URL, e.g. the UCP profile), `cimd` (a Client ID Metadata
    Document), or `directory` (an origin hosting a well-known
    directory); see
-   [Deployment Patterns](overview.md#deployment-patterns-for-wba-interop).
+   [Deployment Patterns](overview/index.md#deployment-patterns-for-wba-interop).
    `data:` URI inline form is out of scope for UCP-WBA interop.
 4. Verification of this signature **MUST** fail if the URL is
    non-HTTPS.
@@ -669,7 +669,7 @@ Both routines below verify a **single candidate** signature.
 `skip_signature(reason)` means the candidate does not authenticate the
 message: under multi-signature handling
 ([RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3); see
-the [Identity Resolution Algorithm](overview.md#identity-resolution-algorithm)),
+the [Identity Resolution Algorithm](overview/index.md#identity-resolution-algorithm)),
 the verifier tries the next candidate and rejects the message only when
 **every** candidate skips. `success()` authenticates the message.
 
@@ -681,7 +681,7 @@ verify_rest_request(request):
     components = sig_input.components
 
     // 2. Resolve signer's public key (capability-based; see
-    // overview.md#identity-resolution-algorithm).
+    // overview/index.md#identity-resolution-algorithm).
     key_set = resolve_signer_key_set(request.headers)
     // sig_capable skips keys not usable for verification: use:"enc", or
     // key_ops present without "verify" (RFC 7517 §4.2, §4.3)
@@ -689,12 +689,12 @@ verify_rest_request(request):
     if not public_key:
         return skip_signature("key_not_found")
 
-   // pre-2a. WBA-shape signatures bind key identity to key bytes:
-   // keyid MUST equal the matched JWK's RFC 7638 thumbprint
-   // (see IRA step 4 / WBA architecture draft §4.2).
-   if sig_input.tag == "web-bot-auth":
-       if keyid != rfc7638_thumbprint(public_key):
-           return skip_signature("signature_invalid")
+    // pre-2a. WBA-shape signatures bind key identity to key bytes:
+    // keyid MUST equal the matched JWK's RFC 7638 thumbprint
+    // (see IRA step 4 / WBA architecture draft §4.2).
+    if sig_input.tag == "web-bot-auth":
+        if keyid != rfc7638_thumbprint(public_key):
+            return skip_signature("signature_invalid")
     // 2a. Skip keys whose algorithm this verifier does not support.
     // The kty/crv/alg vocabularies are open (see Signature Algorithms);
     // an unsupported key never invalidates the whole key set.
@@ -912,7 +912,7 @@ No JSON canonicalization is required.
 ## Error Handling
 
 Signature verification errors use standard UCP error codes. See
-[Error Handling](overview.md#error-handling) in the specification overview for
+[Error Handling](overview/index.md#error-handling) in the specification overview for
 the complete error code registry and transport bindings.
 
 **Signature-specific errors:**
