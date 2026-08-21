@@ -26,6 +26,12 @@
           {"$ref": "constraint_expression.json#/$defs/value_constraint"}
         ]
       }
+    },
+    "anyOf": {
+      "type": "array",
+      "description": "Alternative Object Constraints. The constrained object must satisfy at least one.",
+      "minItems": 1,
+      "items": {"$ref": "constraint_expression.json"}
     }
   },
   "additionalProperties": false
