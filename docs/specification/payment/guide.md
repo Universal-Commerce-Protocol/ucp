@@ -200,7 +200,7 @@ Each entry narrows along two axes:
 available_instruments[]
 ├── type                       selects an instrument schema
 ├── constraints                derived values, not submitted (card: brand)
-└── ucp.request_constraints[]  requirements on submitted instruments and credentials
+└── ucp.request_constraints    requirements on submitted instruments and credentials
 ```
 
 `constraints` carries values the Business derives rather than receives, so they
@@ -222,12 +222,11 @@ to submitted `handler_id` and the available instrument's `type` to submitted
 Payment-handler and instrument specifications define any stronger association
 the query needs. See [Request Constraints](../overview/index.md#request-constraints).
 
-Because the member is an array, one available instrument can carry several
-rules with different paths. A rule that applies to every instrument of the type
-filters on `type` alone; a rule that applies only to one credential family adds
-a comparison on `credential.type`. Splitting the credential families into
-distinct schemas is what makes that comparison possible, so no rule has to
-branch on a sibling field.
+One path selects the submitted instrument, and one Constraint Expression
+describes it. Requirements shared by every instrument of the type are sibling
+members; requirements that differ per credential family are `anyOf` branches on
+the nested `credential` object. Splitting the credential families into distinct
+schemas is what gives each branch a stable discriminator.
 
 <!-- ucp:example schema=payment_handler def=business_schema -->
 ```json
@@ -239,30 +238,30 @@ branch on a sibling field.
       "type": "card",
       "constraints": { "brand": { "enum": ["visa", "mastercard"] } },
       "ucp": {
-        "request_constraints": [
-          {
-            "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_tokenizer_1234' && @['type'] == 'card']",
-            "required": ["billing_address", "credential"],
-            "properties": {
-              "billing_address": { "required": ["postal_code", "address_country"] },
-              "credential": { "properties": { "type": { "enum": ["pan", "network_token"] } } }
+        "request_constraints": {
+          "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_tokenizer_1234' && @['type'] == 'card']",
+          "required": ["billing_address", "credential"],
+          "properties": {
+            "billing_address": { "required": ["postal_code", "address_country"] },
+            "credential": {
+              "anyOf": [
+                { "properties": { "type": { "const": "pan" } }, "required": ["cvc"] },
+                { "properties": { "type": { "const": "network_token" } } }
+              ]
             }
-          },
-          {
-            "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_tokenizer_1234' && @['credential']['type'] == 'pan']",
-            "properties": { "credential": { "required": ["cvc"] } }
           }
-        ]
+        }
       }
     }
   ]
 }
 ```
 
-The first rule applies to every card instrument from this handler; the second
-requires a CVC only when the submitted credential is a PAN, and leaves a network
-token untouched. Declared constraints are the upfront minimum; dynamic
-requirements still use recoverable errors and
+The sibling members apply to every card instrument from this handler. The
+branches accept either a PAN credential carrying a `cvc` or a network token,
+which `network_token_credential.json` already requires to carry a `cryptogram`;
+a credential of any other type satisfies neither branch. Declared constraints
+are the upfront minimum; dynamic requirements still use recoverable errors and
 [`message_error.path`](site:schemas/common/types/message_error.json).
 
 ---

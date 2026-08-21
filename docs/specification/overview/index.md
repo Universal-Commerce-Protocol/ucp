@@ -184,11 +184,6 @@ Platform request. For example, it can constrain a Line Item quantity to exactly
 avoiding a round trip for request data the Business has already indicated it
 will reject.
 
-`ucp.request_constraints` is an array. Each element carries one optional `path`
-and one Constraint Expression, so a single scope can state several rules with
-different targets. Elements compose conjunctively, array order carries no
-meaning, and a consumer **MUST NOT** read precedence into position.
-
 `ucp.request_constraints` is used only in authoritative operation responses and
 has no effect in discovery profiles or operation requests.
 
@@ -372,14 +367,12 @@ The following Cart responses are alternatives that illustrate different scopes.
     {
       "ucp": {
         "version": "{{ ucp_version }}",
-        "request_constraints": [
-          {
-            "path": "$['line_items'][*]",
-            "properties": {
-              "quantity": {"const": 1}
-            }
+        "request_constraints": {
+          "path": "$['line_items'][*]",
+          "properties": {
+            "quantity": {"const": 1}
           }
-        ]
+        }
       },
       "id": "cart_123",
       "line_items": [
@@ -428,14 +421,12 @@ The following Cart responses are alternatives that illustrate different scopes.
             {"type": "total", "amount": 120000}
           ],
           "ucp": {
-            "request_constraints": [
-              {
-                "path": "$['line_items'][?@['id'] == 'line_123']",
-                "properties": {
-                  "quantity": {"const": 100}
-                }
+            "request_constraints": {
+              "path": "$['line_items'][?@['id'] == 'line_123']",
+              "properties": {
+                "quantity": {"const": 100}
               }
-            ]
+            }
           }
         }
       ],
@@ -478,19 +469,17 @@ derived path is `$`, which selects the next request root.
       ]
     },
     "payment_handlers": {},
-    "request_constraints": [
-      {
-        "required": ["discounts"],
-        "properties": {
-          "discounts": {
-            "required": ["codes"],
-            "properties": {
-              "codes": {"const": ["ACME-X7Q9-L2M4"]}
-            }
+    "request_constraints": {
+      "required": ["discounts"],
+      "properties": {
+        "discounts": {
+          "required": ["codes"],
+          "properties": {
+            "codes": {"const": ["ACME-X7Q9-L2M4"]}
           }
         }
       }
-    ]
+    }
   },
   "id": "checkout_123",
   "status": "incomplete",
@@ -541,12 +530,10 @@ matching submitted card instrument:
 {
   "type": "card",
   "ucp": {
-    "request_constraints": [
-      {
-        "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
-        "required": ["billing_address"]
-      }
-    ]
+    "request_constraints": {
+      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
+      "required": ["billing_address"]
+    }
   }
 }
 ```
@@ -2867,6 +2854,10 @@ Most platform implementations can **avoid PCI-DSS scope** by:
 - Forwarding credentials without the ability to use them directly
 - Using PSP tokenization payment handlers where raw credentials never pass
     through the platform
+- Presenting pre-provisioned card network tokens
+    (`network_token_credential.json`) rather than an FPAN — the platform never
+    shares the underlying account number, and the token is unusable without a
+    matching cryptogram
 
 #### Business Scope
 

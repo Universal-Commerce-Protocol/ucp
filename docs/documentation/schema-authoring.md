@@ -544,14 +544,8 @@ registered member.
 | Object Constraint | `required`, `properties`, `anyOf` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; `anyOf` is a non-empty array of non-empty Object Constraints; an empty object is a no-op except as an `anyOf` branch. |
 | Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
 
-The listed members define the grammar. A `request_constraints` element may
+The listed members define the grammar. A `request_constraints` value may
 additionally contain `path` at the top level.
-
-The registered member is an **array** of these elements, because one scope often
-has more than one rule and each rule needs its own `path`. Elements compose
-conjunctively, order carries no meaning, and each is validated independently. A
-Business **MUST** ensure elements that can select the same object are jointly
-satisfiable.
 
 Grammar changes belong in `constraint_expression.json`, and changes to the root
 Object Constraint must also be reflected in `request_constraints.json`.

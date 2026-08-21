@@ -57,16 +57,22 @@ Tokenization handlers transform credentials between source and checkout forms:
 |   | source_         |                      | checkout_               |  |
 |   | credentials     |    What goes IN      | credentials             |  |
 |   |                 |<---------------      |                         |  |
-|   | * card/fpan     |                      | What comes OUT          |  |
-|   | * card/dpan     |                ----->| * token                 |  |
+|   | * pan           |                      | What comes OUT          |  |
+|   | * network_token |                ----->| * token                 |  |
 |   |                 |                      |                         |  |
 |   +-----------------+                      +-------------------------+  |
 |                                                                         |
 +-------------------------------------------------------------------------+
 ```
 
-Tokenization handlers accept source credentials (e.g., card with FPAN) and
+Tokenization handlers accept source credentials (e.g., a PAN credential) and
 produce checkout credentials (e.g., tokens).
+
+A network token does not always need this round-trip. A handler **MAY** accept
+`network_token_credential.json` as a source credential for tokenization, or
+**MAY** accept it directly as a checkout credential, since the token is
+unusable without a matching cryptogram. The handler's specification **MUST**
+state which of the two it accepts.
 
 ### Token Lifecycle
 
