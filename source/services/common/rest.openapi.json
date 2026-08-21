@@ -21,7 +21,7 @@
       "post": {
         "operationId": "search_locations",
         "summary": "Search Locations",
-        "description": "Search for physical locations (e.g., retail stores, restaurants) using query text, geo proximity, and structured filters (e.g., hours, amenities, inventory).",
+        "description": "Search for physical locations (e.g., retail stores, restaurants) using query text, explicit `distance` and `serves` relations, and structured filters (e.g., hours, amenities, inventory).",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },
@@ -65,7 +65,7 @@
       "post": {
         "operationId": "lookup_locations",
         "summary": "Batch Lookup Locations",
-        "description": "Lookup one or more physical locations by their stable identifiers.",
+        "description": "Lookup one or more physical Locations by supported identifiers.",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },

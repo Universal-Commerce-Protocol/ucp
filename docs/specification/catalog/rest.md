@@ -602,6 +602,7 @@ A conforming REST transport implementation **MUST**:
 
 1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `/catalog/lookup` and `/catalog/product` MUST be available.
 2. Return products with valid `Price` objects (amount + currency).
-3. Support cursor-based pagination with default limit of 10.
+3. Support cursor-based pagination for Search according to the shared
+    pagination contract (see [Pagination](search.md#pagination)).
 4. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 5. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.

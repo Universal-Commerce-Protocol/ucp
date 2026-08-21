@@ -8,6 +8,7 @@
   "$defs": {
     "search_request": {
       "type": "object",
+      "description": "Request body for location search. The `distance` and `serves` relations and every supplied `filters` predicate combine with AND; `query` does not relax them.",
       "properties": {
         "query": {
           "type": "string",
@@ -18,6 +19,16 @@
         },
         "signals": {
           "$ref": "types/signals.json"
+        },
+        "distance": {
+          "$ref": "types/location_distance.json",
+          "description": "Optional explicit-center radius predicate. When present, it combines with `serves` and every supplied `filters` predicate using AND.",
+          "ucp_request": "optional"
+        },
+        "serves": {
+          "$ref": "types/location_serves.json",
+          "description": "Optional authoritative service-target predicate. When present, it combines with `distance` and every supplied `filters` predicate using AND.",
+          "ucp_request": "optional"
         },
         "filters": {
           "$ref": "types/location_filter.json"

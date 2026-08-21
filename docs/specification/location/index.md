@@ -22,16 +22,16 @@ The Location capability allows platforms to discover, search, and retrieve physi
 This is vertical-agnostic and enables key commerce flows such as:
 
 * **Local Pickup Discovery**: Finding locations like retail stores or restaurant branches
-    nearby that support customer pickup and checking their operating hours & inventory availability
+    nearby that support Buyer pickup and checking their operating hours & inventory availability
     before selection.
 * **Fulfillment Area Verification**: Checking if a specific location (e.g., utility depot, restaurant,
-    or local service provider) has delivery coverage for a buyer's address.
+    or local service provider) can serve a Buyer's address (the `serves` relation).
 
 ## Capabilities
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.common.location.search`](search.md) | Search for locations using natural language queries and filters (hours, offerings, geofencing). |
+| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (hours, offerings like `amenities` or `inventory`, etc.). |
 | [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more locations by identifier. |
 
 ## Key Concepts
@@ -43,10 +43,12 @@ This is vertical-agnostic and enables key commerce flows such as:
     * **Amenities**: Static features, services, or capabilities of the location. Modeled as a flat reverse-DNS array to avoid
       semantic ambiguity across diverse industries (e.g., food drive-through vs. pharmacy drive-through).
     * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
-* **Geofencing & Service Area**: Locations implicitly carry a geofence boundary around their coordinates.
-    This is used to determine if a location can serve a specific user (e.g., delivery area check).
-    Clients can perform proximity searches (`distance` filter) or coverage checks (`geofence_point` filter)
-    using the filter.
+* **Proximity & Serviceability**: Two distinct, explicit spatial relations:
+    * **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
+    * **`serves`**: Asks whether the Location can provisionally serve one explicit
+      Platform-supplied target; the Business is authoritative for that answer, and UCP does not
+      model or expose the underlying coverage geometry — a Location does not implicitly carry a
+      geometric boundary around its coordinates. See [Spatial Relations](search.md#spatial-relations).
 * **Operating Hours**: Regular weekly schedules (`hours`) and date-specific
     exceptions (`exception_hours`), interpreted in the Location's `timezone`.
     See [Operating Hours](#operating-hours).
@@ -60,9 +62,9 @@ other capabilities (like Catalog, Cart, and Checkout in Shopping):
     business-scoped `location.id` values. These IDs are referenced further in other requests & responses
     (e.g., associating product variants to specific locations in Catalog filters, passed directly
     in `selected_destination_id` to indicate pickup fulfillment mode).
-2. **Inventory-Based Store Finder**: Platforms can use Location Search with the `offerings.inventory` filter
-    to locate nearby stores that have a specific item available, bridging the gap between online catalog
-    browsing and physical store visits.
+2. **Inventory-Based Store Finder**: Platforms can use Location Search with the `filters.inventory`
+    predicate to locate nearby stores that have a specific item available, bridging the gap between
+    online catalog browsing and physical store visits.
 3. **Provisional vs. Authoritative Boundaries**:
     * *Discovery Phase (Provisional)*: Location responses based on operating hours, real-time inventory
         availability, and amenities offerings represent the business's *current terms* at the
@@ -189,14 +191,17 @@ Platform **MAY** present `title` according to its presentation policy and
 
 ### Context
 
-User location and market context for the operations. All fields are optional
+Buyer location and market context for the operations. All fields are optional
 hints for relevance and localization. Platforms **MAY** geo-detect context from
 request headers.
 
-Context signals are provisional—not authoritative data. Businesses **SHOULD** use
-these values when verified inputs (e.g., coordinates as part of the request filter)
-are absent, and **MAY** ignore or down-rank them if inconsistent with
-higher-confidence signals (authenticated account, risk detection).
+Context signals are provisional—not authoritative data. A Business **MAY** use
+them to influence ranking, localization, or selection of a bounded default
+browse page, and **MAY** ignore or down-rank them if inconsistent with
+higher-confidence signals (authenticated account, risk detection). A Business
+**MUST NOT** substitute them for the explicit `distance` and `serves` operands;
+they prove neither proximity nor serviceability (see
+[Request Grammar](search.md#request-grammar)).
 
 {{ schema_fields('types/context', 'location') }}
 
@@ -219,7 +224,7 @@ Messages communicate business outcomes and provide context:
 
 | Type | When to Use | Example Codes |
 | :--- | :--- | :--- |
-| `error` | Business-level errors | `no_service_coverage` (geographic coordinates based filter) |
+| `error` | Business-level errors | Business-defined codes (freeform codes permitted) |
 | `warning` | Important conditions affecting purchase | `permanently_closed`, `temporary_closure` |
 | `info` | Additional context without issues | `not_found`, `holiday_hours_active` |
 
@@ -261,13 +266,13 @@ The capabilities above are bound to specific transport protocols:
 ## Security & Privacy Considerations
 
 1. **Coarse-by-default**: Platforms **SHOULD** default to sending coarse location hints (e.g., postal code or rounded coordinates) during the discovery phase.
-  Precise locations/coordinates **SHOULD** only be shared when the user explicitly consents or selects a specific location.
+  Precise locations/coordinates **SHOULD** only be shared when the Buyer explicitly consents or selects a specific Location.
 2. **Inventory Probing Mitigation**: Businesses **SHOULD** implement rate-limiting on search requests, especially if containing inventory availability filters,
   to prevent scraping & aggressive numeration of the entire directory.
-3. **Private/Dark Locations**: Businesses **MUST** filter out internal-only or non-user-accessible locations (e.g., dark kitchens, fulfillment-only hubs)
+3. **Private/Dark Locations**: Businesses **MUST** filter out internal-only or non-Buyer-accessible locations (e.g., dark kitchens, fulfillment-only hubs)
   from search results.
 4. **Physical Address Spoofing (Integrity)**: While location discovery is read-only, tampering with physical addresses in responses (e.g., through MITM attacks)
-  poses a physical safety/fraud risk. Platforms **SHOULD** verify signatures on location payloads before rendering them to users.
-5. **Data Retention & Logging Sanitization**: Businesses **MUST NOT** persist precise location inputs beyond the lifecycle of the request, unless explicit user
+  poses a physical safety/fraud risk. Platforms **SHOULD** verify signatures on location payloads before rendering them to Buyers.
+5. **Data Retention & Logging Sanitization**: Businesses **MUST NOT** persist precise location inputs beyond the lifecycle of the request, unless explicit Buyer
   consent is collected. Server logs should sanitize coordinate inputs by truncating decimal places (e.g., to 2 decimal places, ~1km accuracy) to prevent
-  accidental storage of precise user history.
+  accidental storage of precise Buyer history.

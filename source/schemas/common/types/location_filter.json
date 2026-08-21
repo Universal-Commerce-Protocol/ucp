@@ -2,48 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/location_filter.json",
   "title": "Location Filter",
-  "description": "Filter criteria to narrow location search/lookup results. All specified outermost filters combine with AND logic.",
+  "description": "Filter criteria to narrow location search and lookup results. All specified filters combine with AND logic.",
   "type": "object",
   "properties": {
-    "geo": {
-      "type": "object",
-      "description": "Filter locations by geographic proximity or geofence coverage.",
-      "properties": {
-        "distance": {
-          "type": "object",
-          "description": "Filter locations within a maximum distance from a center point (proximity search).",
-          "required": ["max_distance"],
-          "properties": {
-            "center": {
-              "$ref": "geo.json",
-              "description": "The center coordinates. If omitted, the user's coarse location hints in the request context MUST be used to derive the center via forward geocoding strategies."
-            },
-            "max_distance": {
-              "type": "number",
-              "minimum": 0,
-              "description": "Maximum distance in RFC 7035 distance unit (meters)."
-            }
-          },
-          "additionalProperties": false
-        },
-        "serves": {
-          "type": "object",
-          "description": "Filter locations that serve the target destination (e.g., delivery area geofence check).",
-          "properties": {
-            "point": {
-              "$ref": "geo.json",
-              "description": "Coordinates of the target destination."
-            },
-            "address": {
-              "$ref": "locality.json",
-              "description": "Coarse postal address reference of the target destination (e.g., for ZIP-code based routing)."
-            }
-          },
-          "additionalProperties": true
-        }
-      },
-      "additionalProperties": false
-    },
     "hours": {
       "type": "object",
       "description": "Filter by operating hours, evaluated at the one supplied instant.",
