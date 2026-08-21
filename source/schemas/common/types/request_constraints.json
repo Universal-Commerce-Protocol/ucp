@@ -29,9 +29,9 @@
     },
     "anyOf": {
       "type": "array",
-      "description": "Alternative Object Constraints. The constrained object must satisfy at least one.",
+      "description": "Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation.",
       "minItems": 1,
-      "items": {"$ref": "constraint_expression.json"}
+      "items": {"$ref": "constraint_expression.json", "minProperties": 1}
     }
   },
   "additionalProperties": false

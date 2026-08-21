@@ -226,7 +226,7 @@ Object Constraint's `properties` map.
 
 | Position | Admitted members | Shape and behavior |
 | :-- | :-- | :-- |
-| Object Constraint | `required`, `properties`, `anyOf` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. `anyOf` is a non-empty array of Object Constraints, at least one of which the object must satisfy. An empty Object Constraint is a valid no-op at any Object Constraint position. |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. `anyOf` is a non-empty array of non-empty Object Constraints, at least one of which the object must satisfy. An empty Object Constraint is a valid no-op at every Object Constraint position except an `anyOf` branch. |
 | Value Constraint | `enum`, `const` | `enum` is a non-empty array of unique JSON values. `const` is any JSON value. At least one member is present; when both are present, both apply. |
 
 No other member is admitted at either grammar position.
