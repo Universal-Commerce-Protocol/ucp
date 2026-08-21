@@ -79,11 +79,11 @@ Maps to the [Location Search](search.md) capability. See the
 
 #### Request Arguments
 
-{{ extension_schema_fields('location_search.json#/$defs/search_request', 'location/mcp') }}
+{{ extension_schema_fields('location_search.json#/$defs/search_request', 'common/location/mcp') }}
 
 #### Response Schema
 
-{{ extension_schema_fields('location_search.json#/$defs/search_response', 'location/mcp') }}
+{{ extension_schema_fields('location_search.json#/$defs/search_response', 'common/location/mcp') }}
 
 #### Binding envelope example
 
@@ -146,11 +146,11 @@ Maps to the [Location Lookup](lookup.md) capability. See the
 
 #### Request Arguments
 
-{{ extension_schema_fields('location_lookup.json#/$defs/lookup_request', 'location/mcp') }}
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_request', 'common/location/mcp') }}
 
 #### Response Schema
 
-{{ extension_schema_fields('location_lookup.json#/$defs/lookup_response', 'location/mcp') }}
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_response', 'common/location/mcp') }}
 
 #### Binding envelope example
 
@@ -225,27 +225,27 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 
 ### Amenity Type
 
-{{ schema_fields('types/amenity_type', 'location/mcp') }}
+{{ schema_fields('types/amenity_type', 'common/location/mcp') }}
 
 ### Location {: #location-entity }
 
-{{ schema_fields('types/location', 'location/mcp') }}
+{{ schema_fields('types/location', 'common/location/mcp') }}
 
 ### Location Filter {: #location-filter-schema }
 
-{{ schema_fields('types/location_filter', 'location/mcp') }}
+{{ schema_fields('types/location_filter', 'common/location/mcp') }}
 
 ### Location Distance {: #location-distance-schema }
 
-{{ schema_fields('types/location_distance', 'location/mcp') }}
+{{ schema_fields('types/location_distance', 'common/location/mcp') }}
 
 ### Location Serves {: #location-serves-schema }
 
-{{ schema_fields('types/location_serves', 'location/mcp') }}
+{{ schema_fields('types/location_serves', 'common/location/mcp') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'location/mcp') }}
+{{ schema_fields('types/error_response', 'common/location/mcp') }}
 
 ## Conformance
 

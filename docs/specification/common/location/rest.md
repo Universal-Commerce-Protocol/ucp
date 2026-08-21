@@ -70,7 +70,7 @@ Location capabilities through their UCP profile at `/.well-known/ucp`.
 Maps to the [Location Search](search.md) capability. See the
 [complete transport-neutral Search example](search.md#examples).
 
-{{ method_fields('search_locations', 'common/rest.openapi.json', 'location/rest') }}
+{{ method_fields('search_locations', 'common/rest.openapi.json', 'common/location/rest') }}
 
 #### Binding envelope example
 
@@ -120,7 +120,7 @@ Maps to the [Location Search](search.md) capability. See the
 Maps to the [Location Lookup](lookup.md) capability. See the
 [complete transport-neutral Lookup example](lookup.md#examples).
 
-{{ method_fields('lookup_locations', 'common/rest.openapi.json', 'location/rest') }}
+{{ method_fields('lookup_locations', 'common/rest.openapi.json', 'common/location/rest') }}
 
 #### Binding envelope example
 
@@ -190,31 +190,31 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 ### UCP Response Catalog (Envelope) {: #ucp-response-catalog-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'location/rest') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'common/location/rest') }}
 
 ### Amenity Type
 
-{{ schema_fields('types/amenity_type', 'location/rest') }}
+{{ schema_fields('types/amenity_type', 'common/location/rest') }}
 
 ### Location {: #location-entity }
 
-{{ schema_fields('types/location', 'location/rest') }}
+{{ schema_fields('types/location', 'common/location/rest') }}
 
 ### Location Filter {: #location-filter-schema }
 
-{{ schema_fields('types/location_filter', 'location/rest') }}
+{{ schema_fields('types/location_filter', 'common/location/rest') }}
 
 ### Location Distance {: #location-distance-schema }
 
-{{ schema_fields('types/location_distance', 'location/rest') }}
+{{ schema_fields('types/location_distance', 'common/location/rest') }}
 
 ### Location Serves {: #location-serves-schema }
 
-{{ schema_fields('types/location_serves', 'location/rest') }}
+{{ schema_fields('types/location_serves', 'common/location/rest') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'location/rest') }}
+{{ schema_fields('types/error_response', 'common/location/rest') }}
 
 ## Conformance
 
