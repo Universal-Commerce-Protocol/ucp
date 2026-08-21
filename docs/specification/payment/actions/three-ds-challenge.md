@@ -20,7 +20,7 @@ This specification defines the 3DS challenge Action type declared by the
 [Payment Authentication extension](../authentication.md):
 
 ```text
-dev.ucp.payment.three_ds_challenge
+dev.ucp.common.payment.three_ds_challenge
 ```
 
 It asks the Platform to present a buyer-facing payment-authentication surface to
@@ -59,7 +59,7 @@ The Action is emitted under its type key:
 ```json
 {
   "actions": {
-    "dev.ucp.payment.three_ds_challenge": [
+    "dev.ucp.common.payment.three_ds_challenge": [
       {
         "id": "three-ds-challenge-1",
         "config": {
