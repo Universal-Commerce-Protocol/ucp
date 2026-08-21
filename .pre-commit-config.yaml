@@ -44,6 +44,29 @@ repos:
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
         stages: [pre-commit, pre-push]
+      # Totals-arithmetic guard. The validator above proves examples conform
+      # structurally, but JSON Schema cannot relate the values of sibling
+      # array entries — so the `totals[]` sums the spec states normatively
+      # (docs/specification/shopping/checkout/index.md#totals) go unenforced
+      # by it, and an example can drift out of balance while staying schema-valid.
+      #
+      # No full-corpus counterpart is needed: this check resolves no schemas,
+      # so a schema edit cannot invalidate an example for it. Editing the
+      # validator itself runs its unit tests, and CI runs the full corpus.
+      - id: validate-totals-changed
+        name: Validate totals arithmetic (changed docs)
+        entry: uv run --frozen python scripts/validate_totals.py --file
+        language: system
+        pass_filenames: true
+        files: ^docs/.*\.md$
+        stages: [pre-commit, pre-push]
+      - id: validate-totals-tests
+        name: Totals validator unit tests
+        entry: uv run --frozen python scripts/test_validate_totals.py
+        language: system
+        pass_filenames: false
+        files: ^scripts/(validate_totals|test_validate_totals)\.py$
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
