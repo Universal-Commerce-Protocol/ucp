@@ -819,7 +819,7 @@ its completion, whether processing the same occurrence is ever safe to retry,
 and its trust, failure, abandonment, and fallback behavior.
 
 See [Overview — Actions](../overview/index.md#actions) for the common envelope and
-[Schema Authoring — Extension-Declared Action Types](site:documentation/schema-authoring.html)
+[Schema Authoring — Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types)
 for the extension schema pattern.
 
 ### Processing
