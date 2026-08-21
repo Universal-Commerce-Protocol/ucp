@@ -100,6 +100,12 @@ The `ucp` object included in order responses or events.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'reference') }}
 
+### Location Response Metadata {: #ucp-response-location-schema }
+
+The `ucp` object included in location responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_location_schema', 'reference') }}
+
 ### Capability
 
 This object describes a single capability or extension. It appears in the

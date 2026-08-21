@@ -43,12 +43,12 @@ Businesses advertise MCP transport availability for the Common service and Locat
     "capabilities": {
       "dev.ucp.common.location.search": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/location/search",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/location/search",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/location_search.json"
       }],
       "dev.ucp.common.location.lookup": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/location/lookup",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/location/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/location_lookup.json"
       }]
     },
@@ -226,6 +226,10 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 ### Amenity Type
 
 {{ schema_fields('types/amenity_type', 'common/location/mcp') }}
+
+### Lookup Location
+
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_location', 'common/location/rest') }}
 
 ### Location {: #location-entity }
 

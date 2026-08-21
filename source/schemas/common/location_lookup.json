@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/location_lookup.json",
   "name": "dev.ucp.common.location.lookup",
   "title": "Location Lookup",
-  "description": "Location lookup by identifier. Supports batch retrieval (lookup_locations) and single-location detail (get_location).",
+  "description": "Location lookup by identifiers. Supports batch retrieval and single-location detail.",
   "type": "object",
   "$defs": {
     "lookup_location": {
@@ -76,7 +76,7 @@
       ],
       "properties": {
         "ucp": {
-          "$ref": "../ucp.json#/$defs/response_catalog_schema"
+          "$ref": "../ucp.json#/$defs/response_location_schema"
         },
         "locations": {
           "type": "array",
