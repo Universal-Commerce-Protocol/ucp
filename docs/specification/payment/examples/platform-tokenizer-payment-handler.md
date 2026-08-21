@@ -366,7 +366,7 @@ The platform application orchestrates the payment flow but
 
 1. The platform's **payment credential provider** securely stores payment credentials.
 2. When a payment is needed, the platform application requests a token from the credential provider.
-3. The credential provider generates a token bound to both the `binding` resource and the business's `identity` (from the handler declaration).
+3. The credential provider generates a token bound to the `binding` resource and issued to the business's `identity` (from the handler declaration).
 4. The credential provider returns the token to the platform application.
 5. The platform application includes this token in the checkout submission.
 
@@ -461,7 +461,7 @@ When the business forwards a token to the PSP:
 
 1. Extract the token from the payment instrument.
 2. Call the platform's **payment credential provider** `/detokenize` endpoint
-   with the business's identity in binding.
+   with the business's `identity` alongside the `binding`.
 3. Process the payment with the returned credential.
 
 #### Detokenize Request Example (PSP)
@@ -489,8 +489,9 @@ business, so they must specify which businesses' token they are retrieving.
 
 The platform's payment credential provider verifies that:
 
-* The PSP is authorized to detokenize for this business.
-* The `binding` and `identity` match the original tokenization.
+* The PSP is authorized to act for the business named by `identity`.
+* The `binding` matches the original tokenization, and `identity` resolves to
+  the participant the token was issued to.
 * The token has not expired or been used.
 
 ---
@@ -505,9 +506,9 @@ The platform's payment credential provider verifies that:
 | **No Platform App access** | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does. |
 | **Endpoint isolation** | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application. |
 | **Participant authentication** | Platform's credential provider **MUST** authenticate businesses/PSPs before accepting `/detokenize` calls. |
-| **Identity binding** | Tokens **MUST** be bound to the business's `identity` from the handler declaration. |
+| **Identity binding** | Tokens **MUST** be issued to the business's `identity` from the handler declaration. |
 | **Resource-bound** | Tokens **MUST** be bound to the specific `binding` resource. |
-| **Caller verification** | Platform **MUST** verify authenticated caller matches the token's bound identity (or is an authorized PSP). |
+| **Caller verification** | Platform **MUST** verify the authenticated caller is the participant the token was issued to (or is an authorized PSP). |
 | **Single-use** | Tokens **SHOULD** be invalidated after detokenization. |
 | **Short TTL** | Tokens **SHOULD** expire shortly. |
 | **HTTPS required** | All `/detokenize` calls must use TLS. |

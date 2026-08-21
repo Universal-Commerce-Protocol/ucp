@@ -12,6 +12,7 @@
     },
     "id": {
       "type": "string",
+      "minLength": 1,
       "description": "Opaque identifier of the bound resource within the owning capability, for example a checkout identifier."
     }
   }
