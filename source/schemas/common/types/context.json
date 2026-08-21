@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/context.json",
+  "$id": "https://ucp.dev/schemas/common/types/context.json",
   "title": "Context",
   "description": "Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.",
   "type": "object",
   "additionalProperties": true,
   "allOf": [
     {
-      "$ref": "../../common/types/locality.json"
+      "$ref": "locality.json"
     },
     {
       "type": "object",
@@ -34,7 +34,7 @@
           "description": "Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying.",
           "uniqueItems": true,
           "items": {
-            "$ref": "../../common/types/reverse_domain_name.json"
+            "$ref": "reverse_domain_name.json"
           }
         },
         "payment": {
@@ -45,7 +45,7 @@
             "required": ["handler"],
             "properties": {
               "handler": {
-                "$ref": "../../common/types/reverse_domain_name.json",
+                "$ref": "reverse_domain_name.json",
                 "description": "Handler registry key advertised in the Business profile's `ucp.payment_handlers`."
               },
               "types": {
