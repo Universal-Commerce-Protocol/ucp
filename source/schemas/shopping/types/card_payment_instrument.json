@@ -8,7 +8,9 @@
       "title": "Available Card Payment Instrument",
       "description": "Declares card instrument availability with card-specific constraints.",
       "allOf": [
-        { "$ref": "available_payment_instrument.json" },
+        {
+          "$ref": "available_payment_instrument.json"
+        },
         {
           "type": "object",
           "properties": {
@@ -20,10 +22,43 @@
               "properties": {
                 "brands": {
                   "type": "array",
-                  "items": { "type": "string" },
+                  "items": {
+                    "type": "string"
+                  },
                   "minItems": 1,
                   "uniqueItems": true,
-                  "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
+                  "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex']).",
+                  "deprecated": true
+                },
+                "brand": {
+                  "title": "Card Brand Constraint",
+                  "description": "Card schemes accepted. Derived from the account number, not submitted.",
+                  "allOf": [
+                    {
+                      "$ref": "../../common/types/constraint_expression.json#/$defs/value_constraint"
+                    }
+                  ],
+                  "properties": {
+                    "enum": {
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "const": {
+                      "type": "string"
+                    }
+                  },
+                  "examples": [
+                    {
+                      "enum": [
+                        "visa",
+                        "mastercard"
+                      ]
+                    },
+                    {
+                      "const": "cartebancaire"
+                    }
+                  ]
                 }
               }
             }
@@ -38,12 +73,18 @@
     },
     {
       "type": "object",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "type": {
           "type": "string",
           "const": "card",
           "description": "Indicates this is a card payment instrument."
+        },
+        "network": {
+          "type": "string",
+          "description": "Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another."
         },
         "display": {
           "type": "object",
@@ -51,7 +92,7 @@
           "properties": {
             "brand": {
               "type": "string",
-              "description": "The card brand/network (e.g., visa, mastercard, amex)."
+              "description": "The card brand/network shown to the buyer (e.g., visa, mastercard, amex). Presentational only."
             },
             "last_digits": {
               "type": "string",

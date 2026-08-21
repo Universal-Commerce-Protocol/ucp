@@ -123,8 +123,7 @@ Content-Type: application/json
 
 {
   "credential": {
-    "type": "card",
-    "card_number_type": "fpan",
+    "type": "pan",
     "number": "4111111111111111",
     "expiry_month": 12,
     "expiry_year": 2026,
@@ -174,8 +173,7 @@ Authorization: Bearer {caller_access_token}
 <!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 ```json
 {
-  "type": "card",
-  "card_number_type": "fpan",
+  "type": "pan",
   "number": "4111111111111111",
   "expiry_month": 12,
   "expiry_year": 2026,
@@ -235,7 +233,7 @@ When publishing your handler, your specification document **MUST** include:
 
 | Instrument | Source Credentials           | Checkout Credentials |
 | :--------- | :--------------------------- | :------------------- |
-| `card`     | `card` (fpan, network_token) | `token`              |
+| `card`     | `pan`, `network_token`       | `token`              |
 
 **Token Lifecycle:** Single-use (invalidated after detokenization)
 
