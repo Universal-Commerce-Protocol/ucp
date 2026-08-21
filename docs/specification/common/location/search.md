@@ -237,6 +237,14 @@ Separates static location characteristics from dynamic availability:
 
 UCP defines an open reverse-DNS vocabulary for amenities via `amenity_type.json` to ensure cross-business
 interoperability. Implementations **SHOULD** map their internal features to the well-known types where applicable.
+The following table contains a non-exhaustive list of well-known values:
+
+| Amenity Name                               | Domain             | Semantic Definition                                                    |
+| :----------------------------------------- | :----------------  | :--------------------------------------------------------------------- |
+| `dev.ucp.amenity.wi_fi`                    | Common / Universal | Complimentary or Buyer-accessible wireless internet on premises.       |
+| `dev.ucp.amenity.parking`                  | Common / Universal | Dedicated parking lot or garage available on site.                     |
+| `dev.ucp.amenity.shopping.curbside_pickup` | Retail Shopping    | Dedicated vehicle bays for order pickup without entering the building. |
+| `dev.ucp.amenity.shopping.in_store_pickup` | Retail Shopping    | Dedicated counter or area inside store for order pickup.               |
 
 #### Inventory Filter Evaluation Rules
 

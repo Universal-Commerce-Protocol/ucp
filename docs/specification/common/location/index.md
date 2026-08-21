@@ -42,6 +42,7 @@ This is vertical-agnostic and enables key commerce flows such as:
     This is split into two distinct concepts to ensure tooling compatibility and semantic clarity:
     * **Amenities**: Static features, services, or capabilities of the location. Modeled as a flat reverse-DNS array to avoid
       semantic ambiguity across diverse industries (e.g., food drive-through vs. pharmacy drive-through).
+      See [Amenity Vocabulary](search.md#amenity-vocabulary) for more details.
     * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
 * **Proximity & Serviceability**: Two distinct, explicit spatial relations:
     * **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
@@ -209,7 +210,7 @@ they prove neither proximity nor serviceability (see
 
 Environment data provided by the platform to support authorization
 and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See
-[Signals](../../overview.md#signals) for details and privacy requirements.
+[Signals](../../overview/index.md#signals) for details and privacy requirements.
 
 {{ schema_fields('types/signals', 'common/location') }}
 

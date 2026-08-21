@@ -6,7 +6,7 @@
   "type": "object",
   "additionalProperties": true,
   "allOf": [
-    { "$ref": "location_base.json" },
+    { "$ref": "location_summary.json" },
     {
       "type": "object",
       "properties": {
@@ -17,7 +17,7 @@
         },
         "amenities": {
           "type": "array",
-          "description": "Static features of the location (e.g., 'free_wifi', 'wheelchair_accessible', 'parking', 'curbside_pickup').",
+          "description": "Static features of the location represented as a reverse-DNS string. (e.g., 'dev.ucp.amenity.wi_fi', 'dev.ucp.amenity.shopping.in_store_pickup', 'com.example.amenity.in_person_installation').",
           "items": {
             "$ref": "amenity_type.json"
           },

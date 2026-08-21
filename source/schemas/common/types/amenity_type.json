@@ -8,7 +8,6 @@
     "dev.ucp.amenity.wi_fi",
     "dev.ucp.amenity.parking",
     "dev.ucp.amenity.shopping.in_store_pickup",
-    "dev.ucp.amenity.shopping.curbside_pickup",
-    "dev.ucp.amenity.shopping.drive_through"
+    "dev.ucp.amenity.shopping.curbside_pickup"
   ]
 }
