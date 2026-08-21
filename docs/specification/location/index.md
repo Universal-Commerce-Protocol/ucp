@@ -198,9 +198,9 @@ request headers.
 Context signals are provisional—not authoritative data. A Business **MAY** use
 them to influence ranking, localization, or selection of a bounded default
 browse page, and **MAY** ignore or down-rank them if inconsistent with
-higher-confidence signals (authenticated account, risk detection). They **MUST NOT**
-substitute for the explicit `distance` and `serves` operands and prove neither
-proximity nor serviceability (see
+higher-confidence signals (authenticated account, risk detection). A Business
+**MUST NOT** substitute them for the explicit `distance` and `serves` operands;
+they prove neither proximity nor serviceability (see
 [Request Grammar](search.md#request-grammar)).
 
 {{ schema_fields('types/context', 'location') }}

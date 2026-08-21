@@ -14,7 +14,7 @@
     "max": {
       "type": "number",
       "minimum": 0,
-      "description": "Inclusive maximum distance in RFC 7035 distance unit (meters); `max` is not an alias. A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius."
+      "description": "Inclusive maximum distance in RFC 7035 distance unit (meters). A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius."
     }
   }
 }
