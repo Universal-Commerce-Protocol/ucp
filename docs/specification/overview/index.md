@@ -221,15 +221,21 @@ optional `path`; nested constraint objects may not. The grammar does not admit
 `ucp`. Keys in `properties` name fields on selected request objects.
 
 The constraint begins at an Object Constraint. Object Constraints may nest
-through `properties`; Value Constraints occur only as values in an Object
-Constraint's `properties` map.
+through `properties` and `anyOf`; Value Constraints occur only as values in an
+Object Constraint's `properties` map.
 
 | Position | Admitted members | Shape and behavior |
 | :-- | :-- | :-- |
-| Object Constraint | `required`, `properties` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. An empty Object Constraint is a valid no-op at any Object Constraint position. |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. `anyOf` is a non-empty array of Object Constraints, at least one of which the object must satisfy. An empty Object Constraint is a valid no-op at any Object Constraint position. |
 | Value Constraint | `enum`, `const` | `enum` is a non-empty array of unique JSON values. `const` is any JSON value. At least one member is present; when both are present, both apply. |
 
 No other member is admitted at either grammar position.
+
+Members present at the same Object Constraint all apply. `anyOf` does not
+narrow, override, or replace its siblings; the object must satisfy every
+sibling member and at least one branch. Each branch is an ordinary Object
+Constraint and cannot carry `path`, so every branch is evaluated against the
+same selected object.
 
 ### Path
 
@@ -533,6 +539,40 @@ a match, the constraint requires `billing_address` on every matching instrument.
 The payment-handler or instrument contract defines any stronger association.
 This example does not define card brands, credentials, support, availability, or
 payment policy.
+
+#### Alternative verification requirements on a submitted credential
+
+A Business accepts more than one credential shape and requires different
+verification data for each. In this example, a submitted credential must carry
+either a `cvc` or a `cryptogram` with its `eci_value`:
+
+<!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
+```json
+{
+  "type": "card",
+  "ucp": {
+    "request_constraints": {
+      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
+      "required": ["credential"],
+      "properties": {
+        "credential": {
+          "anyOf": [
+            {"required": ["cvc"]},
+            {"required": ["cryptogram", "eci_value"]}
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+One path selects the submitted instrument, and one Object Constraint describes
+it. The sibling `required` applies to every matching instrument; the `anyOf`
+branches then apply to the nested `credential` object, which must satisfy at
+least one. A credential carrying neither field fails, as does one carrying
+`cryptogram` without `eci_value`. Expressing the same rule as two separately
+targeted constraints would restate the path and lose the single-object reading.
 
 ## Actions
 
