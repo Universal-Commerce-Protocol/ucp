@@ -208,7 +208,7 @@ credential type (e.g., PCI DSS for cards).
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "properties": { "brand": { "enum": ["visa", "mastercard"] } }
               }
             }
           ],
@@ -244,7 +244,7 @@ The response config includes runtime token lifecycle information.
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -342,7 +342,7 @@ registry using `platform_config`.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex", "discover"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex", "discover"] } }
               }
             }
           ],

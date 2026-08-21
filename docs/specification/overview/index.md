@@ -244,6 +244,14 @@ that member is present, so a branch pinning a discriminator through
 discriminator in the branch's `required` makes the branch match only the shape
 it describes.
 
+The grammar is defined independently of the object it is bound to. Request
+Constraints bind it to objects in the next request and add `path`; other UCP
+schemas reuse it where a declaration already identifies the object it
+constrains, such as
+[`available_instruments[].constraints`](site:schemas/shopping/types/available_payment_instrument.json),
+whose object is the `constraint_target` declared by the instrument schema for
+that entry's `type`.
+
 ### Path
 
 Every `request_constraints` value has exactly one effective path. When `path`
@@ -1356,7 +1364,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex"] } }
               }
             }
           ],
@@ -1517,7 +1525,7 @@ example:
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
           "schema": "https://example.com/schemas/payments/delegate-payment.json",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
+            {"type": "card", "constraints": {"properties": {"brand": {"enum": ["visa", "mastercard"]}}}}
           ]
         }
       ]
@@ -2709,7 +2717,7 @@ request a challenge.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "properties": { "brand": { "enum": ["visa", "mastercard"] } }
               }
             }
           ],

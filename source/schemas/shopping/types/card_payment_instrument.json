@@ -4,67 +4,21 @@
   "title": "Card Payment Instrument",
   "description": "A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
   "$defs": {
-    "available_card_payment_instrument": {
-      "title": "Available Card Payment Instrument",
-      "description": "Declares card instrument availability with card-specific constraints.",
-      "allOf": [
-        {
-          "$ref": "available_payment_instrument.json"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "const": "card"
-            },
-            "constraints": {
-              "type": "object",
-              "properties": {
-                "brands": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minItems": 1,
-                  "uniqueItems": true,
-                  "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex']).",
-                  "deprecated": true
-                },
-                "brand": {
-                  "title": "Card Brand Constraint",
-                  "description": "Card schemes accepted. Derived from the account number, not submitted.",
-                  "allOf": [
-                    {
-                      "$ref": "../../common/types/constraint_expression.json#/$defs/value_constraint"
-                    }
-                  ],
-                  "properties": {
-                    "enum": {
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "const": {
-                      "type": "string"
-                    }
-                  },
-                  "examples": [
-                    {
-                      "enum": [
-                        "visa",
-                        "mastercard"
-                      ]
-                    },
-                    {
-                      "const": "cartebancaire"
-                    }
-                  ]
-                }
-              }
-            }
-          }
+    "constraint_target": {
+      "title": "Card Constraint Target",
+      "description": "The object an available card instrument's `constraints` describes. It declares the constrainable members and their types and is never carried in a payload.",
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "Card scheme. Derived from the account number, not submitted.",
+          "examples": [
+            "visa",
+            "mastercard",
+            "cartebancaire"
+          ]
         }
-      ]
+      }
     }
   },
   "allOf": [
