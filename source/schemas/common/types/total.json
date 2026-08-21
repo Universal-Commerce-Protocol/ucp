@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/total.json",
+  "$id": "https://ucp.dev/schemas/common/types/total.json",
   "title": "Total",
   "description": "A cost breakdown entry with a category, amount, and optional display text.",
   "type": "object",
@@ -20,7 +20,7 @@
       "ucp_request": "omit"
     },
     "amount": {
-      "$ref": "../../common/types/signed_amount.json",
+      "$ref": "signed_amount.json",
       "ucp_request": "omit"
     }
   },
