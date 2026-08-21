@@ -171,7 +171,7 @@ def check_links():
       path_part = unquote(path_part)
 
       # Built documentation should link to rendered pages, never copied source
-      # Markdown. A raw .md target can exist and fool the ordinary existence
+      # markdown. A raw .md target can exist and fool the ordinary existence
       # check while sending readers to source text instead of the HTML page.
       if path_part.endswith(".md"):
         errors_by_version[version][str(file_path)].append(
