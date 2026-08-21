@@ -237,6 +237,13 @@ sibling member and at least one branch. Each branch is an ordinary Object
 Constraint and cannot carry `path`, so every branch is evaluated against the
 same selected object.
 
+Branches are alternatives, not a partition: an object satisfying more than one
+branch is valid. Within a branch, `properties` constrains a member only when
+that member is present, so a branch pinning a discriminator through
+`properties` alone is also satisfied by an object that omits it; naming the
+discriminator in the branch's `required` makes the branch match only the shape
+it describes.
+
 ### Path
 
 Every `request_constraints` value has exactly one effective path. When `path`
@@ -543,8 +550,8 @@ payment policy.
 #### Alternative verification requirements on a submitted credential
 
 A Business accepts more than one credential shape and requires different
-verification data for each. In this example, a submitted credential must carry
-either a `cvc` or a `cryptogram` with its `eci_value`:
+verification data for each. In this example, a raw PAN must carry a `cvc`, and a
+network token must carry a `cryptogram` with its `eci_value`:
 
 <!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
 ```json
@@ -557,8 +564,14 @@ either a `cvc` or a `cryptogram` with its `eci_value`:
       "properties": {
         "credential": {
           "anyOf": [
-            {"required": ["cvc"]},
-            {"required": ["cryptogram", "eci_value"]}
+            {
+              "properties": {"card_number_type": {"const": "fpan"}},
+              "required": ["card_number_type", "cvc"]
+            },
+            {
+              "properties": {"card_number_type": {"const": "network_token"}},
+              "required": ["card_number_type", "cryptogram", "eci_value"]
+            }
           ]
         }
       }
@@ -570,9 +583,21 @@ either a `cvc` or a `cryptogram` with its `eci_value`:
 One path selects the submitted instrument, and one Object Constraint describes
 it. The sibling `required` applies to every matching instrument; the `anyOf`
 branches then apply to the nested `credential` object, which must satisfy at
-least one. A credential carrying neither field fails, as does one carrying
-`cryptogram` without `eci_value`. Expressing the same rule as two separately
-targeted constraints would restate the path and lose the single-object reading.
+least one. Each branch pins `card_number_type` and also names it in `required`,
+so a branch matches only the credential shape it describes. A raw PAN without a
+`cvc` fails, as does a network token missing its `eci_value`.
+
+Because every branch pins the discriminator, the branch set also closes the
+accepted values. A `dpan` credential is valid under
+[`card_credential.json`](site:schemas/shopping/types/card_credential.json) but
+satisfies neither branch, so this Business does not accept it at this path. A
+Business that later accepts a new variant adds a branch for it.
+
+Two separately targeted constraints cannot express this rule. Request
+Constraints conjoin, so one value requiring `cvc` and another requiring
+`cryptogram` would require both. Discriminating through the path filter instead
+— selecting `fpan` credentials in one value and `network_token` credentials in
+another — moves conditional logic into the selector, which paths do not carry.
 
 ## Actions
 
