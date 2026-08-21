@@ -45,12 +45,12 @@ nav:
       - Common:
           - Identity Linking: specification/common/identity-linking/index.md
           - Location Capability:
-              - Overview: specification/location/index.md
-              - Search: specification/location/search.md
-              - Lookup: specification/location/lookup.md
+              - Overview: specification/common/location/index.md
+              - Search: specification/common/location/search.md
+              - Lookup: specification/common/location/lookup.md
               - Transports:
-                  - REST: specification/location/rest.md
-                  - MCP: specification/location/mcp.md
+                  - REST: specification/common/location/rest.md
+                  - MCP: specification/common/location/mcp.md
       - Shopping:
           - Checkout Capability:
               - Overview: specification/shopping/checkout/index.md

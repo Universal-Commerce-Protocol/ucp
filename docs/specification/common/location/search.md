@@ -31,11 +31,11 @@ offerings such as amenities and inventory availability.
 
 ### Request
 
-{{ extension_schema_fields('location_search.json#/$defs/search_request', 'location') }}
+{{ extension_schema_fields('location_search.json#/$defs/search_request', 'common/location') }}
 
 ### Response
 
-{{ extension_schema_fields('location_search.json#/$defs/search_response', 'location') }}
+{{ extension_schema_fields('location_search.json#/$defs/search_response', 'common/location') }}
 
 ## Request Grammar
 
@@ -112,7 +112,7 @@ explicit center point. Both members are required: `distance.center` is a
 `geo.json` point in World Geodetic System 1984 (WGS 84) decimal degrees, and
 `distance.max` is the inclusive maximum distance in meters.
 
-{{ schema_fields('types/location_distance', 'location') }}
+{{ schema_fields('types/location_distance', 'common/location') }}
 
 The Platform **MUST** supply `distance.center` whenever it supplies
 `distance`. The Business **MUST NOT** derive a missing center from `context`,
@@ -154,7 +154,7 @@ explicit target. It is a one-entry map: the Platform **MUST** supply exactly
 one target representation — `point`, `address`, or a negotiated
 reverse-domain extension target.
 
-{{ schema_fields('types/location_serves', 'location') }}
+{{ schema_fields('types/location_serves', 'common/location') }}
 
 * `point` is a WGS 84 latitude and longitude coordinate pair and uses the
     same coordinate representation as `distance.center`.
@@ -194,7 +194,7 @@ Standard Location filters are `hours`, `amenities`, and `inventory`. A
 Business **MAY** support additional custom filters through
 `additionalProperties`. All supplied filters combine with AND.
 
-{{ schema_fields('types/location_filter', 'location') }}
+{{ schema_fields('types/location_filter', 'common/location') }}
 
 ### Hours-Based Filter
 
@@ -274,11 +274,11 @@ only to page size; it does not permit reducing `distance.max` (see
 
 ### Pagination Request
 
-{{ extension_schema_fields('types/pagination.json#/$defs/request', 'location') }}
+{{ extension_schema_fields('types/pagination.json#/$defs/request', 'common/location') }}
 
 ### Pagination Response
 
-{{ extension_schema_fields('types/pagination.json#/$defs/response', 'location') }}
+{{ extension_schema_fields('types/pagination.json#/$defs/response', 'common/location') }}
 
 ## Examples {: #examples }
 

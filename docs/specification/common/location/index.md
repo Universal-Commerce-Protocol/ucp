@@ -203,7 +203,7 @@ higher-confidence signals (authenticated account, risk detection). A Business
 they prove neither proximity nor serviceability (see
 [Request Grammar](search.md#request-grammar)).
 
-{{ schema_fields('types/context', 'location') }}
+{{ schema_fields('types/context', 'common/location') }}
 
 ### Signals
 
@@ -211,7 +211,7 @@ Environment data provided by the platform to support authorization
 and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See
 [Signals](../overview.md#signals) for details and privacy requirements.
 
-{{ schema_fields('types/signals', 'location') }}
+{{ schema_fields('types/signals', 'common/location') }}
 
 ## Messages and Error Handling
 
@@ -230,15 +230,15 @@ Messages communicate business outcomes and provide context:
 
 #### Message (Error)
 
-{{ schema_fields('types/message_error', 'location') }}
+{{ schema_fields('types/message_error', 'common/location') }}
 
 #### Message (Warning)
 
-{{ schema_fields('types/message_warning', 'location') }}
+{{ schema_fields('types/message_warning', 'common/location') }}
 
 #### Message (Info)
 
-{{ schema_fields('types/message_info', 'location') }}
+{{ schema_fields('types/message_info', 'common/location') }}
 
 ### Common Scenarios
 

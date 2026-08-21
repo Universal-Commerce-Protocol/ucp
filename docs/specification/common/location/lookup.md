@@ -34,7 +34,7 @@ The `ids` parameter accepts an array of identifiers. A Business **MUST**
 support lookup by a Location's stable canonical `Location.id` and **MAY**
 additionally support secondary or alias identifiers.
 
-A Business **MUST** deduplicate duplicate identifiers in the request. When an
+A Business **MUST** dedupe duplicate identifiers in the request. When an
 identifier matches multiple Locations, the Business returns the matching
 Locations and **MAY** limit the result set. When multiple identifiers resolve
 to the same Location, the Business **MUST** return it only once.
@@ -68,7 +68,7 @@ a subsequent request.
 ### Refinement
 
 The Business first resolves the identifiers and deduplicates repeated values.
-Optional root `distance` and `serves` relations and `filters` predicates then
+Optional root `distance`/`serves` relations and `filters` predicates then
 refine the resolved set. All supplied criteria combine with AND: a resolved
 Location is returned only when it satisfies `distance` (when present),
 `serves` (when present), and every supplied `filters` predicate. The relations
@@ -93,11 +93,11 @@ explanation is guaranteed.
 
 ### Request
 
-{{ extension_schema_fields('location_lookup.json#/$defs/lookup_request', 'location') }}
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_request', 'common/location') }}
 
 ### Response
 
-{{ extension_schema_fields('location_lookup.json#/$defs/lookup_response', 'location') }}
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_response', 'common/location') }}
 
 ## Examples {: #examples }
 
