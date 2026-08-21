@@ -141,10 +141,10 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
 * `checkout` ([Checkout](index.md#create-checkout)): **Required**. Contains
     the initial checkout session data and optional extensions.
     * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](../extensions/discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../ap2-mandates.md)
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
+        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../payment/ap2-mandates.md)
 
 #### Output Schema
 
@@ -401,10 +401,10 @@ unchanged and return the current Checkout with a recoverable error Message.
 * `checkout` ([Checkout](index.md#update-checkout)): **Required**.
     Contains the updated checkout session data.
     * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](../extensions/discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../ap2-mandates.md)
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
+        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../payment/ap2-mandates.md)
 
 #### Output Schema
 

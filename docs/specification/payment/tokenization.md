@@ -323,4 +323,4 @@ A tokenizer handler conforms to this pattern if it:
 ## See Also
 
 - **[Encrypted Credential Handler](examples/encrypted-credential-payment-handler.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](../ap2-mandates.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[AP2 Mandates Extension](ap2-mandates.md)** — Add cryptographic proof of checkout agreement for PSP verification
