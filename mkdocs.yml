@@ -54,8 +54,10 @@ nav:
                   - MCP: specification/shopping/checkout/mcp.md
                   - A2A: specification/shopping/checkout/a2a.md
                   - Embedded: specification/shopping/checkout/embedded.md
-              - AP2 Mandates Extension: specification/ap2-mandates.md
-              - Payment Terms Extension: specification/payment-terms.md
+              - Buyer Consent Extension: specification/buyer-consent.md
+              - Discounts Extension: specification/discount.md
+              - Fulfillment Extension: specification/fulfillment.md
+              - Loyalty Extension: specification/loyalty.md
           - Cart Capability:
               - Overview: specification/shopping/cart/index.md
               - Transports:
@@ -82,13 +84,15 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
       - Payment:
+          - AP2 Mandates Extension: specification/payment/ap2-mandates.md
           - Payment Authentication:
               - Overview: specification/payment/authentication.md
               - Device Data Collection:
                   specification/payment/actions/device-data-collection.md
               - 3DS Challenge:
                   specification/payment/actions/three-ds-challenge.md
-          - Split Payments: specification/payment/split-payments.md
+          - Payment Terms Extension: specification/payment/payment-terms.md
+          - Split Payments Extension: specification/payment/split-payments.md
           - Payment Handlers:
               - Guide: specification/payment/guide.md
               - Template: specification/payment/template.md
@@ -280,6 +284,8 @@ plugins:
         specification/identity-linking.md:
           specification/common/identity-linking/index.md
         # Payment
+        specification/ap2-mandates.md:
+          specification/payment/ap2-mandates.md
         specification/payment-authentication.md:
           specification/payment/authentication.md
         specification/payment-handler-guide.md:
@@ -288,6 +294,8 @@ plugins:
           specification/payment/template.md
         specification/split-payments.md:
           specification/payment/split-payments.md
+        specification/payment-terms.md:
+          specification/payment/payment-terms.md
         specification/tokenization-guide.md:
           specification/payment/tokenization.md
         specification/payment-actions/device-data-collection.md:
@@ -411,6 +419,7 @@ plugins:
               per-session delegation negotiation, URL parameters, native UI
               event mappings, W3C Payment Request conceptual alignment, and
               core lifecycle messages.
+<<<<<<< HEAD
           - specification/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound
               checkout commitments (using SD-JWT+kb digital credentials and
@@ -420,6 +429,26 @@ plugins:
               Payment Terms Extension, enabling checkout payment schedules for
               immediate and deferred payments such as deposits, installments,
               and lodging balance-at-check-in flows.
+=======
+          - specification/buyer-consent.md: >-
+              Buyer Consent Extension, defining data schemas for transmitting
+              buyer privacy choices (analytics, marketing, personalization) to
+              assist with privacy compliance (CCPA/GDPR).
+          - specification/discount.md: >-
+              Discount Extension, covering discount code discovery, applied
+              discounts, allocation method stacking orders, rejected code
+              message handling, and automatic or provisional eligibility
+              promotions.
+          - specification/fulfillment.md: >-
+              Fulfillment extension for checkouts, defining delivery methods,
+              pickup destinations, and method-agnostic UI rendering contracts.
+          - specification/loyalty.md: >-
+              Loyalty Extension, enabling high-fidelity member benefit
+              recognition during catalog, cart, and checkout by defining schemas
+              for memberships, tiers, benefits, and reward earning forecasts
+              while managing provisional eligibility claims and enforcing
+              data-minimization privacy rules.
+>>>>>>> 26c1d23 (Also refactor ap2-mandates extension (core payment construct) and fix payment extension specification structure - move them into the payment/ subfolder. Address PR review feedback like stale references, irrelevant rendering refactoring, etc.)
         Cart Capability:
           - specification/shopping/cart/index.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
@@ -494,6 +523,11 @@ plugins:
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
         Payment:
+          - specification/payment/ap2-mandates.md: >-
+              AP2 Mandates Extension, detailing secure, cryptographically bound
+              checkout commitments (using SD-JWT+kb digital credentials and
+              detached JWS signatures) between business, platform, and payment
+              providers.
           - specification/payment/authentication.md: >-
               Payment Authentication Extension, defining negotiation,
               payment-handler association, lifecycle, trust, and embedded
@@ -507,6 +541,10 @@ plugins:
               Split Payments Extension, defining multiple payment instrument
               allocation, settlement rules, and amount distribution across
               payment handlers.
+          - specification/payment/payment-terms.md: >-
+              Payment Terms Extension, enabling checkout payment schedules for
+              immediate and deferred payments such as deposits, installments,
+              and lodging balance-at-check-in flows.
           - specification/payment/guide.md: >-
               Architectural framework and standard vocabulary for specifying UCP
               payment handlers, covering configuration declarations and

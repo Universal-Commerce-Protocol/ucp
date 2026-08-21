@@ -17,7 +17,7 @@
               "type": "object",
               "ucp_request": "omit",
               "properties": {
-                "dev.ucp.payment.device_data_collection": {
+                "dev.ucp.common.payment.device_data_collection": {
                   "type": "array",
                   "description": "A 3DS device data collection Action.",
                   "items": {
@@ -48,7 +48,7 @@
                     }
                   }
                 },
-                "dev.ucp.payment.three_ds_challenge": {
+                "dev.ucp.common.payment.three_ds_challenge": {
                   "type": "array",
                   "description": "A 3DS challenge Action.",
                   "items": {

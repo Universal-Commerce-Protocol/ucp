@@ -20,7 +20,7 @@ This specification defines the device data collection Action type declared by
 the [Payment Authentication extension](../authentication.md):
 
 ```text
-dev.ucp.payment.device_data_collection
+dev.ucp.common.payment.device_data_collection
 ```
 
 It asks the Platform to mount an invisible payment-authentication surface to
@@ -60,7 +60,7 @@ The Action is emitted under its type key:
 ```json
 {
   "actions": {
-    "dev.ucp.payment.device_data_collection": [
+    "dev.ucp.common.payment.device_data_collection": [
       {
         "id": "ddc-1",
         "config": {
