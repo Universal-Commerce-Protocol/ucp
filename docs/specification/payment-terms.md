@@ -38,7 +38,7 @@ This extension adds two properties to `checkout.payment`:
   is; a Platform writes it to change the selection.
 
 A Buyer picks one of the options in `terms[]`, the same way they pick
-one [fulfillment option](fulfillment.md#platform-responsibilities).
+one [fulfillment option](shopping/extensions/fulfillment.md#platform-responsibilities).
 
 ## When a Checkout carries terms
 
