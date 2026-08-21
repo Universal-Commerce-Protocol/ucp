@@ -712,6 +712,19 @@ def define_env(env):
     if not schema_data:
       return "_No content fields defined._"
 
+    # A bare "#" is a self-root reference naming the schema being rendered.
+    # It carries no filename, so create_link derives an empty anchor and emits
+    # a broken "<page>/##" link. Recursive refs are irreducible: ucp-schema
+    # preserves them even under --bundle, so the docs layer is the only place
+    # that can name them. Resolve against this schema's own $id.
+    self_id = schema_data.get("$id")
+    self_ref_name = self_id.rsplit("/", 1)[-1] if self_id else None
+
+    def _deref_self(ref_value):
+      if ref_value == "#" and self_ref_name:
+        return self_ref_name
+      return ref_value
+
     # If schema is ONLY a oneOf, render as prose instead of table
     if (
       "oneOf" in schema_data
@@ -722,7 +735,9 @@ def define_env(env):
       links = []
       for item in schema_data["oneOf"]:
         if "$ref" in item:
-          links.append(create_link(item["$ref"], spec_file_name, context))
+          links.append(
+            create_link(_deref_self(item["$ref"]), spec_file_name, context)
+          )
         elif item.get("type"):
           links.append(f"`{item.get('type')}`")
       if links:
@@ -795,19 +810,6 @@ def define_env(env):
         )
       )
     else:
-      # A bare "#" is a self-root reference naming the schema being rendered.
-      # It carries no filename, so create_link derives an empty anchor and emits
-      # a broken "<page>/##" link. Recursive refs are irreducible: ucp-schema
-      # preserves them even under --bundle, so the docs layer is the only place
-      # that can name them. Resolve against this schema's own $id.
-      self_id = schema_data.get("$id")
-      self_ref_name = self_id.rsplit("/", 1)[-1] if self_id else None
-
-      def _deref_self(ref_value):
-        if ref_value == "#" and self_ref_name:
-          return self_ref_name
-        return ref_value
-
       for field_name, details in properties.items():
         if field_name == "$ref":
           md.append(
@@ -907,7 +909,7 @@ def define_env(env):
                 continue
               if branch.get("$ref"):
                 inner_type = create_link(
-                  branch["$ref"], spec_file_name, context
+                  _deref_self(branch["$ref"]), spec_file_name, context
                 )
                 break
               if branch.get("title"):
