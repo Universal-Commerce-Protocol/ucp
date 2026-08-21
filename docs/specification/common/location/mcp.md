@@ -215,7 +215,7 @@ UCP uses a two-layer error model separating transport-level errors from business
 
 ### Transport Errors
 
-Transport-level failures (authentication, rate limiting, invalid parameters) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](../overview.md#error-codes) for details.
+Transport-level failures (authentication, rate limiting, invalid parameters) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](../../overview.md#error-codes) for details.
 
 ### Business Outcomes
 

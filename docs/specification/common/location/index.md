@@ -209,7 +209,7 @@ they prove neither proximity nor serviceability (see
 
 Environment data provided by the platform to support authorization
 and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See
-[Signals](../overview.md#signals) for details and privacy requirements.
+[Signals](../../overview.md#signals) for details and privacy requirements.
 
 {{ schema_fields('types/signals', 'common/location') }}
 
