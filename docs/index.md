@@ -312,7 +312,7 @@ image: assets/banner.png
             <div class="pane-text">
               <h3>Checkout</h3>
               <p>Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.</p>
-              <a href="/latest/specification/checkout/" class="learn-more-btn">Get Started</a>
+              <a href="latest/specification/shopping/checkout/" class="learn-more-btn">Get Started</a>
             </div>
             <div class="pane-visuals">
               <div class="image-container">
@@ -393,7 +393,7 @@ image: assets/banner.png
             <div class="pane-text">
               <h3>Identity Linking</h3>
               <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
-              <a href="latest/specification/identity-linking/" class="learn-more-btn">Get Started</a>
+              <a href="latest/specification/common/identity-linking/" class="learn-more-btn">Get Started</a>
             </div>
             <div class="pane-visuals">
               <div class="image-container">
@@ -433,7 +433,7 @@ image: assets/banner.png
             <div class="pane-text">
               <h3>Order</h3>
               <p>From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.</p>
-              <a href="latest/specification/order/" class="learn-more-btn">Get Started</a>
+              <a href="latest/specification/shopping/order/" class="learn-more-btn">Get Started</a>
             </div>
             <div class="pane-visuals">
               <div class="image-container">
@@ -609,7 +609,7 @@ image: assets/banner.png
       <p>
         Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
       </p>
-      <a href="latest/specification/checkout-rest/" class="promo-button">Get Started</a>
+      <a href="latest/specification/shopping/checkout/rest/" class="promo-button">Get Started</a>
     </div>
 
     <div class="two-column-promo-item">
@@ -620,7 +620,7 @@ image: assets/banner.png
       <p>
         Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
       </p>
-      <a href="latest/specification/embedded-checkout/" class="promo-button">See how it works</a>
+      <a href="latest/specification/shopping/checkout/embedded/" class="promo-button">See how it works</a>
     </div>
 
   </div>
@@ -1109,7 +1109,7 @@ image: assets/banner.png
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container-step-icon">
         </div>
-        <h3><a href="latest/specification/playground/" target="_blank">Experiment</a></h3>
+        <h3><a href="latest/specification/shopping/playground/" target="_blank">Experiment</a></h3>
         <p>Experiment with the protocol and its different agent roles</p>
       </div>
       <div class="get-started-container-step">

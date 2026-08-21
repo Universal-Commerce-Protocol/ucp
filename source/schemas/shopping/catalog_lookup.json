@@ -39,10 +39,10 @@
           "description": "Filter criteria to narrow returned products and variants. All specified filters combine with AND logic."
         },
         "context": {
-          "$ref": "types/context.json"
+          "$ref": "../common/types/context.json"
         },
         "signals": {
-          "$ref": "types/signals.json"
+          "$ref": "../common/types/signals.json"
         },
         "attribution": {
           "$ref": "types/attribution.json"
@@ -90,7 +90,7 @@
         "policies": {
           "type": "array",
           "items": {
-            "$ref": "types/policy.json"
+            "$ref": "../common/types/policy.json"
           },
           "description": "Policies (e.g., return/refund terms) that apply to the products in this response. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }
@@ -124,10 +124,10 @@
           "description": "Filter criteria to narrow returned variants. All specified filters combine with AND logic."
         },
         "context": {
-          "$ref": "types/context.json"
+          "$ref": "../common/types/context.json"
         },
         "signals": {
-          "$ref": "types/signals.json"
+          "$ref": "../common/types/signals.json"
         },
         "attribution": {
           "$ref": "types/attribution.json"
@@ -191,7 +191,7 @@
         "policies": {
           "type": "array",
           "items": {
-            "$ref": "types/policy.json"
+            "$ref": "../common/types/policy.json"
           },
           "description": "Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }

@@ -194,7 +194,7 @@ charged immediately therefore cannot be offered on a term that defers any part
 of the payment.
 
 A term with more than one schedule **MUST** be funded by a single instrument.
-[Split Payments](split-payments.md) composes with a term that has exactly one
+[Split Payments](payment/split-payments.md) composes with a term that has exactly one
 schedule, and not otherwise.
 
 ## Disclosures
@@ -206,7 +206,7 @@ consumer-protection rules about what must be shown, and when.
 This extension does not define a private disclosure channel. It uses the two
 that already exist:
 
-1. A [policy](overview.md#policies) carries the durable terms text, targeted
+1. A [policy](overview/index.md#policies) carries the durable terms text, targeted
    with `applies_to` at the node the terms concern — the payment term when the
    terms are about payment timing, the line item when they are about the goods.
 2. A `messages[]` warning with `presentation: "disclosure"` and `code` set to
@@ -219,7 +219,7 @@ optional for a Platform, so any content that **must** reach the Buyer belongs in
 the warning `content`, not only in the policy `description`.
 
 Disclosure display is unconditional. Under [Warning
-Presentation](checkout.md#warning-presentation) a Platform **MUST** display
+Presentation](shopping/checkout/index.md#warning-presentation) a Platform **MUST** display
 every returned disclosure, **MUST** keep it in proximity to the node named by
 `path`, and **MUST NOT** hide, collapse, or auto-dismiss it. A Platform that
 cannot honor that contract — for example one that collapses a list of terms and
@@ -631,7 +631,7 @@ Platforms **MUST**:
 * Treat an unrecognized schedule `type` as not due at completion, and present
   the term regardless.
 * Process disclosures attached to terms per
-  [Warning Presentation](checkout.md#warning-presentation), escalating through
+  [Warning Presentation](shopping/checkout/index.md#warning-presentation), escalating through
   `continue_url` when the rendering contract cannot be honored.
 
 Platforms **MAY** use `type` and `due_at` for enhanced presentation — calendar

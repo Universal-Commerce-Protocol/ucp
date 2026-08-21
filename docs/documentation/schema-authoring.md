@@ -113,7 +113,7 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
   that service `version` repeats on each entry, and transport bindings have no
   separate version. The referenced OpenAPI/OpenRPC artifact carries its own
   `info.version` as artifact metadata, not a negotiated version. See
-  [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+  [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
     - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -130,7 +130,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
-**→ See [Payment Handler Guide](../specification/payment-handler-guide.md)** for detailed
+**→ See [Payment Handler Guide](../specification/payment/guide.md)** for detailed
 guidance on handler structure, config/instrument/credential schemas, and the full
 specification template.
 
@@ -152,6 +152,11 @@ Reusable definitions referenced by other schemas. Do **not** appear in registrie
 
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version`
+- **Expression grammars**: A type schema that defines expression syntax rather
+  than independently placeable UCP fields is direction-agnostic. Its grammar
+  properties carry no `ucp_request` annotation; each UCP property that exposes
+  the grammar declares its own applicability. Example:
+  `common/types/constraint_expression.json`.
 
 Examples: `types/buyer.json`, `types/line_item.json`, `types/postal_address.json`
 
@@ -204,7 +209,7 @@ The member name `ucp` is reserved at every structured UCP object scope — an
 object whose members are schema-defined fields — for the protocol namespace.
 The top-level envelope is its root manifestation. Dictionary containers are
 excluded because their keys are data rather than fields. See
-[The `ucp` Protocol Namespace](../specification/overview.md#the-ucp-protocol-namespace)
+[The `ucp` Protocol Namespace](../specification/overview/index.md#the-ucp-protocol-namespace)
 for the normative rules. For schema authors this means:
 
 - **Never mint a structured domain field named `ucp`.** Schema authors
@@ -369,7 +374,7 @@ does not replace negotiation: capabilities and extensions are still selected by
 exact-version intersection.
 
 Profile selection, including profiles for older supported releases, is defined
-in [Protocol Version](../specification/overview.md#protocol-version).
+in [Protocol Version](../specification/overview/index.md#protocol-version).
 
 ### Third-Party Extensions and Payment Handlers
 
@@ -515,11 +520,70 @@ object fields:
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
   Implementers should accept and process them as a no-op.
 
+## The `request_constraints` Protocol Member
+
+Normative processing, scope, lifecycle, and invalid-member behavior are defined
+in [Request Constraints](../specification/overview/index.md#request-constraints).
+This section covers only the schema-authoring boundary.
+
+### Local structure
+
+`request_constraints` is centrally registered in `ucp.json#/$defs/members` as a
+response-only protocol member with `ucp_request: "omit"`. Capability, extension,
+handler, and shared type schemas do not redeclare it. A conforming UCP-aware
+resolver materializes the registered member into eligible response scopes so
+ordinary resolved-schema validation applies the shared schema.
+
+`schemas/common/types/constraint_expression.json` defines the closed Constraint
+Expression grammar. `schemas/common/types/request_constraints.json` binds that
+grammar to data in the next UCP request and is the schema referenced by the
+registered member.
+
+| Position | Admitted members | Shape |
+| :-- | :-- | :-- |
+| Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
+| Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
+
+The listed members define the grammar. A `request_constraints` value may
+additionally contain `path` at the top level.
+
+Grammar changes belong in `constraint_expression.json`, and changes to the root
+Object Constraint must also be reflected in `request_constraints.json`.
+
+### Annotations and applicability
+
+`constraint_expression.json` carries no `ucp_request` annotations. Its
+properties are Constraint Expression syntax, not independently placeable UCP
+fields, so the grammar has no direction of its own.
+
+Applicability belongs to the containing UCP property. Each UCP property that
+exposes a Constraint Expression owns whichever direction-specific applicability
+annotations that property requires, and those annotations alone determine when
+the grammar is reachable. For `request_constraints`, the containing property is
+the member registered in `ucp.json#/$defs/members`; it remains
+`ucp_request: "omit"` and is the only place that member's response-only
+visibility is declared. Because the grammar is direction-agnostic, the same
+file can be referenced from a request-applicable property and from a
+response-only one without change.
+
+### Constraint Expression grammar
+
+Except for the outer `path` member, an emitted value and its nested constraint
+objects are JSON Schema Draft 2020-12 Constraint Expression syntax, not
+structured UCP domain objects. Do not add or materialize ambient `ucp` inside
+them. The keys in a `properties` map name fields on a selected request object
+and are data, not ambient members.
+
+The containing `ucp` object still follows
+[The Reserved `ucp` Member](#the-reserved-ucp-member). A closed structured object
+admits that container through its optional reference to
+`ucp.json#/$defs/members`, not by declaring `request_constraints` itself.
+
 ## Extension-Declared Action Types
 
 Every Action type is declared by an extension and becomes available only when
 that extension is negotiated, as defined in
-[Actions](../specification/overview.md#actions). Before advertising support,
+[Actions](../specification/overview/index.md#actions). Before advertising support,
 both the Business and the Platform should assess the extension's complete
 Action contract. Negotiation is pre-runtime agreement on that contract's
 semantics and support; it does not pre-approve every future `config` value or
@@ -591,8 +655,8 @@ A capability schema defines both payload structure and declaration variants:
     "line_items": {"type": "array", "items": {"$ref": "types/line_item.json"}},
     "status": {"type": "string", "enum": ["open", "completed", "expired"]},
     "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
-    "totals": {"$ref": "types/totals.json"},
-    "links": {"$ref": "types/links.json"}
+    "totals": {"$ref": "../common/types/totals.json"},
+    "links": {"type": "array", "items": {"$ref": "../common/types/link.json"}}
   }
 }
 ```
@@ -899,7 +963,7 @@ Manual invocation:
 
 ```bash
 python3 scripts/validate_examples.py --schema-base source/schemas/
-python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md docs/specification/cart.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/shopping/checkout/rest.md docs/specification/shopping/cart/index.md
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 

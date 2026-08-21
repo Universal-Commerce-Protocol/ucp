@@ -147,6 +147,10 @@ echo ">>> Merging Spec Versions"
 echo "Extracting: $EXTRACT_LIST"
 git archive "$GH_PAGES_BRANCH" $EXTRACT_LIST | tar -x -C "$OUTPUT_DIR"
 
+# Add redirects for all specification files (mirroring .github/workflows/docs.yml)
+rm -rf "$OUTPUT_DIR/specification"
+(cd "$OUTPUT_DIR" && ln -s latest/specification specification)
+
 echo "=== Build Complete! ==="
 echo "To serve the fully built site (with versioning):"
 echo "  python3 -m http.server 8000 -d $OUTPUT_DIR"

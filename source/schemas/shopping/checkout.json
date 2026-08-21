@@ -47,7 +47,7 @@
       }
     },
     "context": {
-      "$ref": "types/context.json",
+      "$ref": "../common/types/context.json",
       "ucp_request": {
         "create": "optional",
         "update": "optional",
@@ -55,7 +55,7 @@
       }
     },
     "signals": {
-      "$ref": "types/signals.json",
+      "$ref": "../common/types/signals.json",
       "ucp_request": "optional"
     },
     "attribution": {
@@ -81,7 +81,7 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "$ref": "types/totals.json",
+      "$ref": "../common/types/totals.json",
       "description": "Different cart totals.",
       "ucp_request": "omit"
     },
@@ -109,7 +109,7 @@
     "policies": {
       "type": "array",
       "items": {
-        "$ref": "types/policy.json"
+        "$ref": "../common/types/policy.json"
       },
       "description": "Policies (e.g., return/refund terms) that apply to the items in this checkout. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"
