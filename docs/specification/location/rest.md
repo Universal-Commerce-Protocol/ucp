@@ -230,8 +230,8 @@ A conforming REST transport implementation **MUST**:
     check when `serves` is absent.
 3. Apply `distance`, `serves`, and every supplied `filters` predicate
     conjunctively (AND).
-4. Support cursor-based pagination for search results with a default limit
-    of 10; an omitted `pagination.limit` means 10, never all records (see
+4. Support cursor-based pagination for search results; an omitted `pagination.limit` means an arbitrary
+    Business supplied threshold, never all records (see
     [Pagination](search.md#pagination)).
 5. Return HTTP 200 for lookup requests; unknown identifiers result in fewer or no locations
     returned (**MAY** include informational `not_found` messages).

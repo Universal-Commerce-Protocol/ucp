@@ -10,15 +10,13 @@
       "type": "number",
       "minimum": -90,
       "maximum": 90,
-      "description": "WGS 84 latitude in decimal degrees.",
-      "ucp_request": "required"
+      "description": "WGS 84 latitude in decimal degrees."
     },
     "longitude": {
       "type": "number",
       "minimum": -180,
       "maximum": 180,
-      "description": "WGS 84 longitude in decimal degrees.",
-      "ucp_request": "required"
+      "description": "WGS 84 longitude in decimal degrees."
     }
   }
 }

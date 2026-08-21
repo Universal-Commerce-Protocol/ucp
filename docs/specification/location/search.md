@@ -85,8 +85,9 @@ A request with no structured spatial constraint is valid. An empty body
 `{}`, a request carrying only `context` or `signals`, a request carrying
 only `pagination`, and a filters-only request are each a bounded browse over
 the Business's default, policy-controlled selection — never a spatial
-assertion and never an export. An omitted `pagination.limit` defaults to 10,
-not all records.
+assertion and never an export. An omitted `pagination.limit` allows Business
+to enforce their desired arbitrarily threshold and **MUST NOT** be
+interpreted as "all records".
 
 A Business **MAY** use `context`, `signals`, and IP-derived locality to
 influence ranking, localization, or selection of a bounded default browse
@@ -266,9 +267,9 @@ Business **SHOULD** accept a page size of at least 10 unless resource or
 policy constraints require a lower maximum. When the requested limit exceeds
 the Business's maximum, the Business **MAY** clamp to that maximum silently —
 returning fewer results without error. A Platform **MUST NOT** assume the
-response size equals the requested limit. An omitted `limit` defaults to 10;
-it never means all records, and a cursor is not an export guarantee. This
-clamping policy is specific to pagination; it never extends to
+response size equals the requested limit. An omitted `limit` allows Business to
+apply their desired threshold; it never means all records, and a cursor is not
+an export guarantee. This clamping policy is specific to pagination; it never extends to
 `distance.max` (see [Distance](#distance)).
 
 ### Pagination Request

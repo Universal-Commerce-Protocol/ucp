@@ -31,7 +31,7 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (hours, offerings). |
+| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (hours, offerings like `amenities` or `inventory`, etc.). |
 | [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more locations by identifier. |
 
 ## Key Concepts
@@ -43,13 +43,12 @@ This is vertical-agnostic and enables key commerce flows such as:
     * **Amenities**: Static features, services, or capabilities of the location. Modeled as a flat reverse-DNS array to avoid
       semantic ambiguity across diverse industries (e.g., food drive-through vs. pharmacy drive-through).
     * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
-* **Proximity & Serviceability**: Two distinct, explicit spatial relations. `distance`
-    compares a Location's coordinates against a Platform-supplied center point and inclusive
-    radius. `serves` asks whether the Location can provisionally serve one explicit
-    Platform-supplied target; the Business is authoritative for that answer, and UCP does not
-    model or expose the underlying coverage geometry — a Location does not implicitly carry a
-    geometric boundary around its coordinates. See
-    [Spatial Relations](search.md#spatial-relations).
+* **Proximity & Serviceability**: Two distinct, explicit spatial relations:
+    * **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
+    * **`serves`**: Asks whether the Location can provisionally serve one explicit
+      Platform-supplied target; the Business is authoritative for that answer, and UCP does not
+      model or expose the underlying coverage geometry — a Location does not implicitly carry a
+      geometric boundary around its coordinates. See [Spatial Relations](search.md#spatial-relations).
 * **Operating Hours**: Regular weekly schedules (`hours`) and date-specific
     exceptions (`exception_hours`), interpreted in the Location's `timezone`.
     See [Operating Hours](#operating-hours).
@@ -199,7 +198,7 @@ request headers.
 Context signals are provisional—not authoritative data. A Business **MAY** use
 them to influence ranking, localization, or selection of a bounded default
 browse page, and **MAY** ignore or down-rank them if inconsistent with
-higher-confidence signals (authenticated account, risk detection). They never
+higher-confidence signals (authenticated account, risk detection). They **MUST NOT**
 substitute for the explicit `distance` and `serves` operands and prove neither
 proximity nor serviceability (see
 [Request Grammar](search.md#request-grammar)).
