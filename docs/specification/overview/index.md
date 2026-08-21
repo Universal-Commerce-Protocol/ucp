@@ -2714,9 +2714,10 @@ POST /checkout-sessions/{id}/complete
   "payment": {
     "instruments": [
       {
+        "id": "pi_tok_visa",
         "handler_id": "merchant_tokenizer",
-        // ... more instrument required field
-        "credential": { "token": "tok_visa_123" }
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_123" }
       }
     ]
   },
@@ -2793,8 +2794,9 @@ POST /checkout-sessions/{id}/complete
   "payment": {
     "instruments": [
       {
+        "id": "pi_ap2_card",
         "handler_id": "ap2_234352",
-        // other required instruments fields
+        "type": "card",
         "credential": {
           "type": "card",
           "token": "eyJhbGciOiJ..." // Token would contain payment_mandate, the signed proof of funds auth
