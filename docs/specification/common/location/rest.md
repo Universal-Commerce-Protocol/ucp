@@ -188,7 +188,7 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 ## Entities
 
-### UCP Response Catalog (Envelope) {: #ucp-response-location-schema }
+### UCP Response Location (Envelope) {: #ucp-response-location-schema }
 
 {{ extension_schema_fields('ucp.json#/$defs/response_location_schema', 'common/location/rest') }}
 
