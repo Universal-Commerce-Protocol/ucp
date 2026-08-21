@@ -64,11 +64,22 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 
 ### Pagination Request
 
-[Pagination Request](/draft/specification/reference/#pagination-request)
+Pagination parameters for requests.
+
+| Name   | Type    | Requirement | Description                                                        |
+| ------ | ------- | ----------- | ------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                              |
+| limit  | integer | Optional    | Requested page size. Implementations MAY clamp to a lower maximum. |
 
 ### Pagination Response
 
-[Pagination Response](/draft/specification/reference/#pagination-response)
+Pagination information in responses.
+
+| Name          | Type    | Requirement  | Description                                                                           |
+| ------------- | ------- | ------------ | ------------------------------------------------------------------------------------- |
+| cursor        | string  | Optional     | Cursor to fetch the next page of results. MUST be present when has_next_page is true. |
+| has_next_page | boolean | **Required** | Whether more results are available.                                                   |
+| total_count   | integer | Optional     | Total number of matching items, if available.                                         |
 
 ## Actions
 

@@ -41,11 +41,11 @@
       "description": "Product categories with optional taxonomy identifiers."
     },
     "price_range": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/price_range.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/price_range.json",
       "description": "Price range across all variants."
     },
     "list_price_range": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/price_range.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/price_range.json",
       "description": "List price range before discounts (for strikethrough display)."
     },
     "media": {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/policy.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/policy.json",
   "title": "Policy",
   "description": "A durable business rule about the items in a response — return/refund terms, warranty, and the like — at the time of purchase. Every policy carries a `type` (an open reverse-DNS vocabulary) and a `description` so a platform can present it without understanding its type-specific fields; type-specific fields (gated by `type`) add structured context for platforms that model that type. Policies are reference data; the obligation to display a term to the buyer is carried by a `messages[]` warning whose `code` equals the policy `type` — see the Policies section of the specification.",
   "type": "object",

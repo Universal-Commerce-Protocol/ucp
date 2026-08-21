@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/totals.json",
   "title": "Totals",
   "description": "Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.",
   "type": "array",
   "items": {
     "allOf": [
       {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/total.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/total.json"
       },
       {
         "type": "object",

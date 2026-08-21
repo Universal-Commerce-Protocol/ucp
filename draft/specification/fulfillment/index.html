@@ -4059,7 +4059,36 @@ method.</p>
 </tbody>
 </table>
 <h4 id="location-summary">Location Summary<a class="headerlink" href="#location-summary" title="Permanent link">&para;</a></h4>
-<p>See <a href="/draft/specification/reference/#location-summary">Location Summary</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Stable, opaque, Business-scoped Location identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Buyer-facing, Business-owned display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#postal-address">Postal Address</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Physical address of the location.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="fulfillment-group">Fulfillment Group<a class="headerlink" href="#fulfillment-group" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -4146,7 +4175,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#total">Total Response</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Fulfillment option totals breakdown.</td>
 </tr>
@@ -4221,7 +4250,72 @@ method.</p>
 </tbody>
 </table>
 <h4 id="postal-address">Postal Address<a class="headerlink" href="#postal-address" title="Permanent link">&para;</a></h4>
-<p>See <a href="/draft/specification/reference/#postal-address">Postal Address</a> in the <a href="/draft/specification/reference/">Schema Reference</a> for the canonical field definition.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">extended_address</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">An address extension such as an apartment number, C/O or alternative name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">street_address</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The street address.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address_locality</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The locality in which the street address is, and which is in the region. For example, Mountain View.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address_region</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.</td>
+</tr>
+<tr>
+<td style="text-align: left;">address_country</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used.</td>
+</tr>
+<tr>
+<td style="text-align: left;">postal_code</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The postal code. For example, 94043.</td>
+</tr>
+<tr>
+<td style="text-align: left;">first_name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional. First name of the contact associated with the address.</td>
+</tr>
+<tr>
+<td style="text-align: left;">last_name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional. Last name of the contact associated with the address.</td>
+</tr>
+<tr>
+<td style="text-align: left;">phone_number</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional. Phone number of the contact associated with the address.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
 <!-- ucp:example schema=shopping/checkout op=read -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>

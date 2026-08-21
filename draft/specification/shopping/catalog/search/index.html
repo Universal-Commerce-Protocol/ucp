@@ -2991,9 +2991,63 @@ requested limit exceeds the implementation's maximum, implementations
 MAY clamp to their maximum silently — returning fewer results without
 error. Clients MUST NOT assume the response size equals the requested limit.</p>
 <h3 id="pagination-request">Pagination Request<a class="headerlink" href="#pagination-request" title="Permanent link">&para;</a></h3>
-<p><a href="/draft/specification/reference/#pagination-request">Pagination Request</a></p>
+<p>Pagination parameters for requests.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">cursor</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Opaque cursor from previous response.</td>
+</tr>
+<tr>
+<td style="text-align: left;">limit</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Requested page size. Implementations MAY clamp to a lower maximum.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="pagination-response">Pagination Response<a class="headerlink" href="#pagination-response" title="Permanent link">&para;</a></h3>
-<p><a href="/draft/specification/reference/#pagination-response">Pagination Response</a></p>
+<p>Pagination information in responses.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">cursor</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Cursor to fetch the next page of results. MUST be present when has_next_page is true.</td>
+</tr>
+<tr>
+<td style="text-align: left;">has_next_page</td>
+<td style="text-align: left;">boolean</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Whether more results are available.</td>
+</tr>
+<tr>
+<td style="text-align: left;">total_count</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Total number of matching items, if available.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
 <p>Search responses adopt the response-only <code>actions</code> map. The required <code>products</code>
 array can be empty; the Business decides whether it contains zero, some, or all

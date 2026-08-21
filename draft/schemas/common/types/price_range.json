@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/price_range.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/price_range.json",
   "title": "Price Range",
-  "description": "A price range representing minimum and maximum values (e.g., across product variants).",
+  "description": "A price range representing minimum and maximum values (e.g., a common example in retail shopping is when prices vary across product variants).",
   "type": "object",
   "required": [
     "min",

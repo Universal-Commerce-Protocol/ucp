@@ -114,6 +114,22 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Context
+
+| Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
+| address_region  | string                                                                              | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
+| postal_code     | string                                                                              | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| location        | string                                                                              | Optional    | Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries.                                                                                                      |
+| intent          | string                                                                              | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
+| payment         | Array[object]                                                                       | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
+
+______________________________________________________________________
+
 ### Description
 
 | Name     | Type   | Requirement | Description                                                                                                                                                               |
@@ -251,6 +267,17 @@ Cursor-based pagination for list operations.
 
 ______________________________________________________________________
 
+### Policy
+
+| Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type        | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.return` (return terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values.                                                                                                                                                                                                                                                                                                                                                          |
+| description | [Description](/draft/specification/reference/#description)                 | **Required** | Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a `messages[]` warning (see the Policies section).                                                                                                                                                                                                                                                                                                                                                                           |
+| applies_to  | Array[string]                                                              | Optional     | RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves. |
+| url         | string                                                                     | Optional     | Optional link to the full policy document.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+______________________________________________________________________
+
 ### Postal Address
 
 | Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
@@ -273,6 +300,24 @@ ______________________________________________________________________
 | -------- | ------------------------------------------------ | ------------ | ----------------------------------------------------- |
 | amount   | [Amount](/draft/specification/reference/#amount) | **Required** | Amount in ISO 4217 minor units. Use 0 for free items. |
 | currency | string                                           | **Required** | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
+
+______________________________________________________________________
+
+### Price Filter
+
+| Name | Type                                             | Requirement | Description                            |
+| ---- | ------------------------------------------------ | ----------- | -------------------------------------- |
+| min  | [Amount](/draft/specification/reference/#amount) | Optional    | Minimum price in ISO 4217 minor units. |
+| max  | [Amount](/draft/specification/reference/#amount) | Optional    | Maximum price in ISO 4217 minor units. |
+
+______________________________________________________________________
+
+### Price Range
+
+| Name | Type                                           | Requirement  | Description                 |
+| ---- | ---------------------------------------------- | ------------ | --------------------------- |
+| min  | [Price](/draft/specification/reference/#price) | **Required** | Minimum price in the range. |
+| max  | [Price](/draft/specification/reference/#price) | **Required** | Maximum price in the range. |
 
 ______________________________________________________________________
 
@@ -305,9 +350,34 @@ Reverse-domain identifier used for collision-safe namespacing of capabilities, s
 
 ______________________________________________________________________
 
+### Signals
+
+| Name               | Type   | Requirement | Description                                    |
+| ------------------ | ------ | ----------- | ---------------------------------------------- |
+| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
+| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
+
+______________________________________________________________________
+
 ### Signed Amount
 
 Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).
+
+______________________________________________________________________
+
+### Total
+
+| Name         | Type                                                           | Requirement                       | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Required**; omitted in requests | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | Optional; omitted in requests     | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Required**; omitted in requests | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
+
+______________________________________________________________________
+
+### Totals
+
+Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.
 
 ______________________________________________________________________
 
@@ -448,22 +518,6 @@ ______________________________________________________________________
 | -------- | ------ | ------------ | ------------------------------------------------------------------------------------- |
 | value    | string | **Required** | Category value or path (e.g., 'Apparel > Shirts', '1604').                            |
 | taxonomy | string | Optional     | Source taxonomy. Well-known values: `google_product_category`, `shopify`, `merchant`. |
-
-______________________________________________________________________
-
-### Context
-
-| Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| address_country | string                                                                              | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
-| address_region  | string                                                                              | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
-| postal_code     | string                                                                              | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| location        | string                                                                              | Optional    | Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries.                                                                                                      |
-| intent          | string                                                                              | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
-| language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
-| currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
-| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
-| payment         | Array[object]                                                                       | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
 
 ______________________________________________________________________
 
@@ -739,35 +793,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Policy
-
-| Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type        | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.return` (return terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values.                                                                                                                                                                                                                                                                                                                                                          |
-| description | [Description](/draft/specification/reference/#description)                 | **Required** | Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a `messages[]` warning (see the Policies section).                                                                                                                                                                                                                                                                                                                                                                           |
-| applies_to  | Array[string]                                                              | Optional     | RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves. |
-| url         | string                                                                     | Optional     | Optional link to the full policy document.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-
-______________________________________________________________________
-
-### Price Filter
-
-| Name | Type                                             | Requirement | Description                            |
-| ---- | ------------------------------------------------ | ----------- | -------------------------------------- |
-| min  | [Amount](/draft/specification/reference/#amount) | Optional    | Minimum price in ISO 4217 minor units. |
-| max  | [Amount](/draft/specification/reference/#amount) | Optional    | Maximum price in ISO 4217 minor units. |
-
-______________________________________________________________________
-
-### Price Range
-
-| Name | Type                                           | Requirement  | Description                 |
-| ---- | ---------------------------------------------- | ------------ | --------------------------- |
-| min  | [Price](/draft/specification/reference/#price) | **Required** | Minimum price in the range. |
-| max  | [Price](/draft/specification/reference/#price) | **Required** | Maximum price in the range. |
-
-______________________________________________________________________
-
 ### Product
 
 | Name             | Type                                                                      | Requirement  | Description                                                                                      |
@@ -846,15 +871,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Signals
-
-| Name               | Type   | Requirement | Description                                    |
-| ------------------ | ------ | ----------- | ---------------------------------------------- |
-| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
-| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
-
-______________________________________________________________________
-
 ### Token Credential
 
 | Name  | Type   | Requirement  | Description                                                                                  |
@@ -862,22 +878,6 @@ ______________________________________________________________________
 | type  | string | **Required** | The credential type discriminator. Specific schemas will constrain this to a constant value. |
 | type  | string | **Required** | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
 | token | string | **Required** | The token value.                                                                             |
-
-______________________________________________________________________
-
-### Total
-
-| Name         | Type                                                           | Requirement                       | Description                                                                                                                                                                                                                                                                                 |
-| ------------ | -------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                         | **Required**; omitted in requests | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
-| display_text | string                                                         | Optional; omitted in requests     | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
-| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Required**; omitted in requests | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
-
-______________________________________________________________________
-
-### Totals
-
-Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.
 
 ______________________________________________________________________
 

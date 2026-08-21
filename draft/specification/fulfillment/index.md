@@ -117,7 +117,11 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 #### Location Summary
 
-See [Location Summary](/draft/specification/reference/#location-summary) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name    | Type                                                             | Requirement  | Description                                          |
+| ------- | ---------------------------------------------------------------- | ------------ | ---------------------------------------------------- |
+| id      | string                                                           | **Required** | Stable, opaque, Business-scoped Location identifier. |
+| name    | string                                                           | **Required** | Buyer-facing, Business-owned display name.           |
+| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional     | Physical address of the location.                    |
 
 #### Fulfillment Group
 
@@ -130,15 +134,15 @@ See [Location Summary](/draft/specification/reference/#location-summary) in the 
 
 #### Fulfillment Option
 
-| Name                      | Type                                                       | Requirement  | Description                                                                                                                                             |
-| ------------------------- | ---------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id                        | string                                                     | **Required** | Unique identifier for this fulfillment option.                                                                                                          |
-| title                     | string                                                     | **Required** | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
-| description               | [Description](/draft/specification/reference/#description) | Optional     | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
-| carrier                   | string                                                     | Optional     | Carrier name (for shipping).                                                                                                                            |
-| earliest_fulfillment_time | string                                                     | Optional     | Earliest fulfillment date.                                                                                                                              |
-| latest_fulfillment_time   | string                                                     | Optional     | Latest fulfillment date.                                                                                                                                |
-| totals                    | Array\[[Total](/draft/specification/reference/#total)\]    | **Required** | Fulfillment option totals breakdown.                                                                                                                    |
+| Name                      | Type                                                             | Requirement  | Description                                                                                                                                             |
+| ------------------------- | ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | string                                                           | **Required** | Unique identifier for this fulfillment option.                                                                                                          |
+| title                     | string                                                           | **Required** | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description               | [Description](/draft/specification/reference/#description)       | Optional     | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
+| carrier                   | string                                                           | Optional     | Carrier name (for shipping).                                                                                                                            |
+| earliest_fulfillment_time | string                                                           | Optional     | Earliest fulfillment date.                                                                                                                              |
+| latest_fulfillment_time   | string                                                           | Optional     | Latest fulfillment date.                                                                                                                                |
+| totals                    | Array\[[Total Response](/draft/specification/reference/#total)\] | **Required** | Fulfillment option totals breakdown.                                                                                                                    |
 
 #### Fulfillment Available Method
 
@@ -159,7 +163,17 @@ See [Location Summary](/draft/specification/reference/#location-summary) in the 
 
 #### Postal Address
 
-See [Postal Address](/draft/specification/reference/#postal-address) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | Optional    | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | Optional    | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | Optional    | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | Optional    | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | Optional    | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | Optional    | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | Optional    | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | Optional    | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | Optional    | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ### Example
 

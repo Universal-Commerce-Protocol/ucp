@@ -4815,17 +4815,21 @@ Platform-emitted referral and conversion-event context — campaign identifiers,
 
 #### Line Item
 
-| Name      | Type                                                    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
-| --------- | ------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string                                                  | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
-| item      | [Item](/draft/specification/reference/#item)            | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
-| quantity  | integer                                                 | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
-| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                                                                                              |
-| parent_id | string                                                  | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
+| Name      | Type                                                             | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------- | ---------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                                           | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| item      | [Item](/draft/specification/reference/#item)                     | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| quantity  | integer                                                          | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
+| totals    | Array\[[Total Response](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                                                                                              |
+| parent_id | string                                                           | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
 
 ### Link
 
-See [Link](/draft/specification/reference/#link) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                          |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
+| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
+| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
 
 #### Well-Known Link Types
 
@@ -4854,23 +4858,45 @@ Policies (return/refund terms, warranty, and the like) that apply to the items i
 
 ### Message
 
-See [Message](/draft/specification/reference/#message) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+This object MUST be one of the following types: [Message Error](/draft/specification/reference/#message-error), [Message Warning](/draft/specification/reference/#message-warning), [Message Info](/draft/specification/reference/#message-info).
 
 ### Message Error
 
-See [Message Error](/draft/specification/reference/#message-error) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                     | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Required** | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Required** | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| path         | string                                                   | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| content      | string                                                   | **Required** | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| severity     | string                                                   | **Required** | Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 #### Error Code
 
-See [Error Code](/draft/specification/reference/#error-code) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.
 
 ### Message Info
 
-See [Message Info](/draft/specification/reference/#message-info) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                   | Requirement  | Description                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Required** | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                 | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                              |
+| code         | [Info Code](/draft/specification/reference/#info-code) | Optional     | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                 | **Required** | Human-readable message.                                                                                                                                                                        |
 
 ### Message Warning
 
-See [Message Warning](/draft/specification/reference/#message-warning) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                         | Requirement  | Description                                                                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                       | **Required** | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                       | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                   |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Required** | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
+| content      | string                                                       | **Required** | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                       | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                       | Optional     | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                       | Optional     | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                       | Optional     | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
 
 ### Payment
 
@@ -4900,7 +4926,17 @@ A payment instrument with selection state.
 
 ### Postal Address
 
-See [Postal Address](/draft/specification/reference/#postal-address) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | Optional    | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | Optional    | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | Optional    | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | Optional    | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | Optional    | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | Optional    | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | Optional    | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | Optional    | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | Optional    | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ### Response
 
@@ -5060,7 +5096,11 @@ UCP metadata for checkout responses.
 
 ### Error Response
 
-See [Error Response](/draft/specification/reference/#error-response) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                        | Requirement  | Description                                                       |
+| ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
 
 # Checkout Capability - REST Binding
 
@@ -9140,7 +9180,17 @@ The address object uses the UCP [PostalAddress](/draft/specification/reference/#
 
 ### Postal Address
 
-See [Postal Address](/draft/specification/reference/#postal-address) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | Optional    | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | Optional    | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | Optional    | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | Optional    | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | Optional    | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | Optional    | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | Optional    | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | Optional    | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | Optional    | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ## Window Extension
 
@@ -10778,7 +10828,11 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 #### Location Summary
 
-See [Location Summary](/draft/specification/reference/#location-summary) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name    | Type                                                             | Requirement  | Description                                          |
+| ------- | ---------------------------------------------------------------- | ------------ | ---------------------------------------------------- |
+| id      | string                                                           | **Required** | Stable, opaque, Business-scoped Location identifier. |
+| name    | string                                                           | **Required** | Buyer-facing, Business-owned display name.           |
+| address | [Postal Address](/draft/specification/reference/#postal-address) | Optional     | Physical address of the location.                    |
 
 #### Fulfillment Group
 
@@ -10791,15 +10845,15 @@ See [Location Summary](/draft/specification/reference/#location-summary) in the 
 
 #### Fulfillment Option
 
-| Name                      | Type                                                       | Requirement  | Description                                                                                                                                             |
-| ------------------------- | ---------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id                        | string                                                     | **Required** | Unique identifier for this fulfillment option.                                                                                                          |
-| title                     | string                                                     | **Required** | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
-| description               | [Description](/draft/specification/reference/#description) | Optional     | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
-| carrier                   | string                                                     | Optional     | Carrier name (for shipping).                                                                                                                            |
-| earliest_fulfillment_time | string                                                     | Optional     | Earliest fulfillment date.                                                                                                                              |
-| latest_fulfillment_time   | string                                                     | Optional     | Latest fulfillment date.                                                                                                                                |
-| totals                    | Array\[[Total](/draft/specification/reference/#total)\]    | **Required** | Fulfillment option totals breakdown.                                                                                                                    |
+| Name                      | Type                                                             | Requirement  | Description                                                                                                                                             |
+| ------------------------- | ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | string                                                           | **Required** | Unique identifier for this fulfillment option.                                                                                                          |
+| title                     | string                                                           | **Required** | Short label that distinguishes this option from its siblings (e.g. 'Standard', 'Express Shipping', 'Curbside Pickup').                                  |
+| description               | [Description](/draft/specification/reference/#description)       | Optional     | Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title. |
+| carrier                   | string                                                           | Optional     | Carrier name (for shipping).                                                                                                                            |
+| earliest_fulfillment_time | string                                                           | Optional     | Earliest fulfillment date.                                                                                                                              |
+| latest_fulfillment_time   | string                                                           | Optional     | Latest fulfillment date.                                                                                                                                |
+| totals                    | Array\[[Total Response](/draft/specification/reference/#total)\] | **Required** | Fulfillment option totals breakdown.                                                                                                                    |
 
 #### Fulfillment Available Method
 
@@ -10820,7 +10874,17 @@ See [Location Summary](/draft/specification/reference/#location-summary) in the 
 
 #### Postal Address
 
-See [Postal Address](/draft/specification/reference/#postal-address) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | Optional    | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | Optional    | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | Optional    | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | Optional    | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | Optional    | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | Optional    | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | Optional    | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | Optional    | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | Optional    | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ### Example
 
@@ -12923,13 +12987,13 @@ UCP metadata for cart responses. No payment handlers needed pre-checkout.
 
 #### Line Item
 
-| Name      | Type                                                    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
-| --------- | ------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string                                                  | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
-| item      | [Item](/draft/specification/reference/#item)            | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
-| quantity  | integer                                                 | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
-| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                                                                                              |
-| parent_id | string                                                  | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
+| Name      | Type                                                             | Requirement  | Description                                                                                                                                                                                                                                                                                                                                              |
+| --------- | ---------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                                           | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| item      | [Item](/draft/specification/reference/#item)                     | **Required** |                                                                                                                                                                                                                                                                                                                                                          |
+| quantity  | integer                                                          | **Required** | Always an integer step count. On Platform requests, steps use the item's Business-authoritative sale basis; omitting `item.quantity_unit` makes no assertion and does not imply `each`. On Business responses, `item.quantity_unit` describes the basis; if absent, it encodes the `each` machine identity (`C62`, 0) and `quantity` counts whole items. |
+| totals    | Array\[[Total Response](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                                                                                              |
+| parent_id | string                                                           | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                                                                                                   |
 
 #### Item
 
@@ -12994,23 +13058,49 @@ Taxes MAY be included where calculable. Platforms SHOULD assume cart totals are 
 
 ### Message
 
-See [Message](/draft/specification/reference/#message) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+This object MUST be one of the following types: [Message Error](/draft/specification/reference/#message-error), [Message Warning](/draft/specification/reference/#message-warning), [Message Info](/draft/specification/reference/#message-info).
 
 #### Message Error
 
-See [Message Error](/draft/specification/reference/#message-error) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                     | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Required** | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Required** | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| path         | string                                                   | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| content      | string                                                   | **Required** | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| severity     | string                                                   | **Required** | Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 #### Message Info
 
-See [Message Info](/draft/specification/reference/#message-info) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                   | Requirement  | Description                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Required** | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                 | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                              |
+| code         | [Info Code](/draft/specification/reference/#info-code) | Optional     | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                 | **Required** | Human-readable message.                                                                                                                                                                        |
 
 #### Message Warning
 
-See [Message Warning](/draft/specification/reference/#message-warning) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                         | Requirement  | Description                                                                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                       | **Required** | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                       | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                   |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Required** | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
+| content      | string                                                       | **Required** | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                       | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                       | Optional     | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                       | Optional     | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                       | Optional     | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
 
 ### Link
 
-See [Link](/draft/specification/reference/#link) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                          |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
+| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
+| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
 
 ### Policy
 
@@ -15850,7 +15940,10 @@ In lookup responses, each variant carries an `inputs` array for correlation: whi
 
 ### Price
 
-See [Price](/draft/specification/reference/#price) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name     | Type                                             | Requirement  | Description                                           |
+| -------- | ------------------------------------------------ | ------------ | ----------------------------------------------------- |
+| amount   | [Amount](/draft/specification/reference/#amount) | **Required** | Amount in ISO 4217 minor units. Use 0 for free items. |
+| currency | string                                           | **Required** | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
 
 ### Price Range
 
@@ -15861,7 +15954,13 @@ See [Price](/draft/specification/reference/#price) in the [Schema Reference](/dr
 
 ### Media
 
-See [Media](/draft/specification/reference/#media) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name     | Type    | Requirement  | Description                                                  |
+| -------- | ------- | ------------ | ------------------------------------------------------------ |
+| type     | string  | **Required** | Media type. Well-known values: `image`, `video`, `model_3d`. |
+| url      | string  | **Required** | URL to the media resource.                                   |
+| alt_text | string  | Optional     | Accessibility text describing the media.                     |
+| width    | integer | Optional     | Width in pixels (for images/video).                          |
+| height   | integer | Optional     | Height in pixels (for images/video).                         |
 
 ### Product Option
 
@@ -15961,15 +16060,37 @@ Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declara
 
 #### Message (Error)
 
-See [Message Error](/draft/specification/reference/#message-error) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                     | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Required** | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Required** | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| path         | string                                                   | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| content      | string                                                   | **Required** | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| severity     | string                                                   | **Required** | Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
 
 #### Message (Warning)
 
-See [Message Warning](/draft/specification/reference/#message-warning) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                         | Requirement  | Description                                                                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                       | **Required** | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                       | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                   |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Required** | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
+| content      | string                                                       | **Required** | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                       | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                       | Optional     | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                       | Optional     | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                       | Optional     | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
 
 #### Message (Info)
 
-See [Message Info](/draft/specification/reference/#message-info) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                   | Requirement  | Description                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Required** | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                 | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                              |
+| code         | [Info Code](/draft/specification/reference/#info-code) | Optional     | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                 | **Required** | Human-readable message.                                                                                                                                                                        |
 
 ### Common Scenarios
 
@@ -16181,11 +16302,22 @@ The `limit` parameter is a requested page size, not a guaranteed count. Implemen
 
 ### Pagination Request
 
-[Pagination Request](/draft/specification/reference/#pagination-request)
+Pagination parameters for requests.
+
+| Name   | Type    | Requirement | Description                                                        |
+| ------ | ------- | ----------- | ------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                              |
+| limit  | integer | Optional    | Requested page size. Implementations MAY clamp to a lower maximum. |
 
 ### Pagination Response
 
-[Pagination Response](/draft/specification/reference/#pagination-response)
+Pagination information in responses.
+
+| Name          | Type    | Requirement  | Description                                                                           |
+| ------------- | ------- | ------------ | ------------------------------------------------------------------------------------- |
+| cursor        | string  | Optional     | Cursor to fetch the next page of results. MUST be present when has_next_page is true. |
+| has_next_page | boolean | **Required** | Whether more results are available.                                                   |
+| total_count   | integer | Optional     | Total number of matching items, if available.                                         |
 
 ## Actions
 
@@ -16993,7 +17125,11 @@ A product in a get_product response, extended with effective selections and avai
 
 ### Error Response
 
-See [Error Response](/draft/specification/reference/#error-response) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                        | Requirement  | Description                                                       |
+| ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
 
 ## Conformance
 
@@ -17691,7 +17827,11 @@ A product in a get_product response, extended with effective selections and avai
 
 ### Error Response
 
-See [Error Response](/draft/specification/reference/#error-response) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                        | Requirement  | Description                                                       |
+| ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
 
 ## Conformance
 
@@ -17817,14 +17957,14 @@ Businesses MAY surface a snapshot of the policies that applied at checkout on th
 
 Line items reflect what was purchased at checkout and their current state.
 
-| Name      | Type                                                    | Requirement  | Description                                                                                                                                                                                                                                                                     |
-| --------- | ------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id        | string                                                  | **Required** | Line item identifier.                                                                                                                                                                                                                                                           |
-| item      | [Item](/draft/specification/reference/#item)            | **Required** | Purchased item data, including identity, price, and sale basis.                                                                                                                                                                                                                 |
-| quantity  | object                                                  | **Required** | Tracks the line item's original, current active, and fulfilled quantities. All three values use the same inherited `item.quantity_unit`. When `item.quantity_unit` is absent on an authoritative order response, each step is one whole item (`each`) under the shared default. |
-| totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                     |
-| status    | string                                                  | **Required** | Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled`, `removed`             |
-| parent_id | string                                                  | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                          |
+| Name      | Type                                                             | Requirement  | Description                                                                                                                                                                                                                                                                     |
+| --------- | ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | string                                                           | **Required** | Line item identifier.                                                                                                                                                                                                                                                           |
+| item      | [Item](/draft/specification/reference/#item)                     | **Required** | Purchased item data, including identity, price, and sale basis.                                                                                                                                                                                                                 |
+| quantity  | object                                                           | **Required** | Tracks the line item's original, current active, and fulfilled quantities. All three values use the same inherited `item.quantity_unit`. When `item.quantity_unit` is absent on an authoritative order response, each step is one whole item (`each`) under the shared default. |
+| totals    | Array\[[Total Response](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                     |
+| status    | string                                                           | **Required** | Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled`, `removed`             |
+| parent_id | string                                                           | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                          |
 
 **Quantity Structure:**
 
@@ -17883,15 +18023,15 @@ Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`, 
 
 Adjustments are polymorphic events that exist independently of fulfillment. The `type` field is an open string - businesses can use any values that make sense to them.
 
-| Name        | Type                                                    | Requirement  | Description                                                                                                                                                                                     |
-| ----------- | ------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string                                                  | **Required** | Adjustment event identifier.                                                                                                                                                                    |
-| type        | string                                                  | **Required** | Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business. |
-| occurred_at | string                                                  | **Required** | RFC 3339 timestamp when this adjustment occurred.                                                                                                                                               |
-| status      | string                                                  | **Required** | Adjustment status. **Enum:** `pending`, `completed`, `failed`                                                                                                                                   |
-| line_items  | Array[object]                                           | Optional     | Which line items and quantities are affected (optional).                                                                                                                                        |
-| totals      | Array\[[Total](/draft/specification/reference/#total)\] | Optional     | Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges).                                              |
-| description | string                                                  | Optional     | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
+| Name        | Type                                                             | Requirement  | Description                                                                                                                                                                                     |
+| ----------- | ---------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                                           | **Required** | Adjustment event identifier.                                                                                                                                                                    |
+| type        | string                                                           | **Required** | Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business. |
+| occurred_at | string                                                           | **Required** | RFC 3339 timestamp when this adjustment occurred.                                                                                                                                               |
+| status      | string                                                           | **Required** | Adjustment status. **Enum:** `pending`, `completed`, `failed`                                                                                                                                   |
+| line_items  | Array[object]                                                    | Optional     | Which line items and quantities are affected (optional).                                                                                                                                        |
+| totals      | Array\[[Total Response](/draft/specification/reference/#total)\] | Optional     | Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges).                                              |
+| description | string                                                           | Optional     | Human-readable reason or description (e.g., 'Defective item', 'Customer requested').                                                                                                            |
 
 Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`, `cancellation`, etc.
 
@@ -18457,7 +18597,17 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 
 ### Postal Address
 
-See [Postal Address](/draft/specification/reference/#postal-address) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
+| ---------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| extended_address | string | Optional    | An address extension such as an apartment number, C/O or alternative name.                                                                                                                                                                |
+| street_address   | string | Optional    | The street address.                                                                                                                                                                                                                       |
+| address_locality | string | Optional    | The locality in which the street address is, and which is in the region. For example, Mountain View.                                                                                                                                      |
+| address_region   | string | Optional    | The region in which the locality is, and which is in the country. Required for applicable countries (i.e. state in US, province in CA). For example, California or another appropriate first-level Administrative division.               |
+| address_country  | string | Optional    | The country. Recommended to be in 2-letter ISO 3166-1 alpha-2 format, for example "US". For backward compatibility, a 3-letter ISO 3166-1 alpha-3 country code such as "SGP" or a full country name such as "Singapore" can also be used. |
+| postal_code      | string | Optional    | The postal code. For example, 94043.                                                                                                                                                                                                      |
+| first_name       | string | Optional    | Optional. First name of the contact associated with the address.                                                                                                                                                                          |
+| last_name        | string | Optional    | Optional. Last name of the contact associated with the address.                                                                                                                                                                           |
+| phone_number     | string | Optional    | Optional. Phone number of the contact associated with the address.                                                                                                                                                                        |
 
 ### Response
 
@@ -22479,6 +22629,22 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Context
+
+| Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
+| address_region  | string                                                                              | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
+| postal_code     | string                                                                              | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| location        | string                                                                              | Optional    | Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries.                                                                                                      |
+| intent          | string                                                                              | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
+| payment         | Array[object]                                                                       | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
+
+______________________________________________________________________
+
 ### Description
 
 | Name     | Type   | Requirement | Description                                                                                                                                                               |
@@ -22616,6 +22782,17 @@ Cursor-based pagination for list operations.
 
 ______________________________________________________________________
 
+### Policy
+
+| Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type        | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.return` (return terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values.                                                                                                                                                                                                                                                                                                                                                          |
+| description | [Description](/draft/specification/reference/#description)                 | **Required** | Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a `messages[]` warning (see the Policies section).                                                                                                                                                                                                                                                                                                                                                                           |
+| applies_to  | Array[string]                                                              | Optional     | RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves. |
+| url         | string                                                                     | Optional     | Optional link to the full policy document.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+______________________________________________________________________
+
 ### Postal Address
 
 | Name             | Type   | Requirement | Description                                                                                                                                                                                                                               |
@@ -22638,6 +22815,24 @@ ______________________________________________________________________
 | -------- | ------------------------------------------------ | ------------ | ----------------------------------------------------- |
 | amount   | [Amount](/draft/specification/reference/#amount) | **Required** | Amount in ISO 4217 minor units. Use 0 for free items. |
 | currency | string                                           | **Required** | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
+
+______________________________________________________________________
+
+### Price Filter
+
+| Name | Type                                             | Requirement | Description                            |
+| ---- | ------------------------------------------------ | ----------- | -------------------------------------- |
+| min  | [Amount](/draft/specification/reference/#amount) | Optional    | Minimum price in ISO 4217 minor units. |
+| max  | [Amount](/draft/specification/reference/#amount) | Optional    | Maximum price in ISO 4217 minor units. |
+
+______________________________________________________________________
+
+### Price Range
+
+| Name | Type                                           | Requirement  | Description                 |
+| ---- | ---------------------------------------------- | ------------ | --------------------------- |
+| min  | [Price](/draft/specification/reference/#price) | **Required** | Minimum price in the range. |
+| max  | [Price](/draft/specification/reference/#price) | **Required** | Maximum price in the range. |
 
 ______________________________________________________________________
 
@@ -22670,9 +22865,34 @@ Reverse-domain identifier used for collision-safe namespacing of capabilities, s
 
 ______________________________________________________________________
 
+### Signals
+
+| Name               | Type   | Requirement | Description                                    |
+| ------------------ | ------ | ----------- | ---------------------------------------------- |
+| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
+| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
+
+______________________________________________________________________
+
 ### Signed Amount
 
 Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).
+
+______________________________________________________________________
+
+### Total
+
+| Name         | Type                                                           | Requirement                       | Description                                                                                                                                                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                         | **Required**; omitted in requests | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
+| display_text | string                                                         | Optional; omitted in requests     | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
+| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Required**; omitted in requests | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
+
+______________________________________________________________________
+
+### Totals
+
+Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.
 
 ______________________________________________________________________
 
@@ -22813,22 +23033,6 @@ ______________________________________________________________________
 | -------- | ------ | ------------ | ------------------------------------------------------------------------------------- |
 | value    | string | **Required** | Category value or path (e.g., 'Apparel > Shirts', '1604').                            |
 | taxonomy | string | Optional     | Source taxonomy. Well-known values: `google_product_category`, `shopify`, `merchant`. |
-
-______________________________________________________________________
-
-### Context
-
-| Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| address_country | string                                                                              | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
-| address_region  | string                                                                              | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
-| postal_code     | string                                                                              | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| location        | string                                                                              | Optional    | Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries.                                                                                                      |
-| intent          | string                                                                              | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
-| language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
-| currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
-| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
-| payment         | Array[object]                                                                       | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
 
 ______________________________________________________________________
 
@@ -23104,35 +23308,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Policy
-
-| Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type        | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.return` (return terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values.                                                                                                                                                                                                                                                                                                                                                          |
-| description | [Description](/draft/specification/reference/#description)                 | **Required** | Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a `messages[]` warning (see the Policies section).                                                                                                                                                                                                                                                                                                                                                                           |
-| applies_to  | Array[string]                                                              | Optional     | RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves. |
-| url         | string                                                                     | Optional     | Optional link to the full policy document.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-
-______________________________________________________________________
-
-### Price Filter
-
-| Name | Type                                             | Requirement | Description                            |
-| ---- | ------------------------------------------------ | ----------- | -------------------------------------- |
-| min  | [Amount](/draft/specification/reference/#amount) | Optional    | Minimum price in ISO 4217 minor units. |
-| max  | [Amount](/draft/specification/reference/#amount) | Optional    | Maximum price in ISO 4217 minor units. |
-
-______________________________________________________________________
-
-### Price Range
-
-| Name | Type                                           | Requirement  | Description                 |
-| ---- | ---------------------------------------------- | ------------ | --------------------------- |
-| min  | [Price](/draft/specification/reference/#price) | **Required** | Minimum price in the range. |
-| max  | [Price](/draft/specification/reference/#price) | **Required** | Maximum price in the range. |
-
-______________________________________________________________________
-
 ### Product
 
 | Name             | Type                                                                      | Requirement  | Description                                                                                      |
@@ -23211,15 +23386,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Signals
-
-| Name               | Type   | Requirement | Description                                    |
-| ------------------ | ------ | ----------- | ---------------------------------------------- |
-| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
-| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
-
-______________________________________________________________________
-
 ### Token Credential
 
 | Name  | Type   | Requirement  | Description                                                                                  |
@@ -23227,22 +23393,6 @@ ______________________________________________________________________
 | type  | string | **Required** | The credential type discriminator. Specific schemas will constrain this to a constant value. |
 | type  | string | **Required** | The specific type of token produced by the handler (e.g., 'stripe_token').                   |
 | token | string | **Required** | The token value.                                                                             |
-
-______________________________________________________________________
-
-### Total
-
-| Name         | Type                                                           | Requirement                       | Description                                                                                                                                                                                                                                                                                 |
-| ------------ | -------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type         | string                                                         | **Required**; omitted in requests | Cost category. Well-known values: subtotal, items_discount, discount, fulfillment, tax, fee, total. Businesses MAY use additional values.                                                                                                                                                   |
-| display_text | string                                                         | Optional; omitted in requests     | Text to display against the amount. Should reflect appropriate method (e.g., 'Shipping', 'Delivery').                                                                                                                                                                                       |
-| amount       | [Signed Amount](/draft/specification/reference/#signed-amount) | **Required**; omitted in requests | Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive). |
-
-______________________________________________________________________
-
-### Totals
-
-Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.
 
 ______________________________________________________________________
 

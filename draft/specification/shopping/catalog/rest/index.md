@@ -624,7 +624,11 @@ A product in a get_product response, extended with effective selections and avai
 
 ### Error Response
 
-See [Error Response](/draft/specification/reference/#error-response) in the [Schema Reference](/draft/specification/reference/) for the canonical field definition.
+| Name         | Type                                                        | Requirement  | Description                                                       |
+| ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
 
 ## Conformance
 

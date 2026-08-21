@@ -68,7 +68,7 @@
       }
     },
     "context": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/context.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/context.json",
       "description": "Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.",
       "ucp_request": {
         "create": "optional",
@@ -76,7 +76,7 @@
       }
     },
     "signals": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/signals.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/signals.json",
       "ucp_request": {
         "create": "optional",
         "update": "optional"
@@ -103,7 +103,7 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/totals.json",
+      "$ref": "https://ucp.dev/draft/schemas/common/types/totals.json",
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },
@@ -131,7 +131,7 @@
     "policies": {
       "type": "array",
       "items": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/types/policy.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/policy.json"
       },
       "description": "Policies (e.g., return/refund terms) that apply to the items in this cart. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"
@@ -149,5 +149,5 @@
       "ucp_request": "omit"
     }
   },
-  "version": "2026-08-20"
+  "version": "2026-08-21"
 }
