@@ -20,7 +20,7 @@ This specification defines the device data collection Action type declared by
 the [Payment Authentication extension](../authentication.md):
 
 ```text
-dev.ucp.payment.device_data_collection
+dev.ucp.common.payment.device_data_collection
 ```
 
 It asks the Platform to mount an invisible payment-authentication surface to
@@ -56,11 +56,11 @@ will not wait for, the Business **MUST NOT** emit an Action.
 
 The Action is emitted under its type key:
 
-<!-- ucp:example schema=shopping/payment_authentication def=dev.ucp.shopping.checkout extract=$.actions target=$.actions op=read -->
+<!-- ucp:example schema=common/payment_authentication def=dev.ucp.shopping.checkout extract=$.actions target=$.actions op=read -->
 ```json
 {
   "actions": {
-    "dev.ucp.payment.device_data_collection": [
+    "dev.ucp.common.payment.device_data_collection": [
       {
         "id": "ddc-1",
         "config": {
@@ -74,7 +74,7 @@ The Action is emitted under its type key:
 ```
 
 The config shape is defined inline by the
-[Payment Authentication extension schema](site:schemas/shopping/payment_authentication.json).
+[Payment Authentication extension schema](site:schemas/common/payment_authentication.json).
 
 | Field | Type | Required | Notes |
 | :---- | :--- | :------- | :---- |

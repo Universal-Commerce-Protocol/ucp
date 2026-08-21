@@ -996,7 +996,7 @@
         ]
       },
       "payment": {
-        "$ref": "../../schemas/shopping/payment.json"
+        "$ref": "../../schemas/common/payment.json"
       },
       "ucp": {
         "$ref": "../../schemas/ucp.json"

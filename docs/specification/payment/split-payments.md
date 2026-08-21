@@ -16,7 +16,7 @@
 
 # Split Payments Extension
 
-* **Capability Name:** `dev.ucp.shopping.split_payments`
+* **Capability Name:** `dev.ucp.common.split_payments`
 
 > **Note on examples:** Instrument `type` strings used in this spec
 > (`card`, `gift_card`, `store_credit`, `loyalty`) are illustrative.
@@ -111,7 +111,7 @@ gift cards alone, and (c) two credit cards:
 ```json
 {
   "capabilities": [{
-    "dev.ucp.shopping.split_payments": [
+    "dev.ucp.common.split_payments": [
       {
         "version": "2026-01-23",
         "config": {

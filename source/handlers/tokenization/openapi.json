@@ -10,7 +10,7 @@
       "post": {
         "operationId": "tokenize",
         "summary": "Tokenize Credential",
-        "description": "Convert a credential into a token bound to a specific checkout session. Handlers define accepted credential schemas and their own authentication requirements.",
+        "description": "Convert a credential into a token bound to a specific capability resource. Handlers define accepted credential schemas and their own authentication requirements.",
         "requestBody": {
           "required": true,
           "content": {
@@ -20,12 +20,16 @@
                 "required": ["credential", "binding"],
                 "properties": {
                   "credential": {
-                    "$ref": "../../schemas/shopping/types/payment_credential.json",
+                    "$ref": "../../schemas/common/types/payment_credential.json",
                     "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
                   },
                   "binding": {
-                    "$ref": "../../schemas/shopping/types/binding.json",
-                    "description": "Binding context that ties this token to a specific checkout and participant identity."
+                    "$ref": "../../schemas/common/types/binding.json",
+                    "description": "Resource this token is bound to. Ties the token to a specific capability resource."
+                  },
+                  "identity": {
+                    "$ref": "../../schemas/common/types/payment_identity.json",
+                    "description": "The participant this token is bound to. Required when acting on behalf of another participant, for example an agent tokenizing for a business. Omit when the authenticated caller is the binding target."
                   }
                 }
               },
@@ -43,10 +47,11 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 },
@@ -63,7 +68,8 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "xyz789"
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "xyz789"
                     }
                   }
                 },
@@ -81,10 +87,11 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 }
@@ -139,8 +146,12 @@
                     "description": "The token value."
                   },
                   "binding": {
-                    "$ref": "../../schemas/shopping/types/binding.json",
-                    "description": "Binding context that must match the original tokenization request."
+                    "$ref": "../../schemas/common/types/binding.json",
+                    "description": "Resource binding that must match the original tokenization request."
+                  },
+                  "identity": {
+                    "$ref": "../../schemas/common/types/payment_identity.json",
+                    "description": "Participant identity that must match the original tokenization request. Omit when it was omitted at tokenization."
                   }
                 }
               },
@@ -150,7 +161,8 @@
                   "value": {
                     "token": "tok_abc123xyz789",
                     "binding": {
-                      "checkout_id": "xyz789"
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "xyz789"
                     }
                   }
                 },
@@ -159,10 +171,11 @@
                   "value": {
                     "token": "tok_abc123xyz789",
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 }
@@ -176,7 +189,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "../../schemas/shopping/types/payment_credential.json"
+                  "$ref": "../../schemas/common/types/payment_credential.json"
                 },
                 "examples": {
                   "card_credential_fpan": {
