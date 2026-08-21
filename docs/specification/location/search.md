@@ -85,9 +85,8 @@ A request with no structured spatial constraint is valid. An empty body
 `{}`, a request carrying only `context` or `signals`, a request carrying
 only `pagination`, and a filters-only request are each a bounded browse over
 the Business's default, policy-controlled selection — never a spatial
-assertion and never an export. An omitted `pagination.limit` allows Business
-to enforce their desired arbitrarily threshold and **MUST NOT** be
-interpreted as "all records".
+assertion and never an export. Its page size follows the shared
+[Pagination](#pagination) contract.
 
 A Business **MAY** use `context`, `signals`, and IP-derived locality to
 influence ranking, localization, or selection of a bounded default browse
@@ -139,8 +138,8 @@ Matching semantics are closed:
 * A Business that cannot honor a supplied `distance.max` (for example, a
     radius cap below the requested value) **MUST** reject the request with an
     actionable error; it **MUST NOT** silently clamp the radius or substitute
-    its own. Requested-limit clamping in [Pagination](#pagination) never
-    applies to `distance.max`.
+    its own. The permission to return fewer results under
+    [Pagination](#pagination) never permits reducing `distance.max`.
 * A Location without a usable authoritative `geo` does not match; exclusion
     is a non-match, not an error.
 
@@ -262,15 +261,16 @@ Business **MAY** encode them as stateless keyset tokens.
 
 ### Page Size
 
-The `limit` parameter is a requested page size, not a guaranteed count. A
-Business **SHOULD** accept a page size of at least 10 unless resource or
-policy constraints require a lower maximum. When the requested limit exceeds
-the Business's maximum, the Business **MAY** clamp to that maximum silently —
-returning fewer results without error. A Platform **MUST NOT** assume the
-response size equals the requested limit. An omitted `limit` allows Business to
-apply their desired threshold; it never means all records, and a cursor is not
-an export guarantee. This clamping policy is specific to pagination; it never extends to
-`distance.max` (see [Distance](#distance)).
+The `limit` parameter is a requested page size, not a guaranteed result
+count. When `limit` is omitted, the Business **MUST** apply a default page
+size. A default of 10 is **RECOMMENDED**, but the Business **MAY** choose
+another value.
+
+The Business **MAY** return fewer results than the requested or default page
+size, including when enforcing its maximum page size. A Platform **MUST NOT**
+assume that the response count equals either value. This permission applies
+only to page size; it does not permit reducing `distance.max` (see
+[Distance](#distance)).
 
 ### Pagination Request
 
