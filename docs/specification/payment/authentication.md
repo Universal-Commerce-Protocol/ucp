@@ -24,8 +24,8 @@ two concrete [Action types](../overview/index.md#actions):
 
 | Action type | Platform interaction |
 | :---------- | :------------------- |
-| `dev.ucp.payment.device_data_collection` | Run an invisible browser-capable device data collection surface. |
-| `dev.ucp.payment.three_ds_challenge` | Present a buyer-facing 3DS challenge surface. |
+| `dev.ucp.common.payment.device_data_collection` | Run an invisible browser-capable device data collection surface. |
+| `dev.ucp.common.payment.three_ds_challenge` | Present a buyer-facing 3DS challenge surface. |
 
 The extension is named:
 
@@ -57,7 +57,7 @@ Businesses and Platforms advertise this extension in their profiles:
         {
           "version": "{{ ucp_version }}",
           "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/authentication/",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/authentication",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_authentication.json"
         }
       ]
@@ -121,7 +121,7 @@ collection step can be followed by a challenge in a later response:
     ]
   },
   "actions": {
-    "dev.ucp.payment.device_data_collection": [
+    "dev.ucp.common.payment.device_data_collection": [
       {
         "id": "ddc-1",
         "config": {
@@ -139,9 +139,9 @@ outstanding per payment attempt at a time, emitting only the next interaction
 the Platform can process, because collection completes or times out before a
 challenge is emitted. When collection must precede a challenge, the Business
 emits the device data collection Action first and emits the challenge under
-`dev.ucp.payment.three_ds_challenge` only in a later Checkout response.
+`dev.ucp.common.payment.three_ds_challenge` only in a later Checkout response.
 
-When `dev.ucp.shopping.split_payments` is active a Checkout can carry an attempt
+When `dev.ucp.common.split_payments` is active a Checkout can carry an attempt
 per instrument, each with its own outstanding authentication action, and
 `config.payment_instrument_id` is what distinguishes them.
 

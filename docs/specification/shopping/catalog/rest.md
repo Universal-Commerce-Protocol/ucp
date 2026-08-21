@@ -71,11 +71,7 @@ Businesses advertise REST transport availability through their UCP profile at
 
 Maps to the [Catalog Search](search.md) capability.
 
-<<<<<<< HEAD:docs/specification/shopping/catalog/rest.md
 {{ method_fields('search_catalog', 'rest.openapi.json', 'shopping/catalog/rest') }}
-=======
-{{ method_fields('search_catalog', 'shopping/rest.openapi.json', 'catalog/rest') }}
->>>>>>> 0d686b4 (Refactor out all payment related schema into common/ and treat it as a standalone capability.):docs/specification/catalog/rest.md
 
 #### Example
 
@@ -205,11 +201,7 @@ for supported identifiers, resolution behavior, and client correlation requireme
 The request body contains an array of identifiers and optional context that
 applies to all lookups in the batch.
 
-<<<<<<< HEAD:docs/specification/shopping/catalog/rest.md
 {{ method_fields('lookup_catalog', 'rest.openapi.json', 'shopping/catalog/rest') }}
-=======
-{{ method_fields('lookup_catalog', 'shopping/rest.openapi.json', 'catalog/rest') }}
->>>>>>> 0d686b4 (Refactor out all payment related schema into common/ and treat it as a standalone capability.):docs/specification/catalog/rest.md
 
 #### Example: Batch Lookup with Context
 
@@ -361,7 +353,7 @@ messages indicating which identifiers were not found.
 Maps to the [Catalog Lookup](lookup.md#get-product-get_product) capability. Returns a singular
 `product` object (not an array) for full product detail page rendering.
 
-{{ method_fields('get_product', 'shopping/rest.openapi.json', 'shopping/catalog/rest') }}
+{{ method_fields('get_product', 'rest.openapi.json', 'shopping/catalog/rest') }}
 
 #### Example: With Option Selection
 
@@ -522,7 +514,7 @@ with the same identifier.
 The following headers are defined for the HTTP binding and apply to all
 operations unless otherwise noted.
 
-{{ header_fields('search_catalog', 'shopping/rest.openapi.json') }}
+{{ header_fields('search_catalog', 'rest.openapi.json') }}
 
 ### Specific Header Requirements
 

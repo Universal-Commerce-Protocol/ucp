@@ -275,7 +275,7 @@ Businesses advertise payment terms support in their profile:
             "dev.ucp.shopping.checkout",
             "dev.ucp.shopping.order"
           ],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment-terms",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/payment-terms",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_terms.json"
         }
       ]
@@ -291,7 +291,7 @@ Businesses advertise payment terms support in their profile:
 When this capability is active, `checkout.payment` is extended with available
 terms and the selected term.
 
-{{ extension_schema_fields('payment_terms.json#/$defs/payment', 'payment-terms') }}
+{{ extension_schema_fields('payment_terms.json#/$defs/payment', 'payment/payment-terms') }}
 
 ### Order Payment
 
@@ -306,17 +306,17 @@ can therefore sum to more than the Order currently owes after a refund, or less
 after an exchange: the term states what was agreed, and the adjustments state
 what happened after.
 
-{{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment-terms') }}
+{{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment/payment-terms') }}
 
 ### Entities
 
 #### Payment Term
 
-{{ schema_fields('types/payment_term', 'payment-terms') }}
+{{ schema_fields('types/payment_term', 'payment/payment-terms') }}
 
 #### Payment Schedule
 
-{{ schema_fields('types/payment_schedule', 'payment-terms') }}
+{{ schema_fields('types/payment_schedule', 'payment/payment-terms') }}
 
 ## Examples
 
