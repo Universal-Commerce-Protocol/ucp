@@ -1000,3 +1000,14 @@ corpus" is intentional:
   `validate_examples.py` itself) can invalidate examples across many
   unrelated docs. The full check is the only way to catch that
   cross-file regression locally before it hits CI.
+
+#### Example numbers must also add up
+
+Schema conformance is structural: JSON Schema cannot relate the values of
+sibling array entries. A second check, `scripts/validate_totals.py`, enforces
+the two arithmetic identities the spec states normatively for
+[`totals[]`](../specification/shopping/checkout/index.md#totals) — a breakdown's
+entries sum to its `total` entry, and an entry's `lines` sum to that entry. It
+runs on the same surfaces as the schema validator and needs no annotation of its
+own: every ` ```json ` block is scanned for `totals` arrays, and arrays that are
+elided or that carry no subtotal/total pairing are skipped.
