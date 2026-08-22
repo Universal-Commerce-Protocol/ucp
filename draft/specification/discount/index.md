@@ -339,7 +339,6 @@ A flat discount applied to the order total. No allocations—the discount applie
 
 ```json
 {
-  "id": "...",  // deprecated: id is provided in URL path
   "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10"]
@@ -377,7 +376,6 @@ This example shows both discount types: a per-item discount (20% off) allocated 
 
 ```json
 {
-  "id": "...",  // deprecated: id is provided in URL path
   "line_items": [ ... ],
   "discounts": {
     "codes": ["SUMMER20"]
@@ -440,7 +438,6 @@ When a discount code cannot be applied, the rejection is communicated via the `m
 
 ```json
 {
-  "id": "...",  // deprecated: id is provided in URL path
   "line_items": [ ... ],
   "discounts": {
     "codes": ["SAVE10", "EXPIRED50"]
