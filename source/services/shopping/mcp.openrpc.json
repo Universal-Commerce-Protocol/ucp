@@ -68,6 +68,28 @@
           }
         }
       }
+    },
+    "errors": {
+      "authentication_failed": {
+        "code": -32002,
+        "message": "Authentication failed",
+        "data": { "$ref": "../../schemas/common/types/error_response.json" }
+      },
+      "invalid_params": {
+        "code": -32602,
+        "message": "Invalid params",
+        "data": { "$ref": "../../schemas/common/types/error_response.json" }
+      },
+      "not_found": {
+        "code": -32001,
+        "message": "Resource not found",
+        "data": { "$ref": "../../schemas/common/types/error_response.json" }
+      },
+      "idempotency_conflict": {
+        "code": -32003,
+        "message": "Idempotency conflict",
+        "data": { "$ref": "../../schemas/common/types/error_response.json" }
+      }
     }
   },
   "methods": [
@@ -79,18 +101,23 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/checkout.json"}
+          "schema": { "$ref": "../../schemas/shopping/checkout.json" }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "#/components/schemas/checkout_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/checkout_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
+      ]
     },
     {
       "name": "get_checkout",
@@ -99,18 +126,24 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "#/components/schemas/checkout_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/checkout_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/not_found" }
+      ]
     },
     {
       "name": "update_checkout",
@@ -120,23 +153,30 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/checkout.json"}
+          "schema": { "$ref": "../../schemas/shopping/checkout.json" }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "#/components/schemas/checkout_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/checkout_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/not_found" }
+      ]
     },
     {
       "name": "complete_checkout",
@@ -147,26 +187,39 @@
           "required": true,
           "schema": {
             "allOf": [
-              {"$ref": "#/components/schemas/meta"},
-              {"required": ["ucp-agent", "idempotency-key"]}
+              { "$ref": "#/components/schemas/meta" },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
             ]
           }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "checkout",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/checkout.json"}
+          "schema": { "$ref": "../../schemas/shopping/checkout.json" }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "#/components/schemas/checkout_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/checkout_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
+      ]
     },
     {
       "name": "cancel_checkout",
@@ -177,21 +230,34 @@
           "required": true,
           "schema": {
             "allOf": [
-              {"$ref": "#/components/schemas/meta"},
-              {"required": ["ucp-agent", "idempotency-key"]}
+              { "$ref": "#/components/schemas/meta" },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
             ]
           }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "checkout",
-        "schema": {"$ref": "#/components/schemas/checkout_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/checkout_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
+      ]
     },
     {
       "name": "create_cart",
@@ -201,18 +267,23 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "cart",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/cart.json"}
+          "schema": { "$ref": "../../schemas/shopping/cart.json" }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "#/components/schemas/cart_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/cart_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
+      ]
     },
     {
       "name": "get_cart",
@@ -221,18 +292,24 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "#/components/schemas/cart_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/cart_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/not_found" }
+      ]
     },
     {
       "name": "update_cart",
@@ -241,23 +318,30 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         },
         {
           "name": "cart",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/cart.json"}
+          "schema": { "$ref": "../../schemas/shopping/cart.json" }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "#/components/schemas/cart_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/cart_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/not_found" }
+      ]
     },
     {
       "name": "cancel_cart",
@@ -268,21 +352,34 @@
           "required": true,
           "schema": {
             "allOf": [
-              {"$ref": "#/components/schemas/meta"},
-              {"required": ["ucp-agent", "idempotency-key"]}
+              { "$ref": "#/components/schemas/meta" },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
             ]
           }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string"}
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
         "name": "cart",
-        "schema": {"$ref": "#/components/schemas/cart_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/cart_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" },
+        { "$ref": "#/components/errors/not_found" },
+        { "$ref": "#/components/errors/idempotency_conflict" }
+      ]
     },
     {
       "name": "search_catalog",
@@ -292,18 +389,22 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "catalog",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"}
+          "schema": { "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request" }
         }
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"}
-      }
+        "schema": { "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" }
+      ]
     },
     {
       "name": "lookup_catalog",
@@ -313,18 +414,22 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "catalog",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"}
+          "schema": { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request" }
         }
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
-      }
+        "schema": { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" }
+      ]
     },
     {
       "name": "get_order",
@@ -334,18 +439,25 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "id",
           "required": true,
-          "schema": {"type": "string", "description": "The unique identifier of the order."}
+          "schema": {
+            "type": "string",
+            "description": "The unique identifier of the order."
+          }
         }
       ],
       "result": {
         "name": "order",
-        "schema": {"$ref": "#/components/schemas/order_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/order_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/not_found" }
+      ]
     },
     {
       "name": "get_product",
@@ -355,18 +467,22 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "catalog",
           "required": true,
-          "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"}
+          "schema": { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request" }
         }
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
-      }
+        "schema": { "$ref": "#/components/schemas/catalog_get_product_result" }
+      },
+      "errors": [
+        { "$ref": "#/components/errors/authentication_failed" },
+        { "$ref": "#/components/errors/invalid_params" }
+      ]
     }
   ]
 }
