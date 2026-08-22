@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/common/split_payments.json",
-  "name": "dev.ucp.common.split_payments",
-  "title": "Split Payments Extension",
+  "$id": "https://ucp.dev/schemas/common/payment_split_payments.json",
+  "name": "dev.ucp.common.payment.split_payments",
+  "title": "Payment Split Payments Extension",
   "description": "Enables Buyers to use multiple payment instruments for a single session.",
   "$defs": {
     "instrument_group": {
@@ -53,7 +53,7 @@
         }
       ]
     },
-    "dev.ucp.common.split_payments": {
+    "dev.ucp.common.payment.split_payments": {
       "business_schema": {
         "title": "Split Payments Capability (Business)",
         "description": "Business-level split payments capability configuration.",

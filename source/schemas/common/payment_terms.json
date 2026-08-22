@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/payment_terms.json",
-  "name": "dev.ucp.common.payment_terms",
+  "name": "dev.ucp.common.payment.terms",
   "title": "Payment Terms Extension",
   "description": "Extends capabilities (e.g., checkout in retail shopping) with selectable payment terms, letting a Business offer alternative schedules for when payment for the checkout is due, and projects the accepted term onto the resulting Order.",
   "$defs": {

@@ -84,15 +84,15 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
       - Payment:
-          - AP2 Mandates Extension: specification/payment/ap2-mandates.md
+          - AP2 Mandates Extension: specification/payment/extensions/ap2-mandates.md
           - Payment Authentication:
-              - Overview: specification/payment/authentication.md
+              - Overview: specification/payment/extensions/authentication.md
               - Device Data Collection:
-                  specification/payment/actions/device-data-collection.md
+                  specification/payment/extensions/actions/device-data-collection.md
               - 3DS Challenge:
-                  specification/payment/actions/three-ds-challenge.md
-          - Payment Terms Extension: specification/payment/payment-terms.md
-          - Split Payments Extension: specification/payment/split-payments.md
+                  specification/payment/extensions/actions/three-ds-challenge.md
+          - Payment Terms Extension: specification/payment/extensions/terms.md
+          - Split Payments Extension: specification/payment/extensions/split-payments.md
           - Payment Handlers:
               - Guide: specification/payment/guide.md
               - Template: specification/payment/template.md
@@ -285,23 +285,23 @@ plugins:
           specification/common/identity-linking/index.md
         # Payment
         specification/ap2-mandates.md:
-          specification/payment/ap2-mandates.md
+          specification/payment/extensions/ap2-mandates.md
         specification/payment-authentication.md:
-          specification/payment/authentication.md
+          specification/payment/extensions/authentication.md
         specification/payment-handler-guide.md:
           specification/payment/guide.md
         specification/payment-handler-template.md:
           specification/payment/template.md
         specification/split-payments.md:
-          specification/payment/split-payments.md
+          specification/payment/extensions/split-payments.md
         specification/payment-terms.md:
-          specification/payment/payment-terms.md
+          specification/payment/extensions/terms.md
         specification/tokenization-guide.md:
           specification/payment/tokenization.md
         specification/payment-actions/device-data-collection.md:
-          specification/payment/actions/device-data-collection.md
+          specification/payment/extensions/actions/device-data-collection.md
         specification/payment-actions/three-ds-challenge.md:
-          specification/payment/actions/three-ds-challenge.md
+          specification/payment/extensions/actions/three-ds-challenge.md
         specification/examples/processor-tokenizer-payment-handler.md:
           specification/payment/examples/processor-tokenizer-payment-handler.md
         specification/examples/platform-tokenizer-payment-handler.md:
@@ -523,25 +523,25 @@ plugins:
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
         Payment:
-          - specification/payment/ap2-mandates.md: >-
+          - specification/payment/extensions/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound
               checkout commitments (using SD-JWT+kb digital credentials and
               detached JWS signatures) between business, platform, and payment
               providers.
-          - specification/payment/authentication.md: >-
+          - specification/payment/extensions/authentication.md: >-
               Payment Authentication Extension, defining negotiation,
               payment-handler association, lifecycle, trust, and embedded
               notifications for standard payment authentication Actions.
-          - specification/payment/actions/device-data-collection.md: >-
+          - specification/payment/extensions/actions/device-data-collection.md: >-
               Standard Action type for running invisible device-data collection
               surfaces during payment processing.
-          - specification/payment/actions/three-ds-challenge.md: >-
+          - specification/payment/extensions/actions/three-ds-challenge.md: >-
               Standard Action type for presenting buyer-facing 3DS challenges.
-          - specification/payment/split-payments.md: >-
+          - specification/payment/extensions/split-payments.md: >-
               Split Payments Extension, defining multiple payment instrument
               allocation, settlement rules, and amount distribution across
               payment handlers.
-          - specification/payment/payment-terms.md: >-
+          - specification/payment/extensions/terms.md: >-
               Payment Terms Extension, enabling checkout payment schedules for
               immediate and deferred payments such as deposits, installments,
               and lodging balance-at-check-in flows.

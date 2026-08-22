@@ -404,7 +404,7 @@ unchanged and return the current Checkout with a recoverable error Message.
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
         * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../payment/ap2-mandates.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 
