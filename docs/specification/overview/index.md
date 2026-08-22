@@ -2416,7 +2416,7 @@ touch raw financial credentials.
 
 For scenarios requiring cryptographic proof of user authorization (e.g.,
 autonomous AI agents), UCP supports the **AP2 Mandates Extension**
-(`dev.ucp.common.ap2_mandate`). This optional extension provides
+(`dev.ucp.common.payment.ap2_mandate`). This optional extension provides
 non-repudiable authorization through verifiable digital credentials.
 
 See [Transaction Integrity](#transaction-integrity-and-non-repudiation)
@@ -2498,7 +2498,7 @@ the [Payment Handler Guide](../payment/guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
 **Instrument Cardinality:** A checkout submission **MUST** contain exactly one
-payment instrument unless the `dev.ucp.common.split_payments` capability is
+payment instrument unless the `dev.ucp.common.payment.split_payments` capability is
 active. Businesses **MUST** reject submissions that violate this constraint with
 a `payment_failed` error in `messages[]`. See
 [Split Payments](../payment/extensions/split-payments.md) for the extension that relaxes this
@@ -2819,7 +2819,7 @@ certified and handle:
 4. Log payment events without logging credentials
 5. Set appropriate credential timeouts
 6. For autonomous commerce scenarios requiring cryptographic proof, consider
-    supporting the `dev.ucp.common.ap2_mandate` extension (see
+    supporting the `dev.ucp.common.payment.ap2_mandate` extension (see
     [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md))
 
 **For Platforms:**
@@ -2829,7 +2829,7 @@ certified and handle:
 3. Implement timeout handling for credential acquisition
 4. Clear credentials from memory after submission
 5. Handle credential expiration gracefully (re-acquire if needed)
-6. For autonomous agents, consider using the `dev.ucp.common.ap2_mandate`
+6. For autonomous agents, consider using the `dev.ucp.common.payment.ap2_mandate`
     extension for cryptographic proof of authorization (see
     [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md))
 
@@ -2863,7 +2863,7 @@ payment architecture:
 The core payment architecture described above can be extended for specialized
 use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.common.ap2_mandate`): Adds
+- **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`): Adds
     cryptographic proof of user authorization for autonomous commerce scenarios
     where non-repudiable evidence is required. See
     [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md).
@@ -3324,7 +3324,7 @@ business-emitted snapshot of the originating checkout's attribution.
 
 For scenarios requiring cryptographic proof of authorization (e.g., autonomous
 agents, high-value transactions), UCP supports the **AP2 Mandates Extension**
-(`dev.ucp.common.ap2_mandate`). When this optional extension is negotiated:
+(`dev.ucp.common.payment.ap2_mandate`). When this optional extension is negotiated:
 
 - Businesses provide a cryptographic signature on checkout terms
 - Platforms provide cryptographic mandates proving user authorization
