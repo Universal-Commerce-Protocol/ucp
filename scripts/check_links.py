@@ -116,6 +116,30 @@ def check_links():
 
     try:
       content = path.read_text(encoding="utf-8")
+      # If this is a redirect stub, follow the redirect target
+      # to collect anchors.
+      refresh_match = re.search(
+        r'<meta http-equiv="refresh" content="[0-9]+;\s*url=([^"]+)"', content
+      )
+      if refresh_match:
+        redirect_url = refresh_match.group(1)
+        parsed_redirect = urlparse(redirect_url)
+        redirect_path = unquote(parsed_redirect.path)
+        if SITE_BASE_PATH != "/" and redirect_path.startswith(SITE_BASE_PATH):
+          redirect_path = "/" + redirect_path[len(SITE_BASE_PATH) :]
+        if redirect_path.startswith("/"):
+          target = ROOT_DIR / redirect_path[1:]
+        else:
+          target = path.parent / redirect_path
+        if target.is_dir() or redirect_path.endswith("/"):
+          target = target / "index.html"
+        elif not target.exists() and target.with_suffix(".html").exists():
+          target = target.with_suffix(".html")
+        if target.exists() and target != path:
+          target_ids = get_file_ids(target)
+          file_cache[path] = target_ids
+          return target_ids
+
       parser = LinkParser()
       parser.feed(content)
       file_cache[path] = parser.ids

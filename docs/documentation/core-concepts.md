@@ -167,7 +167,7 @@ core capabilities.
     {
       "version": "{{ ucp_version }}",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
@@ -290,7 +290,7 @@ authentication are resolved together.
       }],
       "dev.ucp.shopping.fulfillment": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]

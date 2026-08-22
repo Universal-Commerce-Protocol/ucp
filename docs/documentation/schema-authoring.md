@@ -279,7 +279,7 @@ Each entity type defines **three variants** for different contexts:
 {
   "dev.ucp.shopping.fulfillment": [{
     "version": "{{ ucp_version }}",
-    "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+    "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
     "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
     "config": {
       "supports_multi_group": true

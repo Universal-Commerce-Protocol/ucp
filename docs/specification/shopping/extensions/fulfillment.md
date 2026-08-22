@@ -709,7 +709,7 @@ checkout and on catalog discovery):
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
@@ -732,7 +732,7 @@ Opt-in declaration (business MAY return multiple groups per method):
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
@@ -758,7 +758,7 @@ Businesses declare what fulfillment configurations they support using
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",

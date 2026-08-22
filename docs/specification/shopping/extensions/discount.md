@@ -48,7 +48,7 @@ extend cart, checkout, or both:
         {
           "version": "{{ ucp_version }}",
           "extends": ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/discount",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
         }
       ]

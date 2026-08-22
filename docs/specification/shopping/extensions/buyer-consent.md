@@ -67,7 +67,7 @@ cart, checkout, or both:
     "dev.ucp.shopping.buyer_consent": [
       {
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/buyer-consent",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json",
         "extends": [
           "dev.ucp.shopping.cart",

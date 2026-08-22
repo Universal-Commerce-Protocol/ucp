@@ -505,7 +505,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         config: {
           multi_destination: [],
@@ -520,7 +520,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/discount",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/discount",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
@@ -528,7 +528,7 @@ const UcpData = {
       {
         extends: ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/buyer-consent",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
       }
     ],
