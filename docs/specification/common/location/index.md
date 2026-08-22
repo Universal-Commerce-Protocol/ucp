@@ -56,7 +56,7 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 ### Relationship to Other Capabilities
 
-The Location capability provides the foundation for localized commerce by integrating tightly
+The Location capability provides the foundation for localized commerce by integrating tightly with
 other capabilities (like Catalog, Cart, and Checkout in Shopping):
 
 1. **Stable Identifiers**: Location search/lookup operations return stable,

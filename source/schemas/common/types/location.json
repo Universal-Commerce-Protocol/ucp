@@ -17,7 +17,7 @@
         },
         "amenities": {
           "type": "array",
-          "description": "Static features of the location represented as a reverse-DNS string. (e.g., 'dev.ucp.amenity.wi_fi', 'dev.ucp.amenity.shopping.in_store_pickup', 'com.example.amenity.in_person_installation').",
+          "description": "Static features of the location represented as a reverse-DNS string (e.g., 'dev.ucp.amenity.wi_fi', 'dev.ucp.amenity.shopping.in_store_pickup', 'com.example.amenity.in_person_installation').",
           "items": {
             "$ref": "amenity_type.json"
           },

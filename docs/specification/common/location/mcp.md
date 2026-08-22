@@ -229,7 +229,7 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 
 ### Lookup Location
 
-{{ extension_schema_fields('location_lookup.json#/$defs/lookup_location', 'common/location/rest') }}
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_location', 'common/location/mcp') }}
 
 ### Location {: #location-entity }
 

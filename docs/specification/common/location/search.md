@@ -230,7 +230,7 @@ Separates static location characteristics from dynamic availability:
     the location. Some industry specific use cases include:
     * *Shopping*: Checking stock availability for specific products or variants.
     * *Food Ordering*: Checking offering availability of specific dishes or menu items.
-    Each inventory filter requires an stable, opaque `id` (e.g., product/dish ID) and
+    Each inventory filter requires a stable, opaque `id` (e.g., product/dish ID) and
     can optionally specify a coarse `availability_status` value.
 
 #### Amenity Vocabulary
