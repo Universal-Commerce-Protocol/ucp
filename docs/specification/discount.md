@@ -500,8 +500,8 @@ to line items, and an automatic shipping discount at the order level.
         {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
         {"type": "items_discount", "display_text": "Item Discounts", "amount": -800},
         {"type": "discount", "display_text": "Order Discounts", "amount": -599},
-        {"type": "fulfillment", "display_text": "Shipping", "amount": 0},
-        {"type": "total", "display_text": "Total", "amount": 2601}
+        {"type": "fulfillment", "display_text": "Shipping", "amount": 599},
+        {"type": "total", "display_text": "Total", "amount": 3200}
       ]
     }
     ```
