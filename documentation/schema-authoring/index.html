@@ -2227,7 +2227,7 @@ breaking capability negotiation.</p>
 <li><strong>Top-level fields</strong>: <code>$schema</code>, <code>$id</code>, <code>title</code>, <code>description</code>, <code>name</code>, <code>version</code>, <code>available_instruments</code></li>
 <li><strong>Variants</strong>: <code>platform_schema</code>, <code>business_schema</code>, <code>response_schema</code></li>
 <li><strong>Instance <code>id</code></strong>: Required to distinguish multiple configurations of the same handler</li>
-<li><strong><code>available_instruments</code></strong>: Optional. Array of supported instrument types with type-specific constraints (e.g., brands for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.</li>
+<li><strong><code>available_instruments</code></strong>: Optional. Array of supported instrument types, each with an optional Constraint Expression over type-specific members (e.g., <code>brand</code> for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.</li>
 </ul>
 <p>Examples: <code>com.google.pay</code>, <code>dev.shopify.shop_pay</code>, <code>dev.ucp.processor_tokenizer</code></p>
 <p><strong>→ See <a href="/latest/specification/payment/guide/">Payment Handler Guide</a></strong> for detailed
