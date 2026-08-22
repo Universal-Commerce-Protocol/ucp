@@ -78,6 +78,9 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Run schema pattern unit tests
+        run: uv run python scripts/test_ap2_mandate_pattern.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
