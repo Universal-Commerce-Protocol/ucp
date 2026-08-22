@@ -102,7 +102,7 @@ The Platform **MUST**:
 
 Mounting the surface **MUST** follow the shared
 [Payment Authentication rendering contract](../authentication.md#surface-rendering-and-notifications)
-and [Embedded Protocol security requirements](../../embedded-protocol.md#security).
+and [Embedded Protocol security requirements](../../../embedded-protocol.md#security).
 
 On the web the surface may be a full-page frame, modal frame, or separate window
 when the negotiated handler defines that presentation and its security policy.

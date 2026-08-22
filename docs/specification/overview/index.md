@@ -2582,7 +2582,7 @@ for the full resolution semantics.
 payment instrument unless the `dev.ucp.common.split_payments` capability is
 active. Businesses **MUST** reject submissions that violate this constraint with
 a `payment_failed` error in `messages[]`. See
-[Split Payments](../payment/split-payments.md) for the extension that relaxes this
+[Split Payments](../payment/extensions/split-payments.md) for the extension that relaxes this
 constraint.
 
 ### Implementation Scenarios

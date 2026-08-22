@@ -100,7 +100,7 @@ The Platform **MUST**:
 
 Mounting the surface **MUST** follow the shared
 [Payment Authentication rendering contract](../authentication.md#surface-rendering-and-notifications)
-and [Embedded Protocol security requirements](../../embedded-protocol.md#security).
+and [Embedded Protocol security requirements](../../../embedded-protocol.md#security).
 
 On the web the surface is typically a hidden iframe. A native Platform may use
 an isolated webview or equivalent browser surface. It **MUST NOT** be visible to
