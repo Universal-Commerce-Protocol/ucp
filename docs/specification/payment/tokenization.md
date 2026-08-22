@@ -268,14 +268,14 @@ A tokenizer handler conforms to this pattern if it:
 | Resource                | URL                                                                                                             |
 | :---------------------- | :-------------------------------------------------------------------------------------------------------------- |
 | Tokenization OpenAPI    | [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)                                   |
-| Identity Schema         | [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)               |
+| Identity Schema         | [schemas/common/types/payment_identity.json](site:schemas/common/types/payment_identity.json)                   |
 | Binding Schema          | [schemas/shopping/types/binding.json](site:schemas/shopping/types/binding.json)                                 |
-| Token Credential Schema | [schemas/shopping/types/token_credential.json](site:schemas/shopping/types/token_credential.json)               |
-| Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json) |
+| Token Credential Schema | [schemas/common/types/token_credential.json](site:schemas/common/types/token_credential.json)                   |
+| Card Instrument Schema  | [schemas/common/types/card_payment_instrument.json](site:schemas/common/types/card_payment_instrument.json)     |
 
 ---
 
 ## See Also
 
 - **[Encrypted Credential Handler](examples/encrypted-credential-payment-handler.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](../ap2-mandates.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[AP2 Mandates Extension](extensions/ap2-mandates.md)** — Add cryptographic proof of checkout agreement for PSP verification

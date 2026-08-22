@@ -16,7 +16,7 @@
 
 # Split Payments Extension
 
-* **Capability Name:** `dev.ucp.shopping.split_payments`
+* **Capability Name:** `dev.ucp.common.payment.split_payments`
 
 > **Note on examples:** Instrument `type` strings used in this spec
 > (`card`, `gift_card`, `store_credit`, `loyalty`) are illustrative.
@@ -67,7 +67,7 @@ allocation, not processing sequence.
 When this capability is active, each payment instrument in
 `checkout.payment.instruments` gains an optional `amount` field.
 
-{{ extension_schema_fields('split_payments.json#/$defs/payment_instrument', 'payment/split-payments') }}
+{{ extension_schema_fields('payment_split_payments.json#/$defs/payment_instrument', 'payment/extensions/split-payments') }}
 
 ## Configuration
 
@@ -75,7 +75,7 @@ Businesses declare split payments configuration in their profile.
 
 ### Business Profile
 
-{{ schema_fields('types/business_split_payments_config', 'payment/split-payments') }}
+{{ schema_fields('types/business_split_payments_config', 'payment/extensions/split-payments') }}
 
 #### `allowed_combinations`
 
@@ -90,7 +90,7 @@ A set of instruments is valid if it matches **any** combination in the array.
 Each group within a combination defines a "slot" that accepts certain
 instrument types:
 
-{{ schema_fields('types/instrument_group', 'payment/split-payments') }}
+{{ schema_fields('types/instrument_group', 'payment/extensions/split-payments') }}
 
 **Matching algorithm:** a submission matches a combination if there exists
 an assignment of each submitted instrument to exactly one group such that
@@ -111,7 +111,7 @@ gift cards alone, and (c) two credit cards:
 ```json
 {
   "capabilities": [{
-    "dev.ucp.shopping.split_payments": [
+    "dev.ucp.common.payment.split_payments": [
       {
         "version": "2026-01-23",
         "config": {
@@ -175,7 +175,7 @@ reference to prior requests or responses.
 > [!NOTE]
 > Each split payments submission is processed as a complete,
 > self-contained request: a modified instrument set is a new submission,
-> requiring a fresh [idempotency key](../signatures.md#replay-protection).
+> requiring a fresh [idempotency key](../../signatures.md#replay-protection).
 > Split-payments state — including authorizations — does not persist
 > between submissions; the unwind-on-failure requirement above
 > enforces this.

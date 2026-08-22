@@ -21,6 +21,8 @@ within the UCP.
 
 ## Capability Schemas
 
+{{ auto_generate_schema_reference('.', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
 
 ## Type Schemas
@@ -54,6 +56,8 @@ within the UCP.
 {{ schema_fields('types/info_code', 'reference') }}
 
 ## Extension Schemas
+
+{{ auto_generate_schema_reference('.', 'reference', include_capability=False, base_dir='source/schemas/common') }}
 
 {{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
 

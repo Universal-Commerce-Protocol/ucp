@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/payment_authentication.json",
-  "name": "dev.ucp.shopping.payment_authentication",
+  "$id": "https://ucp.dev/schemas/common/payment_authentication.json",
+  "name": "dev.ucp.common.payment.authentication",
   "title": "Payment Authentication Extension",
-  "description": "Extends Checkout with standard device data collection and 3DS challenge Action types used during payment authentication.",
+  "description": "Extends capabilities (e.g., checkout in retail shopping) with standard device data collection and 3DS challenge Action types used during payment authentication.",
   "$defs": {
     "dev.ucp.shopping.checkout": {
       "allOf": [
         {
-          "$ref": "checkout.json"
+          "$ref": "../shopping/checkout.json"
         },
         {
           "type": "object",
@@ -17,7 +17,7 @@
               "type": "object",
               "ucp_request": "omit",
               "properties": {
-                "dev.ucp.payment.device_data_collection": {
+                "dev.ucp.common.payment.device_data_collection": {
                   "type": "array",
                   "description": "A 3DS device data collection Action.",
                   "items": {
@@ -48,7 +48,7 @@
                     }
                   }
                 },
-                "dev.ucp.payment.three_ds_challenge": {
+                "dev.ucp.common.payment.three_ds_challenge": {
                   "type": "array",
                   "description": "A 3DS challenge Action.",
                   "items": {

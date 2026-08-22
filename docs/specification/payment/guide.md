@@ -125,7 +125,7 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 **Prerequisites Output:**
 
 The `prerequisites_output` contains what a participant receives from onboarding.
-At minimum, this includes an **identity** (see [Payment Identity](site:schemas/shopping/types/payment_identity.json)).
+At minimum, this includes an **identity** (see [Payment Identity](site:schemas/common/types/payment_identity.json)).
 It **MAY** also include additional configuration, credentials, or settings
 specific to the handler.
 
@@ -509,8 +509,8 @@ Each variant has its own config schema tailored to its context:
 
 | Schema                                                                                     | Description                                                      |
 | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+| [`payment_instrument.json`](site:schemas/common/types/payment_instrument.json)             | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](site:schemas/common/types/card_payment_instrument.json)   | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec
 authors **MAY** extend any of the base instruments to add handler-specific
@@ -521,12 +521,12 @@ multiple instrument types for different payment flows.
 
 Each instrument schema defines its own `available_*` variant in `$defs` that
 specifies what constraints are valid for that instrument type. For example,
-[`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
+[`card_payment_instrument.json`](site:schemas/common/types/card_payment_instrument.json)
 defines `available_card_payment_instrument` with a `brands` constraint.
 
 | Schema                                                                                                 | Constraints                                                     |
 | :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                           |
+| [`available_payment_instrument.json`](site:schemas/common/types/available_payment_instrument.json)     | Base: type, constraints (open object)                           |
 | `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands` for card networks        |
 
 Handlers reference these instrument-defined schemas when declaring
@@ -548,7 +548,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
       "title": "Available Tokenizer Card",
       "description": "Card instrument availability with tokenizer-specific constraints.",
       "allOf": [
-        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
         {
           "type": "object",
           "properties": {
@@ -570,7 +570,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
   },
 
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/card_payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -600,7 +600,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
   "title": "Tokenizer Alt Instrument",
   "description": "Alternative payment instrument for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_instrument.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -628,8 +628,8 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
 
 | Schema                                                                           | Description                   |
 | :------------------------------------------------------------------------------- | :---------------------------- |
-| [`payment_credential.json`](site:schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](site:schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+| [`payment_credential.json`](site:schemas/common/types/payment_credential.json)   | Base: type discriminator only |
+| [`token_credential.json`](site:schemas/common/types/token_credential.json)       | Token: type + token string    |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY**
 extend these schemas to include handler-specific credential context. Handlers
@@ -652,7 +652,7 @@ refresh credentials.
   "title": "Tokenizer Card Token",
   "description": "Card token credential for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -680,7 +680,7 @@ refresh credentials.
   "title": "Tokenizer Alt Token",
   "description": "Alt token credential for com.example.tokenizer, adding routing hints",
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -744,9 +744,9 @@ Handler authors have two options:
 
 - **Use the standard Payment Authentication extension.** Handlers that need
   device data collection or a 3DS challenge use
-  [`dev.ucp.shopping.payment_authentication`](authentication.md), which
-  defines the `dev.ucp.payment.device_data_collection` and
-  `dev.ucp.payment.three_ds_challenge` Action types. The handler specification
+  [`dev.ucp.common.payment.authentication`](extensions/authentication.md), which
+  defines the `dev.ucp.common.payment.device_data_collection` and
+  `dev.ucp.common.payment.three_ds_challenge` Action types. The handler specification
   states which types it can cause and any provider-specific trust or fallback
   requirements, such as allowed origins.
 - **Define handler-specific Actions.** When the standard types do not fit, the
