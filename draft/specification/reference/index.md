@@ -430,10 +430,10 @@ ______________________________________________________________________
 
 ### Available Payment Instrument
 
-| Name        | Type   | Requirement  | Description                                                                                                  |
-| ----------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------ |
-| type        | string | **Required** | The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant. |
-| constraints | object | Optional     | Constraints on this instrument type. Structure depends on instrument type and active capabilities.           |
+| Name        | Type                                                                           | Requirement  | Description                                                                                                                                                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type        | string                                                                         | **Required** | The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant.                                                                                                                                                                      |
+| constraints | [Constraint Expression](/draft/specification/reference/#constraint-expression) | Optional     | A Constraint Expression describing the instrument this entry makes available. Keys in `properties` name members of the `constraint_target` declared by the instrument schema for this `type`. Requirements on submitted request data belong in `ucp.request_constraints` instead. |
 
 ______________________________________________________________________
 
@@ -476,18 +476,18 @@ ______________________________________________________________________
 
 ### Card Credential
 
-| Name             | Type    | Requirement  | Description                                                                                                                                            |
-| ---------------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type             | string  | **Required** | The credential type discriminator. Specific schemas will constrain this to a constant value.                                                           |
-| type             | any     | **Required** | **Constant = card**. The credential type identifier for card credentials.                                                                              |
-| card_number_type | string  | **Required** | The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details. **Enum:** `fpan`, `network_token`, `dpan` |
-| number           | string  | Optional     | Card number.                                                                                                                                           |
-| expiry_month     | integer | Optional     | The month of the card's expiration date (1-12).                                                                                                        |
-| expiry_year      | integer | Optional     | The year of the card's expiration date.                                                                                                                |
-| name             | string  | Optional     | Cardholder name.                                                                                                                                       |
-| cvc              | string  | Optional     | Card CVC number.                                                                                                                                       |
-| cryptogram       | string  | Optional     | Cryptogram provided with network tokens.                                                                                                               |
-| eci_value        | string  | Optional     | Electronic Commerce Indicator / Security Level Indicator provided with network tokens.                                                                 |
+| Name             | Type    | Requirement  | Description                                                                                                                                                                                                          |
+| ---------------- | ------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type             | string  | **Required** | The credential type discriminator. Specific schemas will constrain this to a constant value.                                                                                                                         |
+| type             | any     | **Required** | **Constant = card**. The credential type identifier for card credentials.                                                                                                                                            |
+| card_number_type | string  | **Required** | Deprecated: the credential type now carries this distinction. The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details. **Enum:** `fpan`, `network_token`, `dpan` |
+| number           | string  | Optional     | Card number.                                                                                                                                                                                                         |
+| expiry_month     | integer | Optional     | The month of the card's expiration date (1-12).                                                                                                                                                                      |
+| expiry_year      | integer | Optional     | The year of the card's expiration date.                                                                                                                                                                              |
+| name             | string  | Optional     | Cardholder name.                                                                                                                                                                                                     |
+| cvc              | string  | Optional     | Card CVC number.                                                                                                                                                                                                     |
+| cryptogram       | string  | Optional     | Cryptogram provided with network tokens.                                                                                                                                                                             |
+| eci_value        | string  | Optional     | Electronic Commerce Indicator / Security Level Indicator provided with network tokens.                                                                                                                               |
 
 ______________________________________________________________________
 
@@ -502,6 +502,7 @@ ______________________________________________________________________
 | credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | Optional     | The base definition for any payment credential. Handlers define specific credential types.                                                                                                                                                                                                                                                                                            |
 | display         | object                                                                   | Optional     | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler.                                                                                                                                                                                                                          |
 | type            | string                                                                   | **Required** | **Constant = card**. Indicates this is a card payment instrument.                                                                                                                                                                                                                                                                                                                     |
+| network         | string                                                                   | Optional     | Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another.                                                                                                                                                                                                  |
 | display         | object                                                                   | Optional     | Display information for this card payment instrument.                                                                                                                                                                                                                                                                                                                                 |
 
 ______________________________________________________________________
@@ -695,6 +696,22 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Network Token Credential
+
+| Name               | Type    | Requirement  | Description                                                                                                        |
+| ------------------ | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| type               | string  | **Required** | The credential type discriminator. Specific schemas will constrain this to a constant value.                       |
+| type               | any     | **Required** | **Constant = network_token**. The credential type identifier for network token credentials.                        |
+| number             | string  | **Required** | Network token or wallet-provisioned token replacing the underlying FPAN.                                           |
+| expiry_month       | integer | Optional     | The month of the token's expiration date (1-12).                                                                   |
+| expiry_year        | integer | Optional     | The year of the token's expiration date.                                                                           |
+| name               | string  | Optional     | Cardholder name.                                                                                                   |
+| cryptogram         | string  | **Required** | Transaction cryptogram or dynamic CVC (dCVV), in the long or short form expected by the card network or processor. |
+| eci_value          | string  | Optional     | Electronic Commerce Indicator / Security Level Indicator associated with the transaction.                          |
+| token_requestor_id | string  | Optional     | Payment network token requestor identifier, when required by the processor or network-token program.               |
+
+______________________________________________________________________
+
 ### Option Value
 
 | Name  | Type   | Requirement  | Description                                                                                                                                           |
@@ -724,6 +741,20 @@ ______________________________________________________________________
 | totals    | Array\[[Total](/draft/specification/reference/#total)\] | **Required** | Line item totals breakdown.                                                                                                                                                                                                                                                     |
 | status    | string                                                  | **Required** | Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing. **Enum:** `processing`, `partial`, `fulfilled`, `removed`             |
 | parent_id | string                                                  | Optional     | Parent line item identifier for any nested structures.                                                                                                                                                                                                                          |
+
+______________________________________________________________________
+
+### PAN Credential
+
+| Name         | Type    | Requirement  | Description                                                                                  |
+| ------------ | ------- | ------------ | -------------------------------------------------------------------------------------------- |
+| type         | string  | **Required** | The credential type discriminator. Specific schemas will constrain this to a constant value. |
+| type         | any     | **Required** | **Constant = pan**. The credential type identifier for PAN credentials.                      |
+| number       | string  | **Required** | Funding primary account number (FPAN).                                                       |
+| expiry_month | integer | Optional     | The month of the card's expiration date (1-12).                                              |
+| expiry_year  | integer | Optional     | The year of the card's expiration date.                                                      |
+| name         | string  | Optional     | Cardholder name.                                                                             |
+| cvc          | string  | Optional     | Card verification code.                                                                      |
 
 ______________________________________________________________________
 

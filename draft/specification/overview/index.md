@@ -111,6 +111,8 @@ Members present at the same Object Constraint all apply. `anyOf` does not narrow
 
 Branches are alternatives, not a partition: an object satisfying more than one branch is valid. Within a branch, `properties` constrains a member only when that member is present, so a branch pinning a discriminator through `properties` alone is also satisfied by an object that omits it; naming the discriminator in the branch's `required` makes the branch match only the shape it describes.
 
+The grammar is defined independently of the object it is bound to. Request Constraints bind it to objects in the next request and add `path`; other UCP schemas reuse it where a declaration already identifies the object it constrains, such as [`available_instruments[].constraints`](/draft/schemas/shopping/types/available_payment_instrument.json), whose object is the `constraint_target` declared by the instrument schema for that entry's `type`.
+
 ### Path
 
 Every `request_constraints` value has exactly one effective path. When `path` is omitted, the effective path is the [RFC 9535](https://www.rfc-editor.org/rfc/rfc9535.html) Normalized Path from the authoritative response root to the structured response object whose `ucp` member contains `request_constraints`. When the Business provides `path`, that value becomes the effective path and supersedes the Normalized Path that would otherwise be derived; the Business **MUST** make it a complete RFC 9535 JSONPath query. In both cases, the effective path is evaluated against the next logical UCP request to that resource. The effective path therefore differs from response-targeting paths elsewhere in UCP, such as `messages[].path`, which are evaluated against the response that carries them.
@@ -321,7 +323,7 @@ This fragment assumes its containing authoritative response payment-handler decl
 
 #### Alternative verification requirements on a submitted credential
 
-A Business accepts more than one credential shape and requires different verification data for each. In this example, a raw PAN must carry a `cvc`, and a network token must carry a `cryptogram` with its `eci_value`:
+A Business accepts more than one credential shape and requires different verification data for each. In this example, a PAN must carry a `cvc`, and a network token must carry a `cryptogram` with its `eci_value`. Each credential family is its own schema, so every branch discriminates on the credential's own `type` and no rule has to branch on a sibling field:
 
 ```json
 {
@@ -334,12 +336,12 @@ A Business accepts more than one credential shape and requires different verific
         "credential": {
           "anyOf": [
             {
-              "properties": {"card_number_type": {"const": "fpan"}},
-              "required": ["card_number_type", "cvc"]
+              "properties": {"type": {"const": "pan"}},
+              "required": ["cvc"]
             },
             {
-              "properties": {"card_number_type": {"const": "network_token"}},
-              "required": ["card_number_type", "cryptogram", "eci_value"]
+              "properties": {"type": {"const": "network_token"}},
+              "required": ["cryptogram", "eci_value"]
             }
           ]
         }
@@ -349,11 +351,11 @@ A Business accepts more than one credential shape and requires different verific
 }
 ```
 
-One path selects the submitted instrument, and one Object Constraint describes it. The sibling `required` applies to every matching instrument; the `anyOf` branches then apply to the nested `credential` object, which must satisfy at least one. Each branch pins `card_number_type` and also names it in `required`, so a branch matches only the credential shape it describes. A raw PAN without a `cvc` fails, as does a network token missing its `eci_value`.
+One path selects the submitted instrument, and one Object Constraint describes it. The sibling `required` applies to every matching instrument; the `anyOf` branches then apply to the nested `credential` object, which must satisfy at least one. Each branch pins `type` with `const`, so a branch matches only the credential family it describes; [`payment_credential.json`](/draft/schemas/shopping/types/payment_credential.json) already requires `type` on every credential, so no branch has to name it in `required`. A [PAN credential](/draft/schemas/shopping/types/pan_credential.json) without a `cvc` fails, as does a [network token](/draft/schemas/shopping/types/network_token_credential.json) missing its `eci_value`.
 
-Because every branch pins the discriminator, the branch set also closes the accepted values. A `dpan` credential is valid under [`card_credential.json`](/draft/schemas/shopping/types/card_credential.json) but satisfies neither branch, so this Business does not accept it at this path. A Business that later accepts a new variant adds a branch for it.
+Because every branch pins the discriminator, the branch set also closes the accepted credential families. A handler [token credential](/draft/schemas/shopping/types/token_credential.json) is a valid credential at this position but satisfies neither branch, so this Business does not accept it at this path. A Business that later accepts another family adds a branch for it.
 
-Two separately targeted constraints cannot express this rule. Request Constraints conjoin, so one value requiring `cvc` and another requiring `cryptogram` would require both. Discriminating through the path filter instead — selecting `fpan` credentials in one value and `network_token` credentials in another — moves conditional logic into the selector, which paths do not carry.
+Two separately targeted constraints cannot express this rule. Request Constraints conjoin, so one value requiring `cvc` and another requiring `cryptogram` would require both. Discriminating through the path filter instead — selecting `pan` credentials in one value and `network_token` credentials in another — moves conditional logic into the selector, which paths do not carry.
 
 ## Actions
 
@@ -859,7 +861,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex"] } }
               }
             }
           ],
@@ -991,7 +993,7 @@ Platform profiles are similar and include signing keys for capabilities requirin
           "spec": "https://example.com/specs/payments/processor_tokenizer-payment",
           "schema": "https://example.com/schemas/payments/delegate-payment.json",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard"]}}
+            {"type": "card", "constraints": {"properties": {"brand": {"enum": ["visa", "mastercard"]}}}}
           ]
         }
       ]
@@ -1765,7 +1767,7 @@ In this scenario, the platform uses a generic tokenizer to request a session tok
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "properties": { "brand": { "enum": ["visa", "mastercard"] } }
               }
             }
           ],
@@ -1897,6 +1899,7 @@ Most platform implementations can **avoid PCI-DSS scope** by:
 - Never accessing or storing raw payment data (card numbers, CVV, etc.)
 - Forwarding credentials without the ability to use them directly
 - Using PSP tokenization payment handlers where raw credentials never pass through the platform
+- Presenting pre-provisioned card network tokens (`network_token_credential.json`) rather than an FPAN — the platform never shares the underlying account number, and the token is unusable without a matching cryptogram
 
 #### Business Scope
 

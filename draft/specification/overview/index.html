@@ -6174,6 +6174,13 @@ that member is present, so a branch pinning a discriminator through
 <code>properties</code> alone is also satisfied by an object that omits it; naming the
 discriminator in the branch's <code>required</code> makes the branch match only the shape
 it describes.</p>
+<p>The grammar is defined independently of the object it is bound to. Request
+Constraints bind it to objects in the next request and add <code>path</code>; other UCP
+schemas reuse it where a declaration already identifies the object it
+constrains, such as
+<a href="/draft/schemas/shopping/types/available_payment_instrument.json"><code>available_instruments[].constraints</code></a>,
+whose object is the <code>constraint_target</code> declared by the instrument schema for
+that entry's <code>type</code>.</p>
 <h3 id="path">Path<a class="headerlink" href="#path" title="Permanent link">&para;</a></h3>
 <p>Every <code>request_constraints</code> value has exactly one effective path. When <code>path</code>
 is omitted, the effective path is the
@@ -6443,8 +6450,10 @@ This example does not define card brands, credentials, support, availability, or
 payment policy.</p>
 <h4 id="alternative-verification-requirements-on-a-submitted-credential">Alternative verification requirements on a submitted credential<a class="headerlink" href="#alternative-verification-requirements-on-a-submitted-credential" title="Permanent link">&para;</a></h4>
 <p>A Business accepts more than one credential shape and requires different
-verification data for each. In this example, a raw PAN must carry a <code>cvc</code>, and a
-network token must carry a <code>cryptogram</code> with its <code>eci_value</code>:</p>
+verification data for each. In this example, a PAN must carry a <code>cvc</code>, and a
+network token must carry a <code>cryptogram</code> with its <code>eci_value</code>. Each credential
+family is its own schema, so every branch discriminates on the credential's own
+<code>type</code> and no rule has to branch on a sibling field:</p>
 <!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
@@ -6456,12 +6465,12 @@ network token must carry a <code>cryptogram</code> with its <code>eci_value</cod
 </span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">        </span><span class="nt">&quot;credential&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">          </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">            </span><span class="p">{</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">              </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;card_number_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fpan&quot;</span><span class="p">}},</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">              </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;card_number_type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cvc&quot;</span><span class="p">]</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">              </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pan&quot;</span><span class="p">}},</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">              </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;cvc&quot;</span><span class="p">]</span>
 </span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">            </span><span class="p">},</span>
 </span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">            </span><span class="p">{</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">              </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;card_number_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;network_token&quot;</span><span class="p">}},</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">              </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;card_number_type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cryptogram&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;eci_value&quot;</span><span class="p">]</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">              </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;network_token&quot;</span><span class="p">}},</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">              </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;cryptogram&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;eci_value&quot;</span><span class="p">]</span>
 </span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">            </span><span class="p">}</span>
 </span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">          </span><span class="p">]</span>
 </span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">        </span><span class="p">}</span>
@@ -6473,18 +6482,24 @@ network token must carry a <code>cryptogram</code> with its <code>eci_value</cod
 <p>One path selects the submitted instrument, and one Object Constraint describes
 it. The sibling <code>required</code> applies to every matching instrument; the <code>anyOf</code>
 branches then apply to the nested <code>credential</code> object, which must satisfy at
-least one. Each branch pins <code>card_number_type</code> and also names it in <code>required</code>,
-so a branch matches only the credential shape it describes. A raw PAN without a
-<code>cvc</code> fails, as does a network token missing its <code>eci_value</code>.</p>
+least one. Each branch pins <code>type</code> with <code>const</code>, so a branch matches only the
+credential family it describes;
+<a href="/draft/schemas/shopping/types/payment_credential.json"><code>payment_credential.json</code></a>
+already requires <code>type</code> on every credential, so no branch has to name it in
+<code>required</code>. A <a href="/draft/schemas/shopping/types/pan_credential.json">PAN credential</a>
+without a <code>cvc</code> fails, as does a <a href="/draft/schemas/shopping/types/network_token_credential.json">network
+token</a> missing its
+<code>eci_value</code>.</p>
 <p>Because every branch pins the discriminator, the branch set also closes the
-accepted values. A <code>dpan</code> credential is valid under
-<a href="/draft/schemas/shopping/types/card_credential.json"><code>card_credential.json</code></a> but
-satisfies neither branch, so this Business does not accept it at this path. A
-Business that later accepts a new variant adds a branch for it.</p>
+accepted credential families. A handler
+<a href="/draft/schemas/shopping/types/token_credential.json">token credential</a> is a valid
+credential at this position but satisfies neither branch, so this Business does
+not accept it at this path. A Business that later accepts another family adds a
+branch for it.</p>
 <p>Two separately targeted constraints cannot express this rule. Request
 Constraints conjoin, so one value requiring <code>cvc</code> and another requiring
 <code>cryptogram</code> would require both. Discriminating through the path filter instead
-— selecting <code>fpan</code> credentials in one value and <code>network_token</code> credentials in
+— selecting <code>pan</code> credentials in one value and <code>network_token</code> credentials in
 another — moves conditional logic into the selector, which paths do not carry.</p>
 <h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
 <p>An Action is an outstanding unit of extension-defined work for a Platform to
@@ -7342,7 +7357,7 @@ lookup, and rotation.</p>
 </span><span id="__span-15-85"><a id="__codelineno-15-85" name="__codelineno-15-85" href="#__codelineno-15-85"></a><span class="w">            </span><span class="p">{</span>
 </span><span id="__span-15-86"><a id="__codelineno-15-86" name="__codelineno-15-86" href="#__codelineno-15-86"></a><span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
 </span><span id="__span-15-87"><a id="__codelineno-15-87" name="__codelineno-15-87" href="#__codelineno-15-87"></a><span class="w">              </span><span class="nt">&quot;constraints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-15-88"><a id="__codelineno-15-88" name="__codelineno-15-88" href="#__codelineno-15-88"></a><span class="w">                </span><span class="nt">&quot;brands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;amex&quot;</span><span class="p">]</span>
+</span><span id="__span-15-88"><a id="__codelineno-15-88" name="__codelineno-15-88" href="#__codelineno-15-88"></a><span class="w">                </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;amex&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-15-89"><a id="__codelineno-15-89" name="__codelineno-15-89" href="#__codelineno-15-89"></a><span class="w">              </span><span class="p">}</span>
 </span><span id="__span-15-90"><a id="__codelineno-15-90" name="__codelineno-15-90" href="#__codelineno-15-90"></a><span class="w">            </span><span class="p">}</span>
 </span><span id="__span-15-91"><a id="__codelineno-15-91" name="__codelineno-15-91" href="#__codelineno-15-91"></a><span class="w">          </span><span class="p">],</span>
@@ -7495,7 +7510,7 @@ example:</p>
 </span><span id="__span-16-73"><a id="__codelineno-16-73" name="__codelineno-16-73" href="#__codelineno-16-73"></a><span class="w">          </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/specs/payments/processor_tokenizer-payment&quot;</span><span class="p">,</span>
 </span><span id="__span-16-74"><a id="__codelineno-16-74" name="__codelineno-16-74" href="#__codelineno-16-74"></a><span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/schemas/payments/delegate-payment.json&quot;</span><span class="p">,</span>
 </span><span id="__span-16-75"><a id="__codelineno-16-75" name="__codelineno-16-75" href="#__codelineno-16-75"></a><span class="w">          </span><span class="nt">&quot;available_instruments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-16-76"><a id="__codelineno-16-76" name="__codelineno-16-76" href="#__codelineno-16-76"></a><span class="w">            </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;constraints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;brands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">]}}</span>
+</span><span id="__span-16-76"><a id="__codelineno-16-76" name="__codelineno-16-76" href="#__codelineno-16-76"></a><span class="w">            </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;constraints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">]}}}}</span>
 </span><span id="__span-16-77"><a id="__codelineno-16-77" name="__codelineno-16-77" href="#__codelineno-16-77"></a><span class="w">          </span><span class="p">]</span>
 </span><span id="__span-16-78"><a id="__codelineno-16-78" name="__codelineno-16-78" href="#__codelineno-16-78"></a><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-16-79"><a id="__codelineno-16-79" name="__codelineno-16-79" href="#__codelineno-16-79"></a><span class="w">      </span><span class="p">]</span>
@@ -8696,7 +8711,7 @@ request a challenge.</p>
 </span><span id="__span-37-11"><a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a><span class="w">            </span><span class="p">{</span>
 </span><span id="__span-37-12"><a id="__codelineno-37-12" name="__codelineno-37-12" href="#__codelineno-37-12"></a><span class="w">              </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;card&quot;</span><span class="p">,</span>
 </span><span id="__span-37-13"><a id="__codelineno-37-13" name="__codelineno-37-13" href="#__codelineno-37-13"></a><span class="w">              </span><span class="nt">&quot;constraints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-37-14"><a id="__codelineno-37-14" name="__codelineno-37-14" href="#__codelineno-37-14"></a><span class="w">                </span><span class="nt">&quot;brands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">]</span>
+</span><span id="__span-37-14"><a id="__codelineno-37-14" name="__codelineno-37-14" href="#__codelineno-37-14"></a><span class="w">                </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;visa&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mastercard&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-37-15"><a id="__codelineno-37-15" name="__codelineno-37-15" href="#__codelineno-37-15"></a><span class="w">              </span><span class="p">}</span>
 </span><span id="__span-37-16"><a id="__codelineno-37-16" name="__codelineno-37-16" href="#__codelineno-37-16"></a><span class="w">            </span><span class="p">}</span>
 </span><span id="__span-37-17"><a id="__codelineno-37-17" name="__codelineno-37-17" href="#__codelineno-37-17"></a><span class="w">          </span><span class="p">],</span>
@@ -8817,6 +8832,10 @@ this specific transaction, enabling safe autonomous processing.</em></p>
 <li>Forwarding credentials without the ability to use them directly</li>
 <li>Using PSP tokenization payment handlers where raw credentials never pass
     through the platform</li>
+<li>Presenting pre-provisioned card network tokens
+    (<code>network_token_credential.json</code>) rather than an FPAN — the platform never
+    shares the underlying account number, and the token is unusable without a
+    matching cryptogram</li>
 </ul>
 <h4 id="business-scope">Business Scope<a class="headerlink" href="#business-scope" title="Permanent link">&para;</a></h4>
 <p>Businesses can minimize PCI scope by:</p>

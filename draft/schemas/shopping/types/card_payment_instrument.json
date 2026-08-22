@@ -4,36 +4,21 @@
   "title": "Card Payment Instrument",
   "description": "A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
   "$defs": {
-    "available_card_payment_instrument": {
-      "title": "Available Card Payment Instrument",
-      "description": "Declares card instrument availability with card-specific constraints.",
-      "allOf": [
-        {
-          "$ref": "https://ucp.dev/draft/schemas/shopping/types/available_payment_instrument.json"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "const": "card"
-            },
-            "constraints": {
-              "type": "object",
-              "properties": {
-                "brands": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minItems": 1,
-                  "uniqueItems": true,
-                  "description": "Limit to specific card brands (e.g., ['visa', 'mastercard', 'amex'])."
-                }
-              }
-            }
-          }
+    "constraint_target": {
+      "title": "Card Constraint Target",
+      "description": "The object an available card instrument's `constraints` describes. It declares the constrainable members and their types and is never carried in a payload.",
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "Card scheme. Derived from the account number, not submitted.",
+          "examples": [
+            "visa",
+            "mastercard",
+            "cartebancaire"
+          ]
         }
-      ]
+      }
     }
   },
   "allOf": [
@@ -51,13 +36,17 @@
           "const": "card",
           "description": "Indicates this is a card payment instrument."
         },
+        "network": {
+          "type": "string",
+          "description": "Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another."
+        },
         "display": {
           "type": "object",
           "description": "Display information for this card payment instrument.",
           "properties": {
             "brand": {
               "type": "string",
-              "description": "The card brand/network (e.g., visa, mastercard, amex)."
+              "description": "The card brand/network shown to the buyer (e.g., visa, mastercard, amex). Presentational only."
             },
             "last_digits": {
               "type": "string",

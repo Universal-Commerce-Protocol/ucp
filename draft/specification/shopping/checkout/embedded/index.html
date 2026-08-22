@@ -6299,6 +6299,12 @@ account, or wallet credential) available to the buyer.</p>
 <td style="text-align: left;"><strong>Constant = card</strong>. Indicates this is a card payment instrument.</td>
 </tr>
 <tr>
+<td style="text-align: left;">network</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another.</td>
+</tr>
+<tr>
 <td style="text-align: left;">display</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">Optional</td>
@@ -6377,7 +6383,7 @@ account, or wallet credential) available to the buyer.</p>
 <td style="text-align: left;">card_number_type</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details.<br><strong>Enum:</strong> <code>fpan</code>, <code>network_token</code>, <code>dpan</code></td>
+<td style="text-align: left;">Deprecated: the credential type now carries this distinction. The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details.<br><strong>Enum:</strong> <code>fpan</code>, <code>network_token</code>, <code>dpan</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">number</td>

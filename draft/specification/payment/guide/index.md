@@ -144,9 +144,54 @@ The handler declaration conforms to the [`PaymentHandler`](/draft/schemas/paymen
 }
 ```
 
-**`available_instruments`** is optional. When absent, the handler places no restrictions on instrument types or constraints — it supports the full set of instrument types defined by its handler schema. When present, it narrows the advertised types and/or applies additional constraints (e.g., limiting card brands to `["visa", "mastercard"]`). In a Business profile and authoritative response, array order communicates preferred instrument presentation, earliest first.
+**`available_instruments`** is optional. When absent, the handler places no restrictions on instrument types or constraints — it supports the full set of instrument types defined by its handler schema. When present, it narrows the advertised types and/or applies additional constraints (e.g., limiting card brands to `visa` and `mastercard`). In a Business profile and authoritative response, array order communicates preferred instrument presentation, earliest first.
+
+Each entry narrows along two axes. Both are [Constraint Expressions](http://ucp.dev/draft/specification/overview/#constraint-expression), so one evaluator runs both; they differ only in the object they describe:
+
+```text
+available_instruments[]
+├── type                       selects an instrument schema
+├── constraints                describes that schema's `constraint_target`
+└── ucp.request_constraints    describes the request that submits it, via `path`
+```
+
+`constraints` admits no `path`. Its object is standing, not selected: the instrument schema for the entry's `type` declares it as `$defs/constraint_target`, and keys in `properties` name that object's members. The target holds what the Business derives rather than receives — for cards, `brand`, read from the account number and surviving tokenization — which is why those values cannot be expressed as requirements on request data.
+
+`ucp.request_constraints` carries everything that *is* on the wire: which instrument fields are required, which credential types are accepted, and which fields each of those credential types must carry. Use field requirements rather than handler-specific booleans for modeled data.
 
 When an authoritative response includes `ucp.request_constraints` on an available instrument, the Business **MUST** include an explicit `path` because the available instrument's response Normalized Path does not identify submitted instruments. The path matches the containing handler's `id` to submitted `handler_id` and the available instrument's `type` to submitted `type`, and applies when the next request contains matching instruments. Payment-handler and instrument specifications define any stronger association the query needs. See [Request Constraints](http://ucp.dev/draft/specification/overview/#request-constraints).
+
+One path selects the submitted instrument, and one Constraint Expression describes it. Requirements shared by every instrument of the type are sibling members; requirements that differ per credential family are `anyOf` branches on the nested `credential` object. Splitting the credential families into distinct schemas is what gives each branch a stable discriminator.
+
+```json
+{
+  "id": "processor_tokenizer_1234",
+  "version": "draft",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": { "properties": { "brand": { "enum": ["visa", "mastercard"] } } },
+      "ucp": {
+        "request_constraints": {
+          "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_tokenizer_1234' && @['type'] == 'card']",
+          "required": ["billing_address", "credential"],
+          "properties": {
+            "billing_address": { "required": ["postal_code", "address_country"] },
+            "credential": {
+              "anyOf": [
+                { "properties": { "type": { "const": "pan" } }, "required": ["cvc"] },
+                { "properties": { "type": { "const": "network_token" } } }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+The sibling members apply to every card instrument from this handler. The branches accept either a PAN credential carrying a `cvc` or a network token, which `network_token_credential.json` already requires to carry a `cryptogram`; a credential of any other type satisfies neither branch. Declared constraints are the upfront minimum; dynamic requirements still use recoverable errors and [`message_error.path`](/draft/schemas/common/types/message_error.json).
 
 ______________________________________________________________________
 
@@ -172,7 +217,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -195,7 +240,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard", "amex", "discover"]
+        "properties": { "brand": { "enum": ["visa", "mastercard", "amex", "discover"] } }
       }
     }
   ],
@@ -216,7 +261,7 @@ The `PaymentHandler` schema defines three variants for different contexts. While
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -243,11 +288,11 @@ Both the platform and the business independently advertise `available_instrument
 
 **Example:**
 
-| Source                  | `available_instruments`                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| Platform profile        | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
-| Business profile        | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]`             |
-| **Response (resolved)** | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]`             |
+| Source                  | `available_instruments`                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Platform profile        | `[{type: "card", constraints: {properties: {brand: {enum: ["visa", "mastercard", "amex", "discover"]}}}}]` |
+| Business profile        | `[{type: "card", constraints: {properties: {brand: {enum: ["visa", "mastercard", "amex"]}}}}]`             |
+| **Response (resolved)** | `[{type: "card", constraints: {properties: {brand: {enum: ["visa", "mastercard", "amex"]}}}}]`             |
 
 In this example, the business's PSP is not configured for Discover, so Discover is excluded from the response even though the platform supports it.
 
@@ -437,16 +482,9 @@ ______________________________________________________________________
 
 UCP provides base schemas for universal payment instruments like `card`. Spec authors **MAY** extend any of the base instruments to add handler-specific display data or customize the credential reference. Handlers **MAY** define multiple instrument types for different payment flows.
 
-**Available Instrument Schemas:**
+**Constraint Targets:**
 
-Each instrument schema defines its own `available_*` variant in `$defs` that specifies what constraints are valid for that instrument type. For example, [`card_payment_instrument.json`](/draft/schemas/shopping/types/card_payment_instrument.json) defines `available_card_payment_instrument` with a `brands` constraint.
-
-| Schema                                                                                                 | Constraints                                              |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| [`available_payment_instrument.json`](/draft/schemas/shopping/types/available_payment_instrument.json) | Base: type, constraints (open object)                    |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands` for card networks |
-
-Handlers reference these instrument-defined schemas when declaring `available_instruments`. The **instrument schema authors** define what constraints are meaningful (e.g., `brands` for cards), and **platforms/businesses** use this to advertise what they support (e.g., `["visa", "mastercard"]`).
+An instrument schema declares what its availability constraints may name in `$defs/constraint_target`: a plain object of members and their types, never carried in a payload. The handler's `payment_instrument` set binds each `type` to the schema that owns its target. [`card_payment_instrument.json`](/draft/schemas/shopping/types/card_payment_instrument.json) declares `brand` as a string, so `{ "properties": { "brand": { "enum": ["visa", "mastercard"] } } }` names a declared member and pins it to string values. The base Payment Handler validates the grammar, so a malformed `constraints` fails everywhere; the target supplies the meaning, so naming an undeclared member or pinning the wrong type is reportable without the base dispatching on `type`. A handler extending an instrument **SHOULD** extend that instrument's target rather than restate it.
 
 **Example `types/tokenizer_instrument.json`**:
 
@@ -458,24 +496,17 @@ Handlers reference these instrument-defined schemas when declaring `available_in
   "description": "Card-based payment instrument for com.example.tokenizer.",
 
   "$defs": {
-    "available_tokenizer_card": {
-      "title": "Available Tokenizer Card",
-      "description": "Card instrument availability with tokenizer-specific constraints.",
+    "constraint_target": {
+      "title": "Tokenizer Card Constraint Target",
+      "description": "Extends the card target with tokenizer-specific members.",
       "allOf": [
-        { "$ref": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        { "$ref": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json#/$defs/constraint_target" },
         {
           "type": "object",
           "properties": {
-            "type": { "const": "tokenizer_card" },
-            "constraints": {
-              "type": "object",
-              "properties": {
-                "tokenization_types": {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "description": "Supported tokenization types (e.g., ['network_token', 'merchant_token'])."
-                }
-              }
+            "tokenization_type": {
+              "type": "string",
+              "description": "How the credential was tokenized (e.g., 'network_token', 'merchant_token')."
             }
           }
         }
@@ -539,10 +570,12 @@ ______________________________________________________________________
 
 **Base Credential Schemas:**
 
-| Schema                                                                             | Description                   |
-| ---------------------------------------------------------------------------------- | ----------------------------- |
-| [`payment_credential.json`](/draft/schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](/draft/schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+| Schema                                                                                         | Description                                 |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| [`payment_credential.json`](/draft/schemas/shopping/types/payment_credential.json)             | Base: type discriminator only               |
+| [`token_credential.json`](/draft/schemas/shopping/types/token_credential.json)                 | Token: type + token string                  |
+| [`pan_credential.json`](/draft/schemas/shopping/types/pan_credential.json)                     | Raw FPAN, verified with `cvc`. Source only. |
+| [`network_token_credential.json`](/draft/schemas/shopping/types/network_token_credential.json) | Network token, verified with `cryptogram`   |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY** extend these schemas to include handler-specific credential context. Handlers **MAY** define multiple credential types for different instrument flows.
 

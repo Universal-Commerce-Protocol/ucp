@@ -142,7 +142,7 @@ Optionally, businesses may configure their PSP to detokenize on their behalf (PS
 
 Businesses advertise the platform's tokenization handler. The `config` contains the business's identity with the platform for token binding. The platform's handler specification (referenced via `spec`) documents the `/detokenize` endpoint URL exposed by the platform's **payment credential provider**.
 
-The handler accepts [CardCredential](/draft/schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](/draft/schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [PanCredential](/draft/schemas/shopping/types/pan_credential.json) and [NetworkTokenCredential](/draft/schemas/shopping/types/network_token_credential.json) for tokenization and produces [TokenCredential](/draft/schemas/shopping/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**. Both the sender (platform's credential provider) and receiver (business or PSP) **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards).
 
@@ -170,7 +170,7 @@ The handler accepts [CardCredential](/draft/schemas/shopping/types/card_credenti
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "properties": { "brand": { "enum": ["visa", "mastercard"] } }
               }
             }
           ],
@@ -205,7 +205,7 @@ The response config includes runtime token lifecycle information.
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -296,7 +296,7 @@ Platforms advertise this handler in their UCP profile's `payment_handlers` regis
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex", "discover"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex", "discover"] } }
               }
             }
           ],

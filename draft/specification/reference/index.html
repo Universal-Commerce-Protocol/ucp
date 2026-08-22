@@ -3159,6 +3159,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#network-token-credential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Token Credential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#option-value" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3185,6 +3196,17 @@
     <span class="md-ellipsis">
       
         Order Line Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pan-credential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PAN Credential
       
     </span>
   </a>
@@ -5022,6 +5044,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#network-token-credential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Token Credential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#option-value" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5048,6 +5081,17 @@
     <span class="md-ellipsis">
       
         Order Line Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pan-credential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PAN Credential
       
     </span>
   </a>
@@ -7466,9 +7510,9 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">constraints</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#constraint-expression">Constraint Expression</a></td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Constraints on this instrument type. Structure depends on instrument type and active capabilities.</td>
+<td style="text-align: left;">A Constraint Expression describing the instrument this entry makes available. Keys in <code>properties</code> name members of the <code>constraint_target</code> declared by the instrument schema for this <code>type</code>. Requirements on submitted request data belong in <code>ucp.request_constraints</code> instead.</td>
 </tr>
 </tbody>
 </table>
@@ -7610,7 +7654,7 @@ within the UCP.</p>
 <td style="text-align: left;">card_number_type</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details.<br><strong>Enum:</strong> <code>fpan</code>, <code>network_token</code>, <code>dpan</code></td>
+<td style="text-align: left;">Deprecated: the credential type now carries this distinction. The type of card number. Network tokens are preferred with fallback to FPAN. See PCI Scope for more details.<br><strong>Enum:</strong> <code>fpan</code>, <code>network_token</code>, <code>dpan</code></td>
 </tr>
 <tr>
 <td style="text-align: left;">number</td>
@@ -7709,6 +7753,12 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;"><strong>Constant = card</strong>. Indicates this is a card payment instrument.</td>
+</tr>
+<tr>
+<td style="text-align: left;">network</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another.</td>
 </tr>
 <tr>
 <td style="text-align: left;">display</td>
@@ -8377,6 +8427,74 @@ within the UCP.</p>
 </tbody>
 </table>
 <hr />
+<h3 id="network-token-credential">Network Token Credential<a class="headerlink" href="#network-token-credential" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The credential type discriminator. Specific schemas will constrain this to a constant value.</td>
+</tr>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;"><strong>Constant = network_token</strong>. The credential type identifier for network token credentials.</td>
+</tr>
+<tr>
+<td style="text-align: left;">number</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Network token or wallet-provisioned token replacing the underlying FPAN.</td>
+</tr>
+<tr>
+<td style="text-align: left;">expiry_month</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The month of the token's expiration date (1-12).</td>
+</tr>
+<tr>
+<td style="text-align: left;">expiry_year</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The year of the token's expiration date.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Cardholder name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">cryptogram</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Transaction cryptogram or dynamic CVC (dCVV), in the long or short form expected by the card network or processor.</td>
+</tr>
+<tr>
+<td style="text-align: left;">eci_value</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Electronic Commerce Indicator / Security Level Indicator associated with the transaction.</td>
+</tr>
+<tr>
+<td style="text-align: left;">token_requestor_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Payment network token requestor identifier, when required by the processor or network-token program.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="option-value">Option Value<a class="headerlink" href="#option-value" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -8481,6 +8599,62 @@ within the UCP.</p>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent line item identifier for any nested structures.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="pan-credential">PAN Credential<a class="headerlink" href="#pan-credential" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The credential type discriminator. Specific schemas will constrain this to a constant value.</td>
+</tr>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">any</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;"><strong>Constant = pan</strong>. The credential type identifier for PAN credentials.</td>
+</tr>
+<tr>
+<td style="text-align: left;">number</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Funding primary account number (FPAN).</td>
+</tr>
+<tr>
+<td style="text-align: left;">expiry_month</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The month of the card's expiration date (1-12).</td>
+</tr>
+<tr>
+<td style="text-align: left;">expiry_year</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">The year of the card's expiration date.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Cardholder name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">cvc</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Card verification code.</td>
 </tr>
 </tbody>
 </table>

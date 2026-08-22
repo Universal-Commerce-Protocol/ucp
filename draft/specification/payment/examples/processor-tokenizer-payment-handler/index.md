@@ -95,7 +95,7 @@ The business advertises their tokenization endpoint and identity during discover
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex"] } }
               }
             }
           ],
@@ -129,7 +129,7 @@ The response config includes runtime information about what's available for this
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard", "amex"]
+        "properties": { "brand": { "enum": ["visa", "mastercard", "amex"] } }
       }
     }
   ],
@@ -171,7 +171,7 @@ Platform identifies the processor tokenizer handler and retrieves the business's
           "id": "processor_tokenizer",
           "version": "draft",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
+            {"type": "card", "constraints": {"properties": {"brand": {"enum": ["visa", "mastercard", "amex"]}}}}
           ],
           "config": {
             "environment": "production",
