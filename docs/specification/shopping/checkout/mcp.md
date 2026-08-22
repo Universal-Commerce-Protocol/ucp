@@ -53,7 +53,7 @@ Businesses advertise MCP transport availability through their UCP profile at
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
