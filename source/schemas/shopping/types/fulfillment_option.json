@@ -4,7 +4,6 @@
   "title": "Fulfillment Option",
   "description": "A fulfillment option within a group (e.g., Standard Shipping $5, Express $15). Extends the fulfillment option base with cost and timing.",
   "type": "object",
-  "ucp_shared_request": true,
   "allOf": [
     {
       "$ref": "fulfillment_option_base.json"

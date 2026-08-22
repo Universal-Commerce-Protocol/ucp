@@ -21,6 +21,8 @@ within the UCP.
 
 ## Capability Schemas
 
+{{ auto_generate_schema_reference('.', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
 
 ## Type Schemas
@@ -97,6 +99,12 @@ The `ucp` object included in catalog responses.
 The `ucp` object included in order responses or events.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'reference') }}
+
+### Location Response Metadata {: #ucp-response-location-schema }
+
+The `ucp` object included in location responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_location_schema', 'reference') }}
 
 ### Capability
 

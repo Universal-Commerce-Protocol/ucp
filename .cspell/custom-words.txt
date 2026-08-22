@@ -180,3 +180,7 @@ zapatillas
 recoverably
 Honeycrisp
 unrepresentable
+geofence
+geofencing
+wifi
+optionalities
