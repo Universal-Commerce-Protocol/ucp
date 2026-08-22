@@ -204,7 +204,7 @@ UCP uses reverse-domain naming to embed governance authority directly into its r
 
 Reverse-domain names are used both as collision-safe **identifiers** (keys and references) and by **entities** — capabilities, services, and payment handlers — that declare a `schema` URL. An entity's `schema` URL must originate from its namespace authority domain. This guarantees **provenance** — that the reverse-domain name is controlled by the domain owner — not that the entity is trustworthy; whether to trust or support it remains the client's decision.
 
-Platforms **MUST** validate this binding for declared `schema` URLs and **MUST** reject entities that fail it. Identifiers carry no fetched URL, and the `spec` (documentation) URL is not authority-bound (any `https` origin). See [Authority Binding](/latest/specification/overview/index.md#authority-binding) for the normative algorithm.
+Platforms **MUST** validate this binding for declared `schema` URLs and **MUST** reject entities that fail it. Identifiers carry no fetched URL, and the `spec` (documentation) URL is not authority-bound (any `https` origin). See [Authority Binding](/latest/specification/overview/#authority-binding) for the normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by the UCP Tech Council responsible for the capability's domain. Any vendor can define and publish capabilities under their own domain — `org.acme.*` — without UCP maintainer approval. Vendor capabilities follow the same extension model, meaning they can extend UCP base capabilities (e.g., `org.acme.loyalty` extending `dev.ucp.shopping.checkout`) or define entirely new ones. Because negotiation is always opt-in, vendor capabilities only activate when both parties declare them, keeping the protocol decentralized by design.
 
@@ -275,4 +275,4 @@ UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a s
 
 Every UCP-defined service, capability, and extension in release `D` declares version `D`. Third-party extensions and payment handlers are versioned by their authors, independently of UCP releases.
 
-See [Protocol Version](/latest/specification/overview/index.md#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/index.md#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.
+See [Protocol Version](/latest/specification/overview/#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.

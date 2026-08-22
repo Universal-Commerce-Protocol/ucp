@@ -65,7 +65,7 @@ Define transport bindings that appear in `ucp.services{}` registries. Each trans
 
 - **Registry identity**: Reverse-domain service name used as the registry key
 - **Entry fields**: `version`, `spec`, `schema`, `config`, and transport-specific fields
-- **Versioning**: Every service entry declares an explicit `version`; in release `D` it is `D`. Because each entry pairs the service with one transport binding, that service `version` repeats on each entry, and transport bindings have no separate version. The referenced OpenAPI/OpenRPC artifact carries its own `info.version` as artifact metadata, not a negotiated version. See [Component Versioning and Release Snapshots](/latest/specification/overview/index.md#component-versioning-and-release-snapshots)
+- **Versioning**: Every service entry declares an explicit `version`; in release `D` it is `D`. Because each entry pairs the service with one transport binding, that service `version` repeats on each entry, and transport bindings have no separate version. The referenced OpenAPI/OpenRPC artifact carries its own `info.version` as artifact metadata, not a negotiated version. See [Component Versioning and Release Snapshots](/latest/specification/overview/#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
   - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -148,7 +148,7 @@ The same registry structure appears in three contexts with different field requi
 
 ## The Reserved `ucp` Member
 
-The member name `ucp` is reserved at every structured UCP object scope — an object whose members are schema-defined fields — for the protocol namespace. The top-level envelope is its root manifestation. Dictionary containers are excluded because their keys are data rather than fields. See [The `ucp` Protocol Namespace](/latest/specification/overview/index.md#the-ucp-protocol-namespace) for the normative rules. For schema authors this means:
+The member name `ucp` is reserved at every structured UCP object scope — an object whose members are schema-defined fields — for the protocol namespace. The top-level envelope is its root manifestation. Dictionary containers are excluded because their keys are data rather than fields. See [The `ucp` Protocol Namespace](/latest/specification/overview/#the-ucp-protocol-namespace) for the normative rules. For schema authors this means:
 
 - **Never mint a structured domain field named `ucp`.** Schema authors **MUST NOT** declare a domain field named `ucp` in a structured object; the name denotes the protocol namespace there.
 - **Do not declare ambient `ucp` in open nested objects.** The root `ucp` envelope is not ambient placement; UCP root schemas already declare its required protocol metadata. Below the root, the member is UCP document grammar defined centrally, so schema authors **MUST NOT** declare it in an open nested object. A Business or Platform **MAY** include it in an eligible open structured scope without the domain schema saying so. Ordinary instance validation against an open UCP source domain schema treats it as an ignored unknown object; validating its contents is a conformance-tooling concern.
@@ -260,7 +260,7 @@ In each UCP release `D`, every UCP-defined service entry declares version `D`. S
 
 In each UCP release `D`, every UCP-defined capability and extension declares version `D`, even when its schema did not change directly. Declaring version `D` does not replace negotiation: capabilities and extensions are still selected by exact-version intersection.
 
-Profile selection, including profiles for older supported releases, is defined in [Protocol Version](/latest/specification/overview/index.md#protocol-version).
+Profile selection, including profiles for older supported releases, is defined in [Protocol Version](/latest/specification/overview/#protocol-version).
 
 ### Third-Party Extensions and Payment Handlers
 
@@ -374,7 +374,7 @@ By default, UCP schemas do not set `minProperties` or `maxProperties` on object 
 
 ## The `request_constraints` Protocol Member
 
-Normative processing, scope, lifecycle, and invalid-member behavior are defined in [Request Constraints](/latest/specification/overview/index.md#request-constraints). This section covers only the schema-authoring boundary.
+Normative processing, scope, lifecycle, and invalid-member behavior are defined in [Request Constraints](/latest/specification/overview/#request-constraints). This section covers only the schema-authoring boundary.
 
 ### Local structure
 
@@ -405,7 +405,7 @@ The containing `ucp` object still follows [The Reserved `ucp` Member](#the-reser
 
 ## Extension-Declared Action Types
 
-Every Action type is declared by an extension and becomes available only when that extension is negotiated, as defined in [Actions](/latest/specification/overview/index.md#actions). Before advertising support, both the Business and the Platform should assess the extension's complete Action contract. Negotiation is pre-runtime agreement on that contract's semantics and support; it does not pre-approve every future `config` value or delegate. Each concrete instance still needs to conform to the composed schema, the Action-type contract's runtime rules, and Platform policy.
+Every Action type is declared by an extension and becomes available only when that extension is negotiated, as defined in [Actions](/latest/specification/overview/#actions). Before advertising support, both the Business and the Platform should assess the extension's complete Action contract. Negotiation is pre-runtime agreement on that contract's semantics and support; it does not pre-approve every future `config` value or delegate. Each concrete instance still needs to conform to the composed schema, the Action-type contract's runtime rules, and Platform policy.
 
 When they apply to the Action type, extension authors should define:
 
