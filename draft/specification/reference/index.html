@@ -6526,13 +6526,19 @@ within the UCP.</p>
 <td style="text-align: left;">required</td>
 <td style="text-align: left;">Array[string]</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Property names required by the constrained object.</td>
+<td style="text-align: left;">Property names required by the constrained object. Must be non-empty: an empty array applies no constraint.</td>
 </tr>
 <tr>
 <td style="text-align: left;">properties</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Constraints keyed by property name.</td>
+<td style="text-align: left;">Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.</td>
+</tr>
+<tr>
+<td style="text-align: left;">anyOf</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#constraint-expression">Constraint Expression</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation.</td>
 </tr>
 </tbody>
 </table>
@@ -7258,13 +7264,19 @@ within the UCP.</p>
 <td style="text-align: left;">required</td>
 <td style="text-align: left;">Array[string]</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Property names required by the constrained object.</td>
+<td style="text-align: left;">Property names required by the constrained object. Must be non-empty: an empty array applies no constraint.</td>
 </tr>
 <tr>
 <td style="text-align: left;">properties</td>
 <td style="text-align: left;">object</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Constraints keyed by property name.</td>
+<td style="text-align: left;">Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.</td>
+</tr>
+<tr>
+<td style="text-align: left;">anyOf</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#constraint-expression">Constraint Expression</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation.</td>
 </tr>
 </tbody>
 </table>

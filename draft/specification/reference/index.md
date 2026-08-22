@@ -107,10 +107,11 @@ ______________________________________________________________________
 
 ### Constraint Expression
 
-| Name       | Type          | Requirement | Description                                        |
-| ---------- | ------------- | ----------- | -------------------------------------------------- |
-| required   | Array[string] | Optional    | Property names required by the constrained object. |
-| properties | object        | Optional    | Constraints keyed by property name.                |
+| Name       | Type                                                                                    | Requirement | Description                                                                                                                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| required   | Array[string]                                                                           | Optional    | Property names required by the constrained object. Must be non-empty: an empty array applies no constraint.                                                                                 |
+| properties | object                                                                                  | Optional    | Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.                                                                                               |
+| anyOf      | Array\[[Constraint Expression](/draft/specification/reference/#constraint-expression)\] | Optional    | Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation. |
 
 ______________________________________________________________________
 
@@ -334,11 +335,12 @@ ______________________________________________________________________
 
 ### Request Constraints
 
-| Name       | Type          | Requirement | Description                                                                                             |
-| ---------- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
-| path       | string        | Optional    | A complete RFC 9535 JSONPath query evaluated against the next logical UCP request to the same resource. |
-| required   | Array[string] | Optional    | Property names required by the constrained object.                                                      |
-| properties | object        | Optional    | Constraints keyed by property name.                                                                     |
+| Name       | Type                                                                                    | Requirement | Description                                                                                                                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| path       | string                                                                                  | Optional    | A complete RFC 9535 JSONPath query evaluated against the next logical UCP request to the same resource.                                                                                     |
+| required   | Array[string]                                                                           | Optional    | Property names required by the constrained object. Must be non-empty: an empty array applies no constraint.                                                                                 |
+| properties | object                                                                                  | Optional    | Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.                                                                                               |
+| anyOf      | Array\[[Constraint Expression](/draft/specification/reference/#constraint-expression)\] | Optional    | Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation. |
 
 ______________________________________________________________________
 
