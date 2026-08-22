@@ -84,15 +84,16 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
       - Payment:
-          - AP2 Mandates Extension: specification/payment/extensions/ap2-mandates.md
-          - Payment Authentication:
-              - Overview: specification/payment/extensions/authentication.md
-              - Device Data Collection:
-                  specification/payment/extensions/actions/device-data-collection.md
-              - 3DS Challenge:
-                  specification/payment/extensions/actions/three-ds-challenge.md
-          - Payment Terms Extension: specification/payment/extensions/terms.md
-          - Split Payments Extension: specification/payment/extensions/split-payments.md
+          - Extensions:
+              - AP2 Mandates Extension: specification/payment/extensions/ap2-mandates.md
+              - Payment Authentication:
+                  - Overview: specification/payment/extensions/authentication.md
+                  - Device Data Collection:
+                      specification/payment/extensions/actions/device-data-collection.md
+                  - 3DS Challenge:
+                      specification/payment/extensions/actions/three-ds-challenge.md
+              - Payment Terms Extension: specification/payment/extensions/terms.md
+              - Split Payments Extension: specification/payment/extensions/split-payments.md
           - Payment Handlers:
               - Guide: specification/payment/guide.md
               - Template: specification/payment/template.md
