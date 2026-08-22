@@ -744,9 +744,9 @@ Handler authors have two options:
 
 - **Use the standard Payment Authentication extension.** Handlers that need
   device data collection or a 3DS challenge use
-  [`dev.ucp.shopping.payment_authentication`](authentication.md), which
-  defines the `dev.ucp.payment.device_data_collection` and
-  `dev.ucp.payment.three_ds_challenge` Action types. The handler specification
+  [`dev.ucp.common.payment.authentication`](extensions/authentication.md), which
+  defines the `dev.ucp.common.payment.device_data_collection` and
+  `dev.ucp.common.payment.three_ds_challenge` Action types. The handler specification
   states which types it can cause and any provider-specific trust or fallback
   requirements, such as allowed origins.
 - **Define handler-specific Actions.** When the standard types do not fit, the

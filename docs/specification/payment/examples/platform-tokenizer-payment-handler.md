@@ -413,12 +413,12 @@ Content-Type: application/json
 ## Runtime Payment Authentication Actions
 
 This handler supports both Action types from the negotiated
-[Payment Authentication extension](../authentication.md):
+[Payment Authentication extension](../extensions/authentication.md):
 
 | Action type | Use |
 | :---------- | :-- |
-| `dev.ucp.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
-| `dev.ucp.payment.three_ds_challenge` | Present a buyer-facing 3DS challenge during payment completion. |
+| `dev.ucp.common/payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
+| `dev.ucp.common/payment.three_ds_challenge` | Present a buyer-facing 3DS challenge during payment completion. |
 
 When either step is needed, the Business returns the corresponding Action while
 processing the selected instrument. Its `config.payment_instrument_id` identifies
