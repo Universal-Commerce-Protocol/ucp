@@ -48,7 +48,7 @@ extend cart, checkout, or both:
         {
           "version": "{{ ucp_version }}",
           "extends": ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/discount",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
         }
       ]
@@ -68,15 +68,15 @@ When this capability is active, cart and/or checkout are extended with a
 
 ### Discounts Object
 
-{{ extension_schema_fields('discount.json#/$defs/discounts_object', 'discount') }}
+{{ extension_schema_fields('discount.json#/$defs/discounts_object', 'shopping/extensions/discount') }}
 
 ### Applied Discount
 
-{{ extension_schema_fields('discount.json#/$defs/applied_discount', 'discount') }}
+{{ extension_schema_fields('discount.json#/$defs/applied_discount', 'shopping/extensions/discount') }}
 
 ### Allocation
 
-{{ extension_schema_fields('discount.json#/$defs/allocation', 'discount') }}
+{{ extension_schema_fields('discount.json#/$defs/allocation', 'shopping/extensions/discount') }}
 
 ## Allocation Details
 
@@ -194,7 +194,7 @@ segment, or promotional rules:
 ## Eligibility Claims
 
 Eligibility claims are buyer claims about eligible benefits (see
-[Context](shopping/checkout/index.md#context)) such as loyalty membership, payment instrument
+[Context](../checkout/index.md#context)) such as loyalty membership, payment instrument
 perks, and similar. When the discount extension is active, Businesses that
 choose to accept eligibility claims **MUST** surface their effect on pricing
 as provisional discounts in the `applied` array. Platforms **MUST** display
@@ -203,7 +203,7 @@ provisional discounts to the buyer.
 ### Discount Behavior
 
 Platforms send buyer claims via `context.eligibility` on cart or checkout
-requests (see [Context](shopping/checkout/index.md#context)). When a Business recognizes a
+requests (see [Context](../checkout/index.md#context)). When a Business recognizes a
 claim and it affects pricing, it **MUST** surface a corresponding provisional
 discount in the `discounts.applied` array. This gives the Platform structured
 attribution to display to the buyer.
@@ -226,12 +226,12 @@ Discounts from accepted but unverified claims carry `provisional: true`.
 Provisional discounts remain until the claim is verified, rescinded, or
 replaced during the session. At checkout completion, all remaining provisional
 claims **MUST** be resolved (see
-[Eligibility Verification at Completion](shopping/checkout/index.md#eligibility-verification-at-completion)).
+[Eligibility Verification at Completion](../checkout/index.md#eligibility-verification-at-completion)).
 
 ### Example: Provisional Discount with Attribution
 
 Using the same claim-resolution pattern described in
-[Eligibility Verification at Completion](shopping/checkout/index.md#eligibility-verification-at-completion),
+[Eligibility Verification at Completion](../checkout/index.md#eligibility-verification-at-completion),
 the discount extension provides structured attribution. The Platform claims a
 store card benefit; the Business surfaces the provisional discount with full
 stacking and allocation details:

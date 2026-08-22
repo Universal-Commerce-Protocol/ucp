@@ -730,11 +730,11 @@ This example is illustrative. It uses a negotiated vendor extension,
 `com.example.identity.student_verification`, that declares a single Action type
 under a key of the same name in `actions` and defines the instance `config` and
 verification transport. It composes that extension with `context.eligibility`, a
-provisional [Discount](../../discount.md), an [Action](#actions), and
+provisional [Discount](../extensions/discount.md), an [Action](#actions), and
 `messages`.
 
 The provisional discount fields (`provisional`, `eligibility`) belong to the
-[Discount extension](../../discount.md#eligibility-claims) and are available only when
+[Discount extension](../extensions/discount.md#eligibility-claims) and are available only when
 that extension is active for the checkout.
 
 **1. Claim accepted, discount provisional, verification Action outstanding.**
@@ -1297,17 +1297,17 @@ Platforms MUST render all top-level entries in the order provided:
 
 ```python
 for entry in totals:
-    render_line(entry.display_text, entry.amount)
+  render_line(entry.display_text, entry.amount)
 ```
 
 Platforms MAY render sub-lines as supplementary detail:
 
 ```python
 for entry in totals:
-    render_line(entry.display_text, entry.amount)
-    if entry.lines:
-        for sub in entry.lines:
-            render_detail_line(sub.display_text, sub.amount)
+  render_line(entry.display_text, entry.amount)
+  if entry.lines:
+    for sub in entry.lines:
+      render_detail_line(sub.display_text, sub.amount)
 ```
 
 Platforms MUST NOT interpret, filter, reorder, aggregate, or apply display
