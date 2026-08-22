@@ -319,7 +319,7 @@ Content-Type: application/json
 
 {Include this section if the handler can cause Actions. Identify the negotiated
 Checkout extension that declares them. Use the standard
-[Payment Authentication extension](authentication.md) for device data
+[Payment Authentication extension](extensions/authentication.md) for device data
 collection and 3DS challenges; link to the defining extension specification for
 custom Actions.}
 

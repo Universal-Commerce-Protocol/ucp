@@ -91,7 +91,7 @@ values
 Section 6) and within which
 [JCS](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
 canonicalization, required for
-[AP2 mandate signing](../payment/ap2-mandates.md#canonicalization), is defined. The
+[AP2 mandate signing](../payment/extensions/ap2-mandates.md#canonicalization), is defined. The
 same cap derives `scale`'s maximum of 15: at scale 16, one whole unit
 (10^16 steps) would be unrepresentable. An out-of-range value is
 schema-invalid and is rejected like any other invalid payload.
@@ -2389,7 +2389,7 @@ either suffices.
 This rule governs **HTTP transport identity**. Payload-layer
 assertions (e.g., AP2 mandate JWTs carried in the request body) have
 their own identity binding and key-resolution rules; see
-[AP2 Mandates](../payment/ap2-mandates.md).
+[AP2 Mandates](../payment/extensions/ap2-mandates.md).
 
 ## Payment Architecture
 
@@ -2420,7 +2420,7 @@ autonomous AI agents), UCP supports the **AP2 Mandates Extension**
 non-repudiable authorization through verifiable digital credentials.
 
 See [Transaction Integrity](#transaction-integrity-and-non-repudiation)
-and [AP2 Mandates Extension](../payment/ap2-mandates.md) for details on when and how to
+and [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md) for details on when and how to
 use this extension.
 
 #### Credential Flow & PCI Scope
@@ -2820,7 +2820,7 @@ certified and handle:
 5. Set appropriate credential timeouts
 6. For autonomous commerce scenarios requiring cryptographic proof, consider
     supporting the `dev.ucp.common.ap2_mandate` extension (see
-    [AP2 Mandates Extension](../payment/ap2-mandates.md))
+    [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md))
 
 **For Platforms:**
 
@@ -2831,7 +2831,7 @@ certified and handle:
 5. Handle credential expiration gracefully (re-acquire if needed)
 6. For autonomous agents, consider using the `dev.ucp.common.ap2_mandate`
     extension for cryptographic proof of authorization (see
-    [AP2 Mandates Extension](../payment/ap2-mandates.md))
+    [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md))
 
 **For Payment Credential Providers:**
 
@@ -2866,7 +2866,7 @@ use cases:
 - **AP2 Mandates Extension** (`dev.ucp.common.ap2_mandate`): Adds
     cryptographic proof of user authorization for autonomous commerce scenarios
     where non-repudiable evidence is required. See
-    [AP2 Mandates Extension](../payment/ap2-mandates.md).
+    [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md).
 
 - **Custom Handler Types**: Payment credential providers can define custom
     handlers to support new payment instruments. See
@@ -3333,7 +3333,7 @@ This mechanism provides strong, end-to-end cryptographic assurances about
 transaction details and participant consent, significantly reducing risks of
 tampering and disputes.
 
-See [AP2 Mandates Extension](../payment/ap2-mandates.md) for complete specification,
+See [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md) for complete specification,
 implementation guide, and examples.
 
 ## Versioning

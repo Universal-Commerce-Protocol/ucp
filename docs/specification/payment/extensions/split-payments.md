@@ -67,7 +67,7 @@ allocation, not processing sequence.
 When this capability is active, each payment instrument in
 `checkout.payment.instruments` gains an optional `amount` field.
 
-{{ extension_schema_fields('split_payments.json#/$defs/payment_instrument', 'payment/extensions/split-payments') }}
+{{ extension_schema_fields('payment_split_payments.json#/$defs/payment_instrument', 'payment/extensions/split-payments') }}
 
 ## Configuration
 
