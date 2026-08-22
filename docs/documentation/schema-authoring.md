@@ -541,7 +541,7 @@ registered member.
 
 | Position | Admitted members | Shape |
 | :-- | :-- | :-- |
-| Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; `anyOf` is a non-empty array of non-empty Object Constraints; an empty object is a no-op except as an `anyOf` branch. |
 | Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
 
 The listed members define the grammar. A `request_constraints` value may
