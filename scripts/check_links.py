@@ -155,14 +155,6 @@ def check_links():
     for link in parser.links:
       original_link = link
 
-      should_ignore = False
-      for pattern in ignore_patterns:
-        if pattern.search(original_link):
-          should_ignore = True
-          break
-      if should_ignore:
-        continue
-
       # Ignore external links
       if link.startswith(("mailto:", "tel:", "javascript:", "data:")):
         continue
@@ -177,6 +169,27 @@ def check_links():
       path_part = parsed.path
       anchor_part = parsed.fragment
       path_part = unquote(path_part)
+
+      # Built documentation should link to rendered pages, never copied source
+      # markdown. A raw .md target can exist and fool the ordinary existence
+      # check while sending readers to source text instead of the HTML page.
+      if path_part.endswith(".md"):
+        errors_by_version[version][str(file_path)].append(
+          f"  Link: {original_link}\n"
+          "  Target is raw Markdown; link to the rendered page instead"
+        )
+        continue
+
+      # Ignore patterns may suppress ordinary existence and anchor checks, but
+      # never the raw-Markdown guard above: ignored version links must still
+      # resolve to rendered HTML for readers.
+      should_ignore = False
+      for pattern in ignore_patterns:
+        if pattern.search(original_link):
+          should_ignore = True
+          break
+      if should_ignore:
+        continue
 
       # If the path starts with the SITE_BASE_PATH (e.g. /ucp/), strip it
       # so it resolves correctly against the local ROOT_DIR.
