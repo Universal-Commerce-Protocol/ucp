@@ -2626,8 +2626,8 @@ registered member.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">Object Constraint</td>
-<td style="text-align: left;"><code>required</code>, <code>properties</code></td>
-<td style="text-align: left;"><code>required</code> contains unique field names; <code>properties</code> maps field names to Object or Value Constraints; an empty object is a no-op.</td>
+<td style="text-align: left;"><code>required</code>, <code>properties</code>, <code>anyOf</code></td>
+<td style="text-align: left;"><code>required</code> contains unique field names; <code>properties</code> maps field names to Object or Value Constraints; <code>anyOf</code> is a non-empty array of non-empty Object Constraints; an empty object is a no-op except as an <code>anyOf</code> branch.</td>
 </tr>
 <tr>
 <td style="text-align: left;">Value Constraint</td>

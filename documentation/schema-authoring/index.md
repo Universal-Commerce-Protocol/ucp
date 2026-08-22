@@ -382,10 +382,10 @@ Normative processing, scope, lifecycle, and invalid-member behavior are defined 
 
 `schemas/common/types/constraint_expression.json` defines the closed Constraint Expression grammar. `schemas/common/types/request_constraints.json` binds that grammar to data in the next UCP request and is the schema referenced by the registered member.
 
-| Position          | Admitted members         | Shape                                                                                                                             |
-| ----------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
-| Value Constraint  | `enum`, `const`          | `enum` is non-empty and unique; at least one member is present; both apply when present together.                                 |
+| Position          | Admitted members                  | Shape                                                                                                                                                                                                                       |
+| ----------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; `anyOf` is a non-empty array of non-empty Object Constraints; an empty object is a no-op except as an `anyOf` branch. |
+| Value Constraint  | `enum`, `const`                   | `enum` is non-empty and unique; at least one member is present; both apply when present together.                                                                                                                           |
 
 The listed members define the grammar. A `request_constraints` value may additionally contain `path` at the top level.
 
