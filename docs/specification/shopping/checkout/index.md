@@ -1083,6 +1083,11 @@ general replacement rule does not apply during `complete_in_progress` because
 Update Checkout is not permitted; see
 [Accepted completion](#accepted-completion) for the frozen operation contract.
 
+Captured `buyer.consent` is also an exception when the buyer-consent capability
+is active: an update that omits `consent` MUST NOT clear previously submitted
+consent. See [Buyer Consent](../../buyer-consent.md#normative-requirements) for
+the persistence rule.
+
 {{ method_fields('update_checkout', 'rest.openapi.json', 'shopping/checkout') }}
 
 ### Complete Checkout
