@@ -5,12 +5,37 @@
   "description": "A destination for fulfillment.",
   "type": "object",
   "ucp_shared_request": true,
-  "oneOf": [
+  "required": ["type", "id"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Destination contract discriminator. Required in Business responses and optional in Platform requests. Well-known values: `shipping_address`, `business_location`. The enclosing method contract defines request defaults and which fields the Platform may write; negotiated extensions define additional values.",
+      "ucp_request": "optional"
+    },
+    "id": {
+      "type": "string",
+      "description": "Fulfillment destination identifier.",
+      "ucp_request": "optional"
+    }
+  },
+  "allOf": [
     {
-      "$ref": "shipping_destination.json"
+      "if": {
+        "properties": { "type": { "const": "shipping_address" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "shipping_destination.json"
+      }
     },
     {
-      "$ref": "retail_location.json"
+      "if": {
+        "properties": { "type": { "const": "business_location" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "location_destination.json"
+      }
     }
   ]
 }
