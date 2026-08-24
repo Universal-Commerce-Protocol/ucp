@@ -365,7 +365,7 @@ def on_post_build(config):
           f.write(
             "<!doctype html>"
             f'<link rel="canonical" href="{target}">'
-            '<script>var a=location.hash.substr(1);'
+            "<script>var a=location.hash.substr(1);"
             f'location.href="{target}"+(a?"#"+a:"")</script>'
             f'<meta http-equiv="refresh" content="0; url={target}">'
           )
@@ -378,7 +378,7 @@ def on_post_build(config):
           f.write(
             "<!doctype html>"
             f'<link rel="canonical" href="{target}">'
-            '<script>var a=location.hash.substr(1);'
+            "<script>var a=location.hash.substr(1);"
             f'location.href="{target}"+(a?"#"+a:"")</script>'
             f'<meta http-equiv="refresh" content="0; url={target}">'
           )
@@ -391,7 +391,7 @@ def on_post_build(config):
       f.write(
         "<!doctype html>"
         f'<link rel="canonical" href="{index_target}">'
-        '<script>var a=location.hash.substr(1);'
+        "<script>var a=location.hash.substr(1);"
         f'location.href="{index_target}"+(a?"#"+a:"")</script>'
         f'<meta http-equiv="refresh" content="0; url={index_target}">'
       )
