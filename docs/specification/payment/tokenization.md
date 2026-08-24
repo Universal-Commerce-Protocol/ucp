@@ -120,8 +120,10 @@ to every tokenizer:
 1. A Tokenizer **MUST** verify a binding by exact equality over `type` and
    `id`. A Tokenizer **MUST NOT** accept a partial match, and **MUST NOT**
    reject a request because `binding` carries members it does not recognize. A
-   Tokenizer **MUST** ignore unrecognized members when comparing, and **MAY**
-   include members defined by an extension it implements.
+   Tokenizer **MUST** ignore unrecognized members when comparing. An extension
+   that defines additional `binding` members **MUST** specify whether those
+   members participate in the comparison; a Tokenizer implementing that
+   extension **MUST** follow the extension's definition.
 2. A Tokenizer **MUST** treat `binding.id` as opaque: it **MUST NOT** require
    the value to be resolvable, and **MUST NOT** reject a request because it
    cannot confirm that the identified resource exists.
