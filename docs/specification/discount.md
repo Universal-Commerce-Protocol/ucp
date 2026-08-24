@@ -191,6 +191,16 @@ segment, or promotional rules:
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
 
+## Approaching Discounts
+
+Businesses may return details of approaching promotions.  This is used to entice the buyer
+to buy more to receive a discount (i.e. \$10 off or free shipping) when within a threshold 
+of the qualifying amount (i.e. >= \$100))
+
+- Appear in `discounts.approaching`
+
+For more details, see [approaching-discounts.md] (approaching-discounts.md)  
+
 ## Eligibility Claims
 
 Eligibility claims are buyer claims about eligible benefits (see

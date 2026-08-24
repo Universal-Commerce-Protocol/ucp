@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/approaching_discount.json",
+  "title": "Approaching Discount",
+  "type": "object",
+  "description": "Promotions the buyer is close to unlocking, grouped by promotion class. Each array entry surfaces the gap between the current cart total and the promotion's purchase-condition threshold, enabling upsell messaging (e.g., 'Add $10 more to get free shipping'). Omitted in requests.",
+  "properties": {
+    "cart": {
+      "type": "array",
+      "description": "Order-level promotions the buyer is close to unlocking.",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "threshold",
+          "total"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Discount name (e.g., '$10 off orders >= $50').",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "threshold": {
+            "type": "integer",
+            "description": "The amount (in ISO 4217 minor currency units) the buyer must have in their cart to unlock the promotion. Always non-negative.",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total merchandise amount (in ISO 4217 minor currency units) in the cart that qualifies toward this promotion's purchase condition. May represent the entire cart subtotal or a subset (e.g., items in a specific category) depending on the promotion's scope. Always non-negative.",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "shipping": {
+      "type": "array",
+      "description": "Shipping-level promotions the buyer is close to unlocking.",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "threshold",
+          "total"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Human-readable discount name (e.g., '$10 off orders >= $50').",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "threshold": {
+            "type": "integer",
+            "description": "The amount (in ISO 4217 minor currency units) the buyer must have in their cart to unlock the promotion. Always non-negative.",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total merchandise amount (in ISO 4217 minor currency units) in the cart that qualifies toward this promotion's purchase condition. May represent the entire cart subtotal or a subset (e.g., items in a specific category) depending on the promotion's scope. Always non-negative.",
+            "minimum": 0
+          },
+          "fulfillment_group_id": {
+            "type": "string",
+            "description": "Identifier of the fulfillment group this shipping promotion applies to. When present, the promotion is scoped to that fulfillment group rather than the entire order's shipping cost.",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        }
+      }
+    }
+  }
+}
