@@ -126,7 +126,7 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`, `available_instruments`
 - **Variants**: `platform_schema`, `business_schema`, `response_schema`
 - **Instance `id`**: Required to distinguish multiple configurations of the same handler
-- **`available_instruments`**: Optional. Array of supported instrument types with type-specific constraints (e.g., brands for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.
+- **`available_instruments`**: Optional. Array of supported instrument types, each with an optional Constraint Expression over type-specific members (e.g., `brand` for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
@@ -541,7 +541,7 @@ registered member.
 
 | Position | Admitted members | Shape |
 | :-- | :-- | :-- |
-| Object Constraint | `required`, `properties` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; an empty object is a no-op. |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; `anyOf` is a non-empty array of non-empty Object Constraints; an empty object is a no-op except as an `anyOf` branch. |
 | Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
 
 The listed members define the grammar. A `request_constraints` value may

@@ -81,6 +81,7 @@ amortiguación
 atok
 backorder
 barcodes
+cartebancaire
 checkout
 cimd
 credentialization
