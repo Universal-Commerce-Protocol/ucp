@@ -146,11 +146,17 @@ The following request and response are transport-neutral UCP payloads.
             "latitude": 40.707,
             "longitude": -74.011
           },
-          "amenities": [
-            "dev.ucp.amenity.shopping.curbside_pickup",
-            "dev.ucp.amenity.shopping.in_store_pickup",
-            "dev.ucp.amenity.parking"
-          ],
+          "amenities": {
+            "dev.ucp.amenity.shopping.curbside_pickup": {
+              "description": "Curbside pickup"
+            },
+            "dev.ucp.amenity.shopping.in_store_pickup": {
+              "description": "In-store pickup"
+            },
+            "dev.ucp.amenity.parking": {
+              "description": "On-site parking"
+            }
+          },
           "timezone": "America/New_York",
           "hours": [
             {"day": "monday", "opens": "09:00", "closes": "21:00"},

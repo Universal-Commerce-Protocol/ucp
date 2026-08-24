@@ -23,7 +23,7 @@
       "items": {
         "$ref": "amenity_type.json"
       },
-      "description": "Filter by static services, amenities, or capabilities of the location. Matches locations that have all the listed amenities (AND logic)."
+      "description": "Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching."
     },
     "inventory": {
       "type": "array",

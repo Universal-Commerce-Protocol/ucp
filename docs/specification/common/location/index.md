@@ -31,19 +31,19 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (hours, offerings like `amenities` or `inventory`, etc.). |
+| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `inventory`). |
 | [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more locations by identifier. |
 
 ## Key Concepts
 
 * **Location**: A physical entity that can be found on a map. Defined by a display name,
     address, operating hours, and **geographic context** (geographic coordinates).
-* **Offerings**: Features, capabilities, and inventory provided by the location.
-    This is split into two distinct concepts to ensure tooling compatibility and semantic clarity:
-    * **Amenities**: Static features, services, or capabilities of the location. Modeled as a flat reverse-DNS array to avoid
-      semantic ambiguity across diverse industries (e.g., food drive-through vs. pharmacy drive-through).
-      See [Amenity Vocabulary](search.md#amenity-vocabulary).
-    * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
+* **Amenities**: Static features, services, or capabilities of the Location.
+    Responses use a map with reverse-DNS amenity identifiers as keys, combining
+    collision-resistant names, one entry per identifier, and buyer-facing
+    descriptions that keep custom amenities renderable. See
+    [Amenity Vocabulary](search.md#amenity-vocabulary).
+* **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
 * **Proximity & Serviceability**: Two distinct, explicit spatial relations:
     * **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
     * **`serves`**: Asks whether the Location can provisionally serve one explicit
@@ -68,7 +68,7 @@ other capabilities (like Catalog, Cart, and Checkout in Shopping):
     online catalog browsing and physical store visits.
 3. **Provisional vs. Authoritative Boundaries**:
     * *Discovery Phase (Provisional)*: Location responses based on operating hours, real-time inventory
-        availability, and amenities offerings represent the business's *current terms* at the
+        availability, and amenities represent the business's *current terms* at the
         time of query. They are **provisional signals** (despite most, like hours & amenities, remain stable
         overtime) and are not binding commitments.
     * *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup)
@@ -189,6 +189,28 @@ Platform **MAY** present `title` according to its presentation policy and
 **MUST NOT** use it to determine whether a Location is open or closed.
 
 ## Shared Entities
+
+### Amenity {: #amenity }
+
+Location responses represent amenities as a map keyed by amenity identifier.
+The Business **MUST** provide a nonempty, plain-text, buyer-facing
+`description` for every entry. The Business **SHOULD** make it a short,
+self-contained label or phrase suitable for direct use in a compact list and
+**SHOULD** localize it for the request when possible. It does not participate
+in amenity identity or filtering. An entry without that description is
+schema-invalid; a Platform **MUST** reject the invalid response rather than
+infer presentation text from the key.
+
+Amenity presentation is identifier-agnostic: the Business-provided
+`description` alone is sufficient to present any amenity. A Platform
+**SHOULD** present every returned amenity using its `description`, including
+entries whose identifier it does not recognize. It **MUST NOT** filter returned
+amenities to a set of recognized identifiers. A Platform **MAY** enhance
+recognized amenities with icons, grouping, or other structured presentation,
+but **MUST NOT** infer semantics from an unrecognized identifier or treat it as
+equivalent to another amenity.
+
+{{ extension_schema_fields('types/location.json#/$defs/amenity', 'common/location') }}
 
 ### Context
 

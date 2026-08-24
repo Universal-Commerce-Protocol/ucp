@@ -196,6 +196,10 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 {{ schema_fields('types/amenity_type', 'common/location/rest') }}
 
+### Amenity {: #amenity }
+
+{{ extension_schema_fields('types/location.json#/$defs/amenity', 'common/location/rest') }}
+
 ### Location {: #location-entity }
 
 {{ schema_fields('types/location', 'common/location/rest') }}

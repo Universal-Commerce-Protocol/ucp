@@ -227,6 +227,10 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 
 {{ schema_fields('types/amenity_type', 'common/location/mcp') }}
 
+### Amenity {: #amenity }
+
+{{ extension_schema_fields('types/location.json#/$defs/amenity', 'common/location/mcp') }}
+
 ### Location {: #location-entity }
 
 {{ schema_fields('types/location', 'common/location/mcp') }}
