@@ -36,11 +36,6 @@
                 "description": "URL to the Platform's UCP profile document."
               }
             }
-          },
-          "idempotency-key": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header (optional for read-only operations)."
           }
         }
       }
