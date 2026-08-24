@@ -303,8 +303,6 @@ plugins:
         # Common Extensions
         specification/loyalty.md:
           specification/common/extensions/loyalty.md
-        specification/shopping/extensions/loyalty.md:
-          specification/common/extensions/loyalty.md
         # Shopping Extensions
         specification/buyer-consent.md:
           specification/shopping/extensions/buyer-consent.md

@@ -1297,17 +1297,17 @@ Platforms MUST render all top-level entries in the order provided:
 
 ```python
 for entry in totals:
-  render_line(entry.display_text, entry.amount)
+    render_line(entry.display_text, entry.amount)
 ```
 
 Platforms MAY render sub-lines as supplementary detail:
 
 ```python
 for entry in totals:
-  render_line(entry.display_text, entry.amount)
-  if entry.lines:
-    for sub in entry.lines:
-      render_detail_line(sub.display_text, sub.amount)
+    render_line(entry.display_text, entry.amount)
+    if entry.lines:
+        for sub in entry.lines:
+            render_detail_line(sub.display_text, sub.amount)
 ```
 
 Platforms MUST NOT interpret, filter, reorder, aggregate, or apply display
