@@ -56,21 +56,26 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 ### Relationship to Other Capabilities
 
-The Location capability provides the foundation for localized commerce by integrating tightly
-other capabilities (like Catalog, Cart, and Checkout in Shopping):
+The Location capability provides the foundation for localized commerce by
+integrating tightly with other capabilities (like Catalog, Cart, and Checkout
+in Shopping):
 
-1. **Stable Identifiers**: Location search/lookup operations return stable,
-    business-scoped `location.id` values. These IDs are referenced further in other requests & responses
-    (e.g., associating product variants to specific locations in Catalog filters, passed directly
-    in `selected_destination_id` to indicate pickup fulfillment mode).
+1. **Stable Identifiers**: Location Search and Lookup return stable,
+    Business-scoped `Location.id` values. A Platform **MAY** submit a returned
+    ID as `selected_destination_id` on an applicable Fulfillment method. The
+    method's `type`, not the Location ID, identifies the fulfillment mode; the
+    ID selects only the destination. The Business **MUST** revalidate the
+    selected Location's current availability and terms. Recognizing the ID does
+    not reserve inventory or guarantee eligibility. See
+    [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity).
 2. **Inventory-Based Store Finder**: Platforms can use Location Search with the `filters.inventory`
     predicate to locate nearby stores that have a specific item available, bridging the gap between
     online catalog browsing and physical store visits.
 3. **Provisional vs. Authoritative Boundaries**:
-    * *Discovery Phase (Provisional)*: Location responses based on operating hours, real-time inventory
-        availability, and amenities represent the business's *current terms* at the
-        time of query. They are **provisional signals** (despite most, like hours & amenities, remain stable
-        overtime) and are not binding commitments.
+    * *Discovery Phase (Provisional)*: Location responses based on operating
+        hours, real-time inventory availability, and amenities represent the
+        Business's *current terms* at the time of query. They are **provisional
+        signals** and are not binding commitments.
     * *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup)
         **MUST** be negotiated and finalized authoritatively. Discovery signals **SHOULD NOT** be cached
         or reused across sessions without re-validation.
