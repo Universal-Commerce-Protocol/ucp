@@ -687,8 +687,8 @@ instrument **SHOULD** extend that instrument's target rather than restate it.
 | :--------------------------------------------------------------------------------------------- | :------------------------------------------ |
 | [`payment_credential.json`](site:schemas/common/types/payment_credential.json)                 | Base: type discriminator only               |
 | [`token_credential.json`](site:schemas/common/types/token_credential.json)                     | Token: type + token string                  |
-| [`pan_credential.json`](site:schemas/shopping/types/pan_credential.json)                       | Raw FPAN, verified with `cvc`. Source only. |
-| [`network_token_credential.json`](site:schemas/shopping/types/network_token_credential.json)   | Network token, verified with `cryptogram`   |
+| [`pan_credential.json`](site:schemas/common/types/pan_credential.json)                         | Raw FPAN, verified with `cvc`. Source only. |
+| [`network_token_credential.json`](site:schemas/common/types/network_token_credential.json)     | Network token, verified with `cryptogram`   |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY**
 extend these schemas to include handler-specific credential context. Handlers

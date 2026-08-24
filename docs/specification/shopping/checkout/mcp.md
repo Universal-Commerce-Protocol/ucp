@@ -144,7 +144,7 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
         * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 

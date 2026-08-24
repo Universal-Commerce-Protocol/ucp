@@ -144,7 +144,7 @@ Do **not** appear in registries.
 
 Examples:
 
-- `schemas/common/payment.json` — Payment configuration (part of lower funnel capabilities like checkout in retail shopping)
+- `schemas/common/types/payment.json` — Payment configuration (part of lower funnel capabilities like checkout in retail shopping)
 
 ### Type Schemas
 

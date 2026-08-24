@@ -532,7 +532,7 @@ const UcpData = {
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
       }
     ],
-    "dev.ucp.common.payment.ap2_mandates": [
+    "dev.ucp.common.payment.ap2_mandate": [
       {
         extends: "dev.ucp.shopping.checkout",
         version: "{{ ucp_version }}",
@@ -551,7 +551,7 @@ const UcpData = {
     full: {
       label: "Full",
       description: "Supports core + Fulfillment and Discount extensions.",
-      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.common.payment.ap2_mandates"]
+      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.common.payment.ap2_mandate"]
     }
   },
 

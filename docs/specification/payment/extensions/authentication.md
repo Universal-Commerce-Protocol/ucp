@@ -141,7 +141,7 @@ challenge is emitted. When collection must precede a challenge, the Business
 emits the device data collection Action first and emits the challenge under
 `dev.ucp.common.payment.three_ds_challenge` only in a later Checkout response.
 
-When `dev.ucp.common.split_payments` is active a Checkout can carry an attempt
+When `dev.ucp.common.payment.split_payments` is active a Checkout can carry an attempt
 per instrument, each with its own outstanding authentication action, and
 `config.payment_instrument_id` is what distinguishes them.
 

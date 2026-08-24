@@ -248,7 +248,7 @@ The grammar is defined independently of the object it is bound to. Request
 Constraints bind it to objects in the next request and add `path`; other UCP
 schemas reuse it where a declaration already identifies the object it
 constrains, such as
-[`available_instruments[].constraints`](site:schemas/shopping/types/available_payment_instrument.json),
+[`available_instruments[].constraints`](site:schemas/common/types/available_payment_instrument.json),
 whose object is the `constraint_target` declared by the instrument schema for
 that entry's `type`.
 
@@ -563,7 +563,7 @@ network token must carry a `cryptogram` with its `eci_value`. Each credential
 family is its own schema, so every branch discriminates on the credential's own
 `type` and no rule has to branch on a sibling field:
 
-<!-- ucp:example schema=shopping/types/available_payment_instrument op=read direction=response -->
+<!-- ucp:example schema=common/types/available_payment_instrument op=read direction=response -->
 ```json
 {
   "type": "card",
@@ -595,16 +595,16 @@ it. The sibling `required` applies to every matching instrument; the `anyOf`
 branches then apply to the nested `credential` object, which must satisfy at
 least one. Each branch pins `type` with `const`, so a branch matches only the
 credential family it describes;
-[`payment_credential.json`](site:schemas/shopping/types/payment_credential.json)
+[`payment_credential.json`](site:schemas/common/types/payment_credential.json)
 already requires `type` on every credential, so no branch has to name it in
-`required`. A [PAN credential](site:schemas/shopping/types/pan_credential.json)
+`required`. A [PAN credential](site:schemas/common/types/pan_credential.json)
 without a `cvc` fails, as does a [network
-token](site:schemas/shopping/types/network_token_credential.json) missing its
+token](site:schemas/common/types/network_token_credential.json) missing its
 `eci_value`.
 
 Because every branch pins the discriminator, the branch set also closes the
 accepted credential families. A handler
-[token credential](site:schemas/shopping/types/token_credential.json) is a valid
+[token credential](site:schemas/common/types/token_credential.json) is a valid
 credential at this position but satisfies neither branch, so this Business does
 not accept it at this path. A Business that later accepts another family adds a
 branch for it.
@@ -2497,7 +2497,7 @@ touch raw financial credentials.
 
 For scenarios requiring cryptographic proof of user authorization (e.g.,
 autonomous AI agents), UCP supports the **AP2 Mandates Extension**
-(`dev.ucp.common.ap2_mandate`). This optional extension provides
+(`dev.ucp.common.payment.ap2_mandate`). This optional extension provides
 non-repudiable authorization through verifiable digital credentials.
 
 See [Transaction Integrity](#transaction-integrity-and-non-repudiation)
@@ -2906,7 +2906,7 @@ certified and handle:
 4. Log payment events without logging credentials
 5. Set appropriate credential timeouts
 6. For autonomous commerce scenarios requiring cryptographic proof, consider
-    supporting the `dev.ucp.common.ap2_mandate` extension (see
+    supporting the `dev.ucp.common.payment.ap2_mandate` extension (see
     [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md))
 
 **For Platforms:**
@@ -2916,7 +2916,7 @@ certified and handle:
 3. Implement timeout handling for credential acquisition
 4. Clear credentials from memory after submission
 5. Handle credential expiration gracefully (re-acquire if needed)
-6. For autonomous agents, consider using the `dev.ucp.common.ap2_mandate`
+6. For autonomous agents, consider using the `dev.ucp.common.payment.ap2_mandate`
     extension for cryptographic proof of authorization (see
     [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md))
 
@@ -2950,7 +2950,7 @@ payment architecture:
 The core payment architecture described above can be extended for specialized
 use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.common.ap2_mandate`): Adds
+- **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`): Adds
     cryptographic proof of user authorization for autonomous commerce scenarios
     where non-repudiable evidence is required. See
     [AP2 Mandates Extension](../payment/extensions/ap2-mandates.md).
@@ -3411,7 +3411,7 @@ business-emitted snapshot of the originating checkout's attribution.
 
 For scenarios requiring cryptographic proof of authorization (e.g., autonomous
 agents, high-value transactions), UCP supports the **AP2 Mandates Extension**
-(`dev.ucp.common.ap2_mandate`). When this optional extension is negotiated:
+(`dev.ucp.common.payment.ap2_mandate`). When this optional extension is negotiated:
 
 - Businesses provide a cryptographic signature on checkout terms
 - Platforms provide cryptographic mandates proving user authorization
