@@ -20,8 +20,8 @@
 
 Performs a search for physical locations (e.g., retail stores, restaurants,
 warehouses). Supports free-text queries, explicit spatial relations
-(`distance` and `serves`), and structured filtering by operating hours and
-offerings such as amenities and inventory availability.
+(`distance` and `serves`), and structured filtering by operating hours,
+amenities, and inventory availability.
 
 ## Operation
 
@@ -219,13 +219,15 @@ the range for which it can evaluate authoritatively, or otherwise unusable, the
 Location does not match the filter. A Business **MUST NOT** round, shift, or
 otherwise reinterpret the supplied instant.
 
-### Offerings-Based Filter
+### Amenity and Inventory Filters
 
-Separates static location characteristics from dynamic availability:
+These filters separate static Location characteristics from dynamic
+availability:
 
-* **`amenities`** (Array of Strings): Static features or services of the
-    location. All specified amenities **MUST** be supported by the location (AND semantic).
-    See [Amenity Vocabulary](#amenity-vocabulary) for well-known values.
+* **`amenities`** (Array of Amenity Identifiers): Static features, services, or
+    capabilities. A Location matches only when its response `amenities` map
+    contains every supplied identifier as an exact key. See
+    [Amenity Vocabulary](#amenity-vocabulary) for well-known values.
 * **`inventory`** (Array of Objects): Real-time availability of items/goods at
     the location. Some industry specific use cases include:
     * *Shopping*: Checking stock availability for specific products or variants.
@@ -235,9 +237,11 @@ Separates static location characteristics from dynamic availability:
 
 #### Amenity Vocabulary
 
-UCP defines an open reverse-DNS vocabulary for amenities via `amenity_type.json` to ensure cross-business
-interoperability. Implementations **SHOULD** map their internal features to the well-known types where applicable.
-The following table contains a non-exhaustive list of well-known values:
+UCP defines an open reverse-DNS vocabulary for amenity identifiers. A Business
+**SHOULD** use a well-known UCP identifier when its definition accurately
+describes the amenity and **MAY** define additional identifiers under a
+namespace it controls. The following table is a non-exhaustive list of
+well-known values:
 
 | Amenity Name                               | Domain             | Semantic Definition                                                    |
 | :----------------------------------------- | :----------------  | :--------------------------------------------------------------------- |
@@ -245,6 +249,21 @@ The following table contains a non-exhaustive list of well-known values:
 | `dev.ucp.amenity.parking`                  | Common / Universal | Dedicated parking lot or garage available on site.                     |
 | `dev.ucp.amenity.shopping.curbside_pickup` | Retail Shopping    | Dedicated vehicle bays for order pickup without entering the building. |
 | `dev.ucp.amenity.shopping.in_store_pickup` | Retail Shopping    | Dedicated counter or area inside store for order pickup.               |
+
+Location responses use the shared
+[Amenity representation](index.md#amenity), which keeps custom identifiers
+presentable without assigning them standardized semantics.
+
+A Platform supplies amenity filters as an array of identifiers. Matching uses
+exact whole-key equality; namespace prefixes carry no wildcard or inheritance
+semantics. A Business **MUST NOT** ignore a supplied identifier: a Location
+whose authoritative amenity set lacks any supplied key does not match. This
+includes identifiers the Business does not use; no diagnostic is required for
+an ordinary non-match. When `filters.amenities` is present, the Business
+**MUST** include every supplied identifier in each returned Location's
+`amenities` map. A Platform **MUST** reject a returned Location as
+non-conforming if it omits the map or any requested key, rather than accept a
+broadened or unverifiable result.
 
 #### Inventory Filter Evaluation Rules
 
@@ -348,7 +367,20 @@ The following requests and responses are transport-neutral UCP payloads.
             "latitude": 37.420,
             "longitude": -122.080
           },
-          "amenities": ["dev.ucp.amenity.shopping.curbside_pickup", "dev.ucp.amenity.shopping.in_store_pickup", "dev.ucp.amenity.parking"],
+          "amenities": {
+            "dev.ucp.amenity.shopping.curbside_pickup": {
+              "description": "Curbside pickup"
+            },
+            "dev.ucp.amenity.shopping.in_store_pickup": {
+              "description": "In-store pickup"
+            },
+            "dev.ucp.amenity.parking": {
+              "description": "On-site parking"
+            },
+            "com.example.amenity.in_person_installation": {
+              "description": "In-person installation by appointment"
+            }
+          },
           "timezone": "America/Los_Angeles",
           "hours": [
             {"day": "monday", "opens": "08:00", "closes": "21:00"}
@@ -362,7 +394,8 @@ The explicit `serves.point` is the authoritative service target; the coarse
 `context` hints only shape ranking and localization. At the supplied instant,
 it is Monday at `10:00` in `America/Los_Angeles`, within the returned
 interval. See [Operating Hours](index.md#operating-hours) for complete
-schedule evaluation rules.
+schedule evaluation rules. The custom amenity remains presentable through its
+description without assigning the identifier any standardized UCP meaning.
 
 ### Locations with an inventory item within a distance
 
@@ -413,7 +446,14 @@ schedule evaluation rules.
             "address_country": "US",
             "postal_code": "10005"
           },
-          "amenities": ["dev.ucp.amenity.shopping.curbside_pickup", "dev.ucp.amenity.shopping.in_store_pickup"]
+          "amenities": {
+            "dev.ucp.amenity.shopping.curbside_pickup": {
+              "description": "Curbside pickup"
+            },
+            "dev.ucp.amenity.shopping.in_store_pickup": {
+              "description": "In-store pickup"
+            }
+          }
         }
       ]
     }

@@ -2,7 +2,24 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/location.json",
   "title": "Location",
-  "description": "The full, rich representation of a physical business location. Builds on top of the Base Location schema to include discovery-centric details such as geographic coordinates, operating hours, timezone, and amenities.",
+  "description": "The full, rich representation of a physical business location. Builds on the Location Summary schema with discovery-centric details such as geographic coordinates, operating hours, timezone, and amenities.",
+  "$defs": {
+    "amenity": {
+      "title": "Amenity",
+      "description": "Buyer-facing presentation metadata for one amenity identifier. The containing map key, not this metadata, defines amenity identity and filter matching.",
+      "type": "object",
+      "required": ["description"],
+      "additionalProperties": true,
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short, plain-text, buyer-facing label or phrase for the amenity, suitable for direct use in a compact list (e.g., 'Curbside pickup'). The Business SHOULD localize it for the request when possible. This content does not participate in amenity identity or filter matching.",
+          "ucp_request": "omit"
+        }
+      }
+    }
+  },
   "type": "object",
   "additionalProperties": true,
   "allOf": [
@@ -16,10 +33,13 @@
           "ucp_request": "omit"
         },
         "amenities": {
-          "type": "array",
-          "description": "Static features of the location represented as a reverse-DNS string (e.g., 'dev.ucp.amenity.wi_fi', 'dev.ucp.amenity.shopping.in_store_pickup', 'com.example.amenity.in_person_installation').",
-          "items": {
+          "type": "object",
+          "description": "Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.",
+          "propertyNames": {
             "$ref": "amenity_type.json"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/amenity"
           },
           "ucp_request": "omit"
         },

@@ -2,7 +2,7 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Common Service",
-    "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the merchant's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
+    "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -33,14 +33,9 @@
               "profile": {
                 "type": "string",
                 "format": "uri",
-                "description": "URL to the platform's UCP profile document."
+                "description": "URL to the Platform's UCP profile document."
               }
             }
-          },
-          "idempotency-key": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header (optional for read-only operations)."
           }
         }
       }

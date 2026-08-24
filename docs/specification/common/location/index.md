@@ -16,8 +16,9 @@
 
 # Location Capability
 
-The Location capability allows platforms to discover, search, and retrieve physical locations
-(such as retail stores, restaurants, brand lockers) from businesses.
+The Location capability allows Platforms to discover, search, and retrieve
+physical Locations (such as retail stores, restaurants, brand lockers) from
+Businesses.
 
 This is vertical-agnostic and enables key commerce flows such as:
 
@@ -31,19 +32,19 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (hours, offerings like `amenities` or `inventory`, etc.). |
+| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `inventory`). |
 | [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more locations by identifier. |
 
 ## Key Concepts
 
 * **Location**: A physical entity that can be found on a map. Defined by a display name,
     address, operating hours, and **geographic context** (geographic coordinates).
-* **Offerings**: Features, capabilities, and inventory provided by the location.
-    This is split into two distinct concepts to ensure tooling compatibility and semantic clarity:
-    * **Amenities**: Static features, services, or capabilities of the location. Modeled as a flat reverse-DNS array to avoid
-      semantic ambiguity across diverse industries (e.g., food drive-through vs. pharmacy drive-through).
-      See [Amenity Vocabulary](search.md#amenity-vocabulary).
-    * **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
+* **Amenities**: Static features, services, or capabilities of the Location.
+    Responses use a map with reverse-DNS amenity identifiers as keys, combining
+    collision-resistant names, one entry per identifier, and buyer-facing
+    descriptions that keep custom amenities renderable. See
+    [Amenity Vocabulary](search.md#amenity-vocabulary).
+* **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
 * **Proximity & Serviceability**: Two distinct, explicit spatial relations:
     * **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
     * **`serves`**: Asks whether the Location can provisionally serve one explicit
@@ -56,21 +57,26 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 ### Relationship to Other Capabilities
 
-The Location capability provides the foundation for localized commerce by integrating tightly with
-other capabilities (like Catalog, Cart, and Checkout in Shopping):
+The Location capability provides the foundation for localized commerce by
+integrating tightly with other capabilities (like Catalog, Cart, and Checkout
+in Shopping):
 
-1. **Stable Identifiers**: Location search/lookup operations return stable,
-    business-scoped `location.id` values. These IDs are referenced further in other requests & responses
-    (e.g., associating product variants to specific locations in Catalog filters, passed directly
-    in `selected_destination_id` to indicate pickup fulfillment mode).
+1. **Stable Identifiers**: Location Search and Lookup return stable,
+    Business-scoped `Location.id` values representing physical entities. A
+    Location ID selects only the physical entity; it does not determine the
+    interaction mode, guarantee availability, or bind operational terms.
+    Downstream capabilities authoritatively negotiate and revalidate all terms
+    during transaction processing (for example, a returned ID submitted as
+    `selected_destination_id`; see
+    [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity)).
 2. **Inventory-Based Store Finder**: Platforms can use Location Search with the `filters.inventory`
     predicate to locate nearby stores that have a specific item available, bridging the gap between
     online catalog browsing and physical store visits.
 3. **Provisional vs. Authoritative Boundaries**:
-    * *Discovery Phase (Provisional)*: Location responses based on operating hours, real-time inventory
-        availability, and amenities offerings represent the business's *current terms* at the
-        time of query. They are **provisional signals** (despite most, like hours & amenities, remain stable
-        overtime) and are not binding commitments.
+    * *Discovery Phase (Provisional)*: Location responses based on operating
+        hours, real-time inventory availability, and amenities represent the
+        Business's *current terms* at the time of query. They are **provisional
+        signals** and are not binding commitments.
     * *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup)
         **MUST** be negotiated and finalized authoritatively. Discovery signals **SHOULD NOT** be cached
         or reused across sessions without re-validation.
@@ -190,6 +196,30 @@ Platform **MAY** present `title` according to its presentation policy and
 
 ## Shared Entities
 
+### Amenity {: #amenity }
+
+Location responses represent amenities as a map keyed by amenity identifier.
+The Business **MUST** provide a nonempty, plain-text, buyer-facing
+`description` for every entry. The Business **SHOULD** make it a short,
+self-contained label or phrase suitable for direct use in a compact list and
+**SHOULD** localize it for the request when possible. It does not participate
+in amenity identity or filtering. An entry without that description is
+schema-invalid; a Platform **MUST** reject the invalid response rather than
+infer presentation text from the key.
+
+Amenity presentation is identifier-agnostic: the Business-provided
+`description` alone is sufficient to present any amenity. A Platform governs
+its own presentation policy and **MAY** decide whether and where amenities
+appear (for example, omitting them on a compact summary card). When it
+presents amenities, it **SHOULD** use the provided `description` for every
+entry it presents and **MUST NOT** suppress an entry solely because its
+identifier is unrecognized. A Platform **MAY** enhance recognized amenities
+with icons, grouping, or other structured presentation, but **MUST NOT** infer
+semantics from an unrecognized identifier or treat it as equivalent to another
+amenity.
+
+{{ extension_schema_fields('types/location.json#/$defs/amenity', 'common/location') }}
+
 ### Context
 
 Buyer location and market context for the operations. All fields are optional
@@ -208,16 +238,16 @@ they prove neither proximity nor serviceability (see
 
 ### Signals
 
-Environment data provided by the platform to support authorization
-and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See
+Environment data provided by the Platform to support authorization and abuse
+prevention. Signal values **MUST NOT** be buyer-asserted claims. See
 [Signals](../../overview/index.md#signals) for details and privacy requirements.
 
 {{ schema_fields('types/signals', 'common/location') }}
 
 ## Messages and Error Handling
 
-All location responses include an optional `messages` array that allows businesses
-to provide context about errors, warnings, or informational notices.
+All Location responses include an optional `messages` array that allows
+Businesses to provide context about errors, warnings, or informational notices.
 
 ### Message Types
 
