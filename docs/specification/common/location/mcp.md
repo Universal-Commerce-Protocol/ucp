@@ -256,9 +256,9 @@ All application-level outcomes return a successful JSON-RPC result with the UCP 
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-2. Implement tools for each location capability advertised in the business's UCP profile, per their respective
+2. Implement tools for each Location capability advertised in the Business's UCP profile, per their respective
     capability requirements ([Search](search.md), [Lookup](lookup.md)).
-    Each capability may be adopted independently.
+    Each capability **MAY** be adopted independently.
 3. Evaluate the `distance` relation only against the explicit Platform-supplied
     `distance.center`, and the `serves` relation only against the explicit
     Platform-supplied target; never derive either operand from `context`,
@@ -268,9 +268,9 @@ A conforming MCP transport implementation **MUST**:
     conjunctively (AND).
 5. Support cursor-based pagination for Search according to the shared
     pagination contract (see [Pagination](search.md#pagination)).
-6. Return a successful JSON-RPC result for lookup requests; unknown identifiers result in fewer or no locations
+6. Return a successful JSON-RPC result for Lookup requests; unknown identifiers result in fewer or no Locations
     returned (**MAY** include informational `not_found` messages in the `messages` array).
-7. Return a successful JSON-RPC result when a lookup request exceeds the
+7. Return a successful JSON-RPC result when a Lookup request exceeds the
     Business's batch maximum, process the first maximum number of distinct
     identifiers in request order, and include an informational
     `batch_limit_applied` message.

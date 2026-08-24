@@ -228,7 +228,7 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 A conforming REST transport implementation **MUST**:
 
-1. Implement endpoints for each location capability advertised in the business's UCP profile,
+1. Implement endpoints for each Location capability advertised in the Business's UCP profile,
     per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)).
     Each capability **MAY** be adopted independently.
 2. Evaluate the `distance` relation only against the explicit Platform-supplied
@@ -240,8 +240,8 @@ A conforming REST transport implementation **MUST**:
     conjunctively (AND).
 4. Support cursor-based pagination for Search according to the shared
     pagination contract (see [Pagination](search.md#pagination)).
-5. Return HTTP 200 for lookup requests; unknown identifiers result in fewer or no locations
+5. Return HTTP 200 for Lookup requests; unknown identifiers result in fewer or no Locations
     returned (**MAY** include informational `not_found` messages).
-6. Return HTTP 200 when a lookup request exceeds the Business's batch maximum,
+6. Return HTTP 200 when a Lookup request exceeds the Business's batch maximum,
     process the first maximum number of distinct identifiers in request order,
     and include an informational `batch_limit_applied` message.

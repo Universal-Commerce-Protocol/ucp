@@ -16,8 +16,9 @@
 
 # Location Capability
 
-The Location capability allows platforms to discover, search, and retrieve physical locations
-(such as retail stores, restaurants, brand lockers) from businesses.
+The Location capability allows Platforms to discover, search, and retrieve
+physical Locations (such as retail stores, restaurants, brand lockers) from
+Businesses.
 
 This is vertical-agnostic and enables key commerce flows such as:
 
@@ -235,16 +236,16 @@ they prove neither proximity nor serviceability (see
 
 ### Signals
 
-Environment data provided by the platform to support authorization
-and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See
+Environment data provided by the Platform to support authorization and abuse
+prevention. Signal values **MUST NOT** be buyer-asserted claims. See
 [Signals](../../overview/index.md#signals) for details and privacy requirements.
 
 {{ schema_fields('types/signals', 'common/location') }}
 
 ## Messages and Error Handling
 
-All location responses include an optional `messages` array that allows businesses
-to provide context about errors, warnings, or informational notices.
+All Location responses include an optional `messages` array that allows
+Businesses to provide context about errors, warnings, or informational notices.
 
 ### Message Types
 

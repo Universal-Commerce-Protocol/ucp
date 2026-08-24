@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/location.json",
   "title": "Location",
-  "description": "The full, rich representation of a physical business location. Builds on top of the Base Location schema to include discovery-centric details such as geographic coordinates, operating hours, timezone, and amenities.",
+  "description": "The full, rich representation of a physical business location. Builds on the Location Summary schema with discovery-centric details such as geographic coordinates, operating hours, timezone, and amenities.",
   "$defs": {
     "amenity": {
       "title": "Amenity",
