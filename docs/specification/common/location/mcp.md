@@ -69,8 +69,8 @@ request in `location`.
 
 | Tool | Capability | Description |
 | :--- | :--- | :--- |
-| `search_locations` | [Search](search.md) | Search for locations using text, spatial relations, and filters. |
-| `lookup_locations` | [Lookup](lookup.md) | Batch lookup one or more Locations by identifier. |
+| `search_locations` | [Search](search.md) | Search for Locations using text, explicit relations, and filters. |
+| `lookup_locations` | [Lookup](lookup.md) | Batch lookup Locations by identifier, optionally refined by explicit relations and filters. |
 
 ### `search_locations`
 
@@ -263,11 +263,11 @@ A conforming MCP transport implementation **MUST**:
 2. Implement tools for each Location capability advertised in the Business's UCP profile, per their respective
     capability requirements ([Search](search.md), [Lookup](lookup.md)).
     Each capability **MAY** be adopted independently.
-3. Evaluate the `distance` relation only against the explicit Platform-supplied
-    `distance.center`, and the `serves` relation only against the explicit
-    Platform-supplied target; never derive either operand from `context`,
-    `signals`, or an IP address, and never apply an implicit serviceability
-    check when `serves` is absent.
+3. Evaluate the `distance` and `serves` relations and the `filters.items`
+    availability predicate only against their explicit Platform-supplied
+    operands. Never derive an operand from `context`, `signals`, or an IP address, and never
+    apply an implicit serviceability or item-availability check when its
+    input is absent.
 4. Apply `distance`, `serves`, and every supplied `filters` predicate
     conjunctively (AND).
 5. Support cursor-based pagination for Search according to the shared

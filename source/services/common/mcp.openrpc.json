@@ -45,7 +45,7 @@
     {
       "name": "search_locations",
       "summary": "Search for physical locations",
-      "description": "Search for physical locations (e.g., retail stores, restaurants) using query text, explicit `distance` and `serves` relations, and structured filters (e.g., hours, amenities, inventory).",
+      "description": "Search for physical locations (e.g., retail stores, restaurants) using query text, explicit `distance` and `serves` relations, structured `filters.hours` and `filters.amenities` predicates, and the `filters.items` current item-availability predicate.",
       "params": [
         {
           "name": "meta",
@@ -66,7 +66,7 @@
     {
       "name": "lookup_locations",
       "summary": "Batch lookup locations by identifier",
-      "description": "Batch lookup of physical Locations by supported identifiers. Returns matching Locations and warnings.",
+      "description": "Batch lookup of physical Locations by supported identifiers, optionally refined by explicit `distance` and `serves` relations, structured `filters.hours` and `filters.amenities` predicates, and the `filters.items` current item-availability predicate. Returns matching Locations.",
       "params": [
         {
           "name": "meta",

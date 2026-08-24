@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/location_search.json",
   "name": "dev.ucp.common.location.search",
   "title": "Location Search",
-  "description": "Location search capability. Supports natural language queries, structured filtering, and pagination.",
+  "description": "Location search capability. Supports natural language queries, distance and serviceability relations, structured filtering including current item availability, and pagination.",
   "type": "object",
   "$defs": {
     "search_request": {

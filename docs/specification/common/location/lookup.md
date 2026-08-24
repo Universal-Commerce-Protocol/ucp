@@ -19,8 +19,10 @@
 * **Capability Name:** `dev.ucp.common.location.lookup`
 
 Resolves identifiers to physical Locations.
-Supports full-detail batch retrieval of multiple Locations to provide optionalities
-or retrieval of a single Location (useful for a dedicated Location detail page).
+Supports full-detail batch retrieval of multiple Locations or retrieval of a
+single Location (useful for a dedicated Location detail page), optionally
+refined by the same explicit relations and filters as Search (see
+[Refinement](#refinement)).
 
 ## Operation
 
@@ -68,13 +70,13 @@ a subsequent request.
 ### Refinement
 
 The Business first resolves the identifiers and deduplicates repeated values.
-Optional root `distance`/`serves` relations and `filters` predicates then
+Optional root `distance` and `serves` relations and `filters` predicates then
 refine the resolved set. All supplied criteria combine with AND: a resolved
-Location is returned only when it satisfies `distance` (when present),
-`serves` (when present), and every supplied `filters` predicate. The relations
-and predicates use the same schemas and semantics as Search — see
-[Spatial Relations](search.md#spatial-relations) and
-[Search Filters](search.md#search-filters).
+Location is returned only when it satisfies every supplied relation and
+filter. The relations and predicates use the same schemas and semantics as
+Search — see [Spatial Relations](search.md#spatial-relations) and
+[Search Filters](search.md#search-filters), including the
+[Item Availability Filter](search.md#item-availability-filter).
 
 For example, if a Platform requests `["loc_downtown", "loc_uptown"]` with an
 hours filter of `{"open_at": "2026-05-18T17:00:00Z"}`:
@@ -85,11 +87,13 @@ hours filter of `{"open_at": "2026-05-18T17:00:00Z"}`:
     returns only `loc_downtown`.
 
 An identifier that does not resolve has no corresponding returned Location or
-`inputs` entry. If an identifier resolves to a Location that fails any
-supplied criterion, that Location and its corresponding `inputs` entry are
-omitted. The request still succeeds. The Business **MAY** attach an
-informational message (for example, `not_found`), but no per-identifier
-explanation is guaranteed.
+`inputs` entry. If an identifier resolves to a Location that fails any supplied
+criterion, including because a `filters.items` identifier is unknown,
+is unavailable, or cannot be evaluated there, that Location and its
+corresponding `inputs` entry are omitted. The request
+still succeeds. The Business **MAY** attach an informational `not_found`
+message for an unresolved Location identifier, but no per-identifier
+explanation is guaranteed for a refinement non-match.
 
 ### Request
 
@@ -185,6 +189,51 @@ Sunday has no `hours` entry, meaning no regular interval begins that day. The
 `exception_hours` entry omits `opens` and `closes`, making it a full closure.
 See [Operating Hours](index.md#operating-hours) for schedule representation and
 evaluation rules.
+
+### Item availability refinement
+
+=== "Request"
+
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=request -->
+    ```json
+    {
+      "ids": ["loc_downtown", "loc_uptown"],
+      "filters": {
+        "items": ["item_id_phone_15_pro"]
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/location_lookup op=lookup direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.location.lookup": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_downtown",
+          "inputs": [
+            {"id": "loc_downtown"}
+          ],
+          "name": "Downtown Store"
+        }
+      ]
+    }
+    ```
+
+Both identifiers resolve, but the Business cannot currently provide the
+referenced item at `loc_uptown`, so that Location and its `inputs` entry are
+omitted. The request still succeeds, and this ordinary refinement non-match
+requires no message (see
+[Item Availability Filter](search.md#item-availability-filter)).
 
 ### Partial success
 

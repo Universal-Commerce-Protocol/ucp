@@ -63,7 +63,7 @@ Location capabilities through their UCP profile at `/.well-known/ucp`.
 | Endpoint | Method | Capability | Description |
 | :--- | :--- | :--- | :--- |
 | `/locations/search` | POST | [Search](search.md) | Search for physical locations. |
-| `/locations/lookup` | POST | [Lookup](lookup.md) | Lookup one or more Locations by identifier. |
+| `/locations/lookup` | POST | [Lookup](lookup.md) | Lookup Locations by identifier, optionally refined by explicit relations and filters. |
 
 ### `POST /locations/search`
 
@@ -231,11 +231,11 @@ A conforming REST transport implementation **MUST**:
 1. Implement endpoints for each Location capability advertised in the Business's UCP profile,
     per their respective capability requirements ([Search](search.md), [Lookup](lookup.md)).
     Each capability **MAY** be adopted independently.
-2. Evaluate the `distance` relation only against the explicit Platform-supplied
-    `distance.center`, and the `serves` relation only against the explicit
-    Platform-supplied target; never derive either operand from `context`,
-    `signals`, or an IP address, and never apply an implicit serviceability
-    check when `serves` is absent.
+2. Evaluate the `distance` and `serves` relations and the `filters.items`
+    availability predicate only against their explicit Platform-supplied
+    operands. Never derive an operand from `context`, `signals`, or an IP address, and never
+    apply an implicit serviceability or item-availability check when its
+    input is absent.
 3. Apply `distance`, `serves`, and every supplied `filters` predicate
     conjunctively (AND).
 4. Support cursor-based pagination for Search according to the shared
