@@ -69,8 +69,8 @@ request in `location`.
 
 | Tool | Capability | Description |
 | :--- | :--- | :--- |
-| `search_locations` | [Search](search.md) | Search for Locations using text, explicit relations, and filters. |
-| `lookup_locations` | [Lookup](lookup.md) | Batch lookup Locations by identifier, optionally refined by explicit relations and filters. |
+| `search_locations` | [Search](search.md) | Search for Locations using text, explicit spatial relations, and filters. |
+| `lookup_locations` | [Lookup](lookup.md) | Batch lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
 
 ### `search_locations`
 

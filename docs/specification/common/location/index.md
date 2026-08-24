@@ -33,7 +33,7 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.common.location.search`](search.md) | Search for Locations using free-text queries, explicit `distance` and `serves` relations, and filters (`hours`, `amenities`, and `items`). |
+| [`dev.ucp.common.location.search`](search.md) | Search for Locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `items`). |
 | [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more Locations by identifier, optionally refined by the same relations and filters. |
 
 ## Key Concepts
@@ -74,19 +74,9 @@ in Shopping):
     `selected_destination_id`; see
     [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity)).
 2. **Separation of Discovery Concerns**: Each capability answers one narrow
-    question, and later stages revalidate earlier signals:
-    * *Location* answers which places can currently provide a set of
-        referenced items (the
-        [`items` filter](search.md#item-availability-filter)).
-    * *Catalog* identifies and describes the items themselves and — with the
-        [Fulfillment](../../fulfillment.md) extension active and a chosen or
-        shortlisted Location supplied in `context.location` — evaluates
-        item-level fulfillment methods for that Location.
-    * *Cart* adds concrete item configurations and quantities.
-    * *Checkout* with Fulfillment revalidates the actual basket: item
-        grouping and splits, destination, method, windows and options,
-        prices, and terms.
-
+    question, and later stages revalidate earlier signals. Location answers
+    which places can currently provide a set of referenced items (the
+    [`items` filter](search.md#item-availability-filter)).
 3. **Provisional vs. Authoritative Boundaries**:
     * *Discovery Phase (Provisional)*: Location responses based on operating
         hours, current item availability, and amenities represent the

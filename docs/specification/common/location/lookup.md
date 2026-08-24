@@ -21,7 +21,7 @@
 Resolves identifiers to physical Locations.
 Supports full-detail batch retrieval of multiple Locations or retrieval of a
 single Location (useful for a dedicated Location detail page), optionally
-refined by the same explicit relations and filters as Search (see
+refined by the same explicit spatial relations and filters as Search (see
 [Refinement](#refinement)).
 
 ## Operation
@@ -74,8 +74,8 @@ Optional root `distance` and `serves` relations and `filters` predicates then
 refine the resolved set. All supplied criteria combine with AND: a resolved
 Location is returned only when it satisfies every supplied relation and
 filter. The relations and predicates use the same schemas and semantics as
-Search — see [Spatial Relations](search.md#spatial-relations) and
-[Search Filters](search.md#search-filters), including the
+Search — see [Spatial Relations](search.md#spatial-relations),
+[Search Filters](search.md#search-filters), and
 [Item Availability Filter](search.md#item-availability-filter).
 
 For example, if a Platform requests `["loc_downtown", "loc_uptown"]` with an

@@ -27,7 +27,7 @@ current item availability.
 
 | Operation | Description |
 | :--- | :--- |
-| **Search Locations** | Search for Locations using query text, explicit relations, context, and filters. |
+| **Search Locations** | Search for Locations using query text, explicit spatial relations, context, and filters. |
 
 ### Request
 
@@ -46,15 +46,16 @@ Each request input has a distinct role:
 | `query` | Free-text retrieval (e.g., "restaurants near me that deliver"). |
 | `distance` | A relation between a candidate Location and an explicit Platform-supplied center point and inclusive radius. |
 | `serves` | A relation between a candidate Location and one explicit Platform-supplied service target. |
-| `filters` | Predicates over inherent or current Location facts: standard `hours`, `amenities`, and `items`, plus extension-defined filters. |
+| `filters` | Predicates over inherent or current Location facts: `hours`, `amenities`, and `items`, plus extension-defined filters. |
 | `context` / `signals` | Provisional hints for relevance, localization, and bounded default selection; never spatial proof. |
 | `pagination` | A request for the shape of a bounded result page. |
 
-`distance` and `serves` are independent spatial relations, while `filters`
-carries predicates over the candidate Location, including whether the
-Business can currently provide a set of referenced items there
-(`items`). Either relation can constrain a request by itself, and
-neither inherits inputs from the other.
+`distance` and `serves` sit at the request root because they compare a
+candidate Location against external facts the Platform supplies, while
+`filters` predicates ask whether the Location itself has or currently
+satisfies a fact. The two relations are independent: either can anchor a
+request by itself, they can use different points, and neither inherits an
+operand from the other.
 
 For any candidate Location, every explicit structured constraint is
 conjunctive:
@@ -292,19 +293,17 @@ evaluate Platform-selected quantities, prove that the referenced items can be
 transacted together as one basket, select or identify a fulfillment method,
 reserve any item, or predict availability at a future instant. The Business
 **MUST** revalidate transaction-specific availability, quantities, methods,
-and terms later in the commerce flow; see
-[Relationship to Other Capabilities](index.md#relationship-to-other-capabilities)
-for how Catalog, Cart, and Checkout divide that work.
+and terms later in the commerce flow. See
+[Relationship to Other Capabilities](index.md#relationship-to-other-capabilities).
 
 Combining `filters.items` with a pickup amenity (for example,
 `dev.ucp.amenity.shopping.in_store_pickup`) matches Locations where every
 referenced item is currently available and pickup is generally supported. The
 two predicates remain independent: the combination does not establish that
 the referenced items are available through pickup. Exact one-shot,
-method-qualified store finding is outside the base Location capability;
-item- and method-level answers come from the applicable domain capability,
-such as Catalog with Fulfillment active and the candidate Location supplied
-in `context.location`.
+method-qualified store finding is outside the base Location capability and
+requires an applicable domain capability that can correlate item availability
+with a fulfillment method.
 
 ## Pagination
 

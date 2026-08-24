@@ -63,7 +63,7 @@ Location capabilities through their UCP profile at `/.well-known/ucp`.
 | Endpoint | Method | Capability | Description |
 | :--- | :--- | :--- | :--- |
 | `/locations/search` | POST | [Search](search.md) | Search for physical locations. |
-| `/locations/lookup` | POST | [Lookup](lookup.md) | Lookup Locations by identifier, optionally refined by explicit relations and filters. |
+| `/locations/lookup` | POST | [Lookup](lookup.md) | Lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
 
 ### `POST /locations/search`
 
