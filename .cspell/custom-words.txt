@@ -180,3 +180,6 @@ zapatillas
 recoverably
 Honeycrisp
 unrepresentable
+mercadopago
+chargeback
+sunsetting
