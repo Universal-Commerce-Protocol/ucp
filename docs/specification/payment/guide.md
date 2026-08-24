@@ -777,21 +777,21 @@ INSTRUMENT_ACQUISITION(
 ) → checkout_instrument
 ```
 
-| Field                           | Description                                                              |
-| :------------------------------ | :----------------------------------------------------------------------- |
-| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required |
-| `handler_declaration.config`    | Handler-specific configuration from the business                         |
-| `binding`                       | **(See 2.6)** Context for binding the credential to a specific checkout  |
-| `buyer_input`                   | Buyer's payment selection or credentials                                 |
-| `checkout_instrument`           | The payment instrument to submit at checkout                             |
+| Field                           | Description                                                                    |
+| :------------------------------ | :----------------------------------------------------------------------------- |
+| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required       |
+| `handler_declaration.config`    | Handler-specific configuration from the business                               |
+| `binding`                       | **(See 2.6)** Context binding the credential to a specific capability resource |
+| `buyer_input`                   | Buyer's payment selection or credentials                                       |
+| `checkout_instrument`           | The payment instrument to submit at checkout                                   |
 
 Payment handler specifications do NOT need to define a formal process for
 instrument acquisition. Instead, the specification **SHOULD** clearly document:
 
 - How to apply the handler's `config` to construct a valid `checkout_instrument`.
-- How to create an effective credential binding to the specific checkout and
-  business for usage, which is critical for security, based on the available
-  `config` and `checkout`.
+- How to create an effective credential binding to the specific capability
+  resource, which is critical for security, based on the available `config`
+  and `binding`.
 
 ### Payment Actions
 
@@ -855,9 +855,9 @@ error messages to the buyer regardless of the underlying processor.
 
 ### Key Definitions
 
-| Term        | Definition                                                                                                                                                                                                                                    |
-| :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Binding** | A cryptographic or logical association of a payment instrument to a specific checkout transaction and business identity. This prevents replay attacks where a valid credential intended for Business A is intercepted and used at Business B. |
+| Term        | Definition                                                                                                                                                                                                                                                                             |
+| :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding** | A logical association of a payment instrument to a specific capability resource, identified by `type` and `id`. This prevents replay attacks where a credential intended for one resource is intercepted and used against another. Distinct from the participant a token is issued to. |
 
 ---
 
@@ -964,7 +964,7 @@ specifications:
 
 | Practice                         | Description                                                                    |
 | :------------------------------- | :----------------------------------------------------------------------------- |
-| **Require binding**              | Always tie credentials to a specific checkout via `binding`.                   |
+| **Require binding**              | Always tie credentials to a specific capability resource via `binding`.        |
 | **Minimize credential exposure** | Design flows so raw credentials (PANs, etc.) touch as few systems as possible. |
 | **Specify token lifetimes**      | Document whether tokens are single-use, time-limited, or session-scoped.       |
 

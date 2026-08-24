@@ -305,12 +305,12 @@ data and exposes the `/detokenize` endpoint. To implement, platforms must:
 
 **Implementation Requirements:**
 
-| Requirement            | Description                                                                              |
-| :--------------------- | :--------------------------------------------------------------------------------------- |
-| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)      |
-| Token storage          | Map tokens to credentials with binding metadata in the credential provider               |
-| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`          |
-| Binding verification   | payment credential provider verifies `binding` and caller identity on detokenization     |
+| Requirement            | Description                                                                                     |
+| :--------------------- | :---------------------------------------------------------------------------------------------- |
+| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)             |
+| Token storage          | Map tokens to credentials with binding metadata in the credential provider                      |
+| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`                 |
+| Binding verification   | payment credential provider verifies `binding` and the requesting participant on detokenization |
 
 ### Handler Configuration (Platform)
 
@@ -506,7 +506,7 @@ The platform's payment credential provider verifies that:
 | **No Platform App access** | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does. |
 | **Endpoint isolation** | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application. |
 | **Participant authentication** | Platform's credential provider **MUST** authenticate businesses/PSPs before accepting `/detokenize` calls. |
-| **Identity binding** | Tokens **MUST** be issued to the business's `identity` from the handler declaration. |
+| **Issued to participant** | Tokens **MUST** be issued to the business's `identity` from the handler declaration. |
 | **Resource-bound** | Tokens **MUST** be bound to the specific `binding` resource. |
 | **Caller verification** | Platform **MUST** verify the authenticated caller is the participant the token was issued to (or is an authorized PSP). |
 | **Single-use** | Tokens **SHOULD** be invalidated after detokenization. |

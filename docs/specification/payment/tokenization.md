@@ -118,10 +118,10 @@ Binding is a replay guard, not a resource reference. The following rules apply
 to every tokenizer:
 
 1. A Tokenizer **MUST** verify a binding by exact equality over `type` and
-   `id`. A Tokenizer **MUST NOT** accept a partial match, and **MUST** ignore
-   members of `binding` it does not recognize rather than rejecting the
-   request or including them in the comparison. Members other than `type` and
-   `id` are therefore not covered by the replay guard.
+   `id`. A Tokenizer **MUST NOT** accept a partial match, and **MUST NOT**
+   reject a request because `binding` carries members it does not recognize. A
+   Tokenizer **MUST** ignore unrecognized members when comparing, and **MAY**
+   include members defined by an extension it implements.
 2. A Tokenizer **MUST** treat `binding.id` as opaque: it **MUST NOT** require
    the value to be resolvable, and **MUST NOT** reject a request because it
    cannot confirm that the identified resource exists.
@@ -137,7 +137,9 @@ to every tokenizer:
    authenticated caller is that participant or is authorized to act for it. A
    Tokenizer **MUST NOT** return the credential when either check fails.
    `identity` is a participant identifier, not a credential, and a Tokenizer
-   **MUST NOT** accept it as authentication.
+   **MUST NOT** accept it as authentication. The mechanism by which one
+   participant is authorized to act for another is handler-defined and outside
+   the scope of this specification.
 
 ---
 
