@@ -113,7 +113,7 @@ gift cards alone, and (c) two credit cards:
   "capabilities": [{
     "dev.ucp.shopping.split_payments": [
       {
-        "version": "2026-01-23",
+        "version": "{{ ucp_version }}",
         "config": {
           "allowed_combinations": [
             [
