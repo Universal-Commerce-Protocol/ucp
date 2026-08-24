@@ -3633,11 +3633,12 @@ credential type (e.g., PCI DSS for cards).</p>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ptok_x9y8z7w6v5u4&quot;</span><span class="p">,</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">&quot;binding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;checkout_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_789&quot;</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">}</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_789&quot;</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Note: No <code>binding.identity</code> is needed if the business authenticates
+<p>Note: No <code>identity</code> is needed if the business authenticates
 directly—the platform knows who they are based on the API key.</p>
 <hr />
 <h2 id="platform-integration">Platform Integration<a class="headerlink" href="#platform-integration" title="Permanent link">&para;</a></h2>
@@ -3674,7 +3675,7 @@ data and exposes the <code>/detokenize</code> endpoint. To implement, platforms 
 </tr>
 <tr>
 <td style="text-align: left;">Binding verification</td>
-<td style="text-align: left;">payment credential provider verifies <code>checkout_id</code> and caller identity on detokenization</td>
+<td style="text-align: left;">payment credential provider verifies <code>binding</code> and the requesting participant on detokenization</td>
 </tr>
 </tbody>
 </table>
@@ -3749,7 +3750,7 @@ registry using <code>platform_config</code>.</p>
 <ol>
 <li>The platform's <strong>payment credential provider</strong> securely stores payment credentials.</li>
 <li>When a payment is needed, the platform application requests a token from the credential provider.</li>
-<li>The credential provider generates a token bound to both the <code>checkout_id</code> and the business's <code>identity</code> (from the handler declaration).</li>
+<li>The credential provider generates a token bound to the <code>binding</code> resource and issued to the business's <code>identity</code> (from the handler declaration).</li>
 <li>The credential provider returns the token to the platform application.</li>
 <li>The platform application includes this token in the checkout submission.</li>
 </ol>
@@ -3854,7 +3855,7 @@ for the credential type being handled (e.g., PCI DSS for cards). This includes:<
 <ol>
 <li>Extract the token from the payment instrument.</li>
 <li>Call the platform's <strong>payment credential provider</strong> <code>/detokenize</code> endpoint
-   with the business's identity in binding.</li>
+   with the business's <code>identity</code> alongside the <code>binding</code>.</li>
 <li>Process the payment with the returned credential.</li>
 </ol>
 <h4 id="detokenize-request-example-psp">Detokenize Request Example (PSP)<a class="headerlink" href="#detokenize-request-example-psp" title="Permanent link">&para;</a></h4>
@@ -3866,19 +3867,21 @@ for the credential type being handled (e.g., PCI DSS for cards). This includes:<
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">{</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ptok_x9y8z7w6v5u4&quot;</span><span class="p">,</span>
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">&quot;binding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;checkout_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_789&quot;</span><span class="p">,</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;business_abc123&quot;</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="p">}</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">,</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;checkout_789&quot;</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;business_abc123&quot;</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Note: <code>binding.identity</code> IS required here—the PSP is calling on behalf of a
+<p>Note: <code>identity</code> IS required here—the PSP is calling on behalf of a
 business, so they must specify which businesses' token they are retrieving.</p>
 <p>The platform's payment credential provider verifies that:</p>
 <ul>
-<li>The PSP is authorized to detokenize for this business.</li>
-<li>The <code>checkout_id</code> matches the original tokenization.</li>
+<li>The PSP is authorized to act for the business named by <code>identity</code>.</li>
+<li>The <code>binding</code> matches the original tokenization, and <code>identity</code> resolves to
+  the participant the token was issued to.</li>
 <li>The token has not expired or been used.</li>
 </ul>
 <hr />
@@ -3916,16 +3919,16 @@ business, so they must specify which businesses' token they are retrieving.</p>
 <td style="text-align: left;">Platform's credential provider <strong>MUST</strong> authenticate businesses/PSPs before accepting <code>/detokenize</code> calls.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Identity binding</strong></td>
-<td style="text-align: left;">Tokens <strong>MUST</strong> be bound to the business's <code>identity</code> from the handler declaration.</td>
+<td style="text-align: left;"><strong>Issued to participant</strong></td>
+<td style="text-align: left;">Tokens <strong>MUST</strong> be issued to the business's <code>identity</code> from the handler declaration.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Checkout-bound</strong></td>
-<td style="text-align: left;">Tokens <strong>MUST</strong> be bound to the specific <code>checkout_id</code>.</td>
+<td style="text-align: left;"><strong>Resource-bound</strong></td>
+<td style="text-align: left;">Tokens <strong>MUST</strong> be bound to the specific <code>binding</code> resource.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Caller verification</strong></td>
-<td style="text-align: left;">Platform <strong>MUST</strong> verify authenticated caller matches the token's bound identity (or is an authorized PSP).</td>
+<td style="text-align: left;">Platform <strong>MUST</strong> verify the authenticated caller is the participant the token was issued to (or is an authorized PSP).</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Single-use</strong></td>

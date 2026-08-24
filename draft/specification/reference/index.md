@@ -105,6 +105,15 @@ Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to th
 
 ______________________________________________________________________
 
+### Binding
+
+| Name | Type                                                                       | Requirement  | Description                                                                                                                                  |
+| ---- | -------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| type | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | The capability that owns the bound resource, for example dev.ucp.shopping.checkout. MUST be a capability name declared in the UCP namespace. |
+| id   | string                                                                     | **Required** | Opaque identifier of the bound resource within the owning capability, for example a checkout identifier.                                     |
+
+______________________________________________________________________
+
 ### Constraint Expression
 
 | Name       | Type                                                                                    | Requirement | Description                                                                                                                                                                                 |
@@ -434,15 +443,6 @@ ______________________________________________________________________
 | ----------- | ------------------------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | type        | string                                                                         | **Required** | The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant.                                                                                                                                                                      |
 | constraints | [Constraint Expression](/draft/specification/reference/#constraint-expression) | Optional     | A Constraint Expression describing the instrument this entry makes available. Keys in `properties` name members of the `constraint_target` declared by the instrument schema for this `type`. Requirements on submitted request data belong in `ucp.request_constraints` instead. |
-
-______________________________________________________________________
-
-### Binding
-
-| Name        | Type                                                                 | Requirement  | Description                                                                                                                                                                                    |
-| ----------- | -------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| checkout_id | string                                                               | **Required** | The checkout session identifier this token is bound to.                                                                                                                                        |
-| identity    | [Payment Identity](/draft/specification/reference/#payment-identity) | Optional     | The participant this token is bound to. Required when acting on behalf of another participant (e.g., agent tokenizing for merchant). Omit when the authenticated caller is the binding target. |
 
 ______________________________________________________________________
 

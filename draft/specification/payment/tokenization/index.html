@@ -2943,7 +2943,7 @@ which lifecycle policy you use:</p>
 </table>
 <h3 id="binding">Binding<a class="headerlink" href="#binding" title="Permanent link">&para;</a></h3>
 <p>All tokenization requests require a <code>binding</code> object that ties the token to a
-specific context:</p>
+specific capability resource:</p>
 <table>
 <thead>
 <tr>
@@ -2954,25 +2954,61 @@ specific context:</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;"><code>checkout_id</code></td>
+<td style="text-align: left;"><code>type</code></td>
 <td style="text-align: left;">Yes</td>
-<td style="text-align: left;">The checkout session this token is valid for</td>
+<td style="text-align: left;">The capability that owns the bound resource, for example <code>dev.ucp.shopping.checkout</code></td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>identity</code></td>
-<td style="text-align: left;">Conditional</td>
-<td style="text-align: left;">The participant identity to bind to; required when caller acts on behalf of another participant</td>
+<td style="text-align: left;"><code>id</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Opaque identifier of the bound resource within that capability. The caller <strong>MUST</strong> send a non-empty string</td>
 </tr>
 </tbody>
 </table>
-<p>The tokenizer <strong>MUST</strong> verify binding matches on <code>/detokenize</code>. See <a href="/draft/schemas/shopping/types/binding.json">Binding Schema</a>.</p>
+<p>See <a href="/draft/schemas/common/types/binding.json">Binding Schema</a>.</p>
+<p>Resource scope and participant scope are separate. Requests carry <code>identity</code>
+alongside <code>binding</code> rather than inside it: <code>binding</code> says which resource the
+token is for, <code>identity</code> says which participant it is for. <code>identity</code> is
+required when the caller acts on behalf of another participant, and omitted
+when the authenticated caller is that participant. See
+<a href="/draft/schemas/shopping/types/payment_identity.json">Payment Identity Schema</a>.</p>
+<p>Binding is a replay guard, not a resource reference. The following rules apply
+to every tokenizer:</p>
+<ol>
+<li>A Tokenizer <strong>MUST</strong> verify a binding by exact equality over <code>type</code> and
+   <code>id</code>. A Tokenizer <strong>MUST NOT</strong> accept a partial match, and <strong>MUST NOT</strong>
+   reject a request because <code>binding</code> carries members it does not recognize. A
+   Tokenizer <strong>MUST</strong> ignore unrecognized members when comparing. An extension
+   that defines additional <code>binding</code> members <strong>MUST</strong> specify whether those
+   members participate in the comparison; a Tokenizer implementing that
+   extension <strong>MUST</strong> follow the extension's definition.</li>
+<li>A Tokenizer <strong>MUST</strong> treat <code>binding.id</code> as opaque: it <strong>MUST NOT</strong> require
+   the value to be resolvable, and <strong>MUST NOT</strong> reject a request because it
+   cannot confirm that the identified resource exists.</li>
+<li>A Tokenizer <strong>MUST NOT</strong> reject a request solely because it does not
+   recognize <code>binding.type</code>. A tokenizer serving one capability today therefore
+   remains usable by capabilities defined later without changing its
+   implementation.</li>
+<li>Every token is issued to exactly one participant. A Tokenizer <strong>MUST</strong>
+   record that participant at <code>/tokenize</code> — from <code>identity</code> when present,
+   otherwise the authenticated caller. On <code>/detokenize</code> a Tokenizer <strong>MUST</strong>
+   resolve the requesting participant the same way, <strong>MUST</strong> verify it matches
+   the participant recorded at issuance, and <strong>MUST</strong> verify that the
+   authenticated caller is that participant or is authorized to act for it. A
+   Tokenizer <strong>MUST NOT</strong> return the credential when either check fails.
+   <code>identity</code> is a participant identifier, not a credential, and a Tokenizer
+   <strong>MUST NOT</strong> accept it as authentication. The mechanism by which one
+   participant is authorized to act for another is handler-defined and outside
+   the scope of this specification.</li>
+</ol>
 <hr />
 <h2 id="openapi">OpenAPI<a class="headerlink" href="#openapi" title="Permanent link">&para;</a></h2>
 <p>Tokenization handlers implement two endpoints. Your handler <strong>MAY</strong> implement
 one or both depending on your architecture. Or none, like our encrypted
 payload example, which defines its own mechanism to encrypt.</p>
 <h3 id="post-tokenize">POST /tokenize<a class="headerlink" href="#post-tokenize" title="Permanent link">&para;</a></h3>
-<p>Converts a raw credential into a token bound to a checkout and identity.</p>
+<p>Converts a raw credential into a token bound to a capability resource and issued
+to a participant.</p>
 <p><strong>When to implement:</strong> Always, unless you are an agent generating tokens
 internally.</p>
 <!-- ucp:example skip reason="tokenization API, not UCP payload" -->
@@ -2988,12 +3024,13 @@ internally.</p>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">&quot;cvc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="p">},</span>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="nt">&quot;binding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nt">&quot;checkout_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span><span class="p">,</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_001&quot;</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="p">}</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;merchant_001&quot;</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>Response:</strong></p>
 <!-- ucp:example skip reason="tokenization API, not UCP payload" -->
@@ -3013,9 +3050,10 @@ processing (see PSP example).</p>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tok_abc123xyz789&quot;</span><span class="p">,</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">&quot;binding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;checkout_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">}</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev.ucp.shopping.checkout&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123&quot;</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>Response:</strong></p>
 <!-- ucp:example skip reason="tokenization API, not UCP payload" -->
@@ -3027,9 +3065,9 @@ processing (see PSP example).</p>
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">&quot;cvc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span>
 </span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
 </span></code></pre></div>
-<p><strong>Note:</strong> <code>binding.identity</code> is omitted when the authenticated caller is the
-binding target. Include it when acting on behalf of another participant (e.g.,
-PSP detokenizing for business).</p>
+<p><strong>Note:</strong> <code>identity</code> is omitted when the authenticated caller is the participant
+the token was issued to. Include it when acting on behalf of another participant
+(e.g., PSP detokenizing for business).</p>
 <p>See the full <a href="/draft/handlers/tokenization/openapi.json">OpenAPI specification</a> for complete request/response schemas.</p>
 <hr />
 <h2 id="security-requirements">Security Requirements<a class="headerlink" href="#security-requirements" title="Permanent link">&para;</a></h2>
@@ -3043,7 +3081,7 @@ PSP detokenizing for business).</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Binding required</strong></td>
-<td style="text-align: left;">Credentials <strong>MUST</strong> be bound to <code>checkout_id</code> and participant <code>identity</code> to prevent reuse</td>
+<td style="text-align: left;">Credentials <strong>MUST</strong> be bound to a <code>binding</code> resource (<code>type</code> and <code>id</code>) and issued to exactly one participant to prevent reuse</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Binding verified</strong></td>
@@ -3147,9 +3185,11 @@ PSP detokenizing for business).</p>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Documents credential transformation between source and checkout forms</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Produces tokens compatible with the <code>TokenCredential</code> schema</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Specifies token lifecycle policy (TTL, single-use, etc.)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Requires <code>binding</code> with <code>checkout_id</code> on tokenization requests</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Requires <code>binding</code> with <code>type</code> and <code>id</code> on tokenization requests</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Uses <code>PaymentIdentity</code> for participant identification</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Verifies <code>binding</code> matches on detokenization requests</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Verifies <code>binding</code> matches by exact equality on detokenization requests</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Records the participant each token is issued to, and on detokenization verifies both that participant and the caller's authority to act for it</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Accepts binding types it does not recognize</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Requires security acknowledgements from participants receiving raw credentials</li>
 </ul>
 <hr />
@@ -3172,7 +3212,7 @@ PSP detokenizing for business).</p>
 </tr>
 <tr>
 <td style="text-align: left;">Binding Schema</td>
-<td style="text-align: left;"><a href="/draft/schemas/shopping/types/binding.json">schemas/shopping/types/binding.json</a></td>
+<td style="text-align: left;"><a href="/draft/schemas/common/types/binding.json">schemas/common/types/binding.json</a></td>
 </tr>
 <tr>
 <td style="text-align: left;">Token Credential Schema</td>

@@ -3307,7 +3307,7 @@ that ensures the sensitive instrument details never touch the platform).</p>
 <h4 id="step-3-tokenize-data">Step 3: Tokenize Data<a class="headerlink" href="#step-3-tokenize-data" title="Permanent link">&para;</a></h4>
 <p>Platform's payment credential provider calls the configured <code>endpoint</code>.</p>
 <p><strong>Note:</strong> If the handler configuration includes an <code>identity</code> object, the
-credential provider <strong>MUST</strong> inject it into the <code>binding</code> object.</p>
+credential provider <strong>MUST</strong> include it in the request alongside <code>binding</code>.</p>
 <p>Response:</p>
 <!-- ucp:example skip reason="tokenization API, not UCP payload" -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
@@ -3368,7 +3368,7 @@ credential provider <strong>MUST</strong> inject it into the <code>binding</code
 <li><strong>Requirements:</strong><ol>
 <li>Provide the <code>endpoint</code> URL to merchants.</li>
 <li>Issue <code>identity.access_token</code> (Merchant Secure Identifier) to merchants.</li>
-<li>Validate that the <code>binding.identity</code> matches the merchant requesting
+<li>Validate that the <code>identity</code> matches the merchant requesting
 the final payment charge.</li>
 </ol>
 </li>
@@ -3399,7 +3399,7 @@ the final payment charge.</li>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Binding Validation</strong></td>
-<td style="text-align: left;">The Tokenizer/Processor <strong>MUST</strong> verify that the <code>checkout_id</code> submitted during final payment matches the <code>checkout_id</code> provided during tokenization.</td>
+<td style="text-align: left;">The Tokenizer/Processor <strong>MUST</strong> verify that the <code>binding</code> submitted during final payment matches the <code>binding</code> provided during tokenization.</td>
 </tr>
 </tbody>
 </table>

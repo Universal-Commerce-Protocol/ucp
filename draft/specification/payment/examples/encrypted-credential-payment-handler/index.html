@@ -3354,7 +3354,8 @@ have their own compliance requirements.</p>
 <ol>
 <li><strong>Validate Handler:</strong> Confirm <code>instrument.handler_id</code> matches the expected handler ID</li>
 <li><strong>Decrypt Credential:</strong> Use business's private key to decrypt the credential</li>
-<li><strong>Verify Binding:</strong> Confirm the decrypted <code>checkout_id</code> matches the current checkout</li>
+<li><strong>Verify Binding:</strong> Confirm the decrypted <code>binding</code> matches the resource being
+  processed, comparing <code>type</code> and <code>id</code></li>
 <li><strong>Process Payment:</strong> Use the decrypted credential to complete payment</li>
 <li><strong>Return Response:</strong> Respond with the finalized checkout state</li>
 </ol>
@@ -3528,7 +3529,7 @@ access to raw PANs.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Binding embedded</strong></td>
-<td style="text-align: left;"><code>checkout_id</code> MUST be included in encrypted payload to prevent replay</td>
+<td style="text-align: left;">The <code>binding</code> object (<code>type</code> and <code>id</code>) MUST be included in the encrypted payload to prevent replay</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Key rotation</strong></td>

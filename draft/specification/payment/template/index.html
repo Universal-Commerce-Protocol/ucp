@@ -3646,11 +3646,11 @@ Platform processing contract.</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Binding required</strong></td>
-<td style="text-align: left;">Credentials <strong>MUST</strong> be bound to <code>checkout_id</code> and <code>identity</code> to prevent reuse.</td>
+<td style="text-align: left;">Credentials <strong>MUST</strong> be bound to the <code>binding</code> resource (<code>type</code> and <code>id</code>) and issued to exactly one participant to prevent reuse.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Binding placement</strong></td>
-<td style="text-align: left;">Binding data (e.g., <code>checkout_id</code>) <strong>SHOULD</strong> be included within the <code>credential</code> payload to ensure it is covered by the signature, rather than in transport headers.</td>
+<td style="text-align: left;">The <code>binding</code> object <strong>SHOULD</strong> be included within the <code>credential</code> payload to ensure it is covered by the signature, rather than in transport headers.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Binding verified</strong></td>

@@ -20775,18 +20775,18 @@ INSTRUMENT_ACQUISITION(
 ) → checkout_instrument
 ```
 
-| Field                           | Description                                                              |
-| ------------------------------- | ------------------------------------------------------------------------ |
-| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required |
-| `handler_declaration.config`    | Handler-specific configuration from the business                         |
-| `binding`                       | **(See 2.6)** Context for binding the credential to a specific checkout  |
-| `buyer_input`                   | Buyer's payment selection or credentials                                 |
-| `checkout_instrument`           | The payment instrument to submit at checkout                             |
+| Field                           | Description                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required       |
+| `handler_declaration.config`    | Handler-specific configuration from the business                               |
+| `binding`                       | **(See 2.6)** Context binding the credential to a specific capability resource |
+| `buyer_input`                   | Buyer's payment selection or credentials                                       |
+| `checkout_instrument`           | The payment instrument to submit at checkout                                   |
 
 Payment handler specifications do NOT need to define a formal process for instrument acquisition. Instead, the specification **SHOULD** clearly document:
 
 - How to apply the handler's `config` to construct a valid `checkout_instrument`.
-- How to create an effective credential binding to the specific checkout and business for usage, which is critical for security, based on the available `config` and `checkout`.
+- How to create an effective credential binding to the specific capability resource, which is critical for security, based on the available `config` and `binding`.
 
 ### Payment Actions
 
@@ -20830,9 +20830,9 @@ The specification **MUST** define a mapping for common failures (e.g., 'Declined
 
 ### Key Definitions
 
-| Term        | Definition                                                                                                                                                                                                                                    |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Binding** | A cryptographic or logical association of a payment instrument to a specific checkout transaction and business identity. This prevents replay attacks where a valid credential intended for Business A is intercepted and used at Business B. |
+| Term        | Definition                                                                                                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding** | A logical association of a payment instrument to a specific capability resource, identified by `type` and `id`. This prevents replay attacks where a credential intended for one resource is intercepted and used against another. Distinct from the participant a token is issued to. |
 
 ______________________________________________________________________
 
@@ -20936,7 +20936,7 @@ Follow these guidelines to create high-quality, maintainable handler specificati
 
 | Practice                         | Description                                                                    |
 | -------------------------------- | ------------------------------------------------------------------------------ |
-| **Require binding**              | Always tie credentials to a specific checkout via `binding`.                   |
+| **Require binding**              | Always tie credentials to a specific capability resource via `binding`.        |
 | **Minimize credential exposure** | Design flows so raw credentials (PANs, etc.) touch as few systems as possible. |
 | **Specify token lifetimes**      | Document whether tokens are single-use, time-limited, or session-scoped.       |
 
@@ -21269,14 +21269,14 @@ ______________________________________________________________________
 
 ## Security Considerations
 
-| Requirement                  | Description                                                                                                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse.                                                                                       |
-| **Binding placement**        | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
-| **Binding verified**         | The processing participant **MUST** verify binding matches before processing.                                                                                         |
-| **Token Expiry**             | {If using tokens: Tokens **MUST** expire after {duration} or single-use.}                                                                                             |
-| **Data Residency**           | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}                                                |
-| **{Additional requirement}** | {description}                                                                                                                                                         |
+| Requirement                  | Description                                                                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding required**         | Credentials **MUST** be bound to the `binding` resource (`type` and `id`) and issued to exactly one participant to prevent reuse.                       |
+| **Binding placement**        | The `binding` object **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
+| **Binding verified**         | The processing participant **MUST** verify binding matches before processing.                                                                           |
+| **Token Expiry**             | {If using tokens: Tokens **MUST** expire after {duration} or single-use.}                                                                               |
+| **Data Residency**           | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}                                  |
+| **{Additional requirement}** | {description}                                                                                                                                           |
 
 ______________________________________________________________________
 
@@ -21357,14 +21357,23 @@ Tokens move through distinct phases. Your handler specification must document wh
 
 ### Binding
 
-All tokenization requests require a `binding` object that ties the token to a specific context:
+All tokenization requests require a `binding` object that ties the token to a specific capability resource:
 
-| Field         | Required    | Description                                                                                     |
-| ------------- | ----------- | ----------------------------------------------------------------------------------------------- |
-| `checkout_id` | Yes         | The checkout session this token is valid for                                                    |
-| `identity`    | Conditional | The participant identity to bind to; required when caller acts on behalf of another participant |
+| Field  | Required | Description                                                                                                 |
+| ------ | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `type` | Yes      | The capability that owns the bound resource, for example `dev.ucp.shopping.checkout`                        |
+| `id`   | Yes      | Opaque identifier of the bound resource within that capability. The caller **MUST** send a non-empty string |
 
-The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](/draft/schemas/shopping/types/binding.json).
+See [Binding Schema](/draft/schemas/common/types/binding.json).
+
+Resource scope and participant scope are separate. Requests carry `identity` alongside `binding` rather than inside it: `binding` says which resource the token is for, `identity` says which participant it is for. `identity` is required when the caller acts on behalf of another participant, and omitted when the authenticated caller is that participant. See [Payment Identity Schema](/draft/schemas/shopping/types/payment_identity.json).
+
+Binding is a replay guard, not a resource reference. The following rules apply to every tokenizer:
+
+1. A Tokenizer **MUST** verify a binding by exact equality over `type` and `id`. A Tokenizer **MUST NOT** accept a partial match, and **MUST NOT** reject a request because `binding` carries members it does not recognize. A Tokenizer **MUST** ignore unrecognized members when comparing. An extension that defines additional `binding` members **MUST** specify whether those members participate in the comparison; a Tokenizer implementing that extension **MUST** follow the extension's definition.
+1. A Tokenizer **MUST** treat `binding.id` as opaque: it **MUST NOT** require the value to be resolvable, and **MUST NOT** reject a request because it cannot confirm that the identified resource exists.
+1. A Tokenizer **MUST NOT** reject a request solely because it does not recognize `binding.type`. A tokenizer serving one capability today therefore remains usable by capabilities defined later without changing its implementation.
+1. Every token is issued to exactly one participant. A Tokenizer **MUST** record that participant at `/tokenize` — from `identity` when present, otherwise the authenticated caller. On `/detokenize` a Tokenizer **MUST** resolve the requesting participant the same way, **MUST** verify it matches the participant recorded at issuance, and **MUST** verify that the authenticated caller is that participant or is authorized to act for it. A Tokenizer **MUST NOT** return the credential when either check fails. `identity` is a participant identifier, not a credential, and a Tokenizer **MUST NOT** accept it as authentication. The mechanism by which one participant is authorized to act for another is handler-defined and outside the scope of this specification.
 
 ______________________________________________________________________
 
@@ -21374,7 +21383,7 @@ Tokenization handlers implement two endpoints. Your handler **MAY** implement on
 
 ### POST /tokenize
 
-Converts a raw credential into a token bound to a checkout and identity.
+Converts a raw credential into a token bound to a capability resource and issued to a participant.
 
 **When to implement:** Always, unless you are an agent generating tokens internally.
 
@@ -21391,10 +21400,11 @@ Content-Type: application/json
     "cvc": "123"
   },
   "binding": {
-    "checkout_id": "abc123",
-    "identity": {
-      "access_token": "merchant_001"
-    }
+    "type": "dev.ucp.shopping.checkout",
+    "id": "abc123"
+  },
+  "identity": {
+    "access_token": "merchant_001"
   }
 }
 ```
@@ -21421,7 +21431,8 @@ Authorization: Bearer {caller_access_token}
 {
   "token": "tok_abc123xyz789",
   "binding": {
-    "checkout_id": "abc123"
+    "type": "dev.ucp.shopping.checkout",
+    "id": "abc123"
   }
 }
 ```
@@ -21438,7 +21449,7 @@ Authorization: Bearer {caller_access_token}
 }
 ```
 
-**Note:** `binding.identity` is omitted when the authenticated caller is the binding target. Include it when acting on behalf of another participant (e.g., PSP detokenizing for business).
+**Note:** `identity` is omitted when the authenticated caller is the participant the token was issued to. Include it when acting on behalf of another participant (e.g., PSP detokenizing for business).
 
 See the full [OpenAPI specification](/draft/handlers/tokenization/openapi.json) for complete request/response schemas.
 
@@ -21446,16 +21457,16 @@ ______________________________________________________________________
 
 ## Security Requirements
 
-| Requirement                  | Description                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------------ |
-| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and participant `identity` to prevent reuse |
-| **Binding verified**         | Tokenizer **MUST** verify binding matches before returning credentials                     |
-| **Cryptographically random** | Use secure random generators; tokens must be unguessable                                   |
-| **Sufficient length**        | Minimum 128 bits of entropy                                                                |
-| **Non-reversible**           | Cannot derive the credential from the token                                                |
-| **Scoped**                   | Token should only work with your tokenizer                                                 |
-| **Time-limited**             | Enforce TTL appropriate to use case (typically 5-30 minutes)                               |
-| **Single-use preferred**     | Invalidate after first detokenization when possible                                        |
+| Requirement                  | Description                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Binding required**         | Credentials **MUST** be bound to a `binding` resource (`type` and `id`) and issued to exactly one participant to prevent reuse |
+| **Binding verified**         | Tokenizer **MUST** verify binding matches before returning credentials                                                         |
+| **Cryptographically random** | Use secure random generators; tokens must be unguessable                                                                       |
+| **Sufficient length**        | Minimum 128 bits of entropy                                                                                                    |
+| **Non-reversible**           | Cannot derive the credential from the token                                                                                    |
+| **Scoped**                   | Token should only work with your tokenizer                                                                                     |
+| **Time-limited**             | Enforce TTL appropriate to use case (typically 5-30 minutes)                                                                   |
+| **Single-use preferred**     | Invalidate after first detokenization when possible                                                                            |
 
 ______________________________________________________________________
 
@@ -21509,9 +21520,11 @@ A tokenizer handler conforms to this pattern if it:
 - Documents credential transformation between source and checkout forms
 - Produces tokens compatible with the `TokenCredential` schema
 - Specifies token lifecycle policy (TTL, single-use, etc.)
-- Requires `binding` with `checkout_id` on tokenization requests
+- Requires `binding` with `type` and `id` on tokenization requests
 - Uses `PaymentIdentity` for participant identification
-- Verifies `binding` matches on detokenization requests
+- Verifies `binding` matches by exact equality on detokenization requests
+- Records the participant each token is issued to, and on detokenization verifies both that participant and the caller's authority to act for it
+- Accepts binding types it does not recognize
 - Requires security acknowledgements from participants receiving raw credentials
 
 ______________________________________________________________________
@@ -21522,7 +21535,7 @@ ______________________________________________________________________
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Tokenization OpenAPI    | [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)                                   |
 | Identity Schema         | [schemas/shopping/types/payment_identity.json](/draft/schemas/shopping/types/payment_identity.json)               |
-| Binding Schema          | [schemas/shopping/types/binding.json](/draft/schemas/shopping/types/binding.json)                                 |
+| Binding Schema          | [schemas/common/types/binding.json](/draft/schemas/common/types/binding.json)                                     |
 | Token Credential Schema | [schemas/shopping/types/token_credential.json](/draft/schemas/shopping/types/token_credential.json)               |
 | Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](/draft/schemas/shopping/types/card_payment_instrument.json) |
 
@@ -21727,7 +21740,7 @@ Platform's **compliant secure payment credential providers** collects the sensit
 
 Platform's payment credential provider calls the configured `endpoint`.
 
-**Note:** If the handler configuration includes an `identity` object, the credential provider **MUST** inject it into the `binding` object.
+**Note:** If the handler configuration includes an `identity` object, the credential provider **MUST** include it in the request alongside `binding`.
 
 Response:
 
@@ -21792,7 +21805,7 @@ ______________________________________________________________________
 - **Requirements:**
   1. Provide the `endpoint` URL to merchants.
   1. Issue `identity.access_token` (Merchant Secure Identifier) to merchants.
-  1. Validate that the `binding.identity` matches the merchant requesting the final payment charge.
+  1. Validate that the `identity` matches the merchant requesting the final payment charge.
 - **Security:** PSP bears the compliance burden for credential storage (e.g., PCI DSS for cards).
 
 ______________________________________________________________________
@@ -21804,7 +21817,7 @@ ______________________________________________________________________
 | **TLS/HTTPS**          | All traffic to `config.endpoint` **MUST** be encrypted.                                                                                                        |
 | **Compliance**         | The entity hosting `config.endpoint` **MUST** be compliant with relevant data standards for the credential type (e.g., PCI DSS for cards, GDPR for PII, etc.). |
 | **Scope Isolation**    | The Platform's main application **MUST NOT** see the raw credential; only the Platform's Secure credential provider and the Tokenizer Host may see it.         |
-| **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `checkout_id` submitted during final payment matches the `checkout_id` provided during tokenization.          |
+| **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `binding` submitted during final payment matches the `binding` provided during tokenization.                  |
 
 # Platform Tokenizer Payment Handler
 
@@ -22047,12 +22060,13 @@ Authorization: Bearer {business_api_key}
 {
   "token": "ptok_x9y8z7w6v5u4",
   "binding": {
-    "checkout_id": "checkout_789"
+    "type": "dev.ucp.shopping.checkout",
+    "id": "checkout_789"
   }
 }
 ```
 
-Note: No `binding.identity` is needed if the business authenticates directly—the platform knows who they are based on the API key.
+Note: No `identity` is needed if the business authenticates directly—the platform knows who they are based on the API key.
 
 ______________________________________________________________________
 
@@ -22068,12 +22082,12 @@ This handler is implemented by platforms that operate **compliant payment creden
 
 **Implementation Requirements:**
 
-| Requirement            | Description                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)      |
-| Token storage          | Map tokens to credentials with binding metadata in the credential provider               |
-| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`          |
-| Binding verification   | payment credential provider verifies `checkout_id` and caller identity on detokenization |
+| Requirement            | Description                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)             |
+| Token storage          | Map tokens to credentials with binding metadata in the credential provider                      |
+| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`                 |
+| Binding verification   | payment credential provider verifies `binding` and the requesting participant on detokenization |
 
 ### Handler Configuration (Platform)
 
@@ -22126,7 +22140,7 @@ The platform application orchestrates the payment flow but **never has access to
 
 1. The platform's **payment credential provider** securely stores payment credentials.
 1. When a payment is needed, the platform application requests a token from the credential provider.
-1. The credential provider generates a token bound to both the `checkout_id` and the business's `identity` (from the handler declaration).
+1. The credential provider generates a token bound to the `binding` resource and issued to the business's `identity` (from the handler declaration).
 1. The credential provider returns the token to the platform application.
 1. The platform application includes this token in the checkout submission.
 
@@ -22207,7 +22221,7 @@ As the party receiving sensitive instrument details via the `/detokenize` endpoi
 When the business forwards a token to the PSP:
 
 1. Extract the token from the payment instrument.
-1. Call the platform's **payment credential provider** `/detokenize` endpoint with the business's identity in binding.
+1. Call the platform's **payment credential provider** `/detokenize` endpoint with the business's `identity` alongside the `binding`.
 1. Process the payment with the returned credential.
 
 #### Detokenize Request Example (PSP)
@@ -22220,20 +22234,21 @@ Authorization: Bearer {psp_api_key}
 {
   "token": "ptok_x9y8z7w6v5u4",
   "binding": {
-    "checkout_id": "checkout_789",
-    "identity": {
-      "access_token": "business_abc123"
-    }
+    "type": "dev.ucp.shopping.checkout",
+    "id": "checkout_789"
+  },
+  "identity": {
+    "access_token": "business_abc123"
   }
 }
 ```
 
-Note: `binding.identity` IS required here—the PSP is calling on behalf of a business, so they must specify which businesses' token they are retrieving.
+Note: `identity` IS required here—the PSP is calling on behalf of a business, so they must specify which businesses' token they are retrieving.
 
 The platform's payment credential provider verifies that:
 
-- The PSP is authorized to detokenize for this business.
-- The `checkout_id` matches the original tokenization.
+- The PSP is authorized to act for the business named by `identity`.
+- The `binding` matches the original tokenization, and `identity` resolves to the participant the token was issued to.
 - The token has not expired or been used.
 
 ______________________________________________________________________
@@ -22248,9 +22263,9 @@ ______________________________________________________________________
 | **No Platform App access**           | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does.                                                                          |
 | **Endpoint isolation**               | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application.                                                                           |
 | **Participant authentication**       | Platform's credential provider **MUST** authenticate businesses/PSPs before accepting `/detokenize` calls.                                                                             |
-| **Identity binding**                 | Tokens **MUST** be bound to the business's `identity` from the handler declaration.                                                                                                    |
-| **Checkout-bound**                   | Tokens **MUST** be bound to the specific `checkout_id`.                                                                                                                                |
-| **Caller verification**              | Platform **MUST** verify authenticated caller matches the token's bound identity (or is an authorized PSP).                                                                            |
+| **Issued to participant**            | Tokens **MUST** be issued to the business's `identity` from the handler declaration.                                                                                                   |
+| **Resource-bound**                   | Tokens **MUST** be bound to the specific `binding` resource.                                                                                                                           |
+| **Caller verification**              | Platform **MUST** verify the authenticated caller is the participant the token was issued to (or is an authorized PSP).                                                                |
 | **Single-use**                       | Tokens **SHOULD** be invalidated after detokenization.                                                                                                                                 |
 | **Short TTL**                        | Tokens **SHOULD** expire shortly.                                                                                                                                                      |
 | **HTTPS required**                   | All `/detokenize` calls must use TLS.                                                                                                                                                  |
@@ -22444,7 +22459,7 @@ Upon receiving a checkout with an encrypted credential:
 
 1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
 1. **Decrypt Credential:** Use business's private key to decrypt the credential
-1. **Verify Binding:** Confirm the decrypted `checkout_id` matches the current checkout
+1. **Verify Binding:** Confirm the decrypted `binding` matches the resource being processed, comparing `type` and `id`
 1. **Process Payment:** Use the decrypted credential to complete payment
 1. **Return Response:** Respond with the finalized checkout state
 
@@ -22570,7 +22585,7 @@ ______________________________________________________________________
 | **Compliance (Business)**             | Businesses MUST be compliant with relevant standards for decryption and handling of raw credentials locally (e.g., PCI DSS for cards)    |
 | **No platform app credential access** | Platform applications MUST NOT handle raw credentials—only the compliant vaulting service does                                           |
 | **Asymmetric encryption**             | Platform's credential vault encrypts with business's public key; only business can decrypt                                               |
-| **Binding embedded**                  | `checkout_id` MUST be included in encrypted payload to prevent replay                                                                    |
+| **Binding embedded**                  | The `binding` object (`type` and `id`) MUST be included in the encrypted payload to prevent replay                                       |
 | **Key rotation**                      | Businesses SHOULD rotate keys periodically; platform must support key updates                                                            |
 | **No credential storage**             | Platform does not store encrypted credentials; encryption is one-way                                                                     |
 | **HTTPS required**                    | All checkout submissions must use TLS                                                                                                    |
@@ -22687,6 +22702,15 @@ ______________________________________________________________________
 ### Amount
 
 Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).
+
+______________________________________________________________________
+
+### Binding
+
+| Name | Type                                                                       | Requirement  | Description                                                                                                                                  |
+| ---- | -------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| type | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | The capability that owns the bound resource, for example dev.ucp.shopping.checkout. MUST be a capability name declared in the UCP namespace. |
+| id   | string                                                                     | **Required** | Opaque identifier of the bound resource within the owning capability, for example a checkout identifier.                                     |
 
 ______________________________________________________________________
 
@@ -23019,15 +23043,6 @@ ______________________________________________________________________
 | ----------- | ------------------------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | type        | string                                                                         | **Required** | The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant.                                                                                                                                                                      |
 | constraints | [Constraint Expression](/draft/specification/reference/#constraint-expression) | Optional     | A Constraint Expression describing the instrument this entry makes available. Keys in `properties` name members of the `constraint_target` declared by the instrument schema for this `type`. Requirements on submitted request data belong in `ucp.request_constraints` instead. |
-
-______________________________________________________________________
-
-### Binding
-
-| Name        | Type                                                                 | Requirement  | Description                                                                                                                                                                                    |
-| ----------- | -------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| checkout_id | string                                                               | **Required** | The checkout session identifier this token is bound to.                                                                                                                                        |
-| identity    | [Payment Identity](/draft/specification/reference/#payment-identity) | Optional     | The participant this token is bound to. Required when acting on behalf of another participant (e.g., agent tokenizing for merchant). Omit when the authenticated caller is the binding target. |
 
 ______________________________________________________________________
 

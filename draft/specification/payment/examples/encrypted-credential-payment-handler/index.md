@@ -179,7 +179,7 @@ Upon receiving a checkout with an encrypted credential:
 
 1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
 1. **Decrypt Credential:** Use business's private key to decrypt the credential
-1. **Verify Binding:** Confirm the decrypted `checkout_id` matches the current checkout
+1. **Verify Binding:** Confirm the decrypted `binding` matches the resource being processed, comparing `type` and `id`
 1. **Process Payment:** Use the decrypted credential to complete payment
 1. **Return Response:** Respond with the finalized checkout state
 
@@ -305,7 +305,7 @@ ______________________________________________________________________
 | **Compliance (Business)**             | Businesses MUST be compliant with relevant standards for decryption and handling of raw credentials locally (e.g., PCI DSS for cards)    |
 | **No platform app credential access** | Platform applications MUST NOT handle raw credentials—only the compliant vaulting service does                                           |
 | **Asymmetric encryption**             | Platform's credential vault encrypts with business's public key; only business can decrypt                                               |
-| **Binding embedded**                  | `checkout_id` MUST be included in encrypted payload to prevent replay                                                                    |
+| **Binding embedded**                  | The `binding` object (`type` and `id`) MUST be included in the encrypted payload to prevent replay                                       |
 | **Key rotation**                      | Businesses SHOULD rotate keys periodically; platform must support key updates                                                            |
 | **No credential storage**             | Platform does not store encrypted credentials; encryption is one-way                                                                     |
 | **HTTPS required**                    | All checkout submissions must use TLS                                                                                                    |

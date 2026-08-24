@@ -2532,6 +2532,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#constraint-expression" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2899,17 +2910,6 @@
     <span class="md-ellipsis">
       
         Available Payment Instrument
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#binding" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Binding
       
     </span>
   </a>
@@ -4417,6 +4417,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Binding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#constraint-expression" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4784,17 +4795,6 @@
     <span class="md-ellipsis">
       
         Available Payment Instrument
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#binding" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Binding
       
     </span>
   </a>
@@ -6533,6 +6533,32 @@ within the UCP.</p>
 <h3 id="amount">Amount<a class="headerlink" href="#amount" title="Permanent link">&para;</a></h3>
 <p>Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD).</p>
 <hr />
+<h3 id="binding">Binding<a class="headerlink" href="#binding" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The capability that owns the bound resource, for example dev.ucp.shopping.checkout. MUST be a capability name declared in the UCP namespace.</td>
+</tr>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Opaque identifier of the bound resource within the owning capability, for example a checkout identifier.</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="constraint-expression">Constraint Expression<a class="headerlink" href="#constraint-expression" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -7513,32 +7539,6 @@ within the UCP.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#constraint-expression">Constraint Expression</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">A Constraint Expression describing the instrument this entry makes available. Keys in <code>properties</code> name members of the <code>constraint_target</code> declared by the instrument schema for this <code>type</code>. Requirements on submitted request data belong in <code>ucp.request_constraints</code> instead.</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h3 id="binding">Binding<a class="headerlink" href="#binding" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Requirement</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">checkout_id</td>
-<td style="text-align: left;">string</td>
-<td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">The checkout session identifier this token is bound to.</td>
-</tr>
-<tr>
-<td style="text-align: left;">identity</td>
-<td style="text-align: left;"><a href="/draft/specification/reference/#payment-identity">Payment Identity</a></td>
-<td style="text-align: left;">Optional</td>
-<td style="text-align: left;">The participant this token is bound to. Required when acting on behalf of another participant (e.g., agent tokenizing for merchant). Omit when the authenticated caller is the binding target.</td>
 </tr>
 </tbody>
 </table>

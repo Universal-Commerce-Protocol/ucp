@@ -192,7 +192,7 @@ Platform's **compliant secure payment credential providers** collects the sensit
 
 Platform's payment credential provider calls the configured `endpoint`.
 
-**Note:** If the handler configuration includes an `identity` object, the credential provider **MUST** inject it into the `binding` object.
+**Note:** If the handler configuration includes an `identity` object, the credential provider **MUST** include it in the request alongside `binding`.
 
 Response:
 
@@ -257,7 +257,7 @@ ______________________________________________________________________
 - **Requirements:**
   1. Provide the `endpoint` URL to merchants.
   1. Issue `identity.access_token` (Merchant Secure Identifier) to merchants.
-  1. Validate that the `binding.identity` matches the merchant requesting the final payment charge.
+  1. Validate that the `identity` matches the merchant requesting the final payment charge.
 - **Security:** PSP bears the compliance burden for credential storage (e.g., PCI DSS for cards).
 
 ______________________________________________________________________
@@ -269,4 +269,4 @@ ______________________________________________________________________
 | **TLS/HTTPS**          | All traffic to `config.endpoint` **MUST** be encrypted.                                                                                                        |
 | **Compliance**         | The entity hosting `config.endpoint` **MUST** be compliant with relevant data standards for the credential type (e.g., PCI DSS for cards, GDPR for PII, etc.). |
 | **Scope Isolation**    | The Platform's main application **MUST NOT** see the raw credential; only the Platform's Secure credential provider and the Tokenizer Host may see it.         |
-| **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `checkout_id` submitted during final payment matches the `checkout_id` provided during tokenization.          |
+| **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `binding` submitted during final payment matches the `binding` provided during tokenization.                  |

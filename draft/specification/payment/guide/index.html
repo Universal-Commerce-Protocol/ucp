@@ -4164,7 +4164,7 @@ that can be submitted to the business's checkout.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>binding</code></td>
-<td style="text-align: left;"><strong>(See 2.6)</strong> Context for binding the credential to a specific checkout</td>
+<td style="text-align: left;"><strong>(See 2.6)</strong> Context binding the credential to a specific capability resource</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>buyer_input</code></td>
@@ -4180,9 +4180,9 @@ that can be submitted to the business's checkout.</p>
 instrument acquisition. Instead, the specification <strong>SHOULD</strong> clearly document:</p>
 <ul>
 <li>How to apply the handler's <code>config</code> to construct a valid <code>checkout_instrument</code>.</li>
-<li>How to create an effective credential binding to the specific checkout and
-  business for usage, which is critical for security, based on the available
-  <code>config</code> and <code>checkout</code>.</li>
+<li>How to create an effective credential binding to the specific capability
+  resource, which is critical for security, based on the available <code>config</code>
+  and <code>binding</code>.</li>
 </ul>
 <h3 id="payment-actions">Payment Actions<a class="headerlink" href="#payment-actions" title="Permanent link">&para;</a></h3>
 <p>A payment handler may require the Platform to perform additional work while the
@@ -4266,7 +4266,7 @@ error messages to the buyer regardless of the underlying processor.</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Binding</strong></td>
-<td style="text-align: left;">A cryptographic or logical association of a payment instrument to a specific checkout transaction and business identity. This prevents replay attacks where a valid credential intended for Business A is intercepted and used at Business B.</td>
+<td style="text-align: left;">A logical association of a payment instrument to a specific capability resource, identified by <code>type</code> and <code>id</code>. This prevents replay attacks where a credential intended for one resource is intercepted and used against another. Distinct from the participant a token is issued to.</td>
 </tr>
 </tbody>
 </table>
@@ -4406,7 +4406,7 @@ specifications:</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Require binding</strong></td>
-<td style="text-align: left;">Always tie credentials to a specific checkout via <code>binding</code>.</td>
+<td style="text-align: left;">Always tie credentials to a specific capability resource via <code>binding</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Minimize credential exposure</strong></td>
