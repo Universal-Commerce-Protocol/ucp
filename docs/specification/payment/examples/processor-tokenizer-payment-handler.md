@@ -123,7 +123,7 @@ The handler's specification (referenced via the `spec` field) documents the
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex"] } }
               }
             }
           ],
@@ -158,7 +158,7 @@ The response config includes runtime information about what's available for this
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard", "amex"]
+        "properties": { "brand": { "enum": ["visa", "mastercard", "amex"] } }
       }
     }
   ],
@@ -205,7 +205,7 @@ business's configuration.
           "id": "processor_tokenizer",
           "version": "{{ ucp_version }}",
           "available_instruments": [
-            {"type": "card", "constraints": {"brands": ["visa", "mastercard", "amex"]}}
+            {"type": "card", "constraints": {"properties": {"brand": {"enum": ["visa", "mastercard", "amex"]}}}}
           ],
           "config": {
             "environment": "production",

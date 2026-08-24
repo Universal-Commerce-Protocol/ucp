@@ -176,7 +176,7 @@ platform's handler specification (referenced via `spec`) documents the
 `/detokenize` endpoint URL exposed by the platform's
 **payment credential provider**.
 
-The handler accepts [CardCredential](site:schemas/shopping/types/card_credential.json) for tokenization and produces [TokenCredential](site:schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [PanCredential](site:schemas/shopping/types/pan_credential.json) and [NetworkTokenCredential](site:schemas/shopping/types/network_token_credential.json) for tokenization and produces [TokenCredential](site:schemas/shopping/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**.
 Both the sender (platform's credential provider) and receiver
@@ -208,7 +208,7 @@ credential type (e.g., PCI DSS for cards).
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "properties": { "brand": { "enum": ["visa", "mastercard"] } }
               }
             }
           ],
@@ -244,7 +244,7 @@ The response config includes runtime token lifecycle information.
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -342,7 +342,7 @@ registry using `platform_config`.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex", "discover"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex", "discover"] } }
               }
             }
           ],

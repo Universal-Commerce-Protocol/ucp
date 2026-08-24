@@ -121,11 +121,11 @@ Businesses advertise the platform's handler. The `business_id` field identifies
 the business, which the platform uses to look up the correct public key for
 encryption.
 
-The only supported instrument schema is [CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](site:schemas/shopping/types/card_credential.json).
+The only supported instrument schema is [CardPaymentInstrument](site:schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [PanCredential](site:schemas/shopping/types/pan_credential.json).
 
 **Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
 
-**Note:** `CardCredential` contains raw PANs. For card credentials, the
+**Note:** `PanCredential` contains raw PANs. For card credentials, the
 platform's vaulting service must be **PCI DSS compliant** when handling these
 credentials. Businesses receive only encrypted payloads but must be PCI DSS
 compliant once they decrypt card credentials locally. Other credential types
@@ -157,7 +157,7 @@ have their own compliance requirements.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard"]
+                "properties": { "brand": { "enum": ["visa", "mastercard"] } }
               }
             }
           ],
@@ -195,7 +195,7 @@ The response config includes information about the encryption used.
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -269,7 +269,7 @@ registry using `platform_config`.
             {
               "type": "card",
               "constraints": {
-                "brands": ["visa", "mastercard", "amex", "discover"]
+                "properties": { "brand": { "enum": ["visa", "mastercard", "amex", "discover"] } }
               }
             }
           ],

@@ -288,11 +288,13 @@ def on_page_markdown(markdown, page, config, files):
     target_base = f"{base_path}latest/specification/"
 
     def replace_link(match):
-      path = match.group(1)
+      path, separator, fragment = match.group(1).partition("#")
       if path.endswith("index.md"):
         path = path[:-8]
       elif path.endswith(".md"):
         path = path[:-3] + "/"
+      if separator:
+        path = f"{path}#{fragment}"
       return f"({target_base}{path})"
 
     # Pattern matches: (  prefix  specification/  path  )

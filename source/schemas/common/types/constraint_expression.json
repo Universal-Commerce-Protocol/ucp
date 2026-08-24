@@ -7,7 +7,8 @@
   "properties": {
     "required": {
       "type": "array",
-      "description": "Property names required by the constrained object.",
+      "description": "Property names required by the constrained object. Must be non-empty: an empty array applies no constraint.",
+      "minItems": 1,
       "uniqueItems": true,
       "items": {
         "type": "string"
@@ -15,13 +16,20 @@
     },
     "properties": {
       "type": "object",
-      "description": "Constraints keyed by property name.",
+      "description": "Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.",
+      "minProperties": 1,
       "additionalProperties": {
         "oneOf": [
           {"$ref": "#"},
           {"$ref": "#/$defs/value_constraint"}
         ]
       }
+    },
+    "anyOf": {
+      "type": "array",
+      "description": "Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation.",
+      "minItems": 1,
+      "items": {"$ref": "#", "minProperties": 1}
     }
   },
   "additionalProperties": false,

@@ -319,6 +319,23 @@
           }
         }
       ]
+    },
+
+    "response_location_schema": {
+      "title": "UCP Location Response Schema",
+      "description": "UCP metadata for location responses.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
