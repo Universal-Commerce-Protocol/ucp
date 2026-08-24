@@ -1596,7 +1596,7 @@ For example, `attribution` is a dictionary of string values, so an attribution
 key named `ucp` is ordinary attribution data, not a protocol-namespace member.
 Guidance for schema authors on working within this reservation lives in the
 Schema Authoring Guide's
-[The Reserved `ucp` Member](site:documentation/schema-authoring/#the-reserved-ucp-member)
+[The Reserved `ucp` Member](/documentation/schema-authoring/#the-reserved-ucp-member)
 section. A Business or Platform encountering a `ucp` member at an eligible
 structured scope processes the members it recognizes, each per its own
 definition, and **MUST** ignore unrecognized members (see *Openness* above).

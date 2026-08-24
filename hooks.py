@@ -364,6 +364,9 @@ def on_post_build(config):
         with Path.open(dest_index, "w") as f:
           f.write(
             "<!doctype html>"
+            f'<link rel="canonical" href="{target}">'
+            '<script>var a=location.hash.substr(1);'
+            f'location.href="{target}"+(a?"#"+a:"")</script>'
             f'<meta http-equiv="refresh" content="0; url={target}">'
           )
 
@@ -374,6 +377,9 @@ def on_post_build(config):
         with Path.open(dest_file, "w") as f:
           f.write(
             "<!doctype html>"
+            f'<link rel="canonical" href="{target}">'
+            '<script>var a=location.hash.substr(1);'
+            f'location.href="{target}"+(a?"#"+a:"")</script>'
             f'<meta http-equiv="refresh" content="0; url={target}">'
           )
 
@@ -384,6 +390,9 @@ def on_post_build(config):
     with Path.open(index_file, "w") as f:
       f.write(
         "<!doctype html>"
+        f'<link rel="canonical" href="{index_target}">'
+        '<script>var a=location.hash.substr(1);'
+        f'location.href="{index_target}"+(a?"#"+a:"")</script>'
         f'<meta http-equiv="refresh" content="0; url={index_target}">'
       )
 
