@@ -62,13 +62,13 @@ integrating tightly with other capabilities (like Catalog, Cart, and Checkout
 in Shopping):
 
 1. **Stable Identifiers**: Location Search and Lookup return stable,
-    Business-scoped `Location.id` values. A Platform **MAY** submit a returned
-    ID as `selected_destination_id` on an applicable Fulfillment method. The
-    method's `type`, not the Location ID, identifies the fulfillment mode; the
-    ID selects only the destination. The Business **MUST** revalidate the
-    selected Location's current availability and terms. Recognizing the ID does
-    not reserve inventory or guarantee eligibility. See
-    [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity).
+    Business-scoped `Location.id` values representing physical entities. A
+    Location ID selects only the physical entity; it does not determine the
+    interaction mode, guarantee availability, or bind operational terms.
+    Downstream capabilities authoritatively negotiate and revalidate all terms
+    during transaction processing (for example, a returned ID submitted as
+    `selected_destination_id`; see
+    [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity)).
 2. **Inventory-Based Store Finder**: Platforms can use Location Search with the `filters.inventory`
     predicate to locate nearby stores that have a specific item available, bridging the gap between
     online catalog browsing and physical store visits.
@@ -208,13 +208,15 @@ schema-invalid; a Platform **MUST** reject the invalid response rather than
 infer presentation text from the key.
 
 Amenity presentation is identifier-agnostic: the Business-provided
-`description` alone is sufficient to present any amenity. A Platform
-**SHOULD** present every returned amenity using its `description`, including
-entries whose identifier it does not recognize. It **MUST NOT** filter returned
-amenities to a set of recognized identifiers. A Platform **MAY** enhance
-recognized amenities with icons, grouping, or other structured presentation,
-but **MUST NOT** infer semantics from an unrecognized identifier or treat it as
-equivalent to another amenity.
+`description` alone is sufficient to present any amenity. A Platform governs
+its own presentation policy and **MAY** decide whether and where amenities
+appear (for example, omitting them on a compact summary card). When it
+presents amenities, it **SHOULD** use the provided `description` for every
+entry it presents and **MUST NOT** suppress an entry solely because its
+identifier is unrecognized. A Platform **MAY** enhance recognized amenities
+with icons, grouping, or other structured presentation, but **MUST NOT** infer
+semantics from an unrecognized identifier or treat it as equivalent to another
+amenity.
 
 {{ extension_schema_fields('types/location.json#/$defs/amenity', 'common/location') }}
 

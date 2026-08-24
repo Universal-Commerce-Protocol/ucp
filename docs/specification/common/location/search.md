@@ -261,9 +261,9 @@ whose authoritative amenity set lacks any supplied key does not match. This
 includes identifiers the Business does not use; no diagnostic is required for
 an ordinary non-match. When `filters.amenities` is present, the Business
 **MUST** include every supplied identifier in each returned Location's
-`amenities` map. A Platform **MUST** reject as non-conforming a returned
-Location that omits the map or any requested key rather than accept a broadened
-or unverifiable result.
+`amenities` map. A Platform **MUST** reject a returned Location as
+non-conforming if it omits the map or any requested key, rather than accept a
+broadened or unverifiable result.
 
 #### Inventory Filter Evaluation Rules
 
@@ -393,10 +393,9 @@ The following requests and responses are transport-neutral UCP payloads.
 The explicit `serves.point` is the authoritative service target; the coarse
 `context` hints only shape ranking and localization. At the supplied instant,
 it is Monday at `10:00` in `America/Los_Angeles`, within the returned
-interval. The custom amenity remains presentable through its description
-without assigning the identifier any standardized UCP meaning. See
-[Operating Hours](index.md#operating-hours) for complete schedule evaluation
-rules.
+interval. See [Operating Hours](index.md#operating-hours) for complete
+schedule evaluation rules. The custom amenity remains presentable through its
+description without assigning the identifier any standardized UCP meaning.
 
 ### Locations with an inventory item within a distance
 
