@@ -204,6 +204,10 @@ All application-level outcomes return HTTP 200 with the UCP envelope and optiona
 
 {{ schema_fields('types/location', 'common/location/rest') }}
 
+### Lookup Location {: #lookup-location }
+
+{{ extension_schema_fields('location_lookup.json#/$defs/lookup_location', 'common/location/rest') }}
+
 ### Location Filter {: #location-filter-schema }
 
 {{ schema_fields('types/location_filter', 'common/location/rest') }}

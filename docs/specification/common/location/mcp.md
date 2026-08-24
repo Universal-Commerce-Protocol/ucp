@@ -43,12 +43,12 @@ Businesses advertise MCP transport availability for the Common service and Locat
     "capabilities": {
       "dev.ucp.common.location.search": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/location/search",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/location/search",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/location_search.json"
       }],
       "dev.ucp.common.location.lookup": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/location/lookup",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/location/lookup",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/location_lookup.json"
       }]
     },
