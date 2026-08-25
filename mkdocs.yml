@@ -420,36 +420,6 @@ plugins:
               per-session delegation negotiation, URL parameters, native UI
               event mappings, W3C Payment Request conceptual alignment, and
               core lifecycle messages.
-<<<<<<< HEAD
-          - specification/ap2-mandates.md: >-
-              AP2 Mandates Extension, detailing secure, cryptographically bound
-              checkout commitments (using SD-JWT+kb digital credentials and
-              detached JWS signatures) between business, platform, and payment
-              providers.
-          - specification/payment-terms.md: >-
-              Payment Terms Extension, enabling checkout payment schedules for
-              immediate and deferred payments such as deposits, installments,
-              and lodging balance-at-check-in flows.
-=======
-          - specification/buyer-consent.md: >-
-              Buyer Consent Extension, defining data schemas for transmitting
-              buyer privacy choices (analytics, marketing, personalization) to
-              assist with privacy compliance (CCPA/GDPR).
-          - specification/discount.md: >-
-              Discount Extension, covering discount code discovery, applied
-              discounts, allocation method stacking orders, rejected code
-              message handling, and automatic or provisional eligibility
-              promotions.
-          - specification/fulfillment.md: >-
-              Fulfillment extension for checkouts, defining delivery methods,
-              pickup destinations, and method-agnostic UI rendering contracts.
-          - specification/loyalty.md: >-
-              Loyalty Extension, enabling high-fidelity member benefit
-              recognition during catalog, cart, and checkout by defining schemas
-              for memberships, tiers, benefits, and reward earning forecasts
-              while managing provisional eligibility claims and enforcing
-              data-minimization privacy rules.
->>>>>>> 26c1d23 (Also refactor ap2-mandates extension (core payment construct) and fix payment extension specification structure - move them into the payment/ subfolder. Address PR review feedback like stale references, irrelevant rendering refactoring, etc.)
         Cart Capability:
           - specification/shopping/cart/index.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
