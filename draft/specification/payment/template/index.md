@@ -275,7 +275,7 @@ ______________________________________________________________________
 
 ## Payment Actions [CONDITIONAL]
 
-{Include this section if the handler can cause Actions. Identify the negotiated Checkout extension that declares them. Use the standard [Payment Authentication extension](http://ucp.dev/draft/specification/payment/authentication/index.md) for device data collection and 3DS challenges; link to the defining extension specification for custom Actions.}
+{Include this section if the handler can cause Actions. Identify the negotiated Checkout extension that declares them. Use the standard [Payment Authentication extension](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md) for device data collection and 3DS challenges; link to the defining extension specification for custom Actions.}
 
 | Action type     | When emitted | Gated effect | Handler-specific requirements                                   |
 | --------------- | ------------ | ------------ | --------------------------------------------------------------- |

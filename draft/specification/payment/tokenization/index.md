@@ -79,7 +79,7 @@ All tokenization requests require a `binding` object that ties the token to a sp
 
 See [Binding Schema](/draft/schemas/common/types/binding.json).
 
-Resource scope and participant scope are separate. Requests carry `identity` alongside `binding` rather than inside it: `binding` says which resource the token is for, `identity` says which participant it is for. `identity` is required when the caller acts on behalf of another participant, and omitted when the authenticated caller is that participant. See [Payment Identity Schema](/draft/schemas/shopping/types/payment_identity.json).
+Resource scope and participant scope are separate. Requests carry `identity` alongside `binding` rather than inside it: `binding` says which resource the token is for, `identity` says which participant it is for. `identity` is required when the caller acts on behalf of another participant, and omitted when the authenticated caller is that participant. See [Payment Identity Schema](/draft/schemas/common/types/payment_identity.json).
 
 Binding is a replay guard, not a resource reference. The following rules apply to every tokenizer:
 
@@ -244,17 +244,17 @@ ______________________________________________________________________
 
 ## References
 
-| Resource                | URL                                                                                                               |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Tokenization OpenAPI    | [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)                                   |
-| Identity Schema         | [schemas/shopping/types/payment_identity.json](/draft/schemas/shopping/types/payment_identity.json)               |
-| Binding Schema          | [schemas/common/types/binding.json](/draft/schemas/common/types/binding.json)                                     |
-| Token Credential Schema | [schemas/shopping/types/token_credential.json](/draft/schemas/shopping/types/token_credential.json)               |
-| Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](/draft/schemas/shopping/types/card_payment_instrument.json) |
+| Resource                | URL                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Tokenization OpenAPI    | [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)                               |
+| Identity Schema         | [schemas/common/types/payment_identity.json](/draft/schemas/common/types/payment_identity.json)               |
+| Binding Schema          | [schemas/common/types/binding.json](/draft/schemas/common/types/binding.json)                                 |
+| Token Credential Schema | [schemas/common/types/token_credential.json](/draft/schemas/common/types/token_credential.json)               |
+| Card Instrument Schema  | [schemas/common/types/card_payment_instrument.json](/draft/schemas/common/types/card_payment_instrument.json) |
 
 ______________________________________________________________________
 
 ## See Also
 
 - **[Encrypted Credential Handler](http://ucp.dev/draft/specification/payment/examples/encrypted-credential-payment-handler/index.md)** — Alternative pattern using encryption instead of tokenize/detokenize round-trips
-- **[AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification
+- **[AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)** — Add cryptographic proof of checkout agreement for PSP verification

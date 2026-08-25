@@ -4,15 +4,15 @@
 
 The Payment Authentication extension defines browser-surface interactions that a Platform may need to process while a payment attempt is underway. It declares two concrete [Action types](http://ucp.dev/draft/specification/overview/#actions):
 
-| Action type                              | Platform interaction                                             |
-| ---------------------------------------- | ---------------------------------------------------------------- |
-| `dev.ucp.payment.device_data_collection` | Run an invisible browser-capable device data collection surface. |
-| `dev.ucp.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge surface.                    |
+| Action type                                     | Platform interaction                                             |
+| ----------------------------------------------- | ---------------------------------------------------------------- |
+| `dev.ucp.common.payment.device_data_collection` | Run an invisible browser-capable device data collection surface. |
+| `dev.ucp.common.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge surface.                    |
 
 The extension is named:
 
 ```text
-dev.ucp.shopping.payment_authentication
+dev.ucp.common.payment.authentication
 ```
 
 It extends `dev.ucp.shopping.checkout`. Negotiating this extension activates the complete contract for both Action types. A Business **MUST NOT** emit either type unless this extension is active for the Checkout.
@@ -28,12 +28,12 @@ Businesses and Platforms advertise this extension in their profiles:
   "ucp": {
     "version": "draft",
     "capabilities": {
-      "dev.ucp.shopping.payment_authentication": [
+      "dev.ucp.common.payment.authentication": [
         {
           "version": "draft",
           "extends": "dev.ucp.shopping.checkout",
-          "spec": "https://ucp.dev/draft/specification/payment/authentication/",
-          "schema": "https://ucp.dev/draft/schemas/shopping/payment_authentication.json"
+          "spec": "https://ucp.dev/draft/specification/payment/extensions/authentication",
+          "schema": "https://ucp.dev/draft/schemas/common/payment_authentication.json"
         }
       ]
     }
@@ -55,7 +55,7 @@ Actions are keyed by type in the Checkout response. For example, a device data c
     "version": "draft",
     "status": "success",
     "capabilities": {
-      "dev.ucp.shopping.payment_authentication": [
+      "dev.ucp.common.payment.authentication": [
         {
           "version": "draft",
           "extends": "dev.ucp.shopping.checkout"
@@ -88,7 +88,7 @@ Actions are keyed by type in the Checkout response. For example, a device data c
     ]
   },
   "actions": {
-    "dev.ucp.payment.device_data_collection": [
+    "dev.ucp.common.payment.device_data_collection": [
       {
         "id": "ddc-1",
         "config": {
@@ -101,9 +101,9 @@ Actions are keyed by type in the Checkout response. For example, a device data c
 }
 ```
 
-A Business **SHOULD** keep at most one Payment Authentication Action outstanding per payment attempt at a time, emitting only the next interaction the Platform can process, because collection completes or times out before a challenge is emitted. When collection must precede a challenge, the Business emits the device data collection Action first and emits the challenge under `dev.ucp.payment.three_ds_challenge` only in a later Checkout response.
+A Business **SHOULD** keep at most one Payment Authentication Action outstanding per payment attempt at a time, emitting only the next interaction the Platform can process, because collection completes or times out before a challenge is emitted. When collection must precede a challenge, the Business emits the device data collection Action first and emits the challenge under `dev.ucp.common.payment.three_ds_challenge` only in a later Checkout response.
 
-When `dev.ucp.shopping.split_payments` is active a Checkout can carry an attempt per instrument, each with its own outstanding authentication action, and `config.payment_instrument_id` is what distinguishes them.
+When `dev.ucp.common.payment.split_payments` is active a Checkout can carry an attempt per instrument, each with its own outstanding authentication action, and `config.payment_instrument_id` is what distinguishes them.
 
 Each Action's `config.payment_instrument_id` **MUST** identify an instrument in the containing Checkout. The Platform resolves that instrument's `handler_id` against `ucp.payment_handlers` and applies that handler's trust and fallback rules. The Platform **MUST** decline an Action whose instrument or handler association cannot be resolved unambiguously.
 
@@ -140,8 +140,8 @@ For an Action on an `incomplete` Checkout, the Platform may instead choose a dif
 
 The individual Action specifications define type-specific timeout and fallback behavior:
 
-- [Payment Device Data Collection](http://ucp.dev/draft/specification/payment/actions/device-data-collection/index.md)
-- [Payment 3DS Challenge](http://ucp.dev/draft/specification/payment/actions/three-ds-challenge/index.md)
+- [Payment Device Data Collection](http://ucp.dev/draft/specification/payment/extensions/actions/device-data-collection/index.md)
+- [Payment 3DS Challenge](http://ucp.dev/draft/specification/payment/extensions/actions/three-ds-challenge/index.md)
 
 ## Surface Rendering and Notifications
 

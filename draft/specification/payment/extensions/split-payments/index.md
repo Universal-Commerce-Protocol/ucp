@@ -1,6 +1,6 @@
 # Split Payments Extension
 
-- **Capability Name:** `dev.ucp.shopping.split_payments`
+- **Capability Name:** `dev.ucp.common.payment.split_payments`
 
 > **Note on examples:** Instrument `type` strings used in this spec (`card`, `gift_card`, `store_credit`, `loyalty`) are illustrative. Only `card` has a normative instrument schema in the base spec (`card_payment_instrument.json`); the others are handler-defined. Credential shapes shown in examples are similarly illustrative — real handlers MUST publish their credential schemas. Each usage example below assumes a business `allowed_combinations` config that admits the instrument set shown; the "Example Configuration" block later in this doc is one such config, not the only one.
 
@@ -35,7 +35,7 @@ Payment instrument extended with an optional per-instrument amount for split pay
 | billing_address | object  | Optional     | The billing address associated with this payment method.                                                                                                                                                                                                                                                                                                                              |
 | credential      | object  | Optional     | The base definition for any payment credential. Handlers define specific credential types.                                                                                                                                                                                                                                                                                            |
 | display         | object  | Optional     | Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler.                                                                                                                                                                                                                          |
-| amount          | integer | Optional     | Contribution amount for this instrument in `checkout.currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed).                                                                                                                           |
+| amount          | integer | Optional     | Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's `currency`. On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed).                                                                                      |
 
 ## Configuration
 
@@ -77,7 +77,7 @@ A business that supports (a) a card with up to 2 redeemables, (b) up to 5 gift c
 ```json
 {
   "capabilities": [{
-    "dev.ucp.shopping.split_payments": [
+    "dev.ucp.common.payment.split_payments": [
       {
         "version": "2026-01-23",
         "config": {

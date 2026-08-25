@@ -142,7 +142,7 @@ Optionally, businesses may configure their PSP to detokenize on their behalf (PS
 
 Businesses advertise the platform's tokenization handler. The `config` contains the business's identity with the platform for token binding. The platform's handler specification (referenced via `spec`) documents the `/detokenize` endpoint URL exposed by the platform's **payment credential provider**.
 
-The handler accepts [PanCredential](/draft/schemas/shopping/types/pan_credential.json) and [NetworkTokenCredential](/draft/schemas/shopping/types/network_token_credential.json) for tokenization and produces [TokenCredential](/draft/schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [PanCredential](/draft/schemas/common/types/pan_credential.json) and [NetworkTokenCredential](/draft/schemas/common/types/network_token_credential.json) for tokenization and produces [TokenCredential](/draft/schemas/common/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**. Both the sender (platform's credential provider) and receiver (business or PSP) **MUST** be compliant with relevant standards for the credential type (e.g., PCI DSS for cards).
 
@@ -363,12 +363,12 @@ ______________________________________________________________________
 
 ## Runtime Payment Authentication Actions
 
-This handler supports both Action types from the negotiated [Payment Authentication extension](http://ucp.dev/draft/specification/payment/authentication/index.md):
+This handler supports both Action types from the negotiated [Payment Authentication extension](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md):
 
-| Action type                              | Use                                                                |
-| ---------------------------------------- | ------------------------------------------------------------------ |
-| `dev.ucp.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
-| `dev.ucp.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge during payment completion.    |
+| Action type                                     | Use                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| `dev.ucp.common.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
+| `dev.ucp.common.payment.three_ds_challenge`     | Present a buyer-facing 3DS challenge during payment completion.    |
 
 When either step is needed, the Business returns the corresponding Action while processing the selected instrument. Its `config.payment_instrument_id` identifies that instrument, from which the Platform resolves this handler and its trust policy. The Platform processes the Action according to the extension and retrieves Checkout after `action.done`. The submitted token and instrument remain unchanged; the Business determines the payment outcome from its provider state.
 
@@ -455,4 +455,4 @@ ______________________________________________________________________
 
 - **Pattern:** [Tokenization Payment Handler](http://ucp.dev/draft/specification/payment/guide/index.md)
 - **API Pattern:** [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)
-- **Identity Schema:** [schemas/shopping/types/payment_identity.json](/draft/schemas/shopping/types/payment_identity.json)
+- **Identity Schema:** [schemas/common/types/payment_identity.json](/draft/schemas/common/types/payment_identity.json)

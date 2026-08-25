@@ -1,6 +1,6 @@
 # Payment Terms Extension
 
-- **Capability Name:** `dev.ucp.shopping.payment_terms`
+- **Capability Name:** `dev.ucp.common.payment.terms`
 
 ## Overview
 
@@ -87,7 +87,7 @@ A Platform therefore cannot pre-compute the effect of a choice, and **MUST** tre
 
 The instrument funding a term is charged once for each of that term's schedules, and **MUST** be capable of every one of them. A Business **MUST NOT** advertise an instrument that cannot fund every schedule of the selected term, and **MUST** reject one that is submitted. An instrument that can only be charged immediately therefore cannot be offered on a term that defers any part of the payment.
 
-A term with more than one schedule **MUST** be funded by a single instrument. [Split Payments](http://ucp.dev/draft/specification/payment/split-payments/index.md) composes with a term that has exactly one schedule, and not otherwise.
+A term with more than one schedule **MUST** be funded by a single instrument. [Split Payments](http://ucp.dev/draft/specification/payment/extensions/split-payments/index.md) composes with a term that has exactly one schedule, and not otherwise.
 
 ## Disclosures
 
@@ -125,15 +125,15 @@ Businesses advertise payment terms support in their profile:
   "ucp": {
     "version": "draft",
     "capabilities": {
-      "dev.ucp.shopping.payment_terms": [
+      "dev.ucp.common.payment.terms": [
         {
           "version": "draft",
           "extends": [
             "dev.ucp.shopping.checkout",
             "dev.ucp.shopping.order"
           ],
-          "spec": "https://ucp.dev/draft/specification/payment-terms",
-          "schema": "https://ucp.dev/draft/schemas/shopping/payment_terms.json"
+          "spec": "https://ucp.dev/draft/specification/payment/extensions/terms",
+          "schema": "https://ucp.dev/draft/schemas/common/payment_terms.json"
         }
       ]
     }
@@ -266,7 +266,7 @@ The $50 the pay-now term saves is stated where the purchase is priced, as its ow
     "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.checkout": [{ "version": "draft" }],
-      "dev.ucp.shopping.payment_terms": [{ "version": "draft" }]
+      "dev.ucp.common.payment.terms": [{ "version": "draft" }]
     },
     "payment_handlers": {
       "com.example.card_handler": [
@@ -356,7 +356,7 @@ On completion, the accepted term travels to the Order, so the Buyer can still se
     "version": "draft",
     "capabilities": {
       "dev.ucp.shopping.order": [{"version": "draft"}],
-      "dev.ucp.shopping.payment_terms": [{"version": "draft"}]
+      "dev.ucp.common.payment.terms": [{"version": "draft"}]
     }
   },
   "id": "order_9f2",

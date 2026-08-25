@@ -1,36 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/split_payments.json",
-  "name": "dev.ucp.shopping.split_payments",
-  "title": "Split Payments Extension",
-  "description": "Enables buyers to use multiple payment instruments for a single checkout.",
-  "requires": {
-    "protocol": {
-      "min": "2026-01-23"
-    },
-    "capabilities": {
-      "dev.ucp.shopping.checkout": {
-        "min": "2026-01-23"
-      }
-    }
-  },
+  "$id": "https://ucp.dev/draft/schemas/common/payment_split_payments.json",
+  "name": "dev.ucp.common.payment.split_payments",
+  "title": "Payment Split Payments Extension",
+  "description": "Enables Buyers to use multiple payment instruments for a single session.",
   "$defs": {
     "instrument_group": {
-      "$ref": "https://ucp.dev/draft/schemas/shopping/types/instrument_group.json"
+      "$ref": "https://ucp.dev/draft/schemas/common/types/instrument_group.json"
     },
     "payment_instrument": {
       "title": "Payment Instrument (Split Payments)",
       "description": "Payment instrument extended with an optional per-instrument amount for split payments.",
       "allOf": [
         {
-          "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json"
+          "$ref": "https://ucp.dev/draft/schemas/common/types/payment_instrument.json"
         },
         {
           "type": "object",
           "properties": {
             "amount": {
               "$ref": "https://ucp.dev/draft/schemas/common/types/amount.json",
-              "description": "Contribution amount for this instrument in `checkout.currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
+              "description": "Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's `currency`. On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
             }
           }
         }
@@ -67,7 +57,7 @@
         }
       ]
     },
-    "dev.ucp.shopping.split_payments": {
+    "dev.ucp.common.payment.split_payments": {
       "business_schema": {
         "title": "Split Payments Capability (Business)",
         "description": "Business-level split payments capability configuration.",
@@ -79,7 +69,7 @@
             "type": "object",
             "properties": {
               "config": {
-                "$ref": "https://ucp.dev/draft/schemas/shopping/types/business_split_payments_config.json",
+                "$ref": "https://ucp.dev/draft/schemas/common/types/business_split_payments_config.json",
                 "description": "Business split payments configuration"
               }
             }

@@ -21,7 +21,7 @@
             "available_instruments": {
               "type": "array",
               "items": {
-                "$ref": "https://ucp.dev/draft/schemas/shopping/types/available_payment_instrument.json"
+                "$ref": "https://ucp.dev/draft/schemas/common/types/available_payment_instrument.json"
               },
               "description": "Instrument types this handler supports, with optional constraints. When absent, every instrument should be considered available.",
               "minItems": 1

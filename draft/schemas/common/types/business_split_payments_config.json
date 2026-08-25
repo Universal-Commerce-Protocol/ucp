@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/business_split_payments_config.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/business_split_payments_config.json",
   "title": "Business Split Payments Config",
   "description": "Business-level configuration for split payments. Declaring the capability means multiple payment instruments are supported; this config declares which combinations are valid.",
   "type": "object",
@@ -15,7 +15,7 @@
         "type": "array",
         "description": "A single valid combination: an array of instrument groups that together define the constraints. All groups must be satisfied (AND logic).",
         "items": {
-          "$ref": "https://ucp.dev/draft/schemas/shopping/types/instrument_group.json"
+          "$ref": "https://ucp.dev/draft/schemas/common/types/instrument_group.json"
         },
         "minItems": 1
       },

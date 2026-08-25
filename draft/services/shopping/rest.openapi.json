@@ -1315,7 +1315,7 @@
         ]
       },
       "payment": {
-        "$ref": "https://ucp.dev/draft/schemas/shopping/payment.json"
+        "$ref": "https://ucp.dev/draft/schemas/common/types/payment.json"
       },
       "ucp": {
         "$ref": "https://ucp.dev/draft/schemas/ucp.json"

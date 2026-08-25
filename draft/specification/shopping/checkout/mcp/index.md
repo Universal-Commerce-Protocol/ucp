@@ -115,7 +115,7 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/shopping/checko
     - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md)
     - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md)
     - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
+    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
 
 #### Output Schema
 
@@ -361,7 +361,7 @@ The Platform **MUST NOT** start a new `update_checkout` operation while the Chec
     - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md)
     - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md)
     - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md)
-    - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
+    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
 
 #### Output Schema
 

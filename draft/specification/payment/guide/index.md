@@ -93,7 +93,7 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 
 **Prerequisites Output:**
 
-The `prerequisites_output` contains what a participant receives from onboarding. At minimum, this includes an **identity** (see [Payment Identity](/draft/schemas/shopping/types/payment_identity.json)). It **MAY** also include additional configuration, credentials, or settings specific to the handler.
+The `prerequisites_output` contains what a participant receives from onboarding. At minimum, this includes an **identity** (see [Payment Identity](/draft/schemas/common/types/payment_identity.json)). It **MAY** also include additional configuration, credentials, or settings specific to the handler.
 
 Payment handler specifications **are not required** to define a formal schema for `prerequisites_output`. Instead, the specification **SHOULD** clearly document:
 
@@ -475,16 +475,16 @@ ______________________________________________________________________
 
 **Base Instrument Schemas:**
 
-| Schema                                                                                       | Description                                                      |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| [`payment_instrument.json`](/draft/schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](/draft/schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+| Schema                                                                                     | Description                                                      |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| [`payment_instrument.json`](/draft/schemas/common/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](/draft/schemas/common/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec authors **MAY** extend any of the base instruments to add handler-specific display data or customize the credential reference. Handlers **MAY** define multiple instrument types for different payment flows.
 
 **Constraint Targets:**
 
-An instrument schema declares what its availability constraints may name in `$defs/constraint_target`: a plain object of members and their types, never carried in a payload. The handler's `payment_instrument` set binds each `type` to the schema that owns its target. [`card_payment_instrument.json`](/draft/schemas/shopping/types/card_payment_instrument.json) declares `brand` as a string, so `{ "properties": { "brand": { "enum": ["visa", "mastercard"] } } }` names a declared member and pins it to string values. The base Payment Handler validates the grammar, so a malformed `constraints` fails everywhere; the target supplies the meaning, so naming an undeclared member or pinning the wrong type is reportable without the base dispatching on `type`. A handler extending an instrument **SHOULD** extend that instrument's target rather than restate it.
+An instrument schema declares what its availability constraints may name in `$defs/constraint_target`: a plain object of members and their types, never carried in a payload. The handler's `payment_instrument` set binds each `type` to the schema that owns its target. [`card_payment_instrument.json`](/draft/schemas/common/types/card_payment_instrument.json) declares `brand` as a string, so `{ "properties": { "brand": { "enum": ["visa", "mastercard"] } } }` names a declared member and pins it to string values. The base Payment Handler validates the grammar, so a malformed `constraints` fails everywhere; the target supplies the meaning, so naming an undeclared member or pinning the wrong type is reportable without the base dispatching on `type`. A handler extending an instrument **SHOULD** extend that instrument's target rather than restate it.
 
 **Example `types/tokenizer_instrument.json`**:
 
@@ -500,7 +500,7 @@ An instrument schema declares what its availability constraints may name in `$de
       "title": "Tokenizer Card Constraint Target",
       "description": "Extends the card target with tokenizer-specific members.",
       "allOf": [
-        { "$ref": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json#/$defs/constraint_target" },
+        { "$ref": "https://ucp.dev/draft/schemas/common/types/card_payment_instrument.json#/$defs/constraint_target" },
         {
           "type": "object",
           "properties": {
@@ -515,7 +515,7 @@ An instrument schema declares what its availability constraints may name in `$de
   },
 
   "allOf": [
-    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/card_payment_instrument.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/common/types/card_payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -544,7 +544,7 @@ An instrument schema declares what its availability constraints may name in `$de
   "title": "Tokenizer Alt Instrument",
   "description": "Alternative payment instrument for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/common/types/payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -570,12 +570,12 @@ ______________________________________________________________________
 
 **Base Credential Schemas:**
 
-| Schema                                                                                         | Description                                 |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| [`payment_credential.json`](/draft/schemas/shopping/types/payment_credential.json)             | Base: type discriminator only               |
-| [`token_credential.json`](/draft/schemas/shopping/types/token_credential.json)                 | Token: type + token string                  |
-| [`pan_credential.json`](/draft/schemas/shopping/types/pan_credential.json)                     | Raw FPAN, verified with `cvc`. Source only. |
-| [`network_token_credential.json`](/draft/schemas/shopping/types/network_token_credential.json) | Network token, verified with `cryptogram`   |
+| Schema                                                                                       | Description                                 |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| [`payment_credential.json`](/draft/schemas/common/types/payment_credential.json)             | Base: type discriminator only               |
+| [`token_credential.json`](/draft/schemas/common/types/token_credential.json)                 | Token: type + token string                  |
+| [`pan_credential.json`](/draft/schemas/common/types/pan_credential.json)                     | Raw FPAN, verified with `cvc`. Source only. |
+| [`network_token_credential.json`](/draft/schemas/common/types/network_token_credential.json) | Network token, verified with `cryptogram`   |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY** extend these schemas to include handler-specific credential context. Handlers **MAY** define multiple credential types for different instrument flows.
 
@@ -592,7 +592,7 @@ The specification **MUST** define which credential types are accepted by the han
   "title": "Tokenizer Card Token",
   "description": "Card token credential for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/common/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -619,7 +619,7 @@ The specification **MUST** define which credential types are accepted by the han
   "title": "Tokenizer Alt Token",
   "description": "Alt token credential for com.example.tokenizer, adding routing hints",
   "allOf": [
-    { "$ref": "https://ucp.dev/draft/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/draft/schemas/common/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -675,7 +675,7 @@ A payment handler may require the Platform to perform additional work while the 
 
 Handler authors have two options:
 
-- **Use the standard Payment Authentication extension.** Handlers that need device data collection or a 3DS challenge use [`dev.ucp.shopping.payment_authentication`](http://ucp.dev/draft/specification/payment/authentication/index.md), which defines the `dev.ucp.payment.device_data_collection` and `dev.ucp.payment.three_ds_challenge` Action types. The handler specification states which types it can cause and any provider-specific trust or fallback requirements, such as allowed origins.
+- **Use the standard Payment Authentication extension.** Handlers that need device data collection or a 3DS challenge use [`dev.ucp.common.payment.authentication`](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md), which defines the `dev.ucp.common.payment.device_data_collection` and `dev.ucp.common.payment.three_ds_challenge` Action types. The handler specification states which types it can cause and any provider-specific trust or fallback requirements, such as allowed origins.
 - **Define handler-specific Actions.** When the standard types do not fit, the handler author publishes a Checkout extension that declares its Action type keys and `config` shapes. Both the Business and Platform advertise that extension before those Actions are emitted.
 
 For each handler-specific Action, document when it is emitted, the exact effect its type gates, how the Platform processes its config, how the Business observes its completion, whether processing the same occurrence is ever safe to retry, and its trust, failure, abandonment, and fallback behavior.

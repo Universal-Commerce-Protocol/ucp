@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/draft/schemas/shopping/types/payment_schedule.json",
+  "$id": "https://ucp.dev/draft/schemas/common/types/payment_schedule.json",
   "title": "Payment Schedule",
   "description": "A single payment that settles part or all of the checkout under a payment term. Timing is stated in buyer-facing text; `type` and `due_at` are supplementary machine-readable signals derived from it.",
   "type": "object",

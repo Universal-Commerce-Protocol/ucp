@@ -5,19 +5,11 @@
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
-         <loc>http://ucp.dev/draft/specification/ap2-mandates/</loc>
-         <lastmod>2026-08-25</lastmod>
-    </url>
-    <url>
          <loc>http://ucp.dev/draft/specification/embedded-protocol/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
          <loc>http://ucp.dev/draft/specification/glossary/</loc>
-         <lastmod>2026-08-25</lastmod>
-    </url>
-    <url>
-         <loc>http://ucp.dev/draft/specification/payment-terms/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
@@ -45,15 +37,7 @@
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
-         <loc>http://ucp.dev/draft/specification/payment/authentication/</loc>
-         <lastmod>2026-08-25</lastmod>
-    </url>
-    <url>
          <loc>http://ucp.dev/draft/specification/payment/guide/</loc>
-         <lastmod>2026-08-25</lastmod>
-    </url>
-    <url>
-         <loc>http://ucp.dev/draft/specification/payment/split-payments/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
@@ -62,14 +46,6 @@
     </url>
     <url>
          <loc>http://ucp.dev/draft/specification/payment/tokenization/</loc>
-         <lastmod>2026-08-25</lastmod>
-    </url>
-    <url>
-         <loc>http://ucp.dev/draft/specification/payment/actions/device-data-collection/</loc>
-         <lastmod>2026-08-25</lastmod>
-    </url>
-    <url>
-         <loc>http://ucp.dev/draft/specification/payment/actions/three-ds-challenge/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
@@ -82,6 +58,30 @@
     </url>
     <url>
          <loc>http://ucp.dev/draft/specification/payment/examples/processor-tokenizer-payment-handler/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/payment/extensions/authentication/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/payment/extensions/split-payments/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/payment/extensions/terms/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/payment/extensions/actions/device-data-collection/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/payment/extensions/actions/three-ds-challenge/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>

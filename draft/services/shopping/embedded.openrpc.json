@@ -584,7 +584,7 @@
           "instruments": {
             "type": "array",
             "items": {
-              "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
+              "$ref": "https://ucp.dev/draft/schemas/common/types/payment_instrument.json#/$defs/selected_payment_instrument"
             },
             "description": "Available payment instruments."
           }

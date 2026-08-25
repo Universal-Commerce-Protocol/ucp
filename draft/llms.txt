@@ -46,8 +46,6 @@ specifications:
 - [A2A](http://ucp.dev/draft/specification/shopping/checkout/a2a/index.md): Agent2Agent Protocol (A2A) binding for Checkout Capability, detailing transport discovery, agent card profile advertisement, and message negotiation flows.
 - [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
 - [Embedded](http://ucp.dev/draft/specification/shopping/checkout/embedded/index.md): Embedded Checkout Protocol (ECP) specification, detailing per-session delegation negotiation, URL parameters, native UI event mappings, W3C Payment Request conceptual alignment, and core lifecycle messages.
-- [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md): AP2 Mandates Extension, detailing secure, cryptographically bound checkout commitments (using SD-JWT+kb digital credentials and detached JWS signatures) between business, platform, and payment providers.
-- [Payment Terms Extension](http://ucp.dev/draft/specification/payment-terms/index.md): Payment Terms Extension, enabling checkout payment schedules for immediate and deferred payments such as deposits, installments, and lodging balance-at-check-in flows.
 
 ## Cart Capability
 
@@ -83,10 +81,12 @@ specifications:
 
 ## Payment
 
-- [Overview](http://ucp.dev/draft/specification/payment/authentication/index.md): Payment Authentication Extension, defining negotiation, payment-handler association, lifecycle, trust, and embedded notifications for standard payment authentication Actions.
-- [Device Data Collection](http://ucp.dev/draft/specification/payment/actions/device-data-collection/index.md): Standard Action type for running invisible device-data collection surfaces during payment processing.
-- [3DS Challenge](http://ucp.dev/draft/specification/payment/actions/three-ds-challenge/index.md): Standard Action type for presenting buyer-facing 3DS challenges.
-- [Split Payments](http://ucp.dev/draft/specification/payment/split-payments/index.md): Split Payments Extension, defining multiple payment instrument allocation, settlement rules, and amount distribution across payment handlers.
+- [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md): AP2 Mandates Extension, detailing secure, cryptographically bound checkout commitments (using SD-JWT+kb digital credentials and detached JWS signatures) between business, platform, and payment providers.
+- [Overview](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md): Payment Authentication Extension, defining negotiation, payment-handler association, lifecycle, trust, and embedded notifications for standard payment authentication Actions.
+- [Device Data Collection](http://ucp.dev/draft/specification/payment/extensions/actions/device-data-collection/index.md): Standard Action type for running invisible device-data collection surfaces during payment processing.
+- [3DS Challenge](http://ucp.dev/draft/specification/payment/extensions/actions/three-ds-challenge/index.md): Standard Action type for presenting buyer-facing 3DS challenges.
+- [Split Payments Extension](http://ucp.dev/draft/specification/payment/extensions/split-payments/index.md): Split Payments Extension, defining multiple payment instrument allocation, settlement rules, and amount distribution across payment handlers.
+- [Payment Terms Extension](http://ucp.dev/draft/specification/payment/extensions/terms/index.md): Payment Terms Extension, enabling checkout payment schedules for immediate and deferred payments such as deposits, installments, and lodging balance-at-check-in flows.
 - [Guide](http://ucp.dev/draft/specification/payment/guide/index.md): Architectural framework and standard vocabulary for specifying UCP payment handlers, covering configuration declarations and transaction execution.
 - [Template](http://ucp.dev/draft/specification/payment/template/index.md): Standard Markdown template and integration checklist when authoring new UCP payment handler specifications.
 - [Tokenization Guide](http://ucp.dev/draft/specification/payment/tokenization/index.md): Shared API, security requirements, and lifecycle policies (single-use, TTL, session-scoped) for building compliant tokenization payment handlers.

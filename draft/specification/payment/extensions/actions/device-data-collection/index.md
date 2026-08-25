@@ -1,9 +1,9 @@
 # Payment Device Data Collection Action
 
-This specification defines the device data collection Action type declared by the [Payment Authentication extension](http://ucp.dev/draft/specification/payment/authentication/index.md):
+This specification defines the device data collection Action type declared by the [Payment Authentication extension](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md):
 
 ```text
-dev.ucp.payment.device_data_collection
+dev.ucp.common.payment.device_data_collection
 ```
 
 It asks the Platform to mount an invisible payment-authentication surface to complete device data collection.
@@ -27,7 +27,7 @@ The Action is emitted under its type key:
 ```json
 {
   "actions": {
-    "dev.ucp.payment.device_data_collection": [
+    "dev.ucp.common.payment.device_data_collection": [
       {
         "id": "ddc-1",
         "config": {
@@ -40,7 +40,7 @@ The Action is emitted under its type key:
 }
 ```
 
-The config shape is defined inline by the [Payment Authentication extension schema](/draft/schemas/shopping/payment_authentication.json).
+The config shape is defined inline by the [Payment Authentication extension schema](/draft/schemas/common/payment_authentication.json).
 
 | Field                   | Type   | Required | Notes                                                       |
 | ----------------------- | ------ | -------- | ----------------------------------------------------------- |
@@ -59,7 +59,7 @@ The Platform **MUST**:
 1. correlate embedded notifications with both this Action occurrence and the mounted surface; and
 1. unmount the surface after `action.done`, `action.error`, load failure, or timeout.
 
-Mounting the surface **MUST** follow the shared [Payment Authentication rendering contract](http://ucp.dev/draft/specification/payment/authentication/#surface-rendering-and-notifications) and [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security).
+Mounting the surface **MUST** follow the shared [Payment Authentication rendering contract](http://ucp.dev/draft/specification/payment/extensions/authentication/#surface-rendering-and-notifications) and [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security).
 
 On the web the surface is typically a hidden iframe. A native Platform may use an isolated webview or equivalent browser surface. It **MUST NOT** be visible to the Buyer or request Buyer interaction.
 
@@ -67,7 +67,7 @@ The Platform distinguishes only whether its surface finished or could not contin
 
 ## Embedded Notifications
 
-After completing the shared [`action.ready` handshake](http://ucp.dev/draft/specification/payment/authentication/#ready-handshake), the surface sends JSON-RPC 2.0 notifications defined by the [payment Action embedded contract](http://ucp.dev/draft/specification/payment/authentication/#surface-rendering-and-notifications).
+After completing the shared [`action.ready` handshake](http://ucp.dev/draft/specification/payment/extensions/authentication/#ready-handshake), the surface sends JSON-RPC 2.0 notifications defined by the [payment Action embedded contract](http://ucp.dev/draft/specification/payment/extensions/authentication/#surface-rendering-and-notifications).
 
 ### Done
 
@@ -110,7 +110,7 @@ If the surface cannot continue from the Platform-facing transport perspective, i
 }
 ```
 
-Surface-level codes are the shared [well-known `action.error` codes](http://ucp.dev/draft/specification/payment/authentication/#surface-rendering-and-notifications). They are not EMV 3DS or payment outcomes: a provider-domain timeout or unavailable method that the handler can safely continue past should normally result in `action.done`, with the Business and provider recording the domain outcome server-side. After either notification, the Platform follows the shared Payment Authentication reconciliation contract.
+Surface-level codes are the shared [well-known `action.error` codes](http://ucp.dev/draft/specification/payment/extensions/authentication/#surface-rendering-and-notifications). They are not EMV 3DS or payment outcomes: a provider-domain timeout or unavailable method that the handler can safely continue past should normally result in `action.done`, with the Business and provider recording the domain outcome server-side. After either notification, the Platform follows the shared Payment Authentication reconciliation contract.
 
 ## Deadline and Fallback
 
@@ -122,7 +122,7 @@ If no valid `action.done` or `action.error` arrives before the outer deadline, t
 
 ## Security
 
-The common [Payment Authentication security requirements](http://ucp.dev/draft/specification/payment/authentication/#security-and-data-handling) apply. In addition:
+The common [Payment Authentication security requirements](http://ucp.dev/draft/specification/payment/extensions/authentication/#security-and-data-handling) apply. In addition:
 
 - The handler's trust policy **MUST** authorize the initial and redirect origins before the Platform loads them.
 - The surface **MUST NOT** receive Platform credentials or access Platform storage.

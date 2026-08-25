@@ -1,9 +1,9 @@
 # Payment 3DS Challenge Action
 
-This specification defines the 3DS challenge Action type declared by the [Payment Authentication extension](http://ucp.dev/draft/specification/payment/authentication/index.md):
+This specification defines the 3DS challenge Action type declared by the [Payment Authentication extension](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md):
 
 ```text
-dev.ucp.payment.three_ds_challenge
+dev.ucp.common.payment.three_ds_challenge
 ```
 
 It asks the Platform to present a buyer-facing payment-authentication surface to complete 3DS challenges.
@@ -27,7 +27,7 @@ The Action is emitted under its type key:
 ```json
 {
   "actions": {
-    "dev.ucp.payment.three_ds_challenge": [
+    "dev.ucp.common.payment.three_ds_challenge": [
       {
         "id": "three-ds-challenge-1",
         "config": {
@@ -40,7 +40,7 @@ The Action is emitted under its type key:
 }
 ```
 
-The config shape is defined inline by the [Payment Authentication extension schema](/draft/schemas/shopping/payment_authentication.json).
+The config shape is defined inline by the [Payment Authentication extension schema](/draft/schemas/common/payment_authentication.json).
 
 | Field                   | Type   | Required | Notes                                                       |
 | ----------------------- | ------ | -------- | ----------------------------------------------------------- |
@@ -60,7 +60,7 @@ The Platform **MUST**:
 1. correlate embedded notifications with both this Action occurrence and the mounted surface; and
 1. close the surface after `action.done`, `action.error`, unrecoverable load failure, or abandonment.
 
-Mounting the surface **MUST** follow the shared [Payment Authentication rendering contract](http://ucp.dev/draft/specification/payment/authentication/#surface-rendering-and-notifications) and [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security).
+Mounting the surface **MUST** follow the shared [Payment Authentication rendering contract](http://ucp.dev/draft/specification/payment/extensions/authentication/#surface-rendering-and-notifications) and [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security).
 
 On the web the surface may be a full-page frame, modal frame, or separate window when the negotiated handler defines that presentation and its security policy. A native Platform may use an isolated webview, browser view, or system browser. A top-level or system-browser handoff is permitted only when the handler defines a completion channel that the Platform can authenticate and correlate with the Action occurrence.
 
@@ -68,7 +68,7 @@ The Platform **MUST NOT** infer an authentication outcome from frame content, UR
 
 ## Embedded Notifications
 
-After completing the shared [`action.ready` handshake](http://ucp.dev/draft/specification/payment/authentication/#ready-handshake), the surface sends JSON-RPC 2.0 notifications defined by the [payment Action embedded contract](http://ucp.dev/draft/specification/payment/authentication/#surface-rendering-and-notifications).
+After completing the shared [`action.ready` handshake](http://ucp.dev/draft/specification/payment/extensions/authentication/#ready-handshake), the surface sends JSON-RPC 2.0 notifications defined by the [payment Action embedded contract](http://ucp.dev/draft/specification/payment/extensions/authentication/#surface-rendering-and-notifications).
 
 ### Done
 
@@ -113,7 +113,7 @@ If the surface cannot continue, it **MAY** send:
 }
 ```
 
-Surface-level codes are the shared [well-known `action.error` codes](http://ucp.dev/draft/specification/payment/authentication/#surface-rendering-and-notifications). Buyer abandonment and provider authentication outcomes may be unavailable to the surface or known only by the provider backend; the Business and payment provider remain authoritative for those distinctions. After either notification, the Platform follows the shared Payment Authentication reconciliation contract.
+Surface-level codes are the shared [well-known `action.error` codes](http://ucp.dev/draft/specification/payment/extensions/authentication/#surface-rendering-and-notifications). Buyer abandonment and provider authentication outcomes may be unavailable to the surface or known only by the provider backend; the Business and payment provider remain authoritative for those distinctions. After either notification, the Platform follows the shared Payment Authentication reconciliation contract.
 
 ## Combined Provider Flows
 
@@ -134,7 +134,7 @@ The Platform may close sooner after a valid terminal notification, load failure,
 
 ## Security
 
-The common [Payment Authentication security requirements](http://ucp.dev/draft/specification/payment/authentication/#security-and-data-handling) apply. In addition:
+The common [Payment Authentication security requirements](http://ucp.dev/draft/specification/payment/extensions/authentication/#security-and-data-handling) apply. In addition:
 
 - The handler's trust policy **MUST** authorize the initial and redirect origins before the Platform displays them.
 - The Platform validates both message source and origin.

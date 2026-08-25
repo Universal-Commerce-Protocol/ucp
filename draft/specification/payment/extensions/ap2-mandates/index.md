@@ -26,7 +26,7 @@ This extension follows the standard UCP negotiation protocol. It is activated on
 
 ### Business Profile Advertisement
 
-Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their `capabilities` list in `/.well-known/ucp`.
+Businesses declare support by adding `dev.ucp.common.payment.ap2_mandate` to their `capabilities` list in `/.well-known/ucp`.
 
 **Business Profile Example:**
 
@@ -43,11 +43,11 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their `ca
           "schema": "https://ucp.dev/draft/schemas/shopping/checkout.json"
         }
       ],
-      "dev.ucp.shopping.ap2_mandate": [
+      "dev.ucp.common.payment.ap2_mandate": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/ap2-mandates",
-          "schema": "https://ucp.dev/draft/schemas/shopping/ap2_mandate.json",
+          "spec": "https://ucp.dev/draft/specification/payment/extensions/ap2-mandates",
+          "schema": "https://ucp.dev/draft/schemas/common/payment_ap2_mandate.json",
           "extends": "dev.ucp.shopping.checkout",
           "config": {
             "vp_formats_supported": {
@@ -70,7 +70,7 @@ Platforms declare support in their profile. If the platform is operating under t
 
 1. The platform advertises its profile URI (transport-specific mechanism).
 1. The business fetches the profile and computes the intersection.
-1. If `dev.ucp.shopping.ap2_mandate` is present in the intersection:
+1. If `dev.ucp.common.payment.ap2_mandate` is present in the intersection:
    - The business **MUST** include `ap2.merchant_authorization` in all checkout responses.
    - The business **MUST NOT** accept a `complete_checkout` request that lacks `ap2.checkout_mandate`.
    - The platform **MUST** verify the business's signature before presenting the checkout to the user.
@@ -183,7 +183,7 @@ Verification and mandate construction operate on the complete checkout JSON, not
 
 ## The Mandate Flow
 
-Once the `dev.ucp.shopping.ap2_mandate` capability is negotiated, the session is locked into the following flow. Both parties **MUST** follow these steps to ensure cryptographic integrity; any attempt to bypass these steps or submit a completion request without mandates **MUST** result in a session failure.
+Once the `dev.ucp.common.payment.ap2_mandate` capability is negotiated, the session is locked into the following flow. Both parties **MUST** follow these steps to ensure cryptographic integrity; any attempt to bypass these steps or submit a completion request without mandates **MUST** result in a session failure.
 
 ### Step 1: Checkout Creation & Signing
 

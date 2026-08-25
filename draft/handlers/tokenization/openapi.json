@@ -23,7 +23,7 @@
                 ],
                 "properties": {
                   "credential": {
-                    "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_credential.json",
+                    "$ref": "https://ucp.dev/draft/schemas/common/types/payment_credential.json",
                     "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
                   },
                   "binding": {
@@ -31,7 +31,7 @@
                     "description": "Resource this token is bound to. Ties the token to a specific capability resource."
                   },
                   "identity": {
-                    "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_identity.json",
+                    "$ref": "https://ucp.dev/draft/schemas/common/types/payment_identity.json",
                     "description": "The participant this token is issued to. Required when acting on behalf of another participant, for example an agent tokenizing for a business. Omit when the authenticated caller is that participant."
                   }
                 }
@@ -156,7 +156,7 @@
                     "description": "Resource binding that must match the original tokenization request."
                   },
                   "identity": {
-                    "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_identity.json",
+                    "$ref": "https://ucp.dev/draft/schemas/common/types/payment_identity.json",
                     "description": "Participant whose token is being retrieved. Required when the caller acts on behalf of another participant; omit when the authenticated caller is that participant."
                   }
                 }
@@ -195,7 +195,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "https://ucp.dev/draft/schemas/shopping/types/payment_credential.json"
+                  "$ref": "https://ucp.dev/draft/schemas/common/types/payment_credential.json"
                 },
                 "examples": {
                   "pan_credential": {

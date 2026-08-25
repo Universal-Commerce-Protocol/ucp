@@ -29,7 +29,7 @@ Reading a quantity requires no arithmetic and no unit knowledge: shift the decim
 
 ### Integer range and ingestion
 
-Every integer-valued field in UCP — amounts, quantity step counts, measure values — is a JSON integer; each field's schema declares its sign and bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the range within which every JSON implementation agrees exactly on integer values ([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html), Section 6) and within which [JCS](https://www.rfc-editor.org/rfc/rfc8785.html) canonicalization, required for [AP2 mandate signing](http://ucp.dev/draft/specification/ap2-mandates/#canonicalization), is defined. The same cap derives `scale`'s maximum of 15: at scale 16, one whole unit (10^16 steps) would be unrepresentable. An out-of-range value is schema-invalid and is rejected like any other invalid payload.
+Every integer-valued field in UCP — amounts, quantity step counts, measure values — is a JSON integer; each field's schema declares its sign and bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the range within which every JSON implementation agrees exactly on integer values ([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html), Section 6) and within which [JCS](https://www.rfc-editor.org/rfc/rfc8785.html) canonicalization, required for [AP2 mandate signing](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/#canonicalization), is defined. The same cap derives `scale`'s maximum of 15: at scale 16, one whole unit (10^16 steps) would be unrepresentable. An out-of-range value is schema-invalid and is rejected like any other invalid payload.
 
 Arithmetic over these values **MUST** be exact. Within the wire range, IEEE 754 binary64 — a JavaScript `Number` from `JSON.parse` — holds every integer exactly; products such as `amount × quantity` can exceed 64 bits, so use wider or arbitrary-precision integers, or overflow checks. An implementation that cannot produce an exact, in-range result **MUST** surface an error rather than emit, display, or act on an approximate or wrapped value.
 
@@ -111,7 +111,7 @@ Members present at the same Object Constraint all apply. `anyOf` does not narrow
 
 Branches are alternatives, not a partition: an object satisfying more than one branch is valid. Within a branch, `properties` constrains a member only when that member is present, so a branch pinning a discriminator through `properties` alone is also satisfied by an object that omits it; naming the discriminator in the branch's `required` makes the branch match only the shape it describes.
 
-The grammar is defined independently of the object it is bound to. Request Constraints bind it to objects in the next request and add `path`; other UCP schemas reuse it where a declaration already identifies the object it constrains, such as [`available_instruments[].constraints`](/draft/schemas/shopping/types/available_payment_instrument.json), whose object is the `constraint_target` declared by the instrument schema for that entry's `type`.
+The grammar is defined independently of the object it is bound to. Request Constraints bind it to objects in the next request and add `path`; other UCP schemas reuse it where a declaration already identifies the object it constrains, such as [`available_instruments[].constraints`](/draft/schemas/common/types/available_payment_instrument.json), whose object is the `constraint_target` declared by the instrument schema for that entry's `type`.
 
 ### Path
 
@@ -351,9 +351,9 @@ A Business accepts more than one credential shape and requires different verific
 }
 ```
 
-One path selects the submitted instrument, and one Object Constraint describes it. The sibling `required` applies to every matching instrument; the `anyOf` branches then apply to the nested `credential` object, which must satisfy at least one. Each branch pins `type` with `const`, so a branch matches only the credential family it describes; [`payment_credential.json`](/draft/schemas/shopping/types/payment_credential.json) already requires `type` on every credential, so no branch has to name it in `required`. A [PAN credential](/draft/schemas/shopping/types/pan_credential.json) without a `cvc` fails, as does a [network token](/draft/schemas/shopping/types/network_token_credential.json) missing its `eci_value`.
+One path selects the submitted instrument, and one Object Constraint describes it. The sibling `required` applies to every matching instrument; the `anyOf` branches then apply to the nested `credential` object, which must satisfy at least one. Each branch pins `type` with `const`, so a branch matches only the credential family it describes; [`payment_credential.json`](/draft/schemas/common/types/payment_credential.json) already requires `type` on every credential, so no branch has to name it in `required`. A [PAN credential](/draft/schemas/common/types/pan_credential.json) without a `cvc` fails, as does a [network token](/draft/schemas/common/types/network_token_credential.json) missing its `eci_value`.
 
-Because every branch pins the discriminator, the branch set also closes the accepted credential families. A handler [token credential](/draft/schemas/shopping/types/token_credential.json) is a valid credential at this position but satisfies neither branch, so this Business does not accept it at this path. A Business that later accepts another family adds a branch for it.
+Because every branch pins the discriminator, the branch set also closes the accepted credential families. A handler [token credential](/draft/schemas/common/types/token_credential.json) is a valid credential at this position but satisfies neither branch, so this Business does not accept it at this path. A Business that later accepts another family adds a branch for it.
 
 Two separately targeted constraints cannot express this rule. Request Constraints conjoin, so one value requiring `cvc` and another requiring `cryptogram` would require both. Discriminating through the path filter instead — selecting `pan` credentials in one value and `network_token` credentials in another — moves conditional logic into the selector, which paths do not carry.
 
@@ -1570,7 +1570,7 @@ The request **MUST** be rejected (`key_not_found`, `algorithm_unsupported`, or r
 
 **Authenticated identity.** When a signature verifies, the authenticated signer is identified by the URL that supplied the verifying key — the `Signature-Agent` URL for WBA-shape signatures, the `UCP-Agent` URL for default UCP signatures. Both URLs may be present in the same request; the identity attached to the request is determined by which signature verified, not by which headers were sent. When multiple signatures verify, each identifies the signer only as the URL that supplied its key — a key resolved via `Signature-Agent` proves control of that key source, not of the `UCP-Agent` profile (whose URL is merely a signed header value). Implementations **MUST** treat the request as a single authenticated identity only when those URLs are the same after normalization; otherwise they are distinct identities and policy decides whether either suffices.
 
-This rule governs **HTTP transport identity**. Payload-layer assertions (e.g., AP2 mandate JWTs carried in the request body) have their own identity binding and key-resolution rules; see [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md).
+This rule governs **HTTP transport identity**. Payload-layer assertions (e.g., AP2 mandate JWTs carried in the request body) have their own identity binding and key-resolution rules; see [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md).
 
 ## Payment Architecture
 
@@ -1588,9 +1588,9 @@ The payment architecture is built on a "Trust-by-Design" philosophy. It assumes 
 
 #### Enhanced Security for Autonomous Commerce
 
-For scenarios requiring cryptographic proof of user authorization (e.g., autonomous AI agents), UCP supports the **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`). This optional extension provides non-repudiable authorization through verifiable digital credentials.
+For scenarios requiring cryptographic proof of user authorization (e.g., autonomous AI agents), UCP supports the **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`). This optional extension provides non-repudiable authorization through verifiable digital credentials.
 
-See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) for details on when and how to use this extension.
+See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) for details on when and how to use this extension.
 
 #### Credential Flow & PCI Scope
 
@@ -1635,7 +1635,7 @@ Payment handlers allow for a variety of different payment instruments and token-
 
 **Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment/guide/#resolving-available_instruments) for the full resolution semantics.
 
-**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.shopping.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](http://ucp.dev/draft/specification/payment/split-payments/index.md) for the extension that relaxes this constraint.
+**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.common.payment.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](http://ucp.dev/draft/specification/payment/extensions/split-payments/index.md) for the extension that relaxes this constraint.
 
 ### Implementation Scenarios
 
@@ -1928,7 +1928,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement idempotency for payment processing (prevent double-charges)
 1. Log payment events without logging credentials
 1. Set appropriate credential timeouts
-1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.shopping.ap2_mandate` extension (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md))
+1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.common.payment.ap2_mandate` extension (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md))
 
 **For Platforms:**
 
@@ -1937,7 +1937,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement timeout handling for credential acquisition
 1. Clear credentials from memory after submission
 1. Handle credential expiration gracefully (re-acquire if needed)
-1. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md))
+1. For autonomous agents, consider using the `dev.ucp.common.payment.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md))
 
 **For Payment Credential Providers:**
 
@@ -1960,7 +1960,7 @@ UCP supports fraud prevention through [Signals](#signals) and the payment archit
 
 The core payment architecture described above can be extended for specialized use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md).
+- **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md).
 - **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/draft/specification/payment/guide/index.md) for details.
 
 The extension model ensures the core architecture remains simple while supporting advanced security and compliance requirements when needed.
@@ -2271,14 +2271,14 @@ Attribution appears on cart, checkout, and catalog requests as platform-provided
 
 ### Transaction Integrity and Non-Repudiation
 
-For scenarios requiring cryptographic proof of authorization (e.g., autonomous agents, high-value transactions), UCP supports the **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`). When this optional extension is negotiated:
+For scenarios requiring cryptographic proof of authorization (e.g., autonomous agents, high-value transactions), UCP supports the **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`). When this optional extension is negotiated:
 
 - Businesses provide a cryptographic signature on checkout terms
 - Platforms provide cryptographic mandates proving user authorization
 
 This mechanism provides strong, end-to-end cryptographic assurances about transaction details and participant consent, significantly reducing risks of tampering and disputes.
 
-See [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
+See [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
 
 ## Versioning
 
