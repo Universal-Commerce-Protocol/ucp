@@ -176,7 +176,7 @@ platform's handler specification (referenced via `spec`) documents the
 `/detokenize` endpoint URL exposed by the platform's
 **payment credential provider**.
 
-The handler accepts [PanCredential](site:schemas/shopping/types/pan_credential.json) and [NetworkTokenCredential](site:schemas/shopping/types/network_token_credential.json) for tokenization and produces [TokenCredential](site:schemas/shopping/types/token_credential.json) for checkout.
+The handler accepts [PanCredential](site:schemas/common/types/pan_credential.json) and [NetworkTokenCredential](site:schemas/common/types/network_token_credential.json) for tokenization and produces [TokenCredential](site:schemas/common/types/token_credential.json) for checkout.
 
 **Note:** The result of `/detokenize` contains **sensitive payment data**.
 Both the sender (platform's credential provider) and receiver
@@ -414,12 +414,12 @@ Content-Type: application/json
 ## Runtime Payment Authentication Actions
 
 This handler supports both Action types from the negotiated
-[Payment Authentication extension](../authentication.md):
+[Payment Authentication extension](../extensions/authentication.md):
 
 | Action type | Use |
 | :---------- | :-- |
-| `dev.ucp.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
-| `dev.ucp.payment.three_ds_challenge` | Present a buyer-facing 3DS challenge during payment completion. |
+| `dev.ucp.common.payment.device_data_collection` | Collect device/browser data for the selected tokenized instrument. |
+| `dev.ucp.common.payment.three_ds_challenge` | Present a buyer-facing 3DS challenge during payment completion. |
 
 When either step is needed, the Business returns the corresponding Action while
 processing the selected instrument. Its `config.payment_instrument_id` identifies
@@ -519,4 +519,4 @@ The platform's payment credential provider verifies that:
 
 * **Pattern:** [Tokenization Payment Handler](../guide.md)
 * **API Pattern:** [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)
-* **Identity Schema:** [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)
+* **Identity Schema:** [schemas/common/types/payment_identity.json](site:schemas/common/types/payment_identity.json)

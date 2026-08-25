@@ -1576,7 +1576,7 @@ account, or wallet credential) available to the buyer.
 
 #### Selected Payment Instrument
 
-{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'embedded-checkout') }}
+{{ extension_schema_fields('../common/types/payment_instrument.json#/$defs/selected_payment_instrument', 'embedded-checkout') }}
 
 ### Card Payment Instrument
 

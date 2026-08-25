@@ -1268,7 +1268,7 @@ this response root (e.g., `$.line_items[0]`). See
 
 #### Selected Payment Instrument
 
-{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'shopping/checkout') }}
+{{ extension_schema_fields('../common/types/payment_instrument.json#/$defs/selected_payment_instrument', 'shopping/checkout') }}
 
 ### Payment Credential
 

@@ -144,7 +144,7 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
         * `dev.ucp.shopping.discount`: [Discount](../extensions/discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../ap2-mandates.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 
@@ -404,7 +404,7 @@ unchanged and return the current Checkout with a recoverable error Message.
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
         * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
         * `dev.ucp.shopping.discount`: [Discount](../extensions/discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](../../ap2-mandates.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 

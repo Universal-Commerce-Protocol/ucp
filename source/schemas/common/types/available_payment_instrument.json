@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/types/available_payment_instrument.json",
+  "$id": "https://ucp.dev/schemas/common/types/available_payment_instrument.json",
   "title": "Available Payment Instrument",
   "description": "An instrument type available from a payment handler with optional constraints.",
   "type": "object",
@@ -11,7 +11,7 @@
       "description": "The instrument type identifier (e.g., 'card', 'gift_card'). References an instrument schema's type constant."
     },
     "constraints": {
-      "$ref": "../../common/types/constraint_expression.json",
+      "$ref": "constraint_expression.json",
       "description": "A Constraint Expression describing the instrument this entry makes available. Keys in `properties` name members of the `constraint_target` declared by the instrument schema for this `type`. Requirements on submitted request data belong in `ucp.request_constraints` instead."
     }
   }

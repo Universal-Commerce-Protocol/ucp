@@ -57,6 +57,8 @@ within the UCP.
 
 ## Extension Schemas
 
+{{ auto_generate_schema_reference('.', 'reference', include_capability=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
 
 ## UCP Metadata <span id="services"></span> <span id="ap2-checkout-response"></span> <span id="ap2-complete-request"></span>

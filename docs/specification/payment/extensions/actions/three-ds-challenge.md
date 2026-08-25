@@ -20,7 +20,7 @@ This specification defines the 3DS challenge Action type declared by the
 [Payment Authentication extension](../authentication.md):
 
 ```text
-dev.ucp.payment.three_ds_challenge
+dev.ucp.common.payment.three_ds_challenge
 ```
 
 It asks the Platform to present a buyer-facing payment-authentication surface to
@@ -55,11 +55,11 @@ challenge occurrence.
 
 The Action is emitted under its type key:
 
-<!-- ucp:example schema=shopping/payment_authentication def=dev.ucp.shopping.checkout extract=$.actions target=$.actions op=read -->
+<!-- ucp:example schema=common/payment_authentication def=dev.ucp.shopping.checkout extract=$.actions target=$.actions op=read -->
 ```json
 {
   "actions": {
-    "dev.ucp.payment.three_ds_challenge": [
+    "dev.ucp.common.payment.three_ds_challenge": [
       {
         "id": "three-ds-challenge-1",
         "config": {
@@ -73,7 +73,7 @@ The Action is emitted under its type key:
 ```
 
 The config shape is defined inline by the
-[Payment Authentication extension schema](site:schemas/shopping/payment_authentication.json).
+[Payment Authentication extension schema](site:schemas/common/payment_authentication.json).
 
 | Field | Type | Required | Notes |
 | :---- | :--- | :------- | :---- |
@@ -102,7 +102,7 @@ The Platform **MUST**:
 
 Mounting the surface **MUST** follow the shared
 [Payment Authentication rendering contract](../authentication.md#surface-rendering-and-notifications)
-and [Embedded Protocol security requirements](../../embedded-protocol.md#security).
+and [Embedded Protocol security requirements](../../../embedded-protocol.md#security).
 
 On the web the surface may be a full-page frame, modal frame, or separate window
 when the negotiated handler defines that presentation and its security policy.

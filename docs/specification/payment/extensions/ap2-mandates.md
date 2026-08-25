@@ -60,7 +60,7 @@ and the platform.
 
 ### Business Profile Advertisement
 
-Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
+Businesses declare support by adding `dev.ucp.common.payment.ap2_mandate` to their
 `capabilities` list in `/.well-known/ucp`.
 
 **Business Profile Example:**
@@ -79,11 +79,11 @@ Businesses declare support by adding `dev.ucp.shopping.ap2_mandate` to their
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
         }
       ],
-      "dev.ucp.shopping.ap2_mandate": [
+      "dev.ucp.common.payment.ap2_mandate": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/extensions/ap2-mandates",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_ap2_mandate.json",
           "extends": "dev.ucp.shopping.checkout",
           "config": {
             "vp_formats_supported": {
@@ -108,7 +108,7 @@ key in the top-level `keys` array in their profile.
 
 1. The platform advertises its profile URI (transport-specific mechanism).
 2. The business fetches the profile and computes the intersection.
-3. If `dev.ucp.shopping.ap2_mandate` is present in the intersection:
+3. If `dev.ucp.common.payment.ap2_mandate` is present in the intersection:
     * The business **MUST** include `ap2.merchant_authorization` in all
         checkout responses.
     * The business **MUST NOT** accept a `complete_checkout` request that
@@ -130,16 +130,16 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 ## Cryptographic Requirements
 
 This extension uses the cryptographic primitives defined in the
-[Message Signatures](signatures.md) specification:
+[Message Signatures](../../signatures.md) specification:
 
 * **Algorithm:** per AP2's Checkout JWT signing rule — AP2 v0.2 requires
   ECDSA (`ES256`/`ES384`/`ES512`); see the note below.
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
 * **Key Discovery:** `keys[]` in `/.well-known/ucp` (see
-  [Key Discovery](overview/index.md#key-discovery))
+  [Key Discovery](../../overview/index.md#key-discovery))
 
-See [Message Signatures](signatures.md) for key format and rotation.
+See [Message Signatures](../../signatures.md) for key format and rotation.
 
 > **Note (algorithm requirement).** AP2 binds the Payment Mandate to the
 > Checkout via `hash(checkout_jwt)`; the underlying security property is
@@ -267,7 +267,7 @@ are automatically handled.
 
 ## The Mandate Flow
 
-Once the `dev.ucp.shopping.ap2_mandate` capability is negotiated, the session
+Once the `dev.ucp.common.payment.ap2_mandate` capability is negotiated, the session
 is locked into the following flow. Both parties **MUST** follow these steps to
 ensure cryptographic integrity; any attempt to bypass these steps or submit
 a completion request without mandates **MUST** result in a session failure.
@@ -277,7 +277,7 @@ a completion request without mandates **MUST** result in a session failure.
 The platform initiates the session. The business returns the `Checkout` object
 with `ap2.merchant_authorization` embedded in the response body.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/dev.ucp.shopping.checkout', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/dev.ucp.shopping.checkout', 'payment/extensions/ap2-mandates') }}
 
 **Example Response:**
 
@@ -367,7 +367,7 @@ Binding (+kb) signature.
 Once the mandates are generated, the platform submits them in the completion
 request:
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'payment/extensions/ap2-mandates') }}
 
 <!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
@@ -455,27 +455,27 @@ checkout.
 
 ### Business Authorization {: #merchant-authorization }
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/merchant_authorization', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/merchant_authorization', 'payment/extensions/ap2-mandates') }}
 
 ### AP2 Checkout Response
 
 The `ap2` object included in checkout responses.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_merchant_authorization', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/ap2_with_merchant_authorization', 'payment/extensions/ap2-mandates') }}
 
 ### Checkout Mandate
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_mandate', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/checkout_mandate', 'payment/extensions/ap2-mandates') }}
 
 ### AP2 Complete Request
 
 The `ap2` object included in COMPLETE checkout requests.
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'payment/extensions/ap2-mandates') }}
 
 ### Error Codes
 
-{{ extension_schema_fields('ap2_mandate.json#/$defs/error_code', 'ap2-mandates') }}
+{{ extension_schema_fields('payment_ap2_mandate.json#/$defs/error_code', 'payment/extensions/ap2-mandates') }}
 
 | Error Code                       | Description                                                       |
 | :------------------------------- | :---------------------------------------------------------------- |

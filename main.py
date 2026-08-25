@@ -1296,6 +1296,9 @@ def define_env(env):
             rendered_table = _read_schema_from_defs(
               f"{entity_name}.json#/$defs/{def_name}", spec_file_name
             )
+            if rendered_table == "_No properties defined._":
+              output.pop()  # remove title
+              continue
             output.append(rendered_table)
             output.append("\n")
 

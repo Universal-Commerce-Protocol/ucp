@@ -3,7 +3,7 @@
     "version": "2026-01-01",
     "status": "success",
     "capabilities": {
-      "dev.ucp.shopping.payment_authentication": [
+      "dev.ucp.common.payment.authentication": [
         {
           "version": "2026-01-01",
           "extends": "dev.ucp.shopping.checkout"

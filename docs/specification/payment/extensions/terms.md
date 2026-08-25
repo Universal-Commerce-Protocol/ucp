@@ -16,7 +16,7 @@
 
 # Payment Terms Extension
 
-* **Capability Name:** `dev.ucp.shopping.payment_terms`
+* **Capability Name:** `dev.ucp.common.payment.terms`
 
 ## Overview
 
@@ -38,7 +38,7 @@ This extension adds two properties to `checkout.payment`:
   is; a Platform writes it to change the selection.
 
 A Buyer picks one of the options in `terms[]`, the same way they pick
-one [fulfillment option](shopping/extensions/fulfillment.md#platform-responsibilities).
+one [fulfillment option](../../shopping/extensions/fulfillment.md#platform-responsibilities).
 
 ## When a Checkout carries terms
 
@@ -194,7 +194,7 @@ charged immediately therefore cannot be offered on a term that defers any part
 of the payment.
 
 A term with more than one schedule **MUST** be funded by a single instrument.
-[Split Payments](payment/split-payments.md) composes with a term that has exactly one
+[Split Payments](split-payments.md) composes with a term that has exactly one
 schedule, and not otherwise.
 
 ## Disclosures
@@ -206,7 +206,7 @@ consumer-protection rules about what must be shown, and when.
 This extension does not define a private disclosure channel. It uses the two
 that already exist:
 
-1. A [policy](overview/index.md#policies) carries the durable terms text, targeted
+1. A [policy](../../overview/index.md#policies) carries the durable terms text, targeted
    with `applies_to` at the node the terms concern — the payment term when the
    terms are about payment timing, the line item when they are about the goods.
 2. A `messages[]` warning with `presentation: "disclosure"` and `code` set to
@@ -219,7 +219,7 @@ optional for a Platform, so any content that **must** reach the Buyer belongs in
 the warning `content`, not only in the policy `description`.
 
 Disclosure display is unconditional. Under [Warning
-Presentation](shopping/checkout/index.md#warning-presentation) a Platform **MUST** display
+Presentation](../../shopping/checkout/index.md#warning-presentation) a Platform **MUST** display
 every returned disclosure, **MUST** keep it in proximity to the node named by
 `path`, and **MUST NOT** hide, collapse, or auto-dismiss it. A Platform that
 cannot honor that contract — for example one that collapses a list of terms and
@@ -268,15 +268,15 @@ Businesses advertise payment terms support in their profile:
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.payment_terms": [
+      "dev.ucp.common.payment.terms": [
         {
           "version": "{{ ucp_version }}",
           "extends": [
             "dev.ucp.shopping.checkout",
             "dev.ucp.shopping.order"
           ],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment-terms",
-          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/payment_terms.json"
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/extensions/terms",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_terms.json"
         }
       ]
     }
@@ -291,7 +291,7 @@ Businesses advertise payment terms support in their profile:
 When this capability is active, `checkout.payment` is extended with available
 terms and the selected term.
 
-{{ extension_schema_fields('payment_terms.json#/$defs/payment', 'payment-terms') }}
+{{ extension_schema_fields('payment_terms.json#/$defs/payment', 'payment/extensions/terms') }}
 
 ### Order Payment
 
@@ -306,17 +306,17 @@ can therefore sum to more than the Order currently owes after a refund, or less
 after an exchange: the term states what was agreed, and the adjustments state
 what happened after.
 
-{{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment-terms') }}
+{{ extension_schema_fields('payment_terms.json#/$defs/order_payment', 'payment/extensions/terms') }}
 
 ### Entities
 
 #### Payment Term
 
-{{ schema_fields('types/payment_term', 'payment-terms') }}
+{{ schema_fields('types/payment_term', 'payment/extensions/terms') }}
 
 #### Payment Schedule
 
-{{ schema_fields('types/payment_schedule', 'payment-terms') }}
+{{ schema_fields('types/payment_schedule', 'payment/extensions/terms') }}
 
 ## Examples
 
@@ -332,7 +332,7 @@ total.
 **Checkout response fragment — the terms on offer.** The Buyer has not chosen
 yet, so the Business defaults to paying now, and says so:
 
-<!-- ucp:example schema=shopping/payment_terms def=payment op=read direction=response -->
+<!-- ucp:example schema=common/payment_terms def=payment op=read direction=response -->
 ```json
 {
   "selected_term_id": "pt_pay_now",
@@ -390,7 +390,7 @@ own entry in `checkout.totals`:
 
 **Update request — the Buyer selects the deposit term:**
 
-<!-- ucp:example schema=shopping/payment_terms def=payment op=update direction=request -->
+<!-- ucp:example schema=common/payment_terms def=payment op=update direction=request -->
 ```json
 {
   "selected_term_id": "pt_deposit_balance"
@@ -399,14 +399,14 @@ own entry in `checkout.totals`:
 
 **Checkout response — recomputed and authoritative:**
 
-<!-- ucp:example schema=shopping/payment_terms def=dev.ucp.shopping.checkout op=update direction=response -->
+<!-- ucp:example schema=common/payment_terms def=dev.ucp.shopping.checkout op=update direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }],
-      "dev.ucp.shopping.payment_terms": [{ "version": "{{ ucp_version }}" }]
+      "dev.ucp.common.payment.terms": [{ "version": "{{ ucp_version }}" }]
     },
     "payment_handlers": {
       "com.example.card_handler": [
@@ -499,14 +499,14 @@ On completion, the accepted term travels to the Order, so the Buyer can still
 see that $900 is due at check-in. The other terms do not travel, and the deposit
 disclosure moves with the term it governs:
 
-<!-- ucp:example schema=shopping/payment_terms def=dev.ucp.shopping.order op=read direction=response -->
+<!-- ucp:example schema=common/payment_terms def=dev.ucp.shopping.order op=read direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.payment_terms": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.payment.terms": [{"version": "{{ ucp_version }}"}]
     }
   },
   "id": "order_9f2",
@@ -582,7 +582,7 @@ Four payments and four schedules: one due at completion, and three with
 computed due dates. The Business does the calendar arithmetic; the Platform
 reads dates.
 
-<!-- ucp:example schema=shopping/payment_terms def=payment_term -->
+<!-- ucp:example schema=common/payment_terms def=payment_term -->
 ```json
 {
   "id": "pt_pay_in_4",
@@ -631,7 +631,7 @@ Platforms **MUST**:
 * Treat an unrecognized schedule `type` as not due at completion, and present
   the term regardless.
 * Process disclosures attached to terms per
-  [Warning Presentation](shopping/checkout/index.md#warning-presentation), escalating through
+  [Warning Presentation](../../shopping/checkout/index.md#warning-presentation), escalating through
   `continue_url` when the rendering contract cannot be honored.
 
 Platforms **MAY** use `type` and `due_at` for enhanced presentation — calendar
