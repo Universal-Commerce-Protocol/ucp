@@ -10,7 +10,7 @@
       "post": {
         "operationId": "tokenize",
         "summary": "Tokenize Credential",
-        "description": "Convert a credential into a token bound to a specific checkout session. Handlers define accepted credential schemas and their own authentication requirements.",
+        "description": "Convert a credential into a token bound to a specific capability resource. Handlers define accepted credential schemas and their own authentication requirements.",
         "requestBody": {
           "required": true,
           "content": {
@@ -24,8 +24,12 @@
                     "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
                   },
                   "binding": {
-                    "$ref": "../../schemas/shopping/types/binding.json",
-                    "description": "Binding context that ties this token to a specific checkout and participant identity."
+                    "$ref": "../../schemas/common/types/binding.json",
+                    "description": "Resource this token is bound to. Ties the token to a specific capability resource."
+                  },
+                  "identity": {
+                    "$ref": "../../schemas/shopping/types/payment_identity.json",
+                    "description": "The participant this token is issued to. Required when acting on behalf of another participant, for example an agent tokenizing for a business. Omit when the authenticated caller is that participant."
                   }
                 }
               },
@@ -42,10 +46,11 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 },
@@ -61,7 +66,8 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "xyz789"
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "xyz789"
                     }
                   }
                 },
@@ -79,10 +85,11 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 }
@@ -137,8 +144,12 @@
                     "description": "The token value."
                   },
                   "binding": {
-                    "$ref": "../../schemas/shopping/types/binding.json",
-                    "description": "Binding context that must match the original tokenization request."
+                    "$ref": "../../schemas/common/types/binding.json",
+                    "description": "Resource binding that must match the original tokenization request."
+                  },
+                  "identity": {
+                    "$ref": "../../schemas/shopping/types/payment_identity.json",
+                    "description": "Participant whose token is being retrieved. Required when the caller acts on behalf of another participant; omit when the authenticated caller is that participant."
                   }
                 }
               },
@@ -148,7 +159,8 @@
                   "value": {
                     "token": "tok_abc123xyz789",
                     "binding": {
-                      "checkout_id": "xyz789"
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "xyz789"
                     }
                   }
                 },
@@ -157,10 +169,11 @@
                   "value": {
                     "token": "tok_abc123xyz789",
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 }

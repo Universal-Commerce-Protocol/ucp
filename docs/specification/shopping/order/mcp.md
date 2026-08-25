@@ -297,7 +297,7 @@ Platforms implementing the MCP binding:
 Businesses implementing the MCP binding:
 
 * **MUST** implement the `get_order` tool per the
-  [OpenRPC schema](<https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json>)
+  [OpenRPC schema](site:services/shopping/mcp.openrpc.json)
 
 See [Order Capability - Guidelines](index.md#operations-guidelines) for
 capability-level requirements that apply across all transports.

@@ -1058,7 +1058,7 @@ Extensions use the `extends` field to declare their parent(s):
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": "dev.ucp.shopping.checkout"
     }
@@ -1076,7 +1076,7 @@ Extensions **MAY** extend multiple parent capabilities by using an array:
   "dev.ucp.shopping.discount": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/discount",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
       "extends": ["dev.ucp.shopping.checkout", "dev.ucp.shopping.cart"]
     }
@@ -1329,7 +1329,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -1337,7 +1337,7 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
       "dev.ucp.shopping.discount": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/discount",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/discount",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -1483,7 +1483,7 @@ example:
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "{{ ucp_version }}",
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }

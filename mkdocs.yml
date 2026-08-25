@@ -44,6 +44,8 @@ nav:
       - Overview: specification/overview/index.md
       - Common:
           - Identity Linking: specification/common/identity-linking/index.md
+          - Extensions:
+              - Loyalty: specification/common/extensions/loyalty.md
       - Shopping:
           - Checkout Capability:
               - Overview: specification/shopping/checkout/index.md
@@ -53,10 +55,6 @@ nav:
                   - A2A: specification/shopping/checkout/a2a.md
                   - Embedded: specification/shopping/checkout/embedded.md
               - AP2 Mandates Extension: specification/ap2-mandates.md
-              - Buyer Consent Extension: specification/buyer-consent.md
-              - Discounts Extension: specification/discount.md
-              - Fulfillment Extension: specification/fulfillment.md
-              - Loyalty Extension: specification/loyalty.md
               - Payment Terms Extension: specification/payment-terms.md
           - Cart Capability:
               - Overview: specification/shopping/cart/index.md
@@ -77,6 +75,11 @@ nav:
               - Transports:
                   - REST: specification/shopping/order/rest.md
                   - MCP: specification/shopping/order/mcp.md
+          - Extensions:
+              - Fulfillment: specification/shopping/extensions/fulfillment.md
+              - Discounts: specification/shopping/extensions/discount.md
+              - Buyer Consent:
+                  specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
       - Payment:
           - Payment Authentication:
@@ -297,6 +300,16 @@ plugins:
           specification/payment/examples/platform-tokenizer-payment-handler.md
         specification/examples/encrypted-credential-handler.md:
           specification/payment/examples/encrypted-credential-payment-handler.md
+        # Common Extensions
+        specification/loyalty.md:
+          specification/common/extensions/loyalty.md
+        # Shopping Extensions
+        specification/buyer-consent.md:
+          specification/shopping/extensions/buyer-consent.md
+        specification/discount.md:
+          specification/shopping/extensions/discount.md
+        specification/fulfillment.md:
+          specification/shopping/extensions/fulfillment.md
   - llmstxt:
       full_output: llms-full.txt
       markdown_description: |
@@ -360,6 +373,12 @@ plugins:
               User authentication via the Identity Linking Capability,
               specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
               RFC 9207) to unlock personalized commerce data.
+          - specification/common/extensions/loyalty.md: >-
+              Loyalty Extension, enabling high-fidelity member benefit
+              recognition during catalog, cart, and checkout by defining schemas
+              for memberships, tiers, benefits, and reward earning forecasts
+              while managing provisional eligibility claims and enforcing
+              data-minimization privacy rules.
         Message Signatures:
           - specification/signatures.md: >-
               Implementation details for RFC 9421 HTTP Message Signatures and
@@ -397,24 +416,6 @@ plugins:
               checkout commitments (using SD-JWT+kb digital credentials and
               detached JWS signatures) between business, platform, and payment
               providers.
-          - specification/buyer-consent.md: >-
-              Buyer Consent Extension, defining data schemas for transmitting
-              buyer privacy choices (analytics, marketing, personalization) to
-              assist with privacy compliance (CCPA/GDPR).
-          - specification/discount.md: >-
-              Discount Extension, covering discount code discovery, applied
-              discounts, allocation method stacking orders, rejected code
-              message handling, and automatic or provisional eligibility
-              promotions.
-          - specification/fulfillment.md: >-
-              Fulfillment extension for checkouts, defining delivery methods,
-              pickup destinations, and method-agnostic UI rendering contracts.
-          - specification/loyalty.md: >-
-              Loyalty Extension, enabling high-fidelity member benefit
-              recognition during catalog, cart, and checkout by defining schemas
-              for memberships, tiers, benefits, and reward earning forecasts
-              while managing provisional eligibility claims and enforcing
-              data-minimization privacy rules.
           - specification/payment-terms.md: >-
               Payment Terms Extension, enabling checkout payment schedules for
               immediate and deferred payments such as deposits, installments,
@@ -479,6 +480,19 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
+        Shopping Extensions:
+          - specification/shopping/extensions/fulfillment.md: >-
+              Fulfillment extension for checkouts, defining delivery methods,
+              pickup destinations, and method-agnostic UI rendering contracts.
+          - specification/shopping/extensions/discount.md: >-
+              Discount Extension, covering discount code discovery, applied
+              discounts, allocation method stacking orders, rejected code
+              message handling, and automatic or provisional eligibility
+              promotions.
+          - specification/shopping/extensions/buyer-consent.md: >-
+              Buyer Consent Extension, defining data schemas for transmitting
+              buyer privacy choices (analytics, marketing, personalization) to
+              assist with privacy compliance (CCPA/GDPR).
         Payment:
           - specification/payment/authentication.md: >-
               Payment Authentication Extension, defining negotiation,

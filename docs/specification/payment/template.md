@@ -370,8 +370,8 @@ Before participating in this handler's flow, {participants} **MUST** complete:
 
 | Requirement                  | Description                                                                                                                                                           |
 | :--------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and `identity` to prevent reuse.                                                                                       |
-| **Binding placement**        | Binding data (e.g., `checkout_id`) **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers. |
+| **Binding required**         | Credentials **MUST** be bound to the `binding` resource (`type` and `id`) and issued to exactly one participant to prevent reuse.                                     |
+| **Binding placement**        | The `binding` object **SHOULD** be included within the `credential` payload to ensure it is covered by the signature, rather than in transport headers.               |
 | **Binding verified**         | The processing participant **MUST** verify binding matches before processing.                                                                                         |
 | **Token Expiry**             | {If using tokens: Tokens **MUST** expire after {duration} or single-use.}                                                                                             |
 | **Data Residency**           | {Specify if PII **MUST** be processed/stored in specific geographic regions (e.g., EU, US) to comply with local laws.}                                                |

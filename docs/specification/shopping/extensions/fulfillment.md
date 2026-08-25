@@ -54,10 +54,10 @@ On Checkout, the `fulfillment` field contains:
 
 ## Location Context
 
-Base [Context](shopping/catalog/index.md#context) defines an optional `location`: a
-stable, opaque [Location](glossary.md#commerce) identifier in the Business's
+Base [Context](../catalog/index.md#context) defines an optional `location`: a
+stable, opaque [Location](../../glossary.md#commerce) identifier in the Business's
 namespace. The field appears on Catalog requests and on Cart and Checkout
-create and update requests (see [Checkout Context](shopping/checkout/index.md#context)).
+create and update requests (see [Checkout Context](../checkout/index.md#context)).
 Fulfillment does not add or redefine the field; when the Fulfillment
 extension is active, it defines the field's effects.
 
@@ -89,7 +89,7 @@ Precedence is scoped to what each field governs:
 these fields without collapsing their roles. A Catalog response can report a
 place-based method at `loc_123`. Because base Cart Context already includes
 `location`, `loc_123` can travel forward as `context.location` on a Cart
-request. [Cart-to-Checkout conversion](shopping/cart/index.md#cart-to-checkout-conversion)
+request. [Cart-to-Checkout conversion](../cart/index.md#cart-to-checkout-conversion)
 initializes the Checkout from the Cart's `context`, so the Business **MAY**
 use `loc_123` to generate an initial Checkout fulfillment destination. Once
 the Platform sets `selected_destination_id`, that explicit selection governs.
@@ -102,53 +102,53 @@ method.
 
 ### Properties
 
-{{ extension_fields('fulfillment', 'fulfillment') }}
+{{ extension_fields('fulfillment', 'shopping/extensions/fulfillment') }}
 
 ### Entities
 
 #### Fulfillment
 
-{{ schema_fields('types/fulfillment_resp', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_resp', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Method
 
-{{ schema_fields('types/fulfillment_method_resp', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_method_resp', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Destination
 
-{{ schema_fields('types/fulfillment_destination_resp', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_destination_resp', 'shopping/extensions/fulfillment') }}
 
 #### Shipping Destination
 
-{{ schema_fields('types/shipping_destination_resp', 'fulfillment') }}
+{{ schema_fields('types/shipping_destination_resp', 'shopping/extensions/fulfillment') }}
 
 #### Business Location Destination
 
-{{ schema_fields('types/location_destination_resp', 'fulfillment') }}
+{{ schema_fields('types/location_destination_resp', 'shopping/extensions/fulfillment') }}
 
 #### Location Summary
 
-{{ schema_fields('location_summary', 'fulfillment') }}
+{{ schema_fields('location_summary', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Group
 
-{{ schema_fields('types/fulfillment_group_resp', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_group_resp', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Option
 
-{{ schema_fields('types/fulfillment_option_resp', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_option_resp', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Available Method
 
-{{ schema_fields('types/fulfillment_available_method_resp', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_available_method_resp', 'shopping/extensions/fulfillment') }}
 
 #### Total
 
-{{ schema_fields('types/total_resp', 'fulfillment') }}
+{{ schema_fields('types/total_resp', 'shopping/extensions/fulfillment') }}
 
 #### Postal Address
 
-{{ schema_fields('postal_address', 'fulfillment') }}
+{{ schema_fields('postal_address', 'shopping/extensions/fulfillment') }}
 
 ### Example
 
@@ -372,15 +372,15 @@ describes another location. A Business that cannot honor the submitted
 selection rejects it rather than replacing it.
 
 When the Business cannot accept a `selected_destination_id` submitted on
-[Update Checkout](shopping/checkout/index.md#update-checkout) — the ID is not recognized for
+[Update Checkout](../checkout/index.md#update-checkout) — the ID is not recognized for
 that method, or revalidation fails — it follows the general behavior for a
 rejected Update: it **MUST** leave the current Checkout unchanged and
 **MUST** return that Checkout with an error Message with
 `severity: "recoverable"` whose `path` selects the attempted method's
 `selected_destination_id` (for example
 `$.fulfillment.methods[0].selected_destination_id`). See
-[Error Handling](shopping/checkout/index.md#error-handling) and
-[The `path` Field](shopping/checkout/index.md#the-path-field).
+[Error Handling](../checkout/index.md#error-handling) and
+[The `path` Field](../checkout/index.md#the-path-field).
 
 ## Rendering
 
@@ -523,7 +523,7 @@ method has:
 * `availability` — whether the variant is available via this method at the
     specified or inferred location.
 * `location` — for place-based methods such as `pickup`, the
-    [Location](glossary.md#commerce) resolved for that method and the
+    [Location](../../glossary.md#commerce) resolved for that method and the
     Business's stable identifier for that place. A Business that advertises
     pickup at a `location` **MUST** accept that same ID as
     `selected_destination_id` for that method in Checkout. The Business
@@ -571,23 +571,23 @@ quantities, and combined fulfillment modify the options.
 
 #### Catalog Fulfillment
 
-{{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment', 'fulfillment') }}
+{{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment', 'shopping/extensions/fulfillment') }}
 
 #### Catalog Fulfillment Method
 
-{{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment_method', 'fulfillment') }}
+{{ extension_schema_fields('fulfillment.json#/$defs/catalog_fulfillment_method', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Option Base
 
-{{ schema_fields('types/fulfillment_option_base', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_option_base', 'shopping/extensions/fulfillment') }}
 
 #### Availability
 
-{{ schema_fields('types/availability', 'fulfillment') }}
+{{ schema_fields('types/availability', 'shopping/extensions/fulfillment') }}
 
 #### Fulfillment Destination Filter
 
-{{ schema_fields('types/fulfillment_destination_filter', 'fulfillment') }}
+{{ schema_fields('types/fulfillment_destination_filter', 'shopping/extensions/fulfillment') }}
 
 ### Location and method: `context` and `filters`
 
@@ -693,7 +693,7 @@ fulfillment on catalog, or omits them to scope itself to checkout only.
 
 Platforms declare their rendering capabilities using `platform_schema`:
 
-{{ schema_fields('types/platform_fulfillment_config', 'fulfillment') }}
+{{ schema_fields('types/platform_fulfillment_config', 'shopping/extensions/fulfillment') }}
 
 Platforms that omit config or set `supports_multi_group: false` receive
 single-group responses. The response shape is always
@@ -709,7 +709,7 @@ checkout and on catalog discovery):
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
@@ -732,7 +732,7 @@ Opt-in declaration (business MAY return multiple groups per method):
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",
@@ -750,7 +750,7 @@ Opt-in declaration (business MAY return multiple groups per method):
 Businesses declare what fulfillment configurations they support using
 `business_config`:
 
-{{ schema_fields('types/business_fulfillment_config', 'fulfillment') }}
+{{ schema_fields('types/business_fulfillment_config', 'shopping/extensions/fulfillment') }}
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
@@ -758,7 +758,7 @@ Businesses declare what fulfillment configurations they support using
   "dev.ucp.shopping.fulfillment": [
     {
       "version": "{{ ucp_version }}",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
       "extends": [
         "dev.ucp.shopping.checkout",

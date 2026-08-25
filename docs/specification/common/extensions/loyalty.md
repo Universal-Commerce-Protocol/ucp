@@ -144,7 +144,7 @@ extended.
             "dev.ucp.shopping.cart",
             "dev.ucp.shopping.checkout"
           ],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/loyalty",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/extensions/loyalty",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/loyalty.json"
         }
       ]
@@ -166,39 +166,39 @@ extended.
 
 #### Loyalty
 
-{{ extension_schema_fields('loyalty.json#/$defs/loyalty', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/loyalty', 'common/extensions/loyalty') }}
 
 #### Loyalty Membership
 
-{{ extension_schema_fields('loyalty.json#/$defs/loyalty_membership', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/loyalty_membership', 'common/extensions/loyalty') }}
 
 #### Membership Tier
 
-{{ extension_schema_fields('loyalty.json#/$defs/membership_tier', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_tier', 'common/extensions/loyalty') }}
 
 #### Membership Tier Benefit
 
-{{ extension_schema_fields('loyalty.json#/$defs/membership_tier_benefit', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_tier_benefit', 'common/extensions/loyalty') }}
 
 #### Membership Reward
 
-{{ extension_schema_fields('loyalty.json#/$defs/membership_reward', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/membership_reward', 'common/extensions/loyalty') }}
 
 #### Reward Amount
 
-{{ extension_schema_fields('loyalty.json#/$defs/reward_amount', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/reward_amount', 'common/extensions/loyalty') }}
 
 #### Reward Currency
 
-{{ extension_schema_fields('loyalty.json#/$defs/reward_currency', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/reward_currency', 'common/extensions/loyalty') }}
 
 #### Earning Forecast
 
-{{ extension_schema_fields('loyalty.json#/$defs/earning_forecast', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/earning_forecast', 'common/extensions/loyalty') }}
 
 #### Earning Breakdown
 
-{{ extension_schema_fields('loyalty.json#/$defs/earning_breakdown', 'loyalty') }}
+{{ extension_schema_fields('loyalty.json#/$defs/earning_breakdown', 'common/extensions/loyalty') }}
 
 ## Loyalty behavior
 
@@ -219,7 +219,7 @@ explicit eligibility claim. In this case, the map key MUST be the same reverse-d
 identifier the business would accept as a claim value. This is a specific instance of
 the general pattern where identity linking lets a business return its own user state on a
 response; see
-[Business-Populated Response Values](common/identity-linking/index.md#business-populated-response-values).
+[Business-Populated Response Values](../identity-linking/index.md#business-populated-response-values).
 
 * When a business verifies a membership claim or determines membership from
   authenticated identity, it MUST return `provisional: false`. It MUST populate the
@@ -237,7 +237,7 @@ response; see
   and proceed through checkout without loyalty benefits applied.
 
 At checkout completion, all accepted but unverified loyalty claims MUST be resolved per
-the [Eligibility Verification at Completion](shopping/checkout/index.md#eligibility-verification-at-completion)
+the [Eligibility Verification at Completion](../../shopping/checkout/index.md#eligibility-verification-at-completion)
 contract defined in the checkout capability.
 
 ### Monetary loyalty benefits
@@ -279,7 +279,7 @@ complete cart and checkout responses also include base required fields such as `
 `id`, `currency`, and `totals`.
 
 Building on the store loyalty card example from
-[Eligibility Verification at Completion](shopping/checkout/index.md#eligibility-verification-at-completion),
+[Eligibility Verification at Completion](../../shopping/checkout/index.md#eligibility-verification-at-completion),
 assume the card offers one unconditional product discount and one conditional discount
 that the current checkout cart fails to satisfy. The platform can surface the first
 provisional discount with disclaimers like "verified at purchase" and additionally show
