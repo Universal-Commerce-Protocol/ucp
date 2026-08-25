@@ -270,6 +270,6 @@ Platforms implementing the MCP binding:
 
 Businesses implementing the MCP binding:
 
-- **MUST** implement the `get_order` tool per the [OpenRPC schema](https://ucp.dev/draft/services/shopping/mcp.openrpc.json)
+- **MUST** implement the `get_order` tool per the [OpenRPC schema](/draft/services/shopping/mcp.openrpc.json)
 
 See [Order Capability - Guidelines](http://ucp.dev/draft/specification/shopping/order/#operations-guidelines) for capability-level requirements that apply across all transports.

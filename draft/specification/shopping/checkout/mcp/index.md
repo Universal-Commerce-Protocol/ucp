@@ -34,7 +34,7 @@ Businesses advertise MCP transport availability through their UCP profile at `/.
       "dev.ucp.shopping.fulfillment": [
         {
           "version": "draft",
-          "spec": "https://ucp.dev/draft/specification/fulfillment",
+          "spec": "https://ucp.dev/draft/specification/shopping/extensions/fulfillment",
           "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
           "extends": "dev.ucp.shopping.checkout"
         }
@@ -112,9 +112,9 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/shopping/checko
 
 - `checkout` ([Checkout](http://ucp.dev/draft/specification/shopping/checkout/#create-checkout)): **Required**. Contains the initial checkout session data and optional extensions.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/discount/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md)
     - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 
 #### Output Schema
@@ -358,9 +358,9 @@ The Platform **MUST NOT** start a new `update_checkout` operation while the Chec
 - `id` (String): **Required**. The ID of the checkout session to update.
 - `checkout` ([Checkout](http://ucp.dev/draft/specification/shopping/checkout/#update-checkout)): **Required**. Contains the updated checkout session data.
   - Extensions (Optional):
-    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/buyer-consent/index.md)
-    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/fulfillment/index.md)
-    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/discount/index.md)
+    - `dev.ucp.shopping.buyer_consent`: [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md)
+    - `dev.ucp.shopping.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md)
+    - `dev.ucp.shopping.discount`: [Discount](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md)
     - `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/ap2-mandates/index.md)
 
 #### Output Schema

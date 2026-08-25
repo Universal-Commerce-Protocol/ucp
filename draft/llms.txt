@@ -32,6 +32,7 @@ specifications:
 ## Common
 
 - [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/index.md): User authentication via the Identity Linking Capability, specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and RFC 9207) to unlock personalized commerce data.
+- [Loyalty](http://ucp.dev/draft/specification/common/extensions/loyalty/index.md): Loyalty Extension, enabling high-fidelity member benefit recognition during catalog, cart, and checkout by defining schemas for memberships, tiers, benefits, and reward earning forecasts while managing provisional eligibility claims and enforcing data-minimization privacy rules.
 
 ## Message Signatures
 
@@ -46,10 +47,6 @@ specifications:
 - [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
 - [Embedded](http://ucp.dev/draft/specification/shopping/checkout/embedded/index.md): Embedded Checkout Protocol (ECP) specification, detailing per-session delegation negotiation, URL parameters, native UI event mappings, W3C Payment Request conceptual alignment, and core lifecycle messages.
 - [AP2 Mandates Extension](http://ucp.dev/draft/specification/ap2-mandates/index.md): AP2 Mandates Extension, detailing secure, cryptographically bound checkout commitments (using SD-JWT+kb digital credentials and detached JWS signatures) between business, platform, and payment providers.
-- [Buyer Consent Extension](http://ucp.dev/draft/specification/buyer-consent/index.md): Buyer Consent Extension, defining data schemas for transmitting buyer privacy choices (analytics, marketing, personalization) to assist with privacy compliance (CCPA/GDPR).
-- [Discounts Extension](http://ucp.dev/draft/specification/discount/index.md): Discount Extension, covering discount code discovery, applied discounts, allocation method stacking orders, rejected code message handling, and automatic or provisional eligibility promotions.
-- [Fulfillment Extension](http://ucp.dev/draft/specification/fulfillment/index.md): Fulfillment extension for checkouts, defining delivery methods, pickup destinations, and method-agnostic UI rendering contracts.
-- [Loyalty Extension](http://ucp.dev/draft/specification/loyalty/index.md): Loyalty Extension, enabling high-fidelity member benefit recognition during catalog, cart, and checkout by defining schemas for memberships, tiers, benefits, and reward earning forecasts while managing provisional eligibility claims and enforcing data-minimization privacy rules.
 - [Payment Terms Extension](http://ucp.dev/draft/specification/payment-terms/index.md): Payment Terms Extension, enabling checkout payment schedules for immediate and deferred payments such as deposits, installments, and lodging balance-at-check-in flows.
 
 ## Cart Capability
@@ -77,6 +74,12 @@ specifications:
 - [Overview](http://ucp.dev/draft/specification/shopping/order/index.md): Post-purchase tracking via the Order Capability, detailing line item updates, fulfillment expectations, shipment events, adjustments, and webhook-based status updates.
 - [REST](http://ucp.dev/draft/specification/shopping/order/rest/index.md): HTTP REST transport binding for the Order Capability, detailing endpoints, HTTP headers, payload schemas, and error structures.
 - [MCP](http://ucp.dev/draft/specification/shopping/order/mcp/index.md): Model Context Protocol (MCP) transport binding for the Order Capability, detailing the JSON-RPC tool interface and parameters for fetching order states.
+
+## Shopping Extensions
+
+- [Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md): Fulfillment extension for checkouts, defining delivery methods, pickup destinations, and method-agnostic UI rendering contracts.
+- [Discounts](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md): Discount Extension, covering discount code discovery, applied discounts, allocation method stacking orders, rejected code message handling, and automatic or provisional eligibility promotions.
+- [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md): Buyer Consent Extension, defining data schemas for transmitting buyer privacy choices (analytics, marketing, personalization) to assist with privacy compliance (CCPA/GDPR).
 
 ## Payment
 

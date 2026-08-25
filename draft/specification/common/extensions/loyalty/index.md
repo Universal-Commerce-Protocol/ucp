@@ -102,7 +102,7 @@ Businesses can follow the standard advertising mechanism to advertise loyalty su
             "dev.ucp.shopping.cart",
             "dev.ucp.shopping.checkout"
           ],
-          "spec": "https://ucp.dev/draft/specification/loyalty",
+          "spec": "https://ucp.dev/draft/specification/common/extensions/loyalty",
           "schema": "https://ucp.dev/draft/schemas/common/loyalty.json"
         }
       ]

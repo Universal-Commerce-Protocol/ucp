@@ -13,7 +13,7 @@ This extension adds two properties to `checkout.payment`:
 - `terms[]` — the payment terms the Business offers for this checkout. Response-only.
 - `selected_term_id` — the selected term. Present in a response whenever `terms` is; a Platform writes it to change the selection.
 
-A Buyer picks one of the options in `terms[]`, the same way they pick one [fulfillment option](http://ucp.dev/draft/specification/fulfillment/#platform-responsibilities).
+A Buyer picks one of the options in `terms[]`, the same way they pick one [fulfillment option](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/#platform-responsibilities).
 
 ## When a Checkout carries terms
 

@@ -440,9 +440,9 @@ The Business **MUST** return an error in `messages` with `code: "eligibility_inv
 
 ##### Example: resolving a claim with a verification Action
 
-This example is illustrative. It uses a negotiated vendor extension, `com.example.identity.student_verification`, that declares a single Action type under a key of the same name in `actions` and defines the instance `config` and verification transport. It composes that extension with `context.eligibility`, a provisional [Discount](http://ucp.dev/draft/specification/discount/index.md), an [Action](#actions), and `messages`.
+This example is illustrative. It uses a negotiated vendor extension, `com.example.identity.student_verification`, that declares a single Action type under a key of the same name in `actions` and defines the instance `config` and verification transport. It composes that extension with `context.eligibility`, a provisional [Discount](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md), an [Action](#actions), and `messages`.
 
-The provisional discount fields (`provisional`, `eligibility`) belong to the [Discount extension](http://ucp.dev/draft/specification/discount/#eligibility-claims) and are available only when that extension is active for the checkout.
+The provisional discount fields (`provisional`, `eligibility`) belong to the [Discount extension](http://ucp.dev/draft/specification/shopping/extensions/discount/#eligibility-claims) and are available only when that extension is active for the checkout.
 
 **1. Claim accepted, discount provisional, verification Action outstanding.** The Platform submits `org.example.student` in `context.eligibility` on Create Checkout. The Business accepts the claim and, with the Discount extension active, returns a provisional discount, an explanatory `info` message, and a verification Action. The claim is unresolved, so the checkout stays `incomplete`:
 

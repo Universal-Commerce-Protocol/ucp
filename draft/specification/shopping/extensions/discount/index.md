@@ -28,7 +28,7 @@ Businesses advertise discount support in their profile. The capability can exten
         {
           "version": "draft",
           "extends": ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
-          "spec": "https://ucp.dev/draft/specification/discount",
+          "spec": "https://ucp.dev/draft/specification/shopping/extensions/discount",
           "schema": "https://ucp.dev/draft/schemas/shopping/discount.json"
         }
       ]

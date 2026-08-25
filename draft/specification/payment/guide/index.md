@@ -680,7 +680,7 @@ Handler authors have two options:
 
 For each handler-specific Action, document when it is emitted, the exact effect its type gates, how the Platform processes its config, how the Business observes its completion, whether processing the same occurrence is ever safe to retry, and its trust, failure, abandonment, and fallback behavior.
 
-See [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common envelope and [Schema Authoring — Extension-Declared Action Types](/draft/documentation/schema-authoring.html) for the extension schema pattern.
+See [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common envelope and [Schema Authoring — Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types) for the extension schema pattern.
 
 ### Processing
 
