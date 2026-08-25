@@ -141,9 +141,9 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
 * `checkout` ([Checkout](index.md#create-checkout)): **Required**. Contains
     the initial checkout session data and optional extensions.
     * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](../extensions/discount.md)
         * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
