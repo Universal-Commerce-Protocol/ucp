@@ -72,7 +72,7 @@ in Shopping):
     Downstream capabilities authoritatively negotiate and revalidate all terms
     during transaction processing (for example, a returned ID submitted as
     `selected_destination_id`; see
-    [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity)).
+    [Selection and Location Identity](../../shopping/extensions/fulfillment.md#selection-and-location-identity)).
 2. **Separation of Discovery Concerns**: Each capability answers one narrow
     question, and later stages revalidate earlier signals. Location answers
     which places can currently provide a set of referenced items (the
