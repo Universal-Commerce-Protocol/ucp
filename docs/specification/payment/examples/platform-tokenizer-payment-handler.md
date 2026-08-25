@@ -279,12 +279,13 @@ Authorization: Bearer {business_api_key}
 {
   "token": "ptok_x9y8z7w6v5u4",
   "binding": {
-    "checkout_id": "checkout_789"
+    "type": "dev.ucp.shopping.checkout",
+    "id": "checkout_789"
   }
 }
 ```
 
-Note: No `binding.identity` is needed if the business authenticates
+Note: No `identity` is needed if the business authenticates
 directly—the platform knows who they are based on the API key.
 
 ---
@@ -304,12 +305,12 @@ data and exposes the `/detokenize` endpoint. To implement, platforms must:
 
 **Implementation Requirements:**
 
-| Requirement            | Description                                                                              |
-| :--------------------- | :--------------------------------------------------------------------------------------- |
-| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)      |
-| Token storage          | Map tokens to credentials with binding metadata in the credential provider               |
-| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`          |
-| Binding verification   | payment credential provider verifies `checkout_id` and caller identity on detokenization |
+| Requirement            | Description                                                                                     |
+| :--------------------- | :---------------------------------------------------------------------------------------------- |
+| `/detokenize` endpoint | Exposed by the compliant payment credential provider (not the platform application)             |
+| Token storage          | Map tokens to credentials with binding metadata in the credential provider                      |
+| Participant allowlist  | Only onboarded businesses/PSPs can call the credential provider's `/detokenize`                 |
+| Binding verification   | payment credential provider verifies `binding` and the requesting participant on detokenization |
 
 ### Handler Configuration (Platform)
 
@@ -365,7 +366,7 @@ The platform application orchestrates the payment flow but
 
 1. The platform's **payment credential provider** securely stores payment credentials.
 2. When a payment is needed, the platform application requests a token from the credential provider.
-3. The credential provider generates a token bound to both the `checkout_id` and the business's `identity` (from the handler declaration).
+3. The credential provider generates a token bound to the `binding` resource and issued to the business's `identity` (from the handler declaration).
 4. The credential provider returns the token to the platform application.
 5. The platform application includes this token in the checkout submission.
 
@@ -460,7 +461,7 @@ When the business forwards a token to the PSP:
 
 1. Extract the token from the payment instrument.
 2. Call the platform's **payment credential provider** `/detokenize` endpoint
-   with the business's identity in binding.
+   with the business's `identity` alongside the `binding`.
 3. Process the payment with the returned credential.
 
 #### Detokenize Request Example (PSP)
@@ -474,21 +475,23 @@ Authorization: Bearer {psp_api_key}
 {
   "token": "ptok_x9y8z7w6v5u4",
   "binding": {
-    "checkout_id": "checkout_789",
-    "identity": {
-      "access_token": "business_abc123"
-    }
+    "type": "dev.ucp.shopping.checkout",
+    "id": "checkout_789"
+  },
+  "identity": {
+    "access_token": "business_abc123"
   }
 }
 ```
 
-Note: `binding.identity` IS required here—the PSP is calling on behalf of a
+Note: `identity` IS required here—the PSP is calling on behalf of a
 business, so they must specify which businesses' token they are retrieving.
 
 The platform's payment credential provider verifies that:
 
-* The PSP is authorized to detokenize for this business.
-* The `checkout_id` matches the original tokenization.
+* The PSP is authorized to act for the business named by `identity`.
+* The `binding` matches the original tokenization, and `identity` resolves to
+  the participant the token was issued to.
 * The token has not expired or been used.
 
 ---
@@ -503,9 +506,9 @@ The platform's payment credential provider verifies that:
 | **No Platform App access** | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does. |
 | **Endpoint isolation** | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application. |
 | **Participant authentication** | Platform's credential provider **MUST** authenticate businesses/PSPs before accepting `/detokenize` calls. |
-| **Identity binding** | Tokens **MUST** be bound to the business's `identity` from the handler declaration. |
-| **Checkout-bound** | Tokens **MUST** be bound to the specific `checkout_id`. |
-| **Caller verification** | Platform **MUST** verify authenticated caller matches the token's bound identity (or is an authorized PSP). |
+| **Issued to participant** | Tokens **MUST** be issued to the business's `identity` from the handler declaration. |
+| **Resource-bound** | Tokens **MUST** be bound to the specific `binding` resource. |
+| **Caller verification** | Platform **MUST** verify the authenticated caller is the participant the token was issued to (or is an authorized PSP). |
 | **Single-use** | Tokens **SHOULD** be invalidated after detokenization. |
 | **Short TTL** | Tokens **SHOULD** expire shortly. |
 | **HTTPS required** | All `/detokenize` calls must use TLS. |

@@ -98,14 +98,50 @@ which lifecycle policy you use:
 ### Binding
 
 All tokenization requests require a `binding` object that ties the token to a
-specific context:
+specific capability resource:
 
-| Field         | Required    | Description                                                                                     |
-| :------------ | :---------- | :---------------------------------------------------------------------------------------------- |
-| `checkout_id` | Yes         | The checkout session this token is valid for                                                    |
-| `identity`    | Conditional | The participant identity to bind to; required when caller acts on behalf of another participant |
+| Field  | Required | Description                                                                                                 |
+| :----- | :------- | :---------------------------------------------------------------------------------------------------------- |
+| `type` | Yes      | The capability that owns the bound resource, for example `dev.ucp.shopping.checkout`                        |
+| `id`   | Yes      | Opaque identifier of the bound resource within that capability. The caller **MUST** send a non-empty string |
 
-The tokenizer **MUST** verify binding matches on `/detokenize`. See [Binding Schema](site:schemas/shopping/types/binding.json).
+See [Binding Schema](site:schemas/common/types/binding.json).
+
+Resource scope and participant scope are separate. Requests carry `identity`
+alongside `binding` rather than inside it: `binding` says which resource the
+token is for, `identity` says which participant it is for. `identity` is
+required when the caller acts on behalf of another participant, and omitted
+when the authenticated caller is that participant. See
+[Payment Identity Schema](site:schemas/shopping/types/payment_identity.json).
+
+Binding is a replay guard, not a resource reference. The following rules apply
+to every tokenizer:
+
+1. A Tokenizer **MUST** verify a binding by exact equality over `type` and
+   `id`. A Tokenizer **MUST NOT** accept a partial match, and **MUST NOT**
+   reject a request because `binding` carries members it does not recognize. A
+   Tokenizer **MUST** ignore unrecognized members when comparing. An extension
+   that defines additional `binding` members **MUST** specify whether those
+   members participate in the comparison; a Tokenizer implementing that
+   extension **MUST** follow the extension's definition.
+2. A Tokenizer **MUST** treat `binding.id` as opaque: it **MUST NOT** require
+   the value to be resolvable, and **MUST NOT** reject a request because it
+   cannot confirm that the identified resource exists.
+3. A Tokenizer **MUST NOT** reject a request solely because it does not
+   recognize `binding.type`. A tokenizer serving one capability today therefore
+   remains usable by capabilities defined later without changing its
+   implementation.
+4. Every token is issued to exactly one participant. A Tokenizer **MUST**
+   record that participant at `/tokenize` — from `identity` when present,
+   otherwise the authenticated caller. On `/detokenize` a Tokenizer **MUST**
+   resolve the requesting participant the same way, **MUST** verify it matches
+   the participant recorded at issuance, and **MUST** verify that the
+   authenticated caller is that participant or is authorized to act for it. A
+   Tokenizer **MUST NOT** return the credential when either check fails.
+   `identity` is a participant identifier, not a credential, and a Tokenizer
+   **MUST NOT** accept it as authentication. The mechanism by which one
+   participant is authorized to act for another is handler-defined and outside
+   the scope of this specification.
 
 ---
 
@@ -117,7 +153,8 @@ payload example, which defines its own mechanism to encrypt.
 
 ### POST /tokenize
 
-Converts a raw credential into a token bound to a checkout and identity.
+Converts a raw credential into a token bound to a capability resource and issued
+to a participant.
 
 **When to implement:** Always, unless you are an agent generating tokens
 internally.
@@ -136,10 +173,11 @@ Content-Type: application/json
     "cvc": "123"
   },
   "binding": {
-    "checkout_id": "abc123",
-    "identity": {
-      "access_token": "merchant_001"
-    }
+    "type": "dev.ucp.shopping.checkout",
+    "id": "abc123"
+  },
+  "identity": {
+    "access_token": "merchant_001"
   }
 }
 ```
@@ -169,7 +207,8 @@ Authorization: Bearer {caller_access_token}
 {
   "token": "tok_abc123xyz789",
   "binding": {
-    "checkout_id": "abc123"
+    "type": "dev.ucp.shopping.checkout",
+    "id": "abc123"
   }
 }
 ```
@@ -187,9 +226,9 @@ Authorization: Bearer {caller_access_token}
 }
 ```
 
-**Note:** `binding.identity` is omitted when the authenticated caller is the
-binding target. Include it when acting on behalf of another participant (e.g.,
-PSP detokenizing for business).
+**Note:** `identity` is omitted when the authenticated caller is the participant
+the token was issued to. Include it when acting on behalf of another participant
+(e.g., PSP detokenizing for business).
 
 See the full [OpenAPI specification](site:handlers/tokenization/openapi.json) for complete request/response schemas.
 
@@ -197,16 +236,16 @@ See the full [OpenAPI specification](site:handlers/tokenization/openapi.json) fo
 
 ## Security Requirements
 
-| Requirement                  | Description                                                                                |
-| :--------------------------- | :----------------------------------------------------------------------------------------- |
-| **Binding required**         | Credentials **MUST** be bound to `checkout_id` and participant `identity` to prevent reuse |
-| **Binding verified**         | Tokenizer **MUST** verify binding matches before returning credentials                     |
-| **Cryptographically random** | Use secure random generators; tokens must be unguessable                                   |
-| **Sufficient length**        | Minimum 128 bits of entropy                                                                |
-| **Non-reversible**           | Cannot derive the credential from the token                                                |
-| **Scoped**                   | Token should only work with your tokenizer                                                 |
-| **Time-limited**             | Enforce TTL appropriate to use case (typically 5-30 minutes)                               |
-| **Single-use preferred**     | Invalidate after first detokenization when possible                                        |
+| Requirement                  | Description                                                                                                                    |
+| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| **Binding required**         | Credentials **MUST** be bound to a `binding` resource (`type` and `id`) and issued to exactly one participant to prevent reuse |
+| **Binding verified**         | Tokenizer **MUST** verify binding matches before returning credentials                                                         |
+| **Cryptographically random** | Use secure random generators; tokens must be unguessable                                                                       |
+| **Sufficient length**        | Minimum 128 bits of entropy                                                                                                    |
+| **Non-reversible**           | Cannot derive the credential from the token                                                                                    |
+| **Scoped**                   | Token should only work with your tokenizer                                                                                     |
+| **Time-limited**             | Enforce TTL appropriate to use case (typically 5-30 minutes)                                                                   |
+| **Single-use preferred**     | Invalidate after first detokenization when possible                                                                            |
 
 ---
 
@@ -260,9 +299,11 @@ A tokenizer handler conforms to this pattern if it:
 - [ ] Documents credential transformation between source and checkout forms
 - [ ] Produces tokens compatible with the `TokenCredential` schema
 - [ ] Specifies token lifecycle policy (TTL, single-use, etc.)
-- [ ] Requires `binding` with `checkout_id` on tokenization requests
+- [ ] Requires `binding` with `type` and `id` on tokenization requests
 - [ ] Uses `PaymentIdentity` for participant identification
-- [ ] Verifies `binding` matches on detokenization requests
+- [ ] Verifies `binding` matches by exact equality on detokenization requests
+- [ ] Records the participant each token is issued to, and on detokenization verifies both that participant and the caller's authority to act for it
+- [ ] Accepts binding types it does not recognize
 - [ ] Requires security acknowledgements from participants receiving raw credentials
 
 ---
@@ -273,7 +314,7 @@ A tokenizer handler conforms to this pattern if it:
 | :---------------------- | :-------------------------------------------------------------------------------------------------------------- |
 | Tokenization OpenAPI    | [handlers/tokenization/openapi.json](site:handlers/tokenization/openapi.json)                                   |
 | Identity Schema         | [schemas/shopping/types/payment_identity.json](site:schemas/shopping/types/payment_identity.json)               |
-| Binding Schema          | [schemas/shopping/types/binding.json](site:schemas/shopping/types/binding.json)                                 |
+| Binding Schema          | [schemas/common/types/binding.json](site:schemas/common/types/binding.json)                                     |
 | Token Credential Schema | [schemas/shopping/types/token_credential.json](site:schemas/shopping/types/token_credential.json)               |
 | Card Instrument Schema  | [schemas/shopping/types/card_payment_instrument.json](site:schemas/shopping/types/card_payment_instrument.json) |
 
