@@ -401,9 +401,9 @@ unchanged and return the current Checkout with a recoverable error Message.
 * `checkout` ([Checkout](index.md#update-checkout)): **Required**.
     Contains the updated checkout session data.
     * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../../buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../../fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](../../discount.md)
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
+        * `dev.ucp.shopping.discount`: [Discount](../extensions/discount.md)
         * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
