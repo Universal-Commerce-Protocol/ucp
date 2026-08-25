@@ -305,6 +305,17 @@ plugins:
           specification/payment/examples/platform-tokenizer-payment-handler.md
         specification/examples/encrypted-credential-handler.md:
           specification/payment/examples/encrypted-credential-payment-handler.md
+        # Payment Extensions: currently-published paths under specification/payment/,
+        # superseded by the payment/extensions/ subtree. Distinct from the flat
+        # pre-vertical URLs above, which are also still served.
+        specification/payment/authentication.md:
+          specification/payment/extensions/authentication.md
+        specification/payment/split-payments.md:
+          specification/payment/extensions/split-payments.md
+        specification/payment/actions/device-data-collection.md:
+          specification/payment/extensions/actions/device-data-collection.md
+        specification/payment/actions/three-ds-challenge.md:
+          specification/payment/extensions/actions/three-ds-challenge.md
         # Common Extensions
         specification/loyalty.md:
           specification/common/extensions/loyalty.md
