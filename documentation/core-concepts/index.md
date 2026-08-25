@@ -86,7 +86,7 @@ Extensions optionally augment a base capability. They use the `extends` field to
     {
       "version": "draft",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/draft/specification/fulfillment",
+      "spec": "https://ucp.dev/draft/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json"
     }
   ]
@@ -170,7 +170,7 @@ Both business and platform profiles share a common base structure — a `ucp` ob
       }],
       "dev.ucp.shopping.fulfillment": [{
         "version": "draft",
-        "spec": "https://ucp.dev/draft/specification/fulfillment",
+        "spec": "https://ucp.dev/draft/specification/shopping/extensions/fulfillment",
         "schema": "https://ucp.dev/draft/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
