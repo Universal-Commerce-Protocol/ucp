@@ -407,11 +407,15 @@ def strip_ellipsis(obj, _path="", _paths=None):
         result[k] = strip_ellipsis(v, child_path, _paths)
     return result if _path else (result, _paths)
   elif isinstance(obj, list):
+    # Child paths use the post-strip index — the position the item
+    # occupies in the payload the validator sees. Removed sentinels
+    # shift later items left, so the source index would point at the
+    # wrong element (or suppress a real error on a shifted sibling).
     items = []
-    for i, item in enumerate(obj):
+    for item in obj:
       if item == "...":
         continue
-      items.append(strip_ellipsis(item, f"{_path}/{i}", _paths))
+      items.append(strip_ellipsis(item, f"{_path}/{len(items)}", _paths))
     return items if _path else (items, _paths)
   return obj if _path else (obj, _paths)
 
@@ -637,7 +641,7 @@ def resolve_schema(
   schema_base: Path,
 ) -> dict:
   """Resolve a schema via ucp-schema, with caching."""
-  key = (schema_path, direction, op)
+  key = (schema_base.resolve(), schema_path, direction, op)
   if key in _schema_cache:
     return _schema_cache[key]
 

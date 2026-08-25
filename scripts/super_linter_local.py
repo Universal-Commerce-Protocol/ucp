@@ -16,11 +16,16 @@ def map_action_to_image(action_str):
   """Map GitHub Action string to ghcr.io image."""
   # super-linter/super-linter/slim@v8 ->
   # ghcr.io/super-linter/super-linter:slim-v8
-  match = re.match(r"super-linter/super-linter/(.*)@(.*)", action_str)
+  # super-linter/super-linter/slim@<hash> # v8.7.0 ->
+  # ghcr.io/super-linter/super-linter:slim-v8.7.0
+  match = re.match(
+    r"super-linter/super-linter/([^@\s]+)@(?:[0-9a-f]{40}\s*#\s*(\S+)|(\S+))",
+    action_str,
+  )
 
   if match:
     variant = match.group(1)
-    version = match.group(2)
+    version = match.group(2) or match.group(3)
     return f"ghcr.io/super-linter/super-linter:{variant}-{version}"
 
   return action_str
@@ -77,6 +82,12 @@ def main():
 
   lint_env = lint_step.get("env", {})
   action_uses = lint_step.get("uses", "")
+
+  for line in workflow_path.read_text().splitlines():
+    if "super-linter/super-linter" in line and "uses:" in line:
+      action_uses = line.split("uses:", 1)[1].strip()
+      break
+
   image = map_action_to_image(action_uses)
 
   cmd = [

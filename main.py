@@ -27,7 +27,7 @@ from typing import Any
 
 # --- CONFIGURATION ---
 # Base directories for schema resolution
-OPENAPI_DIR = Path("source/services/shopping")
+OPENAPI_DIR = Path("source/services")
 SCHEMAS_DIR = Path("source/schemas")
 HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
 COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
@@ -360,11 +360,11 @@ def define_env(env):
     # Refer to checkout.json for ap2-mandates.json entities that are not
     # explicitly defined in ap2-mandates.json.
     if (
-      spec_file_name == "ap2-mandates"
+      spec_file_name in ("ap2-mandates", "shopping/checkout/ap2-mandates")
       and "ap2_mandate" not in ref_string
       and not ref_string.startswith("#")
     ):
-      spec_file_name = "checkout"
+      spec_file_name = "shopping/checkout"
 
     # Extract fragment identifier if present (e.g., #/$defs/response)
     # This handles cases like "types/pagination.json#/$defs/response"
@@ -643,8 +643,22 @@ def define_env(env):
       diff_request = {}
       for op in ("create", "update", "complete"):
         val = ucp_request.get(op)
-        if val and val != response:
-          diff_request[op] = val
+        if val:
+          disp_val = None
+          if isinstance(val, str):
+            if val != response:
+              disp_val = word.get(val, val)
+          elif isinstance(val, dict) and "transition" in val:
+            transition = val["transition"]
+            to_state = transition.get("to")
+            from_state = transition.get("from")
+            from_disp = word.get(from_state, from_state)
+            to_disp = word.get(to_state, to_state)
+            disp_val = f"transitioning from {from_disp} to {to_disp}"
+
+          if disp_val:
+            diff_request[op] = disp_val
+
       if not diff_request:
         return base_disp
 
@@ -659,9 +673,7 @@ def define_env(env):
           groups[-1][1].append(op)
         else:
           groups.append((val, [op]))
-      clauses = [
-        f"{word.get(val, val)} on {' & '.join(ops)}" for val, ops in groups
-      ]
+      clauses = [f"{val} on {' & '.join(ops)}" for val, ops in groups]
       if not clauses:
         return base_disp
       return f"{base_disp}; {', '.join(clauses)}"
@@ -700,6 +712,19 @@ def define_env(env):
     if not schema_data:
       return "_No content fields defined._"
 
+    # A bare "#" is a self-root reference naming the schema being rendered.
+    # It carries no filename, so create_link derives an empty anchor and emits
+    # a broken "<page>/##" link. Recursive refs are irreducible: ucp-schema
+    # preserves them even under --bundle, so the docs layer is the only place
+    # that can name them. Resolve against this schema's own $id.
+    self_id = schema_data.get("$id")
+    self_ref_name = self_id.rsplit("/", 1)[-1] if self_id else None
+
+    def _deref_self(ref_value):
+      if ref_value == "#" and self_ref_name:
+        return self_ref_name
+      return ref_value
+
     # If schema is ONLY a oneOf, render as prose instead of table
     if (
       "oneOf" in schema_data
@@ -710,7 +735,9 @@ def define_env(env):
       links = []
       for item in schema_data["oneOf"]:
         if "$ref" in item:
-          links.append(create_link(item["$ref"], spec_file_name, context))
+          links.append(
+            create_link(_deref_self(item["$ref"]), spec_file_name, context)
+          )
         elif item.get("type"):
           links.append(f"`{item.get('type')}`")
       if links:
@@ -799,7 +826,7 @@ def define_env(env):
         )
 
         f_type = details.get("type", "any")
-        ref = details.get("$ref")
+        ref = _deref_self(details.get("$ref"))
 
         # Resolve UCP $defs references inline so properties render as
         # expanded tables (with anchors) instead of opaque links.
@@ -825,7 +852,7 @@ def define_env(env):
 
         # Check for Array specific logic
         items = details.get("items", {})
-        items_ref = items.get("$ref")
+        items_ref = _deref_self(items.get("$ref"))
 
         # Special handling for UCP version
         version_data = None
@@ -847,7 +874,9 @@ def define_env(env):
           for one_of_type in details.get("oneOf", []):
             if "$ref" in one_of_type:
               parts.append(
-                create_link(one_of_type["$ref"], spec_file_name, context)
+                create_link(
+                  _deref_self(one_of_type["$ref"]), spec_file_name, context
+                )
               )
             elif one_of_type.get("type"):
               parts.append(f"`{one_of_type['type']}`")
@@ -880,7 +909,7 @@ def define_env(env):
                 continue
               if branch.get("$ref"):
                 inner_type = create_link(
-                  branch["$ref"], spec_file_name, context
+                  _deref_self(branch["$ref"]), spec_file_name, context
                 )
                 break
               if branch.get("title"):
@@ -1009,22 +1038,13 @@ def define_env(env):
     """Return path if ref_path identifies a `common/types/` primitive.
 
     Scope is intentionally narrow: only schemas under
-    `source/schemas/common/types/` get redirected to `reference.md`.
-    These are cross-vertical primitives -- types reused as
-    interchangeable building blocks across capabilities -- where an
-    integrator reading a capability page does not need their fields
-    enumerated inline, and a link to the canonical entry preserves
-    enough context.
+    `source/schemas/common/types/` have canonical entries eligible for
+    link-only rendering on capability pages. Callers render fields inline by
+    default and use this lookup only when they explicitly opt out.
 
-    Vertical-namespaced types under `<vertical>/types/` intentionally
-    retain inline rendering on capability pages. They carry
-    vertical-specific semantics that integrators expect to read in
-    situ, including operation-filtered variants (per-operation
-    request shapes and the response shape) that `reference.md` cannot
-    express because it renders a single canonical heading per schema
-    file. The resulting render duplication across capability pages is
-    acceptable because every render is generated from the same JSON
-    source, so drift between them is structurally impossible.
+    Vertical-namespaced types under `<vertical>/types/` always render inline
+    because they have no canonical shared-type entry. Render duplication is
+    safe because every table is generated from the same JSON source.
 
     Cross-references emitted inside any rendered table continue to
     route to `reference.md` via `create_link` (the redirect rule
@@ -1036,7 +1056,7 @@ def define_env(env):
     basename collision, the rule here will need explicit
     disambiguation.
     """
-    name = ref_path.split("/")[-1]
+    name = Path(str(ref_path).split("#", 1)[0]).stem
     candidate = COMMON_TYPES_DIR / (name + ".json")
     return candidate if candidate.exists() else None
 
@@ -1079,7 +1099,7 @@ def define_env(env):
 
   # --- MACRO 1: For Standalone JSON Schemas ---
   @env.macro
-  def schema_fields(entity_name, spec_file_name):
+  def schema_fields(entity_name, spec_file_name, render_inline=True):
     """Parse a standalone JSON Schema file and render a table.
 
     Usage: {{ schema_fields('buyer', 'checkout') }}
@@ -1090,15 +1110,17 @@ def define_env(env):
     - 'buyer' -> resolves buyer.json as response schema (default)
 
     For schemas under `common/types/` (cross-vertical primitives),
-    callers from pages other than `reference.md` receive a Markdown
-    link to the canonical entry on `reference.md` instead of an
-    inline table. See `_resolves_to_shared_type` for the scope
-    rationale and #412 for the motivating discussion.
+    callers from pages other than `reference.md` can selectively receive a
+    Markdown link to the canonical entry on `reference.md` or an
+    inline table based on the `render_inline` value.
 
     Args:
     ----
       entity_name: Schema name with optional suffix (e.g., 'cart_resp').
       spec_file_name: Spec file for link generation (e.g., 'checkout').
+      render_inline: A boolean that determines whether common types
+        should be rendered inline or redirect to reference.md. Has a
+        default value of True to always force inline rendering.
 
     """
     # Parse suffix to determine resolution direction/operation
@@ -1124,14 +1146,18 @@ def define_env(env):
         base_name = entity_name[:-4]
         direction = "request"
 
-    # Redirect capability-page callers to reference.md for primitives
-    # under `common/types/` only. Vertical-namespaced types continue to
-    # render inline; see _resolves_to_shared_type for the scope
-    # rationale. reference.md itself always renders full tables via
-    # auto_generate_schema_reference. base_name is passed (suffix
-    # stripped) so the link anchor targets the canonical heading.
+    # Dynamically choose rendering mechanisms (redirect to reference.md
+    # for `common/types` vs. inline rendering) based on specifications
+    # from capability-page callers via `render_inline`.
+    # By default, `render_inline` is always true to promote better readability,
+    # but callers can override it to false to explicitly trigger the redirect
+    # rendering for non vertical-namespaced schemas. reference.md
+    # itself always renders full tables via auto_generate_schema_reference.
+    # base_name is passed (suffix stripped) so the link anchor targets
+    # the canonical heading.
     if (
-      spec_file_name != "reference"
+      not render_inline
+      and spec_file_name != "reference"
       and _resolves_to_shared_type(base_name) is not None
     ):
       return _render_shared_type_link(base_name, spec_file_name)
@@ -1164,16 +1190,15 @@ def define_env(env):
     )
 
   @env.macro
-  def extension_schema_fields(entity_name, spec_file_name):
+  def extension_schema_fields(entity_name, spec_file_name, render_inline=True):
     """Parse a standalone JSON Schema file and render a table.
 
     Usage: {{ extension_schema_fields('fulfillment_option') }}
 
-    When the embedded schema lives under `common/types/`, the macro
-    emits a link to the canonical entry on `reference.md` instead of
-    rendering the table inline. Vertical-namespaced extensions render
-    inline as before. See `_resolves_to_shared_type` for scope and
-    #412 for motivation.
+    When the embedded schema lives under `common/types/` and `render_inline` is
+    False, the macro emits a link to the canonical entry on `reference.md`
+    instead of render the table inline. Vertical-namespaced extensions
+    always render inline.
 
     Args:
     ----
@@ -1181,18 +1206,20 @@ def define_env(env):
         (e.g., 'fulfillment.json#/$defs/fulfillment_option').
       spec_file_name: The name of the spec file indicating where the dictionary
         should be rendered (e.g., "checkout", "fulfillment").
+      render_inline: A boolean that determines whether common types should be
+        rendered inline or redirect to reference.md. Has a default value
+        of True to always force inline rendering.
 
     """
     # entity_name has the form `<file>.json#/$defs/<def>`. Redirect to
     # reference.md only when `<file>.json` resolves to a
-    # `common/types/` schema; vertical-namespaced extensions keep
-    # their inline render so same-page `$defs` anchors continue to
-    # resolve. file_part preserves any `types/` prefix from the
-    # caller so the lookup is unambiguous against the basename
-    # namespace.
+    # `common/types/` schema and `render_inline` is False; vertical-namespaced
+    # extensions keep their inline render so same-page `$defs` anchors
+    # continue to resolve. file_part preserves any `types/` prefix from
+    # the caller so the lookup is unambiguous against the basename namespace.
     if spec_file_name != "reference" and ".json#" in entity_name:
       file_part = entity_name.split(".json#", 1)[0]
-      if _resolves_to_shared_type(file_part) is not None:
+      if not render_inline and _resolves_to_shared_type(file_part) is not None:
         return create_link(entity_name, spec_file_name)
     return _read_schema_from_defs(entity_name, spec_file_name)
 
@@ -1269,6 +1296,9 @@ def define_env(env):
             rendered_table = _read_schema_from_defs(
               f"{entity_name}.json#/$defs/{def_name}", spec_file_name
             )
+            if rendered_table == "_No properties defined._":
+              output.pop()  # remove title
+              continue
             output.append(rendered_table)
             output.append("\n")
 

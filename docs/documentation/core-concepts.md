@@ -127,19 +127,21 @@ interact.
 
 ### Capabilities
 
-Capabilities are standalone, independently versioned features that
-a business declares it supports. They are the "verbs" of the protocol —
-discrete units of functionality that platforms can discover, negotiate, and
-invoke.
+Capabilities are discrete, versioned features that a Business declares it
+supports. They are the "verbs" of the protocol — units of functionality that
+Platforms can discover, negotiate, and invoke.
 
 Each capability is identified by a reverse-domain name (e.g.,
 `dev.ucp.shopping.checkout`) and carries a date-based version. Capabilities
-are declared in the business's UCP profile at `/.well-known/ucp` and
-negotiated and confirmed in every response so that the platform always knows
-the active feature set for a given interaction.
+are declared in the Business's UCP profile at `/.well-known/ucp`, negotiated
+by exact version, and confirmed in every response so that the Platform always
+knows the active feature set for a given interaction. UCP-authored `dev.ucp.*`
+capabilities and extensions are versioned in lockstep with the specification:
+each declares the date `D` of the UCP release it ships in. Third-party
+extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Capability | Description |
@@ -163,10 +165,10 @@ core capabilities.
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-04-08",
+      "version": "{{ ucp_version }}",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -177,22 +179,23 @@ intersection is automatically pruned. This ensures extension coherence —
 you never activate a discount extension without the checkout it extends.
 
 The following are examples of extensions defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Extension | Extends | Description |
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
-| `dev.ucp.shopping.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
+| `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
+| `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
 
 ### Services
 
 **Services** group the operations and events for a vertical under a
-reverse-domain namespace (e.g., `dev.ucp.shopping`).
-A service declares *what* functionality exists for that vertical; transport
-bindings declare *how* it is accessed on the wire.
+reverse-domain registry key (e.g., `dev.ucp.shopping`). The key identifies the
+service: a service declares *what* functionality exists for that vertical, and
+each entry in its array declares *how* it is accessed over a transport binding.
 
 A single service can be accessed via multiple transport bindings:
 
@@ -203,12 +206,13 @@ A single service can be accessed via multiple transport bindings:
 | **A2A** | Agent Card | Agent-to-Agent protocol integrations |
 | **Embedded** | OpenRPC | Embedded integrations |
 
-A business declares which transport bindings it supports within each service;
-platforms pick whichever fits their context — an AI agent may prefer MCP, a
-traditional web app may use REST.
+A Business declares which transport bindings it supports within each service;
+Platforms pick whichever fits their context — an AI agent may prefer MCP, a
+traditional web app may use REST. Every UCP-defined service declares an explicit
+`version` equal to the selected `ucp.version`, repeated on every entry since they
+differ only by transport binding. Transport bindings have no separate version.
 
-Service namespaces are also UCP's extensibility mechanism for new
-verticals — e.g., `dev.ucp.hotels` may be introduced in the future.
+Service namespaces are also UCP's extensibility mechanism for new verticals.
 Businesses opt in by declaring which services they support.
 
 ## Discovery & Capability Negotiation
@@ -266,35 +270,35 @@ authentication are resolved together.
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [{
         "id": "processor_tokenizer",
-        "version": "2026-04-08",
+        "version": "{{ ucp_version }}",
         "spec": "https://example.com/specs/payments/processor_tokenizer",
         "schema": "https://example.com/specs/payments/merchant_tokenizer.json"
       }]
@@ -331,17 +335,17 @@ remains the client's decision.
 Platforms **MUST** validate this binding for declared `schema` URLs and **MUST**
 reject entities that fail it. Identifiers carry no fetched URL, and the `spec`
 (documentation) URL is not authority-bound (any `https` origin). See
-[Authority Binding](../specification/overview.md#authority-binding) for the
+[Authority Binding](../specification/overview/index.md#authority-binding) for the
 normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
-the UCP Tech Council. Any vendor can define and publish capabilities under their
-own domain — `org.acme.*` — without UCP maintainer approval. Vendor
-capabilities follow the same extension model, meaning they can extend UCP base
-capabilities (e.g., `org.acme.loyalty` extending `dev.ucp.shopping.checkout`)
-or define entirely new ones. Because negotiation is always opt-in, vendor
-capabilities only activate when both parties declare them, keeping the protocol
-decentralized by design.
+the UCP Tech Council responsible for the capability's domain. Any vendor can
+define and publish capabilities under their own domain — `org.acme.*` — without
+UCP maintainer approval. Vendor capabilities follow the same extension model,
+meaning they can extend UCP base capabilities (e.g., `org.acme.loyalty`
+extending `dev.ucp.shopping.checkout`) or define entirely new ones. Because
+negotiation is always opt-in, vendor capabilities only activate when both parties
+declare them, keeping the protocol decentralized by design.
 
 ## Payment Architecture
 
@@ -437,20 +441,19 @@ Businesses publish their OAuth 2.0 server metadata at
 
 ## Versioning
 
-UCP uses date-based version identifiers (`YYYY-MM-DD`). The version represents
-the date of the last backwards-incompatible change.
+UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a
+snapshot of the core protocol — its services and transport bindings,
+capabilities, extensions, and shared schemas — published together as one
+internally compatible set. A profile's `ucp.version` selects that snapshot, and
+the match is exact: an older date is available only when the Business
+advertises it in `supported_versions`. A published snapshot can gain approved
+backwards-compatible additions over time; copies fetched earlier remain valid.
 
-* **Non-breaking additions** do not increment the date.
-* **Breaking changes** require a `!` prefix in the PR title and a 2-week
-  advance notice to the community before merging.
-* Businesses that support older protocol versions **SHOULD** publish
-  version-specific profiles and advertise them via the `supported_versions`
-  field in their profile, enabling platforms to discover the exact capability
-  set for each supported version.
+Every UCP-defined service, capability, and extension in release `D` declares
+version `D`. Third-party extensions and payment handlers are versioned by their
+authors, independently of UCP releases.
 
-Capability schemas carry their version inline, which enables independent
-versioning — a discount extension can version on a different cadence than
-the checkout capability it extends.
-
-See [Versioning](../versioning.md) for the release branch process and the
-full breaking-change procedure.
+See [Protocol Version](../specification/overview/index.md#protocol-version) for version
+discovery, [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
+for the normative release contract, and [Versioning](../versioning.md) for the
+release-branch and backport process.
