@@ -67,7 +67,7 @@ cart, checkout, or both:
     "dev.ucp.shopping.buyer_consent": [
       {
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/buyer-consent",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json",
         "extends": [
           "dev.ucp.shopping.cart",
@@ -104,11 +104,11 @@ scopes.
 
 ### Consent Purpose
 
-{{ extension_schema_fields('buyer_consent.json#/$defs/consent_purpose', 'buyer-consent') }}
+{{ extension_schema_fields('buyer_consent.json#/$defs/consent_purpose', 'shopping/extensions/buyer-consent') }}
 
 ### Consent Segment
 
-{{ extension_schema_fields('buyer_consent.json#/$defs/consent_segment', 'buyer-consent') }}
+{{ extension_schema_fields('buyer_consent.json#/$defs/consent_segment', 'shopping/extensions/buyer-consent') }}
 
 ## Well-known purposes
 
@@ -330,8 +330,8 @@ Some consent states depend on additional buyer or checkout data. For example,
 SMS marketing consent requires a buyer phone number. When the
 platform confirms a consent value whose required dependency is missing,
 businesses surface the gap through the standard [Checkout Status
-Lifecycle](shopping/checkout/index.md#checkout-status-lifecycle) and [Error
-Handling](shopping/checkout/index.md#error-handling) mechanisms.
+Lifecycle](../checkout/index.md#checkout-status-lifecycle) and [Error
+Handling](../checkout/index.md#error-handling) mechanisms.
 
 On `create_cart`, `update_cart`, `create_checkout`, and `update_checkout`,
 businesses SHOULD surface missing dependencies as `warning` messages so the
@@ -354,7 +354,7 @@ consent decisions remain valid; the warning is informational.
 On `complete_checkout`, businesses MUST NOT transition the checkout to
 `completed` while a confirmed consent decision has unmet data dependencies.
 Missing dependencies MUST be surfaced via the standard [Error
-Handling](shopping/checkout/index.md#error-handling) flow.
+Handling](../checkout/index.md#error-handling) flow.
 
 ## Normative requirements
 
