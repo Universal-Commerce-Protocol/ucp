@@ -17,14 +17,15 @@
 # Location Capability
 
 The Location capability allows Platforms to discover, search, and retrieve
-physical Locations (such as retail stores, restaurants, brand lockers) from
+physical Locations (such as retail stores, restaurants, and brand lockers) from
 Businesses.
 
 This is vertical-agnostic and enables key commerce flows such as:
 
-* **Local Pickup Discovery**: Finding locations like retail stores or restaurant branches
-    nearby that support Buyer pickup and checking their operating hours & inventory availability
-    before selection.
+* **Local Pickup Discovery**: Finding nearby Locations such as retail stores or
+    restaurant branches that support Buyer pickup, checking their operating
+    hours, and discovering where selected items are currently available before
+    selection.
 * **Fulfillment Area Verification**: Checking if a specific location (e.g., utility depot, restaurant,
     or local service provider) can serve a Buyer's address (the `serves` relation).
 
@@ -32,8 +33,8 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.common.location.search`](search.md) | Search for locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `inventory`). |
-| [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more locations by identifier. |
+| [`dev.ucp.common.location.search`](search.md) | Search for Locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `items`). |
+| [`dev.ucp.common.location.lookup`](lookup.md) | Retrieve full details for one or more Locations by identifier, optionally refined by the same relations and filters. |
 
 ## Key Concepts
 
@@ -44,7 +45,10 @@ This is vertical-agnostic and enables key commerce flows such as:
     collision-resistant names, one entry per identifier, and buyer-facing
     descriptions that keep custom amenities renderable. See
     [Amenity Vocabulary](search.md#amenity-vocabulary).
-* **Inventory**: Dynamic availability of goods (e.g., retail products or restaurant dishes).
+* **Item Availability**: The `items` filter asks whether the Business can
+    currently provide every referenced item at a candidate Location. Returning
+    the Location is a coarse, provisional assertion, not item-level detail or a
+    reservation. See [Item Availability Filter](search.md#item-availability-filter).
 * **Proximity & Serviceability**: Two distinct, explicit spatial relations:
     * **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
     * **`serves`**: Asks whether the Location can provisionally serve one explicit
@@ -69,12 +73,13 @@ in Shopping):
     during transaction processing (for example, a returned ID submitted as
     `selected_destination_id`; see
     [Selection and Location Identity](../../fulfillment.md#selection-and-location-identity)).
-2. **Inventory-Based Store Finder**: Platforms can use Location Search with the `filters.inventory`
-    predicate to locate nearby stores that have a specific item available, bridging the gap between
-    online catalog browsing and physical store visits.
+2. **Separation of Discovery Concerns**: Each capability answers one narrow
+    question, and later stages revalidate earlier signals. Location answers
+    which places can currently provide a set of referenced items (the
+    [`items` filter](search.md#item-availability-filter)).
 3. **Provisional vs. Authoritative Boundaries**:
     * *Discovery Phase (Provisional)*: Location responses based on operating
-        hours, real-time inventory availability, and amenities represent the
+        hours, current item availability, and amenities represent the
         Business's *current terms* at the time of query. They are **provisional
         signals** and are not binding commitments.
     * *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup)
@@ -230,8 +235,9 @@ Context signals are provisional—not authoritative data. A Business **MAY** use
 them to influence ranking, localization, or selection of a bounded default
 browse page, and **MAY** ignore or down-rank them if inconsistent with
 higher-confidence signals (authenticated account, risk detection). A Business
-**MUST NOT** substitute them for the explicit `distance` and `serves` operands;
-they prove neither proximity nor serviceability (see
+**MUST NOT** substitute them for explicit `distance` or `serves` operands or
+for `filters.items` item identifiers; they prove neither proximity,
+serviceability, nor item availability (see
 [Request Grammar](search.md#request-grammar)).
 
 {{ schema_fields('types/context', 'common/location') }}
@@ -257,7 +263,7 @@ Messages communicate business outcomes and provide context:
 | :--- | :--- | :--- |
 | `error` | Business-level errors | Business-defined codes (freeform codes permitted) |
 | `warning` | Important conditions affecting purchase | `permanently_closed`, `temporary_closure` |
-| `info` | Additional context without issues | `not_found`, `holiday_hours_active` |
+| `info` | Diagnostics or additional context that do not fail the operation | `not_found`, `holiday_hours_active` |
 
 #### Message (Error)
 
@@ -275,7 +281,10 @@ Messages communicate business outcomes and provide context:
 
 #### Empty Search
 
-When search finds no matches, return an empty array without messages.
+When a valid Search finds no matches, the Business **MUST** return an empty
+`locations` array. No message is required for an ordinary non-match, including
+when a `filters.items` identifier is unknown, is unavailable, or cannot be
+evaluated.
 
 <!-- ucp:example schema=common/location_search op=search -->
 ```json
@@ -285,7 +294,8 @@ When search finds no matches, return an empty array without messages.
 }
 ```
 
-This is not an error - the query was valid but returned no results.
+An ordinary empty result is not an error: the query was valid but returned no
+matching Locations.
 
 ## Transport Bindings
 
@@ -298,8 +308,9 @@ The capabilities above are bound to specific transport protocols:
 
 1. **Coarse-by-default**: Platforms **SHOULD** default to sending coarse location hints (e.g., postal code or rounded coordinates) during the discovery phase.
   Precise locations/coordinates **SHOULD** only be shared when the Buyer explicitly consents or selects a specific Location.
-2. **Inventory Probing Mitigation**: Businesses **SHOULD** implement rate-limiting on search requests, especially if containing inventory availability filters,
-  to prevent scraping & aggressive numeration of the entire directory.
+2. **Availability Probing Mitigation**: Businesses **SHOULD** rate-limit
+  requests carrying `filters.items` to reduce item-availability probing
+  and aggressive enumeration of the directory.
 3. **Private/Dark Locations**: Businesses **MUST** filter out internal-only or non-Buyer-accessible locations (e.g., dark kitchens, fulfillment-only hubs)
   from search results.
 4. **Physical Address Spoofing (Integrity)**: While location discovery is read-only, tampering with physical addresses in responses (e.g., through MITM attacks)

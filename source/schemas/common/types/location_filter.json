@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/location_filter.json",
   "title": "Location Filter",
-  "description": "Filter criteria to narrow location search and lookup results. All specified filters combine with AND logic.",
+  "description": "Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.",
   "type": "object",
   "properties": {
     "hours": {
@@ -25,12 +25,16 @@
       },
       "description": "Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching."
     },
-    "inventory": {
+    "items": {
       "type": "array",
+      "description": "Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.",
+      "minItems": 1,
+      "uniqueItems": true,
       "items": {
-        "$ref": "inventory_filter.json"
-      },
-      "description": "Filter by real-time availability of inventory (e.g., retail products or restaurant dishes) at the location. Matches locations that have ALL the listed items in stock (AND logic)."
+        "type": "string",
+        "minLength": 1,
+        "description": "A non-empty, opaque Business-scoped item identifier."
+      }
     }
   },
   "additionalProperties": true

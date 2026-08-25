@@ -370,13 +370,15 @@ plugins:
         Location Capability:
           - specification/common/location/index.md: >-
               Core Location Capability, detailing physical Location discovery,
-              spatial relations, operating hours, amenities, and inventory.
+              spatial relations, item availability, operating hours, and
+              amenities.
           - specification/common/location/search.md: >-
               Location discovery via the Location Search capability, specifying
               text queries, spatial relations, and structured filters.
           - specification/common/location/lookup.md: >-
               Direct Location retrieval via the Location Lookup capability,
-              specifying identifiers and optional filters.
+              specifying identifiers and optional spatial relations and
+              filters.
           - specification/common/location/rest.md: >-
               HTTP REST transport binding for the Location Capability,
               detailing search and lookup endpoints with JSON payload examples.

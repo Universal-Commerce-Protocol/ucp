@@ -57,8 +57,7 @@
           "ucp_request": "optional"
         },
         "filters": {
-          "$ref": "types/location_filter.json",
-          "description": "Filter criteria to narrow returned locations. All specified filters combine with AND logic."
+          "$ref": "types/location_filter.json"
         },
         "context": {
           "$ref": "types/context.json"
