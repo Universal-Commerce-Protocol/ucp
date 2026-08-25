@@ -113,11 +113,11 @@ when they're applied.
 The `allocations` array breaks down where each discount dollar landed, using
 JSONPath to identify targets:
 
-| Path Pattern        | Target           |
-| ------------------- | ---------------- |
-| `$.line_items[0]`   | First line item  |
-| `$.line_items[1]`   | Second line item |
-| `$.totals.shipping` | Shipping cost    |
+| Path Pattern                         | Target            |
+| ------------------------------------ | ----------------- |
+| `$.line_items[0]`                    | First line item   |
+| `$.line_items[1]`                    | Second line item  |
+| `$.totals[?@.type == "fulfillment"]` | Fulfillment total |
 
 This enables platforms to explain exactly how much each discount contributed to
 each line item, even when multiple discounts stack.
