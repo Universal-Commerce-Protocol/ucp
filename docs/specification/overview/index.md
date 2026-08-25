@@ -2579,7 +2579,7 @@ the [Payment Handler Guide](../payment/guide.md#resolving-available_instruments)
 for the full resolution semantics.
 
 **Instrument Cardinality:** A checkout submission **MUST** contain exactly one
-payment instrument unless the `dev.ucp.common.split_payments` capability is
+payment instrument unless the `dev.ucp.common.payment.split_payments` capability is
 active. Businesses **MUST** reject submissions that violate this constraint with
 a `payment_failed` error in `messages[]`. See
 [Split Payments](../payment/extensions/split-payments.md) for the extension that relaxes this

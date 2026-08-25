@@ -18,7 +18,7 @@
           "properties": {
             "amount": {
               "$ref": "types/amount.json",
-              "description": "Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's `currency` minor units (ISO 4217). On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
+              "description": "Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's `currency`. On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
             }
           }
         }
