@@ -1,0 +1,482 @@
+# Catalog Capability
+
+## Overview
+
+The Catalog capability allows platforms to search and browse business product catalogs. This enables product discovery before checkout, supporting use cases like:
+
+- Free-text product search
+- Category and filter-based browsing
+- Batch product/variant retrieval by identifier
+- Price comparison across variants
+
+## Capabilities
+
+| Capability                                                                                                    | Description                                       |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`dev.ucp.shopping.catalog.search`](http://ucp.dev/2026-08-25/specification/shopping/catalog/search/index.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](http://ucp.dev/2026-08-25/specification/shopping/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
+
+## Key Concepts
+
+- **Product**: A catalog item with title, description, media, and one or more variants.
+- **Variant**: A purchasable item with specific option selections (e.g., "Blue / Large"), price, and availability.
+- **Price**: Price values include both amount (in minor currency units) and currency code, enabling multi-currency catalogs.
+- **Sale basis**: How quantity is denominated—as whole items (`each`, the default) or in a unit of measure such as weight, length, area, volume, or time. See [Quantities and units](http://ucp.dev/2026-08-25/specification/overview/#quantities-and-units).
+
+### Relationship to Checkout
+
+Catalog operations return product and variant IDs that can be used directly in checkout `line_items[].item.id`. The variant ID from catalog retrieval should match the item ID expected by checkout.
+
+Catalog responses (pricing, availability, etc.) reflect the Business's current terms for the given request but are not transactional commitments — checkout is authoritative. Responses can be session-specific and **SHOULD NOT** be reused across sessions without re-validation.
+
+## Sale basis and quantity units
+
+`variants[].quantity_unit` advertises a variant's sale basis before a transaction. The descriptor follows the shared [quantities and units](http://ucp.dev/2026-08-25/specification/overview/#quantities-and-units) contract. Its absence advertises the default `each` basis; the Business advertises a non-`each` basis by including the descriptor.
+
+The catalog is where the Platform learns the sale basis before transacting: `unit` and `scale` define how quantities are denominated, and an optional [`increment`](http://ucp.dev/2026-08-25/specification/overview/#ordering-increment) advertises the ordering granularity the Business sells in, letting the Platform build quantity steppers and validate input before submission. A Business selling bananas by the pound in quarter-pound multiples advertises `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
+
+The sale basis is not limited to physical measure: metered offerings — parking by the minute, labor by the hour — use the same descriptor (`MIN`, `HUR`) with the same contract.
+
+`variants[].id` identifies the purchasable variant; `quantity_unit` defines the denomination and granularity used to order it. Bananas whose `quantity_unit` is `{ "unit": "LBR", "scale": 2, "display_text": "lb" }` are sold in hundredth-of-a-pound steps, so a `quantity` of `150` represents 1.50 lb.
+
+### Distinction from unit price
+
+`quantity_unit` and a variant's [`unit_price`](#variant) answer different questions and are set independently:
+
+- `quantity_unit` is the **sale basis** — the unit `quantity` is counted in and `price` is quoted in.
+- `unit_price` is a **display comparator** — a derived "price per standard measure" (for example, per 100 mL) for shelf-style comparison. Its `measure` is the packaging or content quantity of the variant and its `reference` is the comparison denominator.
+
+The unit fields in `quantity_unit`, `unit_price.measure`, and `unit_price.reference` follow the shared [quantities and units](http://ucp.dev/2026-08-25/specification/overview/#quantities-and-units) contract. The two unit-price fields use the shared measure type, so their integer `value` fields are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`, both, or neither on a variant.
+
+To keep the display comparator defined, the Business **MUST** use a positive integer for both `unit_price.measure.value` and `unit_price.reference.value`. The Business **MUST** set `unit_price.currency` equal to `price.currency`. Within `unit_price`, the Business **MUST** use identical values for `measure.unit` and `reference.unit`. The Business **MAY** use different `scale` values for those measures. The Business **MUST NOT** perform cross-unit or currency conversion as part of the unit-price calculation. Each measure represents its integer `value × 10^-scale` in the common unit. The Business **MUST** compute the comparator from `price.amount` and those scaled values:
+
+```text
+(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)
+```
+
+The Business **MUST** round the result once to the currency's minor units according to its pricing rules and return it as `unit_price.amount`. The returned `unit_price.amount` is authoritative. The Platform **MUST NOT** recompute it or substitute its own result.
+
+The same-unit and same-currency rules are semantic invariants. JSON Schema validates the corresponding fields independently and does not enforce either equality.
+
+For example, a 50 m cable spool sold by `each` can omit `quantity_unit` while carrying a `unit_price` per metre. Its `measure` can be `{ "value": 5000, "unit": "MTR", "scale": 2, "display_text": "m" }` and its `reference` can be `{ "value": 1, "unit": "MTR", "display_text": "m" }`. Both measures use `MTR`; they represent 50 m and 1 m respectively without cross-unit conversion.
+
+On transaction lines, presence marks the role: the Business **MUST** echo `unit_price` on any line whose pricing basis differs from its sale basis (see [Checkout — pricing basis](http://ucp.dev/2026-08-25/specification/shopping/checkout/#quantity-and-sale-basis)). A catalog-only `unit_price`, like this spool's per-metre figure, is a display comparator; a line-level one carries the rate the charge is computed from.
+
+### Example: a good sold by weight
+
+A `get_product` response for bananas sold by the pound. The variant advertises `quantity_unit` `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a `price` of `79` — $0.79 per whole pound, sold in 0.25-lb multiples:
+
+```json
+{
+  "ucp": { "version": "2026-08-25" },
+  "product": {
+    "id": "prod_bananas",
+    "title": "Bananas",
+    "description": { "plain": "Fresh bananas sold by the pound." },
+    "price_range": {
+      "min": { "amount": 79, "currency": "USD" },
+      "max": { "amount": 79, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "description": { "plain": "Fresh bananas sold by the pound." },
+        "price": { "amount": 79, "currency": "USD" },
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 },
+        "availability": { "available": true }
+      }
+    ]
+  }
+}
+```
+
+## Shared Entities
+
+### Context
+
+Location and market context for catalog operations. All fields are optional hints for relevance and localization. Platforms MAY geo-detect context from request headers.
+
+Context signals are provisional—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data.
+
+Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](http://ucp.dev/2026-08-25/specification/shopping/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
+
+When `context.eligibility` claims are present, Businesses that accept them **MAY** adjust `price` / `list_price` directly for strikethrough display and **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the adjustment to a specific claim.
+
+| Name            | Type                                                                                     | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                                   | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
+| address_region  | string                                                                                   | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
+| postal_code     | string                                                                                   | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| location        | string                                                                                   | Optional    | Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries.                                                                                                      |
+| intent          | string                                                                                   | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                                   | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                                   | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/2026-08-25/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
+| payment         | Array[object]                                                                            | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
+
+### Signals
+
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/2026-08-25/specification/overview/#signals) for details and privacy requirements.
+
+| Name               | Type   | Requirement | Description                                    |
+| ------------------ | ------ | ----------- | ---------------------------------------------- |
+| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
+| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
+
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](http://ucp.dev/2026-08-25/specification/overview/#attribution) for details and consent requirements.
+
+Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.
+
+### Product
+
+A catalog item representing a sellable item with one or more purchasable variants.
+
+`media` and `variants` are ordered arrays. Businesses SHOULD return the most relevant variant and image first—default for lookups, best match based on query and context for search. Platforms SHOULD treat the first element as featured.
+
+| Name             | Type                                                                           | Requirement  | Description                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------ |
+| id               | string                                                                         | **Required** | Global ID (GID) uniquely identifying this product.                                               |
+| handle           | string                                                                         | Optional     | URL-safe slug for SEO-friendly URLs (e.g., 'blue-runner-pro'). Use id for stable API references. |
+| title            | string                                                                         | **Required** | Product title.                                                                                   |
+| description      | [Description](/2026-08-25/specification/reference/#description)                | **Required** | Product description in one or more formats.                                                      |
+| url              | string                                                                         | Optional     | Canonical product page URL.                                                                      |
+| categories       | Array\[[Category](/2026-08-25/specification/reference/#category)\]             | Optional     | Product categories with optional taxonomy identifiers.                                           |
+| price_range      | [Price Range](/2026-08-25/specification/reference/#price-range)                | **Required** | Price range across all variants.                                                                 |
+| list_price_range | [Price Range](/2026-08-25/specification/reference/#price-range)                | Optional     | List price range before discounts (for strikethrough display).                                   |
+| media            | Array\[[Media](/2026-08-25/specification/reference/#media)\]                   | Optional     | Product media (images, videos, 3D models). First item is the featured media for listings.        |
+| options          | Array\[[Product Option](/2026-08-25/specification/reference/#product-option)\] | Optional     | Product options (Size, Color, etc.).                                                             |
+| variants         | Array\[[Variant](/2026-08-25/specification/reference/#variant)\]               | **Required** | Purchasable variants of this product. First item is the featured variant for listings.           |
+| rating           | [Rating](/2026-08-25/specification/reference/#rating)                          | Optional     | Aggregate product rating.                                                                        |
+| tags             | Array[string]                                                                  | Optional     | Product tags for categorization and search.                                                      |
+| metadata         | object                                                                         | Optional     | Business-defined custom data extending the standard product model.                               |
+
+### Variant
+
+A purchasable item with specific option selections, price, and availability.
+
+In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](http://ucp.dev/2026-08-25/specification/shopping/catalog/lookup/#client-correlation) for details.
+
+`media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
+
+| Name          | Type                                                                             | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                               |
+| ------------- | -------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | string                                                                           | **Required** | Global ID (GID) uniquely identifying this variant. Used as item.id in checkout.                                                                                                                                                                                                                                                                                           |
+| sku           | string                                                                           | Optional     | Business-assigned identifier for inventory and fulfillment.                                                                                                                                                                                                                                                                                                               |
+| barcodes      | Array[object]                                                                    | Optional     | Industry-standard product identifiers for cross-reference and correlation.                                                                                                                                                                                                                                                                                                |
+| handle        | string                                                                           | Optional     | URL-safe variant handle/slug.                                                                                                                                                                                                                                                                                                                                             |
+| title         | string                                                                           | **Required** | Variant display title (e.g., 'Blue / Large').                                                                                                                                                                                                                                                                                                                             |
+| description   | [Description](/2026-08-25/specification/reference/#description)                  | **Required** | Variant description in one or more formats.                                                                                                                                                                                                                                                                                                                               |
+| url           | string                                                                           | Optional     | Canonical variant page URL.                                                                                                                                                                                                                                                                                                                                               |
+| categories    | Array\[[Category](/2026-08-25/specification/reference/#category)\]               | Optional     | Variant categories with optional taxonomy identifiers.                                                                                                                                                                                                                                                                                                                    |
+| price         | [Price](/2026-08-25/specification/reference/#price)                              | **Required** | Current selling price. Price is the amount per one whole `quantity_unit.unit` (for example, per lb or per hour); when `quantity_unit` is absent, it is per `each`. Line total is `price × quantity × 10^-scale`, computed and rounded once by the Business; `totals` remain authoritative.                                                                                |
+| quantity_unit | [Quantity Unit](/2026-08-25/specification/reference/#quantity-unit)              | Optional     | Sale basis this variant's `quantity` is denominated in. The default sale basis is `each`, whose machine identity is (`C62`, 0); `C62` is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An `increment` advertises the ordering granularity in steps (for example, `scale` 2 with `increment` 25 sells in 0.25-unit multiples). |
+| list_price    | [Price](/2026-08-25/specification/reference/#price)                              | Optional     | List price before discounts (for strikethrough display).                                                                                                                                                                                                                                                                                                                  |
+| unit_price    | [Unit Price](/2026-08-25/specification/reference/#unit-price)                    | Optional     | Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.                                                                                                                                                                                                                                              |
+| availability  | [Availability](/2026-08-25/specification/reference/#availability)                | Optional     | Variant availability for purchase.                                                                                                                                                                                                                                                                                                                                        |
+| options       | Array\[[Selected Option](/2026-08-25/specification/reference/#selected-option)\] | Optional     | Option values that define this variant (e.g., Color: Blue, Size: Large).                                                                                                                                                                                                                                                                                                  |
+| media         | Array\[[Media](/2026-08-25/specification/reference/#media)\]                     | Optional     | Variant media (images, videos, 3D models). First item is the featured media for listings.                                                                                                                                                                                                                                                                                 |
+| rating        | [Rating](/2026-08-25/specification/reference/#rating)                            | Optional     | Variant rating.                                                                                                                                                                                                                                                                                                                                                           |
+| tags          | Array[string]                                                                    | Optional     | Variant tags for categorization and search.                                                                                                                                                                                                                                                                                                                               |
+| metadata      | object                                                                           | Optional     | Business-defined custom data extending the standard variant model.                                                                                                                                                                                                                                                                                                        |
+| seller        | object                                                                           | Optional     | Optional seller context for this variant.                                                                                                                                                                                                                                                                                                                                 |
+
+### Price
+
+| Name     | Type                                                  | Requirement  | Description                                           |
+| -------- | ----------------------------------------------------- | ------------ | ----------------------------------------------------- |
+| amount   | [Amount](/2026-08-25/specification/reference/#amount) | **Required** | Amount in ISO 4217 minor units. Use 0 for free items. |
+| currency | string                                                | **Required** | ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').   |
+
+### Price Range
+
+| Name | Type                                                | Requirement  | Description                 |
+| ---- | --------------------------------------------------- | ------------ | --------------------------- |
+| min  | [Price](/2026-08-25/specification/reference/#price) | **Required** | Minimum price in the range. |
+| max  | [Price](/2026-08-25/specification/reference/#price) | **Required** | Maximum price in the range. |
+
+### Media
+
+| Name     | Type    | Requirement  | Description                                                  |
+| -------- | ------- | ------------ | ------------------------------------------------------------ |
+| type     | string  | **Required** | Media type. Well-known values: `image`, `video`, `model_3d`. |
+| url      | string  | **Required** | URL to the media resource.                                   |
+| alt_text | string  | Optional     | Accessibility text describing the media.                     |
+| width    | integer | Optional     | Width in pixels (for images/video).                          |
+| height   | integer | Optional     | Height in pixels (for images/video).                         |
+
+### Product Option
+
+| Name   | Type                                                                       | Requirement  | Description                          |
+| ------ | -------------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| name   | string                                                                     | **Required** | Option name (e.g., 'Size', 'Color'). |
+| values | Array\[[Option Value](/2026-08-25/specification/reference/#option-value)\] | **Required** | Available values for this option.    |
+
+### Option Value
+
+| Name  | Type   | Requirement  | Description                                                                                                                                           |
+| ----- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id    | string | Optional     | Optional server-assigned identifier for this option value. When present in a selected_option, the server SHOULD use it for matching instead of label. |
+| label | string | **Required** | Display text for this option value (e.g., 'Small', 'Blue').                                                                                           |
+
+### Selected Option
+
+| Name  | Type   | Requirement  | Description                                                                                                                                             |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name  | string | **Required** | Option name (e.g., 'Size').                                                                                                                             |
+| id    | string | Optional     | Optional option value identifier from option_value.id. When present, the server SHOULD use it for matching; name and label remain required for display. |
+| label | string | **Required** | Selected option label (e.g., 'Large').                                                                                                                  |
+
+### Rating
+
+| Name      | Type    | Requirement  | Description                                                |
+| --------- | ------- | ------------ | ---------------------------------------------------------- |
+| value     | number  | **Required** | Average rating value.                                      |
+| scale_min | number  | Optional     | Minimum value on the rating scale (e.g., 1 for 1-5 stars). |
+| scale_max | number  | **Required** | Maximum value on the rating scale (e.g., 5 for 5-star).    |
+| count     | integer | Optional     | Number of reviews contributing to the rating.              |
+
+### Policy
+
+Policies (return/refund terms, warranty, and the like) that apply to the products in a catalog response. JSONPath targets in `applies_to` are relative to the response root — `$.products[N]` for search and batch lookup, `$.product` for get_product. See [Policies](http://ucp.dev/2026-08-25/specification/overview/#policies) for the full model.
+
+| Name        | Type                                                                            | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type        | [Reverse Domain Name](/2026-08-25/specification/reference/#reverse-domain-name) | **Required** | Policy type discriminator. Open reverse-DNS vocabulary. Well-known values: `dev.ucp.shopping.policy.return` (return terms), `dev.ucp.shopping.policy.warranty` (warranty terms). Businesses MAY define custom types in their own domain (e.g., `com.example.policy.price_match`). Platforms MUST tolerate unknown values.                                                                                                                                                                                                                                                                                                                                                          |
+| description | [Description](/2026-08-25/specification/reference/#description)                 | **Required** | Human-readable policy summary in one or more formats (plain, markdown, html). Required on every policy so a platform can present it without understanding any type-specific fields. This is not the buyer-facing disclosure — display is compelled by a `messages[]` warning (see the Policies section).                                                                                                                                                                                                                                                                                                                                                                           |
+| applies_to  | Array[string]                                                                   | Optional     | RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves. |
+| url         | string                                                                          | Optional     | Optional link to the full policy document.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+## Actions
+
+Catalog Search, batch Lookup, and successful Get Product responses can include extension-defined Actions. In Catalog, an Action is outstanding work that gates the effect its type defines, which may affect which products the Business returns or how the Platform handles them.
+
+Search, batch Lookup, and successful Get Product are independent Catalog operations; their responses do not share a containing-resource lifetime. The Business **MAY** use the same Action `id` in separate responses; that equality does not identify the same work. A concrete Action-type contract **MAY** define stronger correlation for its instances.
+
+For Search and batch Lookup, the Business decides whether to return zero, some, or all otherwise relevant products under the Action-type contract and its own policy. A Message can point to the Action to explain the response. Successful Get Product still includes `product`; its existing error response is unchanged.
+
+After processing an Action, the Platform performs a fresh Catalog operation and the later Business response is authoritative. Catalog defines no Action lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY** define those behaviors for processing its instances. The common shape and rules are defined in [Overview — Actions](http://ucp.dev/2026-08-25/specification/overview/#actions).
+
+For example, this Search response returns no products and explains that age verification may affect the results:
+
+```json
+{
+  "ucp": {...},
+  "products": [],
+  "actions": {
+    "com.example.identity.age_verification": [
+      {
+        "id": "age-check-1"
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "age_verification_required",
+      "content": "Complete age verification to see age-restricted products matching your search.",
+      "path": "$.actions['com.example.identity.age_verification'][0]"
+    }
+  ]
+}
+```
+
+Returning zero products is one Business choice; returning a subset or the full result set is also conformant. The Action type and Message code are illustrative; Catalog defines neither.
+
+## Messages and Error Handling
+
+All catalog responses include an optional `messages` array that allows businesses to provide context about errors, warnings, or informational notices.
+
+### Message Types
+
+Messages communicate business outcomes and provide context:
+
+| Type      | When to Use                             | Example Codes                                    |
+| --------- | --------------------------------------- | ------------------------------------------------ |
+| `error`   | Business-level errors                   | `NOT_FOUND`, `OUT_OF_STOCK`, `REGION_RESTRICTED` |
+| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE`              |
+| `info`    | Additional context without issues       | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY`    |
+
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](http://ucp.dev/2026-08-25/specification/shopping/checkout/#warning-presentation) for the full rendering contract.
+
+**Note**: Most catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives). `get_product` returns `severity: "unrecoverable"` when an identifier doesn't resolve; agents MUST NOT retry the same `id` (see the [REST](http://ucp.dev/2026-08-25/specification/shopping/catalog/rest/#product-not-found) and [MCP](http://ucp.dev/2026-08-25/specification/shopping/catalog/mcp/#product-not-found) examples).
+
+#### Message (Error)
+
+| Name         | Type                                                          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | ------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                        | **Required** | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| code         | [Error Code](/2026-08-25/specification/reference/#error-code) | **Required** | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| path         | string                                                        | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                        | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| content      | string                                                        | **Required** | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| severity     | string                                                        | **Required** | Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
+
+#### Message (Warning)
+
+| Name         | Type                                                              | Requirement  | Description                                                                                                                                                                                                                                         |
+| ------------ | ----------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                            | **Required** | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                            | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                   |
+| code         | [Warning Code](/2026-08-25/specification/reference/#warning-code) | **Required** | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
+| content      | string                                                            | **Required** | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                            | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                            | Optional     | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                            | Optional     | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                            | Optional     | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
+
+#### Message (Info)
+
+| Name         | Type                                                        | Requirement  | Description                                                                                                                                                                                    |
+| ------------ | ----------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                      | **Required** | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                      | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                              |
+| code         | [Info Code](/2026-08-25/specification/reference/#info-code) | Optional     | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                      | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                      | **Required** | Human-readable message.                                                                                                                                                                        |
+
+### Common Scenarios
+
+#### Empty Search
+
+When search finds no matches, return an empty array without messages.
+
+```json
+{
+  "ucp": {...},
+  "products": []
+}
+```
+
+This is not an error - the query was valid but returned no results.
+
+#### Backorder Warning
+
+When a product is available but has delayed fulfillment, return the product with a warning message. Use the `path` field to target specific variants.
+
+```json
+{
+  "ucp": {...},
+  "products": [
+    {
+      "id": "prod_xyz789",
+      "title": "Professional Chef Knife Set",
+      "description": { "plain": "Complete professional knife collection." },
+      "price_range": {
+        "min": { "amount": 29900, "currency": "USD" },
+        "max": { "amount": 29900, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_abc",
+          "title": "12-piece Set",
+          "description": { "plain": "Complete professional knife collection." },
+          "price": { "amount": 29900, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "delayed_fulfillment",
+      "path": "$.products[0].variants[0]",
+      "content": "12-piece set on backorder, ships in 2-3 weeks"
+    }
+  ]
+}
+```
+
+Agents can present the option and inform the user about the delay. The `path` field uses RFC 9535 JSONPath to target specific components.
+
+#### Identifiers Not Found
+
+When requested identifiers don't exist, return success with the found products (if any). The response MAY include informational messages indicating which identifiers were not found.
+
+```json
+{
+  "ucp": {...},
+  "products": [],
+  "messages": [
+    {
+      "type": "info",
+      "code": "not_found",
+      "content": "prod_invalid"
+    }
+  ]
+}
+```
+
+Agents correlate results using the `inputs` array on each variant. See [Client Correlation](http://ucp.dev/2026-08-25/specification/shopping/catalog/lookup/#client-correlation).
+
+#### Product Disclosure
+
+When a product requires a disclosure (e.g., allergen notice, safety warning), return it as a warning with `presentation: "disclosure"`. The `path` field targets the relevant component in the response — when it targets a product, the disclosure applies to all of its variants.
+
+```json
+{
+  "ucp": {...},
+  "products": [
+    {
+      "id": "prod_nut_butter",
+      "title": "Artisan Nut Butter Collection",
+      "description": { "plain": "Assorted artisan nut butters." },
+      "price_range": {
+        "min": { "amount": 1299, "currency": "USD" },
+        "max": { "amount": 1499, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_almond",
+          "title": "Almond Butter",
+          "description": { "plain": "Smooth almond butter." },
+          "price": { "amount": 1299, "currency": "USD" },
+          "availability": { "available": true }
+        },
+        {
+          "id": "var_cashew",
+          "title": "Cashew Butter",
+          "description": { "plain": "Creamy cashew butter." },
+          "price": { "amount": 1499, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "allergens",
+      "path": "$.products[0]",
+      "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+      "content_type": "markdown",
+      "presentation": "disclosure",
+      "image_url": "https://merchant.com/allergen-tree-nuts.svg",
+      "url": "https://merchant.com/allergen-info"
+    }
+  ]
+}
+```
+
+See [Warning Presentation](http://ucp.dev/2026-08-25/specification/shopping/checkout/#warning-presentation) for the full rendering contract.
+
+## Scopes
+
+The Catalog Search and Catalog Lookup capabilities define the following well-known scopes for user-authenticated access:
+
+| Scope                                  | Description                                                                                              |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `dev.ucp.shopping.catalog.search:read` | Search on behalf of the authenticated user — personalized results, member pricing, gated inventory.      |
+| `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
+
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/2026-08-25/specification/common/identity-linking/#scopes).
+
+## Transport Bindings
+
+The capabilities above are bound to specific transport protocols:
+
+- [REST Binding](http://ucp.dev/2026-08-25/specification/shopping/catalog/rest/index.md): RESTful API mapping.
+- [MCP Binding](http://ucp.dev/2026-08-25/specification/shopping/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.

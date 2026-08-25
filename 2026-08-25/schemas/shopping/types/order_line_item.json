@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/2026-08-25/schemas/shopping/types/order_line_item.json",
+  "title": "Order Line Item",
+  "type": "object",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "totals",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Line item identifier."
+    },
+    "item": {
+      "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/item.json",
+      "description": "Purchased item data, including identity, price, and sale basis."
+    },
+    "quantity": {
+      "type": "object",
+      "required": [
+        "total",
+        "fulfilled"
+      ],
+      "properties": {
+        "original": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Quantity from the original checkout, expressed as an integer step count."
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Current active quantity after returns, cancellations, or other order changes, expressed as an integer step count."
+        },
+        "fulfilled": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Quantity fulfilled so far, expressed as an integer step count."
+        }
+      },
+      "description": "Tracks the line item's original, current active, and fulfilled quantities. All three values use the same inherited `item.quantity_unit`. When `item.quantity_unit` is absent on an authoritative order response, each step is one whole item (`each`) under the shared default."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ucp.dev/2026-08-25/schemas/common/types/total.json"
+      },
+      "description": "Line item totals breakdown."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "partial",
+        "fulfilled",
+        "removed"
+      ],
+      "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing."
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent line item identifier for any nested structures."
+    }
+  }
+}

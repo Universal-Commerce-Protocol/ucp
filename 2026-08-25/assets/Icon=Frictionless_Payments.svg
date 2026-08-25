@@ -1,0 +1,19 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="80" height="80" rx="8" fill="white"/>
+<rect x="20.5938" y="6" width="34.7147" height="68" rx="3.87988" fill="#F8FAFD" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="28.7617" y="13.2492" width="37.6319" height="21.952" rx="2.41323" fill="#F8F9FA" stroke="#D9D9D9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M32.0571 30.8245H36.4509" stroke="#D9D9D9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M40.8447 30.8245H45.2385" stroke="#D9D9D9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M49.6318 30.8245H54.0256" stroke="#D9D9D9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M58.4194 30.8245H62.8132" stroke="#D9D9D9" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="31.8979" y="20.9384" width="7.05598" height="5.48799" rx="1.20662" fill="#D9D9D9"/>
+<rect x="28.7617" y="37.2433" width="37.6319" height="21.952" rx="2.41323" fill="#F8F9FA" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M32.0571 54.8183H36.4509" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M40.8447 54.8183H45.2385" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M49.6318 54.8183H54.0256" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M58.4194 54.8183H62.8132" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="31.8979" y="44.9324" width="7.05598" height="5.48799" rx="1.20662" fill="#1F1F1F"/>
+<path d="M28.7506 50.8751L20.5684 56.7339V52.8103L28.7506 50.8751Z" fill="#1F1F1F" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M28.8049 45.6458L18.1493 40.6844C15.8588 39.6195 13.4057 41.8161 14.2188 44.2092L15.5219 47.1134C15.7252 47.712 15.7252 48.3609 15.5219 48.9595L14.1588 52.0457C13.3553 54.4117 15.7474 56.6035 18.0311 55.5957L28.7468 50.8753C31.0082 49.8802 31.0412 46.6874 28.8049 45.6458Z" fill="#D9D9D9" stroke="#1F1F1F" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="23.3506" y="65.2193" width="29.2012" height="5.71772" rx="2.85886" fill="#1F1F1F"/>
+</svg>

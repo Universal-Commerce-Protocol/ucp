@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/2026-08-25/schemas/shopping/fulfillment.json",
+  "name": "dev.ucp.shopping.fulfillment",
+  "title": "Fulfillment Extension",
+  "description": "Extends Catalog with fulfillment discovery and Checkout with hierarchical fulfillment.",
+  "$defs": {
+    "fulfillment_option": {
+      "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment_option.json"
+    },
+    "fulfillment_group": {
+      "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment_group.json"
+    },
+    "fulfillment_method": {
+      "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment_method.json"
+    },
+    "fulfillment_available_method": {
+      "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment_available_method.json"
+    },
+    "fulfillment": {
+      "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment.json"
+    },
+    "catalog_fulfillment_method": {
+      "title": "Catalog Fulfillment Method",
+      "description": "A fulfillment method on a catalog variant: how the variant can be fulfilled, and its availability.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values."
+        },
+        "description": {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/common/types/description.json",
+          "description": "Short buyer-facing summary (e.g. 'Ships in 2–4 business days')."
+        },
+        "availability": {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/availability.json",
+          "description": "Availability of this variant via this method at the specified or inferred location."
+        },
+        "location": {
+          "type": "string",
+          "description": "Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method. The Business recognizes the same ID when submitted as `selected_destination_id` for that method; recognition does not reserve inventory or guarantee eligibility, and current terms are revalidated."
+        },
+        "options": {
+          "type": "array",
+          "description": "Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.",
+          "items": {
+            "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment_option_base.json"
+          }
+        }
+      }
+    },
+    "catalog_fulfillment": {
+      "title": "Catalog Fulfillment",
+      "description": "How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "methods": {
+          "type": "array",
+          "description": "Fulfillment methods for this variant.",
+          "items": {
+            "$ref": "#/$defs/catalog_fulfillment_method"
+          }
+        }
+      }
+    },
+    "fulfillment_variant": {
+      "description": "A catalog variant with fulfillment.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/variant.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "$ref": "#/$defs/catalog_fulfillment"
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_product": {
+      "description": "A catalog product whose variants are fulfillment-enriched. Used by search.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fulfillment_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_lookup_variant": {
+      "description": "A lookup variant (carrying input correlation) enriched with fulfillment.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_lookup.json#/$defs/lookup_variant"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "$ref": "#/$defs/catalog_fulfillment"
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_lookup_product": {
+      "description": "A lookup product whose variants are fulfillment-enriched, preserving input correlation. Used by lookup.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fulfillment_lookup_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_detail_product": {
+      "description": "A get_product detail product (carrying selected/options availability signals) whose variants are fulfillment-enriched. Used by get_product.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_lookup.json#/$defs/detail_product"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fulfillment_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_search_filters": {
+      "description": "Catalog filters extended with a fulfillment destination filter and a method-type filter.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/search_filters.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfills_to": {
+              "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment_destination_filter.json",
+              "description": "Explicit destination where items are fulfilled. It may differ from the locality or Business Location supplied in `context` (e.g. a gift delivered directly to the recipient). The filter restricts results to what can be fulfilled there and seeds method `availability`. It supersedes `context` only for fulfillment destination and availability resolution."
+            },
+            "methods": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Restrict results to these fulfillment method types (e.g. [\"pickup\"]). Well-known values: `shipping`, `pickup`."
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_search_request": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_search.json#/$defs/search_request"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "$ref": "#/$defs/fulfillment_search_filters"
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_search_response": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fulfillment_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_lookup_request": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_lookup.json#/$defs/lookup_request"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "$ref": "#/$defs/fulfillment_search_filters"
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_lookup_response": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fulfillment_lookup_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_get_product_request": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_lookup.json#/$defs/get_product_request"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "$ref": "#/$defs/fulfillment_search_filters"
+            }
+          }
+        }
+      ]
+    },
+    "fulfillment_get_product_response": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "product": {
+              "$ref": "#/$defs/fulfillment_detail_product"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with fulfillment (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_request": {
+          "$ref": "#/$defs/fulfillment_search_request"
+        },
+        "search_response": {
+          "$ref": "#/$defs/fulfillment_search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with fulfillment (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_request": {
+          "$ref": "#/$defs/fulfillment_lookup_request"
+        },
+        "lookup_response": {
+          "$ref": "#/$defs/fulfillment_lookup_response"
+        },
+        "get_product_request": {
+          "$ref": "#/$defs/fulfillment_get_product_request"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/fulfillment_get_product_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Fulfillment",
+      "description": "Checkout extended with hierarchical fulfillment.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "$ref": "#/$defs/fulfillment",
+              "description": "Fulfillment details.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.fulfillment": {
+      "platform_schema": {
+        "title": "Fulfillment Capability (Platform)",
+        "description": "Platform-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/2026-08-25/schemas/capability.json#/$defs/platform_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/platform_fulfillment_config.json",
+                "description": "Platform fulfillment configuration"
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Fulfillment Capability (Business)",
+        "description": "Business-level fulfillment capability configuration",
+        "allOf": [
+          {
+            "$ref": "https://ucp.dev/2026-08-25/schemas/capability.json#/$defs/business_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/business_fulfillment_config.json",
+                "description": "Business fulfillment configuration"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "embedded": {
+    "delegations": [
+      "fulfillment.address_change"
+    ],
+    "methods": {
+      "ec.fulfillment.change": {
+        "name": "ec.fulfillment.change",
+        "summary": "Fulfillment details changed",
+        "description": "Merchant notifies host that checkout.fulfillment has changed (shipping method selected, delivery options updated).",
+        "params": [
+          {
+            "name": "checkout",
+            "required": true,
+            "schema": {
+              "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json",
+              "description": "Current checkout state with updated fulfillment."
+            }
+          }
+        ]
+      },
+      "ec.fulfillment.address_change_request": {
+        "name": "ec.fulfillment.address_change_request",
+        "summary": "Request address change",
+        "description": "Merchant requests host to present address selection UI for a shipping fulfillment method.",
+        "params": [
+          {
+            "name": "checkout",
+            "required": true,
+            "schema": {
+              "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json",
+              "description": "Current checkout state with fulfillment details."
+            }
+          }
+        ],
+        "result": {
+          "name": "addressChangeResult",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "object",
+                "description": "Checkout state after address selection.",
+                "required": [
+                  "ucp",
+                  "checkout"
+                ],
+                "properties": {
+                  "ucp": {
+                    "$ref": "https://ucp.dev/2026-08-25/schemas/ucp.json#/$defs/success"
+                  },
+                  "checkout": {
+                    "type": "object",
+                    "description": "Partial checkout update with fulfillment address selection.",
+                    "properties": {
+                      "fulfillment": {
+                        "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/types/fulfillment.json",
+                        "description": "Updated fulfillment with new selected destination and destinations."
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "$ref": "https://ucp.dev/2026-08-25/schemas/common/types/error_response.json"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version": "2026-08-25"
+}
