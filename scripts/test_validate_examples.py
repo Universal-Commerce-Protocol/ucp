@@ -10,8 +10,8 @@ broke.
 
 Two layers of testing exist for the validator:
 
-  - **The doc corpus is the integration test.** All 268 ```json blocks
-    across 39 spec docs are validated on every CI run. This proves
+  - **The doc corpus is the integration test.** All annotated ```json
+    blocks across the spec docs are validated on every CI run. This proves
     real-world examples conform to the contract.
 
   - **This file is the unit test layer.** It proves the contract is
