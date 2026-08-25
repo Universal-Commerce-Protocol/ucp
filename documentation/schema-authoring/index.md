@@ -93,7 +93,7 @@ Data structures embedded within capabilities but not independently negotiated. D
 
 Examples:
 
-- `schemas/shopping/payment.json` — Payment configuration (part of checkout)
+- `schemas/common/types/payment.json` — Payment configuration (part of lower funnel capabilities like checkout in retail shopping)
 
 ### Type Schemas
 
