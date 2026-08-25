@@ -56,6 +56,7 @@ nav:
                   - Embedded: specification/shopping/checkout/embedded.md
               - AP2 Mandates Extension: specification/ap2-mandates.md
               - Payment Terms Extension: specification/payment-terms.md
+              - Payment Render Artifact Extension: specification/payment-render-artifact.md
           - Cart Capability:
               - Overview: specification/shopping/cart/index.md
               - Transports:
@@ -420,6 +421,12 @@ plugins:
               Payment Terms Extension, enabling checkout payment schedules for
               immediate and deferred payments such as deposits, installments,
               and lodging balance-at-check-in flows.
+          - specification/payment-render-artifact.md: >-
+              Payment Render Artifact Extension, defining an in-session, out-of-band
+              payment Action (e.g., Pix) that surfaces an inert display artifact
+              (QR image, copy-and-paste code, hosted instructions) for the
+              Platform to render without redirect or continue_url, resolved by
+              polling Get Checkout, under a strict render and trust contract.
         Cart Capability:
           - specification/shopping/cart/index.md: >-
               Pre-purchase Cart Capability, detailing item collection, state
