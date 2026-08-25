@@ -1152,10 +1152,10 @@ ______________________________________________________________________
 
 Breakdown of how a discount amount was allocated to a specific target.
 
-| Name   | Type    | Requirement  | Description                                                                       |
-| ------ | ------- | ------------ | --------------------------------------------------------------------------------- |
-| path   | string  | **Required** | JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping'). |
-| amount | integer | **Required** | Amount allocated to this target in ISO 4217 minor units.                          |
+| Name   | Type    | Requirement  | Description                                                                                                 |
+| ------ | ------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| path   | string  | **Required** | RFC 9535 JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals[?@.type == "fulfillment"]'). |
+| amount | integer | **Required** | Amount allocated to this target in ISO 4217 minor units.                                                    |
 
 #### Applied Discount
 
