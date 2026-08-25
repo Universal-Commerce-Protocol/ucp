@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/location_search.json",
+  "name": "dev.ucp.common.location.search",
+  "title": "Location Search",
+  "description": "Location search capability. Supports natural language queries, distance and serviceability relations, structured filtering including current item availability, and pagination.",
+  "type": "object",
+  "$defs": {
+    "search_request": {
+      "type": "object",
+      "description": "Request body for location search. The `distance` and `serves` relations and every supplied `filters` predicate combine with AND; `query` does not relax them.",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Free-text search query for natural language location search (e.g., 'restaurants near me that deliver', 'hotels with pool')."
+        },
+        "context": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/context.json"
+        },
+        "signals": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/signals.json"
+        },
+        "distance": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/location_distance.json",
+          "description": "Optional explicit-center radius predicate. When present, it combines with `serves` and every supplied `filters` predicate using AND.",
+          "ucp_request": "optional"
+        },
+        "serves": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/location_serves.json",
+          "description": "Optional authoritative service-target predicate. When present, it combines with `distance` and every supplied `filters` predicate using AND.",
+          "ucp_request": "optional"
+        },
+        "filters": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/location_filter.json"
+        },
+        "pagination": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "search_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "locations"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "https://ucp.dev/draft/schemas/ucp.json#/$defs/response_location_schema"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ucp.dev/draft/schemas/common/types/location.json"
+          },
+          "description": "Locations matching the search criteria."
+        },
+        "pagination": {
+          "$ref": "https://ucp.dev/draft/schemas/common/types/pagination.json#/$defs/response"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ucp.dev/draft/schemas/common/types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the search results."
+        }
+      }
+    }
+  },
+  "version": "2026-08-25"
+}

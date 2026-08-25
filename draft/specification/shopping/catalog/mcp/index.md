@@ -700,5 +700,5 @@ A conforming MCP transport implementation **MUST**:
 1. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Validate tool inputs against UCP schemas.
 1. Return products with valid `Price` objects (amount + currency).
-1. Support cursor-based pagination with default limit of 10.
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
 1. Return `-32602` (Invalid params) for requests exceeding batch size limits.

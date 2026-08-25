@@ -56,20 +56,22 @@ Filter criteria for narrowing search results. Standard filters are defined below
 
 ## Pagination
 
-Cursor-based pagination for list operations. Cursors are opaque strings that implementations MAY encode as stateless keyset tokens.
+Cursor-based pagination for list operations. Cursors are opaque strings. A Business **MAY** encode them as stateless keyset tokens.
 
 ### Page Size
 
-The `limit` parameter is a requested page size, not a guaranteed count. Implementations SHOULD accept a page size of at least 10. When the requested limit exceeds the implementation's maximum, implementations MAY clamp to their maximum silently — returning fewer results without error. Clients MUST NOT assume the response size equals the requested limit.
+The `limit` parameter is a requested page size, not a guaranteed result count. When `limit` is omitted, the Business **MUST** apply a default page size. A default of 10 is **RECOMMENDED**, but the Business **MAY** choose another value.
+
+The Business **MAY** return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform **MUST NOT** assume that the response count equals either value.
 
 ### Pagination Request
 
 Pagination parameters for requests.
 
-| Name   | Type    | Requirement | Description                                                        |
-| ------ | ------- | ----------- | ------------------------------------------------------------------ |
-| cursor | string  | Optional    | Opaque cursor from previous response.                              |
-| limit  | integer | Optional    | Requested page size. Implementations MAY clamp to a lower maximum. |
+| Name   | Type    | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                                                                                                                                                                                                                                                                                                                                                            |
+| limit  | integer | Optional    | Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value. |
 
 ### Pagination Response
 

@@ -3831,6 +3831,1418 @@ In addition to immediate-value benefits like member pricing/shipping, delayed-va
 - Loyalty extension response MUST be data-minimized and MUST NOT expose raw stable member identifiers (as this would allow the platform to uniquely identify individual buyers).
 - Loyalty extension response MUST only include `display_id` after verified/authenticated memberships.
 - Loyalty extension response MUST treat all `context.eligibility` values in the request as buyer claims rather than proof.
+# Location Capability
+
+# Location Capability
+
+The Location capability allows Platforms to discover, search, and retrieve physical Locations (such as retail stores, restaurants, and brand lockers) from Businesses.
+
+This is vertical-agnostic and enables key commerce flows such as:
+
+- **Local Pickup Discovery**: Finding nearby Locations such as retail stores or restaurant branches that support Buyer pickup, checking their operating hours, and discovering where selected items are currently available before selection.
+- **Fulfillment Area Verification**: Checking if a specific location (e.g., utility depot, restaurant, or local service provider) can serve a Buyer's address (the `serves` relation).
+
+## Capabilities
+
+| Capability                                                                                             | Description                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`dev.ucp.common.location.search`](http://ucp.dev/draft/specification/common/location/search/index.md) | Search for Locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `items`). |
+| [`dev.ucp.common.location.lookup`](http://ucp.dev/draft/specification/common/location/lookup/index.md) | Retrieve full details for one or more Locations by identifier, optionally refined by the same relations and filters.                              |
+
+## Key Concepts
+
+- **Location**: A physical entity that can be found on a map. Defined by a display name, address, operating hours, and **geographic context** (geographic coordinates).
+- **Amenities**: Static features, services, or capabilities of the Location. Responses use a map with reverse-DNS amenity identifiers as keys, combining collision-resistant names, one entry per identifier, and buyer-facing descriptions that keep custom amenities renderable. See [Amenity Vocabulary](http://ucp.dev/draft/specification/common/location/search/#amenity-vocabulary).
+- **Item Availability**: The `items` filter asks whether the Business can currently provide every referenced item at a candidate Location. Returning the Location is a coarse, provisional assertion, not item-level detail or a reservation. See [Item Availability Filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter).
+- **Proximity & Serviceability**: Two distinct, explicit spatial relations:
+  - **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
+  - **`serves`**: Asks whether the Location can provisionally serve one explicit Platform-supplied target; the Business is authoritative for that answer, and UCP does not model or expose the underlying coverage geometry — a Location does not implicitly carry a geometric boundary around its coordinates. See [Spatial Relations](http://ucp.dev/draft/specification/common/location/search/#spatial-relations).
+- **Operating Hours**: Regular weekly schedules (`hours`) and date-specific exceptions (`exception_hours`), interpreted in the Location's `timezone`. See [Operating Hours](#operating-hours).
+
+### Relationship to Other Capabilities
+
+The Location capability provides the foundation for localized commerce by integrating tightly with other capabilities (like Catalog, Cart, and Checkout in Shopping):
+
+1. **Stable Identifiers**: Location Search and Lookup return stable, Business-scoped `Location.id` values representing physical entities. A Location ID selects only the physical entity; it does not determine the interaction mode, guarantee availability, or bind operational terms. Downstream capabilities authoritatively negotiate and revalidate all terms during transaction processing (for example, a returned ID submitted as `selected_destination_id`; see [Selection and Location Identity](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/#selection-and-location-identity)).
+1. **Separation of Discovery Concerns**: Each capability answers one narrow question, and later stages revalidate earlier signals. Location answers which places can currently provide a set of referenced items (the [`items` filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter)).
+1. **Provisional vs. Authoritative Boundaries**:
+   - *Discovery Phase (Provisional)*: Location responses based on operating hours, current item availability, and amenities represent the Business's *current terms* at the time of query. They are **provisional signals** and are not binding commitments.
+   - *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup) **MUST** be negotiated and finalized authoritatively. Discovery signals **SHOULD NOT** be cached or reused across sessions without re-validation.
+
+## Operating Hours
+
+### Representation
+
+The hours filter's [`open_at`](http://ucp.dev/draft/specification/common/location/search/#hours-based-filter) value is an exact instant. Operating hours use the Location's local date and clock time, interpreted using its IANA timezone.
+
+- `hours` is a list of regular weekly intervals. Each item contains `day`, `opens`, and `closes`. `day` is a stable UCP day-of-week identifier for the day on which the interval begins, not localized display text. A Platform **MAY** localize it for presentation. Times use 24-hour `HH:MM` form.
+- `exception_hours` is a list of date-specific timed intervals or full closures. Each item contains inclusive local-date bounds `valid_from` and `valid_through` in `YYYY-MM-DD` form; equal bounds select one date. Both `opens` and `closes` define a timed interval, while omitting both defines a full closure. The optional `title` is a short, human-readable heading. It is presentation metadata and does not affect schedule evaluation.
+- `timezone` identifies the Business-owned canonical local civil-time frame for both schedules.
+
+### Evaluation
+
+Timed intervals are open at `opens` and closed at `closes`. For example, `10:00`–`17:00` is open immediately before `17:00` and closed at `17:00`. If `closes` is earlier than `opens`, the interval continues into the next local date. As a reserved exception to this closing-boundary rule, the exact `00:00`–`23:59` pair represents the entire local civil date, including daylight saving time transitions. Every pair with equal `opens` and `closes` is invalid, including `00:00`–`00:00`.
+
+Schedule evaluation is deterministic for each instant: convert the instant to the Location's local date, day of week, and time using `timezone`, then apply the effective schedule to those local values. During a forward daylight saving time (DST) transition, local clock labels in the gap correspond to no instants and are not shifted. During a backward DST transition, both instants in the fold that map to the same repeated local time receive the same schedule result. The current schedule shape cannot distinguish the two fold occurrences.
+
+Multiple `hours` items for the same `day` combine as split shifts. An omitted day means no regular interval begins that day, but an interval from the preceding day can carry into it. Absent `hours` means the regular schedule is unknown, not closed. To represent a temporary full closure, a Business retains its regular `hours` and adds an `exception_hours` entry for the affected dates without `opens` or `closes`.
+
+An exception schedule replaces the regular schedule on every covered local date. If an interval carries into a local date governed by an exception, that exception takes authority at local midnight. Intersecting non-identical exception ranges are invalid, including when one contains another. Timed entries with identical bounds can coexist as split shifts, but a full closure stands alone for its bounds. Array order establishes no precedence.
+
+#### Exception hours example
+
+```json
+{
+  "id": "loc_downtown",
+  "name": "Downtown Store",
+  "timezone": "America/New_York",
+  "exception_hours": [
+    {
+      "title": "Holiday hours",
+      "valid_from": "2026-12-24",
+      "valid_through": "2026-12-26",
+      "opens": "10:00",
+      "closes": "14:00"
+    },
+    {
+      "title": "Holiday hours",
+      "valid_from": "2026-12-24",
+      "valid_through": "2026-12-26",
+      "opens": "16:00",
+      "closes": "18:00"
+    }
+  ]
+}
+```
+
+The two entries share date bounds, so they define split shifts that apply independently on each date in the inclusive range. A full closure instead uses one item that omits both `opens` and `closes`.
+
+### Guidelines
+
+#### Business
+
+A Business owns each Location's canonical schedule frame. When a Business emits `hours` or `exception_hours`, it **MUST** express every `day`, `opens`, `closes`, `valid_from`, and `valid_through` value in that frame and **MUST** include `timezone` as a valid [Internet Assigned Numbers Authority (IANA) Time Zone Database](https://www.iana.org/time-zones) identifier. A Business **MUST NOT** vary the canonical schedule frame according to the requesting Platform's or Buyer's timezone. Because JSON Schema does not enforce every semantic constraint, a Business **MUST** emit only schedules that follow the rules above, including unequal `opens` and `closes`, a `valid_from` value no later than `valid_through`, and valid exception-range intersections. A Business **SHOULD** omit an `exception_hours` entry once it can no longer affect the schedule at any current or future instant. It **SHOULD** publish known future exceptions through the planning horizon for which its schedule is authoritative.
+
+#### Platform
+
+When evaluating a returned schedule, a Platform **MUST** use the returned Location's `timezone`. A Platform **MAY** convert concrete dated occurrences to another timezone for presentation, but it **MUST NOT** reinterpret the canonical schedule values in another timezone. A Platform **MUST NOT** infer that a Location with absent, invalid, or otherwise unusable schedule data is open. A Platform **MAY** present `title` according to its presentation policy and **MUST NOT** use it to determine whether a Location is open or closed.
+
+## Shared Entities
+
+### Amenity
+
+Location responses represent amenities as a map keyed by amenity identifier. The Business **MUST** provide a nonempty, plain-text, buyer-facing `description` for every entry. The Business **SHOULD** make it a short, self-contained label or phrase suitable for direct use in a compact list and **SHOULD** localize it for the request when possible. It does not participate in amenity identity or filtering. An entry without that description is schema-invalid; a Platform **MUST** reject the invalid response rather than infer presentation text from the key.
+
+Amenity presentation is identifier-agnostic: the Business-provided `description` alone is sufficient to present any amenity. A Platform governs its own presentation policy and **MAY** decide whether and where amenities appear (for example, omitting them on a compact summary card). When it presents amenities, it **SHOULD** use the provided `description` for every entry it presents and **MUST NOT** suppress an entry solely because its identifier is unrecognized. A Platform **MAY** enhance recognized amenities with icons, grouping, or other structured presentation, but **MUST NOT** infer semantics from an unrecognized identifier or treat it as equivalent to another amenity.
+
+Buyer-facing presentation metadata for one amenity identifier. The containing map key, not this metadata, defines amenity identity and filter matching.
+
+| Name        | Type   | Requirement  | Description                                                                                                                                                                                                                                                                    |
+| ----------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| description | string | **Required** | Short, plain-text, buyer-facing label or phrase for the amenity, suitable for direct use in a compact list (e.g., 'Curbside pickup'). The Business SHOULD localize it for the request when possible. This content does not participate in amenity identity or filter matching. |
+
+### Context
+
+Buyer location and market context for the operations. All fields are optional hints for relevance and localization. Platforms **MAY** geo-detect context from request headers.
+
+Context signals are provisional—not authoritative data. A Business **MAY** use them to influence ranking, localization, or selection of a bounded default browse page, and **MAY** ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection). A Business **MUST NOT** substitute them for explicit `distance` or `serves` operands or for `filters.items` item identifiers; they prove neither proximity, serviceability, nor item availability (see [Request Grammar](http://ucp.dev/draft/specification/common/location/search/#request-grammar)).
+
+| Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| address_country | string                                                                              | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used.                                                                                                                                                                                                                                                                                                                                     |
+| address_region  | string                                                                              | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                                                                                                                                                                                                                                                                                                                                                            |
+| postal_code     | string                                                                              | Optional    | The postal code (e.g. "94043").                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| location        | string                                                                              | Optional    | Stable, opaque identifier for a Location in the Business's namespace. This provisional, non-binding hint is distinct from the Buyer's locality. The operation specification or an active capability/extension defines its effects. A common example in retail shopping is the default home store ID selected and saved by the user when purchasing groceries.                                                                                                      |
+| intent          | string                                                                              | Optional    | Background context describing buyer's intent (e.g., 'looking for a gift under $50', 'need something durable for outdoor use'). Informs relevance, recommendations, and personalization.                                                                                                                                                                                                                                                                            |
+| language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
+| currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
+| eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
+| payment         | Array[object]                                                                       | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
+
+### Signals
+
+Environment data provided by the Platform to support authorization and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+
+| Name               | Type   | Requirement | Description                                    |
+| ------------------ | ------ | ----------- | ---------------------------------------------- |
+| dev.ucp.buyer_ip   | string | Optional    | Client's IP address (IPv4 or IPv6).            |
+| dev.ucp.user_agent | string | Optional    | Client's HTTP User-Agent header or equivalent. |
+
+## Messages and Error Handling
+
+All Location responses include an optional `messages` array that allows Businesses to provide context about errors, warnings, or informational notices.
+
+### Message Types
+
+Messages communicate business outcomes and provide context:
+
+| Type      | When to Use                                                      | Example Codes                                     |
+| --------- | ---------------------------------------------------------------- | ------------------------------------------------- |
+| `error`   | Business-level errors                                            | Business-defined codes (freeform codes permitted) |
+| `warning` | Important conditions affecting purchase                          | `permanently_closed`, `temporary_closure`         |
+| `info`    | Diagnostics or additional context that do not fail the operation | `not_found`, `holiday_hours_active`               |
+
+#### Message (Error)
+
+| Name         | Type                                                     | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                   | **Required** | **Constant = error**. Message type discriminator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| code         | [Error Code](/draft/specification/reference/#error-code) | **Required** | Error code identifying the type of error. Standard errors are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| path         | string                                                   | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| content_type | string                                                   | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| content      | string                                                   | **Required** | Human-readable message.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| severity     | string                                                   | **Required** | Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires\_*' severity contribute to 'status: requires_escalation'.* *Enum:*\* `recoverable`, `requires_buyer_input`, `requires_buyer_review`, `unrecoverable` |
+
+#### Message (Warning)
+
+| Name         | Type                                                         | Requirement  | Description                                                                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                       | **Required** | **Constant = warning**. Message type discriminator.                                                                                                                                                                                                 |
+| path         | string                                                       | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                                                                                   |
+| code         | [Warning Code](/draft/specification/reference/#warning-code) | **Required** | Warning code identifying the type of warning. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted.                                                                 |
+| content      | string                                                       | **Required** | Human-readable warning message that MUST be displayed.                                                                                                                                                                                              |
+| content_type | string                                                       | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                                                                      |
+| presentation | string                                                       | Optional     | Rendering contract for this warning. 'notice' (default): platform MUST display, MAY dismiss. 'disclosure': platform MUST display in proximity to the path-referenced component, MUST NOT hide or auto-dismiss. See specification for full contract. |
+| image_url    | string                                                       | Optional     | URL to a required visual element (e.g., warning symbol, energy class label).                                                                                                                                                                        |
+| url          | string                                                       | Optional     | Reference URL for more information (e.g., regulatory site, registry entry, policy page).                                                                                                                                                            |
+
+#### Message (Info)
+
+| Name         | Type                                                   | Requirement  | Description                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type         | string                                                 | **Required** | **Constant = info**. Message type discriminator.                                                                                                                                               |
+| path         | string                                                 | Optional     | RFC 9535 JSONPath to the component the message refers to (e.g., $.line_items[0]).                                                                                                              |
+| code         | [Info Code](/draft/specification/reference/#info-code) | Optional     | Info code identifying the type of informational message. Standard codes are defined in capability specifications (see examples) and have standardized semantics; freeform codes are permitted. |
+| content_type | string                                                 | Optional     | Content format, default = plain. **Enum:** `plain`, `markdown`                                                                                                                                 |
+| content      | string                                                 | **Required** | Human-readable message.                                                                                                                                                                        |
+
+### Common Scenarios
+
+#### Empty Search
+
+When a valid Search finds no matches, the Business **MUST** return an empty `locations` array. No message is required for an ordinary non-match, including when a `filters.items` identifier is unknown, is unavailable, or cannot be evaluated.
+
+```json
+{
+  "ucp": {...},
+  "locations": []
+}
+```
+
+An ordinary empty result is not an error: the query was valid but returned no matching Locations.
+
+## Transport Bindings
+
+The capabilities above are bound to specific transport protocols:
+
+- [REST Binding](http://ucp.dev/draft/specification/common/location/rest/index.md): RESTful API mapping.
+- [MCP Binding](http://ucp.dev/draft/specification/common/location/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
+
+## Security & Privacy Considerations
+
+1. **Coarse-by-default**: Platforms **SHOULD** default to sending coarse location hints (e.g., postal code or rounded coordinates) during the discovery phase. Precise locations/coordinates **SHOULD** only be shared when the Buyer explicitly consents or selects a specific Location.
+1. **Availability Probing Mitigation**: Businesses **SHOULD** rate-limit requests carrying `filters.items` to reduce item-availability probing and aggressive enumeration of the directory.
+1. **Private/Dark Locations**: Businesses **MUST** filter out internal-only or non-Buyer-accessible locations (e.g., dark kitchens, fulfillment-only hubs) from search results.
+1. **Physical Address Spoofing (Integrity)**: While location discovery is read-only, tampering with physical addresses in responses (e.g., through MITM attacks) poses a physical safety/fraud risk. Platforms **SHOULD** verify signatures on location payloads before rendering them to Buyers.
+1. **Data Retention & Logging Sanitization**: Businesses **MUST NOT** persist precise location inputs beyond the lifecycle of the request, unless explicit Buyer consent is collected. Server logs should sanitize coordinate inputs by truncating decimal places (e.g., to 2 decimal places, ~1km accuracy) to prevent accidental storage of precise Buyer history.
+
+# Location Search Capability
+
+- **Capability Name:** `dev.ucp.common.location.search`
+
+Performs a search for physical locations (e.g., retail stores, restaurants, warehouses). Supports free-text queries, explicit `distance` and `serves` relations, and structured filtering by operating hours, amenities, and current item availability.
+
+## Operation
+
+| Operation            | Description                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| **Search Locations** | Search for Locations using query text, explicit spatial relations, context, and filters. |
+
+### Request
+
+Request body for location search. The `distance` and `serves` relations and every supplied `filters` predicate combine with AND; `query` does not relax them.
+
+| Name       | Type   | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| query      | string | Optional    | Free-text search query for natural language location search (e.g., 'restaurants near me that deliver', 'hotels with pool').                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| context    | object | Optional    | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals    | object | Optional    | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| distance   | object | Optional    | Optional explicit-center radius predicate. When present, it combines with `serves` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| serves     | object | Optional    | Optional authoritative service-target predicate. When present, it combines with `distance` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| filters    | object | Optional    | Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| pagination | object | Optional    | Pagination parameters for requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+### Response
+
+| Name       | Type          | Requirement  | Description                                                           |
+| ---------- | ------------- | ------------ | --------------------------------------------------------------------- |
+| ucp        | any           | **Required** | UCP metadata for location responses.                                  |
+| locations  | Array[object] | **Required** | Locations matching the search criteria.                               |
+| pagination | object        | Optional     | Pagination information in responses.                                  |
+| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results. |
+
+## Request Grammar
+
+Each request input has a distinct role:
+
+| Input                 | Meaning                                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `query`               | Free-text retrieval (e.g., "restaurants near me that deliver").                                                        |
+| `distance`            | A relation between a candidate Location and an explicit Platform-supplied center point and inclusive radius.           |
+| `serves`              | A relation between a candidate Location and one explicit Platform-supplied service target.                             |
+| `filters`             | Predicates over inherent or current Location facts: `hours`, `amenities`, and `items`, plus extension-defined filters. |
+| `context` / `signals` | Provisional hints for relevance, localization, and bounded default selection; never spatial proof.                     |
+| `pagination`          | A request for the shape of a bounded result page.                                                                      |
+
+`distance` and `serves` sit at the request root because they compare a candidate Location against external facts the Platform supplies, while `filters` predicates ask whether the Location itself has or currently satisfies a fact. The two relations are independent: either can anchor a request by itself, they can use different points, and neither inherits an operand from the other.
+
+For any candidate Location, every explicit structured constraint is conjunctive:
+
+```text
+matches = distance (when present)
+      AND serves (when present)
+      AND every supplied filters.* predicate
+```
+
+This rule defines observable results, not backend evaluation order.
+
+A Business **MAY** use the `query` text to narrow and rank results as ordinary free-text retrieval, including letting spatial phrases in it (for example, "near me") influence text relevance and ranking. The `query` never carries structured authority in either direction. A Business **MUST NOT** treat `query` text as creating a `distance` or `serves` relation or a `filters` predicate. Only explicit constraints establish structured matching; spatial proof comes only from the operands in [Spatial Relations](#spatial-relations). A Business **MUST NOT** relax an explicit structured constraint because of the `query` text: a Location that fails `distance`, `serves`, or a `filters` predicate is excluded no matter how well it matches the query.
+
+### Bounded Browse
+
+A request without a spatial relation is valid. An empty body `{}`, a request carrying only `context` or `signals`, a request carrying only `pagination`, and a filters-only request are each a bounded browse over the Business's default, policy-controlled selection — never a spatial assertion and never an export. A request carrying only `filters.items` remains non-spatial: it constrains the candidate set through its explicit item identifiers without asserting any spatial relation. Page size follows the shared [Pagination](#pagination) contract.
+
+A Business **MAY** use `context`, `signals`, and IP-derived locality to influence ranking, localization, or selection of a bounded default browse page. A Business using those hints **MUST NOT** treat that choice as proof that a Location serves a target or falls within an unstated radius; only explicit `distance` and `serves` operands establish spatial matching.
+
+### Rejection and Empty Results
+
+Requests that fail the Search request schema use the binding's invalid-request mechanism. The same mechanism carries the defined semantic errors for `distance`, `serves`, and unsupported filters; see [Spatial Relations](#spatial-relations) and [Search Filters](#search-filters). A well-formed relation or supported predicate that simply matches no Locations remains a successful empty business outcome (see [Empty Search](http://ucp.dev/draft/specification/common/location/#common-scenarios)).
+
+## Spatial Relations
+
+### Distance
+
+The `distance` relation matches Locations within an inclusive radius of an explicit center point. Both members are required: `distance.center` is a `geo.json` point in World Geodetic System 1984 (WGS 84) decimal degrees, and `distance.max` is the inclusive maximum distance in meters.
+
+| Name   | Type                                       | Requirement  | Description                                                                                                                                                                             |
+| ------ | ------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| center | [Geo](/draft/specification/reference/#geo) | **Required** | Explicit center of the radius. The Platform MUST supply it; the Business MUST NOT derive it from context, signals, an IP address, or `serves`.                                          |
+| max    | number                                     | **Required** | Inclusive maximum distance in RFC 7035 distance unit (meters). A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius. |
+
+The Platform **MUST** supply `distance.center` whenever it supplies `distance`. The Business **MUST NOT** derive a missing center from `context`, `signals`, an Internet Protocol (IP) address, or `serves`; a request missing a required operand is invalid rather than broader than intended.
+
+Matching semantics are closed:
+
+- The computed distance is the shortest geodesic distance over the WGS 84 ellipsoid between `distance.center` and the Location's authoritative `geo`, in meters. When the two points lie on opposite sides of the 180-degree meridian the same rule applies — the shortest geodesic — with no special casing.
+- The Business **MUST** compare the unrounded computed value to `distance.max`; a Location matches when that value is less than or equal to `distance.max`, and exact equality matches.
+- The Business **MUST NOT** apply a tolerance band, substitute an operand, clamp the radius, or evaluate route, travel, or planar distance in place of the geodesic comparison.
+- The Business **MAY** compute the value with any algorithm that produces the WGS 84 inverse-geodesic result at sufficient precision that the match outcome agrees with the unrounded comparison defined above.
+- A Business that cannot honor a supplied `distance.max` (for example, a radius cap below the requested value) **MUST** reject the request with an actionable error; it **MUST NOT** silently clamp the radius or substitute its own. The permission to return fewer results under [Pagination](#pagination) never permits reducing `distance.max`.
+- A Location without a usable authoritative `geo` does not match; exclusion is a non-match, not an error.
+
+The relation is a hard restriction; it neither requests nor implies distance ordering. Ranking remains separate Business behavior unless another negotiated input specifies it.
+
+### Serves
+
+The `serves` relation matches Locations that can provisionally serve one explicit target. It is a one-entry map: the Platform **MUST** supply exactly one target representation — `point`, `address`, or a negotiated reverse-domain extension target.
+
+| Name    | Type                                       | Requirement | Description                               |
+| ------- | ------------------------------------------ | ----------- | ----------------------------------------- |
+| point   | [Geo](/draft/specification/reference/#geo) | Optional    | WGS 84 coordinates of the service target. |
+| address | any                                        | Optional    | Coarse locality of the service target.    |
+
+- `point` is a WGS 84 latitude and longitude coordinate pair and uses the same coordinate representation as `distance.center`.
+- `address` is a coarse locality. When supplying it, the Platform **MUST** include at least one non-empty `address_country`, `address_region`, or `postal_code`. An `address` is invalid if it is empty, contains only unrecognized fields, or all of its recognized fields are empty. A `serves` map is invalid if it is empty or contains more than one target.
+
+The explicit target is authoritative. Omitting `serves` never creates an implicit serviceability check, and the Business **MUST NOT** derive a target from `context`, `signals`, or an IP address.
+
+A Location matches when at least one currently available service or fulfillment method at that Location can provisionally serve the target. The match does not disclose the Business's coverage geometry, identify the qualifying method, reserve capacity, or guarantee that checkout or fulfillment will succeed; the Business revalidates serviceability against binding transaction data later in the commerce flow.
+
+A Business unable to evaluate an otherwise well-formed target — for example, a postal code system it does not model — **MUST** return an actionable request error; it **MUST NOT** fall back to a coarser interpretation or return broadened results. If a namespaced target's extension was not negotiated, the Business **MUST** return an actionable request error rather than silently omit the target.
+
+The relation also has a deliberate correlation limit: a Location matching both `serves` and [`filters.items`](#item-availability-filter) satisfies each constraint independently. The match establishes that at least one method can provisionally serve the target and that the Business can currently provide every referenced item at that Location — not that the same method can fulfill those items to that target.
+
+## Search Filters
+
+Standard Location filters are `hours`, `amenities`, and `items`. A Business **MAY** support additional custom filters through `additionalProperties`. All supplied filters combine with AND. A Business that receives a filter it does not support **MUST** reject the request with an actionable error; it **MUST NOT** ignore the filter and return broadened results.
+
+| Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
+| --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
+| items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+### Hours-Based Filter
+
+The standard `filters.hours` object requires `open_at`, an RFC 3339 instant expressed with `Z` or a numeric offset.
+
+A Platform selects `open_at` to represent the time relevant to the Buyer's intent. It can use its current time or choose another time, such as an expected arrival, pickup, or order-acceptance time. A Platform **MAY** round or adjust its selected time to the granularity appropriate to the interaction, but the value it sends identifies one specific instant.
+
+For each candidate Location, a Business **MUST** evaluate `open_at` exactly as supplied. It converts the instant to the local date, day of week, and time using the Location's authoritative `timezone`, then evaluates the effective schedule under [Operating Hours](http://ucp.dev/draft/specification/common/location/#operating-hours). The `Z` or numeric offset in `open_at` identifies the instant; it does not identify the Location's timezone.
+
+A Business **MUST** return a Location only when it can establish that the Location is open at `open_at`. If its schedule data is absent, invalid, outside the range for which it can evaluate authoritatively, or otherwise unusable, the Location does not match the filter. A Business **MUST NOT** round, shift, or otherwise reinterpret the supplied instant.
+
+### Amenity Filter
+
+The `amenities` filter identifies static features, services, or capabilities. A Location matches only when its response `amenities` map contains every supplied identifier as an exact key. See [Amenity Vocabulary](#amenity-vocabulary) for well-known values.
+
+#### Amenity Vocabulary
+
+UCP defines an open reverse-DNS vocabulary for amenity identifiers. A Business **SHOULD** use a well-known UCP identifier when its definition accurately describes the amenity and **MAY** define additional identifiers under a namespace it controls. The following table is a non-exhaustive list of well-known values:
+
+| Amenity Name                               | Domain             | Semantic Definition                                                    |
+| ------------------------------------------ | ------------------ | ---------------------------------------------------------------------- |
+| `dev.ucp.amenity.wi_fi`                    | Common / Universal | Complimentary or Buyer-accessible wireless internet on premises.       |
+| `dev.ucp.amenity.parking`                  | Common / Universal | Dedicated parking lot or garage available on site.                     |
+| `dev.ucp.amenity.shopping.curbside_pickup` | Retail Shopping    | Dedicated vehicle bays for order pickup without entering the building. |
+| `dev.ucp.amenity.shopping.in_store_pickup` | Retail Shopping    | Dedicated counter or area inside store for order pickup.               |
+
+Location responses use the shared [Amenity representation](http://ucp.dev/draft/specification/common/location/#amenity), which keeps custom identifiers presentable without assigning them standardized semantics.
+
+A Platform supplies amenity filters as an array of identifiers. Matching uses exact whole-key equality; namespace prefixes carry no wildcard or inheritance semantics. A Business **MUST NOT** ignore a supplied identifier: a Location whose authoritative amenity set lacks any supplied key does not match. This includes identifiers the Business does not use; no diagnostic is required for an ordinary non-match. When `filters.amenities` is present, the Business **MUST** include every supplied identifier in each returned Location's `amenities` map. A Platform **MUST** reject a returned Location as non-conforming if it omits the map or any requested key, rather than accept a broadened or unverifiable result.
+
+### Item Availability Filter
+
+The standard `filters.items` value is a nonempty array of distinct item identifiers. Each identifier is a stable, opaque, Business-scoped reference to an orderable item in the applicable domain, such as a shopping variant or a food menu item. The filter asks one coarse discovery question: at which Locations can the Business currently provide every referenced item?
+
+A Location matches only when the Business can currently provide every referenced item at that Location. The Business evaluates each identifier independently against its current data when processing the request, and the per-item outcomes combine with AND. Evaluation is independent of the Location's operating hours and of any fulfillment method: `filters.hours` is a separate conjunctive predicate, and `filters.hours.open_at` does not change the availability evaluation instant, even when it represents a future arrival or pickup time.
+
+An identifier that is unknown, is currently unavailable, or cannot be evaluated at a candidate Location fails the filter for that Location. The Business **MUST NOT** ignore such an identifier to return broadened results; the candidate does not match. This is an ordinary non-match and requires no diagnostic (see [Empty Search](http://ucp.dev/draft/specification/common/location/#common-scenarios)).
+
+A match is a coarse, provisional assertion, and the response intentionally remains Location-shaped without echoing per-item facts. The result does not evaluate Platform-selected quantities, prove that the referenced items can be transacted together as one basket, select or identify a fulfillment method, reserve any item, or predict availability at a future instant. The Business **MUST** revalidate transaction-specific availability, quantities, methods, and terms later in the commerce flow. See [Relationship to Other Capabilities](http://ucp.dev/draft/specification/common/location/#relationship-to-other-capabilities).
+
+Combining `filters.items` with a pickup amenity (for example, `dev.ucp.amenity.shopping.in_store_pickup`) matches Locations where every referenced item is currently available and pickup is generally supported. The two predicates remain independent: the combination does not establish that the referenced items are available through pickup. Exact one-shot, method-qualified store finding is outside the base Location capability and requires an applicable domain capability that can correlate item availability with a fulfillment method.
+
+## Pagination
+
+Cursor-based pagination for list operations. Cursors are opaque strings. A Business **MAY** encode them as stateless keyset tokens.
+
+### Page Size
+
+The `limit` parameter is a requested page size, not a guaranteed result count. When `limit` is omitted, the Business **MUST** apply a default page size. A default of 10 is **RECOMMENDED**, but the Business **MAY** choose another value.
+
+The Business **MAY** return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform **MUST NOT** assume that the response count equals either value. This permission applies only to page size; it does not permit reducing `distance.max` (see [Distance](#distance)).
+
+### Pagination Request
+
+Pagination parameters for requests.
+
+| Name   | Type    | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                                                                                                                                                                                                                                                                                                                                                            |
+| limit  | integer | Optional    | Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value. |
+
+### Pagination Response
+
+Pagination information in responses.
+
+| Name          | Type    | Requirement  | Description                                                                           |
+| ------------- | ------- | ------------ | ------------------------------------------------------------------------------------- |
+| cursor        | string  | Optional     | Cursor to fetch the next page of results. MUST be present when has_next_page is true. |
+| has_next_page | boolean | **Required** | Whether more results are available.                                                   |
+| total_count   | integer | Optional     | Total number of matching items, if available.                                         |
+
+## Examples
+
+The following requests and responses are transport-neutral UCP payloads.
+
+### Grocery stores serving a point and open at an instant
+
+```json
+{
+  "query": "grocery store near me",
+  "context": {
+    "address_country": "US",
+    "address_region": "CA",
+    "postal_code": "94043"
+  },
+  "serves": {
+    "point": {
+      "latitude": 37.422,
+      "longitude": -122.084
+    }
+  },
+  "filters": {
+    "hours": {
+      "open_at": "2026-05-18T17:00:00Z"
+    },
+    "amenities": ["dev.ucp.amenity.shopping.curbside_pickup"]
+  }
+}
+```
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.search": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_valley_grocers",
+      "name": "Valley Grocers",
+      "address": {
+        "street_address": "789 Maple Ave",
+        "address_locality": "Mountain View",
+        "address_region": "CA",
+        "address_country": "US",
+        "postal_code": "94043"
+      },
+      "geo": {
+        "latitude": 37.420,
+        "longitude": -122.080
+      },
+      "amenities": {
+        "dev.ucp.amenity.shopping.curbside_pickup": {
+          "description": "Curbside pickup"
+        },
+        "dev.ucp.amenity.shopping.in_store_pickup": {
+          "description": "In-store pickup"
+        },
+        "dev.ucp.amenity.parking": {
+          "description": "On-site parking"
+        },
+        "com.example.amenity.in_person_installation": {
+          "description": "In-person installation by appointment"
+        }
+      },
+      "timezone": "America/Los_Angeles",
+      "hours": [
+        {"day": "monday", "opens": "08:00", "closes": "21:00"}
+      ]
+    }
+  ]
+}
+```
+
+The explicit `serves.point` is the authoritative service target; the coarse `context` hints only shape ranking and localization. At the supplied instant, it is Monday at `10:00` in `America/Los_Angeles`, within the returned interval. See [Operating Hours](http://ucp.dev/draft/specification/common/location/#operating-hours) for complete schedule evaluation rules. The custom amenity remains presentable through its description without assigning the identifier any standardized UCP meaning.
+
+### Locations where every requested item is available within a distance
+
+```json
+{
+  "distance": {
+    "center": {
+      "latitude": 40.707,
+      "longitude": -74.011
+    },
+    "max": 10000
+  },
+  "filters": {
+    "items": [
+      "item_id_phone_15_pro",
+      "item_id_phone_15_pro_case_black"
+    ]
+  }
+}
+```
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.search": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_downtown_electronics",
+      "name": "Downtown Electronics",
+      "address": {
+        "street_address": "100 Broadway",
+        "address_locality": "New York",
+        "address_region": "NY",
+        "address_country": "US",
+        "postal_code": "10005"
+      },
+      "amenities": {
+        "dev.ucp.amenity.shopping.curbside_pickup": {
+          "description": "Curbside pickup"
+        },
+        "dev.ucp.amenity.shopping.in_store_pickup": {
+          "description": "In-store pickup"
+        }
+      }
+    }
+  ]
+}
+```
+
+Each returned Location satisfies the `distance` relation and the `items` availability predicate for every supplied identifier. The response does not echo per-item facts. The `distance` relation does not require the Business to disclose the Location coordinate used in the evaluation.
+
+## Transport Bindings
+
+- [REST Binding](http://ucp.dev/draft/specification/common/location/rest/#post-locationssearch): `POST /locations/search`
+- [MCP Binding](http://ucp.dev/draft/specification/common/location/mcp/#search_locations): `search_locations` tool
+
+# Location Lookup Capability
+
+- **Capability Name:** `dev.ucp.common.location.lookup`
+
+Resolves identifiers to physical Locations. Supports full-detail batch retrieval of multiple Locations or retrieval of a single Location (useful for a dedicated Location detail page), optionally refined by the same explicit spatial relations and filters as Search (see [Refinement](#refinement)).
+
+## Operation
+
+| Operation              | Description                                          |
+| ---------------------- | ---------------------------------------------------- |
+| **Lookup Location(s)** | Retrieve single or multiple Locations by identifier. |
+
+## Supported Identifiers
+
+The `ids` parameter accepts an array of identifiers. A Business **MUST** support lookup by a Location's stable canonical `Location.id` and **MAY** additionally support secondary or alias identifiers.
+
+A Business **MUST** dedupe duplicate identifiers in the request. When an identifier matches multiple Locations, the Business returns the matching Locations and **MAY** limit the result set. When multiple identifiers resolve to the same Location, the Business **MUST** return it only once.
+
+### Platform Correlation
+
+The response does not guarantee order. Each Location carries an `inputs` array identifying which requested identifiers resolved to it. Every entry contains a required `id`, copied exactly from the Lookup request.
+
+Multiple request identifiers may resolve to the same Location. When this occurs, the Location's `inputs` array contains one entry per resolved identifier. A Business **MUST NOT** include a Location without an `inputs` entry in a Lookup response.
+
+### Batch Size
+
+A Business **SHOULD** accept at least 10 identifiers per request and **MAY** enforce a maximum batch size. The maximum applies after duplicate identifiers are deduplicated.
+
+When a request exceeds that maximum, the Business **MUST** process the first maximum number of distinct identifiers in request order and return a successful response for that prefix. It **MUST** include an informational message with `code: "batch_limit_applied"`; the message content **MUST** state the applied maximum and how many identifiers were not processed. The Business **MUST NOT** evaluate the omitted suffix or report its identifiers as unresolved. A Platform **MUST NOT** interpret the omitted suffix as unresolved and **MAY** submit it in a subsequent request.
+
+### Refinement
+
+The Business first resolves the identifiers and deduplicates repeated values. Optional root `distance` and `serves` relations and `filters` predicates then refine the resolved set. All supplied criteria combine with AND: a resolved Location is returned only when it satisfies every supplied relation and filter. The relations and predicates use the same schemas and semantics as Search — see [Spatial Relations](http://ucp.dev/draft/specification/common/location/search/#spatial-relations), [Search Filters](http://ucp.dev/draft/specification/common/location/search/#search-filters), and [Item Availability Filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter).
+
+For example, if a Platform requests `["loc_downtown", "loc_uptown"]` with an hours filter of `{"open_at": "2026-05-18T17:00:00Z"}`:
+
+1. The Business first resolves both identifiers to their respective Locations.
+1. The Business evaluates the supplied instant against each resolved Location.
+1. If `loc_uptown` is closed at that instant, the Business excludes it and returns only `loc_downtown`.
+
+An identifier that does not resolve has no corresponding returned Location or `inputs` entry. If an identifier resolves to a Location that fails any supplied criterion, including because a `filters.items` identifier is unknown, is unavailable, or cannot be evaluated there, that Location and its corresponding `inputs` entry are omitted. The request still succeeds. The Business **MAY** attach an informational `not_found` message for an unresolved Location identifier, but no per-identifier explanation is guaranteed for a refinement non-match.
+
+### Request
+
+Request body for batch location lookup. The Business resolves and deduplicates `ids` before applying `distance`, `serves`, and every supplied `filters` predicate; all structured predicates combine with AND.
+
+| Name     | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | ------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ids      | Array[string] | **Required** | Identifiers of the Locations to look up. The Business MUST support canonical `Location.id` values and MAY support secondary or alias identifiers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| distance | object        | Optional     | Optional explicit-center radius predicate applied after ID resolution. It combines with `serves` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| serves   | object        | Optional     | Optional authoritative service-target predicate applied after ID resolution. It combines with `distance` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| filters  | object        | Optional     | Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| context  | object        | Optional     | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals  | object        | Optional     | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+
+### Response
+
+| Name      | Type            | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | --------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp       | any             | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
+| locations | Array[Location] | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
+| messages  | Array[object]   | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
+
+## Examples
+
+The following request and response are transport-neutral UCP payloads.
+
+### Downtown Store schedule
+
+```json
+{
+  "ids": ["loc_downtown", "downtown-store"]
+}
+```
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_downtown",
+      "inputs": [
+        {"id": "loc_downtown"},
+        {"id": "downtown-store"}
+      ],
+      "name": "Downtown Store",
+      "address": {
+        "street_address": "100 Broadway",
+        "address_locality": "New York",
+        "address_region": "NY",
+        "address_country": "US",
+        "postal_code": "10005"
+      },
+      "geo": {
+        "latitude": 40.707,
+        "longitude": -74.011
+      },
+      "amenities": {
+        "dev.ucp.amenity.shopping.curbside_pickup": {
+          "description": "Curbside pickup"
+        },
+        "dev.ucp.amenity.shopping.in_store_pickup": {
+          "description": "In-store pickup"
+        },
+        "dev.ucp.amenity.parking": {
+          "description": "On-site parking"
+        }
+      },
+      "timezone": "America/New_York",
+      "hours": [
+        {"day": "monday", "opens": "09:00", "closes": "21:00"},
+        {"day": "tuesday", "opens": "09:00", "closes": "12:00"},
+        {"day": "tuesday", "opens": "13:00", "closes": "21:00"},
+        {"day": "wednesday", "opens": "09:00", "closes": "21:00"},
+        {"day": "thursday", "opens": "09:00", "closes": "21:00"},
+        {"day": "friday", "opens": "09:00", "closes": "22:00"},
+        {"day": "saturday", "opens": "10:00", "closes": "20:00"}
+      ],
+      "exception_hours": [
+        {
+          "title": "Thanksgiving",
+          "valid_from": "2026-11-26",
+          "valid_through": "2026-11-26"
+        }
+      ]
+    }
+  ]
+}
+```
+
+The response correlates the canonical identifier and the Business-supported alias to one Location. Tuesday's two `hours` entries form a split shift. Sunday has no `hours` entry, meaning no regular interval begins that day. The `exception_hours` entry omits `opens` and `closes`, making it a full closure. See [Operating Hours](http://ucp.dev/draft/specification/common/location/#operating-hours) for schedule representation and evaluation rules.
+
+### Item availability refinement
+
+```json
+{
+  "ids": ["loc_downtown", "loc_uptown"],
+  "filters": {
+    "items": ["item_id_phone_15_pro"]
+  }
+}
+```
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_downtown",
+      "inputs": [
+        {"id": "loc_downtown"}
+      ],
+      "name": "Downtown Store"
+    }
+  ]
+}
+```
+
+Both identifiers resolve, but the Business cannot currently provide the referenced item at `loc_uptown`, so that Location and its `inputs` entry are omitted. The request still succeeds, and this ordinary refinement non-match requires no message (see [Item Availability Filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter)).
+
+### Partial success
+
+```json
+{
+  "ids": ["loc_downtown", "loc_invalid_id"]
+}
+```
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_downtown",
+      "inputs": [
+        {"id": "loc_downtown"}
+      ],
+      "name": "Downtown Store"
+    }
+  ],
+  "messages": [
+    {
+      "type": "info",
+      "code": "not_found",
+      "content": "Unable to find the location associated with loc_invalid_id."
+    }
+  ]
+}
+```
+
+The request succeeds with the Locations that resolve. A Business can use an informational `not_found` message to identify an unresolved identifier.
+
+### Batch limit applied
+
+The following Business accepts at most two distinct identifiers per Lookup request.
+
+```json
+{
+  "ids": ["loc_downtown", "loc_uptown", "loc_airport"]
+}
+```
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_downtown",
+      "inputs": [{"id": "loc_downtown"}],
+      "name": "Downtown Store"
+    },
+    {
+      "id": "loc_uptown",
+      "inputs": [{"id": "loc_uptown"}],
+      "name": "Uptown Store"
+    }
+  ],
+  "messages": [
+    {
+      "type": "info",
+      "code": "batch_limit_applied",
+      "content": "Processed the first 2 of 3 distinct identifiers; 1 identifier was not processed."
+    }
+  ]
+}
+```
+
+The Business evaluates `loc_downtown` and `loc_uptown` in request order. `loc_airport` was not evaluated and is not unresolved; the Platform can submit it in a subsequent request.
+
+## Transport Bindings
+
+- [REST Binding](http://ucp.dev/draft/specification/common/location/rest/#post-locationslookup): `POST /locations/lookup`
+- [MCP Binding](http://ucp.dev/draft/specification/common/location/mcp/#lookup_locations): `lookup_locations` tool
+
+# Location - REST Binding
+
+This document specifies the HTTP/REST binding for the [Location Capability](http://ucp.dev/draft/specification/common/location/index.md).
+
+## Protocol Fundamentals
+
+### Discovery
+
+Businesses advertise REST transport availability for the Common service and Location capabilities through their UCP profile at `/.well-known/ucp`.
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "services": {
+      "dev.ucp.common": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/draft/services/common/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.common.location.search": [{
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/common/location/search",
+        "schema": "https://ucp.dev/draft/schemas/common/location_search.json"
+      }],
+      "dev.ucp.common.location.lookup": [{
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/common/location/lookup",
+        "schema": "https://ucp.dev/draft/schemas/common/location_lookup.json"
+      }]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+## Endpoints
+
+| Endpoint            | Method | Capability                                                                   | Description                                                                                   |
+| ------------------- | ------ | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `/locations/search` | POST   | [Search](http://ucp.dev/draft/specification/common/location/search/index.md) | Search for physical locations.                                                                |
+| `/locations/lookup` | POST   | [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) | Lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
+
+### `POST /locations/search`
+
+Maps to the [Location Search](http://ucp.dev/draft/specification/common/location/search/index.md) capability. See the [complete transport-neutral Search example](http://ucp.dev/draft/specification/common/location/search/#examples).
+
+**Inputs**
+
+| Name       | Type                                                                     | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| query      | string                                                                   | Optional    | Free-text search query for natural language location search (e.g., 'restaurants near me that deliver', 'hotels with pool').                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| context    | [Context](/draft/specification/reference/#context)                       | Optional    | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals    | [Signals](/draft/specification/reference/#signals)                       | Optional    | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| distance   | [Location Distance](/draft/specification/reference/#location-distance)   | Optional    | Optional explicit-center radius predicate. When present, it combines with `serves` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| serves     | [Location Serves](/draft/specification/reference/#location-serves)       | Optional    | Optional authoritative service-target predicate. When present, it combines with `distance` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| filters    | [Location Filter](/draft/specification/reference/#location-filter)       | Optional    | Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| pagination | [Pagination Request](/draft/specification/reference/#pagination-request) | Optional    | Cursor-based pagination for list operations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+
+**Output**
+
+| Name       | Type                                                                       | Requirement  | Description                                                           |
+| ---------- | -------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
+| ucp        | any                                                                        | **Required** | UCP metadata for location responses.                                  |
+| locations  | Array\[[Location](/draft/specification/reference/#location)\]              | **Required** | Locations matching the search criteria.                               |
+| pagination | [Pagination Response](/draft/specification/reference/#pagination-response) | Optional     | Cursor-based pagination for list operations.                          |
+| messages   | Array\[[Message](/draft/specification/reference/#message)\]                | Optional     | Errors, warnings, or informational messages about the search results. |
+
+#### Binding envelope example
+
+```json
+POST /locations/search HTTP/1.1
+Host: business.example.com
+Content-Type: application/json
+Request-Id: 8ef9b0c2-78d1-4e4b-91c2-3e2ef0d3ab9f
+UCP-Agent: profile="https://platform.example/profiles/v2026-01/agent.json"
+
+{
+  "query": "grocery store"
+}
+```
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Digest: sha-256=:yG9a8bC7...:
+
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.search": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_valley_grocers",
+      "name": "Valley Grocers"
+    }
+  ]
+}
+```
+
+### `POST /locations/lookup`
+
+Maps to the [Location Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) capability. See the [complete transport-neutral Lookup example](http://ucp.dev/draft/specification/common/location/lookup/#examples).
+
+**Inputs**
+
+| Name     | Type                                                                   | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | ---------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ids      | Array[string]                                                          | **Required** | Identifiers of the Locations to look up. The Business MUST support canonical `Location.id` values and MAY support secondary or alias identifiers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| distance | [Location Distance](/draft/specification/reference/#location-distance) | Optional     | Optional explicit-center radius predicate applied after ID resolution. It combines with `serves` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| serves   | [Location Serves](/draft/specification/reference/#location-serves)     | Optional     | Optional authoritative service-target predicate applied after ID resolution. It combines with `distance` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| filters  | [Location Filter](/draft/specification/reference/#location-filter)     | Optional     | Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| context  | [Context](/draft/specification/reference/#context)                     | Optional     | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals  | [Signals](/draft/specification/reference/#signals)                     | Optional     | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+
+**Output**
+
+| Name      | Type                                                                                    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | --------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp       | any                                                                                     | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
+| locations | Array\[ [Lookup Location](/draft/specification/common/location/rest/#lookup-location)\] | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
+| messages  | Array\[[Message](/draft/specification/reference/#message)\]                             | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
+
+#### Binding envelope example
+
+```json
+POST /locations/lookup HTTP/1.1
+Host: business.example.com
+Content-Type: application/json
+Request-Id: 2c9b0c2a-18d1-4e4b-91c2-3e2ef0d3ab9f
+UCP-Agent: profile="https://platform.example/profiles/v2026-01/agent.json"
+
+{
+  "ids": ["loc_downtown"]
+}
+```
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "ucp": {
+    "version": "draft",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "draft"}
+      ]
+    }
+  },
+  "locations": [
+    {
+      "id": "loc_downtown",
+      "inputs": [
+        {"id": "loc_downtown"}
+      ],
+      "name": "Downtown Store"
+    }
+  ]
+}
+```
+
+## Error Handling
+
+UCP uses a two-layer error model separating transport-level errors from business outcomes.
+
+### Transport Errors
+
+Use HTTP status codes for protocol-level issues that prevent request processing:
+
+| Status | Meaning                                                     |
+| ------ | ----------------------------------------------------------- |
+| 400    | Bad Request - Malformed JSON or missing required parameters |
+| 401    | Unauthorized - Missing or invalid authentication            |
+| 429    | Too Many Requests - Rate limited                            |
+| 500    | Internal Server Error                                       |
+
+### Business Outcomes
+
+All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Location Overview](http://ucp.dev/draft/specification/common/location/#messages-and-error-handling) for message semantics.
+
+## Entities
+
+### UCP Response Location (Envelope)
+
+UCP metadata for location responses.
+
+| Name             | Type   | Requirement  | Description                                                                                                                                    |
+| ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
+| map_order        | object | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
+| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
+| services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
+| payment_handlers | object | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| capabilities     | any    | Optional     |                                                                                                                                                |
+
+### Amenity Type
+
+| Name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type | Requirement | Description |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ----------- | ----------- |
+| Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold'). Segments after the first are domain- or identifier-derived: they may contain interior hyphens, may start with a digit, and may contain underscores (e.g., 'com.example-shop.checkout', 'com.2example.cart', 'dev.ucp.common.identity_linking'), but must not start or end with a hyphen. The first segment (the reversed top-level domain) is letters and digits, and may contain interior hyphens to support internationalized (punycode) top-level domains such as 'xn--p1ai'. |      |             |             |
+
+**Pattern:** `^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+$`
+
+### Amenity
+
+Buyer-facing presentation metadata for one amenity identifier. The containing map key, not this metadata, defines amenity identity and filter matching.
+
+| Name        | Type   | Requirement  | Description                                                                                                                                                                                                                                                                    |
+| ----------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| description | string | **Required** | Short, plain-text, buyer-facing label or phrase for the amenity, suitable for direct use in a compact list (e.g., 'Curbside pickup'). The Business SHOULD localize it for the request when possible. This content does not participate in amenity identity or filter matching. |
+
+### Location
+
+| Name            | Type                                                                      | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                    | **Required** | Stable, opaque, Business-scoped Location identifier.                                                                                                                                                                                                                                                                                                                           |
+| name            | string                                                                    | **Required** | Buyer-facing, Business-owned display name.                                                                                                                                                                                                                                                                                                                                     |
+| address         | [Postal Address](/draft/specification/reference/#postal-address)          | Optional     | Physical address of the location.                                                                                                                                                                                                                                                                                                                                              |
+| geo             | [Geo](/draft/specification/reference/#geo)                                | Optional     | Geographic coordinates for the location.                                                                                                                                                                                                                                                                                                                                       |
+| amenities       | object                                                                    | Optional     | Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.                                                                                                                                                            |
+| hours           | Array\[[Daily Hour](/draft/specification/reference/#daily-hour)\]         | Optional     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
+| exception_hours | Array\[[Exception Hour](/draft/specification/reference/#exception-hour)\] | Optional     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
+| timezone        | string                                                                    | Optional     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
+
+### Lookup Location
+
+Location with required correlation metadata for lookup responses.
+
+| Name            | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string        | **Required** | Stable, opaque, Business-scoped Location identifier.                                                                                                                                                                                                                                                                                                                           |
+| name            | string        | **Required** | Buyer-facing, Business-owned display name.                                                                                                                                                                                                                                                                                                                                     |
+| address         | object        | Optional     | Physical address of the location.                                                                                                                                                                                                                                                                                                                                              |
+| geo             | object        | Optional     | Geographic coordinates for the location.                                                                                                                                                                                                                                                                                                                                       |
+| amenities       | object        | Optional     | Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.                                                                                                                                                            |
+| hours           | Array[object] | Optional     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
+| exception_hours | Array[object] | Optional     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
+| timezone        | string        | Optional     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
+| inputs          | Array[object] | **Required** | Which request identifiers resolved to this Location. Each entry preserves one identifier exactly as supplied in the request.                                                                                                                                                                                                                                                   |
+
+### Location Filter
+
+| Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
+| --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
+| items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+### Location Distance
+
+| Name   | Type                                       | Requirement  | Description                                                                                                                                                                             |
+| ------ | ------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| center | [Geo](/draft/specification/reference/#geo) | **Required** | Explicit center of the radius. The Platform MUST supply it; the Business MUST NOT derive it from context, signals, an IP address, or `serves`.                                          |
+| max    | number                                     | **Required** | Inclusive maximum distance in RFC 7035 distance unit (meters). A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius. |
+
+### Location Serves
+
+| Name    | Type                                       | Requirement | Description                               |
+| ------- | ------------------------------------------ | ----------- | ----------------------------------------- |
+| point   | [Geo](/draft/specification/reference/#geo) | Optional    | WGS 84 coordinates of the service target. |
+| address | any                                        | Optional    | Coarse locality of the service target.    |
+
+### Error Response
+
+| Name         | Type                                                        | Requirement  | Description                                                       |
+| ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
+
+## Conformance
+
+A conforming REST transport implementation **MUST**:
+
+1. Implement endpoints for each Location capability advertised in the Business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/common/location/search/index.md), [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md)). Each capability **MAY** be adopted independently.
+1. Evaluate the `distance` and `serves` relations and the `filters.items` availability predicate only against their explicit Platform-supplied operands. Never derive an operand from `context`, `signals`, or an IP address, and never apply an implicit serviceability or item-availability check when its input is absent.
+1. Apply `distance`, `serves`, and every supplied `filters` predicate conjunctively (AND).
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/common/location/search/#pagination)).
+1. Return HTTP 200 for Lookup requests; unknown identifiers result in fewer or no Locations returned (**MAY** include informational `not_found` messages).
+1. Return HTTP 200 when a Lookup request exceeds the Business's batch maximum, process the first maximum number of distinct identifiers in request order, and include an informational `batch_limit_applied` message.
+
+# Location - MCP Binding
+
+This document specifies the Model Context Protocol (MCP) binding for the [Location Capability](http://ucp.dev/draft/specification/common/location/index.md).
+
+## Protocol Fundamentals
+
+### Discovery
+
+Businesses advertise MCP transport availability for the Common service and Location capabilities through their UCP profile at `/.well-known/ucp`.
+
+```json
+{
+  "ucp": {
+    "version": "draft",
+    "services": {
+      "dev.ucp.common": [
+        {
+          "version": "draft",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
+          "schema": "https://ucp.dev/draft/services/common/mcp.openrpc.json",
+          "endpoint": "https://business.example.com/ucp/mcp"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.common.location.search": [{
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/common/location/search",
+        "schema": "https://ucp.dev/draft/schemas/common/location_search.json"
+      }],
+      "dev.ucp.common.location.lookup": [{
+        "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/common/location/lookup",
+        "schema": "https://ucp.dev/draft/schemas/common/location_lookup.json"
+      }]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+### Request Metadata
+
+A Platform using MCP **MUST** include a `meta` object with `meta["ucp-agent"].profile` in every request. The field identifies the Platform's UCP profile for version compatibility checks and capability negotiation. Protocol metadata remains in `meta`, separate from the domain request in `location`.
+
+## Tools
+
+| Tool               | Capability                                                                   | Description                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `search_locations` | [Search](http://ucp.dev/draft/specification/common/location/search/index.md) | Search for Locations using text, explicit spatial relations, and filters.                           |
+| `lookup_locations` | [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) | Batch lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
+
+### `search_locations`
+
+Maps to the [Location Search](http://ucp.dev/draft/specification/common/location/search/index.md) capability. See the [complete transport-neutral Search example](http://ucp.dev/draft/specification/common/location/search/#examples).
+
+#### Request Arguments
+
+Request body for location search. The `distance` and `serves` relations and every supplied `filters` predicate combine with AND; `query` does not relax them.
+
+| Name       | Type   | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| query      | string | Optional    | Free-text search query for natural language location search (e.g., 'restaurants near me that deliver', 'hotels with pool').                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| context    | object | Optional    | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals    | object | Optional    | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+| distance   | object | Optional    | Optional explicit-center radius predicate. When present, it combines with `serves` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| serves     | object | Optional    | Optional authoritative service-target predicate. When present, it combines with `distance` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| filters    | object | Optional    | Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| pagination | object | Optional    | Pagination parameters for requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+#### Response Schema
+
+| Name       | Type          | Requirement  | Description                                                           |
+| ---------- | ------------- | ------------ | --------------------------------------------------------------------- |
+| ucp        | any           | **Required** | UCP metadata for location responses.                                  |
+| locations  | Array[object] | **Required** | Locations matching the search criteria.                               |
+| pagination | object        | Optional     | Pagination information in responses.                                  |
+| messages   | Array[object] | Optional     | Errors, warnings, or informational messages about the search results. |
+
+#### Binding envelope example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "search_locations",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
+        }
+      },
+      "location": {
+        "query": "grocery store"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.common.location.search": [
+            {"version": "draft"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_valley_grocers",
+          "name": "Valley Grocers"
+        }
+      ]
+    }
+  }
+}
+```
+
+### `lookup_locations`
+
+Maps to the [Location Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) capability. See the [complete transport-neutral Lookup example](http://ucp.dev/draft/specification/common/location/lookup/#examples).
+
+#### Request Arguments
+
+Request body for batch location lookup. The Business resolves and deduplicates `ids` before applying `distance`, `serves`, and every supplied `filters` predicate; all structured predicates combine with AND.
+
+| Name     | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | ------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ids      | Array[string] | **Required** | Identifiers of the Locations to look up. The Business MUST support canonical `Location.id` values and MAY support secondary or alias identifiers.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| distance | object        | Optional     | Optional explicit-center radius predicate applied after ID resolution. It combines with `serves` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| serves   | object        | Optional     | Optional authoritative service-target predicate applied after ID resolution. It combines with `distance` and every supplied `filters` predicate using AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| filters  | object        | Optional     | Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| context  | object        | Optional     | Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context. |
+| signals  | object        | Optional     | Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.                                                                                                                                                                                                                                                                 |
+
+#### Response Schema
+
+| Name      | Type            | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | --------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp       | any             | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
+| locations | Array[Location] | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
+| messages  | Array[object]   | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
+
+#### Binding envelope example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "lookup_locations",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
+        }
+      },
+      "location": {
+        "ids": ["loc_downtown"]
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "draft",
+        "capabilities": {
+          "dev.ucp.common.location.lookup": [
+            {"version": "draft"}
+          ]
+        }
+      },
+      "locations": [
+        {
+          "id": "loc_downtown",
+          "inputs": [
+            {"id": "loc_downtown"}
+          ],
+          "name": "Downtown Store"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Error Handling
+
+UCP uses a two-layer error model separating transport-level errors from business outcomes.
+
+### Transport Errors
+
+Transport-level failures (authentication, rate limiting, invalid parameters) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-codes) for details.
+
+### Business Outcomes
+
+All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Location Overview](http://ucp.dev/draft/specification/common/location/#messages-and-error-handling) for message semantics.
+
+## Entities
+
+### Amenity Type
+
+| Name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type | Requirement | Description |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ----------- | ----------- |
+| Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold'). Segments after the first are domain- or identifier-derived: they may contain interior hyphens, may start with a digit, and may contain underscores (e.g., 'com.example-shop.checkout', 'com.2example.cart', 'dev.ucp.common.identity_linking'), but must not start or end with a hyphen. The first segment (the reversed top-level domain) is letters and digits, and may contain interior hyphens to support internationalized (punycode) top-level domains such as 'xn--p1ai'. |      |             |             |
+
+**Pattern:** `^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+$`
+
+### Amenity
+
+Buyer-facing presentation metadata for one amenity identifier. The containing map key, not this metadata, defines amenity identity and filter matching.
+
+| Name        | Type   | Requirement  | Description                                                                                                                                                                                                                                                                    |
+| ----------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| description | string | **Required** | Short, plain-text, buyer-facing label or phrase for the amenity, suitable for direct use in a compact list (e.g., 'Curbside pickup'). The Business SHOULD localize it for the request when possible. This content does not participate in amenity identity or filter matching. |
+
+### Lookup Location
+
+Location with required correlation metadata for lookup responses.
+
+| Name            | Type          | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string        | **Required** | Stable, opaque, Business-scoped Location identifier.                                                                                                                                                                                                                                                                                                                           |
+| name            | string        | **Required** | Buyer-facing, Business-owned display name.                                                                                                                                                                                                                                                                                                                                     |
+| address         | object        | Optional     | Physical address of the location.                                                                                                                                                                                                                                                                                                                                              |
+| geo             | object        | Optional     | Geographic coordinates for the location.                                                                                                                                                                                                                                                                                                                                       |
+| amenities       | object        | Optional     | Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.                                                                                                                                                            |
+| hours           | Array[object] | Optional     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
+| exception_hours | Array[object] | Optional     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
+| timezone        | string        | Optional     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
+| inputs          | Array[object] | **Required** | Which request identifiers resolved to this Location. Each entry preserves one identifier exactly as supplied in the request.                                                                                                                                                                                                                                                   |
+
+### Location
+
+| Name            | Type                                                                      | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                    | **Required** | Stable, opaque, Business-scoped Location identifier.                                                                                                                                                                                                                                                                                                                           |
+| name            | string                                                                    | **Required** | Buyer-facing, Business-owned display name.                                                                                                                                                                                                                                                                                                                                     |
+| address         | [Postal Address](/draft/specification/reference/#postal-address)          | Optional     | Physical address of the location.                                                                                                                                                                                                                                                                                                                                              |
+| geo             | [Geo](/draft/specification/reference/#geo)                                | Optional     | Geographic coordinates for the location.                                                                                                                                                                                                                                                                                                                                       |
+| amenities       | object                                                                    | Optional     | Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.                                                                                                                                                            |
+| hours           | Array\[[Daily Hour](/draft/specification/reference/#daily-hour)\]         | Optional     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
+| exception_hours | Array\[[Exception Hour](/draft/specification/reference/#exception-hour)\] | Optional     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
+| timezone        | string                                                                    | Optional     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
+
+### Location Filter
+
+| Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
+| --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
+| items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+### Location Distance
+
+| Name   | Type                                       | Requirement  | Description                                                                                                                                                                             |
+| ------ | ------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| center | [Geo](/draft/specification/reference/#geo) | **Required** | Explicit center of the radius. The Platform MUST supply it; the Business MUST NOT derive it from context, signals, an IP address, or `serves`.                                          |
+| max    | number                                     | **Required** | Inclusive maximum distance in RFC 7035 distance unit (meters). A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius. |
+
+### Location Serves
+
+| Name    | Type                                       | Requirement | Description                               |
+| ------- | ------------------------------------------ | ----------- | ----------------------------------------- |
+| point   | [Geo](/draft/specification/reference/#geo) | Optional    | WGS 84 coordinates of the service target. |
+| address | any                                        | Optional    | Coarse locality of the service target.    |
+
+### Error Response
+
+| Name         | Type                                                        | Requirement  | Description                                                       |
+| ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
+| continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
+
+## Conformance
+
+A conforming MCP transport implementation **MUST**:
+
+1. Implement JSON-RPC 2.0 protocol correctly.
+1. Implement tools for each Location capability advertised in the Business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/common/location/search/index.md), [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md)). Each capability **MAY** be adopted independently.
+1. Evaluate the `distance` and `serves` relations and the `filters.items` availability predicate only against their explicit Platform-supplied operands. Never derive an operand from `context`, `signals`, or an IP address, and never apply an implicit serviceability or item-availability check when its input is absent.
+1. Apply `distance`, `serves`, and every supplied `filters` predicate conjunctively (AND).
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/common/location/search/#pagination)).
+1. Return a successful JSON-RPC result for Lookup requests; unknown identifiers result in fewer or no Locations returned (**MAY** include informational `not_found` messages in the `messages` array).
+1. Return a successful JSON-RPC result when a Lookup request exceeds the Business's batch maximum, process the first maximum number of distinct identifiers in request order, and include an informational `batch_limit_applied` message.
+1. Validate tool inputs against UCP schemas.
 # Message Signatures
 
 # Message Signatures
@@ -13592,20 +15004,22 @@ Filter criteria for narrowing search results. Standard filters are defined below
 
 ## Pagination
 
-Cursor-based pagination for list operations. Cursors are opaque strings that implementations MAY encode as stateless keyset tokens.
+Cursor-based pagination for list operations. Cursors are opaque strings. A Business **MAY** encode them as stateless keyset tokens.
 
 ### Page Size
 
-The `limit` parameter is a requested page size, not a guaranteed count. Implementations SHOULD accept a page size of at least 10. When the requested limit exceeds the implementation's maximum, implementations MAY clamp to their maximum silently — returning fewer results without error. Clients MUST NOT assume the response size equals the requested limit.
+The `limit` parameter is a requested page size, not a guaranteed result count. When `limit` is omitted, the Business **MUST** apply a default page size. A default of 10 is **RECOMMENDED**, but the Business **MAY** choose another value.
+
+The Business **MAY** return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform **MUST NOT** assume that the response count equals either value.
 
 ### Pagination Request
 
 Pagination parameters for requests.
 
-| Name   | Type    | Requirement | Description                                                        |
-| ------ | ------- | ----------- | ------------------------------------------------------------------ |
-| cursor | string  | Optional    | Opaque cursor from previous response.                              |
-| limit  | integer | Optional    | Requested page size. Implementations MAY clamp to a lower maximum. |
+| Name   | Type    | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                                                                                                                                                                                                                                                                                                                                                            |
+| limit  | integer | Optional    | Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value. |
 
 ### Pagination Response
 
@@ -14435,7 +15849,7 @@ A conforming REST transport implementation **MUST**:
 
 1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `/catalog/lookup` and `/catalog/product` MUST be available.
 1. Return products with valid `Price` objects (amount + currency).
-1. Support cursor-based pagination with default limit of 10.
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
 1. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.
 
@@ -15141,7 +16555,7 @@ A conforming MCP transport implementation **MUST**:
 1. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Validate tool inputs against UCP schemas.
 1. Return products with valid `Price` objects (amount + currency).
-1. Support cursor-based pagination with default limit of 10.
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
 1. Return `-32602` (Invalid params) for requests exceeding batch size limits.
 # Order Capability
 
@@ -22606,6 +24020,18 @@ This page provides a reference for all the capability data models and types used
 
 ## Capability Schemas
 
+### Location Lookup
+
+Location lookup by identifiers. Supports batch retrieval and single-location detail.
+
+______________________________________________________________________
+
+### Location Search
+
+Location search capability. Supports natural language queries, distance and serviceability relations, structured filtering including current item availability, and pagination.
+
+______________________________________________________________________
+
 ### Cart
 
 | Name         | Type                                                            | Requirement                       | Description                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -22690,6 +24116,16 @@ ______________________________________________________________________
 ### Actions
 
 Outstanding extension-defined Action instances, keyed by reverse-domain Action type, not extension name.
+
+______________________________________________________________________
+
+### Amenity Type
+
+| Name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type | Requirement | Description |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ----------- | ----------- |
+| Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold'). Segments after the first are domain- or identifier-derived: they may contain interior hyphens, may start with a digit, and may contain underscores (e.g., 'com.example-shop.checkout', 'com.2example.cart', 'dev.ucp.common.identity_linking'), but must not start or end with a hyphen. The first segment (the reversed top-level domain) is letters and digits, and may contain interior hyphens to support internationalized (punycode) top-level domains such as 'xn--p1ai'. |      |             |             |
+
+**Pattern:** `^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+$`
 
 ______________________________________________________________________
 
@@ -22784,6 +24220,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Daily Hour
+
+| Name   | Type   | Requirement                       | Description                                                                                                                                                                                                                                                                |
+| ------ | ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| opens  | string | **Required**; omitted in requests | Opening time in 24-hour HH:MM format.                                                                                                                                                                                                                                      |
+| closes | string | **Required**; omitted in requests | Closing time in 24-hour HH:MM format.                                                                                                                                                                                                                                      |
+| day    | string | **Required**; omitted in requests | A stable UCP day-of-week identifier for the day on which this recurring local civil-time interval begins in the containing Location's `timezone`. It is not localized display text. **Enum:** `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday` |
+
+______________________________________________________________________
+
 ### Description
 
 | Name     | Type   | Requirement | Description                                                                                                                                                               |
@@ -22807,6 +24253,27 @@ ______________________________________________________________________
 | ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
 | messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
 | continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
+
+______________________________________________________________________
+
+### Exception Hour
+
+| Name          | Type   | Requirement                       | Description                                                                                                                                        |
+| ------------- | ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| opens         | string | Optional; omitted in requests     | Opening time in 24-hour HH:MM format.                                                                                                              |
+| closes        | string | Optional; omitted in requests     | Closing time in 24-hour HH:MM format.                                                                                                              |
+| title         | string | Optional; omitted in requests     | A short human-readable heading naming the exception (for example, 'Thanksgiving'). Presentation metadata that does not affect schedule evaluation. |
+| valid_from    | string | **Required**; omitted in requests | The first local civil date to which this exception applies, interpreted in the containing Location's `timezone`.                                   |
+| valid_through | string | **Required**; omitted in requests | The last local civil date to which this exception applies, interpreted in the containing Location's `timezone`.                                    |
+
+______________________________________________________________________
+
+### Geo
+
+| Name      | Type   | Requirement  | Description                          |
+| --------- | ------ | ------------ | ------------------------------------ |
+| latitude  | number | **Required** | WGS 84 latitude in decimal degrees.  |
+| longitude | number | **Required** | WGS 84 longitude in decimal degrees. |
 
 ______________________________________________________________________
 
@@ -22843,6 +24310,49 @@ ______________________________________________________________________
 | address_country | string | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used. |
 | address_region  | string | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                        |
 | postal_code     | string | Optional    | The postal code (e.g. "94043").                                                                                                |
+
+______________________________________________________________________
+
+### Location
+
+| Name            | Type                                                                      | Requirement                       | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                    | **Required**                      | Stable, opaque, Business-scoped Location identifier.                                                                                                                                                                                                                                                                                                                           |
+| name            | string                                                                    | **Required**; omitted in requests | Buyer-facing, Business-owned display name.                                                                                                                                                                                                                                                                                                                                     |
+| address         | [Postal Address](/draft/specification/reference/#postal-address)          | Optional; omitted in requests     | Physical address of the location.                                                                                                                                                                                                                                                                                                                                              |
+| geo             | [Geo](/draft/specification/reference/#geo)                                | Optional; omitted in requests     | Geographic coordinates for the location.                                                                                                                                                                                                                                                                                                                                       |
+| amenities       | object                                                                    | Optional; omitted in requests     | Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.                                                                                                                                                            |
+| hours           | Array\[[Daily Hour](/draft/specification/reference/#daily-hour)\]         | Optional; omitted in requests     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
+| exception_hours | Array\[[Exception Hour](/draft/specification/reference/#exception-hour)\] | Optional; omitted in requests     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
+| timezone        | string                                                                    | Optional; omitted in requests     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
+
+______________________________________________________________________
+
+### Location Distance
+
+| Name   | Type                                       | Requirement  | Description                                                                                                                                                                             |
+| ------ | ------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| center | [Geo](/draft/specification/reference/#geo) | **Required** | Explicit center of the radius. The Platform MUST supply it; the Business MUST NOT derive it from context, signals, an IP address, or `serves`.                                          |
+| max    | number                                     | **Required** | Inclusive maximum distance in RFC 7035 distance unit (meters). A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius. |
+
+______________________________________________________________________
+
+### Location Filter
+
+| Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
+| --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
+| items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+______________________________________________________________________
+
+### Location Serves
+
+| Name    | Type                                       | Requirement | Description                               |
+| ------- | ------------------------------------------ | ----------- | ----------------------------------------- |
+| point   | [Geo](/draft/specification/reference/#geo) | Optional    | WGS 84 coordinates of the service target. |
+| address | any                                        | Optional    | Coarse locality of the service target.    |
 
 ______________________________________________________________________
 
@@ -23117,6 +24627,15 @@ ______________________________________________________________________
 ### Signed Amount
 
 Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).
+
+______________________________________________________________________
+
+### Time Interval
+
+| Name   | Type   | Requirement                   | Description                           |
+| ------ | ------ | ----------------------------- | ------------------------------------- |
+| opens  | string | Optional; omitted in requests | Opening time in 24-hour HH:MM format. |
+| closes | string | Optional; omitted in requests | Closing time in 24-hour HH:MM format. |
 
 ______________________________________________________________________
 
@@ -23563,10 +25082,10 @@ A payment instrument with selection state.
 
 Pagination parameters for requests.
 
-| Name   | Type    | Requirement | Description                                                        |
-| ------ | ------- | ----------- | ------------------------------------------------------------------ |
-| cursor | string  | Optional    | Opaque cursor from previous response.                              |
-| limit  | integer | Optional    | Requested page size. Implementations MAY clamp to a lower maximum. |
+| Name   | Type    | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                                                                                                                                                                                                                                                                                                                                                            |
+| limit  | integer | Optional    | Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value. |
 
 ### Pagination Response
 
@@ -24544,6 +26063,22 @@ UCP metadata for catalog responses.
 The `ucp` object included in order responses or events.
 
 UCP metadata for order responses. No payment handlers needed post-purchase.
+
+| Name             | Type   | Requirement  | Description                                                                                                                                    |
+| ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
+| map_order        | object | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
+| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
+| services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
+| payment_handlers | object | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| capabilities     | any    | Optional     |                                                                                                                                                |
+
+### Location Response Metadata
+
+The `ucp` object included in location responses.
+
+UCP metadata for location responses.
 
 | Name             | Type   | Requirement  | Description                                                                                                                                    |
 | ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |

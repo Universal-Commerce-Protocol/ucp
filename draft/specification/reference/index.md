@@ -4,6 +4,18 @@ This page provides a reference for all the capability data models and types used
 
 ## Capability Schemas
 
+### Location Lookup
+
+Location lookup by identifiers. Supports batch retrieval and single-location detail.
+
+______________________________________________________________________
+
+### Location Search
+
+Location search capability. Supports natural language queries, distance and serviceability relations, structured filtering including current item availability, and pagination.
+
+______________________________________________________________________
+
 ### Cart
 
 | Name         | Type                                                            | Requirement                       | Description                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -88,6 +100,16 @@ ______________________________________________________________________
 ### Actions
 
 Outstanding extension-defined Action instances, keyed by reverse-domain Action type, not extension name.
+
+______________________________________________________________________
+
+### Amenity Type
+
+| Name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type | Requirement | Description |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ----------- | ----------- |
+| Reverse-domain identifier used for collision-safe namespacing of capabilities, services, handlers, eligibility claims, and extension-contributed keys. Must contain at least two dot-separated segments (e.g., 'dev.ucp.shopping.checkout', 'com.example.loyalty_gold'). Segments after the first are domain- or identifier-derived: they may contain interior hyphens, may start with a digit, and may contain underscores (e.g., 'com.example-shop.checkout', 'com.2example.cart', 'dev.ucp.common.identity_linking'), but must not start or end with a hyphen. The first segment (the reversed top-level domain) is letters and digits, and may contain interior hyphens to support internationalized (punycode) top-level domains such as 'xn--p1ai'. |      |             |             |
+
+**Pattern:** `^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+$`
 
 ______________________________________________________________________
 
@@ -182,6 +204,16 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
+### Daily Hour
+
+| Name   | Type   | Requirement                       | Description                                                                                                                                                                                                                                                                |
+| ------ | ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| opens  | string | **Required**; omitted in requests | Opening time in 24-hour HH:MM format.                                                                                                                                                                                                                                      |
+| closes | string | **Required**; omitted in requests | Closing time in 24-hour HH:MM format.                                                                                                                                                                                                                                      |
+| day    | string | **Required**; omitted in requests | A stable UCP day-of-week identifier for the day on which this recurring local civil-time interval begins in the containing Location's `timezone`. It is not localized display text. **Enum:** `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday` |
+
+______________________________________________________________________
+
 ### Description
 
 | Name     | Type   | Requirement | Description                                                                                                                                                               |
@@ -205,6 +237,27 @@ ______________________________________________________________________
 | ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
 | messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
 | continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
+
+______________________________________________________________________
+
+### Exception Hour
+
+| Name          | Type   | Requirement                       | Description                                                                                                                                        |
+| ------------- | ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| opens         | string | Optional; omitted in requests     | Opening time in 24-hour HH:MM format.                                                                                                              |
+| closes        | string | Optional; omitted in requests     | Closing time in 24-hour HH:MM format.                                                                                                              |
+| title         | string | Optional; omitted in requests     | A short human-readable heading naming the exception (for example, 'Thanksgiving'). Presentation metadata that does not affect schedule evaluation. |
+| valid_from    | string | **Required**; omitted in requests | The first local civil date to which this exception applies, interpreted in the containing Location's `timezone`.                                   |
+| valid_through | string | **Required**; omitted in requests | The last local civil date to which this exception applies, interpreted in the containing Location's `timezone`.                                    |
+
+______________________________________________________________________
+
+### Geo
+
+| Name      | Type   | Requirement  | Description                          |
+| --------- | ------ | ------------ | ------------------------------------ |
+| latitude  | number | **Required** | WGS 84 latitude in decimal degrees.  |
+| longitude | number | **Required** | WGS 84 longitude in decimal degrees. |
 
 ______________________________________________________________________
 
@@ -241,6 +294,49 @@ ______________________________________________________________________
 | address_country | string | Optional    | The country, as a 2-letter ISO 3166-1 alpha-2 code (e.g. "US"). A 3-letter alpha-3 code or full country name MAY also be used. |
 | address_region  | string | Optional    | The first-level administrative region within the country (e.g. a state or province such as California).                        |
 | postal_code     | string | Optional    | The postal code (e.g. "94043").                                                                                                |
+
+______________________________________________________________________
+
+### Location
+
+| Name            | Type                                                                      | Requirement                       | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id              | string                                                                    | **Required**                      | Stable, opaque, Business-scoped Location identifier.                                                                                                                                                                                                                                                                                                                           |
+| name            | string                                                                    | **Required**; omitted in requests | Buyer-facing, Business-owned display name.                                                                                                                                                                                                                                                                                                                                     |
+| address         | [Postal Address](/draft/specification/reference/#postal-address)          | Optional; omitted in requests     | Physical address of the location.                                                                                                                                                                                                                                                                                                                                              |
+| geo             | [Geo](/draft/specification/reference/#geo)                                | Optional; omitted in requests     | Geographic coordinates for the location.                                                                                                                                                                                                                                                                                                                                       |
+| amenities       | object                                                                    | Optional; omitted in requests     | Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.                                                                                                                                                            |
+| hours           | Array\[[Daily Hour](/draft/specification/reference/#daily-hour)\]         | Optional; omitted in requests     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
+| exception_hours | Array\[[Exception Hour](/draft/specification/reference/#exception-hour)\] | Optional; omitted in requests     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
+| timezone        | string                                                                    | Optional; omitted in requests     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
+
+______________________________________________________________________
+
+### Location Distance
+
+| Name   | Type                                       | Requirement  | Description                                                                                                                                                                             |
+| ------ | ------------------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| center | [Geo](/draft/specification/reference/#geo) | **Required** | Explicit center of the radius. The Platform MUST supply it; the Business MUST NOT derive it from context, signals, an IP address, or `serves`.                                          |
+| max    | number                                     | **Required** | Inclusive maximum distance in RFC 7035 distance unit (meters). A Business unable to honor the supplied value MUST reject the request rather than clamp it or substitute another radius. |
+
+______________________________________________________________________
+
+### Location Filter
+
+| Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
+| --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
+| items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+______________________________________________________________________
+
+### Location Serves
+
+| Name    | Type                                       | Requirement | Description                               |
+| ------- | ------------------------------------------ | ----------- | ----------------------------------------- |
+| point   | [Geo](/draft/specification/reference/#geo) | Optional    | WGS 84 coordinates of the service target. |
+| address | any                                        | Optional    | Coarse locality of the service target.    |
 
 ______________________________________________________________________
 
@@ -515,6 +611,15 @@ ______________________________________________________________________
 ### Signed Amount
 
 Monetary amount in the currency's minor unit as defined by ISO 4217. Refer to the currency's exponent to determine minor-to-major ratio (e.g., 2 for USD, 0 for JPY, 3 for KWD). May be negative — the sign is intrinsic to the value (e.g., discounts are negative, charges are positive).
+
+______________________________________________________________________
+
+### Time Interval
+
+| Name   | Type   | Requirement                   | Description                           |
+| ------ | ------ | ----------------------------- | ------------------------------------- |
+| opens  | string | Optional; omitted in requests | Opening time in 24-hour HH:MM format. |
+| closes | string | Optional; omitted in requests | Closing time in 24-hour HH:MM format. |
 
 ______________________________________________________________________
 
@@ -961,10 +1066,10 @@ A payment instrument with selection state.
 
 Pagination parameters for requests.
 
-| Name   | Type    | Requirement | Description                                                        |
-| ------ | ------- | ----------- | ------------------------------------------------------------------ |
-| cursor | string  | Optional    | Opaque cursor from previous response.                              |
-| limit  | integer | Optional    | Requested page size. Implementations MAY clamp to a lower maximum. |
+| Name   | Type    | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| cursor | string  | Optional    | Opaque cursor from previous response.                                                                                                                                                                                                                                                                                                                                                            |
+| limit  | integer | Optional    | Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value. |
 
 ### Pagination Response
 
@@ -1942,6 +2047,22 @@ UCP metadata for catalog responses.
 The `ucp` object included in order responses or events.
 
 UCP metadata for order responses. No payment handlers needed post-purchase.
+
+| Name             | Type   | Requirement  | Description                                                                                                                                    |
+| ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
+| map_order        | object | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
+| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
+| services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
+| payment_handlers | object | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| capabilities     | any    | Optional     |                                                                                                                                                |
+
+### Location Response Metadata
+
+The `ucp` object included in location responses.
+
+UCP metadata for location responses.
 
 | Name             | Type   | Requirement  | Description                                                                                                                                    |
 | ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |

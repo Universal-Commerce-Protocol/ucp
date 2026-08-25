@@ -33,6 +33,26 @@
          <lastmod>2026-08-25</lastmod>
     </url>
     <url>
+         <loc>http://ucp.dev/draft/specification/common/location/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/common/location/lookup/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/common/location/mcp/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/common/location/rest/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/common/location/search/</loc>
+         <lastmod>2026-08-25</lastmod>
+    </url>
+    <url>
          <loc>http://ucp.dev/draft/specification/overview/</loc>
          <lastmod>2026-08-25</lastmod>
     </url>

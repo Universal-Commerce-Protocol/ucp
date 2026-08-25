@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/types/time_interval.json",
+  "title": "Time Interval",
+  "description": "Reusable opening and closing time fields for a containing schedule schema. Containing schemas determine whether the `opens` and `closes` pair is required; this fragment's standalone `{}` is not an interval.",
+  "type": "object",
+  "properties": {
+    "opens": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+      "description": "Opening time in 24-hour HH:MM format.",
+      "ucp_request": "omit"
+    },
+    "closes": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+      "description": "Closing time in 24-hour HH:MM format.",
+      "ucp_request": "omit"
+    }
+  },
+  "dependentRequired": {
+    "opens": [
+      "closes"
+    ],
+    "closes": [
+      "opens"
+    ]
+  }
+}

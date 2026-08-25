@@ -34,6 +34,14 @@ specifications:
 - [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/index.md): User authentication via the Identity Linking Capability, specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and RFC 9207) to unlock personalized commerce data.
 - [Loyalty](http://ucp.dev/draft/specification/common/extensions/loyalty/index.md): Loyalty Extension, enabling high-fidelity member benefit recognition during catalog, cart, and checkout by defining schemas for memberships, tiers, benefits, and reward earning forecasts while managing provisional eligibility claims and enforcing data-minimization privacy rules.
 
+## Location Capability
+
+- [Overview](http://ucp.dev/draft/specification/common/location/index.md): Core Location Capability, detailing physical Location discovery, spatial relations, item availability, operating hours, and amenities.
+- [Search](http://ucp.dev/draft/specification/common/location/search/index.md): Location discovery via the Location Search capability, specifying text queries, spatial relations, and structured filters.
+- [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md): Direct Location retrieval via the Location Lookup capability, specifying identifiers and optional spatial relations and filters.
+- [REST](http://ucp.dev/draft/specification/common/location/rest/index.md): HTTP REST transport binding for the Location Capability, detailing search and lookup endpoints with JSON payload examples.
+- [MCP](http://ucp.dev/draft/specification/common/location/mcp/index.md): Model Context Protocol (MCP) transport binding for the Location Capability, mapping discovery operations to JSON-RPC tools with metadata validation rules.
+
 ## Message Signatures
 
 - [Signatures](http://ucp.dev/draft/specification/signatures/index.md): Implementation details for RFC 9421 HTTP Message Signatures and RFC 9530 Content-Digests to achieve secure, transport-agnostic request authentication and replay protection.

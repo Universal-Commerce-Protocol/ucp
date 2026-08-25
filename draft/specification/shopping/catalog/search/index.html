@@ -608,7 +608,7 @@
   <span class="md-ellipsis">
     
   
-    Extensions
+    Location Capability
   
 
     
@@ -621,6 +621,262 @@
         
         <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Location Capability
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../common/location/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../common/location/search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../common/location/lookup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lookup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_2_4" id="__nav_2_2_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Transports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../common/location/rest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../common/location/mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_3" id="__nav_2_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extensions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3156,14 +3412,16 @@ merchants MAY support additional custom filters via <code>additionalProperties</
 </tbody>
 </table>
 <h2 id="pagination">Pagination<a class="headerlink" href="#pagination" title="Permanent link">&para;</a></h2>
-<p>Cursor-based pagination for list operations. Cursors are opaque strings
-that implementations MAY encode as stateless keyset tokens.</p>
+<p>Cursor-based pagination for list operations. Cursors are opaque strings. A
+Business <strong>MAY</strong> encode them as stateless keyset tokens.</p>
 <h3 id="page-size">Page Size<a class="headerlink" href="#page-size" title="Permanent link">&para;</a></h3>
-<p>The <code>limit</code> parameter is a requested page size, not a guaranteed count.
-Implementations SHOULD accept a page size of at least 10. When the
-requested limit exceeds the implementation's maximum, implementations
-MAY clamp to their maximum silently — returning fewer results without
-error. Clients MUST NOT assume the response size equals the requested limit.</p>
+<p>The <code>limit</code> parameter is a requested page size, not a guaranteed result
+count. When <code>limit</code> is omitted, the Business <strong>MUST</strong> apply a default page
+size. A default of 10 is <strong>RECOMMENDED</strong>, but the Business <strong>MAY</strong> choose
+another value.</p>
+<p>The Business <strong>MAY</strong> return fewer results than the requested or default page
+size, including when enforcing its maximum page size. A Platform <strong>MUST NOT</strong>
+assume that the response count equals either value.</p>
 <h3 id="pagination-request">Pagination Request<a class="headerlink" href="#pagination-request" title="Permanent link">&para;</a></h3>
 <p>Pagination parameters for requests.</p>
 <table>
@@ -3186,7 +3444,7 @@ error. Clients MUST NOT assume the response size equals the requested limit.</p>
 <td style="text-align: left;">limit</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Requested page size. Implementations MAY clamp to a lower maximum.</td>
+<td style="text-align: left;">Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value.</td>
 </tr>
 </tbody>
 </table>
