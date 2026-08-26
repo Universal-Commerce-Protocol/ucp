@@ -627,6 +627,101 @@ def test_resolve_schema_cache_key() -> None:
 
 
 # -----------------------------------------------------------
+# JSONPath subset: bare, indexed and bracket-quoted segments
+# -----------------------------------------------------------
+
+
+def test_jsonpath_quoted_keys() -> None:
+  """Keys that are not bare-legal are reachable in bracket-quoted form.
+
+  UCP uses reverse-domain identifiers and scope tokens as object keys
+  (`dev.ucp.common.identity_linking`, `dev.ucp.shopping.order:read`).
+  Their dots and colons cannot appear in a bare segment, so extract=
+  and target= must accept the quoted form to address them at all.
+  """
+  doc = {
+    "capabilities": {
+      "dev.ucp.common.identity_linking": [{"config": {"scopes": {}}}]
+    },
+    "config": {
+      "scopes": {"dev.ucp.shopping.order:read": {"description": "d"}},
+      "providers": {"com.example.attestor": [{"type": "wallet_attestation"}]},
+    },
+    "messages": [{"code": "identity_optional"}],
+  }
+
+  # Bare and indexed paths are unchanged.
+  _check(
+    "jsonpath_bare_unchanged",
+    v.jsonpath_get(doc, "$.messages")[0]["code"] == "identity_optional",
+  )
+  _check(
+    "jsonpath_index_unchanged",
+    v.jsonpath_get(doc, "$.messages[0]")["code"] == "identity_optional",
+  )
+  _check("jsonpath_root_unchanged", v.jsonpath_get(doc, "$") is doc)
+
+  # Dotted key, with and without a trailing index.
+  _check(
+    "jsonpath_quoted_dotted_key",
+    v.jsonpath_get(doc, "$.config.providers['com.example.attestor'][0]")["type"]
+    == "wallet_attestation",
+  )
+  _check(
+    "jsonpath_quoted_capability_name",
+    v.jsonpath_get(doc, "$.capabilities['dev.ucp.common.identity_linking'][0]")[
+      "config"
+    ]
+    == {"scopes": {}},
+  )
+
+  # Colon-bearing scope token, and the double-quoted spelling.
+  _check(
+    "jsonpath_quoted_scope_token",
+    v.jsonpath_get(doc, "$.config.scopes['dev.ucp.shopping.order:read']")[
+      "description"
+    ]
+    == "d",
+  )
+  _check(
+    "jsonpath_quoted_double_quotes",
+    v.jsonpath_get(doc, '$.config.scopes["dev.ucp.shopping.order:read"]')[
+      "description"
+    ]
+    == "d",
+  )
+
+  # target= writes through the same parser.
+  target = {
+    "config": {"providers": {"com.example.attestor": [{"type": "oauth2"}]}}
+  }
+  v.jsonpath_set(
+    target,
+    "$.config.providers['com.example.attestor'][0]",
+    {"type": "wallet_attestation"},
+  )
+  _check(
+    "jsonpath_set_quoted_key",
+    target["config"]["providers"]["com.example.attestor"][0]["type"]
+    == "wallet_attestation",
+  )
+
+  # Elision paths are reported as JSON Pointers against the same subset.
+  _check(
+    "jsonpath_pointer_quoted_key",
+    v.jsonpath_to_pointer("$.config.providers['com.example.attestor'][0]")
+    == "/config/providers/com.example.attestor/0",
+  )
+
+  # Unparsable segments still raise rather than silently mis-navigating.
+  try:
+    v.jsonpath_get(doc, "$.config.providers.com.example.attestor")
+    _check("jsonpath_unquoted_dotted_key_raises", False, "expected KeyError")
+  except KeyError:
+    _check("jsonpath_unquoted_dotted_key_raises", True)
+
+
+# -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
 
@@ -642,6 +737,7 @@ def main() -> int:
   test_annotation_parsing()
   test_extract_blocks()
   test_scaffold_resolution()
+  test_jsonpath_quoted_keys()
   test_resolve_schema_cache_key()
   test_process_block_integration()
   return _report()
