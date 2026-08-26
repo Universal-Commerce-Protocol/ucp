@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/offer.json",
+  "name": "dev.ucp.shopping.offer",
+  "title": "Offer Extension",
+  "description": "Extends Cart with Business-proposed Cart transitions. An Offer states: given this exact Cart state, the Business proposes this resulting Cart state. Each Offer is bound to the Cart state it was generated against, so a proposal cannot be silently applied to a Cart that has since changed.",
+  "$defs": {
+    "applies_to": {
+      "type": "object",
+      "description": "The exact Cart state this Offer was generated against.",
+      "required": [
+        "cart_id",
+        "state_ref"
+      ],
+      "properties": {
+        "cart_id": {
+          "type": "string",
+          "description": "Identifier of the Cart this Offer applies to. MUST match the Cart carrying the Offer."
+        },
+        "state_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Opaque, implementation-assigned reference to the Cart state this Offer was generated against. Not interpreted by the Platform. The Business MUST reject application when the Cart no longer matches this state, even if the Offer has not expired."
+        }
+      }
+    },
+    "proposed_update": {
+      "type": "object",
+      "description": "The Cart state the Business proposes. Uses existing Cart update semantics; this extension defines no separate mutation vocabulary.",
+      "required": [
+        "line_items"
+      ],
+      "properties": {
+        "line_items": {
+          "type": "array",
+          "items": {
+            "$ref": "types/line_item.json"
+          },
+          "description": "Proposed target line items, using the same full-replacement semantics as a Cart update. Represents the complete resulting line-item state, not a delta."
+        }
+      }
+    },
+    "impact": {
+      "type": "object",
+      "description": "Structured preview of what applying this Offer would change, for agent evaluation. The Cart returned after application remains authoritative.",
+      "required": [
+        "total_delta"
+      ],
+      "properties": {
+        "total_delta": {
+          "$ref": "../common/types/signed_amount.json",
+          "description": "Change to the Cart grand total if this Offer is applied, in the Cart currency's ISO 4217 minor units. Positive when the total increases, negative when it decreases."
+        }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "description": "Non-authoritative display copy. Not decision-relevant: changing it does not change what the Offer proposes.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Short human-readable Offer title (e.g., 'Add a travel charger')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Longer human-readable Offer description."
+        }
+      }
+    },
+    "available_offer": {
+      "type": "object",
+      "description": "An Offer the Business is currently proposing against this Cart state. Applicable only while the source state still matches, it has not expired, and the Business can still honor it. These conditions are conjunctive: a stale but unexpired Offer is not applicable.",
+      "required": [
+        "id",
+        "revision",
+        "applies_to",
+        "expires_at",
+        "proposed_update",
+        "impact"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Business-assigned Offer identifier, stable across revisions."
+        },
+        "revision": {
+          "type": "string",
+          "description": "Business-assigned revision of this Offer. Together with `id` this forms the operational identity of an immutable Offer artifact: any change to decision-relevant terms MUST be issued as a new revision."
+        },
+        "applies_to": {
+          "$ref": "#/$defs/applies_to"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Offer expiry timestamp (RFC 3339). Expiry invalidates the Offer independently of source-state staleness."
+        },
+        "proposed_update": {
+          "$ref": "#/$defs/proposed_update"
+        },
+        "impact": {
+          "$ref": "#/$defs/impact"
+        },
+        "presentation": {
+          "$ref": "#/$defs/presentation"
+        }
+      }
+    },
+    "applied_offer": {
+      "type": "object",
+      "description": "Provenance for an Offer that was applied to this Cart, recording which exact Offer revision caused the transition.",
+      "required": [
+        "id",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of the applied Offer."
+        },
+        "revision": {
+          "type": "string",
+          "description": "Revision of the applied Offer."
+        },
+        "affected_line_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Identifiers of the Cart line items this Offer created or changed."
+        }
+      }
+    },
+    "offers_object": {
+      "type": "object",
+      "description": "Offers currently proposed against this Cart, and Offers already applied to it.",
+      "properties": {
+        "available": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/available_offer"
+          },
+          "description": "Offers the Business proposes against the current Cart state. Applying one changes the Cart state and makes sibling Offers bound to the previous state stale.",
+          "ucp_request": "omit"
+        },
+        "applied": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/applied_offer"
+          },
+          "description": "Offers already applied to this Cart, most recent last.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Offers",
+      "description": "Cart extended with Offer capability.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "offers": {
+              "$ref": "#/$defs/offers_object",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
