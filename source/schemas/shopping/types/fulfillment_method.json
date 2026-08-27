@@ -33,7 +33,7 @@
         "type": "string"
       },
       "ucp_request": {
-        "create": "optional",
+        "create": "omit",
         "update": "required"
       }
     },

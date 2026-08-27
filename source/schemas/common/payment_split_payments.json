@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/payment_split_payments.json",
+  "name": "dev.ucp.common.payment.split_payments",
+  "title": "Payment Split Payments Extension",
+  "description": "Enables Buyers to use multiple payment instruments for a single session.",
+  "$defs": {
+    "instrument_group": {
+      "$ref": "types/instrument_group.json"
+    },
+    "payment_instrument": {
+      "title": "Payment Instrument (Split Payments)",
+      "description": "Payment instrument extended with an optional per-instrument amount for split payments.",
+      "allOf": [
+        { "$ref": "types/payment_instrument.json" },
+        {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "$ref": "types/amount.json",
+              "description": "Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's `currency`. On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed)."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Split Payments",
+      "description": "Checkout extended with split payment instrument amounts.",
+      "allOf": [
+        { "$ref": "../shopping/checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "object",
+              "properties": {
+                "instruments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/payment_instrument"
+                  },
+                  "description": "Payment instruments in allocation priority order.",
+                  "ucp_request": {
+                    "create": "optional",
+                    "update": "optional",
+                    "complete": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.common.payment.split_payments": {
+      "business_schema": {
+        "title": "Split Payments Capability (Business)",
+        "description": "Business-level split payments capability configuration.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/business_split_payments_config.json",
+                "description": "Business split payments configuration"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

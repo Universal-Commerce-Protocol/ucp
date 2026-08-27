@@ -125,7 +125,7 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 **Prerequisites Output:**
 
 The `prerequisites_output` contains what a participant receives from onboarding.
-At minimum, this includes an **identity** (see [Payment Identity](site:schemas/shopping/types/payment_identity.json)).
+At minimum, this includes an **identity** (see [Payment Identity](site:schemas/common/types/payment_identity.json)).
 It **MAY** also include additional configuration, credentials, or settings
 specific to the handler.
 
@@ -190,9 +190,32 @@ and desired configuration.
 restrictions on instrument types or constraints — it supports the full set of
 instrument types defined by its handler schema. When present, it narrows the
 advertised types and/or applies additional constraints (e.g., limiting card
-brands to `["visa", "mastercard"]`). In a Business profile and authoritative
+brands to `visa` and `mastercard`). In a Business profile and authoritative
 response, array order communicates preferred instrument presentation, earliest
 first.
+
+Each entry narrows along two axes. Both are
+[Constraint Expressions](../overview/index.md#constraint-expression), so one
+evaluator runs both; they differ only in the object they describe:
+
+```text
+available_instruments[]
+├── type                       selects an instrument schema
+├── constraints                describes that schema's `constraint_target`
+└── ucp.request_constraints    describes the request that submits it, via `path`
+```
+
+`constraints` admits no `path`. Its object is standing, not selected: the
+instrument schema for the entry's `type` declares it as `$defs/constraint_target`,
+and keys in `properties` name that object's members. The target holds what the
+Business derives rather than receives — for cards, `brand`, read from the account
+number and surviving tokenization — which is why those values cannot be expressed
+as requirements on request data.
+
+`ucp.request_constraints` carries everything that *is* on the wire: which
+instrument fields are required, which credential types are accepted, and which
+fields each of those credential types must carry. Use field requirements rather
+than handler-specific booleans for modeled data.
 
 When an authoritative response includes `ucp.request_constraints` on an
 available instrument, the Business **MUST** include an explicit `path` because
@@ -202,6 +225,48 @@ to submitted `handler_id` and the available instrument's `type` to submitted
 `type`, and applies when the next request contains matching instruments.
 Payment-handler and instrument specifications define any stronger association
 the query needs. See [Request Constraints](../overview/index.md#request-constraints).
+
+One path selects the submitted instrument, and one Constraint Expression
+describes it. Requirements shared by every instrument of the type are sibling
+members; requirements that differ per credential family are `anyOf` branches on
+the nested `credential` object. Splitting the credential families into distinct
+schemas is what gives each branch a stable discriminator.
+
+<!-- ucp:example schema=payment_handler def=business_schema -->
+```json
+{
+  "id": "processor_tokenizer_1234",
+  "version": "{{ ucp_version }}",
+  "available_instruments": [
+    {
+      "type": "card",
+      "constraints": { "properties": { "brand": { "enum": ["visa", "mastercard"] } } },
+      "ucp": {
+        "request_constraints": {
+          "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_tokenizer_1234' && @['type'] == 'card']",
+          "required": ["billing_address", "credential"],
+          "properties": {
+            "billing_address": { "required": ["postal_code", "address_country"] },
+            "credential": {
+              "anyOf": [
+                { "properties": { "type": { "const": "pan" } }, "required": ["cvc"] },
+                { "properties": { "type": { "const": "network_token" } } }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+The sibling members apply to every card instrument from this handler. The
+branches accept either a PAN credential carrying a `cvc` or a network token,
+which `network_token_credential.json` already requires to carry a `cryptogram`;
+a credential of any other type satisfies neither branch. Declared constraints
+are the upfront minimum; dynamic requirements still use recoverable errors and
+[`message_error.path`](site:schemas/common/types/message_error.json).
 
 ---
 
@@ -230,7 +295,7 @@ and typically includes different configuration:
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -254,7 +319,7 @@ and typically includes different configuration:
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard", "amex", "discover"]
+        "properties": { "brand": { "enum": ["visa", "mastercard", "amex", "discover"] } }
       }
     }
   ],
@@ -276,7 +341,7 @@ and typically includes different configuration:
     {
       "type": "card",
       "constraints": {
-        "brands": ["visa", "mastercard"]
+        "properties": { "brand": { "enum": ["visa", "mastercard"] } }
       }
     }
   ],
@@ -316,9 +381,9 @@ authoritative value returned in the `response_schema`.
 
 | Source | `available_instruments` |
 | :----- | :---------------------- |
-| Platform profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex", "discover"]}}]` |
-| Business profile | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
-| **Response (resolved)** | `[{type: "card", constraints: {brands: ["visa", "mastercard", "amex"]}}]` |
+| Platform profile | `[{type: "card", constraints: {properties: {brand: {enum: ["visa", "mastercard", "amex", "discover"]}}}}]` |
+| Business profile | `[{type: "card", constraints: {properties: {brand: {enum: ["visa", "mastercard", "amex"]}}}}]` |
+| **Response (resolved)** | `[{type: "card", constraints: {properties: {brand: {enum: ["visa", "mastercard", "amex"]}}}}]` |
 
 In this example, the business's PSP is not configured for Discover, so Discover
 is excluded from the response even though the platform supports it.
@@ -509,29 +574,28 @@ Each variant has its own config schema tailored to its context:
 
 | Schema                                                                                     | Description                                                      |
 | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [`payment_instrument.json`](site:schemas/shopping/types/payment_instrument.json)           | Base: id, handler_id, type, billing_address, credential, display |
-| [`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json) | Extends base with display: brand, last_digits, expiry, card art  |
+| [`payment_instrument.json`](site:schemas/common/types/payment_instrument.json)             | Base: id, handler_id, type, billing_address, credential, display |
+| [`card_payment_instrument.json`](site:schemas/common/types/card_payment_instrument.json)   | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec
 authors **MAY** extend any of the base instruments to add handler-specific
 display data or customize the credential reference. Handlers **MAY** define
 multiple instrument types for different payment flows.
 
-**Available Instrument Schemas:**
+**Constraint Targets:**
 
-Each instrument schema defines its own `available_*` variant in `$defs` that
-specifies what constraints are valid for that instrument type. For example,
-[`card_payment_instrument.json`](site:schemas/shopping/types/card_payment_instrument.json)
-defines `available_card_payment_instrument` with a `brands` constraint.
-
-| Schema                                                                                                 | Constraints                                                     |
-| :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| [`available_payment_instrument.json`](site:schemas/shopping/types/available_payment_instrument.json)   | Base: type, constraints (open object)                           |
-| `card_payment_instrument.json#/$defs/available_card_payment_instrument`                                | Extends base with `constraints.brands` for card networks        |
-
-Handlers reference these instrument-defined schemas when declaring
-`available_instruments`. The **instrument schema authors** define what
-constraints are meaningful (e.g., `brands` for cards), and **platforms/businesses** use this to advertise what they support (e.g., `["visa", "mastercard"]`).
+An instrument schema declares what its availability constraints may name in
+`$defs/constraint_target`: a plain object of members and their types, never
+carried in a payload. The handler's `payment_instrument` set binds each `type`
+to the schema that owns its target.
+[`card_payment_instrument.json`](site:schemas/common/types/card_payment_instrument.json)
+declares `brand` as a string, so
+`{ "properties": { "brand": { "enum": ["visa", "mastercard"] } } }` names a
+declared member and pins it to string values. The base Payment Handler validates
+the grammar, so a malformed `constraints` fails everywhere; the target supplies
+the meaning, so naming an undeclared member or pinning the wrong type is
+reportable without the base dispatching on `type`. A handler extending an
+instrument **SHOULD** extend that instrument's target rather than restate it.
 
 **Example `types/tokenizer_instrument.json`**:
 
@@ -544,24 +608,17 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
   "description": "Card-based payment instrument for com.example.tokenizer.",
 
   "$defs": {
-    "available_tokenizer_card": {
-      "title": "Available Tokenizer Card",
-      "description": "Card instrument availability with tokenizer-specific constraints.",
+    "constraint_target": {
+      "title": "Tokenizer Card Constraint Target",
+      "description": "Extends the card target with tokenizer-specific members.",
       "allOf": [
-        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json#/$defs/available_card_payment_instrument" },
+        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/card_payment_instrument.json#/$defs/constraint_target" },
         {
           "type": "object",
           "properties": {
-            "type": { "const": "tokenizer_card" },
-            "constraints": {
-              "type": "object",
-              "properties": {
-                "tokenization_types": {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "description": "Supported tokenization types (e.g., ['network_token', 'merchant_token'])."
-                }
-              }
+            "tokenization_type": {
+              "type": "string",
+              "description": "How the credential was tokenized (e.g., 'network_token', 'merchant_token')."
             }
           }
         }
@@ -570,7 +627,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
   },
 
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/card_payment_instrument.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/card_payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -600,7 +657,7 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
   "title": "Tokenizer Alt Instrument",
   "description": "Alternative payment instrument for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/payment_instrument.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/payment_instrument.json" }
   ],
   "type": "object",
   "required": ["type"],
@@ -626,10 +683,12 @@ constraints are meaningful (e.g., `brands` for cards), and **platforms/businesse
 
 **Base Credential Schemas:**
 
-| Schema                                                                           | Description                   |
-| :------------------------------------------------------------------------------- | :---------------------------- |
-| [`payment_credential.json`](site:schemas/shopping/types/payment_credential.json) | Base: type discriminator only |
-| [`token_credential.json`](site:schemas/shopping/types/token_credential.json)     | Token: type + token string    |
+| Schema                                                                                         | Description                                 |
+| :--------------------------------------------------------------------------------------------- | :------------------------------------------ |
+| [`payment_credential.json`](site:schemas/common/types/payment_credential.json)                 | Base: type discriminator only               |
+| [`token_credential.json`](site:schemas/common/types/token_credential.json)                     | Token: type + token string                  |
+| [`pan_credential.json`](site:schemas/common/types/pan_credential.json)                         | Raw FPAN, verified with `cvc`. Source only. |
+| [`network_token_credential.json`](site:schemas/common/types/network_token_credential.json)     | Network token, verified with `cryptogram`   |
 
 UCP provides base schemas for universal payment credentials. Authors **MAY**
 extend these schemas to include handler-specific credential context. Handlers
@@ -652,7 +711,7 @@ refresh credentials.
   "title": "Tokenizer Card Token",
   "description": "Card token credential for com.example.tokenizer.",
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -680,7 +739,7 @@ refresh credentials.
   "title": "Tokenizer Alt Token",
   "description": "Alt token credential for com.example.tokenizer, adding routing hints",
   "allOf": [
-    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/types/token_credential.json" }
+    { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/common/types/token_credential.json" }
   ],
   "type": "object",
   "required": ["type", "token", "expiry"],
@@ -718,21 +777,21 @@ INSTRUMENT_ACQUISITION(
 ) → checkout_instrument
 ```
 
-| Field                           | Description                                                              |
-| :------------------------------ | :----------------------------------------------------------------------- |
-| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required |
-| `handler_declaration.config`    | Handler-specific configuration from the business                         |
-| `binding`                       | **(See 2.6)** Context for binding the credential to a specific checkout  |
-| `buyer_input`                   | Buyer's payment selection or credentials                                 |
-| `checkout_instrument`           | The payment instrument to submit at checkout                             |
+| Field                           | Description                                                                    |
+| :------------------------------ | :----------------------------------------------------------------------------- |
+| `platform_prerequisites_output` | platform's prerequisites output (config), if prerequisites were required       |
+| `handler_declaration.config`    | Handler-specific configuration from the business                               |
+| `binding`                       | **(See 2.6)** Context binding the credential to a specific capability resource |
+| `buyer_input`                   | Buyer's payment selection or credentials                                       |
+| `checkout_instrument`           | The payment instrument to submit at checkout                                   |
 
 Payment handler specifications do NOT need to define a formal process for
 instrument acquisition. Instead, the specification **SHOULD** clearly document:
 
 - How to apply the handler's `config` to construct a valid `checkout_instrument`.
-- How to create an effective credential binding to the specific checkout and
-  business for usage, which is critical for security, based on the available
-  `config` and `checkout`.
+- How to create an effective credential binding to the specific capability
+  resource, which is critical for security, based on the available `config`
+  and `binding`.
 
 ### Payment Actions
 
@@ -744,9 +803,9 @@ Handler authors have two options:
 
 - **Use the standard Payment Authentication extension.** Handlers that need
   device data collection or a 3DS challenge use
-  [`dev.ucp.shopping.payment_authentication`](authentication.md), which
-  defines the `dev.ucp.payment.device_data_collection` and
-  `dev.ucp.payment.three_ds_challenge` Action types. The handler specification
+  [`dev.ucp.common.payment.authentication`](extensions/authentication.md), which
+  defines the `dev.ucp.common.payment.device_data_collection` and
+  `dev.ucp.common.payment.three_ds_challenge` Action types. The handler specification
   states which types it can cause and any provider-specific trust or fallback
   requirements, such as allowed origins.
 - **Define handler-specific Actions.** When the standard types do not fit, the
@@ -760,7 +819,7 @@ its completion, whether processing the same occurrence is ever safe to retry,
 and its trust, failure, abandonment, and fallback behavior.
 
 See [Overview — Actions](../overview/index.md#actions) for the common envelope and
-[Schema Authoring — Extension-Declared Action Types](site:documentation/schema-authoring.html)
+[Schema Authoring — Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types)
 for the extension schema pattern.
 
 ### Processing
@@ -796,9 +855,9 @@ error messages to the buyer regardless of the underlying processor.
 
 ### Key Definitions
 
-| Term        | Definition                                                                                                                                                                                                                                    |
-| :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Binding** | A cryptographic or logical association of a payment instrument to a specific checkout transaction and business identity. This prevents replay attacks where a valid credential intended for Business A is intercepted and used at Business B. |
+| Term        | Definition                                                                                                                                                                                                                                                                             |
+| :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Binding** | A logical association of a payment instrument to a specific capability resource, identified by `type` and `id`. This prevents replay attacks where a credential intended for one resource is intercepted and used against another. Distinct from the participant a token is issued to. |
 
 ---
 
@@ -905,7 +964,7 @@ specifications:
 
 | Practice                         | Description                                                                    |
 | :------------------------------- | :----------------------------------------------------------------------------- |
-| **Require binding**              | Always tie credentials to a specific checkout via `binding`.                   |
+| **Require binding**              | Always tie credentials to a specific capability resource via `binding`.        |
 | **Minimize credential exposure** | Design flows so raw credentials (PANs, etc.) touch as few systems as possible. |
 | **Specify token lifetimes**      | Document whether tokens are single-use, time-limited, or session-scoped.       |
 

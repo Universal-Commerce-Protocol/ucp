@@ -167,7 +167,7 @@ core capabilities.
     {
       "version": "{{ ucp_version }}",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
@@ -186,8 +186,8 @@ up-to-date list.
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
-| `dev.ucp.shopping.payment_authentication` | checkout | Browser-surface device data collection and 3DS challenges |
-| `dev.ucp.shopping.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
+| `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
+| `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
 
 ### Services
@@ -290,7 +290,7 @@ authentication are resolved together.
       }],
       "dev.ucp.shopping.fulfillment": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]

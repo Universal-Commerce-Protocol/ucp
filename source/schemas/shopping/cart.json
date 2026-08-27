@@ -45,16 +45,7 @@
     "id": {
       "type": "string",
       "description": "Unique cart identifier.",
-      "ucp_request": {
-        "create": "omit",
-        "update": {
-          "transition": {
-            "from": "required",
-            "to": "omit",
-            "description": "Id should be omitted in requests to favour transport level identifications (no duplication needed)."
-          }
-        }
-      }
+      "ucp_request": "omit"
     },
     "line_items": {
       "type": "array",
@@ -62,40 +53,25 @@
         "$ref": "types/line_item.json"
       },
       "description": "Cart line items. Same structure as checkout. Full replacement on update.",
-      "ucp_request": {
-        "create": "required",
-        "update": "required"
-      }
+      "ucp_request": "required"
     },
     "context": {
       "$ref": "../common/types/context.json",
       "description": "Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "signals": {
       "$ref": "../common/types/signals.json",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "attribution": {
       "$ref": "types/attribution.json",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "buyer": {
       "$ref": "types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "currency": {
       "type": "string",

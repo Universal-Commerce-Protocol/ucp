@@ -90,7 +90,7 @@ business **MAY** populate it from stored state on the response (for example,
 
 Identity linking provides the authenticated user context for these values.
 Subject to the scopes that gate the operation, a business **MAY** return the
-user's loyalty membership in `loyalty` (see [Loyalty](../../loyalty.md)), saved
+user's loyalty membership in `loyalty` (see [Loyalty](../extensions/loyalty.md)), saved
 payment instruments in `payment.instruments[]` (see [Checkout](../../shopping/checkout/index.md)), or
 buyer profile data in `buyer`.
 
