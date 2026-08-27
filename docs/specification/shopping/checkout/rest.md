@@ -240,7 +240,7 @@ unchanged and return the current Checkout with a recoverable error Message.
 When the buyer-consent capability is active, captured `buyer.consent` is exempt
 from the full replacement: an update that omits `consent` MUST NOT clear
 previously submitted consent. See
-[Buyer Consent](../../buyer-consent.md#normative-requirements).
+[Buyer Consent](../extensions/buyer-consent.md#normative-requirements).
 
 #### Update Buyer Info
 
@@ -250,7 +250,7 @@ Update Checkout replaces the entire Checkout session, so the Platform **MUST**
 include all previously set fields it intends to retain. Captured `buyer.consent`
 is the exception when the buyer-consent capability is active: an update that omits
 `consent` MUST NOT clear it (see
-[Buyer Consent](../../buyer-consent.md#normative-requirements)).
+[Buyer Consent](../extensions/buyer-consent.md#normative-requirements)).
 
 === "Request"
 
