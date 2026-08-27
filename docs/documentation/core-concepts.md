@@ -151,7 +151,10 @@ up-to-date list.
 | `dev.ucp.shopping.catalog.search` | Search across a business catalog |
 | `dev.ucp.shopping.catalog.lookup` | Retrieve a specific product by ID |
 | `dev.ucp.shopping.order` | Order lifecycle events |
+| `dev.ucp.shopping.permalink` | Shareable links to pre-populated carts and products |
 | `dev.ucp.common.identity_linking` | OAuth-based account linking |
+| `dev.ucp.common.location.search` | Search for physical stores and pickup locations |
+| `dev.ucp.common.location.lookup` | Retrieve location details, operating hours, and amenities |
 
 ### Extensions
 
@@ -186,15 +189,18 @@ up-to-date list.
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
+| `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
+| `dev.ucp.common.loyalty` | checkout, cart, catalog | Member benefits, rewards, and points earning |
 | `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
 | `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
-| `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
+| `dev.ucp.common.payment.split_payments` | checkout | Multi-instrument allocation and split settlements |
+| `dev.ucp.common.payment.payment_terms` | checkout | Deposits, installments, and deferred payment schedules |
 
 ### Services
 
-**Services** group the operations and events for a vertical under a
-reverse-domain registry key (e.g., `dev.ucp.shopping`). The key identifies the
-service: a service declares *what* functionality exists for that vertical, and
+**Services** group the operations and events for a vertical or common domain under a
+reverse-domain registry key (e.g., `dev.ucp.shopping`, `dev.ucp.common`). The key identifies the
+service: a service declares *what* functionality exists for that vertical or domain, and
 each entry in its array declares *how* it is accessed over a transport binding.
 
 A single service can be accessed via multiple transport bindings:
