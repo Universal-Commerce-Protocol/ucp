@@ -6,7 +6,7 @@ ______________________________________________________________________
 
 ## August 25, 2026: Protocol Release v2026-08-25
 
-We have released version v2026-08-25 of the protocol. This release introduces major protocol enhancements, key structural refactorings to support multi-vertical expansion, payments security improvements (3DS2) and structured request constraints, independent capability versioning, and grocery vertical readiness.
+We have released version v2026-08-25 of the protocol. This release introduces major protocol enhancements, key structural refactorings to support multi-vertical expansion, payments security improvements (3DS2), structured request constraints, independent capability versioning, grocery shopping readiness and many more.
 
 See the [v2026-08-25 Release Notes](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25) for details on the changes.
 
