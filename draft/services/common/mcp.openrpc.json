@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Common Service",
     "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility.",
-    "version": "2026-08-25"
+    "version": "2026-08-27"
   },
   "servers": [
     {

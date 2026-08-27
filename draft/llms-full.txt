@@ -14,6 +14,9 @@ specifications:
   Specification Index](https://ucp.dev/latest/llms.txt):
   Standardized specifications for production deployments.
 - [UCP Specification Index
+  (2026-08-25)](https://ucp.dev/2026-08-25/llms.txt):
+  Stable spec release version 2026-08-25.
+- [UCP Specification Index
   (2026-04-08)](https://ucp.dev/2026-04-08/llms.txt):
   Stable spec release version 2026-04-08.
 - [UCP Specification Index
