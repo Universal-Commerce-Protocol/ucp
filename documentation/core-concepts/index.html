@@ -1519,8 +1519,20 @@ up-to-date list.</p>
 <td style="text-align: left;">Order lifecycle events</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.permalink</code></td>
+<td style="text-align: left;">Shareable links to pre-populated carts and products</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>dev.ucp.common.identity_linking</code></td>
 <td style="text-align: left;">OAuth-based account linking</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.common.location.search</code></td>
+<td style="text-align: left;">Search for physical stores and pickup locations</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.common.location.lookup</code></td>
+<td style="text-align: left;">Retrieve location details, operating hours, and amenities</td>
 </tr>
 </tbody>
 </table>
@@ -1567,6 +1579,16 @@ up-to-date list.</p>
 <td style="text-align: left;">Shipping and delivery options</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>dev.ucp.shopping.buyer_consent</code></td>
+<td style="text-align: left;">checkout, cart</td>
+<td style="text-align: left;">Explicit consent capture</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.common.loyalty</code></td>
+<td style="text-align: left;">checkout, cart, catalog</td>
+<td style="text-align: left;">Member benefits, rewards, and points earning</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>dev.ucp.common.payment.authentication</code></td>
 <td style="text-align: left;">checkout</td>
 <td style="text-align: left;">Browser-surface device data collection and 3DS challenges</td>
@@ -1577,16 +1599,21 @@ up-to-date list.</p>
 <td style="text-align: left;">Non-repudiable authorization for autonomous commerce</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>dev.ucp.shopping.buyer_consent</code></td>
-<td style="text-align: left;">checkout, cart</td>
-<td style="text-align: left;">Explicit consent capture</td>
+<td style="text-align: left;"><code>dev.ucp.common.payment.split_payments</code></td>
+<td style="text-align: left;">checkout</td>
+<td style="text-align: left;">Multi-instrument allocation and split settlements</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.common.payment.payment_terms</code></td>
+<td style="text-align: left;">checkout</td>
+<td style="text-align: left;">Deposits, installments, and deferred payment schedules</td>
 </tr>
 </tbody>
 </table>
 <h3 id="services">Services<a class="headerlink" href="#services" title="Permanent link">&para;</a></h3>
-<p><strong>Services</strong> group the operations and events for a vertical under a
-reverse-domain registry key (e.g., <code>dev.ucp.shopping</code>). The key identifies the
-service: a service declares <em>what</em> functionality exists for that vertical, and
+<p><strong>Services</strong> group the operations and events for a vertical or common domain under a
+reverse-domain registry key (e.g., <code>dev.ucp.shopping</code>, <code>dev.ucp.common</code>). The key identifies the
+service: a service declares <em>what</em> functionality exists for that vertical or domain, and
 each entry in its array declares <em>how</em> it is accessed over a transport binding.</p>
 <p>A single service can be accessed via multiple transport bindings:</p>
 <table>
