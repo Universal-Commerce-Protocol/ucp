@@ -20,7 +20,7 @@
         "state_ref": {
           "type": "string",
           "minLength": 1,
-          "description": "Opaque, implementation-assigned reference to the Cart state this Offer was generated against. Not interpreted by the Platform. The Business MUST reject application when the Cart no longer matches this state, even if the Offer has not expired."
+          "description": "Opaque, implementation-assigned reference to the exact Cart state this Offer was generated against. Not interpreted by the Platform. The Business MUST determine whether the source state still matches using exact token-value equality between this value and its current state reference for the Cart. Implementations MUST NOT parse, normalize, canonicalize, or semantically compare state_ref values. The Business MUST reject a new application attempt when the Cart no longer matches this state, even if the Offer has not expired."
         }
       }
     },
