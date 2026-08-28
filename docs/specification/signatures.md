@@ -823,6 +823,13 @@ Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" ...);key
 Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 ```
 
+Some bindings also carry the key inside the request payload (over MCP,
+`meta["idempotency-key"]` in the tool arguments). When the request is
+signed, the covered `Idempotency-Key` header is authoritative for the
+idempotency key; a payload copy of the key **MUST** equal it, and
+Businesses **MUST** reject a mismatch without executing. On unsigned
+requests, the payload copy alone is authoritative.
+
 **Idempotency Key Requirements:**
 
 | Requirement | Value |
@@ -834,18 +841,43 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 | **On duplicate (mismatched payload)** | Reject with `409 Conflict` (REST) / `-32000` (MCP); do not execute |
 | **On storage failure** | Fail closed (reject request with 503) |
 
-**Payload Matching:** Businesses **MUST** detect whether the payload of
-a duplicate-key request matches the payload of the original by
-comparing the SHA-256 hash of the raw body bytes — the same digest
-RFC 9530 mandates as `Content-Digest`. When signing is in use, this
-value is supplied in the `Content-Digest` header and the Intermediary
-Warning above guarantees byte fidelity end-to-end; businesses persist
-it alongside the idempotency key. For unsigned requests, businesses
-compute the same digest from the received body bytes. Platforms
-therefore **MUST** generate a fresh idempotency key whenever they
-modify the request payload — including retries with modified payment
-instruments, updated shipping addresses, swapped line items, or any
-other change to the request body.
+**Payload Matching:** Payload identity is defined per operation, by
+whether the operation's arguments carry anything beyond `meta` and the
+target resource identifier — a class decidable from the operation's
+input schema alone, not from the transport envelope:
+
+* **Target-only operations.** The operation's arguments carry nothing
+  beyond `meta` and the target resource identifier (the path parameter
+  for REST, the top-level `id` argument for MCP) — `cancel_checkout` is
+  in this class by schema. Payload identity is the pair (idempotency
+  key, target resource identifier); Businesses persist the identifier
+  alongside the key. Businesses **MUST** treat a request as a replay,
+  and return the stored result, when its key matches a stored key and
+  its target resource identifier matches the identifier stored with
+  that key. Businesses **MUST** reject, without executing, a request
+  whose key matches a stored key but whose target resource identifier
+  differs from the identifier stored with that key. No hashing or
+  canonicalization applies to this class.
+* **Payload-carrying operations.** The operation's arguments carry
+  anything beyond `meta` and the target resource identifier —
+  `complete_checkout` is in this class by schema. Businesses **MUST**
+  detect a payload mismatch by comparing the SHA-256 hash of the
+  operation's arguments with the transport envelope excluded (the
+  request body for REST; the `params.arguments` object with `meta`
+  removed for MCP) — not the full JSON-RPC message bytes, whose
+  envelope fields (the JSON-RPC `id`, `meta`) are guaranteed to vary
+  per retry. Businesses persist this hash alongside the key; for REST
+  the hashed input remains the raw body bytes, the same digest RFC 9530
+  mandates as `Content-Digest`. The Business computes both the stored
+  and the compared hash itself, from each request as received, applying
+  the same deterministic procedure to exclude `meta`; no cross-party
+  canonical form is defined or needed, which preserves the spec's
+  no-canonicalization posture.
+
+Platforms **MUST** generate a fresh idempotency key whenever they modify
+a payload-carrying operation's arguments — including retries with
+modified payment instruments, updated shipping addresses, swapped line
+items, or any other change to the request payload.
 
 **Note:** For **default UCP** signatures, the RFC 9421 `created`
 parameter is **OPTIONAL** and replay protection is handled at the
