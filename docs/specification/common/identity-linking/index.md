@@ -986,17 +986,23 @@ primary proof). A business **MAY** declare both `oauth2` and
 `wallet_attestation` provider entries in `config.providers` to cover the
 full set of entitlements its commerce flow needs.
 
-Wallet attestation also serves **agent-as-buyer** flows. Autonomous agents
-transacting on-chain have wallets but typically cannot complete OAuth flows
-that depend on browser-based user consent. The wallet's chain state
-captures durable proof of prior consent already established when the
-wallet was funded or provisioned; the attestation reads that prior consent
-rather than negotiating fresh consent per request. For these flows, wallet
-attestation is the direct way to prove a chain-state-bound entitlement: the
-wallet is the credential, and the condition is evaluated against state the
-wallet already carries — no account to log into, no token to issue. It
-complements account-based mechanisms rather than replacing them; those remain
-the right tool for entitlements that live in a merchant or IdP account.
+Wallet attestation also serves **agent-as-buyer** flows. OAuth identity
+linking presupposes a prior human consent event and an account the buyer can
+authenticate against; an autonomous agent transacting on-chain, with no human
+in the loop at transaction time, has neither. Wallet attestation requires
+neither, because the entitlement it evaluates is recorded in chain state
+rather than held in an account. For these flows the wallet is the subject of
+the proof: the business supplies a predicate, and the attestation reports
+whether chain state satisfies it at the attested block — no account to log
+into, no token to issue. It complements account-based mechanisms rather than
+replacing them; those remain the right tool for entitlements that live in a
+merchant or IdP account.
+
+This mechanism establishes that the attested wallet satisfies the predicate.
+It does **not** establish that the party presenting the attestation controls
+that wallet. A business **MUST NOT** treat an attestation alone as proof that
+the requester controls the attested wallet; the platform presenting it is
+responsible for establishing that binding.
 
 ### Provider Declaration
 
