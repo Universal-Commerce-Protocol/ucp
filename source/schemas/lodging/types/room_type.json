@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/room_type.json",
+  "title": "Room Type",
+  "description": "Physical room real estate attributes.",
+  "type": "object",
+  "required": [
+    "id",
+    "title"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the physical room type.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the room type.",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the room type.",
+      "ucp_request": "omit"
+    },
+    "capacity": {
+      "$ref": "capacity.json",
+      "description": "Capacity details of the room type.",
+      "ucp_request": "omit"
+    },
+    "image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "List of image URIs for the room type.",
+      "ucp_request": "omit"
+    }
+  }
+}

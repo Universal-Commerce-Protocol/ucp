@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/room_rate.json",
+  "title": "Room Rate",
+  "description": "Compound binding schema linking a physical room type, commercial rate plan, occupancy, guest assignments, optional add-ons, and pricing totals.",
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "anyOf": [
+    {
+      "properties": {
+        "id": {
+          "ucp_request": {
+            "create": "required",
+            "update": "required",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "room_type",
+        "rate_plan"
+      ],
+      "properties": {
+        "room_type": {
+          "properties": {
+            "id": {
+              "ucp_request": {
+                "create": "required",
+                "update": "required",
+                "complete": "omit"
+              }
+            }
+          }
+        },
+        "rate_plan": {
+          "properties": {
+            "id": {
+              "ucp_request": {
+                "create": "required",
+                "update": "required",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, opaque unique identifier of the room rate binding.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "room_type": {
+      "$ref": "room_type.json",
+      "description": "Physical room real estate attributes."
+    },
+    "rate_plan": {
+      "$ref": "rate_plan.json",
+      "description": "Commercial rate policy contract."
+    },
+    "occupancy": {
+      "$ref": "occupancy.json",
+      "description": "Occupancy breakdown and guest count for this room."
+    },
+    "guest_assignments": {
+      "type": "array",
+      "items": {
+        "$ref": "guest_assignment.json"
+      },
+      "description": "List of guest assignments for this room."
+    },
+    "totals": {
+      "$ref": "../../common/types/totals.json",
+      "description": "Totals breakdown for this room rate.",
+      "ucp_request": "omit"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/date_interval.json",
+  "title": "Date Interval",
+  "type": "object",
+  "properties": {
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of the interval in ISO 8601 format."
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of the interval in ISO 8601 format."
+    }
+  }
+}

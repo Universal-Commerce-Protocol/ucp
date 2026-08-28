@@ -1,0 +1,79 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.lodging.booking": [
+        { "version": "2026-01-01" }
+      ]
+    },
+    "payment_handlers": {}
+  },
+  "id": "booking_scaffold",
+  "status": "incomplete",
+  "accommodation": {
+    "id": "acc_scaffold",
+    "name": "Scaffold Hotel",
+    "address": {
+      "street_address": "123 Scaffold Way",
+      "address_locality": "Scaffold City",
+      "address_region": "CA",
+      "address_country": "US",
+      "postal_code": "94043"
+    }
+  },
+  "room_rates": [
+    {
+      "id": "rr_scaffold",
+      "room_details": {
+        "id": "room_scaffold",
+        "title": "Scaffold Room",
+        "capacity": {
+          "adults": 2,
+          "total": 2
+        }
+      },
+      "rate_plan": {
+        "id": "rp_scaffold",
+        "title": "Scaffold Rate"
+      },
+      "occupancy": {
+        "adults": 1,
+        "total": 1
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 1000
+        },
+        {
+          "type": "total",
+          "amount": 1000
+        }
+      ]
+    }
+  ],
+  "itinerary": {
+    "start_date": "2026-01-01",
+    "end_date": "2026-01-05"
+  },
+  "currency": "USD",
+  "totals": [
+    {
+      "type": "subtotal",
+      "amount": 1000
+    },
+    {
+      "type": "total",
+      "amount": 1000
+    }
+  ],
+  "links": [
+    {
+      "type": "terms_of_service",
+      "url": "https://example.com/terms"
+    }
+  ],
+  "continue_url": "https://example.com/booking-sessions/scaffold",
+  "expires_at": "2026-01-01T12:00:00Z"
+}

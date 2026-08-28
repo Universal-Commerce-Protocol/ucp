@@ -1,0 +1,211 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Lodging Service",
+    "description": "Canonical MCP/JSON-RPC interface for UCP Lodging service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.lodging\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
+  },
+  "servers": [
+    {
+      "name": "business",
+      "url": "{endpoint}",
+      "description": "Business-provided endpoint from UCP discovery profile",
+      "variables": {
+        "endpoint": {
+          "default": "https://hotel.example.com/ucp/mcp",
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.lodging\"][transport=mcp].endpoint"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "booking_session_result": {
+        "oneOf": [
+          {
+            "$ref": "../../schemas/lodging/booking.json"
+          },
+          {
+            "$ref": "../../schemas/common/types/error_response.json"
+          }
+        ]
+      },
+      "meta": {
+        "type": "object",
+        "description": "Request metadata.",
+        "required": [
+          "ucp_agent",
+          "idempotency_key"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "ucp_agent": {
+            "type": "object",
+            "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+            "required": [
+              "profile"
+            ],
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the platform's UCP profile document."
+              }
+            }
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
+          }
+        }
+      }
+    }
+  },
+  "methods": [
+    {
+      "name": "create_booking_session",
+      "summary": "Create a booking session",
+      "description": "Create a new booking session.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "booking",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/lodging/booking.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "booking",
+        "schema": {
+          "$ref": "#/components/schemas/booking_session_result"
+        }
+      }
+    },
+    {
+      "name": "get_booking_session",
+      "summary": "Get booking session",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "booking",
+        "schema": {
+          "$ref": "#/components/schemas/booking_session_result"
+        }
+      }
+    },
+    {
+      "name": "update_booking_session",
+      "summary": "Update booking session",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "booking",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/lodging/booking.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "booking",
+        "schema": {
+          "$ref": "#/components/schemas/booking_session_result"
+        }
+      }
+    },
+    {
+      "name": "complete_booking_session",
+      "summary": "Complete booking session and confirm room reservation",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "booking",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/lodging/booking.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "booking",
+        "schema": {
+          "$ref": "#/components/schemas/booking_session_result"
+        }
+      }
+    },
+    {
+      "name": "cancel_booking_session",
+      "summary": "Cancel booking session",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "booking",
+        "schema": {
+          "$ref": "#/components/schemas/booking_session_result"
+        }
+      }
+    }
+  ]
+}
