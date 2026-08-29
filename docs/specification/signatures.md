@@ -841,23 +841,26 @@ requests, the payload copy alone is authoritative.
 | **On duplicate (mismatched payload)** | Reject with `409 Conflict` (REST) / `-32000` (MCP); do not execute |
 | **On storage failure** | Fail closed (reject request with 503) |
 
-**Payload Matching:** Payload identity is defined per operation, by
-whether the operation's arguments carry anything beyond `meta` and the
-target resource identifier — a class decidable from the operation's
-input schema alone, not from the transport envelope:
+**Payload Matching:** A stored idempotency key binds the operation it
+was first used with and, where one exists, the target resource
+identifier (the path parameter for REST, the top-level `id` argument
+for MCP). Businesses **MUST** reject, without executing, any request
+that reuses a stored key with a different operation or a different
+target resource identifier. Within that binding, payload identity is
+defined per operation, by whether the operation's arguments carry
+anything beyond `meta` and the target resource identifier — a class
+decidable from the operation's input schema alone, not from the
+transport envelope:
 
 * **Target-only operations.** The operation's arguments carry nothing
   beyond `meta` and the target resource identifier (the path parameter
   for REST, the top-level `id` argument for MCP) — `cancel_checkout` is
-  in this class by schema. Payload identity is the pair (idempotency
-  key, target resource identifier); Businesses persist the identifier
-  alongside the key. Businesses **MUST** treat a request as a replay,
-  and return the stored result, when its key matches a stored key and
-  its target resource identifier matches the identifier stored with
-  that key. Businesses **MUST** reject, without executing, a request
-  whose key matches a stored key but whose target resource identifier
-  differs from the identifier stored with that key. No hashing or
-  canonicalization applies to this class.
+  in this class by schema. Payload identity is the key binding itself:
+  Businesses persist the operation and the target resource identifier
+  alongside the key, and **MUST** treat a request as a replay, and
+  return the stored result, when key, operation, and identifier all
+  match the stored record. No hashing or canonicalization applies to
+  this class.
 * **Payload-carrying operations.** The operation's arguments carry
   anything beyond `meta` and the target resource identifier —
   `complete_checkout` is in this class by schema. Businesses **MUST**
@@ -866,7 +869,9 @@ input schema alone, not from the transport envelope:
   request body for REST; the `params.arguments` object with `meta`
   removed for MCP) — not the full JSON-RPC message bytes, whose
   envelope fields (the JSON-RPC `id`, `meta`) are guaranteed to vary
-  per retry. Businesses persist this hash alongside the key; for REST
+  per retry. The hash is compared within the key binding above, so a
+  reused key is rejected on an operation or target mismatch before any
+  hash comparison. Businesses persist this hash alongside the key; for REST
   the hashed input remains the raw body bytes, the same digest RFC 9530
   mandates as `Content-Digest`. The Business computes both the stored
   and the compared hash itself, from each request as received, applying
