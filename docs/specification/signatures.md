@@ -865,19 +865,28 @@ transport envelope:
   anything beyond `meta` and the target resource identifier —
   `complete_checkout` is in this class by schema. Businesses **MUST**
   detect a payload mismatch by comparing the SHA-256 hash of the
-  operation's arguments with the transport envelope excluded (the
-  request body for REST; the `params.arguments` object with `meta`
-  removed for MCP) — not the full JSON-RPC message bytes, whose
-  envelope fields (the JSON-RPC `id`, `meta`) are guaranteed to vary
-  per retry. The hash is compared within the key binding above, so a
-  reused key is rejected on an operation or target mismatch before any
-  hash comparison. Businesses persist this hash alongside the key; for REST
-  the hashed input remains the raw body bytes, the same digest RFC 9530
-  mandates as `Content-Digest`. The Business computes both the stored
-  and the compared hash itself, from each request as received, applying
-  the same deterministic procedure to exclude `meta`; no cross-party
-  canonical form is defined or needed, which preserves the spec's
-  no-canonicalization posture.
+  operation's arguments with the transport envelope excluded — not the
+  full JSON-RPC message bytes, whose envelope fields (the JSON-RPC
+  `id`, `meta`) are guaranteed to vary per retry. The hash is compared
+  within the key binding above, so a reused key is rejected on an
+  operation or target mismatch before any hash comparison, and
+  Businesses persist this hash alongside the key. The hashed input is
+  transport specific:
+
+    * For REST, the raw request body bytes as received, the same digest
+      RFC 9530 mandates as `Content-Digest`. No canonicalization: the
+      body is a single byte string on the wire and is hashed as such.
+    * For MCP, the `params.arguments` object with its top-level
+      `meta` member removed, serialized with the JSON
+      Canonicalization Scheme
+      ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785)), the
+      canonicalization this specification already uses for durable
+      artifacts in
+      [AP2 Mandates](payment/extensions/ap2-mandates.md#canonicalization).
+      Removing a member is an operation on a parsed value, not on bytes,
+      so this class adopts canonicalization explicitly: logically
+      identical retries hash identically regardless of member order or
+      serializer, tolerating re-serialization across client stacks.
 
 Platforms **MUST** generate a fresh idempotency key whenever they modify
 a payload-carrying operation's arguments — including retries with
