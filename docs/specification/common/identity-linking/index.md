@@ -1113,6 +1113,11 @@ session.
     proof — `identity_required` for the OAuth gap, `wallet_state_required`
     for the chain-state gap, or both.
 
+See [Scopes](#scopes) and [Error Handling](#error-handling) for the rules
+governing operations that require a user identity token; those rules apply
+uniformly across identity paths and are unchanged by the presence of a
+`wallet_attestation` entry.
+
 ### `WalletAttestation` HTTP Authentication Challenge Scheme
 
 > **Provisional — open for TC review.** The scheme name and parameter set
