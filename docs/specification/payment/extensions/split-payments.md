@@ -114,7 +114,7 @@ gift cards alone, and (c) two credit cards:
     "dev.ucp.common.payment.split_payments": [
       {
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/split-payments",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/extensions/split-payments",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_split_payments.json",
         "extends": [
           "dev.ucp.shopping.checkout"
