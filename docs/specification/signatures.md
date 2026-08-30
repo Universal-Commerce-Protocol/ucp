@@ -952,8 +952,10 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"chk_123","checkout":{...}}}}
 ```
 
-The JSON-RPC message is the HTTP body. `Content-Digest` binds it to the signature.
-No JSON canonicalization is required.
+The JSON-RPC message is the HTTP body. `Content-Digest` binds it to the signature;
+no JSON canonicalization is required for signing. For payload matching, the
+payload-carrying class canonicalizes `params.arguments` with JCS, as defined under
+[Replay Protection](#replay-protection).
 
 ## Error Handling
 
