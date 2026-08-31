@@ -141,7 +141,7 @@ each declares the date `D` of the UCP release it ships in. Third-party
 extensions publish versions on their own cadence.
 
 The following are examples of capabilities defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Capability | Description |
@@ -151,7 +151,10 @@ up-to-date list.
 | `dev.ucp.shopping.catalog.search` | Search across a business catalog |
 | `dev.ucp.shopping.catalog.lookup` | Retrieve a specific product by ID |
 | `dev.ucp.shopping.order` | Order lifecycle events |
+| `dev.ucp.shopping.permalink` | Shareable links to pre-populated carts and products |
 | `dev.ucp.common.identity_linking` | OAuth-based account linking |
+| `dev.ucp.common.location.search` | Search for physical stores and pickup locations |
+| `dev.ucp.common.location.lookup` | Retrieve location details, operating hours, and amenities |
 
 ### Extensions
 
@@ -165,10 +168,10 @@ core capabilities.
 {
   "dev.ucp.shopping.fulfillment": [
     {
-      "version": "2026-04-08",
+      "version": "{{ ucp_version }}",
       "extends": "dev.ucp.shopping.checkout",
-      "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-      "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json"
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json"
     }
   ]
 }
@@ -179,22 +182,25 @@ intersection is automatically pruned. This ensures extension coherence —
 you never activate a discount extension without the checkout it extends.
 
 The following are examples of extensions defined in UCP — see the
-[Specification](../specification/overview.md) for the authoritative and
+[Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
 | Extension | Extends | Description |
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
-| `dev.ucp.shopping.payment_authentication` | checkout | Browser-surface device data collection and 3DS challenges |
-| `dev.ucp.shopping.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
+| `dev.ucp.common.loyalty` | checkout, cart, catalog | Member benefits, rewards, and points earning |
+| `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
+| `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
+| `dev.ucp.common.payment.split_payments` | checkout | Multi-instrument allocation and split settlements |
+| `dev.ucp.common.payment.payment_terms` | checkout | Deposits, installments, and deferred payment schedules |
 
 ### Services
 
-**Services** group the operations and events for a vertical under a
-reverse-domain registry key (e.g., `dev.ucp.shopping`). The key identifies the
-service: a service declares *what* functionality exists for that vertical, and
+**Services** group the operations and events for a vertical or common domain under a
+reverse-domain registry key (e.g., `dev.ucp.shopping`, `dev.ucp.common`). The key identifies the
+service: a service declares *what* functionality exists for that vertical or domain, and
 each entry in its array declares *how* it is accessed over a transport binding.
 
 A single service can be accessed via multiple transport bindings:
@@ -270,35 +276,35 @@ authentication are resolved together.
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "{{ ucp_version }}",
     "services": {
       "dev.ucp.shopping": [
         {
-          "version": "2026-04-08",
-          "spec": "https://ucp.dev/2026-04-08/specification/overview",
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview/",
           "transport": "rest",
-          "schema": "https://ucp.dev/2026-04-08/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp/v1"
         }
       ]
     },
     "capabilities": {
       "dev.ucp.shopping.checkout": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/checkout",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/checkout.json"
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
       }],
       "dev.ucp.shopping.fulfillment": [{
-        "version": "2026-04-08",
-        "spec": "https://ucp.dev/2026-04-08/specification/fulfillment",
-        "schema": "https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         "extends": "dev.ucp.shopping.checkout"
       }]
     },
     "payment_handlers": {
       "com.example.processor_tokenizer": [{
         "id": "processor_tokenizer",
-        "version": "2026-04-08",
+        "version": "{{ ucp_version }}",
         "spec": "https://example.com/specs/payments/processor_tokenizer",
         "schema": "https://example.com/specs/payments/merchant_tokenizer.json"
       }]
@@ -335,7 +341,7 @@ remains the client's decision.
 Platforms **MUST** validate this binding for declared `schema` URLs and **MUST**
 reject entities that fail it. Identifiers carry no fetched URL, and the `spec`
 (documentation) URL is not authority-bound (any `https` origin). See
-[Authority Binding](../specification/overview.md#authority-binding) for the
+[Authority Binding](../specification/overview/index.md#authority-binding) for the
 normative algorithm.
 
 The `dev.ucp.*` namespace is reserved exclusively for capabilities governed by
@@ -453,7 +459,7 @@ Every UCP-defined service, capability, and extension in release `D` declares
 version `D`. Third-party extensions and payment handlers are versioned by their
 authors, independently of UCP releases.
 
-See [Protocol Version](../specification/overview.md#protocol-version) for version
-discovery, [Component Versioning and Release Snapshots](../specification/overview.md#component-versioning-and-release-snapshots)
+See [Protocol Version](../specification/overview/index.md#protocol-version) for version
+discovery, [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 for the normative release contract, and [Versioning](../versioning.md) for the
 release-branch and backport process.

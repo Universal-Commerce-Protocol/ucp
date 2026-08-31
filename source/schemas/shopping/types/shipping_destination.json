@@ -4,7 +4,6 @@
   "title": "Shipping Destination",
   "description": "Shipping destination.",
   "type": "object",
-  "ucp_shared_request": true,
   "allOf": [
     {
       "$ref": "../../common/types/postal_address.json"
@@ -16,10 +15,17 @@
           "type": "string",
           "description": "ID specific to this shipping destination.",
           "ucp_request": "optional"
+        },
+        "type": {
+          "type": "string",
+          "const": "shipping_address",
+          "description": "Destination type discriminator.",
+          "ucp_request": "optional"
         }
       },
       "required": [
-        "id"
+        "id",
+        "type"
       ]
     }
   ]
