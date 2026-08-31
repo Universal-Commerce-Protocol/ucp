@@ -4,7 +4,6 @@
   "title": "Fulfillment Option Base",
   "description": "Common base for a fulfillment option: an addressable, renderable choice (e.g. Standard, Express). Catalog uses this base directly; checkout composes it with cost and timing.",
   "type": "object",
-  "ucp_shared_request": true,
   "required": ["id", "title"],
   "additionalProperties": true,
   "properties": {
