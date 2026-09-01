@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/permalink.json",
   "name": "dev.ucp.shopping.permalink",
   "title": "Permalink Capability",
-  "description": "Browser-addressable shopping intent capability: defines a Business browser endpoint and redirect resolution. It defines no shopping-state fields of its own; permalink query parameters address existing UCP field paths.",
+  "description": "Browser-addressable shopping intent capability: defines a Business browser endpoint and redirect resolution. It defines no shopping-state fields of its own; permalink query parameters address existing UCP field paths, interpreted under the release pinned by the `ucp/version` control parameter.",
   "$defs": {
     "endpoint": {
       "type": "string",
