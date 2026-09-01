@@ -18,12 +18,15 @@
   ],
   "paths": {
     "/": {
-      "description": "No-item permalink path. With config.endpoint set to https://merchant.example/buy, this route resolves URLs such as https://merchant.example/buy/?context/postal_code=94105&continue_to=/; the no-trailing-slash constraint applies to the advertised config.endpoint value, not this resolved route URL.",
+      "description": "No-item permalink path. With config.endpoint set to https://merchant.example/buy, this route resolves URLs such as https://merchant.example/buy/?ucp/version=YYYY-MM-DD&context/postal_code=94105&continue_to=/; the no-trailing-slash constraint applies to the advertised config.endpoint value, not this resolved route URL.",
       "get": {
         "operationId": "resolve_permalink",
         "summary": "Resolve permalink",
         "description": "Resolves a no-item browser-addressable shopping intent from query parameters and redirects the browser to an appropriate buyer-facing destination.",
         "parameters": [
+          {
+            "$ref": "#/components/parameters/ucp_version"
+          },
           {
             "$ref": "#/components/parameters/continue_to"
           }
@@ -46,6 +49,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/items"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_version"
           },
           {
             "$ref": "#/components/parameters/continue_to"
@@ -72,6 +78,17 @@
         "schema": {
           "type": "string",
           "pattern": "^(?:[A-Za-z0-9._-]+|~[A-Za-z0-9_-]+):[1-9][0-9]*(?:,(?:[A-Za-z0-9._-]+|~[A-Za-z0-9_-]+):[1-9][0-9]*)*$"
+        }
+      },
+      "ucp_version": {
+        "name": "ucp/version",
+        "in": "query",
+        "required": false,
+        "description": "UCP release the permalink is pinned to: the `ucp.version` of the Business profile the endpoint was discovered from. Platforms MUST include it in every generated permalink; Businesses MUST accept its absence and resolve under their documented default release. Normative selection, default, and fall-forward rules are defined in the permalink specification.",
+        "schema": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Release date in YYYY-MM-DD format. MUST be a dated release, never a pre-release identifier."
         }
       },
       "continue_to": {
@@ -122,8 +139,9 @@
     }
   },
   "x-ucp-query-semantics": {
-    "description": "OpenAPI cannot enumerate arbitrary JSON Pointer field-path query parameters such as buyer/email, context/postal_code, context/payment/0/handler, attribution/ref, discounts/codes/0, or profile-specific fields. Permalink query syntax omits the leading '/' for UCP field paths, but Businesses may also accept canonical JSON Pointer names. The Business resolves these field paths against its active schemas, capabilities, and internal logic. The permalink specification defines the normative query partitioning and redirect semantics.",
+    "description": "OpenAPI cannot enumerate arbitrary JSON Pointer field-path query parameters such as buyer/email, context/postal_code, context/payment/0/handler, attribution/ref, discounts/codes/0, or profile-specific fields. Permalink query syntax omits the leading '/' for UCP field paths, but Businesses may also accept canonical JSON Pointer names. The Business selects the release from ucp/version first, then resolves these field paths against the schemas, capabilities, and internal logic active at that release. The ucp root is reserved for protocol parameters and is never applied as shopping state. The permalink specification defines the normative query partitioning and redirect semantics.",
     "control_parameters": [
+      "ucp/version",
       "continue_to"
     ],
     "field_paths": "json-pointer-with-leading-slash-optional"
