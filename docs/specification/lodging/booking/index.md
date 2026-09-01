@@ -220,7 +220,7 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 
 ### Platform
 
-* **MUST** supply valid `accommodation.id`, `room_rate.id`, `room_details.id`,
+* **MUST** supply valid `accommodation.id`, `room_rate.id`, `room_type.id`,
   and `rate_plan.id` identifiers sourced from upper-funnel discovery mechanisms
   when creating a booking session.
 * **MUST** generate unique, stable string identifiers in the Platform namespace
@@ -241,7 +241,7 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 
 ### Business
 
-* **MUST** evaluate requested `room_rate.id`, `room_details.id`, and `rate_plan.id`
+* **MUST** evaluate requested `room_rate.id`, `room_type.id`, and `rate_plan.id`
   bindings against real-time availability and inventory constraints, echoing
   authoritative room metadata, pricing totals, and policy terms.
 * **MUST** preserve platform-supplied `guest.id` identifiers across session
@@ -408,7 +408,7 @@ The `id` is discovered from upper-funnel search.
 
 ### Room Rate
 
-Compound binding uniting physical room real estate (`room_details.id`),
+Compound binding uniting physical room real estate (`room_type.id`),
 commercial rate terms (`rate_plan.id`), occupancy, and guest assignments.
 
 {{ schema_fields('types/room_rate', 'lodging/booking') }}

@@ -81,7 +81,7 @@ protocol metadata:
   "id": 1,
   "method": "tools/call",
   "params": {
-    "name": "start_booking_session",
+    "name": "create_booking_session",
     "arguments": {
       "meta": {
         "ucp-agent": {
@@ -364,7 +364,7 @@ Maps to the [Get Booking Session](index.md#get-booking-session) operation.
 
 {{ schema_fields('booking_resp', 'lodging/booking/mcp') }}
 
-### `update_checkout`
+### `update_booking_session`
 
 Maps to the [Update Booking](index.md#update-booking-session) operation.
 
@@ -613,7 +613,7 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
 
 #### Input Schema
 
-* `id` (String): **Required**. The ID of the checkout session.
+* `id` (String): **Required**. The ID of the booking session.
 
 {{ schema_fields('booking_complete_req', 'lodging/booking/mcp') }}
 
@@ -895,7 +895,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
         }
       },
       "id": "booking_123",
-      "status": "ready_for_complete",
+      "status": "incomplete",
       "accommodation": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel"
@@ -1007,7 +1007,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
 ## Message Signing
 
 Platforms **SHOULD** authenticate agents when using MCP transport. When using
-HTTP Message Signatures, all checkout operations follow the
+HTTP Message Signatures, all booking operations follow the
 [Message Signatures](../../signatures.md) specification.
 
 ### Request Signing
@@ -1074,7 +1074,7 @@ for the signing algorithm (identical for MCP over HTTP).
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-2. Provide all core checkout tools defined in this specification.
+2. Provide all core booking tools defined in this specification.
 3. Return errors per the [Core Specification](../../overview/index.md#error-handling).
 4. Return business outcomes as JSON-RPC `result` with UCP envelope and
     `messages` array.

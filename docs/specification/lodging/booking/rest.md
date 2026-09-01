@@ -1181,7 +1181,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
     }
   },
   "id": "booking_123",
-  "status": "ready_for_complete",
+  "status": "incomplete",
   "accommodation": {
     "id": "hotel_123",
     "name": "Beautiful Scenery Hotel"
