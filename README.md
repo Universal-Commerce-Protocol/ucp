@@ -166,8 +166,9 @@ including spec versions:
 ./scripts/build_local.sh
 ```
 
-This will build the site and start a local server. You can use the
-`--draft-only` flag to skip release branches and only build the current draft:
+This will build the site; you can then start a local server with the command
+below. You can use the `--draft-only` flag to skip release branches and only
+build the current draft:
 
 ```bash
 ./scripts/build_local.sh --draft-only
