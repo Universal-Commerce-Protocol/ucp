@@ -16,6 +16,15 @@
       }
     }
   ],
+  "security": [
+    {},
+    {
+      "oauth2_bearer": []
+    },
+    {
+      "api_key": []
+    }
+  ],
   "paths": {
     "/locations/search": {
       "post": {
@@ -23,16 +32,12 @@
         "summary": "Search Locations",
         "description": "Search for physical locations using query text, explicit spatial relations, and structured filters.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -67,16 +72,12 @@
         "summary": "Batch Lookup Locations",
         "description": "Lookup one or more physical Locations by supported identifiers, optionally refined by explicit spatial relations and structured filters.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -107,25 +108,20 @@
     }
   },
   "components": {
-    "parameters": {
-      "authorization": {
-        "name": "Authorization",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Contains an OAuth token representing Platform or Buyer credentials."
+    "securitySchemes": {
+      "oauth2_bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "OAuth 2.0 access token issued by the business's authorization server, which platforms discover per RFC 8414. Covers both platform self-authentication (client_credentials) and platform authentication on behalf of an end user (authorization_code). See the Identity Linking specification."
       },
-      "x_api_key": {
+      "api_key": {
+        "type": "apiKey",
+        "in": "header",
         "name": "X-API-Key",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Reusable API key allocated to the Platform by the Business."
-      },
+        "description": "Reusable API key allocated to the platform by the business."
+      }
+    },
+    "parameters": {
       "signature": {
         "name": "Signature",
         "in": "header",
@@ -180,24 +176,6 @@
           "type": "string"
         },
         "description": "Identifies the UCP agent making the call, containing the signer's profile URI. Format: profile=\"https://example.com/.well-known/ucp\"."
-      },
-      "content_type": {
-        "name": "Content-Type",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Representation Metadata describing the body content."
-      },
-      "accept": {
-        "name": "Accept",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Content Negotiation, indicating accepted formats."
       },
       "accept_language": {
         "name": "Accept-Language",
