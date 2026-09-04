@@ -740,6 +740,16 @@ to ensure authenticity and integrity. Signatures follow the
 | `Signature`      | Contains the signature value               |
 | `Content-Digest` | Body digest (RFC 9530)                     |
 
+`Webhook-Id` and `Webhook-Timestamp` (the required headers listed for the
+[Order Event Webhook](#order-event-webhook)) **MUST** be included as covered
+components in the signature, and platforms **MUST** verify their coverage.
+Webhooks carry no `Idempotency-Key`, so these headers are the only per-delivery
+replay signal, and a signature that omits them leaves an otherwise valid, signed
+delivery open to replay with an altered identity or freshness value. Platforms
+**MUST** reject deliveries whose signature does not cover both components, and
+**MUST** deduplicate on `Webhook-Id` so that a re-sent (or replayed) delivery is
+processed at most once.
+
 **Example Webhook Request:**
 
 ```http
@@ -747,17 +757,21 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Webhook-Timestamp: 1737000000
+Webhook-Id: 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d
 Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="merchant-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
-{"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
+{"id":"order_abc123",...}
 ```
 
 #### Signing (Business)
 
 1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
-2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421),
+   covering `ucp-agent`, `content-digest`, `webhook-id`, and `webhook-timestamp`
+   at minimum (the `UCP-Agent` header binds the signer's identity)
 3. Sign using a key from `keys` in the business's UCP profile
 4. Set `Signature-Input` and `Signature` headers
 
@@ -773,6 +787,8 @@ for complete algorithm.
 3. Locate key in `keys` with matching `kid`
 4. Verify `Content-Digest` matches SHA-256 of raw body
 5. Reconstruct signature base and verify signature
+6. Confirm `webhook-id` and `webhook-timestamp` are among the signed components,
+   and reject the delivery if either is missing
 
 See [Message Signatures - REST Request Verification](../../signatures.md#rest-request-verification)
 for complete algorithm.
