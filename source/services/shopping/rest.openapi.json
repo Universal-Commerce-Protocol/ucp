@@ -561,6 +561,48 @@
         }
       }
     },
+    "/carts/{id}/offers/{offer_id}/revisions/{revision}/apply": {
+      "parameters": [
+        { "$ref": "#/components/parameters/cart_id_path" },
+        { "$ref": "#/components/parameters/offer_id_path" },
+        { "$ref": "#/components/parameters/offer_revision_path" }
+      ],
+      "post": {
+        "operationId": "apply_offer",
+        "summary": "Apply Offer",
+        "description": "Apply a Business-proposed Offer to a cart by reference. Requires the `dev.ucp.shopping.offer` capability. The Business applies the stored proposal identified by `offer_id` and `revision`; the Platform MUST NOT resubmit the proposed `line_items`. For a new logical application attempt, the Business MUST reject the request without mutating the cart when the Offer's bound source state no longer exactly matches the current cart state, when the Offer has expired, or when the Business can no longer honor the exact stored revision. These business outcomes MUST remain machine-distinct using `messages[].code`: `offer_source_state_mismatch`, `offer_expired`, and `offer_unavailable`, respectively, and MUST NOT be collapsed into a single generic invalid-offer outcome. An idempotent replay of the same application request returns the cached original result without re-executing the Offer or re-evaluating `state_ref`. Any new logical application attempt MUST evaluate the Offer against the cart's current state. Returns the authoritative cart.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer applied",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/cart_response" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/search": {
       "post": {
         "operationId": "search_catalog",
@@ -792,6 +834,24 @@
         "in": "path",
         "required": true,
         "description": "The unique identifier of the cart.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "offer_id_path": {
+        "name": "offer_id",
+        "in": "path",
+        "required": true,
+        "description": "The identifier of the Offer to apply.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "offer_revision_path": {
+        "name": "revision",
+        "in": "path",
+        "required": true,
+        "description": "The Offer revision the Platform evaluated.",
         "schema": {
           "type": "string"
         }

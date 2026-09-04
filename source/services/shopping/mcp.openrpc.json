@@ -285,6 +285,42 @@
       }
     },
     {
+      "name": "apply_offer",
+      "summary": "Apply offer",
+      "description": "Apply a Business-proposed Offer to a cart by reference. Requires the `dev.ucp.shopping.offer` capability. The Business applies the stored proposal identified by `offer_id` and `revision`; the Platform does not resubmit the proposed `line_items`. For a new logical application attempt, the Business MUST reject the request without mutating the cart when the Offer's bound source state no longer exactly matches the current cart state, when the Offer has expired, or when the Business can no longer honor the exact stored revision. These business outcomes MUST remain machine-distinct using `messages[].code`: `offer_source_state_mismatch`, `offer_expired`, and `offer_unavailable`, respectively, and MUST NOT be collapsed into a single generic invalid-offer outcome. An idempotent replay of the same application request returns the cached original result without re-executing the Offer or re-evaluating `state_ref`. Any new logical application attempt MUST evaluate the Offer against the cart's current state. Returns the authoritative cart.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {
+          "name": "offer_id",
+          "required": true,
+          "schema": {"type": "string"}
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {"type": "string"}
+        }
+      ],
+      "result": {
+        "name": "cart",
+        "schema": {"$ref": "#/components/schemas/cart_result"}
+      }
+    },
+    {
       "name": "search_catalog",
       "summary": "Search for products in the catalog",
       "description": "Search for products using query text, filters, and pagination.",
