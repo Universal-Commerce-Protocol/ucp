@@ -4,11 +4,11 @@ repos:
   - repo: local
     hooks:
       - id: block-corporate-registries
-        name: Block corporate registries in uv.lock
-        entry: '(?i)(pkgs\.shopify\.io|\.pkg\.dev)'
+        name: Block non-public registries in uv.lock
+        entry: '(?i)(registry\s*=\s*"https?://(?!pypi\.org)|pkgs\.shopify\.io|\.pkg\.dev|codeartifact|amazonaws\.com|visualstudio\.com|dev\.azure\.com)'
         language: pygrep
         files: ^uv\.lock$
-        description: "Avoid corporate URLs (PR #108, #368). Fix: 'uv lock --refresh'."
+        description: "Avoid corporate/private URLs in uv.lock. Packages must resolve from pypi.org. Fix: 'uv lock --refresh'."
       - id: block-corporate-registries-npm
         name: Block non-public registries in package-lock.json
         entry: '(?i)"resolved":\s*"https?://(?!registry\.npmjs\.org)'
