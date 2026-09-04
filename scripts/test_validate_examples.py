@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# cspell:ignore shema directon
+# cspell:ignore shema directon skiped
 """Contract conformance tests for validate_examples.py.
 
 Each test asserts one claim from the contract documented in
@@ -10,8 +10,8 @@ broke.
 
 Two layers of testing exist for the validator:
 
-  - **The doc corpus is the integration test.** All 268 ```json blocks
-    across 39 spec docs are validated on every CI run. This proves
+  - **The doc corpus is the integration test.** All annotated ```json
+    blocks across the spec docs are validated on every CI run. This proves
     real-world examples conform to the contract.
 
   - **This file is the unit test layer.** It proves the contract is
@@ -261,6 +261,29 @@ def test_annotation_parsing() -> None:
   )
 
   # Unknown attribute key rejected via reserved _error
+  # skip must be a whole word. Each typo below carries a valid reason=, so
+  # only a whole-word check can reject them — a reason-only guard cannot.
+  for typo in (
+    'skiped reason="oops"',
+    'skip_the_check reason="oops"',
+    'skipping validation reason="oops"',
+  ):
+    ann = v.parse_annotation(typo)
+    _check(
+      f"annotation_skip_typo_with_reason_not_skipped[{typo}]",
+      ann.get("skip") is None,
+      f"got {ann!r}",
+    )
+
+  # A bare or empty reason= is not auditable and must not skip.
+  for bad in ("skip", 'skip reason=""'):
+    ann = v.parse_annotation(bad)
+    _check(
+      f"annotation_skip_missing_reason_rejected[{bad}]",
+      ann.get("_error") is not None and ann.get("skip") is None,
+      f"got {ann!r}",
+    )
+
   ann = v.parse_annotation("shema=foo")  # typo
   _check(
     "annotation_unknown_key_rejected",
