@@ -5,10 +5,16 @@ repos:
     hooks:
       - id: block-corporate-registries
         name: Block corporate registries in uv.lock
-        entry: '(?i)(pkgs\.shopify\.io|us-npm\.pkg\.dev)'
+        entry: '(?i)(pkgs\.shopify\.io|\.pkg\.dev)'
         language: pygrep
         files: ^uv\.lock$
         description: "Avoid corporate URLs (PR #108, #368). Fix: 'uv lock --refresh'."
+      - id: block-corporate-registries-npm
+        name: Block non-public registries in package-lock.json
+        entry: '(?i)"resolved":\s*"https?://(?!registry\.npmjs\.org)'
+        language: pygrep
+        files: ^package-lock\.json$
+        description: "Avoid corporate/private registry URLs in package-lock.json. Fix: run 'npm install' pointing to registry.npmjs.org."
       # Docs-example validator. Requires the ucp-schema binary on PATH;
       # install with `cargo install ucp-schema`. CI runs the full-corpus
       # check on every PR as the mandatory backstop
