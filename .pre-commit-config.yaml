@@ -44,6 +44,13 @@ repos:
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
         stages: [pre-commit, pre-push]
+      - id: check-links-tests
+        name: Link checker unit tests
+        entry: uv run --frozen python scripts/test_check_links.py
+        language: system
+        pass_filenames: false
+        files: ^scripts/(check_links|test_check_links)\.py$
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
