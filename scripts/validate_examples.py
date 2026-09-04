@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# cspell:ignore shema directon
+# cspell:ignore shema directon skiped
 """Validate JSON examples in UCP specification documentation.
 
 UCP doc examples use a bespoke JSON capability set: strict JSON plus
@@ -136,6 +136,10 @@ _KNOWN_ATTRS = frozenset(
   {"schema", "op", "direction", "extract", "target", "def"}
 )
 
+# `skip` must appear as a whole word. A prefix match would let a typo such as
+# `skiped` or `skip_the_check` silently disable validation for that example.
+_SKIP_RE = re.compile(r"skip\b")
+
 # -----------------------------------------------------------
 # Annotation parsing
 # -----------------------------------------------------------
@@ -149,11 +153,18 @@ def parse_annotation(text: str) -> dict:
   reported via a reserved "_error" key (consumed by process_block).
   """
   text = text.strip()
-  if text.startswith("skip"):
-    reason_match = re.search(r'reason="([^"]*)"', text)
+  if _SKIP_RE.match(text):
+    reason_match = re.search(r'reason="([^"]+)"', text)
+    if reason_match is None:
+      return {
+        "_error": (
+          'skip annotation requires a non-empty reason="..." '
+          "so every skipped example stays auditable"
+        )
+      }
     return {
       "skip": True,
-      "reason": (reason_match.group(1) if reason_match else ""),
+      "reason": reason_match.group(1),
     }
   attrs: dict = {}
   unknown: list[str] = []
