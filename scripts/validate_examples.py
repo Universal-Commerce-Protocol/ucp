@@ -75,6 +75,12 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
 
   - If extract= is present, the indicated subtree is selected from
     the parsed displayed example before semantic validation.
+
+  JSONPath subset used by extract= and target=: dot-separated bare
+  names with an optional array index (`$.a.b[0]`), plus bracket-quoted
+  names for keys that are not bare-legal (`$.a['dev.ucp.common.x'][0]`).
+  The quoted form is required for UCP's reverse-domain keys and scope
+  tokens, whose dots and colons are otherwise read as separators.
   - Ellipsis sentinels are recorded as elided JSON Pointer paths,
     then removed from the tree.
   - The example is deep-merged into a scaffold (a known-valid
@@ -435,19 +441,59 @@ def strip_ellipsis(obj, _path="", _paths=None):
 # JSONPath navigation (minimal subset)
 # -----------------------------------------------------------
 
-_SEGMENT_RE = re.compile(r"^(\w+)(?:\[(\d+)\])?$")
+_BARE_SEGMENT_RE = re.compile(r"\w+")
+_QUOTED_SEGMENT_RE = re.compile(r"\[(['\"])(.*?)\1\]")
+_INDEX_RE = re.compile(r"\[(\d+)\]")
+
+
+def split_path(path: str) -> list[tuple[str, str | None]]:
+  """Tokenize the supported JSONPath subset into (name, index) pairs.
+
+  Bare names are dot-separated (`$.a.b`) and may carry a single array
+  index (`$.a[0]`). Names that are not bare-legal are written in
+  bracket-quoted form (`$.a['x.y'][0]`) — required for the
+  reverse-domain identifiers and scope tokens UCP uses as object keys,
+  such as `dev.ucp.common.identity_linking` and
+  `dev.ucp.shopping.order:read`, whose dots and colons would otherwise
+  be read as path separators or fail to match.
+
+  Raises KeyError on an unparsable segment.
+  """
+  segments: list[tuple[str, str | None]] = []
+  pos = 1 if path.startswith("$") else 0
+  while pos < len(path):
+    if path[pos] == ".":
+      pos += 1
+      continue
+    quoted = _QUOTED_SEGMENT_RE.match(path, pos)
+    if quoted:
+      name = quoted.group(2)
+      pos = quoted.end()
+    else:
+      bare = _BARE_SEGMENT_RE.match(path, pos)
+      if not bare:
+        raise KeyError(path[pos:])
+      name = bare.group(0)
+      pos = bare.end()
+    index = None
+    indexed = _INDEX_RE.match(path, pos)
+    if indexed:
+      index = indexed.group(1)
+      pos = indexed.end()
+    segments.append((name, index))
+  return segments
 
 
 def jsonpath_to_pointer(path: str) -> str:
   """Convert the supported JSONPath subset to a JSON Pointer prefix."""
   if path == "$":
     return ""
+  try:
+    segments = split_path(path)
+  except KeyError:
+    return ""
   pointer_parts: list[str] = []
-  for seg in path.lstrip("$").lstrip(".").split("."):
-    m = _SEGMENT_RE.match(seg)
-    if not m:
-      return ""
-    name, idx = m.group(1), m.group(2)
+  for name, idx in segments:
     pointer_parts.append(name)
     if idx is not None:
       pointer_parts.append(idx)
@@ -459,11 +505,7 @@ def jsonpath_get(obj, path: str):
   if path == "$":
     return obj
   current = obj
-  for seg in path.lstrip("$").lstrip(".").split("."):
-    m = _SEGMENT_RE.match(seg)
-    if not m:
-      raise KeyError(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in split_path(path):
     current = current[name]
     if idx is not None:
       current = current[int(idx)]
@@ -472,16 +514,13 @@ def jsonpath_get(obj, path: str):
 
 def jsonpath_set(obj: dict, path: str, value):
   """Set a value at a JSONPath. Mutates obj."""
-  segments = path.lstrip("$").lstrip(".").split(".")
+  segments = split_path(path)
   current = obj
-  for seg in segments[:-1]:
-    m = _SEGMENT_RE.match(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in segments[:-1]:
     current = current[name]
     if idx is not None:
       current = current[int(idx)]
-  last = _SEGMENT_RE.match(segments[-1])
-  name, idx = last.group(1), last.group(2)
+  name, idx = segments[-1]
   if idx is not None:
     current[name][int(idx)] = value
   else:
@@ -490,11 +529,8 @@ def jsonpath_set(obj: dict, path: str, value):
 
 def jsonpath_get_schema(schema: dict, path: str) -> dict:
   """Navigate a JSON Schema to the sub-schema at path."""
-  segments = path.lstrip("$").lstrip(".").split(".")
   current = schema
-  for seg in segments:
-    m = _SEGMENT_RE.match(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in split_path(path):
     # Resolve through allOf to find properties
     current = _get_property_schema(current, name)
     if current is None:
