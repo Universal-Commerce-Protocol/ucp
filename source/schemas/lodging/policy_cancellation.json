@@ -7,7 +7,7 @@
   "$defs": {
     "cancellation_outcome": {
       "title": "Cancellation Outcome",
-      "description": "The declared economic result of a buyer-initiated cancellation. `kind` is an open vocabulary. For well-known kinds, a Business MUST emit only the fields defined for that kind, and a Platform evaluates only those fields and ignores unrelated outcome members. Platforms encountering an unknown kind must tolerate it, must not infer its meaning, and must use the policy description as fallback.",
+      "description": "The declared economic result of a buyer-initiated cancellation. `kind` is an open vocabulary. For well-known kinds, a Business MUST emit only the fields defined for that kind, and a Platform evaluates only those fields and ignores unrelated outcome members. Platforms encountering an unknown kind MUST tolerate it, MUST NOT infer its meaning, and MUST use the policy description as fallback.",
       "type": "object",
       "required": [
         "kind"
@@ -27,7 +27,7 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 10000,
-          "description": "Business-stated share of the economic amount governed by this policy that remains with or is returned to the Buyer, expressed in basis points. `0` means no refund and `10000` means a full refund. This field does not by itself standardize a monetary basis; a Platform MUST NOT calculate money unless the targeted Booking data supplies an unambiguous basis."
+          "description": "Business-stated refund percentage under this policy, expressed in basis points. `0` means no refund and `10000` means a full refund. This version does not identify a monetary basis; a Platform MUST NOT convert the percentage to money unless the governing Booking data supplies an unambiguous basis."
         },
         "penalty": {
           "title": "Cancellation Penalty",
@@ -36,20 +36,25 @@
           "properties": {
             "amount": {
               "$ref": "../common/types/amount.json",
-              "description": "Fixed cancellation charge in the Booking currency's minor units."
+              "description": "Fixed cancellation charge in the minor units of the root `currency` field of the Booking response."
             },
-            "quantity": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 9007199254740991,
-              "description": "Positive count of lodging units used to state the cancellation penalty."
-            },
-            "unit": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Open unit identifier. `night` is the well-known lodging value. Additional values SHOULD use a reverse-domain identifier. Platforms MUST tolerate an unrecognized value and use the policy description for presentation.",
-              "examples": [
-                "night"
+            "measure": {
+              "description": "Positive whole lodging-unit cancellation penalty expressed with the shared UCP measure representation. `scale` is fixed at `0`; `night` is the well-known lodging unit for this policy.",
+              "allOf": [
+                {
+                  "$ref": "../common/types/measure.json"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "minimum": 1
+                    },
+                    "scale": {
+                      "const": 0
+                    }
+                  }
+                }
               ]
             }
           }
@@ -115,8 +120,7 @@
             "properties": {
               "penalty": {
                 "required": [
-                  "quantity",
-                  "unit"
+                  "measure"
                 ]
               }
             }
@@ -159,7 +163,7 @@
         "anchor": {
           "type": "string",
           "format": "date-time",
-          "pattern": "(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\\.[0-9]+)?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
           "description": "RFC 3339 instant from which tier cutoffs are calculated, expressed with `Z` or an explicit numeric UTC offset. For lodging this normally represents the property's stated arrival or check-in cutoff."
         },
         "tiers": {
@@ -195,7 +199,7 @@
             },
             "refundability": {
               "type": "string",
-              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (cancellable with penalty, or inside penalty window), `non_refundable` (no refund upon cancellation). Platforms MUST tolerate unknown values and use `description` when they cannot interpret the classification.",
+              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (the current cancellation result is strictly between a full refund and no refund), `non_refundable` (no refund upon cancellation). Platforms MUST tolerate unknown values and use `description` when they cannot interpret the classification.",
               "examples": [
                 "refundable",
                 "partially_refundable",

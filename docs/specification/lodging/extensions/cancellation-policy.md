@@ -73,6 +73,18 @@ When this type is active, a `policies[]` entry whose `type` is
 
 {{ extension_schema_fields('policy_cancellation.json#/$defs/cancellation_item', 'lodging/extensions/cancellation-policy') }}
 
+### Cancellation Schedule
+
+{{ extension_schema_fields('policy_cancellation.json#/$defs/cancellation_schedule', 'lodging/extensions/cancellation-policy') }}
+
+### Cancellation Tier
+
+{{ extension_schema_fields('policy_cancellation.json#/$defs/cancellation_tier', 'lodging/extensions/cancellation-policy') }}
+
+### Cancellation Outcome
+
+{{ extension_schema_fields('policy_cancellation.json#/$defs/cancellation_outcome', 'lodging/extensions/cancellation-policy') }}
+
 ## Cancellation terms
 
 ### Refundability classification
@@ -80,8 +92,9 @@ When this type is active, a `policies[]` entry whose `type` is
 `refundability` provides a standardized current high-level classification:
 
 - **`refundable`**: cancellation without penalty is currently available.
-- **`partially_refundable`**: cancellation is available but a penalty currently
-  applies.
+- **`partially_refundable`**: the current cancellation result is strictly
+  between a full refund and no refund; a penalty applies, but some refundable
+  value remains.
 - **`non_refundable`**: no refund is currently available upon cancellation,
   subject to applicable law.
 
@@ -89,16 +102,19 @@ Platforms **MUST** tolerate unknown classification values and use `description`
 when they cannot interpret the value.
 
 `schedule` does not replace this classification. When both are present, the
-Business **MUST** classify the current economic result when it creates the
-response, independent of outcome kind: a full refund is `refundable`, no refund
-is `non_refundable`, and a result strictly between those endpoints is
-`partially_refundable`. When the monetary value of a symbolic outcome cannot be
-derived, a Platform uses the Business-stated `refundability` for that snapshot.
+Business **MUST** ensure that `refundability` accurately summarizes the outcome
+selected at the response-generation instant for the policy's governed scope. A
+full refund is `refundable`, no refund is `non_refundable`, and a result strictly
+between those endpoints is `partially_refundable`. The Business determines this
+classification from its authoritative terms and pricing. A Platform **MUST**
+treat `refundability` as authoritative for that snapshot and **MUST NOT**
+replace it with a classification derived from an outcome kind or an inferred
+monetary basis.
 
 `refundability` is a point-in-time summary. For evaluation at an explicit `at`
-instant, `schedule` governs. Crossing a cutoff later does not make an earlier
-response contradictory, but a Platform **MUST NOT** reuse that snapshot as the
-classification for a different instant.
+instant, `schedule` governs: a Platform **MUST** select the applicable schedule
+outcome and **MUST NOT** extrapolate `refundability` to that instant. Crossing a
+cutoff later does not make the earlier response contradictory.
 
 ### Deterministic schedule
 
@@ -150,14 +166,16 @@ For example, with an anchor of `2026-12-22T15:00:00-05:00` and `until` of
 well-known values:
 
 - **`percentage`** requires `buyer_bps`, an integer from 0 through 10000. It is
-  the Business-stated share of the economic amount governed by the policy that
-  remains with or is returned to the Buyer. This version does not standardize a
-  monetary basis for that percentage.
+  the Business-stated refund percentage under the policy. `0` means no refund
+  and `10000` means a full refund. This version does not identify a monetary
+  basis for the percentage.
 - **`fixed_fee`** requires `penalty.amount`, expressed as an integer in the
-  Booking currency's minor unit. Currency is inherited from the Booking and is
+  minor units of the root `currency` field of the Booking response. Currency is
   not repeated in the outcome.
-- **`unit_deduction`** requires a positive integer `penalty.quantity` and an
-  open `penalty.unit` value. `night` is the well-known lodging unit.
+- **`unit_deduction`** requires `penalty.measure` using the shared UCP measure
+  representation, with a positive `value`, stable `unit`, and required
+  `display_text`. `night` is the well-known lodging unit and has an effective
+  `scale` of `0`.
 
 Percentage and unit-deduction outcomes are deterministic symbolic terms, but
 they do not necessarily imply a cash amount. A Platform **MUST NOT** calculate
@@ -165,8 +183,8 @@ money unless the targeted Booking data supplies an unambiguous basis.
 
 For a well-known `kind`, a Business **MUST** emit only the fields defined for
 that kind. A Platform evaluates only those fields and ignores unrelated outcome
-members. Additional `kind` and `unit` values **SHOULD** use reverse-domain
-identifiers.
+members. Additional `kind` values **SHOULD** use reverse-domain identifiers.
+Unit identifiers and display behavior follow the shared UCP unit rules.
 
 A Platform that encounters an unsupported `kind` **MUST** tolerate the value,
 **MUST NOT** infer its meaning or claim a deterministic outcome, and **MUST**
@@ -177,20 +195,27 @@ use `description` as the fallback.
 To signal that a booking or rate is currently non-refundable, a Business
 **MUST** set `refundability` to `"non_refundable"`.
 
-When the Booker must acknowledge this condition before confirmation, the
-Business emits a `messages[]` warning with `presentation: "disclosure"` and a
-`code` of `dev.ucp.lodging.policy.cancellation`, targeting the affected item.
-See [Presenting policies](../../overview/index.md#presenting-policies).
+When a Business requires that the current non-refundable classification be
+shown to the Booker before confirmation, it **MUST** emit a `messages[]` warning
+with `presentation: "disclosure"` and a `code` of
+`dev.ucp.lodging.policy.cancellation`. It sets `path` to the affected room-rate
+node, or omits `path` for a response-wide policy. See [Presenting
+policies](../../overview/index.md#presenting-policies).
 
 ### Human-readable terms and fallback
 
-`description` remains the universal human-readable and legal fallback. A
-Business **MUST NOT** emit a structured schedule that contradicts
-`description`. Detecting contradictions does not require a Platform to parse
-legal prose. If a contradiction is independently known, the schedule is
-invalid, ordered-tier constraints are violated, or a selected outcome is
-unsupported, the Platform **MUST NOT** present a guessed structured result and
-**SHOULD** present `description` and `url`.
+`description` remains the universal human-readable and legal fallback. Whether
+or not `schedule` is present, a Business **MUST** articulate the full
+cancellation timeline and terms in `description`. The point-in-time
+`refundability` value **MUST NOT** contradict the outcome that `description`
+states applies when the response is created. When present, `schedule`
+**MUST NOT** contradict `description`.
+
+Detecting contradictions does not require a Platform to parse legal prose. If a
+contradiction is independently known, the schedule is invalid, ordered-tier
+constraints are violated, or a selected outcome is unsupported, the Platform
+**MUST NOT** present a guessed structured result and **SHOULD** present
+`description` and `url`.
 
 ## Targeting and precedence
 
@@ -246,8 +271,11 @@ cancellation or refund behavior solely from this pre-purchase policy. It
     "after_last_tier": {
       "kind": "unit_deduction",
       "penalty": {
-        "quantity": 1,
-        "unit": "night"
+        "measure": {
+          "value": 1,
+          "unit": "night",
+          "display_text": "night"
+        }
       }
     }
   },
@@ -270,20 +298,21 @@ cancellation or refund behavior solely from this pre-purchase policy. It
 }
 ```
 
-## Normative evaluation vectors
+## Evaluation examples
 
-The following compact vectors define selection behavior. `tier[n]` uses
-zero-based array indexing. An expected outcome is the selected wire outcome,
-not a cancellation or refund instruction.
+The following human-readable cases define selection behavior. `tier[n]` uses
+zero-based array indexing. An expected result summarizes the selected wire
+outcome; it is not a cancellation or refund instruction. Executable vectors
+remain a separate conformance artifact.
 
 | ID | Schedule and evaluation instant | Expected result |
 | --- | --- | --- |
-| `before_cutoff` | Example schedule above; `at = 2026-12-20T19:59:59Z` | `tier[0]`; `percentage`, `buyer_bps = 10000` |
-| `exact_cutoff` | Example schedule above; `at = 2026-12-20T20:00:00Z` | `after_last_tier`; `unit_deduction`, one `night` |
-| `after_cutoff` | Example schedule above; `at = 2026-12-20T20:00:01Z` | `after_last_tier`; `unit_deduction`, one `night` |
+| `before_cutoff` | Free-cancellation example; `at = 2026-12-20T19:59:59Z` | `tier[0]`; `percentage`, `buyer_bps = 10000` |
+| `exact_cutoff` | Free-cancellation example; `at = 2026-12-20T20:00:00Z` | `after_last_tier`; `unit_deduction`, `penalty.measure.value = 1`, `penalty.measure.unit = night`, `penalty.measure.display_text = night` |
+| `after_cutoff` | Free-cancellation example; `at = 2026-12-20T20:00:01Z` | `after_last_tier`; `unit_deduction`, `penalty.measure.value = 1`, `penalty.measure.unit = night`, `penalty.measure.display_text = night` |
 | `middle_tier` | `anchor = 2026-12-31T12:00:00Z`; tiers `P7D -> buyer_bps 10000`, `PT48H -> buyer_bps 5000`; `at = 2026-12-24T12:00:00Z` | `tier[1]`; `percentage`, `buyer_bps = 5000` |
 | `last_cutoff` | Same two-tier schedule; `at = 2026-12-29T12:00:00Z`; after-last `buyer_bps = 0` | `after_last_tier`; `percentage`, `buyer_bps = 0` |
-| `fixed_fee` | `anchor = 2027-01-10T12:00:00Z`; tier `PT24H -> buyer_bps 10000`; `at = 2027-01-09T12:00:00Z`; after-last fixed fee amount `7500` | `after_last_tier`; `fixed_fee`, the penalty is `7500` minor units |
+| `fixed_fee` | `Booking.currency = USD`; `anchor = 2027-01-10T12:00:00Z`; tier `PT24H -> buyer_bps 10000`; `at = 2027-01-09T12:00:00Z`; after-last fixed fee amount `7500` | `after_last_tier`; `fixed_fee`, `penalty.amount = 7500` minor units in USD |
 | `elapsed_day` | `anchor = 2026-03-09T02:30:00-04:00`; tier `P1D -> buyer_bps 10000`; `at = 2026-03-08T06:29:59Z` | Because `P1D` is 24 elapsed hours, the cutoff is `2026-03-08T06:30:00Z`; select `tier[0]` |
 | `unsupported_kind` | Selected outcome has `kind = com.example.voucher`; otherwise valid schedule | Tolerate the value; structured outcome unavailable; fall back to `description` |
 | `schedule_absent` | Policy has no `schedule` | Timeline evaluation unavailable; use `refundability` and `description` |
