@@ -210,7 +210,7 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
             }
           },
           "id": "booking_123",
-          "status": "ready_for_complete",
+          "status": "incomplete",
           "accommodation": {
             "id": "hotel_123",
             "name": "Beautiful Scenery Hotel",
