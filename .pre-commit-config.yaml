@@ -44,6 +44,19 @@ repos:
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
         stages: [pre-commit, pre-push]
+      - id: validate-cancellation-schedule
+        name: Validate cancellation schedule vectors
+        entry: uv run --frozen python scripts/test_cancellation_schedule.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_schedule\.py$
+            |scripts/fixtures/lodging_cancellation_schedule\.json$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:
