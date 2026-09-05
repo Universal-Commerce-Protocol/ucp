@@ -130,6 +130,12 @@ offset. The timestamp identifies an instant; a numeric offset does not declare a
 recurring property timezone. For lodging, the anchor normally represents the stated
 arrival or check-in cutoff.
 
+Schedule arithmetic uses Unix time (POSIX): each date contributes exactly
+86400 seconds, excluding leap seconds. The supported timestamp profile for
+`anchor` and `at` therefore requires seconds from `00` through `59`;
+leap-second labels with `:60` are unsupported. Offsets, including `-00:00`,
+identify the UTC instant according to RFC 3339; no property timezone is inferred.
+
 Each tier's `until` is an ISO 8601 elapsed duration before `anchor`. This version
 supports nonnegative whole-number days, hours, minutes, and seconds only. A day
 is exactly 24 elapsed hours. Calendar months, calendar years, local-calendar
@@ -154,6 +160,13 @@ tier no longer applies. Neither party rounds, shifts, or reinterprets `at`, the
 anchor, or a computed cutoff. Implementations use exact checked arithmetic. If
 a duration or resulting cutoff cannot be represented exactly, structured
 evaluation is unavailable.
+
+Before selecting any tier, a Platform **MUST** validate the entire schedule,
+including ordering, and the calendar validity of `anchor` and `at`. Passing
+JSON Schema validation alone is insufficient when `format` is annotation-only:
+for example, February 30 is not a valid timestamp. An invalid or unsupported
+timestamp makes structured evaluation unavailable; it **MUST NOT** be repaired,
+rounded, or silently normalized to a different instant.
 
 For example, with an anchor of `2026-12-22T15:00:00-05:00` and `until` of
 `PT48H`, the cutoff is `2026-12-20T20:00:00Z`. An evaluation at
@@ -224,6 +237,16 @@ here. A policy without `applies_to` is the response-wide default. A policy that
 targets a room rate overrides a less-specific policy of the same type. See
 [Targeting](../../overview/index.md#targeting) and
 [Precedence](../../overview/index.md#precedence).
+
+An outcome states the Business's penalty terms for the governed scope.
+Targeting determines which policy governs each node; it does not define
+whether a charge repeats per room, per night, or per cancelled reservation.
+A Platform **MUST NOT** derive an aggregate cancellation quote by multiplying
+a fixed fee or unit deduction solely by the number of matched nodes. For
+example, a USD `7500` fixed fee governing two room rates does not by itself
+establish an aggregate charge of USD `15000`. Aggregation requires explicit
+Business terms and sufficient Booking data; otherwise the Platform presents
+the declared terms without an inferred aggregate.
 
 ## Responsibilities
 
@@ -303,7 +326,21 @@ cancellation or refund behavior solely from this pre-purchase policy. It
 The following human-readable cases define selection behavior. `tier[n]` uses
 zero-based array indexing. An expected result summarizes the selected wire
 outcome; it is not a cancellation or refund instruction. Executable vectors
-remain a separate conformance artifact.
+are provided in `scripts/fixtures/lodging_cancellation_schedule.json` and
+checked by `scripts/test_cancellation_schedule.py`. With `ucp-schema` on
+`PATH`, run:
+
+```sh
+python3 scripts/test_cancellation_schedule.py
+```
+
+The portable fixture contains named schedules and evaluation cases with an
+expected selection or fallback. Its result status, reason, and JSON Pointer
+are test metadata, not protocol fields. The runner is a test-only oracle for
+already-targeted policies; it does not calculate money, classify refunds, or
+resolve policy targeting. The fixture also covers invalid dates and ordering,
+exact fractional instants, mixed duration components, and POSIX arithmetic
+across a leap-second boundary.
 
 | ID | Schedule and evaluation instant | Expected result |
 | --- | --- | --- |
