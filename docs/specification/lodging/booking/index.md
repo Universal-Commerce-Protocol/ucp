@@ -88,6 +88,9 @@ Booking follows a progressive session lifecycle:
   Platforms **MUST NOT** use persistent cross-merchant user tracking identifiers or
   expose personally identifiable information (PII) within `guest.id`. Businesses
   **MUST NOT** infer or link identity across distinct booking sessions based on `guest.id`.
+    * **Timing**: Platform **SHOULD NOT** send `guests[]` identity fields beyond `id` before the
+      booking reaches `ready_for_complete`, and **SHOULD** send only the fields the business
+      requests via `messages[]`.
 * **Guest Pool & Room Assignment Model**: Guest data is structured into a
   two-level relational model:
     * **Root Guest Pool (`guests[]`)**: A flat collection of all individual guest
@@ -115,28 +118,52 @@ Booking follows a progressive session lifecycle:
 
 ### Pricing Scope
 
-Lodging reservations follow strict all-in pricing rules to comply with consumer protection regulations (such as FTC and EU price transparency directives). In lodging, the full financial commitment for a stay is often divided between charges prepaid at the time of reservation confirmation and charges collected directly by the accommodation property upon check-in or check-out (e.g., resort fees, municipal occupancy taxes, or a remaining room balance).
+Lodging reservations follow strict all-in pricing rules to comply with consumer protection regulations
+(such as FTC and EU price transparency directives). In lodging, the full financial commitment for a stay
+is often divided between charges prepaid at the time of reservation confirmation and charges collected
+directly by the accommodation property upon check-in or check-out (e.g., resort fees, municipal
+occupancy taxes, or a remaining room balance).
 
 #### Pricing Architecture & Scope Guidelines
 
-* **Authoritative Root Total (`totals`)**: The top-level `totals` array represents the binding, authoritative pricing breakdown and aggregate financial commitment for the entire reservation stay across all requested room units.
-* **Stay-Level Room Rate Total (`room_rates[].totals`)**: Each entry in `room_rates[].totals` reflects the total charges for that specific room rate unit across the entire itinerary stay duration (i.e., check-in to check-out), **NOT** a per-night figure.
-* **Itemized Subtotals and Nightly Breakdown (`lines`)**: The `lines` array under a total item provides supplementary, itemized clarity:
+* **Authoritative Root Total (`totals`)**: The top-level `totals` array represents the binding,
+  authoritative pricing breakdown and aggregate financial commitment for the entire reservation
+  stay across all requested room units.
+* **Stay-Level Room Rate Total (`room_rates[].totals`)**: Each entry in `room_rates[].totals`
+  reflects the total charges for that specific room rate unit across the entire itinerary stay
+  duration (i.e., check-in to check-out), **NOT** a per-night figure.
+* **Itemized Subtotals and Nightly Breakdown (`lines`)**: The `lines` array under a total item
+  provides supplementary, itemized clarity:
     * `subtotal` total items **MAY** carry `lines` representing the per-night room rate breakdown.
-    * `tax` total items **MAY** carry `lines` delineating separate tax authorities (e.g., state sales tax vs. local occupancy or tourism tax).
-    * `fee` total items **MAY** carry `lines` detailing mandatory charges (e.g., daily resort fees, cleaning fees).
-* **Price Transparency and All-Inclusive Cost**: Platforms and Businesses **MUST** ensure that the guest is presented with the complete stay liability before booking confirmation. Hidden fees or undisclosed property charges violate price transparency standards.
+    * `tax` total items **MAY** carry `lines` delineating separate tax authorities (e.g., state
+      sales tax vs. local occupancy or tourism tax).
+    * `fee` total items **MAY** carry `lines` detailing mandatory charges (e.g., daily resort
+      fees, cleaning fees).
+* **Price Transparency and All-Inclusive Cost**: Platforms and Businesses **MUST** ensure that
+  the guest is presented with the complete stay liability before booking confirmation. Hidden
+  fees or undisclosed property charges violate price transparency standards.
 
 #### Immediate vs. Deferred Payment Breakdown
 
-* **Amount Due Now (`total`)**: The standard `type: "total"` entry strictly represents the immediate amount charged to the buyer's payment instrument upon booking confirmation. In full prepayment terms, this equals the entire cost of the stay. In deposit-based terms, this equals only the initial deposit and prepaid taxes/fees. The sum of all standard prepaid items (`subtotal` + prepaid `fee` + prepaid `tax` + `discount`) **MUST** equal `total`.
-* **Deferred & Property-Collected Well-Known Types**: To model post-booking and property-collected charges consistently, the following well-known `type` values are introduced:
-    * `postpaid_subtotal`: The lodging room rate balance collected directly at the property (e.g., remaining room nights due at check-in after a partial deposit).
-    * `postpaid_fee`: Mandatory amenity, resort, cleaning, or facility fees collected directly by the property during the stay.
-    * `postpaid_tax`: Mandatory municipal, occupancy, or tourism taxes collected locally by the property (e.g., city accommodation tax).
-    * `due_at_property`: The aggregate sum of all property-collected charges (`postpaid_subtotal` + `postpaid_fee` + `postpaid_tax`). Present whenever any postpaid charges exist.
-    * `grand_total`: The all-inclusive stay cost (`total` + `due_at_property`), representing the Buyer's total financial commitment for the entire reservation. Present whenever deferred or property-collected amounts exist, ensuring full compliance with FTC and EU price display requirements.
-    * `grand_total`: The all-inclusive stay cost (`total` + `due_at_property`), representing the
+* **Amount Due Now (`total`)**: The standard `type: "total"` entry strictly represents the
+  immediate amount charged to the buyer's payment instrument upon booking confirmation. In full
+  prepayment terms, this equals the entire cost of the stay. In deposit-based terms, this equals
+  only the initial deposit and prepaid taxes/fees. The sum of all standard prepaid items
+  (`subtotal`, `fee`, `tax`, `discount`) **MUST** equal `total`.
+* **Deferred & Property-Collected Well-Known Types**: To model post-booking and
+  property-collected charges consistently, the following well-known `type` values are introduced:
+    * `postpaid_subtotal`: The lodging room rate balance collected directly at the property
+      (e.g., remaining room nights due at check-in after a partial deposit).
+    * `postpaid_fee`: Mandatory amenity, resort, cleaning, or facility fees collected directly
+      by the property during the stay.
+    * `postpaid_tax`: Mandatory municipal, occupancy, or tourism taxes collected locally by
+      the property (e.g., city accommodation tax).
+    * `due_at_property`: The aggregate sum of all property-collected charges
+      (`postpaid_subtotal` + `postpaid_fee` + `postpaid_tax`). Present whenever any postpaid charges exist.
+    * `grand_total`: The all-inclusive stay cost (`total` + `due_at_property`), representing
+      the Buyer's total financial commitment for the entire reservation. Present whenever deferred
+      or property-collected amounts exist, ensuring full compliance with FTC and EU price
+      display requirements.
 
 ##### Well-Known Totals Types & Accounting Invariants
 
@@ -155,19 +182,31 @@ Lodging reservations follow strict all-in pricing rules to comply with consumer 
 
 #### Local Tax & Fee Disclosures
 
-When mandatory taxes or fees are collected locally by the lodging property and cannot be remitted at booking, the Business **SHOULD** provide a warning message in `messages[]` with `presentation: "disclosure"` and a `path` pointing directly to the relevant postpaid entry (e.g., `$.totals[4]`). This disclosure notice **MUST** state the applicable local rates, exemptions, and payment instructions, complemented by formal policy links in `links[]`.
+When mandatory taxes or fees are collected locally by the lodging property and cannot be
+remitted at booking, the Business **SHOULD** provide a warning message in `messages[]` with
+`presentation: "disclosure"` and a `path` pointing directly to the relevant postpaid entry
+(e.g., `$.totals[4]`). This disclosure notice **MUST** state the applicable local rates,
+exemptions, and payment instructions, complemented by formal policy links in `links[]`.
 
 #### Payment Terms Integration (`dev.ucp.common.payment.terms`)
 
-When a Business supports flexible payment timing, it advertises the `dev.ucp.common.payment.terms` capability and populates `payment.terms[]` with the available payment terms alongside `payment.selected_term_id` indicating the active selection:
+When a Business supports flexible payment timing, it advertises the `dev.ucp.common.payment.terms`
+capability and populates `payment.terms[]` with the available payment terms
+alongside `payment.selected_term_id` indicating the active selection:
 
 * **Schedules and `totals` Alignment**:
     * A payment term is composed of one or more `schedules[]`.
-    * Schedules with `type: "immediate"` represent payments due today upon booking completion and **MUST** sum to `totals[].type: "total"`.
-    * Schedules with `type: "deferred"` represent payments due at a specified future date or event (e.g., `due_at` timestamp or check-in) and **MUST** sum to `totals[].type: "due_at_property"`.
+    * Schedules with `type: "immediate"` represent payments due today upon booking completion
+      and **MUST** sum to `totals[].type: "total"`.
+    * Schedules with `type: "deferred"` represent payments due at a specified future date or
+      event (e.g., `due_at` timestamp or check-in) and **MUST** sum to `totals[].type: "due_at_property"`.
 * **Selection Mutations**:
-    * When the Platform updates `payment.selected_term_id` via Update Booking Session (e.g., switching from "Pay now" to "First night now, balance at check-in"), the Business authoritatively recomputes `totals[]`.
-    * The recomputed `totals[]` reflects the newly selected term's immediate amount in `total`, partitions remaining nights into `postpaid_subtotal` and `postpaid_tax`, and updates `due_at_property` and `grand_total`.
+    * When the Platform updates `payment.selected_term_id` via Update Booking Session
+      (e.g., switching from "Pay now" to "First night now, balance at check-in"),
+      the Business authoritatively recomputes `totals[]`.
+    * The recomputed `totals[]` reflects the newly selected term's immediate amount in `total`,
+      partitions remaining nights into `postpaid_subtotal` and `postpaid_tax`, and updates
+      `due_at_property` and `grand_total`.
 
 The following snippets illustrate how `totals[]` is structured across three canonical lodging pricing patterns:
 
@@ -284,7 +323,8 @@ The following snippets illustrate how `totals[]` is structured across three cano
     ```
 
 > [!TIP]
-> For complete, end-to-end booking session payloads with room rate bindings, lead guest assignments, messages, and payment terms, see [Pricing & Payment Terms Examples](#pricing-examples).
+> For complete, end-to-end booking session payloads with room rate bindings, lead guest assignments,
+> messages, and payment terms, see [Pricing & Payment Terms Examples](#pricing-examples).
 
 ### Payments
 
@@ -294,9 +334,11 @@ collecting payment instruments (e.g., Google Pay, Shop Pay). When the user
 submits payment, the platform populates the `payment.instruments` array with the
 collected instrument data.
 
-The `payment` object is optional on booking creation and may be omitted for
-use cases that don't require immediate payment processing (e.g., pay after
-arrival or hold-with-card).
+The `payment` object is optional on booking session creation and update operations.
+At completion (`complete_booking_session`), `payment` is **REQUIRED** to establish the binding
+payment agreement. For immediate card payments, `payment.instruments` is populated; for deferred
+or pay-at-property reservations, `payment` conveys the finalized terms (e.g., via the Payment
+Terms extension) and `instruments` may be omitted if no upfront card guarantee is required.
 
 ### Booking Status Lifecycle
 
@@ -420,6 +462,9 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
 * **MUST** ensure every `guest_assignments[].guest_id` references a valid `id`
   present in the root `guests[]` pool.
+* **SHOULD NOT** send `guests[]` personal identity fields beyond `id` before the
+  booking reaches `ready_for_complete`, and **SHOULD** send only the fields the
+  business requests via `messages[]`.
 * **MAY** engage an agent to facilitate the booking session (e.g. select room,
   dates, collect guest information). However, the agent must hand over
   the booking session to a trusted and deterministic UI for the user to review
@@ -515,7 +560,8 @@ The abstract operations above are bound to specific transport protocols:
 
 ### Pricing Examples
 
-The following examples provide complete, authoritative booking sessions demonstrating property-collected charges and flexible payment terms integration.
+The following examples provide complete, authoritative booking sessions demonstrating
+property-collected charges and flexible payment terms integration.
 
 === "Property-Collected Taxes & Fees"
 
@@ -1081,6 +1127,14 @@ Requested adult and child guest count breakdown for a room.
 Payment details and collected payment instruments.
 
 {{ schema_fields('payment', 'lodging/booking') }}
+
+### Policy
+
+Policies (cancellation terms, house rules, and the like) that apply to the booking session or room rates.
+JSONPath targets in `applies_to` are relative to this response root (e.g., `$.room_rates[0]`).
+See [Policies](../../overview/index.md#policies) for the full model.
+
+{{ schema_fields('types/policy', 'lodging/booking') }}
 
 ### Rate Plan
 
