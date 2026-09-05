@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/booking_confirmation.json",
+  "title": "Booking Confirmation",
+  "description": "Booking details available at the time of session completion.",
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique booking identifier."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label (e.g., confirmation number) for identifying the booking if it differs from the unique id. MUST only be provided by the business."
+    },
+    "pincode": {
+      "type": "string",
+      "description": "Additional code provided for secure access of the booking. SHOULD be used alongside the unique identifier or confirmation number."
+    },
+    "permalink_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Permalink to access the booking directly on business's website."
+    }
+  }
+}

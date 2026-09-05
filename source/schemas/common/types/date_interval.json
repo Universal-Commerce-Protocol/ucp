@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/date_interval.json",
+  "title": "Date Interval",
+  "description": "Represents a closed date range defined by start and end dates.",
+  "type": "object",
+  "dependentRequired": {
+    "start_date": [
+      "end_date"
+    ],
+    "end_date": [
+      "start_date"
+    ]
+  },
+  "properties": {
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of the interval in ISO 8601 format."
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of the interval in ISO 8601 format. MUST be on or after `start_date`."
+    }
+  }
+}

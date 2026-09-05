@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/booking.json",
+  "name": "dev.ucp.lodging.booking",
+  "title": "Booking",
+  "description": "Base booking schema. Extensions compose onto this using allOf.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "id",
+    "status",
+    "accommodation",
+    "room_rates",
+    "itinerary",
+    "currency",
+    "totals",
+    "links"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_booking_schema",
+      "ucp_request": "omit"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the booking.",
+      "ucp_request": "omit"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "incomplete",
+        "requires_escalation",
+        "ready_for_complete",
+        "complete_in_progress",
+        "completed",
+        "canceled"
+      ],
+      "description": "Booking state indicating the current phase and required action. See Booking Status lifecycle documentation for state transition details.",
+      "ucp_request": "omit"
+    },
+    "accommodation": {
+      "$ref": "types/accommodation.json",
+      "description": "Accommodation location the booking is associated with.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "room_rates": {
+      "type": "array",
+      "items": {
+        "$ref": "types/room_rate.json"
+      },
+      "description": "List of room and rate plan bindings for the booking.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "itinerary": {
+      "$ref": "../common/types/date_interval.json",
+      "description": "Duration of the booking itinerary.",
+      "required": [
+        "start_date",
+        "end_date"
+      ],
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "booker": {
+      "$ref": "types/booker.json",
+      "description": "Representation of the legal contracting party making the reservation.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "guests": {
+      "type": "array",
+      "items": {
+        "$ref": "types/guest.json"
+      },
+      "description": "List of guest profiles associated with the booking.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "travel_purpose": {
+      "type": "string",
+      "description": "Purpose of the trip or reservation. Well-known values: `business`, `leisure`. Businesses MAY implement and support additional values.",
+      "examples": [
+        "business",
+        "leisure"
+      ],
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "context": {
+      "$ref": "../common/types/context.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "signals": {
+      "$ref": "../common/types/signals.json",
+      "ucp_request": "optional"
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code reflecting the business's market determination. Derived from address, context, and geo IP—buyers provide signals, businesses determine currency.",
+      "ucp_request": "omit"
+    },
+    "totals": {
+      "$ref": "../common/types/totals.json",
+      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the immediate amount payable upon confirmation (Due Now). When property-collected or deferred charges apply, businesses provide `postpaid_*` entries, `due_at_property`, and `grand_total` to convey the all-inclusive stay liability in compliance with price transparency directives.",
+      "ucp_request": "omit"
+    },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this booking.",
+      "ucp_request": "omit"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/message.json"
+      },
+      "description": "List of messages with error and info about the booking session state.",
+      "ucp_request": "omit"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/link.json"
+      },
+      "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/policy.json"
+      },
+      "description": "Policies (e.g., cancellation terms) that apply to the booking session. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
+      "ucp_request": "omit"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp after which the booking session is no longer valid. Quoted pricing and availability are held until this time; businesses MUST NOT complete a booking at a modified price without first returning updated totals to the platform.",
+      "ucp_request": "omit"
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for booking handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
+      "ucp_request": "omit"
+    },
+    "payment": {
+      "$ref": "../common/types/payment.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "required"
+      }
+    },
+    "confirmation": {
+      "$ref": "types/booking_confirmation.json",
+      "description": "Details about the booking created from this specific session.",
+      "ucp_request": "omit"
+    }
+  }
+}

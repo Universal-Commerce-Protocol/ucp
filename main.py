@@ -377,17 +377,20 @@ def define_env(env):
     if ref_string.startswith("types/"):
       spec_file_name = "reference"
 
-    # Redirect refs to common/types/ or shopping/types/ schemas to reference.
+    # Redirect refs to common/types/ or <vertical>/types/ schemas to reference.
     # Uses ref_path (fragment stripped) so refs like
     # "../common/types/pagination.json#/$defs/request" are handled correctly.
     elif ref_path.endswith(".json"):
       filename_only = Path(ref_path).name
       common_type_path = COMMON_TYPES_DIR / filename_only
-      shopping_type_path = SHOPPING_TYPES_DIR / filename_only
-      shopping_path = SHOPPING_SCHEMAS_DIR / filename_only
-      if common_type_path.exists() or (
-        shopping_type_path.exists() and not shopping_path.exists()
-      ):
+      vertical_type_paths = []
+      for vertical_dir in VERTICAL_DIRS:
+        vertical_path = vertical_dir / filename_only
+        vertical_type_path = vertical_dir / "types" / filename_only
+        if vertical_type_path.exists() and not vertical_path.exists():
+          vertical_type_paths.append(vertical_type_path)
+
+      if common_type_path.exists() or len(vertical_type_paths) > 0:
         spec_file_name = "reference"
 
     filename = Path(ref_path).name
@@ -606,7 +609,39 @@ def define_env(env):
         )
       )
 
-    return "\n".join(md)
+    # When allOf composition overrides a property from an earlier branch, prefer
+    # the outer (later) definition per cell, falling back to the base branch for
+    # cells the specialization leaves empty. Render each field only once.
+    deduped_rows = {}
+    other_lines = []
+    for block in md:
+      for line in block.splitlines():
+        stripped = line.strip()
+        if not stripped:
+          continue
+        if stripped.startswith("|") and stripped.endswith("|"):
+          parts = [p.strip() for p in stripped.split("|")]
+          # Exclude header and separator rows if any were embedded
+          if len(parts) >= 5 and parts[1] not in ("Name", ":---"):
+            field_name = parts[1]
+            prior = deduped_rows.get(field_name)
+            if prior is None:
+              deduped_rows[field_name] = parts
+            else:
+              # "any" is the renderer's placeholder for a branch that adds no
+              # `type`, so it defers to the base branch just like an empty cell.
+              deduped_rows[field_name] = [
+                new if new and new != "any" else (old or new)
+                for new, old in zip(parts, prior, strict=False)
+              ]
+            continue
+        other_lines.append(line)
+
+    result = ["| " + " | ".join(p[1:-1]) + " |" for p in deduped_rows.values()]
+    if other_lines:
+      result.extend(other_lines)
+
+    return "\n".join(result)
 
   def _field_requirement(field_name, ucp_request, required_list):
     """Render the Requirement cell for a schema field.
@@ -794,10 +829,18 @@ def define_env(env):
           context,
         )
       )
-    elif "allOf" in schema_data and not properties:
+    elif "allOf" in schema_data:
+      all_of_list = list(schema_data.get("allOf", []))
+      if properties:
+        all_of_list.append(
+          {
+            "properties": properties,
+            "required": schema_data.get("required", []),
+          }
+        )
       md.append(
         _render_embedded_table(
-          schema_data.get("allOf", []),
+          all_of_list,
           required_list,
           spec_file_name,
           context,

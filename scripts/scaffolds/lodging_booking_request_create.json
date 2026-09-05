@@ -1,0 +1,24 @@
+{
+  "accommodation": {
+    "id": "acc_scaffold"
+  },
+  "room_rates": [
+    {
+      "id": "rr_scaffold",
+      "room_details": {
+        "id": "room_scaffold"
+      },
+      "rate_plan": {
+        "id": "rp_scaffold"
+      },
+      "occupancy": {
+        "adults": 1,
+        "total": 1
+      }
+    }
+  ],
+  "itinerary": {
+    "start_date": "2026-01-01",
+    "end_date": "2026-01-05"
+  }
+}

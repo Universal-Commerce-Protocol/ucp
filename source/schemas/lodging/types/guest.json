@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/guest.json",
+  "title": "Guest",
+  "description": "Profile of an individual guest staying at the accommodation.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, opaque identifier for a guest in the Platform's namespace."
+    },
+    "first_name": {
+      "type": "string",
+      "description": "First name of the guest."
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Last name of the guest."
+    },
+    "email": {
+      "type": "string",
+      "description": "Email of the guest."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "E.164 standard. Phone number of the guest."
+    },
+    "age": {
+      "type": "integer",
+      "description": "Age of the guest, used to enforce any age-restriction for check-in and room occupancy.",
+      "minimum": 0
+    }
+  }
+}

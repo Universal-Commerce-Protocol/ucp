@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/booker.json",
+  "title": "Booker",
+  "description": "Representation of the legal contracting party making the reservation.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "First name of the booker."
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Last name of the booker."
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address of the booker."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "E.164 standard. Phone number of the booker."
+    },
+    "birthdate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of birth of the booker in ISO 8601 format."
+    },
+    "company": {
+      "type": "string",
+      "description": "The booker's company or organization name, used for corporate invoicing."
+    },
+    "address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "Physical or registered address of the booker or company for legal contracting, regulatory compliance, and invoicing."
+    }
+  }
+}

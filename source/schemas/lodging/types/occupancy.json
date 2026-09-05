@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/occupancy.json",
+  "title": "Occupancy",
+  "description": "Occupancy breakdown and guest count for a booked room.",
+  "type": "object",
+  "required": [
+    "total"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "adults": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of adults occupying the room."
+    },
+    "children": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of children occupying the room."
+    },
+    "child_ages": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 17
+      },
+      "description": "Ages of children occupying the room."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Total number of occupants in the room."
+    }
+  }
+}

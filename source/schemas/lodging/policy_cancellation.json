@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/policy_cancellation.json",
+  "name": "dev.ucp.lodging.policy.cancellation",
+  "title": "Lodging Cancellation Policy Extension",
+  "description": "Extends Booking with structured cancellation policy for lodging reservations.",
+  "$defs": {
+    "cancellation_item": {
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "refundability"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dev.ucp.lodging.policy.cancellation",
+              "description": "Policy discriminator for lodging cancellation terms."
+            },
+            "refundability": {
+              "type": "string",
+              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (cancellable with penalty, or inside penalty window), `non_refundable` (no refund upon cancellation).",
+              "examples": [
+                "refundable",
+                "partially_refundable",
+                "non_refundable"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.lodging.booking": {
+      "title": "Booking with Cancellation Policy",
+      "description": "Booking capability extended with cancellation policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "booking.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "if": {
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "dev.ucp.lodging.policy.cancellation"
+                    }
+                  }
+                },
+                "then": {
+                  "$ref": "#/$defs/cancellation_item"
+                }
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

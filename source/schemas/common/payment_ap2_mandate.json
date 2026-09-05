@@ -72,6 +72,35 @@
         }
       ]
     },
+    "dev.ucp.lodging.booking": {
+      "title": "Booking with AP2 Mandate",
+      "description": "Booking extended with AP2 mandate support.",
+      "allOf": [
+        {
+          "$ref": "../lodging/booking.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ap2": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ap2_with_merchant_authorization"
+                },
+                {
+                  "$ref": "#/$defs/ap2_with_checkout_mandate"
+                }
+              ],
+              "ucp_request": {
+                "create": "omit",
+                "update": "omit",
+                "complete": "required"
+              }
+            }
+          }
+        }
+      ]
+    },
     "error_code": {
       "title": "AP2 Error Code",
       "description": "Error codes specific to AP2 mandate verification.",
