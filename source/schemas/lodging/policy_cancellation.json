@@ -5,6 +5,176 @@
   "title": "Lodging Cancellation Policy Extension",
   "description": "Extends Booking with structured cancellation policy for lodging reservations.",
   "$defs": {
+    "cancellation_outcome": {
+      "title": "Cancellation Outcome",
+      "description": "The result of a buyer-initiated cancellation. `kind` is an open vocabulary. Well-known kinds receive additional validation; Platforms encountering an unknown kind must treat structured evaluation as unavailable and use the policy description.",
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Open outcome discriminator. Well-known values: `percentage`, `fixed_fee`, and `unit_deduction`. Businesses MAY define additional values; Platforms MUST tolerate unknown values and MUST NOT infer their meaning.",
+          "examples": [
+            "percentage",
+            "fixed_fee",
+            "unit_deduction"
+          ]
+        },
+        "buyer_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Percentage of the policy-scoped amount returned to the Buyer, expressed in basis points. `0` means no refund and `10000` means a full refund."
+        },
+        "seller_keeps": {
+          "title": "Seller-Retained Value",
+          "description": "Value retained by the seller. The fields required within this object depend on the outcome `kind`.",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "$ref": "../common/types/amount.json",
+              "description": "Fixed fee retained by the seller, in the Booking currency's minor units."
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "Positive count of units retained by the seller."
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Open unit identifier. `night` is the well-known lodging value. Platforms MUST treat an unrecognized value as opaque and use the policy description for presentation.",
+              "examples": [
+                "night"
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "percentage"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "buyer_bps"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "fixed_fee"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "seller_keeps"
+            ],
+            "properties": {
+              "seller_keeps": {
+                "required": [
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "unit_deduction"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "seller_keeps"
+            ],
+            "properties": {
+              "seller_keeps": {
+                "required": [
+                  "quantity",
+                  "unit"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "cancellation_tier": {
+      "title": "Cancellation Tier",
+      "description": "An outcome that applies before one anchor-relative cutoff. Tiers are evaluated in array order; the first tier whose cutoff is strictly later than the evaluation instant applies.",
+      "type": "object",
+      "required": [
+        "until",
+        "outcome"
+      ],
+      "properties": {
+        "until": {
+          "type": "string",
+          "format": "duration",
+          "pattern": "^P(?=[0-9]+D|T[0-9])(?:[0-9]+D)?(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?$",
+          "description": "ISO 8601 elapsed duration before the schedule anchor. This version permits only integer days, hours, minutes, and seconds; one day is exactly 24 elapsed hours. Years, months, weeks, fractional values, and negative durations are not supported."
+        },
+        "outcome": {
+          "$ref": "#/$defs/cancellation_outcome",
+          "description": "Cancellation outcome that applies when the evaluation instant is strictly earlier than `anchor - until`, after all earlier tiers have failed to match."
+        }
+      }
+    },
+    "cancellation_schedule": {
+      "title": "Cancellation Schedule",
+      "description": "Deterministic buyer-initiated cancellation terms expressed as ordered elapsed-time cutoffs relative to an absolute anchor. Tiers MUST be ordered from the farthest cutoff before the anchor to the nearest, with strictly decreasing durations and no duplicate cutoff. At exactly a cutoff, evaluation advances to the next tier; when no tier matches, `after_last_tier` applies.",
+      "type": "object",
+      "required": [
+        "anchor",
+        "tiers",
+        "after_last_tier"
+      ],
+      "properties": {
+        "anchor": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "description": "RFC 3339 instant from which tier cutoffs are calculated, expressed with `Z` or an explicit numeric UTC offset. For lodging this normally represents the property's stated arrival or check-in cutoff."
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/cancellation_tier"
+          },
+          "description": "Ordered cancellation tiers, from the farthest cutoff before `anchor` to the nearest. Ordering and duration uniqueness are normative constraints because JSON Schema cannot compare duration values across array entries."
+        },
+        "after_last_tier": {
+          "$ref": "#/$defs/cancellation_outcome",
+          "description": "Outcome at or after the nearest cutoff, including at the anchor and afterward."
+        }
+      }
+    },
     "cancellation_item": {
       "allOf": [
         {
@@ -24,12 +194,16 @@
             },
             "refundability": {
               "type": "string",
-              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (cancellable with penalty, or inside penalty window), `non_refundable` (no refund upon cancellation).",
+              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (cancellable with penalty, or inside penalty window), `non_refundable` (no refund upon cancellation). Platforms MUST tolerate unknown values and use `description` when they cannot interpret the classification.",
               "examples": [
                 "refundable",
                 "partially_refundable",
                 "non_refundable"
               ]
+            },
+            "schedule": {
+              "$ref": "#/$defs/cancellation_schedule",
+              "description": "Optional deterministic detail for buyer-initiated cancellation. Supplements, and MUST NOT contradict, `refundability` or the required human-readable `description`."
             }
           }
         }
