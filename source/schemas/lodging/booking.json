@@ -64,6 +64,10 @@
     "itinerary": {
       "$ref": "../common/types/date_interval.json",
       "description": "Duration of the booking itinerary.",
+      "required": [
+        "start_date",
+        "end_date"
+      ],
       "ucp_request": {
         "create": "required",
         "update": "required",
@@ -123,7 +127,12 @@
     },
     "totals": {
       "$ref": "../common/types/totals.json",
-      "description": "Booking totals.",
+      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the immediate amount payable upon confirmation (Due Now). When property-collected or deferred charges apply, businesses provide `postpaid_*` entries, `due_at_property`, and `grand_total` to convey the all-inclusive stay liability in compliance with price transparency directives.",
+      "ucp_request": "omit"
+    },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this booking.",
       "ucp_request": "omit"
     },
     "messages": {
@@ -153,7 +162,7 @@
     "expires_at": {
       "type": "string",
       "format": "date-time",
-      "description": "RFC 3339 expiry timestamp. Default TTL is 6 hours from start if not sent.",
+      "description": "RFC 3339 timestamp after which the booking session is no longer valid. Quoted pricing and availability are held until this time; businesses MUST NOT complete a booking at a modified price without first returning updated totals to the platform.",
       "ucp_request": "omit"
     },
     "continue_url": {

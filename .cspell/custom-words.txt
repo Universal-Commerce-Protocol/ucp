@@ -186,3 +186,5 @@ booker
 pincode
 refundability
 Refundability
+ginza
+Ginza

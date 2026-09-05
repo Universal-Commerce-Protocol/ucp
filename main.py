@@ -609,8 +609,9 @@ def define_env(env):
         )
       )
 
-    # When allOf composition overrides a property from an earlier branch,
-    # prefer the outer (later) definition and render each field only once.
+    # When allOf composition overrides a property from an earlier branch, prefer
+    # the outer (later) definition per cell, falling back to the base branch for
+    # cells the specialization leaves empty. Render each field only once.
     deduped_rows = {}
     other_lines = []
     for block in md:
@@ -623,11 +624,20 @@ def define_env(env):
           # Exclude header and separator rows if any were embedded
           if len(parts) >= 5 and parts[1] not in ("Name", ":---"):
             field_name = parts[1]
-            deduped_rows[field_name] = line
+            prior = deduped_rows.get(field_name)
+            if prior is None:
+              deduped_rows[field_name] = parts
+            else:
+              # "any" is the renderer's placeholder for a branch that adds no
+              # `type`, so it defers to the base branch just like an empty cell.
+              deduped_rows[field_name] = [
+                new if new and new != "any" else (old or new)
+                for new, old in zip(parts, prior, strict=False)
+              ]
             continue
         other_lines.append(line)
 
-    result = list(deduped_rows.values())
+    result = ["| " + " | ".join(p[1:-1]) + " |" for p in deduped_rows.values()]
     if other_lines:
       result.extend(other_lines)
 

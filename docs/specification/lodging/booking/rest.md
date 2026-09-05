@@ -103,6 +103,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 ### Create Booking Session
 
+#### Single-room Booking
+
 === "Request"
 
     <!-- ucp:example schema=lodging/booking op=create direction=request -->
@@ -160,7 +162,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
         }
       },
       "id": "booking_123",
-      "status": "ready_for_complete",
+      "status": "incomplete",
       "accommodation": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
@@ -206,15 +208,15 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "totals": [
             {
               "type": "subtotal",
-              "amount": 55000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 5500
+              "amount": 33000
             },
             {
               "type": "total",
-              "amount": 60500
+              "amount": 363000
             }
           ]
         }
@@ -227,11 +229,11 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       "totals": [
         {
           "type": "subtotal",
-          "amount": 385000
+          "amount": 330000
         },
         {
           "type": "tax",
-          "amount": 38500
+          "amount": 33000
         },
         {
           "type": "fee",
@@ -240,7 +242,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
         },
         {
           "type": "total",
-          "amount": 424500
+          "amount": 364000
         }
       ],
       "links": [
@@ -285,6 +287,213 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
         }
       ],
       "continue_url": "https://business.com/"
+    }
+    ```
+
+#### Multi-room Booking
+
+=== "Request"
+
+    <!-- ucp:example schema=lodging/booking op=create direction=request -->
+    ```json
+    POST /booking-sessions HTTP/1.1
+    UCP-Agent: profile="https://platform.example/profile"
+    Content-Type: application/json
+    ...other required headers...
+
+    {
+      "accommodation": {
+        "id": "hotel_123"
+      },
+      "room_rates": [
+        {
+          "id": "rt_luxury_queen__rp_avg_base_rate",
+          "room_type": {
+            "id": "rt_luxury_queen"
+          },
+          "rate_plan": {
+            "id": "rp_avg_base_rate"
+          },
+          "occupancy": {
+            "adults": 2,
+            "total": 2
+          }
+        },
+        {
+          "id": "rt_standard_king__rp_avg_base_rate",
+          "room_type": {
+            "id": "rt_standard_king"
+          },
+          "rate_plan": {
+            "id": "rp_avg_base_rate"
+          },
+          "occupancy": {
+            "adults": 1,
+            "total": 1
+          }
+        }
+      ],
+      "itinerary": {
+        "start_date": "2026-07-15",
+        "end_date": "2026-07-21"
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=lodging/booking op=read -->
+    ```json
+    HTTP/1.1 201 Created
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.lodging.booking": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        },
+        "payment_handlers": {
+          "com.example.vendor.delegate_payment": [
+            {"id": "handler_1", "version": "{{ ucp_version }}", "available_instruments": [{"type": "card"}], "config": {}}
+          ]
+        }
+      },
+      "id": "booking_124",
+      "status": "incomplete",
+      "accommodation": {
+        "id": "hotel_123",
+        "name": "Beautiful Scenery Hotel",
+        "address": {
+          "street_address": "123 Scene St",
+          "address_locality": "Phoenix",
+          "address_region": "AZ",
+          "address_country": "US",
+          "postal_code": "85004"
+        }
+      },
+      "room_rates": [
+        {
+          "id": "rt_luxury_queen__rp_avg_base_rate",
+          "room_type": {
+            "id": "rt_luxury_queen",
+            "title": "Luxury Queen Room with Two Queen Beds",
+            "capacity": {
+              "adults": 2,
+              "children": [
+                {
+                  "from_age": 0,
+                  "to_age": 5,
+                  "total": 1
+                },
+                {
+                  "from_age": 6,
+                  "to_age": 16,
+                  "total": 1
+                }
+              ],
+              "total": 4
+            }
+          },
+          "rate_plan": {
+            "id": "rp_avg_base_rate",
+            "title": "Best Available Rate"
+          },
+          "occupancy": {
+            "adults": 2,
+            "total": 2
+          },
+          "totals": [
+            {
+              "type": "subtotal",
+              "amount": 330000
+            },
+            {
+              "type": "tax",
+              "amount": 33000
+            },
+            {
+              "type": "total",
+              "amount": 363000
+            }
+          ]
+        },
+        {
+          "id": "rt_standard_king__rp_avg_base_rate",
+          "room_type": {
+            "id": "rt_standard_king",
+            "title": "Standard King Room",
+            "capacity": {
+              "adults": 2,
+              "total": 2
+            }
+          },
+          "rate_plan": {
+            "id": "rp_avg_base_rate",
+            "title": "Best Available Rate"
+          },
+          "occupancy": {
+            "adults": 1,
+            "total": 1
+          },
+          "totals": [
+            {
+              "type": "subtotal",
+              "amount": 270000
+            },
+            {
+              "type": "tax",
+              "amount": 27000
+            },
+            {
+              "type": "total",
+              "amount": 297000
+            }
+          ]
+        }
+      ],
+      "itinerary": {
+        "start_date": "2026-07-15",
+        "end_date": "2026-07-21"
+      },
+      "currency": "USD",
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 600000
+        },
+        {
+          "type": "tax",
+          "amount": 60000
+        },
+        {
+          "type": "fee",
+          "display_text": "Booking fee",
+          "amount": 1000
+        },
+        {
+          "type": "total",
+          "amount": 661000
+        }
+      ],
+      "links": [
+        {
+          "type": "privacy_policy",
+          "url": "https://business.example.com/privacy"
+        },
+        {
+          "type": "terms_of_service",
+          "url": "https://business.example.com/terms"
+        },
+        {
+          "type": "cancellation_policy",
+          "url": "https://business.example.com/cancellation"
+        }
+      ],
+      "continue_url": "https://business.example.com/booking-sessions/booking_124",
+      "expires_at": "2026-06-01T18:30:00Z"
     }
     ```
 
@@ -452,15 +661,15 @@ place to set these expectations via `messages`.
           "totals": [
             {
               "type": "subtotal",
-              "amount": 55000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 5500
+              "amount": 33000
             },
             {
               "type": "total",
-              "amount": 60500
+              "amount": 363000
             }
           ]
         }
@@ -502,11 +711,11 @@ place to set these expectations via `messages`.
       "totals": [
         {
           "type": "subtotal",
-          "amount": 385000
+          "amount": 330000
         },
         {
           "type": "tax",
-          "amount": 38500
+          "amount": 33000
         },
         {
           "type": "fee",
@@ -515,7 +724,7 @@ place to set these expectations via `messages`.
         },
         {
           "type": "total",
-          "amount": 424500
+          "amount": 364000
         }
       ],
       "links": [
@@ -660,15 +869,15 @@ place to set these expectations via `messages`.
           "totals": [
             {
               "type": "subtotal",
-              "amount": 55000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 5500
+              "amount": 33000
             },
             {
               "type": "total",
-              "amount": 60500
+              "amount": 363000
             }
           ]
         }
@@ -710,11 +919,11 @@ place to set these expectations via `messages`.
       "totals": [
         {
           "type": "subtotal",
-          "amount": 385000
+          "amount": 330000
         },
         {
           "type": "tax",
-          "amount": 38500
+          "amount": 33000
         },
         {
           "type": "fee",
@@ -723,7 +932,7 @@ place to set these expectations via `messages`.
         },
         {
           "type": "total",
-          "amount": 424500
+          "amount": 364000
         }
       ],
       "links": [
@@ -843,15 +1052,15 @@ place to set these expectations via `messages`.
           "totals": [
             {
               "type": "subtotal",
-              "amount": 55000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 5500
+              "amount": 33000
             },
             {
               "type": "total",
-              "amount": 60500
+              "amount": 363000
             }
           ]
         }
@@ -893,11 +1102,11 @@ place to set these expectations via `messages`.
       "totals": [
         {
           "type": "subtotal",
-          "amount": 385000
+          "amount": 330000
         },
         {
           "type": "tax",
-          "amount": 38500
+          "amount": 33000
         },
         {
           "type": "fee",
@@ -906,7 +1115,7 @@ place to set these expectations via `messages`.
         },
         {
           "type": "total",
-          "amount": 424500
+          "amount": 364000
         }
       ],
       "links": [
@@ -1026,15 +1235,15 @@ place to set these expectations via `messages`.
           "totals": [
             {
               "type": "subtotal",
-              "amount": 55000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 5500
+              "amount": 33000
             },
             {
               "type": "total",
-              "amount": 60500
+              "amount": 363000
             }
           ]
         }
@@ -1076,11 +1285,11 @@ place to set these expectations via `messages`.
       "totals": [
         {
           "type": "subtotal",
-          "amount": 385000
+          "amount": 330000
         },
         {
           "type": "tax",
-          "amount": 38500
+          "amount": 33000
         },
         {
           "type": "fee",
@@ -1089,7 +1298,7 @@ place to set these expectations via `messages`.
         },
         {
           "type": "total",
-          "amount": 424500
+          "amount": 364000
         }
       ],
       "links": [
@@ -1235,6 +1444,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
     },
     {
       "type": "fee",
+      "display_text": "Resort fee",
       "amount": 32500
     },
     {

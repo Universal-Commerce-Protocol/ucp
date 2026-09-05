@@ -841,6 +841,7 @@ All capability and service names **MUST** use the format:
 | ----------------------------------- | ----------- | -------- | ---------------- |
 | `dev.ucp.shopping.checkout`         | ucp.dev     | shopping | checkout         |
 | `dev.ucp.shopping.fulfillment`      | ucp.dev     | shopping | fulfillment      |
+| `dev.ucp.lodging.booking`           | ucp.dev     | lodging  | booking          |
 | `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
 | `com.example.payments.installments` | example.com | payments | installments     |
 
@@ -3084,6 +3085,7 @@ A Business publishes well-known and custom policies. Every policy carries a
 | :-- | :-- |
 | `dev.ucp.shopping.policy.return` | Return terms. |
 | `dev.ucp.shopping.policy.warranty` | Warranty terms. |
+| `dev.ucp.lodging.policy.cancellation` | Cancellation terms for lodging reservations. |
 
 A Business **MAY** define custom types in its own domain (e.g.,
 `com.example.policy.price_match`) and **MAY** add type-specific fields that a

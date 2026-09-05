@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/lodging/policy_cancellation.json",
+  "name": "dev.ucp.lodging.policy.cancellation",
   "title": "Lodging Cancellation Policy Extension",
   "description": "Extends Booking with structured cancellation policy for lodging reservations.",
-  "type": "object",
   "$defs": {
     "cancellation_item": {
       "allOf": [
@@ -37,7 +37,7 @@
     },
     "dev.ucp.lodging.booking": {
       "title": "Booking with Cancellation Policy",
-      "description": "Booking capability extended with return policy terms on `policies[]`.",
+      "description": "Booking capability extended with cancellation policy terms on `policies[]`.",
       "allOf": [
         {
           "$ref": "booking.json"
@@ -48,7 +48,19 @@
             "policies": {
               "type": "array",
               "items": {
-                "$ref": "#/$defs/cancellation_item"
+                "if": {
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "dev.ucp.lodging.policy.cancellation"
+                    }
+                  }
+                },
+                "then": {
+                  "$ref": "#/$defs/cancellation_item"
+                }
               },
               "ucp_request": "omit"
             }

@@ -552,7 +552,10 @@ plugins:
               JSON-RPC tools for AI booking agents.
         Lodging Extensions:
           - specification/lodging/extensions/cancellation-policy.md: >-
-              TODO: add content
+              Lodging Cancellation Policy Extension, defining the
+              dev.ucp.lodging.policy.cancellation type on the core policies[]
+              primitive with a machine-readable refundability classification and
+              a human-readable penalty schedule for lodging reservations.
         Payment:
           - specification/payment/extensions/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound

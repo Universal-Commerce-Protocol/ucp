@@ -256,15 +256,15 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
               "totals": [
                 {
                   "type": "subtotal",
-                  "amount": 55000
+                  "amount": 330000
                 },
                 {
                   "type": "tax",
-                  "amount": 5500
+                  "amount": 33000
                 },
                 {
                   "type": "total",
-                  "amount": 60500
+                  "amount": 363000
                 }
               ]
             }
@@ -277,11 +277,11 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
           "totals": [
             {
               "type": "subtotal",
-              "amount": 385000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 38500
+              "amount": 33000
             },
             {
               "type": "fee",
@@ -290,7 +290,7 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
             },
             {
               "type": "total",
-              "amount": 424500
+              "amount": 364000
             }
           ],
           "links": [
@@ -529,15 +529,15 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
               "totals": [
                 {
                   "type": "subtotal",
-                  "amount": 55000
+                  "amount": 330000
                 },
                 {
                   "type": "tax",
-                  "amount": 5500
+                  "amount": 33000
                 },
                 {
                   "type": "total",
-                  "amount": 60500
+                  "amount": 363000
                 }
               ]
             }
@@ -564,11 +564,11 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
           "totals": [
             {
               "type": "subtotal",
-              "amount": 385000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 38500
+              "amount": 33000
             },
             {
               "type": "fee",
@@ -577,7 +577,7 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
             },
             {
               "type": "total",
-              "amount": 424500
+              "amount": 364000
             }
           ],
           "links": [
@@ -759,15 +759,15 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
               "totals": [
                 {
                   "type": "subtotal",
-                  "amount": 55000
+                  "amount": 330000
                 },
                 {
                   "type": "tax",
-                  "amount": 5500
+                  "amount": 33000
                 },
                 {
                   "type": "total",
-                  "amount": 60500
+                  "amount": 363000
                 }
               ]
             }
@@ -794,11 +794,11 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
           "totals": [
             {
               "type": "subtotal",
-              "amount": 385000
+              "amount": 330000
             },
             {
               "type": "tax",
-              "amount": 38500
+              "amount": 33000
             },
             {
               "type": "fee",
@@ -807,7 +807,7 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
             },
             {
               "type": "total",
-              "amount": 424500
+              "amount": 364000
             }
           ],
           "links": [
@@ -949,6 +949,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
         },
         {
           "type": "fee",
+          "display_text": "Resort fee",
           "amount": 32500
         },
         {
