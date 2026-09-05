@@ -89,10 +89,16 @@ Platforms **MUST** tolerate unknown classification values and use `description`
 when they cannot interpret the value.
 
 `schedule` does not replace this classification. When both are present, the
-Business **MUST** set `refundability` to the outcome applicable when it creates
-the response: a full refund is `refundable`, a partial, fixed-fee, or unit
-deduction outcome is `partially_refundable`, and no refund is
-`non_refundable`.
+Business **MUST** classify the current economic result when it creates the
+response, independent of outcome kind: a full refund is `refundable`, no refund
+is `non_refundable`, and a result strictly between those endpoints is
+`partially_refundable`. When the monetary value of a symbolic outcome cannot be
+derived, a Platform uses the Business-stated `refundability` for that snapshot.
+
+`refundability` is a point-in-time summary. For evaluation at an explicit `at`
+instant, `schedule` governs. Crossing a cutoff later does not make an earlier
+response contradictory, but a Platform **MUST NOT** reuse that snapshot as the
+classification for a different instant.
 
 ### Deterministic schedule
 
@@ -109,24 +115,29 @@ property timezone. For lodging, the anchor normally represents the stated
 arrival or check-in cutoff.
 
 Each tier's `until` is an ISO 8601 elapsed duration before `anchor`. This version
-supports days, hours, minutes, and seconds only. A day is exactly 24 elapsed
-hours. Calendar months, calendar years, local-calendar days, and business days
-are not supported.
+supports nonnegative whole-number days, hours, minutes, and seconds only. A day
+is exactly 24 elapsed hours. Calendar months, calendar years, local-calendar
+days, and business days are not supported.
 
 A Business **MUST** order `tiers` from the farthest cutoff before `anchor` to
-the nearest cutoff. Durations **MUST** be strictly decreasing and **MUST NOT**
-repeat. An invalid order makes structured evaluation unavailable.
+the nearest cutoff. Businesses and Platforms compare durations after exact
+normalization to elapsed seconds. The durations **MUST** be strictly decreasing
+and **MUST NOT** repeat; for example, `P1D` and `PT24H` denote the same cutoff.
+An invalid order makes structured evaluation unavailable.
 
 #### Evaluation
 
 For a tier, its cutoff is the `anchor` instant minus its `until` elapsed
-duration. Given an evaluation instant `at`, a Platform evaluates tiers in array
-order and selects the first tier for which `at` is strictly earlier than the
-cutoff. If no tier matches, `after_last_tier` applies.
+duration. `at` is the exact hypothetical or current buyer-cancellation instant
+the Platform is evaluating. A Platform evaluates tiers in array order and
+selects the first tier for which `at` is strictly earlier than the cutoff. If no
+tier matches, `after_last_tier` applies.
 
 The cutoff belongs to the following interval. At exactly `anchor - until`, that
 tier no longer applies. Neither party rounds, shifts, or reinterprets `at`, the
-anchor, or a computed cutoff.
+anchor, or a computed cutoff. Implementations use exact checked arithmetic. If
+a duration or resulting cutoff cannot be represented exactly, structured
+evaluation is unavailable.
 
 For example, with an anchor of `2026-12-22T15:00:00-05:00` and `until` of
 `PT48H`, the cutoff is `2026-12-20T20:00:00Z`. An evaluation at
@@ -139,20 +150,27 @@ For example, with an anchor of `2026-12-22T15:00:00-05:00` and `until` of
 well-known values:
 
 - **`percentage`** requires `buyer_bps`, an integer from 0 through 10000. It is
-  the share of the policy-scoped amount returned to the Buyer, in basis points.
-- **`fixed_fee`** requires `seller_keeps.amount`, expressed as an integer in the
+  the Business-stated share of the economic amount governed by the policy that
+  remains with or is returned to the Buyer. This version does not standardize a
+  monetary basis for that percentage.
+- **`fixed_fee`** requires `penalty.amount`, expressed as an integer in the
   Booking currency's minor unit. Currency is inherited from the Booking and is
   not repeated in the outcome.
-- **`unit_deduction`** requires a positive integer `seller_keeps.quantity` and
-  an open `seller_keeps.unit` value. `night` is the well-known lodging unit.
+- **`unit_deduction`** requires a positive integer `penalty.quantity` and an
+  open `penalty.unit` value. `night` is the well-known lodging unit.
 
-A unit deduction is a deterministic symbolic outcome, but it does not imply a
-cash amount. A Platform **MUST NOT** calculate money unless the targeted Booking
-data supplies an unambiguous price basis.
+Percentage and unit-deduction outcomes are deterministic symbolic terms, but
+they do not necessarily imply a cash amount. A Platform **MUST NOT** calculate
+money unless the targeted Booking data supplies an unambiguous basis.
 
-A Platform that encounters an unsupported `kind` **MUST** preserve it, **MUST
-NOT** claim a deterministic outcome it cannot interpret, and **SHOULD** present
-`description`.
+For a well-known `kind`, a Business **MUST** emit only the fields defined for
+that kind. A Platform evaluates only those fields and ignores unrelated outcome
+members. Additional `kind` and `unit` values **SHOULD** use reverse-domain
+identifiers.
+
+A Platform that encounters an unsupported `kind` **MUST** tolerate the value,
+**MUST NOT** infer its meaning or claim a deterministic outcome, and **MUST**
+use `description` as the fallback.
 
 ### Non-refundable bookings
 
@@ -186,18 +204,21 @@ targets a room rate overrides a less-specific policy of the same type. See
 
 ### Business
 
-Cancellation policies are Business-stated response-only facts. A Business
-**MUST** emit a valid ordered schedule, keep `refundability`, `schedule`, and
-`description` consistent, and preserve the complete legal summary in
-`description`. It **SHOULD** link the full terms with `url`.
+Cancellation policies are Business-stated response-only facts. When a Business
+emits `schedule`, it **MUST** emit a valid ordered schedule and keep it
+consistent with `description`. Its outcome at response generation **MUST**
+agree with the `refundability` snapshot. The Business preserves the complete
+legal summary in `description` and **SHOULD** link the full terms with `url`.
 
 ### Platform
 
 A Platform supplies the evaluation instant, applies the exact elapsed-time and
 boundary rules above, and respects policy targeting before evaluation. It
-**MUST NOT** turn a symbolic unit deduction into money without an unambiguous
-basis, infer a result from an unsupported outcome, or execute cancellation or
-refund behavior solely from this pre-purchase policy.
+**MUST NOT** turn a symbolic percentage or unit deduction into money without an
+unambiguous basis, infer a result from an unsupported outcome, or execute
+cancellation or refund behavior solely from this pre-purchase policy. It
+**SHOULD** refresh the authoritative Booking response before presenting a stale
+`refundability` snapshot as current.
 
 ## Examples
 
@@ -224,7 +245,7 @@ refund behavior solely from this pre-purchase policy.
     ],
     "after_last_tier": {
       "kind": "unit_deduction",
-      "seller_keeps": {
+      "penalty": {
         "quantity": 1,
         "unit": "night"
       }
@@ -263,6 +284,6 @@ not a cancellation or refund instruction.
 | `middle_tier` | `anchor = 2026-12-31T12:00:00Z`; tiers `P7D -> buyer_bps 10000`, `PT48H -> buyer_bps 5000`; `at = 2026-12-24T12:00:00Z` | `tier[1]`; `percentage`, `buyer_bps = 5000` |
 | `last_cutoff` | Same two-tier schedule; `at = 2026-12-29T12:00:00Z`; after-last `buyer_bps = 0` | `after_last_tier`; `percentage`, `buyer_bps = 0` |
 | `fixed_fee` | `anchor = 2027-01-10T12:00:00Z`; tier `PT24H -> buyer_bps 10000`; `at = 2027-01-09T12:00:00Z`; after-last fixed fee amount `7500` | `after_last_tier`; `fixed_fee`, seller keeps `7500` minor units |
-| `elapsed_day_dst` | `anchor = 2026-03-09T02:30:00-04:00`; tier `P1D -> buyer_bps 10000`; `at = 2026-03-08T06:29:59Z` | Computed cutoff is `2026-03-08T06:30:00Z`; select `tier[0]` |
-| `unsupported_kind` | Selected outcome has `kind = com.example.voucher`; otherwise valid schedule | Preserve the value; structured outcome unavailable; fall back to `description` |
+| `elapsed_day` | `anchor = 2026-03-09T02:30:00-04:00`; tier `P1D -> buyer_bps 10000`; `at = 2026-03-08T06:29:59Z` | Because `P1D` is 24 elapsed hours, the cutoff is `2026-03-08T06:30:00Z`; select `tier[0]` |
+| `unsupported_kind` | Selected outcome has `kind = com.example.voucher`; otherwise valid schedule | Tolerate the value; structured outcome unavailable; fall back to `description` |
 | `schedule_absent` | Policy has no `schedule` | Timeline evaluation unavailable; use `refundability` and `description` |

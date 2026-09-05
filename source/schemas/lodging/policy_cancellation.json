@@ -7,7 +7,7 @@
   "$defs": {
     "cancellation_outcome": {
       "title": "Cancellation Outcome",
-      "description": "The result of a buyer-initiated cancellation. `kind` is an open vocabulary. Well-known kinds receive additional validation; Platforms encountering an unknown kind must treat structured evaluation as unavailable and use the policy description.",
+      "description": "The declared economic result of a buyer-initiated cancellation. `kind` is an open vocabulary. For well-known kinds, a Business MUST emit only the fields defined for that kind, and a Platform evaluates only those fields and ignores unrelated outcome members. Platforms encountering an unknown kind must tolerate it, must not infer its meaning, and must use the policy description as fallback.",
       "type": "object",
       "required": [
         "kind"
@@ -16,7 +16,7 @@
         "kind": {
           "type": "string",
           "minLength": 1,
-          "description": "Open outcome discriminator. Well-known values: `percentage`, `fixed_fee`, and `unit_deduction`. Businesses MAY define additional values; Platforms MUST tolerate unknown values and MUST NOT infer their meaning.",
+          "description": "Open outcome discriminator. Well-known values: `percentage`, `fixed_fee`, and `unit_deduction`. Additional values SHOULD use a reverse-domain identifier. Platforms MUST tolerate unknown values and MUST NOT infer their meaning.",
           "examples": [
             "percentage",
             "fixed_fee",
@@ -27,27 +27,27 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 10000,
-          "description": "Percentage of the policy-scoped amount returned to the Buyer, expressed in basis points. `0` means no refund and `10000` means a full refund."
+          "description": "Business-stated share of the economic amount governed by this policy that remains with or is returned to the Buyer, expressed in basis points. `0` means no refund and `10000` means a full refund. This field does not by itself standardize a monetary basis; a Platform MUST NOT calculate money unless the targeted Booking data supplies an unambiguous basis."
         },
-        "seller_keeps": {
-          "title": "Seller-Retained Value",
-          "description": "Value retained by the seller. The fields required within this object depend on the outcome `kind`.",
+        "penalty": {
+          "title": "Cancellation Penalty",
+          "description": "Cancellation penalty stated by the Business, regardless of whether it is retained from an earlier payment or charged later. The fields required within this object depend on the outcome `kind`.",
           "type": "object",
           "properties": {
             "amount": {
               "$ref": "../common/types/amount.json",
-              "description": "Fixed fee retained by the seller, in the Booking currency's minor units."
+              "description": "Fixed cancellation charge in the Booking currency's minor units."
             },
             "quantity": {
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991,
-              "description": "Positive count of units retained by the seller."
+              "description": "Positive count of lodging units used to state the cancellation penalty."
             },
             "unit": {
               "type": "string",
               "minLength": 1,
-              "description": "Open unit identifier. `night` is the well-known lodging value. Platforms MUST treat an unrecognized value as opaque and use the policy description for presentation.",
+              "description": "Open unit identifier. `night` is the well-known lodging value. Additional values SHOULD use a reverse-domain identifier. Platforms MUST tolerate an unrecognized value and use the policy description for presentation.",
               "examples": [
                 "night"
               ]
@@ -86,10 +86,10 @@
           },
           "then": {
             "required": [
-              "seller_keeps"
+              "penalty"
             ],
             "properties": {
-              "seller_keeps": {
+              "penalty": {
                 "required": [
                   "amount"
                 ]
@@ -110,10 +110,10 @@
           },
           "then": {
             "required": [
-              "seller_keeps"
+              "penalty"
             ],
             "properties": {
-              "seller_keeps": {
+              "penalty": {
                 "required": [
                   "quantity",
                   "unit"
@@ -137,7 +137,8 @@
           "type": "string",
           "format": "duration",
           "pattern": "^P(?=[0-9]+D|T[0-9])(?:[0-9]+D)?(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?$",
-          "description": "ISO 8601 elapsed duration before the schedule anchor. This version permits only integer days, hours, minutes, and seconds; one day is exactly 24 elapsed hours. Years, months, weeks, fractional values, and negative durations are not supported."
+          "description": "ISO 8601 elapsed duration before the schedule anchor. This version permits only nonnegative whole-number days, hours, minutes, and seconds; one day is exactly 24 elapsed hours. Years, months, weeks, fractional values, and negative durations are not supported. Implementations compare durations after exact normalization to elapsed seconds.",
+          "maxLength": 64
         },
         "outcome": {
           "$ref": "#/$defs/cancellation_outcome",
@@ -147,7 +148,7 @@
     },
     "cancellation_schedule": {
       "title": "Cancellation Schedule",
-      "description": "Deterministic buyer-initiated cancellation terms expressed as ordered elapsed-time cutoffs relative to an absolute anchor. Tiers MUST be ordered from the farthest cutoff before the anchor to the nearest, with strictly decreasing durations and no duplicate cutoff. At exactly a cutoff, evaluation advances to the next tier; when no tier matches, `after_last_tier` applies.",
+      "description": "Deterministic buyer-initiated cancellation terms expressed as ordered elapsed-time cutoffs relative to an absolute anchor. Tiers MUST be ordered from the farthest cutoff before the anchor to the nearest, with strictly decreasing normalized elapsed durations and no duplicate cutoff. Equivalent forms such as `P1D` and `PT24H` denote the same cutoff. At exactly a cutoff, evaluation advances to the next tier; when no tier matches, `after_last_tier` applies.",
       "type": "object",
       "required": [
         "anchor",
@@ -167,7 +168,7 @@
           "items": {
             "$ref": "#/$defs/cancellation_tier"
           },
-          "description": "Ordered cancellation tiers, from the farthest cutoff before `anchor` to the nearest. Ordering and duration uniqueness are normative constraints because JSON Schema cannot compare duration values across array entries."
+          "description": "Ordered cancellation tiers, from the farthest cutoff before `anchor` to the nearest. Ordering and uniqueness are evaluated after exact normalization to elapsed seconds because JSON Schema cannot compare duration values across array entries."
         },
         "after_last_tier": {
           "$ref": "#/$defs/cancellation_outcome",
@@ -203,7 +204,7 @@
             },
             "schedule": {
               "$ref": "#/$defs/cancellation_schedule",
-              "description": "Optional deterministic detail for buyer-initiated cancellation. Supplements, and MUST NOT contradict, `refundability` or the required human-readable `description`."
+              "description": "Optional deterministic detail for buyer-initiated cancellation. It MUST agree with the human-readable `description`. The outcome applicable when the response is created MUST agree with the point-in-time `refundability` summary; crossing a cutoff later does not make the earlier snapshot contradictory."
             }
           }
         }
