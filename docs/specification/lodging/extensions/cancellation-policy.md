@@ -110,8 +110,8 @@ atomic value.
 #### Representation
 
 `anchor` is an RFC 3339 instant and **MUST** include `Z` or a numeric UTC
-offset. The offset identifies the instant; it does not declare a recurring
-property timezone. For lodging, the anchor normally represents the stated
+offset. The timestamp identifies an instant; a numeric offset does not declare a
+recurring property timezone. For lodging, the anchor normally represents the stated
 arrival or check-in cutoff.
 
 Each tier's `until` is an ISO 8601 elapsed duration before `anchor`. This version
@@ -283,7 +283,7 @@ not a cancellation or refund instruction.
 | `after_cutoff` | Example schedule above; `at = 2026-12-20T20:00:01Z` | `after_last_tier`; `unit_deduction`, one `night` |
 | `middle_tier` | `anchor = 2026-12-31T12:00:00Z`; tiers `P7D -> buyer_bps 10000`, `PT48H -> buyer_bps 5000`; `at = 2026-12-24T12:00:00Z` | `tier[1]`; `percentage`, `buyer_bps = 5000` |
 | `last_cutoff` | Same two-tier schedule; `at = 2026-12-29T12:00:00Z`; after-last `buyer_bps = 0` | `after_last_tier`; `percentage`, `buyer_bps = 0` |
-| `fixed_fee` | `anchor = 2027-01-10T12:00:00Z`; tier `PT24H -> buyer_bps 10000`; `at = 2027-01-09T12:00:00Z`; after-last fixed fee amount `7500` | `after_last_tier`; `fixed_fee`, seller keeps `7500` minor units |
+| `fixed_fee` | `anchor = 2027-01-10T12:00:00Z`; tier `PT24H -> buyer_bps 10000`; `at = 2027-01-09T12:00:00Z`; after-last fixed fee amount `7500` | `after_last_tier`; `fixed_fee`, the penalty is `7500` minor units |
 | `elapsed_day` | `anchor = 2026-03-09T02:30:00-04:00`; tier `P1D -> buyer_bps 10000`; `at = 2026-03-08T06:29:59Z` | Because `P1D` is 24 elapsed hours, the cutoff is `2026-03-08T06:30:00Z`; select `tier[0]` |
 | `unsupported_kind` | Selected outcome has `kind = com.example.voucher`; otherwise valid schedule | Tolerate the value; structured outcome unavailable; fall back to `description` |
 | `schedule_absent` | Policy has no `schedule` | Timeline evaluation unavailable; use `refundability` and `description` |
