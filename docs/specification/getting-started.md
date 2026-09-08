@@ -239,6 +239,8 @@ Process the incoming line items, resolve their prices, and calculate the subtota
 
         for index, item_req in enumerate(body.line_items):
             # Mock product database lookup
+            # In production, perform real-time inventory verification and stock
+            # reservation here (catalog availability signals are advisory and can drift).
             price = 2500  # $25.00 in minor units (cents)
             title = f"Flower Bouquet {item_req.item.id}"
             item_subtotal = price * item_req.quantity
@@ -271,6 +273,8 @@ Process the incoming line items, resolve their prices, and calculate the subtota
       // Map input line items to output line items with pricing
       const outputLineItems = body.line_items.map((item, index) => {
         // Mock product database lookup
+        // In production, perform real-time inventory verification and stock
+        // reservation here (catalog availability signals are advisory and can drift).
         const price = 2500; // $25.00 in minor units (cents)
         const title = `Flower Bouquet ${item.item.id}`;
         const itemSubtotal = price * item.quantity;
@@ -305,6 +309,9 @@ Process the incoming line items, resolve their prices, and calculate the subtota
 
 Construct the UCP metadata block, advertising supported payment handlers, and assemble the final checkout response.
 
+!!! note "Capability Negotiation"
+    In production, a business uses the `UCP-Agent` header to resolve the platform's profile, calculates the intersection of supported capabilities, and returns the active negotiated set in `capabilities`. For simplicity in this quickstart, full capability negotiation is omitted. See [Discovery & Capability Negotiation](/documentation/core-concepts/#discovery-capability-negotiation) for details.
+
 === "Python"
 
     ```python
@@ -324,6 +331,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
         }
 
         # Construct UCP protocol metadata
+        # (In production, populate active capabilities from UCP-Agent negotiation)
         ucp_metadata = ResponseCheckoutSchema(
             version="2026-08-25",
             status="success",
@@ -362,7 +370,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
       const ucpMetadata = {
         version: '2026-08-25',
         status: 'success' as const,
-        capabilities: {},
+        capabilities: {}, // In production, populate via capability negotiation from UCP-Agent
         payment_handlers: {
           'com.example.mock_pay': [
             {
@@ -676,6 +684,8 @@ If you want to verify your code, expand the section below to see the complete fi
 
             for index, item_req in enumerate(body.line_items):
                 # Mock product database lookup
+                # In production, perform real-time inventory verification and stock
+                # reservation here (catalog availability signals are advisory and can drift).
                 price = 2500  # $25.00 in minor units (cents)
                 title = f"Flower Bouquet {item_req.item.id}"
                 item_subtotal = price * item_req.quantity
@@ -715,6 +725,7 @@ If you want to verify your code, expand the section below to see the complete fi
             }
 
             # Construct UCP protocol metadata
+            # (In production, populate active capabilities from UCP-Agent negotiation)
             ucp_metadata = ResponseCheckoutSchema(
                 version="2026-08-25",
                 status="success",
@@ -802,6 +813,8 @@ If you want to verify your code, expand the section below to see the complete fi
           // Map input line items to output line items with pricing
           const outputLineItems = body.line_items.map((item, index) => {
             // Mock product database lookup
+            // In production, perform real-time inventory verification and stock
+            // reservation here (catalog availability signals are advisory and can drift).
             const price = 2500; // $25.00 in minor units (cents)
             const title = `Flower Bouquet ${item.item.id}`;
             const itemSubtotal = price * item.quantity;
@@ -836,7 +849,7 @@ If you want to verify your code, expand the section below to see the complete fi
           const ucpMetadata = {
             version: '2026-08-25',
             status: 'success' as const,
-            capabilities: {},
+            capabilities: {}, // In production, populate via capability negotiation from UCP-Agent
             payment_handlers: {
               'com.example.mock_pay': [
                 {
