@@ -2,9 +2,9 @@
 
 This guide defines UCP's release-branch and backport process. UCP uses date-based
 version identifiers in `YYYY-MM-DD` format; see
-[Component Versioning and Release Snapshots](specification/overview.md#component-versioning-and-release-snapshots)
+[Component Versioning and Release Snapshots](specification/overview/index.md#component-versioning-and-release-snapshots)
 for the normative release model and
-[Protocol Version](specification/overview.md#protocol-version) for profile
+[Protocol Version](specification/overview/index.md#protocol-version) for profile
 selection.
 
 New development occurs on the `main` branch. We maintain long-lived branches for
@@ -12,7 +12,7 @@ all supported releases of the spec so that a published snapshot `D` stays
 available for reference and maintenance. Backport eligibility and approval —
 approved backwards-compatible changes by default, breaking changes only through
 exceptional Governance Council approval — are defined in
-[Component Versioning and Release Snapshots](specification/overview.md#component-versioning-and-release-snapshots).
+[Component Versioning and Release Snapshots](specification/overview/index.md#component-versioning-and-release-snapshots).
 A backported change lands on the maintained `release/D` branch, and UCP
 re-certifies the snapshot before publishing the updated artifacts.
 

@@ -14,10 +14,10 @@
           "description": "Free-text search query."
         },
         "context": {
-          "$ref": "types/context.json"
+          "$ref": "../common/types/context.json"
         },
         "signals": {
-          "$ref": "types/signals.json"
+          "$ref": "../common/types/signals.json"
         },
         "attribution": {
           "$ref": "types/attribution.json"
@@ -65,7 +65,7 @@
         "policies": {
           "type": "array",
           "items": {
-            "$ref": "types/policy.json"
+            "$ref": "../common/types/policy.json"
           },
           "description": "Policies (e.g., return/refund terms) that apply to the products in these search results. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }

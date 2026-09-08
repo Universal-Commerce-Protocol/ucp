@@ -81,6 +81,7 @@ amortiguación
 atok
 backorder
 barcodes
+cartebancaire
 checkout
 cimd
 credentialization
@@ -179,3 +180,5 @@ zapatillas
 recoverably
 Honeycrisp
 unrepresentable
+wifi
+optionalities

@@ -4,7 +4,6 @@
   "title": "Fulfillment Destination",
   "description": "A destination for fulfillment.",
   "type": "object",
-  "ucp_shared_request": true,
   "required": ["type", "id"],
   "properties": {
     "type": {

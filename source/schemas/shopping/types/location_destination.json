@@ -4,7 +4,6 @@
   "title": "Business Location Destination",
   "description": "A business location fulfillment destination. Business-authored and response-only: the Platform selects a location via `selected_destination_id` rather than writing destinations.",
   "type": "object",
-  "ucp_shared_request": true,
   "allOf": [
     {
       "$ref": "../../common/types/location_summary.json"

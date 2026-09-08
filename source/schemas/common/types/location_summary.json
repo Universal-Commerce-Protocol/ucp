@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/location_summary.json",
   "title": "Location Summary",
-  "description": "A summary of a business location.",
+  "description": "A summary of a physical business location.",
   "type": "object",
-  "ucp_shared_request": true,
   "required": ["id", "name"],
+  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",
