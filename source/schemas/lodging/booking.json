@@ -127,7 +127,7 @@
     },
     "totals": {
       "$ref": "../common/types/totals.json",
-      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the immediate amount payable upon confirmation (Due Now). When property-collected or deferred charges apply, businesses provide `postpaid_*` entries, `due_at_property`, and `grand_total` to convey the all-inclusive stay liability in compliance with price transparency directives.",
+      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the authoritative all-in stay liability (immediate + deferred). When payment timing is split or property-collected charges apply, businesses provide `due_now` (immediate charge upon confirmation), `postpaid_*` entries, and `due_at_property` (aggregate property-collected charges) to convey timing breakdowns while maintaining full price transparency.",
       "ucp_request": "omit"
     },
     "actions": {

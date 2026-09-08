@@ -145,13 +145,18 @@ occupancy taxes, or a remaining room balance).
 
 #### Immediate vs. Deferred Payment Breakdown
 
-* **Amount Due Now (`total`)**: The standard `type: "total"` entry strictly represents the
-  immediate amount charged to the buyer's payment instrument upon booking confirmation. In full
-  prepayment terms, this equals the entire cost of the stay. In deposit-based terms, this equals
-  only the initial deposit and prepaid taxes/fees. The sum of all standard prepaid items
-  (`subtotal`, `fee`, `tax`, `discount`) **MUST** equal `total`.
-* **Deferred & Property-Collected Well-Known Types**: To model post-booking and
-  property-collected charges consistently, the following well-known `type` values are introduced:
+* **Authoritative Stay Liability (`total`)**: In accordance with the core `totals.json`
+  contract, the standard `type: "total"` entry strictly represents the authoritative all-in stay liability
+  (immediate charges plus deferred or property-collected amounts) for the entire reservation.
+  Every booking session **MUST** contain exactly one `total` entry, ensuring that Platforms display the full,
+  transparent cost of the stay upfront in compliance with FTC and EU price display directives.
+* **Payment Timing Breakdown Types**: To clearly distinguish amounts charged immediately upon booking
+  confirmation from amounts collected later or at the property, the following well-known `type` values
+  are introduced:
+    * `due_now`: The immediate amount charged to the Buyer's payment instrument upon booking confirmation.
+      In full prepayment terms, `due_now` equals `total` (and **MAY** be omitted when no deferred balance exists).
+      In deposit-based or pay-at-property terms, `due_now` represents the upfront deposit and prepaid fees/taxes.
+      The sum of all prepaid items (`subtotal`, `fee`, `tax`, `discount`) **MUST** equal `due_now`.
     * `postpaid_subtotal`: The lodging room rate balance collected directly at the property
       (e.g., remaining room nights due at check-in after a partial deposit).
     * `postpaid_fee`: Mandatory amenity, resort, cleaning, or facility fees collected directly
@@ -160,10 +165,6 @@ occupancy taxes, or a remaining room balance).
       the property (e.g., city accommodation tax).
     * `due_at_property`: The aggregate sum of all property-collected charges
       (`postpaid_subtotal` + `postpaid_fee` + `postpaid_tax`). Present whenever any postpaid charges exist.
-    * `grand_total`: The all-inclusive stay cost (`total` + `due_at_property`), representing
-      the Buyer's total financial commitment for the entire reservation. Present whenever deferred
-      or property-collected amounts exist, ensuring full compliance with FTC and EU price
-      display requirements.
 
 ##### Well-Known Totals Types & Accounting Invariants
 
@@ -173,12 +174,12 @@ occupancy taxes, or a remaining room balance).
 | `fee` | Immediate (Due Now) | Prepaid service, processing, or booking fees | Optional, repeatable |
 | `tax` | Immediate (Due Now) | Prepaid state, value-added, or sales taxes | Optional, repeatable |
 | `discount` | Immediate (Due Now) | Rate reductions, promotional discounts, or pay-now savings | Optional, negative amount |
-| `total` | Immediate (Due Now) | Aggregate amount charged upon confirmation | Exactly one entry in `totals[]`; equals sum of immediate group |
+| `due_now` | Immediate (Due Now) | Aggregate amount charged upon confirmation | Requires `display_text`; equals sum of immediate group (`subtotal + fee + tax + discount`) |
 | `postpaid_subtotal` | Deferred (Property) | Remaining room rate balance collected at hotel | Requires `display_text` |
 | `postpaid_fee` | Deferred (Property) | Mandatory resort, facility, or cleaning fees paid at hotel | Requires `display_text` |
 | `postpaid_tax` | Deferred (Property) | Municipal, city, or occupancy taxes paid at hotel | Requires `display_text` |
 | `due_at_property` | Deferred (Property) | Aggregate total collected upon arrival/departure | Requires `display_text`; equals sum of deferred group |
-| `grand_total` | Summary | Total stay liability across all payment timings | Requires `display_text`; equals `total` + `due_at_property` |
+| `total` | Summary | Authoritative all-in stay liability across all payment timings | Exactly one entry in `totals[]`; equals `due_now` + `due_at_property` |
 
 #### Local Tax & Fee Disclosures
 
@@ -196,23 +197,25 @@ alongside `payment.selected_term_id` indicating the active selection:
 
 * **Schedules and `totals` Alignment**:
     * A payment term is composed of one or more `schedules[]`.
+    * The sum of all `schedules[].amount` within a term **MUST** equal `totals[].type: "total"`
+      (satisfying the core `common/payment_terms.json` invariant).
     * Schedules with `type: "immediate"` represent payments due today upon booking completion
-      and **MUST** sum to `totals[].type: "total"`.
+      and **MUST** sum to `totals[].type: "due_now"`.
     * Schedules with `type: "deferred"` represent payments due at a specified future date or
       event (e.g., `due_at` timestamp or check-in) and **MUST** sum to `totals[].type: "due_at_property"`.
 * **Selection Mutations**:
     * When the Platform updates `payment.selected_term_id` via Update Booking Session
       (e.g., switching from "Pay now" to "First night now, balance at check-in"),
       the Business authoritatively recomputes `totals[]`.
-    * The recomputed `totals[]` reflects the newly selected term's immediate amount in `total`,
-      partitions remaining nights into `postpaid_subtotal` and `postpaid_tax`, and updates
-      `due_at_property` and `grand_total`.
+    * The recomputed `totals[]` reflects the newly selected term's immediate amount in `due_now`,
+      partitions remaining nights into `postpaid_subtotal` and `postpaid_tax`, updates
+      `due_at_property`, and updates `total` to reflect the all-in stay liability under that term.
 
 The following snippets illustrate how `totals[]` is structured across three canonical lodging pricing patterns:
 
 === "Pattern 1: Property-Collected Charges"
 
-    Prepaid room rate and service fee charged immediately (`total: 70400`), while resort fee and Tokyo Accommodation Tax are collected at check-in (`due_at_property: 6000`), totaling `grand_total: 76400`:
+    Prepaid room rate and service fee charged immediately (`due_now: 70400`), while resort fee and Tokyo Accommodation Tax are collected at check-in (`due_at_property: 6000`), totaling `total: 76400`:
 
     <!-- ucp:example schema=lodging/booking target=$.totals op=read -->
     ```json
@@ -228,7 +231,7 @@ The following snippets illustrate how `totals[]` is structured across three cano
         "amount": 6400
       },
       {
-        "type": "total",
+        "type": "due_now",
         "display_text": "Total Due Now (Charged Today)",
         "amount": 70400
       },
@@ -248,8 +251,8 @@ The following snippets illustrate how `totals[]` is structured across three cano
         "amount": 6000
       },
       {
-        "type": "grand_total",
-        "display_text": "Grand Total (Total Stay Cost)",
+        "type": "total",
+        "display_text": "Total Stay Cost",
         "amount": 76400
       }
     ]
@@ -257,7 +260,7 @@ The following snippets illustrate how `totals[]` is structured across three cano
 
 === "Pattern 2: Upfront Payment with Savings"
 
-    Upfront payment term selected (`pt_pay_now`), offering a $50 discount (`discount: -5000`) for paying in full today. No deferred balance remains (`due_at_property: 0`):
+    Upfront payment term selected (`pt_pay_now`), offering a $50 discount (`discount: -5000`) for paying in full today. The upfront charge (`due_now: 130000`) covers the entire reservation liability (`total: 130000`), with no deferred balance remaining (`due_at_property: 0`):
 
     <!-- ucp:example schema=lodging/booking target=$.totals op=read -->
     ```json
@@ -266,15 +269,15 @@ The following snippets illustrate how `totals[]` is structured across three cano
       { "type": "fee", "display_text": "Service Fee", "amount": 3000 },
       { "type": "tax", "display_text": "State Lodging Tax (10%)", "amount": 12000 },
       { "type": "discount", "display_text": "Pay-now saving", "amount": -5000 },
-      { "type": "total", "display_text": "Total Due Now (Charged Today)", "amount": 130000 },
+      { "type": "due_now", "display_text": "Total Due Now (Charged Today)", "amount": 130000 },
       { "type": "due_at_property", "display_text": "Total Due at Property", "amount": 0 },
-      { "type": "grand_total", "display_text": "Grand Total (Total Stay Cost)", "amount": 130000 }
+      { "type": "total", "display_text": "Total Stay Cost", "amount": 130000 }
     ]
     ```
 
 === "Pattern 3: Deposit & Check-in Balance"
 
-    Deposit term selected (`pt_deposit_balance`), charging the 1st night deposit and initial taxes/fees today (`total: 47000`), with the remaining 2 nights rate and tax collected at check-in (`due_at_property: 88000`), yielding `grand_total: 135000`:
+    Deposit term selected (`pt_deposit_balance`), charging the 1st night deposit and initial taxes/fees today (`due_now: 47000`), with the remaining 2 nights rate and tax collected at check-in (`due_at_property: 88000`), yielding total stay liability `total: 135000`:
 
     <!-- ucp:example schema=lodging/booking target=$.totals op=read -->
     ```json
@@ -295,7 +298,7 @@ The following snippets illustrate how `totals[]` is structured across three cano
         "amount": 4000
       },
       {
-        "type": "total",
+        "type": "due_now",
         "display_text": "Total Due Now (Deposit Charged Today)",
         "amount": 47000
       },
@@ -315,8 +318,8 @@ The following snippets illustrate how `totals[]` is structured across three cano
         "amount": 88000
       },
       {
-        "type": "grand_total",
-        "display_text": "Grand Total (Total Stay Cost)",
+        "type": "total",
+        "display_text": "Total Stay Cost",
         "amount": 135000
       }
     ]
@@ -412,11 +415,12 @@ Both result in user handoff, but represent different booking session states:
 
 #### Standard Errors
 
-| Code                  | Description                                                |
-| :-------------------- | :--------------------------------------------------------- |
-| `inventory_exhausted` | The selected room or inventory hold is no longer available |
-| `payment_failed`      | Payment processing failed                                  |
-| `eligibility_invalid` | Eligibility claim could not be verified at completion      |
+| Code                          | Description                                                     |
+| :---------------------------- | :-------------------------------------------------------------- |
+| `inventory_exhausted`         | The selected room or inventory hold is no longer available      |
+| `occupancy_exceeded_capacity` | Number of assigned guests exceeds physical room capacity bounds |
+| `payment_failed`              | Payment processing failed                                       |
+| `eligibility_invalid`         | Eligibility claim could not be verified at completion           |
 
 ### Warning Presentation
 
@@ -424,16 +428,17 @@ The `presentation` field on warning messages controls the rendering contract the
 platform **MUST** follow (e.g., `notice` vs. `disclosure`). For the authoritative
 rendering rules, see [Checkout — Warning Presentation](../../shopping/checkout/index.md#warning-presentation).
 
-#### Price Changes
+#### Totals Changes
 
-When inventory rates or commercial pricing terms fluctuate during an active booking
-session, the Business informs the Platform using a standard warning with
-`code: "price_changed"` and `severity: "recoverable"`.
+When room rates, taxes, or mandatory fees fluctuate during an active booking
+session, the Business returns the updated session with recomputed `totals[]` and
+**MUST** report the modification using a warning message in `messages[]` with
+`code: "totals_changed"` and `path: "$.totals"`.
 
-The Business **MUST NOT** complete a booking session if unacknowledged price
-changes occur. When a `price_changed` warning is received, the Platform **MUST**
-present the updated totals to the buyer for explicit confirmation before submitting
-a Complete Booking Session request.
+The Business **MUST** set `presentation: "disclosure"` when the revised amount
+requires prominent Buyer awareness. The Platform **MUST** present the updated
+totals and the warning content to the buyer, and **MUST NOT** auto-dismiss or hide
+the disclosure.
 
 ## Continue URL
 
@@ -643,7 +648,7 @@ property-collected charges and flexible payment terms integration.
           "amount": 6400
         },
         {
-          "type": "total",
+          "type": "due_now",
           "display_text": "Total Due Now (Charged Today)",
           "amount": 70400
         },
@@ -663,8 +668,8 @@ property-collected charges and flexible payment terms integration.
           "amount": 6000
         },
         {
-          "type": "grand_total",
-          "display_text": "Grand Total (Total Stay Cost)",
+          "type": "total",
+          "display_text": "Total Stay Cost",
           "amount": 76400
         }
       ],
@@ -794,7 +799,7 @@ property-collected charges and flexible payment terms integration.
           "amount": -5000
         },
         {
-          "type": "total",
+          "type": "due_now",
           "display_text": "Total Due Now (Charged Today)",
           "amount": 130000
         },
@@ -804,8 +809,8 @@ property-collected charges and flexible payment terms integration.
           "amount": 0
         },
         {
-          "type": "grand_total",
-          "display_text": "Grand Total (Total Stay Cost)",
+          "type": "total",
+          "display_text": "Total Stay Cost",
           "amount": 130000
         }
       ],
@@ -957,7 +962,7 @@ property-collected charges and flexible payment terms integration.
           "amount": 4000
         },
         {
-          "type": "total",
+          "type": "due_now",
           "display_text": "Total Due Now (Deposit Charged Today)",
           "amount": 47000
         },
@@ -977,8 +982,8 @@ property-collected charges and flexible payment terms integration.
           "amount": 88000
         },
         {
-          "type": "grand_total",
-          "display_text": "Grand Total (Total Stay Cost)",
+          "type": "total",
+          "display_text": "Total Stay Cost",
           "amount": 135000
         }
       ],
