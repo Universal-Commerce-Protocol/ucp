@@ -29,29 +29,35 @@ UCP schemas use standard JSON Schema fields plus UCP-specific metadata:
 | `$id` | JSON Schema | Schema's canonical URI for `$ref` resolution | All schemas |
 | `title` | JSON Schema | Human-readable display name | All schemas |
 | `description` | JSON Schema | Schema purpose and usage | All schemas |
-| `name` | UCP | Reverse-domain identifier; doubles as registry key | Capabilities, services, handlers |
-| `version` | UCP | Entity version (`YYYY-MM-DD` format) | Capabilities, services, payment handlers |
+| `name` | UCP | Reverse-domain identifier; doubles as registry key | Capabilities, extensions, payment handlers |
+| `version` | UCP | Entity version (`YYYY-MM-DD` format) | Capabilities, extensions, payment handlers |
 | `id` | UCP | Instance identifier for multiple configurations | Payment handlers only |
+
+This table lists top-level metadata embedded in published schema documents;
+profile registry declarations are covered in the sections below.
 
 ### Why Self-Describing?
 
-Capability schemas **must be self-describing**: when a platform fetches a schema,
-it should determine exactly what capability and version it represents without
-cross-referencing other documents. This matters because:
+Capability and payment-handler schemas **must be self-describing**: when a
+Platform fetches a schema, it should determine exactly what entity and version
+it represents without cross-referencing other documents. This matters because:
 
-1. **Independent versioning**: Capabilities may version independently. The schema
-   must declare its version explicitly—you can't infer it from the URL.
+1. **Explicit version identity**: Capabilities, extensions, and payment handlers
+   declare their version explicitly; it cannot be inferred from the URL.
+   UCP-authored `dev.ucp.*` capabilities and extensions declare version `D` in
+   each UCP release `D`. Payment handlers publish on their authors' own schedules.
 
 2. **Validation**: Validators can cross-check that a capability declaration's
    `schema` URL points to a schema whose embedded `name`/`version` match the
    declaration. Mismatches are authoring errors caught at build time.
 
 3. **Developer experience**: When reading a schema file, integrators immediately
-   see what capability it defines without reverse-engineering the `$id` URL.
+   see what entity it defines without reverse-engineering the `$id` URL.
 
 4. **Compact namespace**: The `name` field provides a standardized reverse-domain
    identifier (e.g., `dev.ucp.shopping.checkout`) that's more compact and semantic
-   than the full `$id` URL.
+   than the full `$id` URL. Service registry keys provide the same stable
+   identity.
 
 ### Why Both `$id` and `name`?
 
@@ -77,9 +83,10 @@ breaking capability negotiation.
 The `version` field uses date-based versioning (`YYYY-MM-DD`) to enable:
 
 - **Capability negotiation**: Platforms request specific versions they support
-- **Breaking change management**: New versions get new dates; old versions remain
-  valid and resolvable
-- **Independent lifecycles**: Extensions can release on their own schedule
+- **Certified release identity**: Each date identifies the entity's complete,
+  published schema closure
+- **Independent author lifecycles**: Third-party extensions and payment handlers
+  can release on their authors' own schedules
 
 ## Schema Categories
 
@@ -99,7 +106,14 @@ Examples: `checkout.json`, `fulfillment.json`, `discount.json`, `order.json`
 Define transport bindings that appear in `ucp.services{}` registries. Each transport
 (REST, MCP, A2A, Embedded) is a separate entry.
 
-- **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
+- **Registry identity**: Reverse-domain service name used as the registry key
+- **Entry fields**: `version`, `spec`, `schema`, `config`, and transport-specific fields
+- **Versioning**: Every service entry declares an explicit `version`; in release
+  `D` it is `D`. Because each entry pairs the service with one transport binding,
+  that service `version` repeats on each entry, and transport bindings have no
+  separate version. The referenced OpenAPI/OpenRPC artifact carries its own
+  `info.version` as artifact metadata, not a negotiated version. See
+  [Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)
 - **Variants**: `platform_schema`, `business_schema`
 - **Transport requirements** (additional beyond the common base):
     - Platform profile (`platform_schema`): REST/MCP/Embedded require `schema` (OpenAPI/OpenRPC URL). A2A has no additional requirements.
@@ -112,11 +126,11 @@ Define payment handler configurations in `ucp.payment_handlers{}` registries.
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`, `available_instruments`
 - **Variants**: `platform_schema`, `business_schema`, `response_schema`
 - **Instance `id`**: Required to distinguish multiple configurations of the same handler
-- **`available_instruments`**: Optional. Array of supported instrument types with type-specific constraints (e.g., brands for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.
+- **`available_instruments`**: Optional. Array of supported instrument types, each with an optional Constraint Expression over type-specific members (e.g., `brand` for credit cards). When absent, the handler places no restrictions — it supports the full set of instrument types defined by its handler schema.
 
 Examples: `com.google.pay`, `dev.shopify.shop_pay`, `dev.ucp.processor_tokenizer`
 
-**→ See [Payment Handler Guide](../specification/payment-handler-guide.md)** for detailed
+**→ See [Payment Handler Guide](../specification/payment/guide.md)** for detailed
 guidance on handler structure, config/instrument/credential schemas, and the full
 specification template.
 
@@ -130,7 +144,7 @@ Do **not** appear in registries.
 
 Examples:
 
-- `schemas/shopping/payment.json` — Payment configuration (part of checkout)
+- `schemas/common/types/payment.json` — Payment configuration (part of lower funnel capabilities like checkout in retail shopping)
 
 ### Type Schemas
 
@@ -138,6 +152,11 @@ Reusable definitions referenced by other schemas. Do **not** appear in registrie
 
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`
 - **Omit**: `name`, `version`
+- **Expression grammars**: A type schema that defines expression syntax rather
+  than independently placeable UCP fields is direction-agnostic. Its grammar
+  properties carry no `ucp_request` annotation; each UCP property that exposes
+  the grammar declares its own applicability. Example:
+  `common/types/constraint_expression.json`.
 
 Examples: `types/buyer.json`, `types/line_item.json`, `types/postal_address.json`
 
@@ -178,11 +197,64 @@ by `name` rather than arrays of objects with `name` fields.
 
 The same registry structure appears in three contexts with different field requirements:
 
-| Context | Location | Required Fields |
-| ------- | -------- | --------------- |
-| Platform Profile | Advertised URI | `version`, `spec`, `schema` |
-| Business Profile | `/.well-known/ucp` | `version`; may add `config` |
-| API Responses | Checkout/order payloads | `version` (+ `id` for handlers) |
+| Registry | Platform Profile | Business Profile | API Responses |
+| -------- | ---------------- | ---------------- | ------------- |
+| Services | `version`, `transport`, `spec`; `schema` for REST, MCP, and Embedded | `version`, `transport`; `endpoint` for REST, MCP, and A2A | `version`, `transport`; transport-specific `config` where applicable |
+| Capabilities/extensions | `version`, `spec`, `schema` | `version`, `schema`; may add `config` | `version` |
+| Payment handlers | `id`, `version`, `spec`, `schema` | `id`, `version`; may add `config` | `id`, `version` |
+
+## The Reserved `ucp` Member
+
+The member name `ucp` is reserved at every structured UCP object scope — an
+object whose members are schema-defined fields — for the protocol namespace.
+The top-level envelope is its root manifestation. Dictionary containers are
+excluded because their keys are data rather than fields. See
+[The `ucp` Protocol Namespace](../specification/overview/index.md#the-ucp-protocol-namespace)
+for the normative rules. For schema authors this means:
+
+- **Never mint a structured domain field named `ucp`.** Schema authors
+  **MUST NOT** declare a domain field named `ucp` in a structured object; the
+  name denotes the protocol namespace there.
+- **Do not declare ambient `ucp` in open nested objects.** The root `ucp`
+  envelope is not ambient placement; UCP root schemas already declare its
+  required protocol metadata. Below the root, the member is UCP document grammar
+  defined centrally, so schema authors **MUST NOT** declare it in an open nested
+  object. A Business or Platform **MAY** include it in an eligible open
+  structured scope without the domain schema saying so. Ordinary instance
+  validation against an open UCP source domain schema treats it as an ignored
+  unknown object; validating its contents is a conformance-tooling concern.
+- **Dictionary keys remain data.** A dictionary container cannot host the
+  protocol namespace. Schema authors **MUST NOT** model a dictionary key named
+  `ucp` as that namespace; the key is governed by the dictionary's key and
+  value schemas and is ordinary data. A structured object used as a
+  dictionary value remains an eligible scope and follows these rules. For
+  example, `attribution` is a dictionary of string values, so its key `ucp` is
+  ordinary attribution data.
+- **The vocabulary grows only in UCP core.** New protocol members are added
+  in `ucp.json#/$defs/members`, never in domain or extension schemas, and a
+  member is admitted only if it is safe to ignore — a Business or Platform
+  that does not process it loses only that member's benefit, never
+  correctness. The container is open for forward compatibility with future
+  UCP versions, not as an extension point.
+- **Registry maps can never host `ucp`.** Registry maps are dictionaries, so
+  they cannot host the protocol namespace. Their reverse-domain
+  `propertyNames` constraints additionally reject the literal `ucp` key.
+  This is why structural metadata about a registry map — such as `map_order`
+  — sits in the parent structured scope's protocol namespace rather than
+  inside the map itself.
+- **Closed nested structured objects must declare optional `ucp`
+  explicitly.** Closing a nested structured object does not exempt it from the
+  protocol grammar. A schema author defining one with
+  `additionalProperties: false` **MUST** declare an optional `ucp` property
+  referencing `ucp.json#/$defs/members`. This exception applies only to nested
+  structured objects; closing a dictionary does not create an ambient namespace
+  there.
+- **Declare member applicability.** Schema authors **MUST** annotate every
+  property registered in `ucp.json#/$defs/members` with `ucp_request` (`omit`,
+  `optional`, or `required`, as appropriate). They **MUST** repeat the
+  annotation wherever the same member is exposed elsewhere in `ucp.json`. An
+  explicit ambient `ucp` property follows the applicability of its containing
+  schema and is not automatically omitted from requests.
 
 ## The Entity Pattern
 
@@ -207,7 +279,7 @@ Each entity type defines **three variants** for different contexts:
 {
   "dev.ucp.shopping.fulfillment": [{
     "version": "{{ ucp_version }}",
-    "spec": "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+    "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
     "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
     "config": {
       "supports_multi_group": true
@@ -288,14 +360,30 @@ values documented in the `description`.
 
 ## Versioning Strategy
 
+### UCP Services (`dev.ucp.*`)
+
+In each UCP release `D`, every UCP-defined service entry declares version `D`.
+See [Service Schemas](#service-schemas) for how the flattened registry represents
+service versions and transport bindings.
+
 ### UCP Capabilities (`dev.ucp.*`)
 
-UCP-authored capabilities version with protocol releases by default. Individual
-capabilities **may** version independently when needed.
+In each UCP release `D`, every UCP-defined capability and extension declares
+version `D`, even when its schema did not change directly. Declaring version `D`
+does not replace negotiation: capabilities and extensions are still selected by
+exact-version intersection.
 
-### Vendor Capabilities (`com.{vendor}.*`)
+Profile selection, including profiles for older supported releases, is defined
+in [Protocol Version](../specification/overview/index.md#protocol-version).
 
-Capabilities outside `dev.ucp.*` version fully independently:
+### Third-Party Extensions and Payment Handlers
+
+Third-party extensions and payment handlers publish versions on their authors'
+own schedules. Their versions remain independent of the selected `ucp.version`
+and are not constrained to `D`. UCP's `payment_handler.json` defines the shared
+declaration shape, not a payment-handler implementation or its release cadence.
+
+Third-party extensions version independently:
 
 <!-- ucp:example skip reason="schema authoring example" -->
 ```json
@@ -307,7 +395,9 @@ Capabilities outside `dev.ucp.*` version fully independently:
 }
 ```
 
-Vendor schemas follow the same self-describing requirements.
+Extension version requirements belong in the extension schema document:
+`requires.protocol` constrains the selected `ucp.version`, and
+`requires.capabilities` constrains selected parent versions.
 
 ## Extensibility and Forward Compatibility
 
@@ -402,10 +492,7 @@ Marking an object as closed preemptively prevents any future non-breaking additi
 protocol, what would otherwise be a backward-compatible field addition (e.g., adding a "gift_message" field to an order)
 becomes a breaking change for any client validating against a closed schema.
 
-By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare
-circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity), security-critical
-payloads (where unknown fields may indicate tampering), or protocol envelopes (where strictness is useful to catch
-typos in core metadata like the `ucp` block).
+By default, JSON Schema is open and ignores unknown properties. Authors should leave this keyword omitted except in rare circumstances: polymorphic discriminators (where strictness prevents oneOf validation ambiguity) or security-critical payloads (where unknown fields may indicate tampering). The `ucp` protocol namespace itself is deliberately open (tolerant readers ignore unrecognized members); typo discipline there is an authoring-time concern, not a wire-validation one.
 
 **Anti-Pattern (Prevents adding new fields without a reversion):**
 
@@ -433,11 +520,70 @@ object fields:
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
   Implementers should accept and process them as a no-op.
 
+## The `request_constraints` Protocol Member
+
+Normative processing, scope, lifecycle, and invalid-member behavior are defined
+in [Request Constraints](../specification/overview/index.md#request-constraints).
+This section covers only the schema-authoring boundary.
+
+### Local structure
+
+`request_constraints` is centrally registered in `ucp.json#/$defs/members` as a
+response-only protocol member with `ucp_request: "omit"`. Capability, extension,
+handler, and shared type schemas do not redeclare it. A conforming UCP-aware
+resolver materializes the registered member into eligible response scopes so
+ordinary resolved-schema validation applies the shared schema.
+
+`schemas/common/types/constraint_expression.json` defines the closed Constraint
+Expression grammar. `schemas/common/types/request_constraints.json` binds that
+grammar to data in the next UCP request and is the schema referenced by the
+registered member.
+
+| Position | Admitted members | Shape |
+| :-- | :-- | :-- |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` contains unique field names; `properties` maps field names to Object or Value Constraints; `anyOf` is a non-empty array of non-empty Object Constraints; an empty object is a no-op except as an `anyOf` branch. |
+| Value Constraint | `enum`, `const` | `enum` is non-empty and unique; at least one member is present; both apply when present together. |
+
+The listed members define the grammar. A `request_constraints` value may
+additionally contain `path` at the top level.
+
+Grammar changes belong in `constraint_expression.json`, and changes to the root
+Object Constraint must also be reflected in `request_constraints.json`.
+
+### Annotations and applicability
+
+`constraint_expression.json` carries no `ucp_request` annotations. Its
+properties are Constraint Expression syntax, not independently placeable UCP
+fields, so the grammar has no direction of its own.
+
+Applicability belongs to the containing UCP property. Each UCP property that
+exposes a Constraint Expression owns whichever direction-specific applicability
+annotations that property requires, and those annotations alone determine when
+the grammar is reachable. For `request_constraints`, the containing property is
+the member registered in `ucp.json#/$defs/members`; it remains
+`ucp_request: "omit"` and is the only place that member's response-only
+visibility is declared. Because the grammar is direction-agnostic, the same
+file can be referenced from a request-applicable property and from a
+response-only one without change.
+
+### Constraint Expression grammar
+
+Except for the outer `path` member, an emitted value and its nested constraint
+objects are JSON Schema Draft 2020-12 Constraint Expression syntax, not
+structured UCP domain objects. Do not add or materialize ambient `ucp` inside
+them. The keys in a `properties` map name fields on a selected request object
+and are data, not ambient members.
+
+The containing `ucp` object still follows
+[The Reserved `ucp` Member](#the-reserved-ucp-member). A closed structured object
+admits that container through its optional reference to
+`ucp.json#/$defs/members`, not by declaring `request_constraints` itself.
+
 ## Extension-Declared Action Types
 
 Every Action type is declared by an extension and becomes available only when
 that extension is negotiated, as defined in
-[Actions](../specification/overview.md#actions). Before advertising support,
+[Actions](../specification/overview/index.md#actions). Before advertising support,
 both the Business and the Platform should assess the extension's complete
 Action contract. Negotiation is pre-runtime agreement on that contract's
 semantics and support; it does not pre-approve every future `config` value or
@@ -509,8 +655,8 @@ A capability schema defines both payload structure and declaration variants:
     "line_items": {"type": "array", "items": {"$ref": "types/line_item.json"}},
     "status": {"type": "string", "enum": ["open", "completed", "expired"]},
     "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
-    "totals": {"$ref": "types/totals.json"},
-    "links": {"$ref": "types/links.json"}
+    "totals": {"$ref": "../common/types/totals.json"},
+    "links": {"type": "array", "items": {"$ref": "../common/types/link.json"}}
   }
 }
 ```
@@ -817,7 +963,7 @@ Manual invocation:
 
 ```bash
 python3 scripts/validate_examples.py --schema-base source/schemas/
-python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/checkout-rest.md docs/specification/cart.md
+python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/specification/shopping/checkout/rest.md docs/specification/shopping/cart/index.md
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 

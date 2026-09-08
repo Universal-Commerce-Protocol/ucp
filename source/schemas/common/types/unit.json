@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/unit.json",
+  "title": "Unit",
+  "description": "A reusable unit descriptor for quantities and measures. Its unit-descriptor machine identity is (`unit`, effective `scale`), where effective `scale` is the provided `scale` or 0; `display_text` is excluded.",
+  "type": "object",
+  "required": ["unit", "display_text"],
+  "properties": {
+    "unit": {
+      "type": "string",
+      "description": "Stable machine identifier. The Business SHOULD use the exact UN/CEFACT Rec20 Common Code when one accurately identifies the unit. Otherwise, the Business MAY use a custom unit identifier and MUST use it consistently for the same unit. The Platform MUST treat an unrecognized identifier as opaque."
+    },
+    "scale": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15,
+      "default": 0,
+      "description": "One step equals `10^-scale` of `unit`. When `unit` is `C62`, `scale`, if present, MUST be 0. The maximum of 15 is derived from the interoperable integer range: at scale 16 a single whole unit (10^16 steps) is no longer representable, so larger scales cannot denominate one unit of their own basis. Businesses needing finer granularity use a smaller unit."
+    },
+    "display_text": {
+      "type": "string",
+      "description": "Required printable unit label provided by the Business. The Platform MUST use it when it does not recognize `unit`; for a recognized UN/CEFACT Rec 20 Common Code, the Platform MAY substitute its own localized label. It does not participate in unit identity or mismatch comparison."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "unit": { "const": "C62" }
+        },
+        "required": ["unit"]
+      },
+      "then": {
+        "properties": {
+          "scale": { "const": 0 }
+        }
+      }
+    }
+  ]
+}

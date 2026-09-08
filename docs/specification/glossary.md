@@ -26,26 +26,32 @@ acronym in each specification Markdown file spells out the full term (e.g.,
 
 ## Protocol
 
-| Term                            | Acronym | Definition                                                                                                                                                |
-| :------------------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Action**                      | -       | Outstanding extension-defined work for a Platform to process; appears only in the response-only `actions` map of adopting capabilities.                   |
-| **Agent Payments Protocol**     | AP2     | An open protocol designed to enable AI agents to securely interoperate and complete payments autonomously. UCP leverages AP2 for secure payment mandates. |
-| **Agent2Agent Protocol**        | A2A     | An open standard for secure, collaborative communication between diverse AI agents. UCP can use A2A as a transport layer.                                 |
-| **Capability**                  | -       | A standalone core feature that a business supports (e.g., Checkout, Identity Linking). Capabilities are the fundamental "verbs" of UCP.                   |
-| **Credential Provider**         | CP      | A trusted entity (like a digital wallet) responsible for securely managing and executing the user's payment and identity credentials.                     |
-| **Extension**                   | -       | An optional capability that augments another capability via the `extends` field. Extensions appear in `ucp.capabilities[]` alongside core capabilities.   |
-| **Model Context Protocol**      | MCP     | A protocol standardizing how AI models connect to external data and tools. UCP capabilities map 1:1 to MCP tools.                                         |
-| **Profile**                     | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                  |
-| **Universal Commerce Protocol** | UCP     | The standard defined in this document, enabling interoperability between commerce entities via standardized capabilities and discovery.                   |
+| Term                            | Acronym | Definition                                                                                                                                                                                                                                        |
+| :------------------------------ | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Action**                      | -       | Outstanding extension-defined work for a Platform to process; appears only in the response-only `actions` map of adopting capabilities.                                                                                                           |
+| **Agent Payments Protocol**     | AP2     | An open protocol designed to enable AI agents to securely interoperate and complete payments autonomously. UCP leverages AP2 for secure payment mandates.                                                                                         |
+| **Agent2Agent Protocol**        | A2A     | An open standard for secure, collaborative communication between diverse AI agents. UCP can use A2A as a transport layer.                                                                                                                         |
+| **Capability**                  | -       | A standalone core feature that a business supports (e.g., Checkout, Identity Linking). Capabilities are the fundamental "verbs" of UCP.                                                                                                           |
+| **Credential Provider**         | CP      | A trusted entity (like a digital wallet) responsible for securely managing and executing the user's payment and identity credentials.                                                                                                             |
+| **Extension**                   | -       | An optional capability that augments another capability via the `extends` field. Extensions appear in `ucp.capabilities[]` alongside core capabilities.                                                                                           |
+| **Model Context Protocol**      | MCP     | A protocol standardizing how AI models connect to external data and tools. UCP capabilities map 1:1 to MCP tools.                                                                                                                                 |
+| **Profile**                     | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                                                                                                          |
+| **Protocol Namespace**          | -       | Reserved `ucp` member for protocol metadata and annotations in structured UCP objects with schema-defined fields. Dictionaries are excluded: `ucp` is key data there; structured object values remain eligible. Top-level envelope is its root.   |
+| **Universal Commerce Protocol** | UCP     | The standard defined in this document, enabling interoperability between commerce entities via standardized capabilities and discovery.                                                                                                           |
 
 ## Commerce
 
-| Term                         | Acronym | Definition                                                                                                                                            |
-| :--------------------------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order. |
-| **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                         |
-| **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                             |
-| **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                     |
+| Term                         | Acronym | Definition                                                                                                                                                |
+| :--------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.     |
+| **Buyer**                    | -       | The transacting customer or end consumer completing a commerce action over UCP. Synonymous to vocabularies like `user` and `consumer`.                    |
+| **Location**                 | -       | A physical place (e.g., store, restaurant, property, pickup point) identified by a stable, opaque string in a Business's namespace.                       |
+| **Increment**                | -       | Optional [ordering granularity](overview/index.md#ordering-increment) of a sale basis, a count of steps; advisory for Platform-authored quantities.       |
+| **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                             |
+| **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                 |
+| **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                         |
+| **Quantity Unit**            | -       | A [sale-basis descriptor](overview/index.md#quantities-and-units) with machine identity (`unit`, effective `scale`); excludes `display_text`/`increment`. |
+| **Step**                     | -       | One [integer increment](overview/index.md#quantities-and-units) in the authoritative sale basis: `10^-scale` of `unit`.                                   |
 
 ## Payments
 

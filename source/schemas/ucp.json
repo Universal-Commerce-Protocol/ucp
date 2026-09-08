@@ -8,7 +8,7 @@
     "version": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "UCP version in YYYY-MM-DD format."
+      "description": "Version identifier in YYYY-MM-DD format."
     },
 
     "version_constraint": {
@@ -34,13 +34,38 @@
       "properties": {
         "protocol": {
           "$ref": "#/$defs/version_constraint",
-          "description": "Required protocol version."
+          "description": "Required range for the selected `ucp.version`."
         },
         "capabilities": {
           "type": "object",
           "description": "Required capability versions, keyed by capability name. Keys must be a subset of the extension's $defs keys.",
           "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
           "additionalProperties": { "$ref": "#/$defs/version_constraint" }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "map_order": {
+      "type": "object",
+      "description": "Preferred key order for map-valued fields in the scope annotated by the containing `ucp` member. Each property names a target map, and its array lists target keys in preferred order. Lists may be partial and are not allowlists.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+
+    "members": {
+      "type": "object",
+      "description": "Members defined inside the reserved `ucp` protocol object. The object is open for forward compatibility: consumers MUST ignore unrecognized members. Only UCP core defines members, and every defined member MUST be safe to ignore.",
+      "properties": {
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "ucp_request": "omit"
+        },
+        "request_constraints": {
+          "$ref": "common/types/request_constraints.json",
+          "ucp_request": "omit"
         }
       },
       "additionalProperties": true
@@ -83,6 +108,11 @@
       "required": ["version"],
       "properties": {
         "version": { "$ref": "#/$defs/version" },
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "description": "Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`).",
+          "ucp_request": "omit"
+        },
         "status": {
           "type": "string",
           "enum": ["success", "error"],
@@ -277,6 +307,23 @@
     "response_catalog_schema": {
       "title": "UCP Catalog Response Schema",
       "description": "UCP metadata for catalog responses.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "response_location_schema": {
+      "title": "UCP Location Response Schema",
+      "description": "UCP metadata for location responses.",
       "allOf": [
         { "$ref": "#/$defs/base" },
         {
