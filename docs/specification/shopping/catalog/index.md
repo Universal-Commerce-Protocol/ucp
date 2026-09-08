@@ -1,0 +1,529 @@
+<!--
+   Copyright 2026 UCP Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# Catalog Capability
+
+## Overview
+
+The Catalog capability allows platforms to search and browse business product catalogs.
+This enables product discovery before checkout, supporting use cases like:
+
+* Free-text product search
+* Category and filter-based browsing
+* Batch product/variant retrieval by identifier
+* Price comparison across variants
+
+## Capabilities
+
+| Capability | Description |
+| :--- | :--- |
+| [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. |
+
+## Key Concepts
+
+* **Product**: A catalog item with title, description, media, and one or more
+  variants.
+* **Variant**: A purchasable item with specific option selections (e.g., "Blue /
+  Large"), price, and availability.
+* **Price**: Price values include both amount (in minor currency units) and
+  currency code, enabling multi-currency catalogs.
+* **Sale basis**: How quantity is denominated—as whole items (`each`, the
+  default) or in a unit of measure such as weight, length, area, volume, or
+  time. See [Quantities and units](../../overview/index.md#quantities-and-units).
+
+### Relationship to Checkout
+
+Catalog operations return product and variant IDs that can be used directly in
+checkout `line_items[].item.id`. The variant ID from catalog retrieval should match
+the item ID expected by checkout.
+
+Catalog responses (pricing, availability, etc.) reflect the Business's current
+terms for the given request but are not transactional commitments — checkout
+is authoritative. Responses can be session-specific and **SHOULD NOT** be
+reused across sessions without re-validation.
+
+## Sale basis and quantity units
+
+`variants[].quantity_unit` advertises a variant's sale basis before a
+transaction. The descriptor follows the shared
+[quantities and units](../../overview/index.md#quantities-and-units) contract. Its
+absence advertises the default `each` basis; the Business advertises a
+non-`each` basis by including the descriptor.
+
+The catalog is where the Platform learns the sale basis before transacting:
+`unit` and `scale` define how quantities are denominated, and an optional
+[`increment`](../../overview/index.md#ordering-increment) advertises the ordering
+granularity the Business sells in, letting the Platform build quantity
+steppers and validate input before submission. A Business selling bananas by
+the pound in quarter-pound multiples advertises
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
+
+The sale basis is not limited to physical measure: metered offerings —
+parking by the minute, labor by the hour — use the same descriptor (`MIN`,
+`HUR`) with the same contract.
+
+`variants[].id` identifies the purchasable variant; `quantity_unit` defines the
+denomination and granularity used to order it.
+Bananas whose `quantity_unit` is
+`{ "unit": "LBR", "scale": 2, "display_text": "lb" }` are sold in
+hundredth-of-a-pound steps, so a `quantity` of `150` represents 1.50 lb.
+
+### Distinction from unit price
+
+`quantity_unit` and a variant's [`unit_price`](#variant) answer different
+questions and are set independently:
+
+* `quantity_unit` is the **sale basis** — the unit `quantity` is counted in and
+  `price` is quoted in.
+* `unit_price` is a **display comparator** — a derived "price per standard
+  measure" (for example, per 100 mL) for shelf-style comparison. Its `measure`
+  is the packaging or content quantity of the variant and its `reference` is the
+  comparison denominator.
+
+The unit fields in `quantity_unit`, `unit_price.measure`, and
+`unit_price.reference` follow the shared
+[quantities and units](../../overview/index.md#quantities-and-units) contract. The two
+unit-price fields use the shared measure type, so their integer `value` fields
+are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`,
+both, or neither on a variant.
+
+To keep the display comparator defined, the Business **MUST** use a positive
+integer for both `unit_price.measure.value` and `unit_price.reference.value`.
+The Business **MUST** set `unit_price.currency` equal to `price.currency`.
+Within `unit_price`, the Business **MUST** use identical values for
+`measure.unit` and `reference.unit`. The Business **MAY** use different `scale`
+values for those measures. The Business **MUST NOT** perform cross-unit or
+currency conversion as part of the unit-price calculation. Each measure
+represents its integer `value × 10^-scale` in the common unit. The Business
+**MUST** compute the comparator from `price.amount` and those scaled values:
+
+```text
+(price.amount / (measure.value × 10^-measure.scale)) × (reference.value × 10^-reference.scale)
+```
+
+The Business **MUST** round the result once to the currency's minor units
+according to its pricing rules and return it as `unit_price.amount`. The
+returned `unit_price.amount` is authoritative. The Platform **MUST NOT**
+recompute it or substitute its own result.
+
+The same-unit and same-currency rules are semantic invariants. JSON Schema
+validates the corresponding fields independently and does not enforce either
+equality.
+
+For example, a 50 m cable spool sold by `each` can omit `quantity_unit` while
+carrying a `unit_price` per metre. Its `measure` can be
+`{ "value": 5000, "unit": "MTR", "scale": 2, "display_text": "m" }` and its
+`reference` can be
+`{ "value": 1, "unit": "MTR", "display_text": "m" }`. Both measures use
+`MTR`; they represent 50 m and 1 m respectively without cross-unit conversion.
+
+On transaction lines, presence marks the role: the Business **MUST** echo
+`unit_price` on any line whose pricing basis differs from its sale basis (see
+[Checkout — pricing basis](../checkout/index.md#quantity-and-sale-basis)). A
+catalog-only `unit_price`, like this spool's per-metre figure, is a display
+comparator; a line-level one carries the rate the charge is computed from.
+
+### Example: a good sold by weight
+
+A `get_product` response for bananas sold by the pound. The variant advertises
+`quantity_unit`
+`{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }` and a
+`price` of `79` — $0.79 per whole pound, sold in 0.25-lb multiples:
+
+<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}" },
+  "product": {
+    "id": "prod_bananas",
+    "title": "Bananas",
+    "description": { "plain": "Fresh bananas sold by the pound." },
+    "price_range": {
+      "min": { "amount": 79, "currency": "USD" },
+      "max": { "amount": 79, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_bananas",
+        "title": "Bananas",
+        "description": { "plain": "Fresh bananas sold by the pound." },
+        "price": { "amount": 79, "currency": "USD" },
+        "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 },
+        "availability": { "available": true }
+      }
+    ]
+  }
+}
+```
+
+## Shared Entities
+
+### Context
+
+Location and market context for catalog operations. All fields are optional
+hints for relevance and localization. Platforms MAY geo-detect context from
+request headers.
+
+Context signals are provisional—not authoritative data. Businesses SHOULD use
+these values when verified inputs (e.g., shipping address) are absent, and MAY
+ignore or down-rank them if inconsistent with higher-confidence signals
+(authenticated account, risk detection) or regulatory constraints (export
+controls). Eligibility and policy enforcement MUST occur at checkout time using
+binding transaction data.
+
+Businesses determine market assignment—including currency—based on context
+signals. Price filter values are denominated in `context.currency`; when
+the presentment currency differs, businesses SHOULD convert before applying
+(see [Price Filter](search.md#price-filter)). Response prices include
+explicit currency codes confirming the resolution.
+
+When `context.eligibility` claims are present, Businesses that accept them
+**MAY** adjust `price` / `list_price` directly for strikethrough display and
+**MAY** use `messages` with `code: "eligibility_benefit"` to attribute the
+adjustment to a specific claim.
+
+{{ schema_fields('types/context', 'shopping/catalog') }}
+
+### Signals
+
+Environment data provided by the platform to support authorization
+and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See
+[Signals](../../overview/index.md#signals) for details and privacy requirements.
+
+{{ schema_fields('types/signals', 'shopping/catalog') }}
+
+### Attribution
+
+Platform-provided referral and conversion-event context — campaign IDs,
+click identifiers, and source/medium markers communicated by the platform.
+See [Attribution](../../overview/index.md#attribution) for details and consent
+requirements.
+
+{{ schema_fields('types/attribution', 'shopping/catalog') }}
+
+### Product
+
+A catalog item representing a sellable item with one or more purchasable variants.
+
+`media` and `variants` are ordered arrays. Businesses SHOULD return the most
+relevant variant and image first—default for lookups, best match based on query
+and context for search. Platforms SHOULD treat the first element as featured.
+
+{{ schema_fields('types/product', 'shopping/catalog') }}
+
+### Variant
+
+A purchasable item with specific option selections, price, and availability.
+
+In lookup responses, each variant carries an `inputs` array for correlation:
+which request identifiers resolved to this variant, and whether the match
+was `exact` or `featured` (server-selected). See
+[Client Correlation](lookup.md#client-correlation) for details.
+
+`media` is an ordered array. Businesses SHOULD return the featured variant image
+as the first element. Platforms SHOULD treat the first element as featured.
+
+{{ schema_fields('types/variant', 'shopping/catalog') }}
+
+### Price
+
+{{ schema_fields('types/price', 'shopping/catalog') }}
+
+### Price Range
+
+{{ schema_fields('types/price_range', 'shopping/catalog') }}
+
+### Media
+
+{{ schema_fields('types/media', 'shopping/catalog') }}
+
+### Product Option
+
+{{ schema_fields('types/product_option', 'shopping/catalog') }}
+
+### Option Value
+
+{{ schema_fields('types/option_value', 'shopping/catalog') }}
+
+### Selected Option
+
+{{ schema_fields('types/selected_option', 'shopping/catalog') }}
+
+### Rating
+
+{{ schema_fields('types/rating', 'shopping/catalog') }}
+
+### Policy
+
+Policies (return/refund terms, warranty, and the like) that apply to the
+products in a catalog response. JSONPath targets in `applies_to` are
+relative to the response root — `$.products[N]` for search and batch lookup,
+`$.product` for get_product. See [Policies](../../overview/index.md#policies) for the full model.
+
+{{ schema_fields('types/policy', 'shopping/catalog') }}
+
+## Actions
+
+Catalog Search, batch Lookup, and successful Get Product responses can include
+extension-defined Actions. In Catalog, an Action is outstanding work that gates
+the effect its type defines, which may affect which products the Business
+returns or how the Platform handles them.
+
+Search, batch Lookup, and successful Get Product are independent Catalog
+operations; their responses do not share a containing-resource lifetime. The
+Business **MAY** use the same Action `id` in separate responses; that equality
+does not identify the same work. A concrete Action-type contract **MAY** define
+stronger correlation for its instances.
+
+For Search and batch Lookup, the Business decides whether to return zero, some,
+or all otherwise relevant products under the Action-type contract and its own
+policy. A Message can point to the Action to explain the response. Successful
+Get Product still includes `product`; its existing error response is unchanged.
+
+After processing an Action, the Platform performs a fresh Catalog operation and
+the later Business response is authoritative. Catalog defines no Action
+lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY**
+define those behaviors for processing its instances. The common shape and rules
+are defined in [Overview — Actions](../../overview/index.md#actions).
+
+For example, this Search response returns no products and explains that age
+verification may affect the results:
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {...},
+  "products": [],
+  "actions": {
+    "com.example.identity.age_verification": [
+      {
+        "id": "age-check-1"
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "age_verification_required",
+      "content": "Complete age verification to see age-restricted products matching your search.",
+      "path": "$.actions['com.example.identity.age_verification'][0]"
+    }
+  ]
+}
+```
+
+Returning zero products is one Business choice; returning a subset or the full
+result set is also conformant. The Action type and Message code are illustrative;
+Catalog defines neither.
+
+## Messages and Error Handling
+
+All catalog responses include an optional `messages` array that allows businesses
+to provide context about errors, warnings, or informational notices.
+
+### Message Types
+
+Messages communicate business outcomes and provide context:
+
+| Type | When to Use | Example Codes |
+| :--- | :--- | :--- |
+| `error` | Business-level errors | `NOT_FOUND`, `OUT_OF_STOCK`, `REGION_RESTRICTED` |
+| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE` |
+| `info` | Additional context without issues | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY` |
+
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen
+declarations, safety warnings) that platforms must not hide or dismiss. See
+[Warning Presentation](../checkout/index.md#warning-presentation) for the full
+rendering contract.
+
+**Note**: Most catalog errors use `severity: "recoverable"` - agents
+handle them programmatically (retry, inform user, show alternatives).
+`get_product` returns `severity: "unrecoverable"` when an identifier
+doesn't resolve; agents MUST NOT retry the same `id` (see the
+[REST](rest.md#product-not-found) and [MCP](mcp.md#product-not-found)
+examples).
+
+#### Message (Error)
+
+{{ schema_fields('types/message_error', 'shopping/catalog') }}
+
+#### Message (Warning)
+
+{{ schema_fields('types/message_warning', 'shopping/catalog') }}
+
+#### Message (Info)
+
+{{ schema_fields('types/message_info', 'shopping/catalog') }}
+
+### Common Scenarios
+
+#### Empty Search
+
+When search finds no matches, return an empty array without messages.
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {...},
+  "products": []
+}
+```
+
+This is not an error - the query was valid but returned no results.
+
+#### Backorder Warning
+
+When a product is available but has delayed fulfillment, return the product with
+a warning message. Use the `path` field to target specific variants.
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {...},
+  "products": [
+    {
+      "id": "prod_xyz789",
+      "title": "Professional Chef Knife Set",
+      "description": { "plain": "Complete professional knife collection." },
+      "price_range": {
+        "min": { "amount": 29900, "currency": "USD" },
+        "max": { "amount": 29900, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_abc",
+          "title": "12-piece Set",
+          "description": { "plain": "Complete professional knife collection." },
+          "price": { "amount": 29900, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "delayed_fulfillment",
+      "path": "$.products[0].variants[0]",
+      "content": "12-piece set on backorder, ships in 2-3 weeks"
+    }
+  ]
+}
+```
+
+Agents can present the option and inform the user about the delay. The `path`
+field uses RFC 9535 JSONPath to target specific components.
+
+#### Identifiers Not Found
+
+When requested identifiers don't exist, return success with the found products
+(if any). The response MAY include informational messages indicating which
+identifiers were not found.
+
+<!-- ucp:example schema=shopping/catalog_lookup op=lookup -->
+```json
+{
+  "ucp": {...},
+  "products": [],
+  "messages": [
+    {
+      "type": "info",
+      "code": "not_found",
+      "content": "prod_invalid"
+    }
+  ]
+}
+```
+
+Agents correlate results using the `inputs` array on each variant. See
+[Client Correlation](lookup.md#client-correlation).
+
+#### Product Disclosure
+
+When a product requires a disclosure (e.g., allergen notice, safety warning),
+return it as a warning with `presentation: "disclosure"`. The `path` field targets the
+relevant component in the response — when it targets a product, the
+disclosure applies to all of its variants.
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {...},
+  "products": [
+    {
+      "id": "prod_nut_butter",
+      "title": "Artisan Nut Butter Collection",
+      "description": { "plain": "Assorted artisan nut butters." },
+      "price_range": {
+        "min": { "amount": 1299, "currency": "USD" },
+        "max": { "amount": 1499, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_almond",
+          "title": "Almond Butter",
+          "description": { "plain": "Smooth almond butter." },
+          "price": { "amount": 1299, "currency": "USD" },
+          "availability": { "available": true }
+        },
+        {
+          "id": "var_cashew",
+          "title": "Cashew Butter",
+          "description": { "plain": "Creamy cashew butter." },
+          "price": { "amount": 1499, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "allergens",
+      "path": "$.products[0]",
+      "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+      "content_type": "markdown",
+      "presentation": "disclosure",
+      "image_url": "https://merchant.com/allergen-tree-nuts.svg",
+      "url": "https://merchant.com/allergen-info"
+    }
+  ]
+}
+```
+
+See [Warning Presentation](../checkout/index.md#warning-presentation) for the
+full rendering contract.
+
+## Scopes
+
+The Catalog Search and Catalog Lookup capabilities define the following
+well-known scopes for user-authenticated access:
+
+| Scope | Description |
+| :--- | :--- |
+| `dev.ucp.shopping.catalog.search:read` | Search on behalf of the authenticated user — personalized results, member pricing, gated inventory. |
+| `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
+
+Scope declaration, derivation, and rules for extending this set with
+custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
+
+## Transport Bindings
+
+The capabilities above are bound to specific transport protocols:
+
+* [REST Binding](rest.md): RESTful API mapping.
+* [MCP Binding](mcp.md): Model Context Protocol mapping via JSON-RPC.

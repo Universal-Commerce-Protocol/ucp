@@ -41,7 +41,7 @@
         },
         "location": {
           "type": "string",
-          "description": "Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method."
+          "description": "Stable, opaque identifier for the Business Location resolved for this place-based fulfillment method. The Business recognizes the same ID when submitted as `selected_destination_id` for that method; recognition does not reserve inventory or guarantee eligibility, and current terms are revalidated."
         },
         "options": {
           "type": "array",

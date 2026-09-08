@@ -60,7 +60,7 @@
     "totals": {
       "type": "array",
       "items": {
-        "$ref": "total.json"
+        "$ref": "../../common/types/total.json"
       },
       "description": "Adjustment totals breakdown. Signed values - negative for money returned to buyer (refunds, credits), positive for additional charges (exchanges)."
     },

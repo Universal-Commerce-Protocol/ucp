@@ -33,8 +33,8 @@ Capability-specific details — discovery, URL parameters, delegation contracts,
 message payloads, and schema definitions — are defined in each capability's EP
 binding specification:
 
-- [Checkout Capability — EP Binding](embedded-checkout.md)
-- [Cart Capability — EP Binding](embedded-cart.md)
+- [Checkout Capability — EP Binding](shopping/checkout/embedded.md)
+- [Cart Capability — EP Binding](shopping/cart/embedded.md)
 
 ## Terminology & Actors
 
@@ -128,7 +128,7 @@ Transport errors are protocol-level failures that prevent request processing.
 These are returned as JSON-RPC `error` using standard JSON-RPC error codes and
 indicate the message itself is invalid or could not be processed — not that
 executed business logic produced an error outcome. See the
-[Core Specification](overview.md#error-codes) for the complete error code
+[Core Specification](overview/index.md#error-codes) for the complete error code
 registry.
 
 For example, if a request cannot be processed (unknown method, malformed
