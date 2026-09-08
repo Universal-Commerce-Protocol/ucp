@@ -133,9 +133,9 @@ Initialize the application and define an in-memory database to store sessions.
     from ucp_sdk.models.schemas.shopping.checkout_create_request import CheckoutCreateRequest
     from ucp_sdk.models.schemas.shopping.types.line_item import LineItem
     from ucp_sdk.models.schemas.shopping.types.item import Item
-    from ucp_sdk.models.schemas.shopping.types.totals import Total
-    from ucp_sdk.models.schemas.shopping.types.link import Link
-    from ucp_sdk.models.schemas.shopping.types.available_payment_instrument import AvailablePaymentInstrument
+    from ucp_sdk.models.schemas.common.types.totals import Total
+    from ucp_sdk.models.schemas.common.types.link import Link
+    from ucp_sdk.models.schemas.common.types.available_payment_instrument import AvailablePaymentInstrument
     from ucp_sdk.models.schemas.payment_handler import ResponseSchema as PaymentHandlerResponse
 
     # Initialize FastAPI app
@@ -315,7 +315,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
             "com.example.mock_pay": [
                 PaymentHandlerResponse(
                     id="mock_pay_handler_1",
-                    version="2026-04-08",
+                    version="2026-08-25",
                     available_instruments=[
                         AvailablePaymentInstrument(type="mock_instrument")
                     ]
@@ -325,7 +325,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
 
         # Construct UCP protocol metadata
         ucp_metadata = ResponseCheckoutSchema(
-            version="2026-04-08",
+            version="2026-08-25",
             status="success",
             payment_handlers=payment_handlers
         )
@@ -360,14 +360,14 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
       // Configure available payment handlers.
       // We advertise support for a generic mock payment handler.
       const ucpMetadata = {
-        version: '2026-04-08',
+        version: '2026-08-25',
         status: 'success' as const,
         capabilities: {},
         payment_handlers: {
           'com.example.mock_pay': [
             {
               id: 'mock_pay_handler_1',
-              version: '2026-04-08',
+              version: '2026-08-25',
               available_instruments: [
                 { type: 'mock_instrument' }
               ]
@@ -530,12 +530,12 @@ You should receive a response containing the UCP metadata, calculated totals, an
 ```json
 {
   "ucp": {
-    "version": "2026-04-08",
+    "version": "2026-08-25",
     "status": "success",
     "payment_handlers": {
       "com.example.mock_pay": [
         {
-          "version": "2026-04-08",
+          "version": "2026-08-25",
           "id": "mock_pay_handler_1",
           "available_instruments": [
             {
@@ -640,9 +640,9 @@ If you want to verify your code, expand the section below to see the complete fi
         from ucp_sdk.models.schemas.shopping.checkout_create_request import CheckoutCreateRequest
         from ucp_sdk.models.schemas.shopping.types.line_item import LineItem
         from ucp_sdk.models.schemas.shopping.types.item import Item
-        from ucp_sdk.models.schemas.shopping.types.totals import Total
-        from ucp_sdk.models.schemas.shopping.types.link import Link
-        from ucp_sdk.models.schemas.shopping.types.available_payment_instrument import AvailablePaymentInstrument
+        from ucp_sdk.models.schemas.common.types.totals import Total
+        from ucp_sdk.models.schemas.common.types.link import Link
+        from ucp_sdk.models.schemas.common.types.available_payment_instrument import AvailablePaymentInstrument
         from ucp_sdk.models.schemas.payment_handler import ResponseSchema as PaymentHandlerResponse
 
         # Initialize FastAPI app
@@ -706,7 +706,7 @@ If you want to verify your code, expand the section below to see the complete fi
                 "com.example.mock_pay": [
                     PaymentHandlerResponse(
                         id="mock_pay_handler_1",
-                        version="2026-04-08",
+                        version="2026-08-25",
                         available_instruments=[
                             AvailablePaymentInstrument(type="mock_instrument")
                         ]
@@ -716,7 +716,7 @@ If you want to verify your code, expand the section below to see the complete fi
 
             # Construct UCP protocol metadata
             ucp_metadata = ResponseCheckoutSchema(
-                version="2026-04-08",
+                version="2026-08-25",
                 status="success",
                 payment_handlers=payment_handlers
             )
@@ -834,14 +834,14 @@ If you want to verify your code, expand the section below to see the complete fi
           // Configure available payment handlers.
           // We advertise support for a generic mock payment handler.
           const ucpMetadata = {
-            version: '2026-04-08',
+            version: '2026-08-25',
             status: 'success' as const,
             capabilities: {},
             payment_handlers: {
               'com.example.mock_pay': [
                 {
                   id: 'mock_pay_handler_1',
-                  version: '2026-04-08',
+                  version: '2026-08-25',
                   available_instruments: [
                     { type: 'mock_instrument' }
                   ]
