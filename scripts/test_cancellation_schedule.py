@@ -15,7 +15,8 @@
 """Run portable cancellation schedule vectors against a test-only oracle.
 
 Run: python3 scripts/test_cancellation_schedule.py
-Requires ucp-schema on PATH; no Python packages are required.
+Requires ucp-schema on PATH and IANA timezone data for zoneinfo.
+No third-party Python packages are required when system timezone data exists.
 
 These vectors check selection and fallback after a policy has been targeted.
 The small oracle uses exact Fraction arithmetic and the specification's POSIX
@@ -25,6 +26,8 @@ Its result envelope and JSON Pointers are test metadata, not protocol fields.
 
 Schema checks use ucp-schema. Calendar validity, normalized ordering, exact
 boundaries, and unsupported selected kinds are separate semantic checks.
+Local-policy examples separately check producer-side resolution of selected,
+unambiguous wall-clock templates; they do not extend the wire representation.
 """
 
 import json
@@ -33,9 +36,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from fractions import Fraction
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "scripts/fixtures/lodging_cancellation_schedule.json"
@@ -161,6 +165,56 @@ def evaluate(schedule: dict | None, at: str, valid: bool) -> dict:
   return {"status": "selected", "pointer": pointer}
 
 
+def local_example_instant(value: str, zone: ZoneInfo) -> datetime:
+  """Resolve only unambiguous, whole-second local times in test examples."""
+  local = datetime.fromisoformat(value)
+  if local.tzinfo is not None or local.microsecond:
+    raise ValueError("Example must use a naive, whole-second local time")
+  aware = local.replace(tzinfo=zone)
+  if aware.utcoffset() != aware.replace(fold=1).utcoffset():
+    raise ValueError("Ambiguous or nonexistent local example time")
+  round_trip = aware.astimezone(timezone.utc).astimezone(zone)
+  if round_trip.replace(tzinfo=None) != local:
+    raise ValueError("Nonexistent local example time")
+  return aware
+
+
+def check_local_policy_examples(fixtures: dict) -> list[str]:
+  """Check chosen local templates independently of elapsed-time selection."""
+  failures = []
+  names = set()
+  epoch = instant("1970-01-01T00:00:00Z")
+  for example in fixtures.get("local_policy_examples", []):
+    name = example["id"]
+    if name in names:
+      failures.append(f"duplicate local-policy example id: {name}")
+    names.add(name)
+    try:
+      zone = ZoneInfo(example["timezone"])
+      anchor = local_example_instant(example["check_in_local"], zone)
+      cutoff_date = anchor.date() - timedelta(days=example["days_before"])
+      cutoff = local_example_instant(
+        f"{cutoff_date.isoformat()}T{example['cutoff_local_time']}", zone
+      )
+      anchor_instant = instant(anchor.isoformat())
+      cutoff_instant = instant(cutoff.isoformat())
+      actual = {
+        "anchor_epoch": anchor_instant - epoch,
+        "cutoff_epoch": cutoff_instant - epoch,
+        "elapsed_seconds": anchor_instant - cutoff_instant,
+      }
+      if actual != example["expected"]:
+        failures.append(f"local_policy[{name}]: got {actual}")
+      schedule = fixtures["schedules"][example["schedule"]]["value"]
+      if instant(schedule["anchor"]) != anchor_instant:
+        failures.append(f"local_policy[{name}]: wire anchor mismatch")
+      if elapsed(schedule["tiers"][0]["until"]) != actual["elapsed_seconds"]:
+        failures.append(f"local_policy[{name}]: wire duration mismatch")
+    except (ValueError, ZoneInfoNotFoundError) as error:
+      failures.append(f"local_policy[{name}]: {error}")
+  return failures
+
+
 def main() -> int:
   """Check every fixture and return a nonzero status on any failure."""
   if shutil.which("ucp-schema") is None:
@@ -168,8 +222,9 @@ def main() -> int:
     return 1
   fixtures = json.loads(FIXTURES.read_text(encoding="utf-8"))
   results = {}
-  failures = []
+  failures = check_local_policy_examples(fixtures)
   schema_checks = 0
+  outcome_checks = 0
   for name, entry in fixtures["schedules"].items():
     results[name] = schema_valid(entry["value"])
     if "schema_valid" in entry:
@@ -188,11 +243,25 @@ def main() -> int:
       failures.append(
         f"{case['id']}: expected {case['expected']}, got {actual}"
       )
+    if "expected_outcome" in case:
+      outcome_checks += 1
+      if actual["status"] != "selected":
+        failures.append(f"{case['id']}: no selected outcome to compare")
+        continue
+      selected = {"schedule": schedule}
+      for part in actual["pointer"].split("/")[1:]:
+        selected = (
+          selected[int(part)] if isinstance(selected, list) else selected[part]
+        )
+      if selected != case["expected_outcome"]:
+        failures.append(f"{case['id']}: selected outcome mismatch: {selected}")
   for failure in failures:
     print(f"FAIL: {failure}")
   print(
     f"{len(fixtures['cases'])} selection/fallback vectors, "
-    f"{schema_checks} schema expectations, {len(failures)} failures"
+    f"{schema_checks} schema expectations, "
+    f"{len(fixtures.get('local_policy_examples', []))} local-policy examples, "
+    f"{outcome_checks} outcome assertions, {len(failures)} failures"
   )
   return int(bool(failures))
 

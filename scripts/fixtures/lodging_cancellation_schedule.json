@@ -1,6 +1,141 @@
 {
   "description": "Test-only schedule selection vectors. Named schedules contain unchanged wire values. Results use test metadata and JSON Pointers relative to a policy containing schedule; they do not calculate money or classify refundability. Omitted schema_valid expectations allow calendar validation to be tested independently of optional JSON Schema format assertions.",
+  "local_policy_examples": [
+    {
+      "id": "phoenix_local_template",
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "description": "Contributor-provided synthetic reservation; fixed fee is the Business-resolved room-only penalty in root Booking currency USD, not money inferred by the selector.",
+      "schedule": "phoenix_room_only_fee",
+      "timezone": "America/Phoenix",
+      "check_in_local": "2026-10-16T15:00:00",
+      "days_before": 2,
+      "cutoff_local_time": "18:00:00",
+      "expected": {
+        "anchor_epoch": 1792188000,
+        "cutoff_epoch": 1792026000,
+        "elapsed_seconds": 162000
+      }
+    },
+    {
+      "id": "new_york_spring_local_template",
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "description": "Derived spring-forward variant of the public example, not a separate contributor-supplied policy.",
+      "schedule": "new_york_spring_room_only_fee",
+      "timezone": "America/New_York",
+      "check_in_local": "2026-03-09T15:00:00",
+      "days_before": 2,
+      "cutoff_local_time": "18:00:00",
+      "expected": {
+        "anchor_epoch": 1773082800,
+        "cutoff_epoch": 1772924400,
+        "elapsed_seconds": 158400
+      }
+    },
+    {
+      "id": "new_york_fall_local_template",
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "description": "Derived fall-back variant of the public example, not a separate contributor-supplied policy.",
+      "schedule": "new_york_fall_room_only_fee",
+      "timezone": "America/New_York",
+      "check_in_local": "2026-11-02T15:00:00",
+      "days_before": 2,
+      "cutoff_local_time": "18:00:00",
+      "expected": {
+        "anchor_epoch": 1793649600,
+        "cutoff_epoch": 1793484000,
+        "elapsed_seconds": 165600
+      }
+    }
+  ],
   "schedules": {
+    "phoenix_room_only_fee": {
+      "schema_valid": true,
+      "value": {
+        "anchor": "2026-10-16T22:00:00Z",
+        "tiers": [
+          {
+            "until": "PT45H",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "fixed_fee",
+          "penalty": {
+            "amount": 15000
+          }
+        }
+      }
+    },
+    "phoenix_symbolic_night": {
+      "schema_valid": true,
+      "value": {
+        "anchor": "2026-10-16T22:00:00Z",
+        "tiers": [
+          {
+            "until": "PT45H",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "unit_deduction",
+          "penalty": {
+            "measure": {
+              "value": 1,
+              "unit": "night",
+              "display_text": "night"
+            }
+          }
+        }
+      }
+    },
+    "new_york_spring_room_only_fee": {
+      "schema_valid": true,
+      "value": {
+        "anchor": "2026-03-09T19:00:00Z",
+        "tiers": [
+          {
+            "until": "PT44H",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "fixed_fee",
+          "penalty": {
+            "amount": 15000
+          }
+        }
+      }
+    },
+    "new_york_fall_room_only_fee": {
+      "schema_valid": true,
+      "value": {
+        "anchor": "2026-11-02T20:00:00Z",
+        "tiers": [
+          {
+            "until": "PT46H",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "fixed_fee",
+          "penalty": {
+            "amount": 15000
+          }
+        }
+      }
+    },
     "free_night": {
       "schema_valid": true,
       "value": {
@@ -484,6 +619,122 @@
     }
   },
   "cases": [
+    {
+      "id": "phoenix_room_only_fee_before",
+      "schedule": "phoenix_room_only_fee",
+      "at": "2026-10-15T00:59:59Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/tiers/0/outcome"
+      },
+      "expected_outcome": {
+        "kind": "percentage",
+        "buyer_bps": 10000
+      }
+    },
+    {
+      "id": "phoenix_room_only_fee_at_cutoff",
+      "schedule": "phoenix_room_only_fee",
+      "at": "2026-10-15T01:00:00Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/after_last_tier"
+      },
+      "expected_outcome": {
+        "kind": "fixed_fee",
+        "penalty": {
+          "amount": 15000
+        }
+      }
+    },
+    {
+      "id": "phoenix_symbolic_night_before",
+      "schedule": "phoenix_symbolic_night",
+      "at": "2026-10-15T00:59:59Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/tiers/0/outcome"
+      },
+      "expected_outcome": {
+        "kind": "percentage",
+        "buyer_bps": 10000
+      }
+    },
+    {
+      "id": "phoenix_symbolic_night_at_cutoff",
+      "schedule": "phoenix_symbolic_night",
+      "at": "2026-10-15T01:00:00Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/after_last_tier"
+      },
+      "expected_outcome": {
+        "kind": "unit_deduction",
+        "penalty": {
+          "measure": {
+            "value": 1,
+            "unit": "night",
+            "display_text": "night"
+          }
+        }
+      }
+    },
+    {
+      "id": "new_york_spring_room_only_fee_before",
+      "schedule": "new_york_spring_room_only_fee",
+      "at": "2026-03-07T22:59:59Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/tiers/0/outcome"
+      },
+      "expected_outcome": {
+        "kind": "percentage",
+        "buyer_bps": 10000
+      }
+    },
+    {
+      "id": "new_york_spring_room_only_fee_at_cutoff",
+      "schedule": "new_york_spring_room_only_fee",
+      "at": "2026-03-07T23:00:00Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/after_last_tier"
+      },
+      "expected_outcome": {
+        "kind": "fixed_fee",
+        "penalty": {
+          "amount": 15000
+        }
+      }
+    },
+    {
+      "id": "new_york_fall_room_only_fee_before",
+      "schedule": "new_york_fall_room_only_fee",
+      "at": "2026-10-31T21:59:59Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/tiers/0/outcome"
+      },
+      "expected_outcome": {
+        "kind": "percentage",
+        "buyer_bps": 10000
+      }
+    },
+    {
+      "id": "new_york_fall_room_only_fee_at_cutoff",
+      "schedule": "new_york_fall_room_only_fee",
+      "at": "2026-10-31T22:00:00Z",
+      "expected": {
+        "status": "selected",
+        "pointer": "/schedule/after_last_tier"
+      },
+      "expected_outcome": {
+        "kind": "fixed_fee",
+        "penalty": {
+          "amount": 15000
+        }
+      }
+    },
     {
       "id": "before_cutoff",
       "schedule": "free_night",

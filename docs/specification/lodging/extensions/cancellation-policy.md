@@ -147,6 +147,15 @@ normalization to elapsed seconds. The durations **MUST** be strictly decreasing
 and **MUST NOT** repeat; for example, `P1D` and `PT24H` denote the same cutoff.
 An invalid order makes structured evaluation unavailable.
 
+The wire schedule represents resolved instants for a particular reservation,
+not a recurring property-local policy template. For a rule such as "6:00 PM two
+days before check-in," the Business first resolves the local check-in and
+cutoff using the property's IANA timezone, then expresses their difference as
+an elapsed duration. That difference can change across daylight-saving time
+transitions. `P2D` always means 48 elapsed hours, not two local-calendar days.
+This producer-side explanation does not add a timezone or policy-template
+field, or define a general template compiler.
+
 #### Evaluation
 
 For a tier, its cutoff is the `anchor` instant minus its `until` elapsed
@@ -193,6 +202,14 @@ well-known values:
 Percentage and unit-deduction outcomes are deterministic symbolic terms, but
 they do not necessarily imply a cash amount. A Platform **MUST NOT** calculate
 money unless the targeted Booking data supplies an unambiguous basis.
+
+A `night` measure specifies a count, not a machine-readable pricing basis. Its
+`display_text` does not identify which night's rate applies or encode whether
+taxes and fees are excluded. If the Business has resolved a reservation's
+penalty to USD 150.00, a `fixed_fee` with `penalty.amount: 15000` and root
+Booking `currency: "USD"` can carry that concrete amount. This does not encode
+a portable "one night's room rate excluding taxes and fees" formula; the
+complete terms still belong in `description`.
 
 For a well-known `kind`, a Business **MUST** emit only the fields defined for
 that kind. A Platform evaluates only those fields and ignores unrelated outcome
@@ -306,6 +323,37 @@ cancellation or refund behavior solely from this pre-purchase policy. It
 }
 ```
 
+### Property-local cutoff with a resolved penalty
+
+This non-normative example is adapted from the
+[public synthetic policy contributed in #780](https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511).
+For a two-night reservation, cancellation is free strictly before 6:00 PM
+property-local time two calendar days before check-in. At or after the cutoff,
+the penalty is one night's room rate, excluding taxes and fees. The Business
+supplies a nightly room rate of USD 150.00 and resolves this reservation's
+penalty to `fixed_fee`, `penalty.amount: 15000`, in root Booking currency USD.
+The schedule does not infer this amount from a `night` measure.
+
+For `America/Phoenix`, check-in at October 16, 2026, 15:00 local is
+`2026-10-16T22:00:00Z`. The cutoff at October 14, 2026, 18:00 local is
+`2026-10-15T01:00:00Z`. Their difference is 162000 seconds, so the free tier
+uses `until: "PT45H"` and a `percentage` outcome with `buyer_bps: 10000`.
+The fixed fee is `after_last_tier`. At `2026-10-15T00:59:59Z`, cancellation is
+free; at `2026-10-15T01:00:00Z`, the fixed-fee terms apply.
+
+The following derived `America/New_York` variants illustrate why the same
+local-clock template does not imply a fixed elapsed offset:
+
+- Spring: check-in on March 9, 2026, at 15:00 UTC-04:00 is
+  `2026-03-09T19:00:00Z`; the cutoff on March 7 at 18:00 UTC-05:00 is
+  `2026-03-07T23:00:00Z`. The free tier uses `PT44H`.
+- Autumn: check-in on November 2, 2026, at 15:00 UTC-05:00 is
+  `2026-11-02T20:00:00Z`; the cutoff on October 31 at 18:00 UTC-04:00 is
+  `2026-10-31T22:00:00Z`. The free tier uses `PT46H`.
+
+These examples use unambiguous local times. They do not define how a Business
+resolves a template that lands in a nonexistent or repeated local-clock hour.
+
 ### Classification-only policy
 
 <!-- ucp:example schema=lodging/policy_cancellation def=cancellation_item -->
@@ -341,6 +389,15 @@ already-targeted policies; it does not calculate money, classify refunds, or
 resolve policy targeting. The fixture also covers invalid dates and ordering,
 exact fractional instants, mixed duration components, and POSIX arithmetic
 across a leap-second boundary.
+
+The fixture additionally includes the synthetic Phoenix policy and derived
+New York daylight-saving variants above, with complete expected wire outcomes
+immediately before and exactly at each cutoff. A symbolic one-night variant
+retains its measure instead of inferring a cash amount. Separate test-only
+template checks use IANA timezone data to verify the local-to-instant
+derivations before testing schedule selection. Running these checks requires
+IANA timezone data; they are not a general policy-template compiler or tests
+of nonexistent/repeated-hour resolution.
 
 | ID | Schedule and evaluation instant | Expected result |
 | --- | --- | --- |
