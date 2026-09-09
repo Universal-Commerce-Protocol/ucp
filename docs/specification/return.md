@@ -98,6 +98,14 @@ return policy with no structured fields is still presentable from its
 
 {{ extension_schema_fields('policy_return.json#/$defs/return_method', 'return') }}
 
+### Return Method Fee
+
+{{ extension_schema_fields('policy_return.json#/$defs/fee', 'return') }}
+
+### Fixed Fee
+
+{{ extension_schema_fields('policy_return.json#/$defs/fixed_fee', 'return') }}
+
 ## Return terms
 
 ### Window and anchor

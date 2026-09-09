@@ -3,11 +3,11 @@
   "$id": "https://ucp.dev/schemas/shopping/policy_return.json",
   "name": "dev.ucp.shopping.policy.return",
   "title": "Return Policy Extension",
-  "description": "Defines the `dev.ucp.shopping.policy.return` policy type on the core `policies[]` primitive, adding return terms to catalog, cart, checkout, and order.",
+  "description": "Defines the `dev.ucp.shopping.policy.return` policy type on the core `policies[]` primitive, enabling businesses to advertise return terms across one or more supported capabilities (catalog, cart, checkout, and order).",
   "$defs": {
     "return_body": {
       "title": "Return Policy",
-      "description": "Return terms for a `dev.ucp.shopping.policy.return` policy. All fields are optional.",
+      "description": "Return terms for a `dev.ucp.shopping.policy.return` policy.",
       "type": "object",
       "properties": {
         "final_sale": {
@@ -22,8 +22,8 @@
           "properties": {
             "days": {
               "type": "integer",
-              "minimum": 0,
-              "description": "Length of the return window in whole days from `anchor`. `0` means non-returnable."
+              "minimum": 1,
+              "description": "Length of the return window in whole days from `anchor`."
             },
             "anchor": {
               "type": "string",
@@ -68,6 +68,46 @@
         }
       }
     },
+    "fee": {
+      "title": "Return Method Fee",
+      "description": "Logistics cost of using a return channel. Open vocabulary.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Cost structure. Well-known values: `free`, `fixed_fee` (see `fixed_fee`), `customer_responsibility`."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable fee label (e.g., 'Return shipping')."
+        }
+      }
+    },
+    "fixed_fee": {
+      "title": "Fixed Fee Return Method Fee",
+      "description": "Fixed logistics fee charged for a return channel.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fee"
+        }
+      ],
+      "required": [
+        "type",
+        "amount"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "fixed_fee"
+        },
+        "amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Flat channel fee in ISO 4217 minor units. Required when type is fixed_fee."
+        }
+      }
+    },
     "return_method": {
       "title": "Return Method",
       "description": "A return channel and its logistics cost.",
@@ -79,29 +119,37 @@
           "description": "Return channel. Well-known values: `in_store`, `by_mail`, `kiosk`."
         },
         "fee": {
-          "title": "Return Method Fee",
-          "description": "Logistics cost of using this channel.",
-          "type": "object",
-          "required": ["type"],
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "Cost structure. Well-known values: `free`, `fixed_fee` (see `amount`), `customer_responsibility`."
-            },
-            "amount": {
-              "$ref": "../common/types/amount.json",
-              "description": "Flat channel fee in ISO 4217 minor units, when `type` is `fixed_fee`."
-            },
-            "display_text": {
-              "type": "string",
-              "description": "Human-readable fee label (e.g., 'Return shipping')."
-            }
-          }
+          "$ref": "#/$defs/fee",
+          "description": "Logistics cost of using this channel."
         }
       }
     },
+    "return_policy": {
+      "title": "Return Policy",
+      "description": "A return policy statement with type `dev.ucp.shopping.policy.return`.",
+      "allOf": [
+        {
+          "$ref": "types/policy.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dev.ucp.shopping.policy.return"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/return_body"
+        }
+      ]
+    },
     "policies_item": {
-      "description": "A `policies[]` entry; the return body applies when `type` is `dev.ucp.shopping.policy.return`.",
+      "description": "A `policies[]` entry; validates against `return_policy` when `type` is `dev.ucp.shopping.policy.return`.",
       "allOf": [
         {
           "$ref": "types/policy.json"
@@ -113,10 +161,12 @@
                 "const": "dev.ucp.shopping.policy.return"
               }
             },
-            "required": ["type"]
+            "required": [
+              "type"
+            ]
           },
           "then": {
-            "$ref": "#/$defs/return_body"
+            "$ref": "#/$defs/return_policy"
           }
         }
       ]
