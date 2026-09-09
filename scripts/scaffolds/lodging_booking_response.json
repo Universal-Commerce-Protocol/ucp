@@ -25,7 +25,7 @@
   "room_rates": [
     {
       "id": "rr_scaffold",
-      "room_details": {
+      "room_type": {
         "id": "room_scaffold",
         "title": "Scaffold Room",
         "capacity": {

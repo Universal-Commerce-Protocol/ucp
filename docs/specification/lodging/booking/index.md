@@ -463,8 +463,8 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **MUST** identify a lead guest by providing `booker` details or designating at
   least one guest with `role: "primary_guest"` (including full legal name and contact
   details) prior to invoking Complete Booking Session.
-* **MUST** generate unique, stable string identifiers in the Platform namespace
-  for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
+* **MUST** generate unique, stable, session-scoped string identifiers in the Platform
+  namespace for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
 * **MUST** ensure every `guest_assignments[].guest_id` references a valid `id`
   present in the root `guests[]` pool.
 * **SHOULD NOT** send `guests[]` personal identity fields beyond `id` before the
