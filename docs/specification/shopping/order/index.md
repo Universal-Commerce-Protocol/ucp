@@ -26,7 +26,7 @@ it will be delivered, and what has happened since order placement.
 
 ### Key Concepts
 
-Orders have three main components:
+Orders have four main components:
 
 **Line Items** — what was purchased at checkout:
 
@@ -38,6 +38,11 @@ Orders have three main components:
 
 * **Expectations** — buyer-facing *promises* about when/how items will arrive
 * **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
+
+**Payment** — what the Buyer approved and what the Business reports:
+
+* Records the maximum amount approved at Checkout
+* May include the amount authorized and captured for each instrument
 
 **Adjustments** — post-order events independent of fulfillment:
 
@@ -100,6 +105,41 @@ Expectations can be split, merged, or adjusted post-order. For example:
   (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
   `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
+### Payment
+
+**Payment** records the payment instruments used for the Order and the maximum
+amount the Buyer approved at Checkout. The instruments may change after
+purchase, for example when an Order modification adds or replaces a payment
+method.
+
+Each instrument uses the shared Payment Instrument in its Order context:
+
+* `display` is required.
+* Checkout-only `handler_id` and `selected` fields are absent.
+* `credential` is request-only and is omitted from responses.
+* `authorized_amount` is the amount currently authorized, in the Order
+  currency's minor units. Released and expired authorizations are excluded;
+  remaining capture capacity is a separate concept.
+* `captured_amount` is the total amount successfully captured or collected, in
+  the Order currency's minor units, before refunds, credits, disputes, or
+  capture reversals. This measures capture rather than settlement or payout.
+
+Either amount may be omitted when it does not apply or is not reported.
+Platforms MUST accept `captured_amount` greater than `authorized_amount`; this
+can happen when capture above the authorized amount is supported or when an
+authorization is later released. Neither field sets a maximum for the
+instrument.
+
+Every Order includes `payment.maximum_amount`, which records the maximum amount
+the Buyer approved when completing Checkout. For a provisional Checkout total,
+it equals `checkout.payment.maximum_amount`; for a final total, it equals the
+aggregate Checkout total. It remains unchanged if the Buyer later approves an
+Order modification.
+
+Platforms MUST NOT compare `maximum_amount` with the sum of historical
+authorization or capture records. Replaced authorizations and retried captures
+can cause those sums to exceed the amount approved by the Buyer.
+
 ### Attribution
 
 Businesses MAY surface a snapshot of the originating checkout's
@@ -132,6 +172,14 @@ fulfillment:
 ### Order
 
 {{ schema_fields('order', 'shopping/order') }}
+
+### Order Payment
+
+{{ extension_schema_fields('order.json#/$defs/order_payment', 'shopping/order') }}
+
+### Order Payment Instrument
+
+{{ extension_schema_fields('../common/types/payment_instrument.json#/$defs/order_payment_instrument', 'shopping/order') }}
 
 ### Order Line Item
 
@@ -277,6 +325,30 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
       }
     ]
   },
+  "payment": {
+    "maximum_amount": 15342,
+    "instruments": [
+      {
+        "id": "pi_gift",
+        "type": "gift_card",
+        "captured_amount": 5000,
+        "display": {
+          "description": "Gift card",
+          "last_digits": "9821"
+        }
+      },
+      {
+        "id": "pi_card",
+        "type": "card",
+        "captured_amount": 10342,
+        "display": {
+          "brand": "visa",
+          "last_digits": "4242",
+          "description": "Visa ending in 4242"
+        }
+      }
+    ]
+  },
   "adjustments": [
     {
       "id": "adj_1",
@@ -321,6 +393,7 @@ rounded to `119`, and the return credits `79 × 0.25 = 19.75`, rounded to
   "checkout_id": "chk_bananas_1",
   "permalink_url": "https://business.example.com/orders/bananas1",
   "currency": "USD",
+  "payment": { "maximum_amount": 119 },
   "line_items": [
     {
       "id": "li_bananas",
@@ -400,6 +473,7 @@ nominal steps `3 × 40 = 120`, settled `114`, delta `6` steps
   "checkout_id": "chk_apples_1",
   "permalink_url": "https://business.example.com/orders/apples1",
   "currency": "USD",
+  "payment": { "maximum_amount": 240 },
   "line_items": [
     {
       "id": "li_apples",
@@ -490,6 +564,7 @@ then holds exactly (`190 == 190`) and the line derives `fulfilled`:
   "checkout_id": "chk_bananas_2",
   "permalink_url": "https://business.example.com/orders/bananas2",
   "currency": "USD",
+  "payment": { "maximum_amount": 158 },
   "line_items": [
     {
       "id": "li_bananas",

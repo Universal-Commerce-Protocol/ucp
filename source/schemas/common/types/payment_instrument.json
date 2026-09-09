@@ -2,52 +2,85 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/payment_instrument.json",
   "title": "Payment Instrument",
-  "description": "The base definition for any payment instrument. It links the instrument to a specific payment handler.",
-  "type": "object",
-  "required": [
-    "id",
-    "handler_id",
-    "type"
-  ],
-  "properties": {
-    "id": {
-      "type": "string",
-      "description": "A unique identifier for this instrument instance. Typically assigned by the platform for instruments it collects. For a business-owned saved instrument returned on an identity-linked response, this identifier is assigned by the business; the platform MUST treat it as an opaque, business-scoped reference, and the business resolves it server-side when the buyer selects it."
-    },
-    "handler_id": {
-      "type": "string",
-      "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the 'id' field in the Payment Handler definition."
-    },
-    "type": {
-      "type": "string",
-      "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
-    },
-    "billing_address": {
-      "$ref": "postal_address.json",
-      "description": "The billing address associated with this payment method."
-    },
-    "credential": {
-      "$ref": "payment_credential.json"
-    },
-    "display": {
-      "type": "object",
-      "description": "Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler."
-    }
-  },
-  "additionalProperties": true,
+  "description": "Fields shared by payment instruments in Checkout and Order. Payment handlers add instrument-specific credential and display fields, while each capability adds the fields it needs for routing, selection, or reporting.",
+  "$ref": "payment_instrument.json#/$defs/base_payment_instrument",
   "$defs": {
+    "base_payment_instrument": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this instrument, assigned by the participant that introduces it. Identifiers assigned by another participant MUST be treated as opaque."
+        },
+        "type": {
+          "type": "string",
+          "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
+        },
+        "billing_address": {
+          "$ref": "postal_address.json",
+          "description": "The billing address associated with this payment method."
+        },
+        "credential": {
+          "$ref": "payment_credential.json",
+          "description": "Credential used to execute payment. This field is request-only and MUST NOT be returned in responses.",
+          "ucp_response": "omit"
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler."
+        }
+      },
+      "additionalProperties": true
+    },
     "selected_payment_instrument": {
       "title": "Selected Payment Instrument",
-      "description": "A payment instrument with selection state.",
+      "description": "A Checkout payment instrument with handler routing and selection state.",
       "allOf": [
-        { "$ref": "#" },
+        { "$ref": "payment_instrument.json#/$defs/base_payment_instrument" },
         {
           "type": "object",
+          "required": ["handler_id"],
           "properties": {
+            "handler_id": {
+              "type": "string",
+              "description": "The unique identifier for the handler instance that produced this instrument. This corresponds to the `id` field in the Payment Handler definition."
+            },
             "selected": {
               "type": "boolean",
               "description": "Whether this instrument is selected by the user."
             }
+          }
+        }
+      ]
+    },
+    "order_payment_instrument": {
+      "title": "Order Payment Instrument",
+      "description": "Payment instrument as returned on an Order, which may include current authorization and total captured amounts.",
+      "allOf": [
+        { "$ref": "payment_instrument.json#/$defs/base_payment_instrument" },
+        {
+          "type": "object",
+          "required": ["display"],
+          "properties": {
+            "authorized_amount": {
+              "$ref": "amount.json",
+              "description": "Amount currently authorized for this instrument, in the Order currency's minor units. Released and expired authorizations are excluded. Remaining capture capacity is a separate concept."
+            },
+            "captured_amount": {
+              "$ref": "amount.json",
+              "description": "Total amount successfully captured or collected for this instrument, in the Order currency's minor units, before refunds, credits, disputes, or capture reversals. This measures capture rather than settlement or payout."
+            }
+          },
+          "not": {
+            "anyOf": [
+              { "required": ["credential"] },
+              { "required": ["handler_id"] },
+              { "required": ["selected"] }
+            ]
           }
         }
       ]
