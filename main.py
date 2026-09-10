@@ -1590,6 +1590,35 @@ def define_env(env):
         f"Error processing OpenAPI: {e}{get_error_context()}"
       ) from e
 
+  # --- Shared "Specific Header Requirements" prose ---
+  HEADER_REQUIREMENTS = {
+    "ucp_agent": (
+      "* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header\n"
+      "    containing the platform profile URI using Dictionary Structured Field syntax\n"
+      '    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).\n'
+      '    Format: `profile="https://platform.example/profile"`.'
+    ),
+    "idempotency_key": (
+      "* **Idempotency-Key**: Operations that modify state **SHOULD** support\n"
+      "    idempotency. When provided, the server **MUST**:\n"
+      "    1. Store the key with the operation result for at least 24 hours.\n"
+      "    2. Return the cached result for duplicate keys whose request body matches the original.\n"
+      "    3. Return `409 Conflict` if the key is reused with a mismatched body.\n"
+      "    See [Message Signatures — Idempotency Key Requirements](/specification/signatures/#replay-protection)\n"
+      "    for the full payload-matching contract."
+    ),
+  }
+
+  @env.macro
+  def header_requirements(*keys):
+    """Render shared 'Specific Header Requirements' bullets by key."""
+    try:
+      return "\n".join(HEADER_REQUIREMENTS[k] for k in keys)
+    except KeyError as exc:
+      raise ValueError(
+        f"Unknown header requirement {exc}{get_error_context()}."
+      )
+
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
   def header_fields(operation_id, file_name):
