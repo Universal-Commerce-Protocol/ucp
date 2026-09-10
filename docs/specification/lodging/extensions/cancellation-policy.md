@@ -211,6 +211,11 @@ Booking `currency: "USD"` can carry that concrete amount. This does not encode
 a portable "one night's room rate excluding taxes and fees" formula; the
 complete terms still belong in `description`.
 
+A Business-resolved `fixed_fee` amount reflects the reservation terms used in
+its calculation; it is a snapshot, not a reusable formula. Changes to dates,
+room rates, or other governing terms may require an updated Business-provided
+amount, even within the same booking session.
+
 For a well-known `kind`, a Business **MUST** emit only the fields defined for
 that kind. A Platform evaluates only those fields and ignores unrelated outcome
 members. Additional `kind` values **SHOULD** use reverse-domain identifiers.
