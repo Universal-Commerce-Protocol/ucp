@@ -518,10 +518,7 @@ operations unless otherwise noted.
 
 ### Specific Header Requirements
 
-* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
-    containing the platform profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
-    Format: `profile="https://platform.example/profile"`.
+{{ header_requirements('ucp_agent') }}
 
 ## Error Handling
 
