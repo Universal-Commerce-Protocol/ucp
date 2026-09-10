@@ -194,7 +194,7 @@ up-to-date list.
 | `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
 | `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.common.payment.split_payments` | checkout | Multi-instrument allocation and split settlements |
-| `dev.ucp.common.payment.payment_terms` | checkout | Deposits, installments, and deferred payment schedules |
+| `dev.ucp.common.payment.terms` | checkout | Deposits, installments, and deferred payment schedules |
 
 ### Services
 
