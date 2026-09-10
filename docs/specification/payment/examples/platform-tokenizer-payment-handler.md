@@ -163,18 +163,21 @@ Optionally, businesses may configure their PSP to detokenize on their behalf
 
 **Prerequisites Output:**
 
-| Field                      | Description                                                   |
-| :------------------------- | :------------------------------------------------------------ |
-| `identity.access_token`    | Business identifier assigned by platform during onboarding    |
-| Authentication credentials | API key or OAuth token for authenticating `/detokenize` calls |
+| Field                      | Description                                                                                   |
+| :------------------------- | :-------------------------------------------------------------------------------------------- |
+| `business_id`              | Business identifier assigned by platform during onboarding, published in the handler `config` |
+| Authentication credentials | API key or OAuth token for authenticating `/detokenize` calls                                 |
 
 ### Handler Configuration
 
-Businesses advertise the platform's tokenization handler. The `config`
-contains the business's identity with the platform for token binding. The
-platform's handler specification (referenced via `spec`) documents the
-`/detokenize` endpoint URL exposed by the platform's
-**payment credential provider**.
+Businesses advertise the platform's tokenization handler. The `config` publishes
+the business's identifier with the platform as `business_id`. That value is the
+participant identifier the platform issues tokens to, and a caller acting on the
+business's behalf sends it as `identity.access_token` on `/detokenize`. A
+handler's `config` structure is handler-defined, so another handler **MAY**
+publish this identifier under a different member name. The platform's handler
+specification (referenced via `spec`) documents the `/detokenize` endpoint URL
+exposed by the platform's **payment credential provider**.
 
 The handler accepts [PanCredential](site:schemas/common/types/pan_credential.json) and [NetworkTokenCredential](site:schemas/common/types/network_token_credential.json) for tokenization and produces [TokenCredential](site:schemas/common/types/token_credential.json) for checkout.
 
@@ -366,7 +369,7 @@ The platform application orchestrates the payment flow but
 
 1. The platform's **payment credential provider** securely stores payment credentials.
 2. When a payment is needed, the platform application requests a token from the credential provider.
-3. The credential provider generates a token bound to the `binding` resource and issued to the business's `identity` (from the handler declaration).
+3. The credential provider generates a token bound to the `binding` resource and issued to the business's participant identifier (`config.business_id` from the handler declaration).
 4. The credential provider returns the token to the platform application.
 5. The platform application includes this token in the checkout submission.
 
@@ -461,7 +464,8 @@ When the business forwards a token to the PSP:
 
 1. Extract the token from the payment instrument.
 2. Call the platform's **payment credential provider** `/detokenize` endpoint
-   with the business's `identity` alongside the `binding`.
+   with the business's participant identifier as `identity.access_token`
+   alongside the `binding`.
 3. Process the payment with the returned credential.
 
 #### Detokenize Request Example (PSP)
@@ -506,7 +510,7 @@ The platform's payment credential provider verifies that:
 | **No Platform App access** | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does. |
 | **Endpoint isolation** | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application. |
 | **Participant authentication** | Platform's credential provider **MUST** authenticate businesses/PSPs before accepting `/detokenize` calls. |
-| **Issued to participant** | Tokens **MUST** be issued to the business's `identity` from the handler declaration. |
+| **Issued to participant** | Tokens **MUST** be issued to the business's participant identifier (`config.business_id`) from the handler declaration. |
 | **Resource-bound** | Tokens **MUST** be bound to the specific `binding` resource. |
 | **Caller verification** | Platform **MUST** verify the authenticated caller is the participant the token was issued to (or is an authorized PSP). |
 | **Single-use** | Tokens **SHOULD** be invalidated after detokenization. |
