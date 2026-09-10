@@ -704,6 +704,12 @@ comment. Unannotated blocks fail CI.
 | `direction`   | no                | `response` | `request` or `response`                                                    |
 | `extract`     | no                | `$`        | JSONPath inside the displayed block; selected subtree becomes the example  |
 | `target`      | no                | `$`        | JSONPath into the schema/scaffold; example replaces a sub-tree             |
+
+JSONPath here is a small subset: dot-separated bare names with an optional
+array index (`$.a.b[0]`), plus bracket-quoted names for keys that are not
+bare-legal (`$.a['dev.ucp.common.identity_linking'][0]`). Use the quoted form
+for reverse-domain keys and scope tokens — their dots and colons are otherwise
+read as path separators.
 | `def`         | no                | —          | Pull `$defs/<name>` out of the schema and validate against that            |
 | `skip reason` | yes (with skip)   | —          | Free-form prose explaining why this block can't be validated               |
 
