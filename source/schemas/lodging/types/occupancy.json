@@ -26,12 +26,12 @@
         "minimum": 0,
         "maximum": 17
       },
-      "description": "Ages of children occupying the room."
+      "description": "Ages of children occupying the room. If present length(child_ages) MUST equal children."
     },
     "total": {
       "type": "integer",
       "minimum": 1,
-      "description": "Total number of occupants in the room."
+      "description": "Total number of occupants in the room. If adults and/or children fields are specified, this MUST equal adults + children."
     }
   }
 }
