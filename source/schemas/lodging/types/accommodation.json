@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/accommodation.json",
+  "title": "Accommodation",
+  "description": "An accommodation (e.g., hotel, rental property) location.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/types/location_summary.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "List of accommodation image URIs.",
+          "ucp_request": "omit"
+        }
+      }
+    }
+  ]
+}

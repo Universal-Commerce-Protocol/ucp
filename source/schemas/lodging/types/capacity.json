@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/capacity.json",
+  "title": "Capacity",
+  "description": "Physical room capacity specifying maximum occupancy limits broken down by guest age.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "adults": {
+      "type": "integer",
+      "description": "Maximum number of adult occupants.",
+      "minimum": 0
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from_age": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Lower bound of the age bracket."
+          },
+          "to_age": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Upper bound of the age bracket."
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Capacity limit."
+          }
+        }
+      },
+      "description": "Maximum number of child occupants broken down by age brackets."
+    },
+    "total": {
+      "type": "integer",
+      "description": "Maximum number of total occupants (adult or child). MUST be equal to adults + sum(children.total).",
+      "minimum": 0
+    }
+  }
+}

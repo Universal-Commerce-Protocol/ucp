@@ -86,6 +86,14 @@ nav:
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
+      - Lodging:
+          - Booking Capability:
+              - Overview: specification/lodging/booking/index.md
+              - Transports:
+                  - REST: specification/lodging/booking/rest.md
+                  - MCP: specification/lodging/booking/mcp.md
+          - Extensions:
+              - Cancellation Policy: specification/lodging/extensions/cancellation-policy.md
       - Payment:
           - Extensions:
               - AP2 Mandates Extension: specification/payment/extensions/ap2-mandates.md
@@ -529,6 +537,25 @@ plugins:
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
+        Lodging Booking Capability:
+          - specification/lodging/booking/index.md: >-
+              Core Booking Capability specification detailing necessary data
+              exchange and payment processing for finalizing reservations on
+              a pre-selected room inventory.
+          - specification/lodging/booking/rest.md: >-
+              HTTP REST transport binding for Booking operations, including
+              endpoints for session creation, modification, retrieval, and
+              cancellation.
+          - specification/lodging/booking/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for
+              Booking operations, mapping reservation session management to
+              JSON-RPC tools for AI booking agents.
+        Lodging Extensions:
+          - specification/lodging/extensions/cancellation-policy.md: >-
+              Lodging Cancellation Policy Extension, defining the
+              dev.ucp.lodging.policy.cancellation type on the core policies[]
+              primitive with a machine-readable refundability classification and
+              a human-readable penalty schedule for lodging reservations.
         Payment:
           - specification/payment/extensions/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound
