@@ -160,20 +160,23 @@ def check_links():
         continue
 
       parsed = urlparse(link)
-      if parsed.scheme and parsed.scheme in ("http", "https"):
+      if parsed.scheme in ("http", "https"):
         if not link.startswith(SITE_URL):
           continue  # External link
-        # Internal absolute URL (e.g. https://ucp.dev/foo) -> /foo
-        link = link[len(SITE_URL) - 1 :]  # Keep the leading slash
+      elif parsed.netloc or parsed.scheme:
+        # Anything else carrying a host (protocol-relative //host/path) or a
+        # scheme we do not resolve (ftp:, ws:, vscode:, ...) points off-site.
+        # Falling through would read its path as a site-absolute path and
+        # report a spurious "Not Found" against the local build.
+        continue
 
-      path_part = parsed.path
-      anchor_part = parsed.fragment
-      path_part = unquote(path_part)
+      path_part = unquote(parsed.path)
+      anchor_part = unquote(parsed.fragment)
 
       # Built documentation should link to rendered pages, never copied source
       # markdown. A raw .md target can exist and fool the ordinary existence
       # check while sending readers to source text instead of the HTML page.
-      if path_part.endswith(".md"):
+      if path_part.lower().endswith(".md"):
         errors_by_version[version][str(file_path)].append(
           f"  Link: {original_link}\n"
           "  Target is raw Markdown; link to the rendered page instead"
