@@ -16,6 +16,15 @@
       }
     }
   ],
+  "security": [
+    {},
+    {
+      "oauth2_bearer": []
+    },
+    {
+      "api_key": []
+    }
+  ],
   "paths": {
     "/checkout-sessions": {
       "post": {
@@ -23,12 +32,6 @@
         "summary": "Create Checkout",
         "description": "Create a new checkout session.",
         "parameters": [
-          {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
           {
             "$ref": "#/components/parameters/signature"
           },
@@ -49,12 +52,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -106,12 +103,6 @@
         "description": "Get the latest state of a checkout session.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -125,12 +116,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -169,12 +154,6 @@
         "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -194,12 +173,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -251,12 +224,6 @@
         "description": "Place the order",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -276,12 +243,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -331,12 +292,6 @@
         "description": "Cancel a checkout session",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -356,12 +311,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -401,8 +350,6 @@
         "summary": "Create Cart",
         "description": "Create a new cart session.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
@@ -410,8 +357,6 @@
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -449,15 +394,11 @@
         "summary": "Get Cart",
         "description": "Get the latest state of a cart session.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -482,8 +423,6 @@
         "summary": "Update Cart",
         "description": "Update a cart session.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
@@ -491,8 +430,6 @@
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -530,8 +467,6 @@
         "summary": "Cancel Cart",
         "description": "Cancel a cart session. Returns the cart state at time of cancellation.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
@@ -539,8 +474,6 @@
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -567,16 +500,12 @@
         "summary": "Search Catalog",
         "description": "Search for products in the business's catalog.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -611,16 +540,12 @@
         "summary": "Batch Lookup Catalog Items",
         "description": "Lookup one or more products by ID with explicit market context. Supports batch lookups of multiple items in a single request.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -658,15 +583,11 @@
         "summary": "Get Order",
         "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot. The business verifies the requesting platform created the checkout that produced this order.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -693,16 +614,12 @@
         "summary": "Get Product Details",
         "description": "Retrieve complete product detail by identifier. Returns a singular product with a relevant set of variants, exact pricing, and real-time availability. Supports interactive option selection via `selected` and `preferences` parameters for variant narrowing and availability signals.",
         "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
           { "$ref": "#/components/parameters/accept_language" },
           { "$ref": "#/components/parameters/accept_encoding" }
         ],
@@ -743,7 +660,6 @@
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
           { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/webhook_timestamp" },
           { "$ref": "#/components/parameters/webhook_id" }
         ],
@@ -777,6 +693,19 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "oauth2_bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "OAuth 2.0 access token issued by the business's authorization server, which platforms discover per RFC 8414. Covers both platform self-authentication (client_credentials) and platform authentication on behalf of an end user (authorization_code). See the Identity Linking specification."
+      },
+      "api_key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Reusable API key allocated to the platform by the business."
+      }
+    },
     "parameters": {
       "checkout_session_id_path": {
         "name": "id",
@@ -804,24 +733,6 @@
         "schema": {
           "type": "string"
         }
-      },
-      "authorization": {
-        "name": "Authorization",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code)."
-      },
-      "x_api_key": {
-        "name": "X-API-Key",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Authenticates the platform with a reusable api key allocated to the platform by the business."
       },
       "signature": {
         "name": "Signature",
@@ -887,24 +798,6 @@
           "type": "string"
         },
         "description": "Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile=\"https://example.com/.well-known/ucp\"."
-      },
-      "content_type": {
-        "name": "Content-Type",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Representation Metadata. Tells the receiver what the data in the message body actually is."
-      },
-      "accept": {
-        "name": "Accept",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Content Negotiation. The client tells the server what data formats it is capable of understanding."
       },
       "accept_language": {
         "name": "Accept-Language",
