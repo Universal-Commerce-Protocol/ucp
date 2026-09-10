@@ -57,6 +57,20 @@ repos:
             |docs/specification/lodging/extensions/cancellation-policy\.md$
           )
         stages: [pre-commit, pre-push]
+      - id: validate-cancellation-lab
+        name: Validate cancellation lab fixtures
+        entry: uv run --frozen python scripts/test_cancellation_lab.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_(schedule|lab)\.py$
+            |scripts/fixtures/lodging_cancellation_(schedule|lab)\.json$
+            |scripts/fixtures/lodging_cancellation_lab\.md$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:

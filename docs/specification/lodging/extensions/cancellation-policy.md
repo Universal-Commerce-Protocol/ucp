@@ -404,6 +404,15 @@ derivations before testing schedule selection. Running these checks requires
 IANA timezone data; they are not a general policy-template compiler or tests
 of nonexistent/repeated-hour resolution.
 
+A separate non-normative agent-disclosure study package is provided in
+`scripts/fixtures/lodging_cancellation_lab.json`, with usage and interpretation
+notes in `scripts/fixtures/lodging_cancellation_lab.md`. Its ten synthetic
+scenarios separate agent-visible policy data from expected results and cover
+paired prose-only/schedule inputs, missing monetary bases, malformed schedules,
+and a prose-conflict probe. These are experiment inputs, not agent results or
+an official conformance suite. Check their consistency with
+`python3 scripts/test_cancellation_lab.py`.
+
 | ID | Schedule and evaluation instant | Expected result |
 | --- | --- | --- |
 | `before_cutoff` | Free-cancellation example; `at = 2026-12-20T19:59:59Z` | `tier[0]`; `percentage`, `buyer_bps = 10000` |
