@@ -78,6 +78,12 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Validate cancellation schedule vectors
+        run: uv run python scripts/test_cancellation_schedule.py
+
+      - name: Validate cancellation lab fixtures
+        run: uv run python scripts/test_cancellation_lab.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest

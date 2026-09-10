@@ -5,6 +5,180 @@
   "title": "Lodging Cancellation Policy Extension",
   "description": "Extends Booking with structured cancellation policy for lodging reservations.",
   "$defs": {
+    "cancellation_outcome": {
+      "title": "Cancellation Outcome",
+      "description": "The declared economic result of a buyer-initiated cancellation. `kind` is an open vocabulary. For well-known kinds, a Business MUST emit only the fields defined for that kind, and a Platform evaluates only those fields and ignores unrelated outcome members. Platforms encountering an unknown kind MUST tolerate it, MUST NOT infer its meaning, and MUST use the policy description as fallback.",
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Open outcome discriminator. Well-known values: `percentage`, `fixed_fee`, and `unit_deduction`. Additional values SHOULD use a reverse-domain identifier. Platforms MUST tolerate unknown values and MUST NOT infer their meaning.",
+          "examples": [
+            "percentage",
+            "fixed_fee",
+            "unit_deduction"
+          ]
+        },
+        "buyer_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Business-stated refund percentage under this policy, expressed in basis points. `0` means no refund and `10000` means a full refund. This version does not identify a monetary basis; a Platform MUST NOT convert the percentage to money unless the governing Booking data supplies an unambiguous basis."
+        },
+        "penalty": {
+          "title": "Cancellation Penalty",
+          "description": "Cancellation penalty stated by the Business for the governed scope, regardless of whether it is retained from an earlier payment or charged later. Policy targeting alone does not define charge multiplicity across room rates or nights. The fields required within this object depend on the outcome `kind`.",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "$ref": "../common/types/amount.json",
+              "description": "Fixed cancellation charge in the minor units of the root `currency` field of the Booking response."
+            },
+            "measure": {
+              "description": "Positive whole lodging-unit cancellation penalty expressed with the shared UCP measure representation. `scale` is fixed at `0`; `night` is the well-known lodging unit for this policy.",
+              "allOf": [
+                {
+                  "$ref": "../common/types/measure.json"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "minimum": 1
+                    },
+                    "scale": {
+                      "const": 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "percentage"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "buyer_bps"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "fixed_fee"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "penalty"
+            ],
+            "properties": {
+              "penalty": {
+                "required": [
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "unit_deduction"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "penalty"
+            ],
+            "properties": {
+              "penalty": {
+                "required": [
+                  "measure"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "cancellation_tier": {
+      "title": "Cancellation Tier",
+      "description": "An outcome that applies before one anchor-relative cutoff. Tiers are evaluated in array order; the first tier whose cutoff is strictly later than the evaluation instant applies.",
+      "type": "object",
+      "required": [
+        "until",
+        "outcome"
+      ],
+      "properties": {
+        "until": {
+          "type": "string",
+          "pattern": "^P(?=[0-9]+D|T[0-9])(?:[0-9]+D)?(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?(?![\\s\\S])",
+          "description": "ISO 8601 elapsed duration before the schedule anchor. This version permits only nonnegative whole-number days, hours, minutes, and seconds; one day is exactly 24 elapsed hours. Years, months, weeks, fractional values, and negative durations are not supported. Implementations compare durations after exact normalization to elapsed seconds.",
+          "maxLength": 64
+        },
+        "outcome": {
+          "$ref": "#/$defs/cancellation_outcome",
+          "description": "Cancellation outcome that applies when the evaluation instant is strictly earlier than `anchor - until`, after all earlier tiers have failed to match."
+        }
+      }
+    },
+    "cancellation_schedule": {
+      "title": "Cancellation Schedule",
+      "description": "Deterministic buyer-initiated cancellation terms expressed as ordered elapsed-time cutoffs relative to an absolute anchor. Tiers MUST be ordered from the farthest cutoff before the anchor to the nearest, with strictly decreasing normalized elapsed durations and no duplicate cutoff. Equivalent forms such as `P1D` and `PT24H` denote the same cutoff. At exactly a cutoff, evaluation advances to the next tier; when no tier matches, `after_last_tier` applies.",
+      "type": "object",
+      "required": [
+        "anchor",
+        "tiers",
+        "after_last_tier"
+      ],
+      "properties": {
+        "anchor": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])[Tt](?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])(?![\\s\\S])",
+          "description": "Calendar-valid RFC 3339 instant with `Z` or an explicit numeric UTC offset. Schedule arithmetic uses Unix time, with exactly 86400 seconds per day and no leap seconds; second values of `60` are unsupported. Implementations MUST check calendar validity even when schema format assertions are disabled. For lodging this normally represents the property's stated arrival or check-in cutoff."
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/cancellation_tier"
+          },
+          "description": "Ordered cancellation tiers, from the farthest cutoff before `anchor` to the nearest. Ordering and uniqueness are evaluated after exact normalization to elapsed seconds because JSON Schema cannot compare duration values across array entries."
+        },
+        "after_last_tier": {
+          "$ref": "#/$defs/cancellation_outcome",
+          "description": "Outcome at or after the nearest cutoff, including at the anchor and afterward."
+        }
+      }
+    },
     "cancellation_item": {
       "allOf": [
         {
@@ -24,12 +198,16 @@
             },
             "refundability": {
               "type": "string",
-              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (cancellable with penalty, or inside penalty window), `non_refundable` (no refund upon cancellation).",
+              "description": "High-level refundability classification. Well-known values: `refundable` (free cancellation currently available), `partially_refundable` (the current cancellation result is strictly between a full refund and no refund), `non_refundable` (no refund upon cancellation). Platforms MUST tolerate unknown values and use `description` when they cannot interpret the classification.",
               "examples": [
                 "refundable",
                 "partially_refundable",
                 "non_refundable"
               ]
+            },
+            "schedule": {
+              "$ref": "#/$defs/cancellation_schedule",
+              "description": "Optional deterministic detail for buyer-initiated cancellation. It MUST agree with the human-readable `description`. The outcome applicable when the response is created MUST agree with the point-in-time `refundability` summary; crossing a cutoff later does not make the earlier snapshot contradictory."
             }
           }
         }
