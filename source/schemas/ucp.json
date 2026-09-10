@@ -248,6 +248,7 @@
         {
           "required": ["payment_handlers"],
           "properties": {
+            "status": { "const": "success" },
             "services": {
               "additionalProperties": {
                 "items": { "$ref": "service.json#/$defs/response_schema" }
@@ -277,6 +278,7 @@
         { "$ref": "#/$defs/base" },
         {
           "properties": {
+            "status": { "const": "success" },
             "capabilities": {
               "additionalProperties": {
                 "items": { "$ref": "capability.json#/$defs/response_schema" }
@@ -294,6 +296,7 @@
         { "$ref": "#/$defs/base" },
         {
           "properties": {
+            "status": { "const": "success" },
             "capabilities": {
               "additionalProperties": {
                 "items": { "$ref": "capability.json#/$defs/response_schema" }
@@ -311,6 +314,7 @@
         { "$ref": "#/$defs/base" },
         {
           "properties": {
+            "status": { "const": "success" },
             "capabilities": {
               "additionalProperties": {
                 "items": { "$ref": "capability.json#/$defs/response_schema" }
