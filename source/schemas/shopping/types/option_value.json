@@ -15,6 +15,10 @@
     "label": {
       "type": "string",
       "description": "Display text for this option value (e.g., 'Small', 'Blue')."
+    },
+    "media": {
+      "$ref": "../../common/types/media.json",
+      "description": "Optional media representing this option value (e.g., a color sample or product photo for a Color option). Reuses the standard Media type."
     }
   }
 }
