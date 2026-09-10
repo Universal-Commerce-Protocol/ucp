@@ -214,6 +214,11 @@ Performs a full replacement of the cart session. The platform **MUST** send
 the entire cart resource. The provided resource replaces the existing cart
 state on the business side.
 
+Captured `buyer.consent` is an exception when the buyer-consent capability is
+active: an update that omits `consent` MUST NOT clear previously submitted
+consent. See [Buyer Consent](../extensions/buyer-consent.md#normative-requirements) for
+the persistence rule.
+
 * [REST Binding](rest.md#update-cart)
 * [MCP Binding](mcp.md#update_cart)
 
