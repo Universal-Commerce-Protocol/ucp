@@ -109,6 +109,14 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable
 `meta["idempotency-key"]` for retry safety. Platforms **MAY** include
 additional metadata fields.
 
+When the request is signed, the covered `Idempotency-Key` header (see
+[Message Signing](#message-signing)) is authoritative for the idempotency
+key; `meta["idempotency-key"]` **MUST** equal it, and the Business
+**MUST** reject a mismatch without executing. On unsigned requests,
+`meta["idempotency-key"]` alone is authoritative. See
+[Message Signatures — Replay Protection](../../signatures.md#replay-protection)
+for the full payload-matching contract.
+
 ## Tools
 
 UCP Capabilities map 1:1 to MCP Tools.
