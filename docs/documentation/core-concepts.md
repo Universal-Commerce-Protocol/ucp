@@ -160,7 +160,7 @@ up-to-date list.
 
 Extensions optionally augment a base capability. They use the
 `extends` field to declare their parent(s) and compose onto the base schema
-using JSON Schema `allOf`. Extensions appear in `ucp.capabilities[]` alongside
+using JSON Schema `allOf`. Extensions appear in `ucp.capabilities{}` alongside
 core capabilities.
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
