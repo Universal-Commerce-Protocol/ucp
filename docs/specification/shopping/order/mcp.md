@@ -150,6 +150,7 @@ current-state snapshot of an order.
           "checkout_id": "checkout_xyz789",
           "permalink_url": "https://business.example.com/orders/abc123",
           "currency": "USD",
+          "payment": { "maximum_amount": 4104 },
           "line_items": [
             {
               "id": "li_shoes",

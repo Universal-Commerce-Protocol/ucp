@@ -1262,9 +1262,11 @@ this response root (e.g., `$.line_items[0]`). See
 
 {{ schema_fields('types/message_warning', 'shopping/checkout') }}
 
-### Payment
+<span id="payment"></span>
 
-{{ schema_fields('payment', 'shopping/checkout') }}
+### Checkout Payment
+
+{{ extension_schema_fields('checkout.json#/$defs/checkout_payment', 'shopping/checkout') }}
 
 #### Selected Payment Instrument
 
@@ -1282,9 +1284,87 @@ this response root (e.g., `$.line_items[0]`). See
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'shopping/checkout') }}
 
-### Total {: #totals }
+<span id="totals"></span>
 
-{{ schema_fields('types/total_resp', 'shopping/checkout') }}
+### Checkout Totals
+
+`totals` is an ordered array of Checkout Total entries.
+
+#### Checkout Total
+
+{{ extension_schema_fields('checkout.json#/$defs/checkout_total', 'shopping/checkout') }}
+
+#### Final and Provisional Totals
+
+The aggregate Checkout total is the single `totals[]` entry whose `type` is
+`total`. It MAY include `amount_finality` as `final` or `provisional`; omission
+means `final`. Other total entries MUST NOT include `amount_finality`.
+
+Every Checkout sets the maximum amount the Buyer approves:
+
+* For a final total, the aggregate total is the approved maximum and
+  `payment.maximum_amount` MUST be omitted.
+* For a provisional total, `payment.maximum_amount` is required and MUST be
+  greater than or equal to the displayed aggregate total.
+
+JSON Schema cannot compare the two values. Implementations MUST ensure that
+`payment.maximum_amount` is at least the aggregate total.
+
+Before completing a provisional Checkout, the Platform MUST disclose that the
+amount may change up to `payment.maximum_amount` and obtain the Buyer's
+approval. Across all instruments, the Business MUST NOT authorize or collect
+more than that amount under the approval given at Checkout. Increasing the
+payment for a post-purchase Order change requires separate Buyer approval.
+
+`maximum_amount` applies to the Checkout as a whole rather than to each
+instrument. It is also separate from the amount a payment provider will still
+allow the Business to capture against an authorization. The sum of all
+historical authorization and capture records can be larger than
+`maximum_amount` because an authorization can be replaced or a reversed capture
+can be retried.
+
+Within UCP, the Business is responsible for enforcing the approved maximum. A
+payment provider may also enforce a limit passed to it by the Business, but UCP
+does not define that downstream exchange. The authorization and capture
+summaries on the Order are not enough to verify the limit: one reports current
+state and the other reports total activity. When AP2 is used, the Checkout
+mandate provides a signed record of the amount the Buyer approved.
+
+The Business MAY change the total and its finality while the Checkout remains
+open. Once Complete Checkout is accepted, the approved maximum no longer
+changes. The resulting Order MUST record that amount in
+`order.payment.maximum_amount`.
+
+For example, this Checkout can increase from $54.00 to no more than $60.00
+after completion:
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "payment_handlers": {}
+  },
+  "id": "chk_provisional_total",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "line_items": [ ... ],
+  "totals": [
+    { "type": "subtotal", "amount": 5000 },
+    { "type": "tax", "amount": 400 },
+    {
+      "type": "total",
+      "amount": 5400,
+      "amount_finality": "provisional"
+    }
+  ],
+  "links": [],
+  "payment": {
+    "maximum_amount": 6000
+  }
+}
+```
 
 #### Rendering Contract
 
