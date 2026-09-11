@@ -120,6 +120,20 @@ in the [checkout Continue URL format](../checkout/index.md#format):
     [permalink](../../permalink.md), which the business resolves into a cart
     or a checkout.
 
+### When to surface the continue URL
+
+The platform **SHOULD** surface `continue_url` in the following situations:
+
+* the buyer asks to share, save, or continue the cart in a browser;
+* the buyer asks to complete the purchase and the platform cannot convert the
+    cart to a checkout, because the business does not expose the checkout
+    capability or the platform does not support it;
+* a cart response carries a message the platform cannot resolve, for example
+    a message of type `unrecoverable` or `requires_buyer_input` (see
+    [Message](#message)).
+
+The platform **MAY** surface it at other times.
+
 ## Quantity and sale basis
 
 Cart line items apply the shared
@@ -173,7 +187,8 @@ custom scopes are defined in [Identity Linking — Scopes](../../common/identity
 
 * **MAY** use carts for pre-purchase exploration and session persistence.
 * **SHOULD** convert cart to checkout when user expresses purchase intent.
-* **MAY** display `continue_url` for handoff to business UI.
+* **MAY** display `continue_url` for handoff to business UI. See
+    [When to surface the continue URL](#when-to-surface-the-continue-url).
 * **SHOULD** handle `not_found` gracefully when cart expires or is canceled.
 
 ### Business
