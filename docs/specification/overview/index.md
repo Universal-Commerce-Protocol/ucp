@@ -3338,6 +3338,29 @@ extension signals use their own namespace (e.g., `com.example.device_id`).
 }
 ```
 
+Signals describing the buyer's environment (e.g., `dev.ucp.buyer_ip`,
+`dev.ucp.user_agent`) may be sparse or absent when the request originates from
+an agent rather than a browser. Businesses **SHOULD NOT** treat the absence of
+an environment signal as itself indicative of risk, since doing so penalizes
+agent-originated traffic by construction.
+
+For agent-originated requests, the following well-known signals describe the
+agent's behavior during the transaction rather than the buyer's environment
+before it. All are platform-observed and remain subject to the rule that signal
+values **MUST NOT** be buyer-asserted claims.
+
+- `dev.ucp.instruction_provenance` — what caused this purchase: the buyer's own
+  input, the agent's planning, or content the agent read during the task.
+- `dev.ucp.agent_spend_context` — the amount relative to the agent's own
+  observed history, which only the platform can compute.
+- `dev.ucp.payee_continuity` — whether the payment destination matches prior
+  settlements to this counterparty. A scoring input, **not** grounds for a
+  decline on its own.
+- `dev.ucp.request_retry_context` — an idempotency key and attempt number,
+  separating an honest retry from a duplicate charge.
+- `dev.ucp.agent_instance_continuity` — an opaque, platform-scoped identifier
+  for the agent instance, stable across sessions.
+
 Signal fields may contain personally identifiable information
 (PII). Platforms **SHOULD** include only signals relevant to the current
 transaction. Businesses **SHOULD NOT** persist signal data beyond the

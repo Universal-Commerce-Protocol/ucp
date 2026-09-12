@@ -16,6 +16,75 @@
     "dev.ucp.user_agent": {
       "type": "string",
       "description": "Client's HTTP User-Agent header or equivalent."
+    },
+    "dev.ucp.instruction_provenance": {
+      "type": "string",
+      "enum": ["user_turn", "agent_plan", "tool_output", "retrieved_content", "unknown"],
+      "description": "Origin of the instruction that produced this purchase, as observed by the platform running the agent. `user_turn` means the purchase traces to the buyer's own input; `agent_plan` to the agent's own planning; `tool_output` and `retrieved_content` to data the agent read during the task. Distinct from delegated authority: delegation establishes that the buyer authorized the agent to spend, provenance establishes what caused this particular spend."
+    },
+    "dev.ucp.agent_spend_context": {
+      "type": "object",
+      "description": "This transaction's amount relative to the agent's own observed spending history, computed by the platform. Absolute amounts are weak signals for agent traffic, where a figure that is routine for one agent is anomalous for another.",
+      "properties": {
+        "baseline_p50": {
+          "type": "string",
+          "description": "Median prior transaction amount for this agent, as a decimal string in the transaction currency."
+        },
+        "baseline_p95": {
+          "type": "string",
+          "description": "95th percentile prior transaction amount for this agent, as a decimal string in the transaction currency."
+        },
+        "observation_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of prior transactions the baseline is computed over. A low count means the baseline is weak, and receivers SHOULD weight it accordingly."
+        },
+        "deviation_ratio": {
+          "type": "number",
+          "description": "This transaction's amount divided by `baseline_p50`."
+        }
+      },
+      "additionalProperties": false
+    },
+    "dev.ucp.payee_continuity": {
+      "type": "object",
+      "description": "Whether the payment destination for this counterparty matches destinations the agent has previously settled to, as observed by the platform. This is a scoring input and is NOT sufficient grounds for a decline on its own: field data shows destination changes are predominantly legitimate.",
+      "properties": {
+        "known_payee": {
+          "type": "boolean",
+          "description": "Whether the platform has previously observed this agent settling to this destination."
+        },
+        "changed_since_last": {
+          "type": "boolean",
+          "description": "Whether the destination differs from the most recent settlement to this counterparty."
+        },
+        "settlements_observed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of prior settlements to this counterparty the determination is based on."
+        }
+      },
+      "additionalProperties": false
+    },
+    "dev.ucp.request_retry_context": {
+      "type": "object",
+      "description": "Distinguishes a retry of a previously attempted purchase from a distinct purchase. Where settlement failures are common, an induced duplicate charge and an honest retry are otherwise indistinguishable.",
+      "properties": {
+        "idempotency_key": {
+          "type": "string",
+          "description": "Stable key identifying the logical purchase across attempts."
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1 for a first attempt, incrementing per retry of the same logical purchase."
+        }
+      },
+      "additionalProperties": false
+    },
+    "dev.ucp.agent_instance_continuity": {
+      "type": "string",
+      "description": "Opaque, platform-scoped identifier for the agent instance, stable across sessions. Lets a business relate a request to prior behavior by the same agent without the platform disclosing the agent's identity."
     }
   },
   "additionalProperties": true
