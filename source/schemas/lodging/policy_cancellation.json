@@ -140,7 +140,7 @@
         "until": {
           "type": "string",
           "pattern": "^P(?=[0-9]+D|T[0-9])(?:[0-9]+D)?(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+S)?)?(?![\\s\\S])",
-          "description": "ISO 8601 elapsed duration before the schedule anchor. This version permits only nonnegative whole-number days, hours, minutes, and seconds; one day is exactly 24 elapsed hours. Years, months, weeks, fractional values, and negative durations are not supported. Implementations compare durations after exact normalization to elapsed seconds.",
+          "description": "ISO 8601 elapsed duration before the schedule anchor, defining the exclusive cutoff `anchor - until`. This tier can apply only when the evaluation instant is strictly earlier than that cutoff; at equality, continue to the following tiers or use `after_last_tier` when none matches. This version permits only nonnegative whole-number days, hours, minutes, and seconds; one day is exactly 24 elapsed hours. Years, months, weeks, fractional values, and negative durations are not supported. Implementations compare durations after exact normalization to elapsed seconds.",
           "maxLength": 64
         },
         "outcome": {

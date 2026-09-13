@@ -252,6 +252,31 @@ constraints are violated, or a selected outcome is unsupported, the Platform
 **MUST NOT** present a guessed structured result and **SHOULD** present
 `description` and `url`.
 
+### Consumer interpretation examples (non-normative)
+
+These examples illustrate the existing evaluation and fallback rules. They do
+not introduce new wire fields or require a general prose-contradiction detector.
+
+- **Exact cutoff:** `until` names an elapsed duration, not an inclusive natural
+  language promise. Compute `anchor - until` and apply the strict comparison
+  defined above. At equality, that tier no longer applies; evaluate subsequent
+  tiers or use `after_last_tier` when none matches.
+- **Known conflict:** if the description states a USD 150.00 penalty and the
+  selected schedule outcome states USD 75.00 for the same scope and instant,
+  an explanatory fallback can say: "The cancellation amounts disagree: the
+  description says USD 150.00, while the schedule says USD 75.00. I cannot give
+  a reliable cash quote until the Business clarifies the terms." Presenting
+  the description and legal URL does not establish that the conflicting
+  schedule has been corrected. Schedule validation and term selection alone
+  cannot detect a contradiction with arbitrary prose.
+- **Known term, unresolved cash amount:** when the complete description
+  specifies the first night's room rate, the selected outcome is one `night`,
+  and no applicable rate is supplied, an informative answer can say: "The
+  penalty is the first night's room rate, but the response does not provide
+  that rate, so I cannot state a dollar amount." The symbolic term is known;
+  the cash amount is unavailable. This is distinct from an invalid or
+  unsupported schedule and does not imply free cancellation.
+
 ## Targeting and precedence
 
 Targeting and precedence are supplied by `policies[]` and are not redefined
