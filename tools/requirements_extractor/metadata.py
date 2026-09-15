@@ -327,6 +327,9 @@ def annotate(clause: Clause, report: ExtractionReport) -> Clause:
 
   return dataclasses.replace(
     clause,
+    capability=config.resolve_capability(
+      clause.source.file, config.REPO_ROOT / clause.source.file
+    ),
     actor=actor,
     actor_confidence=confidence,
     referenced_fields=extract_referenced_fields(clause.text),

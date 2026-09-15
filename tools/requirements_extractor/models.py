@@ -174,11 +174,17 @@ class Clause:
 class Requirement(Clause):
   """A clause that has been assigned a stable, content-addressed identity.
 
-  The `id` is derived solely from `normalized`; see identity.requirement_id.
+  The `id` digests `capability`, the normalized `compound_parent` and
+  `normalized`, joined by a unit separator; see identity.digest_input. All
+  three are published on the record, so an identifier can be recomputed and
+  checked without the spec or this code. Text alone would not do: the
+  obligation matrix reduces eight cells to "must" or "may", whose meaning
+  lives entirely in the row and column heading them.
 
   Attributes:
     id: Identifier of the form ``UCP-<CAPABILITY-SLUG>-<10 hex>``, with an
-      optional ``-2``/``-3`` suffix disambiguating genuine duplicate prose.
+      optional ``-2``/``-3`` ordinal disambiguating requirements whose
+      content and context are genuinely identical.
 
   """
 
@@ -246,6 +252,9 @@ class ExtractionReport:
     actor_after_keyword_only: Obligations whose sole lexicon match follows
       the keyword. Recorded rather than used: the match is usually the
       direct object, not the party under obligation.
+    duplicate_requirements: Groups sharing content, context and capability,
+      and therefore a digest. Each is given an ordinal, and reported because
+      one normative sentence maintained in two documents can drift.
 
   """
 
@@ -277,6 +286,9 @@ class ExtractionReport:
     default_factory=list
   )
   actor_after_keyword_only: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  duplicate_requirements: list[dict[str, object]] = dataclasses.field(
     default_factory=list
   )
 
