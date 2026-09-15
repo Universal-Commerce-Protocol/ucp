@@ -85,7 +85,8 @@ _TRAILING_NUMERAL_RE = re.compile(r"\s*\b\d+\.\s*$")
 _LEADING_NUMERAL_RE = re.compile(r"^\s*\d+\.\s+")
 
 # Inline code spans. Matched here so keyword scanning can ignore their
-# contents while preserving offsets.
+# contents while preserving offsets, and so sentence splitting cannot break
+# on punctuation that belongs to a code sample.
 _CODE_SPAN_RE = re.compile(r"`[^`]*`")
 
 # A sentence must contain at least one letter to be worth considering; this
@@ -156,8 +157,35 @@ def _render_inline(token: Token) -> str:
   return " ".join("".join(parts).split())
 
 
+def _mask_code_interiors(text: str) -> str:
+  """Blank the inside of every code span, keeping the backticks.
+
+  Used for locating sentence boundaries. `mask_code_spans` cannot serve here
+  because it blanks the backticks too, and a sentence is allowed to begin
+  with a code span -- erasing the opening backtick would hide that boundary.
+
+  Args:
+    text: Rendered Markdown of a clause.
+
+  Returns:
+    The same string, same length, with code span interiors replaced by
+    spaces.
+
+  """
+  return _CODE_SPAN_RE.sub(
+    lambda m: "`" + " " * (len(m.group(0)) - 2) + "`", text
+  )
+
+
 def split_sentences(text: str) -> list[str]:
   """Split reflowed prose into candidate sentences.
+
+  Boundaries are located against a copy whose code span interiors have been
+  blanked, then sliced out of the original. Inline code routinely contains
+  sentence-ending punctuation -- `{transfer: [port2]}` has a colon followed
+  by a bracket, which is exactly the boundary shape -- and splitting there
+  would cut an obligation in half and strand its tail in a clause that no
+  longer cites a keyword.
 
   Args:
     text: Single-line Markdown text for one block.
@@ -167,8 +195,17 @@ def split_sentences(text: str) -> list[str]:
     letters are discarded.
 
   """
+  masked = _mask_code_interiors(text)
+
+  raw_parts: list[str] = []
+  start = 0
+  for match in _SENTENCE_SPLIT_RE.finditer(masked):
+    raw_parts.append(text[start : match.start()])
+    start = match.end()
+  raw_parts.append(text[start:])
+
   sentences = []
-  for raw in _SENTENCE_SPLIT_RE.split(text):
+  for raw in raw_parts:
     cleaned = _LEADING_NUMERAL_RE.sub("", raw)
     cleaned = _TRAILING_NUMERAL_RE.sub("", cleaned).strip()
     if cleaned and _HAS_LETTER_RE.search(cleaned):

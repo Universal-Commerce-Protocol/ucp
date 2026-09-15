@@ -211,3 +211,62 @@ class Requirement(Clause):
       "document_order": self.document_order,
       "source": self.source.as_dict(),
     }
+
+
+@dataclasses.dataclass
+class ExtractionReport:
+  """Diagnostics accumulated while building the catalog.
+
+  This is the spec-linter half of the output and is as valuable as the
+  catalog itself. Its governing rule is that nothing disappears quietly: a
+  clause that cites an RFC 2119 keyword but does not reach the catalog must
+  appear in exactly one of these lists, so the totals reconcile.
+
+  Attributes:
+    candidates_without_emphasis: Obligations whose keyword was not
+      emphasized. Under house style these read as normative but are
+      excluded, so each is either a deliberate non-obligation or a spec bug
+      worth fixing.
+    annotations_excluded: Schema field annotations, which mark optionality
+      rather than stating an obligation on a party.
+    annotation_as_obligation: Annotation keywords used in prose and therefore
+      promoted to the equivalent obligation level. Logged for review because
+      the distinction is a judgement call.
+    rfc2119_boilerplate: Clauses dropped for citing so many keywords that
+      they must be the RFC 2119 definition paragraph.
+    multi_obligation_sentences: Sentences carrying more than one obligation,
+      recorded with the levels they were split into.
+    compounds_not_split: Multi-obligation sentences with no conjunction
+      boundary, emitted as a single clause at the strongest level present.
+    empty_after_split: Fragments that reduced to nothing during splitting.
+
+  """
+
+  candidates_without_emphasis: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  annotations_excluded: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  annotation_as_obligation: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  rfc2119_boilerplate: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  multi_obligation_sentences: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  compounds_not_split: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  empty_after_split: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+
+  def as_dict(self) -> dict[str, object]:
+    """Return a JSON-serializable form."""
+    return {
+      field.name: getattr(self, field.name)
+      for field in dataclasses.fields(self)
+    }
