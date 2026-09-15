@@ -423,8 +423,15 @@ class _DocumentWalker:
         )
       )
 
-    # Remember a colon-terminated paragraph in case a list follows it.
-    if block_type is not BlockType.TABLE_CELL and text.rstrip().endswith(":"):
+    # Remember a colon-terminated paragraph in case a list follows it. The
+    # colon may sit inside the emphasis rather than after it -- the spec
+    # writes both "**Host responsibilities**:" and "**Host
+    # responsibilities:**" -- so trailing markers are stripped before the
+    # test. Missing the second form orphans the list items beneath it, which
+    # is how six delegation obligations lost their actor.
+    if block_type is not BlockType.TABLE_CELL and text.rstrip().rstrip(
+      "*_"
+    ).rstrip().endswith(":"):
       self._pending_stem = text
     else:
       self._pending_stem = None

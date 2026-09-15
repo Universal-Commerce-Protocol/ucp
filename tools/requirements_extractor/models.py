@@ -239,6 +239,13 @@ class ExtractionReport:
     compounds_not_split: Multi-obligation sentences with no conjunction
       boundary, emitted as a single clause at the strongest level present.
     empty_after_split: Fragments that reduced to nothing during splitting.
+    actor_unresolved: Obligations no strategy could attribute to a party.
+    actor_low_confidence: Obligations attributed only by a weak signal, such
+      as the section heading. Worth an author's eye before the catalog is
+      relied on.
+    actor_after_keyword_only: Obligations whose sole lexicon match follows
+      the keyword. Recorded rather than used: the match is usually the
+      direct object, not the party under obligation.
 
   """
 
@@ -261,6 +268,15 @@ class ExtractionReport:
     default_factory=list
   )
   empty_after_split: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  actor_unresolved: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  actor_low_confidence: list[dict[str, object]] = dataclasses.field(
+    default_factory=list
+  )
+  actor_after_keyword_only: list[dict[str, object]] = dataclasses.field(
     default_factory=list
   )
 

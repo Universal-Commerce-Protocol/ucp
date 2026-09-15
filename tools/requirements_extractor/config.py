@@ -125,15 +125,30 @@ RFC2119_BOILERPLATE_KEYWORD_THRESHOLD = 4
 # Canonical actor -> surface forms. Matching is case-insensitive and takes the
 # LAST match preceding the keyword, not the first: in "When a buyer selects an
 # option the platform cannot fully process, the platform **SHOULD** ...", the
-# first match yields `buyer` and the last correctly yields `platform`.
+# first match yields `buyer` and the last correctly yields `platform`. Measured
+# against the checkout corpus, the two disagree on 4 clauses and the last match
+# is right on all 4.
+#
+# Only text BEFORE the keyword is considered. A lexicon match after the keyword
+# is usually the direct object rather than the party under obligation --
+# "**MUST** present the content to the buyer" obliges the host, not the buyer.
+# Of the 22 clauses in this corpus whose only match sits after the keyword, 18
+# are objects of this kind, so the signal is rejected and the clauses are
+# reported for review instead.
+#
+# "embedder" resolves to `host`: in the embedded protocol the party doing the
+# embedding is the host, and the spec uses the two words interchangeably.
 ACTOR_LEXICON = {
   "business": ("business", "businesses", "merchant", "merchants"),
   "platform": ("platform", "platforms"),
   "agent": ("agent", "agents"),
   "handler": ("payment handler", "payment handlers", "handler", "handlers"),
   "buyer": ("buyer", "buyers", "user", "users"),
-  "host": ("host", "hosts"),
+  "host": ("host", "hosts", "embedder", "embedders"),
   "auth_server": ("authorization server", "auth server"),
+  "embedded_checkout": ("embedded checkout", "embedded checkouts"),
+  "implementation": ("implementation", "implementations"),
+  "extension": ("extension", "extensions"),
 }
 
 # Confidence assigned by each resolution strategy.
@@ -146,29 +161,53 @@ ACTOR_CONFIDENCE_NONE = 0.0  # unresolved
 # Clauses below this are surfaced in the report for author review.
 ACTOR_LOW_CONFIDENCE_THRESHOLD = 0.6
 
+# A colon-list stem only supplies an actor when it names that party as the
+# owner of what follows. Two conditions must hold, because either alone lets
+# something through.
+#
+# The party must be named at the front, which rejects an incidental mention
+# deep in a prose stem: "All ECP parameters are passed via URL query string,
+# ... the business ..." is not a statement about who the list items oblige.
+STEM_ACTOR_MAX_OFFSET = 40
+
+# And the stem must read as an obligation label rather than commentary.
+# "**Host responsibilities:**" assigns the list to the host;
+# "**Implementation Notes:**" is a topic heading and assigns nothing, but has
+# the same shape and would otherwise attribute its items to `implementation`.
+STEM_OBLIGATION_LABEL_RE = re.compile(
+  r"\b(?:responsibility|responsibilities|requirements?|obligations?|duties|"
+  r"rules?|constraints?|expectations?)\b",
+  re.IGNORECASE,
+)
+
 # ---------------------------------------------------------------------------
 # Referenced fields
 # ---------------------------------------------------------------------------
 
+# Inline code spans carry field names, but also header names, method calls,
+# literals, arithmetic and whole code samples. Measured against the checkout
+# corpus, a blocklist of stop words and a length cap rejected none of the 172
+# spans, so recognition is positive instead: a field is lowercase, may be a
+# dotted path, and may end in `[]`.
+#
+# Deliberately excluded by this shape: HTTP and CSS names, which are
+# hyphenated (`Content-Digest`, `prefers-color-scheme`); type names, which are
+# capitalized (`DataPart`); method calls and expressions, which contain
+# brackets, operators or spaces (`iframe.contentWindow.postMessage()`,
+# `price x quantity x 10^-scale`); MCP method names, which contain a slash
+# (`tools/call`); and message templates (`{action}_request`).
+FIELD_NAME_RE = re.compile(r"^[a-z_][a-z0-9_]*(?:\.[a-z0-9_]+)*(?:\[\])?$")
+
+# A span may pin a field to a value, as in `severity: "recoverable"` or
+# `status: canceled`. That still references the field, so the key is kept and
+# the value discarded rather than dropping the span altogether.
+FIELD_KEY_VALUE_RE = re.compile(r"^([a-z_][a-z0-9_.]*)\s*:\s*\S.*$")
+
 # Inline-code spans longer than this are URLs or code fragments, not fields.
 FIELD_MAX_LENGTH = 40
 
-# Protocol nouns that appear in backticks but are not schema fields.
-FIELD_STOP_WORDS = frozenset(
-  {
-    "GET",
-    "PUT",
-    "POST",
-    "PATCH",
-    "DELETE",
-    "HEAD",
-    "OPTIONS",
-    "application/json",
-    "true",
-    "false",
-    "null",
-  }
-)
+# Lowercase literals that satisfy the field shape but name a value.
+FIELD_STOP_WORDS = frozenset({"true", "false", "null"})
 
 FIELD_URL_RE = re.compile(r"^https?://")
 
@@ -179,6 +218,12 @@ FIELD_URL_RE = re.compile(r"^https?://")
 CONDITION_TRIGGER_RE = re.compile(
   r"\b(when|if|unless|whenever|while|in case)\b", re.IGNORECASE
 )
+
+# A leading condition ends at the comma that closes the subordinate clause:
+# "When `x` is provided, it **MUST** ...". The comma must be at bracket depth
+# zero, because a parenthetical contains its own: "If the host cannot complete
+# the handshake (e.g., origin validation failure), ...".
+CONDITION_MAX_LENGTH = 200
 
 # ---------------------------------------------------------------------------
 # Identity
