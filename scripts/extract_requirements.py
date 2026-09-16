@@ -77,6 +77,27 @@ def _print_summary(summary: dict) -> None:
     print(f"   {marker}{name:<30} {count}")
 
 
+def _display_path(path: Path) -> str:
+  """Render a path for humans, relative to the repository when possible.
+
+  `Path.relative_to` raises for a path outside the repository rather than
+  falling back, so redirecting output anywhere else -- a temporary directory
+  in a determinism check, for instance -- would otherwise crash the CLI
+  after the files had already been written.
+
+  Args:
+    path: Path to render.
+
+  Returns:
+    A repository-relative path, or the absolute path when outside the tree.
+
+  """
+  try:
+    return str(path.relative_to(REPO_ROOT))
+  except ValueError:
+    return str(path)
+
+
 def _check(paths_and_documents: list[tuple[Path, dict]]) -> int:
   """Compare regenerated documents against what is on disk.
 
@@ -100,7 +121,7 @@ def _check(paths_and_documents: list[tuple[Path, dict]]) -> int:
     return 0
 
   for path, reason in stale:
-    print(f"{path.relative_to(REPO_ROOT)}: {reason}", file=sys.stderr)
+    print(f"{_display_path(path)}: {reason}", file=sys.stderr)
   print(
     "\nRegenerate with: python scripts/extract_requirements.py",
     file=sys.stderr,
@@ -187,8 +208,8 @@ def main() -> int:
   catalog.write(args.catalog, catalog_doc)
   catalog.write(args.report, report_doc)
   print(f"\nWrote {len(requirements)} requirements")
-  print(f"  {args.catalog.relative_to(REPO_ROOT)}")
-  print(f"  {args.report.relative_to(REPO_ROOT)}")
+  print(f"  {_display_path(args.catalog)}")
+  print(f"  {_display_path(args.report)}")
   return 0
 
 
