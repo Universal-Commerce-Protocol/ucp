@@ -90,6 +90,10 @@
       "description": "Outstanding extension-defined Actions for this checkout.",
       "ucp_request": "omit"
     },
+    "correspondence": {
+      "$ref": "../common/types/correspondence.json",
+      "description": "Which earlier record this one continues — the offer, cart or instruction this checkout was built from — and whether the values carried across that boundary agree with it. Optional and descriptive."
+    },
     "messages": {
       "type": "array",
       "items": {

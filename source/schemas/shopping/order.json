@@ -104,6 +104,10 @@
       "description": "Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. `applies_to` targets are relative to the response root.",
       "ucp_request": "omit"
     },
+    "correspondence": {
+      "$ref": "../common/types/correspondence.json",
+      "description": "Which earlier record this one continues — the checkout this order was created from — and whether the values carried across that boundary agree with it. Optional and descriptive."
+    },
     "messages": {
       "type": "array",
       "items": {
