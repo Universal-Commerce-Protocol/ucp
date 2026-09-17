@@ -83,6 +83,7 @@ openrpc
 paypal
 permissionless
 podman
+prefetchers
 preorder
 preorders
 proto
@@ -98,8 +99,10 @@ streamable
 superfences
 talla
 tracción
+unparseable
 upsell
 upsells
+userinfo
 variante
 vulnz
 worktree
