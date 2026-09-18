@@ -400,6 +400,46 @@ def test_extract_blocks() -> None:
   )
 
 
+def test_reads_are_utf8() -> None:
+  """Docs are UTF-8 whatever the locale of the machine reading them."""
+  # Written as bytes on purpose: this is what is in the repository, and it
+  # must be read the same way on a machine whose locale is not UTF-8.
+  path = Path(tempfile.mkstemp(suffix=".md")[1])
+  path.write_bytes(
+    "<!-- ucp:example schema=foo -->\n```json\n"
+    '{"note": "an em dash \u2014 and a quote \u201cx\u201d"}\n'
+    "```\n".encode("utf-8")
+  )
+  try:
+    blocks = v.extract_blocks(path)
+    ok = len(blocks) == 1 and "\u2014" in blocks[0]["content"]
+    detail = f"got {blocks!r}"
+  except UnicodeDecodeError as error:
+    ok, detail = False, f"read with the locale encoding: {error}"
+  _check("extract_blocks_reads_utf8", ok, detail)
+
+
+def test_missing_binary_says_how_to_install() -> None:
+  """A missing ucp-schema is an install instruction, not a traceback."""
+  original = v.subprocess.run
+
+  def absent(*args, **kwargs):
+    raise FileNotFoundError(2, "No such file or directory")
+
+  v.subprocess.run = absent
+  try:
+    v.run_ucp_schema(["resolve", "x"], capture_output=True, text=True)
+    ok, detail = False, "no error raised"
+  except RuntimeError as error:
+    ok = "cargo install ucp-schema" in str(error)
+    detail = f"got {error!r}"
+  except FileNotFoundError as error:
+    ok, detail = False, f"raw FileNotFoundError reached the caller: {error}"
+  finally:
+    v.subprocess.run = original
+  _check("missing_ucp_schema_explains_itself", ok, detail)
+
+
 # -----------------------------------------------------------
 # process_block: integration tests requiring ucp-schema
 # -----------------------------------------------------------
@@ -664,6 +704,8 @@ def main() -> int:
   test_array_ellipsis_paths_use_stripped_indices()
   test_annotation_parsing()
   test_extract_blocks()
+  test_reads_are_utf8()
+  test_missing_binary_says_how_to_install()
   test_scaffold_resolution()
   test_resolve_schema_cache_key()
   test_process_block_integration()
