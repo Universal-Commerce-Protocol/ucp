@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/adjustment_type.json",
+  "title": "Adjustment Type",
+  "description": "Type of adjustment. The enum branch lists standard types whose semantics are defined in the specification (see Adjustment Types) and which platforms MAY give type-specific handling. Any other string is a freeform type carrying no protocol-defined semantics.",
+  "type": "string",
+  "anyOf": [
+    {
+      "enum": [
+        "refund",
+        "return",
+        "credit",
+        "price_adjustment",
+        "dispute",
+        "cancellation"
+      ]
+    },
+    {
+      "type": "string"
+    }
+  ]
+}
