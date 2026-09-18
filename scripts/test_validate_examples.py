@@ -402,20 +402,23 @@ def test_extract_blocks() -> None:
 
 def test_reads_are_utf8() -> None:
   """Docs are UTF-8 whatever the locale of the machine reading them."""
-  # Written as bytes on purpose: this is what is in the repository, and it
-  # must be read the same way on a machine whose locale is not UTF-8.
-  path = Path(tempfile.mkstemp(suffix=".md")[1])
-  path.write_bytes(
-    "<!-- ucp:example schema=foo -->\n```json\n"
-    '{"note": "an em dash \u2014 and a quote \u201cx\u201d"}\n'
-    "```\n".encode("utf-8")
-  )
-  try:
-    blocks = v.extract_blocks(path)
-    ok = len(blocks) == 1 and "\u2014" in blocks[0]["content"]
-    detail = f"got {blocks!r}"
-  except UnicodeDecodeError as error:
-    ok, detail = False, f"read with the locale encoding: {error}"
+  with tempfile.TemporaryDirectory() as td:
+    path = Path(td) / "doc.md"
+    # Written as bytes on purpose: this is what is in the repository, and it
+    # must be read the same way on a machine whose locale is not UTF-8.
+    path.write_bytes(
+      (
+        "<!-- ucp:example schema=foo -->\n```json\n"
+        '{"note": "an em dash \u2014 and a quote \u201cx\u201d"}\n'
+        "```\n"
+      ).encode()
+    )
+    try:
+      blocks = v.extract_blocks(path)
+      ok = len(blocks) == 1 and "\u2014" in blocks[0]["content"]
+      detail = f"got {blocks!r}"
+    except UnicodeDecodeError as error:
+      ok, detail = False, f"read with the locale encoding: {error}"
   _check("extract_blocks_reads_utf8", ok, detail)
 
 

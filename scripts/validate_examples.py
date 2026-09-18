@@ -111,6 +111,7 @@ Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -644,20 +645,29 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
 
 _schema_cache: dict[tuple, dict] = {}
 
+UCP_SCHEMA_MISSING = (
+  "ucp-schema not found on PATH. Install it with"
+  " `cargo install ucp-schema` (see AGENTS.md)."
+)
+
+
 def run_ucp_schema(args: list[str], **kwargs) -> subprocess.CompletedProcess:
   """Run the ucp-schema binary, or explain how to get it.
 
   Without this, a contributor who has not installed the binary sees a
   FileNotFoundError traceback rather than the install line that AGENTS.md
   already documents.
+
+  ucp-schema always writes UTF-8, so decode it as UTF-8 rather than by the
+  locale: schemas under source/schemas/ carry em dashes and section signs,
+  and a cp1252 machine would otherwise fail on the bytes that carry them.
   """
+  if kwargs.get("text"):
+    kwargs.setdefault("encoding", "utf-8")
   try:
     return subprocess.run(["ucp-schema", *args], **kwargs)
   except FileNotFoundError:
-    raise RuntimeError(
-      "ucp-schema not found on PATH. Install it with"
-      " `cargo install ucp-schema` (see AGENTS.md)."
-    ) from None
+    raise RuntimeError(UCP_SCHEMA_MISSING) from None
 
 
 def resolve_schema(
@@ -1056,18 +1066,21 @@ def process_block(
     merged = deep_merge(scaffold, stripped)
 
   # 9. Validate — use extracted $def schema if specified
-  if schema_def:
-    valid, val_errors = validate_payload_with_schema(
-      merged, validation_schema, direction, op, schema_base
-    )
-  else:
-    valid, val_errors = validate_payload(
-      merged,
-      schema_path,
-      direction,
-      op,
-      schema_base,
-    )
+  try:
+    if schema_def:
+      valid, val_errors = validate_payload_with_schema(
+        merged, validation_schema, direction, op, schema_base
+      )
+    else:
+      valid, val_errors = validate_payload(
+        merged,
+        schema_path,
+        direction,
+        op,
+        schema_base,
+      )
+  except RuntimeError as e:
+    return Result(file, line, "error", str(e), annotation)
 
   # Collect all failures
   messages: list[str] = []
@@ -1147,6 +1160,13 @@ def main() -> int:
 
   scaffolds_dir = args.scaffolds or script_dir / "scaffolds"
   docs_dir = args.docs or repo_root / "docs"
+
+  # Every block needs the binary, so a missing one is a single message
+  # before any work rather than the same error repeated per block. --audit
+  # only counts blocks and needs no binary.
+  if not args.audit and shutil.which("ucp-schema") is None:
+    print(UCP_SCHEMA_MISSING, file=sys.stderr)
+    return 1
 
   # Collect markdown files
   md_files = args.file if args.file else sorted(docs_dir.rglob("*.md"))
