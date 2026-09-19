@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/lodging/types/room_rate.json",
   "title": "Room Rate",
-  "description": "Compound binding schema linking a physical room type, commercial rate plan, occupancy, guest assignments, optional add-ons, and pricing totals.",
+  "description": "Compound binding schema linking a physical room type, commercial rate plan, occupancy, guest assignments, and pricing totals.",
   "type": "object",
   "required": [
     "id"

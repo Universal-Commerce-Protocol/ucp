@@ -11,7 +11,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Stable, opaque identifier for a guest in the Platform's namespace."
+      "description": "Stable, opaque session-scoped identifier for a guest in the Platform's namespace."
     },
     "first_name": {
       "type": "string",

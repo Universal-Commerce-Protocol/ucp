@@ -4,6 +4,14 @@ Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we pos
 
 ______________________________________________________________________
 
+## September 2, 2026: Payments Technical Council (Payments TC) Formed
+
+The nomination process for the Payments Technical Council (Payments TC) has officially closed. We are excited to welcome inaugural members Adyen NV, Ant International, Coinbase, Global Payments, Google, PayPal, Shopify, and Stripe to the Payments TC.
+
+For more details, read the full announcement in the [GitHub Discussion #798](https://github.com/Universal-Commerce-Protocol/ucp/discussions/798).
+
+______________________________________________________________________
+
 ## August 25, 2026: Protocol Release v2026-08-25
 
 We have released version v2026-08-25 of the protocol. This release introduces major protocol enhancements, key structural refactorings to support multi-vertical expansion, payments security improvements (3DS2), structured request constraints, independent capability versioning, grocery shopping readiness and many more.

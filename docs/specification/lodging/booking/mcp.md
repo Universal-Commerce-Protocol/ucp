@@ -74,7 +74,7 @@ Businesses advertise MCP transport availability through their UCP profile at
 MCP clients **MUST** include a `meta` object in every request containing
 protocol metadata:
 
-<!-- ucp:example schema=lodging/booking op=start direction=request extract=$.params.arguments.booking -->
+<!-- ucp:example schema=lodging/booking op=create direction=request extract=$.params.arguments.booking -->
 ```json
 {
   "jsonrpc": "2.0",

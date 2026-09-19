@@ -5,7 +5,7 @@
   "room_rates": [
     {
       "id": "rr_scaffold",
-      "room_details": {
+      "room_type": {
         "id": "room_scaffold"
       },
       "rate_plan": {
