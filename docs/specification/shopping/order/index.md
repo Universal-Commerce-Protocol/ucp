@@ -549,6 +549,11 @@ user-authenticated access:
 Scope declaration, derivation, and rules for extending this set with
 custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
+The same scope names appear in the `scopes` array of an
+[order credential](#order-access), so an operation is gated identically whether
+the request was authorized by a user identity token or by a credential bound to
+a single order.
+
 ## Operations
 
 The order entity is a **current-state snapshot**: the authoritative latest
@@ -586,6 +591,7 @@ caller:
 | :------------- | :----------------------- |
 | Platform credentials | Orders originated by the platform |
 | Buyer authorization | Orders owned by the buyer, subject to the granted OAuth scopes |
+| Order credential | The single order the credential is bound to |
 
 **Platform credentials** (API key, signatures, OAuth client credentials) -
 businesses **MAY** allow access for orders the platform originated. The
@@ -597,6 +603,12 @@ order it already has context for.
 [Identity Linking](../../common/identity-linking/index.md) with the necessary scopes, or a
 similar mechanism. This grants access to the buyer's orders regardless of
 which platform originated them.
+
+**Order credential** - the business issued a credential bound to one order at
+checkout completion (see [Order Access](#order-access)). This is the guest
+path: the buyer has no account with the business, so there is no identity to
+link and no user token to obtain. The credential authorizes operations on its
+bound order and nothing else.
 
 Businesses **MAY** define additional access policies (e.g., trusted partner
 agreements), enforce data availability constraints (e.g., retention
@@ -669,6 +681,125 @@ that includes a `messages` array describing the outcome:
 
 * **MUST** authenticate requests to order data before returning a response
   (see [Authorization](#authorization))
+
+## Order Access
+
+A guest checkout produces an order with no account behind it. Neither
+established authorization path reaches that order well:
+[Identity Linking](../../common/identity-linking/index.md) needs a user to
+authenticate, and a guest has none; platform credentials reach only the orders
+that one platform originated, which makes order access an
+all-or-nothing property of the platform relationship rather than of the
+order itself.
+
+An **order credential** closes that gap. The business mints it when the
+checkout completes and returns it to the platform that completed the checkout.
+It is bound to exactly one order and carries no other authority.
+
+### Issuance
+
+The credential is delivered on the checkout completion response, alongside the
+order identifier and permalink the platform already receives (see
+[Order Confirmation](../checkout/index.md#order-confirmation)). No extra round
+trip is involved, and no separate issuance endpoint exists.
+
+Businesses **SHOULD** issue a credential when a checkout completes without a
+linked user identity. Businesses **MAY** issue one for authenticated checkouts
+as well; doing so does not weaken the user's own access path.
+
+<!-- ucp:example schema=shopping/checkout op=read extract=$.order target=$.order -->
+```json
+{
+  "order": {
+    "id": "order_abc123",
+    "permalink_url": "https://business.example.com/orders/abc123",
+    "access": {
+      "token": "oat_3f9a1c7e5b2d48a6",
+      "expires_at": "2026-04-15T00:00:00Z",
+      "scopes": ["dev.ucp.shopping.order:read"]
+    }
+  }
+}
+```
+
+### Presentation
+
+The credential is an input to the operation, not a field of the order. It is
+defined in the operation signature so every transport carries it the same way,
+rather than in a transport-specific header:
+
+| Transport | Carried as |
+| :-------- | :--------- |
+| MCP | the optional `access_token` argument on `get_order` |
+| REST | the optional `access_token` query parameter on `GET /orders/{id}` |
+
+Platforms **MUST** send the credential only to the business that issued it, and
+**MUST NOT** place it in a browser-addressable URL — a
+[permalink](../../permalink.md#privacy) **MUST NOT** carry it. Businesses
+**MUST** respond with `Cache-Control: no-store` to any request that presented
+one, and **SHOULD** redact it from access logs.
+
+A request that presents both an order credential and platform or user
+credentials is authorized on the union of what each grants; the business
+**MUST NOT** treat the presence of an order credential as narrowing an
+otherwise-authorized request.
+
+### Scopes
+
+The `scopes` array uses the same
+[scope token](../../common/identity-linking/index.md#scope-token-format)
+vocabulary Identity Linking uses, so a business gates an operation identically
+whichever way the request was authorized. A credential with no `scopes`
+authorizes read access to its bound order only.
+
+Because the credential names order scopes directly and is bound to one
+resource, it does not need — and **MUST NOT** be treated as conveying — any
+scope beyond those listed.
+
+### Lifetime and revocation
+
+Businesses **SHOULD** set `expires_at`, and **MAY** rotate the credential on
+any order response by returning a replacement in `access`. A platform that
+receives a replacement **MUST** discard the credential it presented.
+
+Businesses **MUST** be able to revoke a credential, and **MUST** revoke it when
+the bound order is claimed into a user account — at that point the order is
+reachable through Identity Linking, and the standing guest credential is
+surplus authority over data that now belongs to an identified user.
+
+Platforms **SHOULD** discard the credential once the buyer's post-purchase
+journey is complete, consistent with treating order data as ephemeral.
+
+### Errors
+
+A request presenting an absent, expired, revoked, or unrecognized credential
+returns the existing `unauthorized` error (see
+[Error Responses](#error-responses)). Businesses **MUST** return the same
+response for a credential that does not match the order as for an order that
+does not exist, so the endpoint cannot be used to probe which order
+identifiers are real.
+
+### Security Considerations
+
+* **Bearer semantics.** The credential is a bearer credential: whoever holds it
+  can read the bound order. That is what makes it delegable to a buyer's
+  second surface, and equally what makes leakage meaningful. Short
+  `expires_at` values and rotation bound the exposure.
+* **No enumeration.** A credential **MUST NOT** grant access to any order other
+  than the one it is bound to, and **MUST NOT** be accepted on any operation
+  that lists or searches orders.
+* **Unguessable values.** Businesses **MUST NOT** derive the credential from order
+  attributes a third party could reconstruct — order number, buyer email,
+  totals, or timestamps.
+* **Query-string exposure.** The REST binding carries the credential in the
+  request URI, which is more exposed than a header (proxy logs, server access
+  logs, browser history if a URL ever escapes to a browser). This is the cost
+  of keeping the credential in the transport-independent operation signature.
+  The `Cache-Control: no-store`, log-redaction, short-lifetime, and
+  single-order-binding requirements above are what keep that cost bounded.
+* **Scope creep.** Post-purchase operations beyond retrieval are not defined by
+  this version of the capability. A business **MUST NOT** honor a scope in
+  `scopes` that names an operation it has not implemented.
 
 ## Events
 
@@ -816,6 +947,10 @@ zero-downtime key rotation procedures.
 ### Item
 
 {{ schema_fields('types/item_resp', 'shopping/order') }}
+
+### Order Access
+
+{{ schema_fields('order_access', 'shopping/order') }}
 
 ### Postal Address
 
