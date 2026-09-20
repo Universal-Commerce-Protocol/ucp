@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/order_access.json",
+  "title": "Order Access",
+  "description": "A credential bound to a single order. The business issues it at checkout completion so a platform can perform authorized order operations on behalf of a buyer who has no account with the business — the guest case, where Identity Linking has no user to authenticate. The credential authorizes exactly the order it was issued for and confers no other authority: it is not a platform credential, not a user identity token, and cannot be used to discover, list, or reach any other order.",
+  "type": "object",
+  "required": [
+    "token"
+  ],
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "Opaque, unguessable credential scoped to a single order. Platforms MUST treat it as a secret and MUST NOT place it in a browser-addressable URL. Businesses MUST bind it to one order, MUST reject it for any other resource, and MUST NOT derive it from guessable order attributes."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 expiry timestamp for the credential. Businesses SHOULD set it. When absent, the business governs the lifetime and platforms MUST NOT assume the credential is permanent."
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/scope_token.json"
+      },
+      "uniqueItems": true,
+      "description": "Order operations this credential authorizes, expressed in the UCP scope token grammar (e.g. 'dev.ucp.shopping.order:read'). Scope names are the same vocabulary Identity Linking uses, so a business gates an operation identically whichever way the request was authorized. When absent, the credential authorizes read access to the bound order only."
+    }
+  },
+  "additionalProperties": true
+}
