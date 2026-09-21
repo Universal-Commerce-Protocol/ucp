@@ -36,7 +36,9 @@ def _report() -> int:
 
 
 REPO_ROOT = Path(__file__).parent.parent
-OPENRPC_PATH = REPO_ROOT / "source" / "services" / "shopping" / "embedded.openrpc.json"
+OPENRPC_PATH = (
+  REPO_ROOT / "source" / "services" / "shopping" / "embedded.openrpc.json"
+)
 AUTH_METHODS = ("ec.auth", "ep.cart.auth")
 
 
@@ -51,10 +53,12 @@ def _find_param(method: dict, name: str) -> dict:
   for param in method.get("params", []):
     if param.get("name") == name:
       return param
-  raise AssertionError(f"param {name!r} not found on method {method.get('name')!r}")
+  method_name = method.get("name")
+  raise AssertionError(f"param {name!r} not found on method {method_name!r}")
 
 
 def test_auth_type_param_is_required() -> None:
+  """Assert the auth `type` param is `required: true` on every auth method."""
   doc = json.loads(OPENRPC_PATH.read_text())
   for method_name in AUTH_METHODS:
     method = _find_method(doc, method_name)
@@ -67,6 +71,7 @@ def test_auth_type_param_is_required() -> None:
 
 
 def main() -> int:
+  """Run all contract tests and return a process exit code."""
   print("Running embedded-auth-required contract tests...\n")
   test_auth_type_param_is_required()
   return _report()
