@@ -149,7 +149,7 @@ occupancy taxes, or a remaining room balance).
   contract, the standard `type: "total"` entry strictly represents the authoritative all-in stay liability
   (immediate charges plus deferred or property-collected amounts) for the entire reservation.
   Every booking session **MUST** contain exactly one `total` entry, ensuring that Platforms display the full,
-  transparent cost of the stay upfront in compliance with FTC and EU price display directives.
+  transparent cost of the stay upfront in compliance with applicable consumer price-display laws.
 * **Payment Timing Breakdown Types**: To clearly distinguish amounts charged immediately upon booking
   confirmation from amounts collected later or at the property, the following well-known `type` values
   are introduced:

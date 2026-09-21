@@ -101,7 +101,7 @@ protocol metadata:
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
 [capability negotiation](../../overview/index.md#negotiation-protocol). The
-`complete_booking_session` operation also requires
+`complete_booking_session` and `cancel_booking_session` operations also require
 `meta["idempotency-key"]` for retry safety. Platforms **MAY** include
 additional metadata fields.
 
@@ -1022,7 +1022,9 @@ signature mechanism as REST. The signature is applied at the HTTP layer:
 | `Signature`              | Yes      | Contains the signature value             |
 | `Content-Digest`         | Yes      | SHA-256 hash of request body             |
 | `UCP-Agent`              | Yes      | Signer identity (profile URL)            |
-| `Idempotency-Key`        | Yes      | Unique key for replay protection         |
+| `Idempotency-Key`        | Cond.*   | Unique key for replay protection         |
+
+\* Required for `complete_booking_session` and `cancel_booking_session`
 
 **Example Signed Request:**
 
