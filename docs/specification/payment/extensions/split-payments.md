@@ -107,13 +107,18 @@ if any valid assignment exists, the combination matches.
 A business that supports (a) a card with up to 2 redeemables, (b) up to 5
 gift cards alone, and (c) two credit cards:
 
-<!-- ucp:example skip reason="illustrative business profile fragment showing allowed_combinations shape" -->
+<!-- ucp:example schema=profile def=business_schema extract=$.capabilities target=$.ucp.capabilities -->
 ```json
 {
-  "capabilities": [{
+  "capabilities": {
     "dev.ucp.common.payment.split_payments": [
       {
-        "version": "2026-01-23",
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/extensions/split-payments",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_split_payments.json",
+        "extends": [
+          "dev.ucp.shopping.checkout"
+        ],
         "config": {
           "allowed_combinations": [
             [
@@ -130,7 +135,7 @@ gift cards alone, and (c) two credit cards:
         }
       }
     ]
-  }]
+  }
 }
 ```
 
