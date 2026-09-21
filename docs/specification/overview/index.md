@@ -31,780 +31,6 @@ Schema notes:
     unless otherwise specified
 - Amounts format: Minor units (cents)
 
-## Quantities and units
-
-UCP uses a shared quantity representation wherever a schema contains an integer
-`quantity`, a `quantity_unit`, or the shared measure type.
-
-A `quantity` is an integer count of **steps**. A unit descriptor consists of:
-
-- `unit` — a required, stable machine identifier.
-- `scale` — an optional nonnegative integer, at most 15 (a bound derived from
-    the integer range; see below). Its effective value is the provided value or
-    `0` when omitted.
-- `display_text` — a required printable label for the unit.
-
-One step is `10^-scale` of `unit`. The shared measure type adds a required
-integer `value`, which is also a count of those steps. Because these counts are
-integers, `scale` fixes the representation's granularity. A unit descriptor's
-machine identity is the (`unit`, effective `scale`) pair; `display_text` is not
-part of that identity. This identity applies only to the unit descriptor; it
-does not identify the purchasable item or exhaustively describe one sale unit.
-
-The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is
-the United Nations Centre for Trade Facilitation and Electronic Business
-(UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business
-**MAY** omit `quantity_unit` from an authoritative Business representation to
-encode this default. When a Business or Platform includes a
-descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`;
-`scale` can only be omitted or explicitly set to `0`.
-
-UCP does not put floating-point numbers on the wire. Quantity arithmetic
-feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled`
-accumulates across fulfillment events, and status derives from
-`fulfilled == total` — so quantities get money's representation: an integer
-count plus a declared interpretation, exactly as an `amount` relates to its
-`currency`. Integer counts keep every total and comparison exact in every
-language, and UCP therefore defines no rounding tolerances and no epsilon
-comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
-legitimately differs from the ordered quantity — a 1.90 lb pick against a
-2.00 lb order — is a commercial fact reconciled through
-[adjustments](../shopping/order/index.md#adjustments) that move money together with quantity,
-not a numeric error absorbed by comparison fuzz.
-
-Reading a quantity requires no arithmetic and no unit knowledge: shift the
-decimal point `scale` places and append `display_text`. `150` with
-`{ "scale": 2, "display_text": "kg" }` renders as `1.50 kg`, by the same code
-path for a Rec20 code and for a custom unit. Unlike a currency exponent,
-`scale` is per-item data rather than a static table — which is why
-authoritative responses always carry their own descriptor on every non-`each`
-line.
-
-### Integer range and ingestion
-
-Every integer-valued field in UCP — amounts, quantity step counts, measure
-values — is a JSON integer; each field's schema declares its sign and
-bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the
-range within which every JSON implementation agrees exactly on integer
-values
-([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html){ target="_blank" },
-Section 6) and within which
-[JCS](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
-canonicalization, required for
-[AP2 mandate signing](../payment/extensions/ap2-mandates.md#canonicalization), is defined. The
-same cap derives `scale`'s maximum of 15: at scale 16, one whole unit
-(10^16 steps) would be unrepresentable. An out-of-range value is
-schema-invalid and is rejected like any other invalid payload.
-
-Arithmetic over these values **MUST** be exact. Within the wire range,
-IEEE 754 binary64 — a JavaScript `Number` from `JSON.parse` — holds every
-integer exactly; products such as `amount × quantity` can exceed 64 bits, so
-use wider or arbitrary-precision integers, or overflow checks. An
-implementation that cannot produce an exact, in-range result **MUST**
-surface an error rather than emit, display, or act on an approximate or
-wrapped value.
-
-When UCP data crosses into external systems, implementations **SHOULD**
-convert once at ingestion — apply the declared scale (or currency exponent)
-into an exact decimal type (SQL `NUMERIC`, Java `BigDecimal`, Python
-`Decimal`), or carry the (value, scale) pair unchanged — and **SHOULD NOT**
-perform scale application or value-bearing arithmetic in binary floating
-point.
-
-### Unit vocabulary
-
-The Business **SHOULD** use the exact Rec20 Common Code unless no code
-accurately identifies the unit. When no Rec20 code accurately identifies the
-unit, the Business **MAY** use a custom unit identifier. If it does, the Business
-**MUST** use that identifier consistently for the same unit. The Platform
-**MUST** treat an unrecognized `unit` value as opaque. The following table is
-non-exhaustive:
-
-| Code  | Unit         |
-| :---- | :----------- |
-| `C62` | one / `each` |
-| `KGM` | kilogram     |
-| `GRM` | gram         |
-| `LBR` | pound        |
-| `MLT` | millilitre   |
-| `LTR` | litre        |
-| `MTR` | metre        |
-| `INH` | inch         |
-| `YRD` | yard         |
-| `FTK` | square foot  |
-| `MTK` | square metre |
-| `HUR` | hour         |
-| `MIN` | minute       |
-
-Rec20 includes X-prefixed package units derived from UN/CEFACT Recommendation
-21 (Rec21). UCP deliberately excludes those values from `quantity_unit`. The
-Business **MUST** make package form part of the purchasable variant's identity
-and count packages as `each`. The Business **MUST NOT** use an X-prefixed
-Rec21-derived package code as `quantity_unit`.
-
-### Display text
-
-When sending a unit descriptor, a Business or Platform **MUST** include
-`display_text`. The Platform **MUST** use that value when it does not recognize
-`unit`. For a recognized Rec20 code, the Platform **MAY** substitute its own
-localized label. The Business and Platform **MUST NOT** use `display_text` when
-matching machine identities or as an input to quantity conversion.
-
-### Ordering increment
-
-A sale-basis descriptor (`quantity_unit`) **MAY** declare an `increment`: an
-optional positive integer, denominated in steps, whose effective value is the
-provided value or `1` when omitted. Only the sale basis carries an increment;
-the bare unit descriptor and the shared measure type do not. It declares the
-ordering granularity the Business sells in — for example, an item sold by the
-pound with `scale` `2` and `increment` `25` is sold in 0.25 lb multiples.
-
-`scale` and `increment` play different roles: `scale` bounds what any quantity
-can express; `increment` shapes what the Platform asks for. The increment is
-advisory merchandising policy, not a representational bound — Platform-authored
-quantities **SHOULD** be integer multiples of the line's effective increment,
-while Business-authored quantities (checkout revisions, fulfillment events,
-adjustments) are bounded only by `scale`. `increment` is not part of the
-unit-descriptor machine identity and **MUST NOT** participate in mismatch
-comparison.
-
-Request assertions, mismatch handling, response echo, off-increment request
-handling, pricing, and lifecycle behavior are defined by the capability that
-uses the shared representation.
-
-## Request Constraints
-
-After capabilities and extensions are negotiated, the resolved UCP request
-schema defines the fields and structure allowed for an operation. In an
-authoritative response, a Business can use `ucp.request_constraints` to signal
-additional rules it will apply when evaluating request data in the next
-Platform request. For example, it can constrain a Line Item quantity to exactly
-`100` sale-basis steps or require a submitted payment instrument to include
-`billing_address`. A Platform can evaluate these constraints before submission,
-avoiding a round trip for request data the Business has already indicated it
-will reject.
-
-`ucp.request_constraints` is used only in authoritative operation responses and
-has no effect in discovery profiles or operation requests.
-
-### Validation model
-
-A submitted request is valid under Request Constraints only if it satisfies the
-resolved request schema and every object selected by Request Constraints
-satisfies the corresponding Constraint Expression. Request Constraints only
-narrow the resolved request schema; they cannot make a request valid when that
-schema rejects it. A Business evaluates the request as follows:
-
-```text
-valid = validate(resolved_request_schema, request)
-
-for each constraint:
-  objects = select(request, effective_path(constraint))
-  valid = valid AND validate_all(
-    constraint_expression(constraint),
-    objects
-  )
-
-return valid
-```
-
-A Platform **MAY** perform the same checks as preflight. For each chosen value,
-the Platform **MUST** use its effective path and complete Constraint Expression.
-The Platform **MAY** submit the request regardless of the preflight result;
-Business evaluation is authoritative.
-
-### Constraint Expression
-
-A `request_constraints` value and every nested constraint object use embedded
-JSON Schema Draft 2020-12 language. The outer value may additionally contain an
-optional `path`; nested constraint objects may not. The grammar does not admit
-`ucp`. Keys in `properties` name fields on selected request objects.
-
-The constraint begins at an Object Constraint. Object Constraints may nest
-through `properties` and `anyOf`; Value Constraints occur only as values in an
-Object Constraint's `properties` map.
-
-| Position | Admitted members | Shape and behavior |
-| :-- | :-- | :-- |
-| Object Constraint | `required`, `properties`, `anyOf` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. `anyOf` is a non-empty array of non-empty Object Constraints, at least one of which the object must satisfy. An empty Object Constraint is a valid no-op at every Object Constraint position except an `anyOf` branch. |
-| Value Constraint | `enum`, `const` | `enum` is a non-empty array of unique JSON values. `const` is any JSON value. At least one member is present; when both are present, both apply. |
-
-No other member is admitted at either grammar position.
-
-Members present at the same Object Constraint all apply. `anyOf` does not
-narrow, override, or replace its siblings; the object must satisfy every
-sibling member and at least one branch. Each branch is an ordinary Object
-Constraint and cannot carry `path`, so every branch is evaluated against the
-same selected object.
-
-Branches are alternatives, not a partition: an object satisfying more than one
-branch is valid. Within a branch, `properties` constrains a member only when
-that member is present, so a branch pinning a discriminator through
-`properties` alone is also satisfied by an object that omits it; naming the
-discriminator in the branch's `required` makes the branch match only the shape
-it describes.
-
-The grammar is defined independently of the object it is bound to. Request
-Constraints bind it to objects in the next request and add `path`; other UCP
-schemas reuse it where a declaration already identifies the object it
-constrains, such as
-[`available_instruments[].constraints`](site:schemas/common/types/available_payment_instrument.json),
-whose object is the `constraint_target` declared by the instrument schema for
-that entry's `type`.
-
-### Path
-
-Every `request_constraints` value has exactly one effective path. When `path`
-is omitted, the effective path is the
-[RFC 9535](https://www.rfc-editor.org/rfc/rfc9535.html){ target="_blank" }
-Normalized Path from the authoritative response root to the structured response
-object whose `ucp` member contains `request_constraints`. When the Business
-provides `path`, that value becomes the effective path and supersedes the
-Normalized Path that would otherwise be derived; the Business **MUST** make it
-a complete RFC 9535 JSONPath query. In both cases, the effective path is
-evaluated against the next logical UCP request to that resource. The effective
-path therefore differs from response-targeting paths elsewhere in UCP, such as
-`messages[].path`, which are evaluated against the response that carries them.
-
-An omitted path establishes positional correspondence for the next request, not
-stable identity: an array index still identifies that position if items reorder
-before that request. A Business **MUST** provide an explicit `path` when the
-Normalized Path of that structured response object does not identify the
-intended request objects. When a constraint must follow a stable identity into
-the next request, the Business **MUST** use an explicit query that encodes that
-association.
-
-A Business that constructs a query from data **MUST** serialize and escape each
-dynamic value as a valid RFC 9535 literal and **MUST NOT** use unsafe string
-concatenation.
-
-Before emitting a value, a Business **MUST** validate the complete value against
-the shared
-[Request Constraints](site:schemas/common/types/request_constraints.json)
-schema, and a Platform **MUST** do the same before using that value for
-preflight; `path` selects the objects and the remaining members form the
-[Constraint Expression](site:schemas/common/types/constraint_expression.json).
-
-A constraint is not tied to an operation name; it applies to every object its
-path selects. A path that selects zero objects has no effect. When
-`request_constraints` is in the response root's `ucp` member and `path` is
-omitted, the effective path is `$`.
-
-If multiple paths select the same object, every corresponding Constraint
-Expression applies. The shared Request Constraints schema validates each value
-independently and cannot guarantee that expressions across overlapping paths can
-all be satisfied. A Business **MUST** ensure expressions that can apply to the
-same object are jointly satisfiable. Contradictory requirements on the same
-property are a Business authoring error.
-
-A Platform that performs preflight on overlapping values evaluates every value
-it chose; if any chosen value fails for the concrete request, preflight fails.
-There is no precedence or override.
-
-### Guidelines
-
-#### Business
-
-A Business **MAY** include `ucp.request_constraints` in an authoritative
-response to describe rules it will enforce against request data in the next
-Platform request. The Business **MUST** emit Request Constraints that conform to
-the shared Request Constraints schema, **MUST** use valid effective paths that
-select only objects, and **MUST** enforce every constraint it emits against that
-next request.
-
-A Business **SHOULD NOT** emit Request Constraints for rules that may change
-before the next request unless it can continue to enforce the advertised
-constraint. Execution-time conditions such as inventory availability, fraud
-decisions, and payment authorization remain governed by the operation's existing
-outcomes and `messages`.
-
-#### Platform
-
-A Platform **MAY** use `ucp.request_constraints` for preflight before submitting
-request data. It **MAY** evaluate any supported subset of values. This preflight
-is optional and advisory.
-
-A malformed or unsupported value, a value whose path selects a non-object, or a
-value the Platform cannot evaluate within its resource limits is unavailable
-for preflight, not a pass or failure. A Platform performing preflight **MUST**
-skip the whole unavailable value and continue with any other chosen values. If
-complete evaluation finds a violation, that value fails preflight.
-
-A successful preflight result covers only the values the Platform evaluated.
-UCP defines no new wire status or issue-marker field for preflight results.
-
-### Scope and lifecycle
-
-Each authoritative resource response from the Business supplies Request
-Constraints for the next request to that resource. The authoritative response
-to that request supplies the constraints for the following request and replaces
-the prior set. Omission clears the set. Invalid values in the new set do not
-preserve stale values, and sets are not merged by `path`.
-
-Only `request_constraints` values attached to eligible structured response
-objects under the [Reserved `ucp` Member](#the-ucp-protocol-namespace) rules
-make up the set; dictionary keys are data.
-
-A response without an authoritative resource supplies no Request Constraints
-set for a following request. A response containing an authoritative resource
-supplies the set even when it reports an application error. A partial
-authoritative resource representation supplies a set only when the resource
-contract defines its scope.
-
-### Operation outcomes
-
-Request Constraints provide proactive, machine-evaluable preflight for the next
-request; `messages` report outcomes from a submitted request, including runtime
-outcomes. Passing validation against both the resolved request schema and
-Request Constraints establishes only schema validity; the request can still
-fail other Business rules. The containing operation's existing semantics and
-outcome/error contract, including `messages`, continue to govern
-submitted-request and runtime outcomes. Request Constraints add no outcome or
-error code.
-
-### Examples
-
-#### Basket-wide and targeted quantities
-
-The following Cart responses are alternatives that illustrate different scopes.
-
-=== "Basket-wide"
-
-    <!-- ucp:example schema=shopping/cart op=read direction=response -->
-    ```json
-    {
-      "ucp": {
-        "version": "{{ ucp_version }}",
-        "request_constraints": {
-          "path": "$['line_items'][*]",
-          "properties": {
-            "quantity": {"const": 1}
-          }
-        }
-      },
-      "id": "cart_123",
-      "line_items": [
-        {
-          "id": "line_123",
-          "item": {
-            "id": "sku_123",
-            "title": "Bulk screws",
-            "price": 1200
-          },
-          "quantity": 1,
-          "totals": [
-            {"type": "subtotal", "amount": 1200},
-            {"type": "total", "amount": 1200}
-          ]
-        }
-      ],
-      "currency": "USD",
-      "totals": [
-        {"type": "subtotal", "amount": 1200},
-        {"type": "total", "amount": 1200}
-      ]
-    }
-    ```
-
-=== "Targeted"
-
-    <!-- ucp:example schema=shopping/cart op=read direction=response -->
-    ```json
-    {
-      "ucp": {
-        "version": "{{ ucp_version }}"
-      },
-      "id": "cart_123",
-      "line_items": [
-        {
-          "id": "line_123",
-          "item": {
-            "id": "sku_123",
-            "title": "Bulk screws",
-            "price": 1200
-          },
-          "quantity": 100,
-          "totals": [
-            {"type": "subtotal", "amount": 120000},
-            {"type": "total", "amount": 120000}
-          ],
-          "ucp": {
-            "request_constraints": {
-              "path": "$['line_items'][?@['id'] == 'line_123']",
-              "properties": {
-                "quantity": {"const": 100}
-              }
-            }
-          }
-        }
-      ],
-      "currency": "USD",
-      "totals": [
-        {"type": "subtotal", "amount": 120000},
-        {"type": "total", "amount": 120000}
-      ]
-    }
-    ```
-
-The basket-wide response emits a root constraint that applies quantity `1` to
-every Line Item in the next request. The targeted response uses ambient local
-authoring and a stable-ID path to apply quantity `100` only to the Line Item
-whose `id` is `line_123`; stable-ID rebinding survives reorder. If that path
-finds no match, it selects zero objects and has no effect. These are separate
-responses and alternatives. Combining them as written would create
-contradictory constraints for `line_123` and is a Business authoring error.
-
-#### Locked negotiated discount codes
-
-This Checkout response has the Discount extension active and advertises Request
-Constraints for the next Checkout Update request. Because `request_constraints`
-is in the Checkout response root's `ucp`, omitting `path` derives that
-structured response object's Normalized Path. For this root placement, the
-derived path is `$`, which selects the next request root.
-
-<!-- ucp:example schema=shopping/discount def=dev.ucp.shopping.checkout op=update direction=response -->
-```json
-{
-  "ucp": {
-    "version": "{{ ucp_version }}",
-    "status": "success",
-    "capabilities": {
-      "dev.ucp.shopping.checkout": [
-        {"version": "{{ ucp_version }}"}
-      ],
-      "dev.ucp.shopping.discount": [
-        {"version": "{{ ucp_version }}"}
-      ]
-    },
-    "payment_handlers": {},
-    "request_constraints": {
-      "required": ["discounts"],
-      "properties": {
-        "discounts": {
-          "required": ["codes"],
-          "properties": {
-            "codes": {"const": ["ACME-X7Q9-L2M4"]}
-          }
-        }
-      }
-    }
-  },
-  "id": "checkout_123",
-  "status": "incomplete",
-  "currency": "USD",
-  "line_items": [
-    {
-      "id": "line_123",
-      "item": {
-        "id": "sku_123",
-        "title": "Bulk screws",
-        "price": 1200
-      },
-      "quantity": 24,
-      "totals": [
-        {"type": "subtotal", "amount": 28800},
-        {"type": "total", "amount": 28800}
-      ]
-    }
-  ],
-  "totals": [
-    {"type": "subtotal", "amount": 28800},
-    {"type": "total", "amount": 28800}
-  ],
-  "links": [
-    {
-      "type": "terms_of_service",
-      "url": "https://business.example/terms"
-    }
-  ],
-  "discounts": {
-    "codes": ["ACME-X7Q9-L2M4"]
-  }
-}
-```
-
-The next Checkout Update request is valid only if it satisfies the resolved
-request schema, contains `discounts.codes`, and supplies exactly
-`["ACME-X7Q9-L2M4"]`.
-
-#### Billing address on a submitted card instrument
-
-In this example, a Business emits `ucp.request_constraints` on an available card
-instrument to require `billing_address` in the next request if it contains a
-matching submitted card instrument:
-
-<!-- ucp:example schema=common/types/available_payment_instrument op=read direction=response -->
-```json
-{
-  "type": "card",
-  "ucp": {
-    "request_constraints": {
-      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
-      "required": ["billing_address"]
-    }
-  }
-}
-```
-
-This fragment assumes its containing authoritative response payment-handler
-declaration has `id: processor_1`. The explicit `path` crosses from the
-response's `available_instruments[]` shape to submitted `payment.instruments[]`
-and matches instruments by `handler_id` and `type`. If the next request contains
-a match, the constraint requires `billing_address` on every matching instrument.
-The payment-handler or instrument contract defines any stronger association.
-This example does not define card brands, credentials, support, availability, or
-payment policy.
-
-#### Alternative verification requirements on a submitted credential
-
-A Business accepts more than one credential shape and requires different
-verification data for each. In this example, a PAN must carry a `cvc`, and a
-network token must carry a `cryptogram` with its `eci_value`. Each credential
-family is its own schema, so every branch discriminates on the credential's own
-`type` and no rule has to branch on a sibling field:
-
-<!-- ucp:example schema=common/types/available_payment_instrument op=read direction=response -->
-```json
-{
-  "type": "card",
-  "ucp": {
-    "request_constraints": {
-      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
-      "required": ["credential"],
-      "properties": {
-        "credential": {
-          "anyOf": [
-            {
-              "properties": {"type": {"const": "pan"}},
-              "required": ["cvc"]
-            },
-            {
-              "properties": {"type": {"const": "network_token"}},
-              "required": ["cryptogram", "eci_value"]
-            }
-          ]
-        }
-      }
-    }
-  }
-}
-```
-
-One path selects the submitted instrument, and one Object Constraint describes
-it. The sibling `required` applies to every matching instrument; the `anyOf`
-branches then apply to the nested `credential` object, which must satisfy at
-least one. Each branch pins `type` with `const`, so a branch matches only the
-credential family it describes;
-[`payment_credential.json`](site:schemas/common/types/payment_credential.json)
-already requires `type` on every credential, so no branch has to name it in
-`required`. A [PAN credential](site:schemas/common/types/pan_credential.json)
-without a `cvc` fails, as does a [network
-token](site:schemas/common/types/network_token_credential.json) missing its
-`eci_value`.
-
-Because every branch pins the discriminator, the branch set also closes the
-accepted credential families. A handler
-[token credential](site:schemas/common/types/token_credential.json) is a valid
-credential at this position but satisfies neither branch, so this Business does
-not accept it at this path. A Business that later accepts another family adds a
-branch for it.
-
-Two separately targeted constraints cannot express this rule. Request
-Constraints conjoin, so one value requiring `cvc` and another requiring
-`cryptogram` would require both. Discriminating through the path filter instead
-— selecting `pan` credentials in one value and `network_token` credentials in
-another — moves conditional logic into the selector, which paths do not carry.
-
-## Actions
-
-An Action is an outstanding unit of extension-defined work for a Platform to
-process. Its presence means the effect defined by its Action type is gated.
-Actions appear only in responses, under the `actions` map. The common
-fields identify the work but do not define how to process it; the active
-extension does.
-
-This section defines the common Actions shape and the invariants every adopting
-response shares. The shape is reusable, but a capability supports Actions only
-when its specification explicitly adopts it and defines the parent-specific
-behavior: where Actions appear, the effect each Action type gates, how Messages
-apply, and how a later response reflects processing. Schema composition alone
-does not establish support. Cart, Checkout, and Catalog adopt this shape; see
-[Cart — Actions](../shopping/cart/index.md#actions),
-[Checkout — Actions](../shopping/checkout/index.md#actions), and
-[Catalog — Actions](../shopping/catalog/index.md#actions) for their parent-specific
-contracts.
-
-Actions and Messages have different roles. An Action represents outstanding
-work: it carries an identity and extension-owned processing configuration. A
-Message communicates explanatory or diagnostic context about the current
-response and can identify an exact Action occurrence through its RFC 9535
-`path`. When a Message includes `path`, the Business **MUST** make it an RFC
-9535 JSONPath expression relative to the root of the containing UCP response
-object.
-Messages do not define how an Action is processed or determine its outcome, and
-neither an Action nor a Message requires the other.
-
-For example, a Business can surface one outstanding Action beside an
-explanatory Message (an illustrative, partial fragment):
-
-<!-- ucp:example skip reason="illustrative fragment" -->
-```json
-{
-  "actions": {
-    "com.example.identity.student_verification": [
-      {
-        "id": "verify-student-1",
-        "config": {
-          "verification_url": "https://business.example.com/verify/abc"
-        }
-      }
-    ]
-  },
-  "messages": [
-    {
-      "type": "info",
-      "code": "eligibility_accepted",
-      "content": "Student discount applied provisionally. Verify your status.",
-      "path": "$.actions['com.example.identity.student_verification'][0]"
-    }
-  ]
-}
-```
-
-The Action identifies the outstanding work and carries extension-owned
-processing configuration under `config`. The Message's `path` selects the exact
-Action occurrence it explains. The
-[checkout eligibility example](../shopping/checkout/index.md#eligibility-verification-at-completion)
-composes this pattern into a complete Student Verification flow.
-
-For a newly processed successful response from a capability that adopts Actions,
-the Business **MUST** include every outstanding Action and **MUST** omit
-`actions` when none are outstanding.
-
-Cart and Checkout define request idempotency separately. Duplicate requests
-follow those existing rules and can return the original cached response,
-including its `actions` (see
-[Message Signatures — Replay Protection](../signatures.md#replay-protection)).
-
-An Action's gate and an operation-specific outcome are orthogonal. Neither a
-parent status nor a Message's type or severity determines whether an Action
-gates its Action-defined effect. A Message explains the response or reports the
-outcome of a particular requested effect. A Business **MAY** include an info or
-warning Message whose `path` selects an outstanding Action to explain the
-current response without reporting an operation failure. For a state-changing
-operation whose requested effect was not applied because of an Action, the
-Business **MUST** instead return the current resource with a `recoverable` error
-Message whose `path` selects the exact Action occurrence.
-
-The Business's response is authoritative for the state after an operation: the
-returned resource, together with any parent lifecycle its capability defines, is
-the source of truth. The Action-type contract defines how the Business observes
-processing, and the Platform then follows the containing capability's operation
-contract.
-
-When an Action prevents a Cart or Checkout operation from succeeding,
-processing the Action does not repeat that operation. If the Platform wants to
-try again, it submits a new operation under the existing
-[Replay Protection](../signatures.md#replay-protection) rules.
-
-Each Action key is a reverse-domain **Action type**: the name identifies the
-type of outstanding work, which is not necessarily the name of the extension
-that declares it. An active extension declares each Action type and defines its
-`config`, how a Platform processes it, its trust and fallback, and its outcomes.
-A single extension can declare more than one Action type. Each declaring
-extension contributes its Action-type keys to the containing capability's
-schema through `allOf` composition (see
-[Schema Composition](#schema-composition)), and capability negotiation selects
-which extensions are active. Negotiating an extension activates the whole
-contract it declares, including every Action type within it.
-
-Action type keys follow existing [Namespace Governance](#namespace-governance)
-rules: an extension can declare only types within a reverse-domain namespace
-controlled by its schema authority. An extension can use its own name as the key
-for a single Action type — as the
-[Student Verification example](../shopping/checkout/index.md#eligibility-verification-at-completion)
-does — or declare several Action types under distinct keys. Each value is a
-non-empty array of outstanding instances of that one Action type. The key
-identifies the type, so an instance carries no separate type discriminator; a
-Business surfaces multiple outstanding instances of the same type as multiple
-entries in that array.
-
-The `actions` map does not define a processing order across Action types. Within
-a single type's array, JSON preserves the order of its instances, and the
-extension that declares the type defines whether that order carries processing
-meaning. When ordering across Action types matters, the declaring extension
-defines the sequencing and which Action types become outstanding at each step.
-
-For example (illustrative only), a negotiated vendor extension
-`com.example.payment.authentication` declares two Action types:
-`com.example.payment.authentication.device_data_collection`, an invisible
-device- and browser-data collection step, and
-`com.example.payment.authentication.three_ds_challenge`, a Buyer-facing
-authentication step. Because the collection step precedes the challenge, the
-Business can emit the `device_data_collection` type first and, once its instance
-is processed, emit the `three_ds_challenge` type in a later response. This shows
-one extension declaring multiple Action types and sequencing them across
-responses; it does not standardize device data collection or the authentication
-challenge, which are illustrative here.
-
-Every instance shares a set of common fields:
-
-- `id` — a non-empty identifier for the Action instance.
-- `config` — an optional extension-owned configuration object.
-
-`id` is required on every instance; `config` is optional. An extension defines
-the instance-specific data a Platform needs to process its work under `config`;
-`config` is the extension-owned channel for that data.
-
-An Action instance also remains open to additional top-level fields for forward
-compatibility. A Platform **MUST** tolerate and ignore Action instance
-fields it does not recognize.
-
-The Business **MUST** use a distinct `id` for each Action instance in a response.
-
-When successive responses represent the same parent resource, the Business
-**MUST** keep the same Action type key and `id` while the same work remains
-outstanding. Replacement work **MUST** have a new `id`, and the Business
-**MUST NOT** reuse an `id` during that resource's lifetime.
-
-Otherwise, the common Actions contract defines no identity relationship between
-Actions in independent responses. Equal `id` values alone do not identify the
-same work.
-
-A Business **MUST** emit an Action type only when an extension that declares it
-is active for the containing capability in the negotiated intersection. The
-composed JSON Schema can validate the common fields and each declared type's key
-and `config` shape, but confirming that the declaring extension is active also
-requires the negotiated capability context.
-
-### Trust and Execution Boundaries
-
-Negotiating an extension confirms support for its complete Action-type contract
-before runtime. That agreement does not make every future runtime value or
-delegate trusted. Each instance remains subject to the composed schema, the
-Action-type contract, and Platform policy.
-
-The active Action-type contract defines which `config` fields a Platform processes
-and what they mean. A Platform **MUST NOT** treat any other field as an
-instruction to load content, render HTML, execute code, run a shell command, or
-invoke a native API.
-
-A Platform **MAY** apply additional trust or runtime policy and **MAY** decline
-any instance that does not satisfy it. Supporting a whole extension does not
-require a Platform to accept every runtime value.
-
-A Platform **MUST NOT** assume that the effect gated by an Action succeeded
-merely because an Action surface or external interaction completed. A later
-response from the Business, together with any parent lifecycle its capability
-defines, remains authoritative for that outcome.
-
-The declaring extension defines the concrete trust, execution, and fallback rules.
-The common Actions contract defines no generic machinery: no URL scheme, origin,
-or delegate policy; no sandbox, permission, or presentation model; no timeout,
-failure, or recovery model; and no callback, result, state, polling, or
-executor. Each concrete Action type adds only the machinery its own processing
-requires.
-
 ## Discovery, Governance, and Negotiation
 
 UCP separates [protocol version selection](#protocol-version) from
@@ -3067,6 +2293,780 @@ UCP defines a set of standard capabilities:
 Detailed definitions for endpoints, schemas, and valid extensions for each
 capability are provided in their respective specification files. Extensions are
 typically versioned and defined alongside their parent capability.
+
+## Quantities and units
+
+UCP uses a shared quantity representation wherever a schema contains an integer
+`quantity`, a `quantity_unit`, or the shared measure type.
+
+A `quantity` is an integer count of **steps**. A unit descriptor consists of:
+
+- `unit` — a required, stable machine identifier.
+- `scale` — an optional nonnegative integer, at most 15 (a bound derived from
+    the integer range; see below). Its effective value is the provided value or
+    `0` when omitted.
+- `display_text` — a required printable label for the unit.
+
+One step is `10^-scale` of `unit`. The shared measure type adds a required
+integer `value`, which is also a count of those steps. Because these counts are
+integers, `scale` fixes the representation's granularity. A unit descriptor's
+machine identity is the (`unit`, effective `scale`) pair; `display_text` is not
+part of that identity. This identity applies only to the unit descriptor; it
+does not identify the purchasable item or exhaustively describe one sale unit.
+
+The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is
+the United Nations Centre for Trade Facilitation and Electronic Business
+(UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business
+**MAY** omit `quantity_unit` from an authoritative Business representation to
+encode this default. When a Business or Platform includes a
+descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`;
+`scale` can only be omitted or explicitly set to `0`.
+
+UCP does not put floating-point numbers on the wire. Quantity arithmetic
+feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled`
+accumulates across fulfillment events, and status derives from
+`fulfilled == total` — so quantities get money's representation: an integer
+count plus a declared interpretation, exactly as an `amount` relates to its
+`currency`. Integer counts keep every total and comparison exact in every
+language, and UCP therefore defines no rounding tolerances and no epsilon
+comparisons anywhere in the quantity lifecycle. A fulfilled quantity that
+legitimately differs from the ordered quantity — a 1.90 lb pick against a
+2.00 lb order — is a commercial fact reconciled through
+[adjustments](../shopping/order/index.md#adjustments) that move money together with quantity,
+not a numeric error absorbed by comparison fuzz.
+
+Reading a quantity requires no arithmetic and no unit knowledge: shift the
+decimal point `scale` places and append `display_text`. `150` with
+`{ "scale": 2, "display_text": "kg" }` renders as `1.50 kg`, by the same code
+path for a Rec20 code and for a custom unit. Unlike a currency exponent,
+`scale` is per-item data rather than a static table — which is why
+authoritative responses always carry their own descriptor on every non-`each`
+line.
+
+### Integer range and ingestion
+
+Every integer-valued field in UCP — amounts, quantity step counts, measure
+values — is a JSON integer; each field's schema declares its sign and
+bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the
+range within which every JSON implementation agrees exactly on integer
+values
+([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html){ target="_blank" },
+Section 6) and within which
+[JCS](https://www.rfc-editor.org/rfc/rfc8785.html){ target="_blank" }
+canonicalization, required for
+[AP2 mandate signing](../payment/extensions/ap2-mandates.md#canonicalization), is defined. The
+same cap derives `scale`'s maximum of 15: at scale 16, one whole unit
+(10^16 steps) would be unrepresentable. An out-of-range value is
+schema-invalid and is rejected like any other invalid payload.
+
+Arithmetic over these values **MUST** be exact. Within the wire range,
+IEEE 754 binary64 — a JavaScript `Number` from `JSON.parse` — holds every
+integer exactly; products such as `amount × quantity` can exceed 64 bits, so
+use wider or arbitrary-precision integers, or overflow checks. An
+implementation that cannot produce an exact, in-range result **MUST**
+surface an error rather than emit, display, or act on an approximate or
+wrapped value.
+
+When UCP data crosses into external systems, implementations **SHOULD**
+convert once at ingestion — apply the declared scale (or currency exponent)
+into an exact decimal type (SQL `NUMERIC`, Java `BigDecimal`, Python
+`Decimal`), or carry the (value, scale) pair unchanged — and **SHOULD NOT**
+perform scale application or value-bearing arithmetic in binary floating
+point.
+
+### Unit vocabulary
+
+The Business **SHOULD** use the exact Rec20 Common Code unless no code
+accurately identifies the unit. When no Rec20 code accurately identifies the
+unit, the Business **MAY** use a custom unit identifier. If it does, the Business
+**MUST** use that identifier consistently for the same unit. The Platform
+**MUST** treat an unrecognized `unit` value as opaque. The following table is
+non-exhaustive:
+
+| Code  | Unit         |
+| :---- | :----------- |
+| `C62` | one / `each` |
+| `KGM` | kilogram     |
+| `GRM` | gram         |
+| `LBR` | pound        |
+| `MLT` | millilitre   |
+| `LTR` | litre        |
+| `MTR` | metre        |
+| `INH` | inch         |
+| `YRD` | yard         |
+| `FTK` | square foot  |
+| `MTK` | square metre |
+| `HUR` | hour         |
+| `MIN` | minute       |
+
+Rec20 includes X-prefixed package units derived from UN/CEFACT Recommendation
+21 (Rec21). UCP deliberately excludes those values from `quantity_unit`. The
+Business **MUST** make package form part of the purchasable variant's identity
+and count packages as `each`. The Business **MUST NOT** use an X-prefixed
+Rec21-derived package code as `quantity_unit`.
+
+### Display text
+
+When sending a unit descriptor, a Business or Platform **MUST** include
+`display_text`. The Platform **MUST** use that value when it does not recognize
+`unit`. For a recognized Rec20 code, the Platform **MAY** substitute its own
+localized label. The Business and Platform **MUST NOT** use `display_text` when
+matching machine identities or as an input to quantity conversion.
+
+### Ordering increment
+
+A sale-basis descriptor (`quantity_unit`) **MAY** declare an `increment`: an
+optional positive integer, denominated in steps, whose effective value is the
+provided value or `1` when omitted. Only the sale basis carries an increment;
+the bare unit descriptor and the shared measure type do not. It declares the
+ordering granularity the Business sells in — for example, an item sold by the
+pound with `scale` `2` and `increment` `25` is sold in 0.25 lb multiples.
+
+`scale` and `increment` play different roles: `scale` bounds what any quantity
+can express; `increment` shapes what the Platform asks for. The increment is
+advisory merchandising policy, not a representational bound — Platform-authored
+quantities **SHOULD** be integer multiples of the line's effective increment,
+while Business-authored quantities (checkout revisions, fulfillment events,
+adjustments) are bounded only by `scale`. `increment` is not part of the
+unit-descriptor machine identity and **MUST NOT** participate in mismatch
+comparison.
+
+Request assertions, mismatch handling, response echo, off-increment request
+handling, pricing, and lifecycle behavior are defined by the capability that
+uses the shared representation.
+
+## Request Constraints
+
+After capabilities and extensions are negotiated, the resolved UCP request
+schema defines the fields and structure allowed for an operation. In an
+authoritative response, a Business can use `ucp.request_constraints` to signal
+additional rules it will apply when evaluating request data in the next
+Platform request. For example, it can constrain a Line Item quantity to exactly
+`100` sale-basis steps or require a submitted payment instrument to include
+`billing_address`. A Platform can evaluate these constraints before submission,
+avoiding a round trip for request data the Business has already indicated it
+will reject.
+
+`ucp.request_constraints` is used only in authoritative operation responses and
+has no effect in discovery profiles or operation requests.
+
+### Validation model
+
+A submitted request is valid under Request Constraints only if it satisfies the
+resolved request schema and every object selected by Request Constraints
+satisfies the corresponding Constraint Expression. Request Constraints only
+narrow the resolved request schema; they cannot make a request valid when that
+schema rejects it. A Business evaluates the request as follows:
+
+```text
+valid = validate(resolved_request_schema, request)
+
+for each constraint:
+  objects = select(request, effective_path(constraint))
+  valid = valid AND validate_all(
+    constraint_expression(constraint),
+    objects
+  )
+
+return valid
+```
+
+A Platform **MAY** perform the same checks as preflight. For each chosen value,
+the Platform **MUST** use its effective path and complete Constraint Expression.
+The Platform **MAY** submit the request regardless of the preflight result;
+Business evaluation is authoritative.
+
+### Constraint Expression
+
+A `request_constraints` value and every nested constraint object use embedded
+JSON Schema Draft 2020-12 language. The outer value may additionally contain an
+optional `path`; nested constraint objects may not. The grammar does not admit
+`ucp`. Keys in `properties` name fields on selected request objects.
+
+The constraint begins at an Object Constraint. Object Constraints may nest
+through `properties` and `anyOf`; Value Constraints occur only as values in an
+Object Constraint's `properties` map.
+
+| Position | Admitted members | Shape and behavior |
+| :-- | :-- | :-- |
+| Object Constraint | `required`, `properties`, `anyOf` | `required` is an array of unique field names. `properties` maps field names to Object or Value Constraints. `anyOf` is a non-empty array of non-empty Object Constraints, at least one of which the object must satisfy. An empty Object Constraint is a valid no-op at every Object Constraint position except an `anyOf` branch. |
+| Value Constraint | `enum`, `const` | `enum` is a non-empty array of unique JSON values. `const` is any JSON value. At least one member is present; when both are present, both apply. |
+
+No other member is admitted at either grammar position.
+
+Members present at the same Object Constraint all apply. `anyOf` does not
+narrow, override, or replace its siblings; the object must satisfy every
+sibling member and at least one branch. Each branch is an ordinary Object
+Constraint and cannot carry `path`, so every branch is evaluated against the
+same selected object.
+
+Branches are alternatives, not a partition: an object satisfying more than one
+branch is valid. Within a branch, `properties` constrains a member only when
+that member is present, so a branch pinning a discriminator through
+`properties` alone is also satisfied by an object that omits it; naming the
+discriminator in the branch's `required` makes the branch match only the shape
+it describes.
+
+The grammar is defined independently of the object it is bound to. Request
+Constraints bind it to objects in the next request and add `path`; other UCP
+schemas reuse it where a declaration already identifies the object it
+constrains, such as
+[`available_instruments[].constraints`](site:schemas/common/types/available_payment_instrument.json),
+whose object is the `constraint_target` declared by the instrument schema for
+that entry's `type`.
+
+### Path
+
+Every `request_constraints` value has exactly one effective path. When `path`
+is omitted, the effective path is the
+[RFC 9535](https://www.rfc-editor.org/rfc/rfc9535.html){ target="_blank" }
+Normalized Path from the authoritative response root to the structured response
+object whose `ucp` member contains `request_constraints`. When the Business
+provides `path`, that value becomes the effective path and supersedes the
+Normalized Path that would otherwise be derived; the Business **MUST** make it
+a complete RFC 9535 JSONPath query. In both cases, the effective path is
+evaluated against the next logical UCP request to that resource. The effective
+path therefore differs from response-targeting paths elsewhere in UCP, such as
+`messages[].path`, which are evaluated against the response that carries them.
+
+An omitted path establishes positional correspondence for the next request, not
+stable identity: an array index still identifies that position if items reorder
+before that request. A Business **MUST** provide an explicit `path` when the
+Normalized Path of that structured response object does not identify the
+intended request objects. When a constraint must follow a stable identity into
+the next request, the Business **MUST** use an explicit query that encodes that
+association.
+
+A Business that constructs a query from data **MUST** serialize and escape each
+dynamic value as a valid RFC 9535 literal and **MUST NOT** use unsafe string
+concatenation.
+
+Before emitting a value, a Business **MUST** validate the complete value against
+the shared
+[Request Constraints](site:schemas/common/types/request_constraints.json)
+schema, and a Platform **MUST** do the same before using that value for
+preflight; `path` selects the objects and the remaining members form the
+[Constraint Expression](site:schemas/common/types/constraint_expression.json).
+
+A constraint is not tied to an operation name; it applies to every object its
+path selects. A path that selects zero objects has no effect. When
+`request_constraints` is in the response root's `ucp` member and `path` is
+omitted, the effective path is `$`.
+
+If multiple paths select the same object, every corresponding Constraint
+Expression applies. The shared Request Constraints schema validates each value
+independently and cannot guarantee that expressions across overlapping paths can
+all be satisfied. A Business **MUST** ensure expressions that can apply to the
+same object are jointly satisfiable. Contradictory requirements on the same
+property are a Business authoring error.
+
+A Platform that performs preflight on overlapping values evaluates every value
+it chose; if any chosen value fails for the concrete request, preflight fails.
+There is no precedence or override.
+
+### Guidelines
+
+#### Business
+
+A Business **MAY** include `ucp.request_constraints` in an authoritative
+response to describe rules it will enforce against request data in the next
+Platform request. The Business **MUST** emit Request Constraints that conform to
+the shared Request Constraints schema, **MUST** use valid effective paths that
+select only objects, and **MUST** enforce every constraint it emits against that
+next request.
+
+A Business **SHOULD NOT** emit Request Constraints for rules that may change
+before the next request unless it can continue to enforce the advertised
+constraint. Execution-time conditions such as inventory availability, fraud
+decisions, and payment authorization remain governed by the operation's existing
+outcomes and `messages`.
+
+#### Platform
+
+A Platform **MAY** use `ucp.request_constraints` for preflight before submitting
+request data. It **MAY** evaluate any supported subset of values. This preflight
+is optional and advisory.
+
+A malformed or unsupported value, a value whose path selects a non-object, or a
+value the Platform cannot evaluate within its resource limits is unavailable
+for preflight, not a pass or failure. A Platform performing preflight **MUST**
+skip the whole unavailable value and continue with any other chosen values. If
+complete evaluation finds a violation, that value fails preflight.
+
+A successful preflight result covers only the values the Platform evaluated.
+UCP defines no new wire status or issue-marker field for preflight results.
+
+### Scope and lifecycle
+
+Each authoritative resource response from the Business supplies Request
+Constraints for the next request to that resource. The authoritative response
+to that request supplies the constraints for the following request and replaces
+the prior set. Omission clears the set. Invalid values in the new set do not
+preserve stale values, and sets are not merged by `path`.
+
+Only `request_constraints` values attached to eligible structured response
+objects under the [Reserved `ucp` Member](#the-ucp-protocol-namespace) rules
+make up the set; dictionary keys are data.
+
+A response without an authoritative resource supplies no Request Constraints
+set for a following request. A response containing an authoritative resource
+supplies the set even when it reports an application error. A partial
+authoritative resource representation supplies a set only when the resource
+contract defines its scope.
+
+### Operation outcomes
+
+Request Constraints provide proactive, machine-evaluable preflight for the next
+request; `messages` report outcomes from a submitted request, including runtime
+outcomes. Passing validation against both the resolved request schema and
+Request Constraints establishes only schema validity; the request can still
+fail other Business rules. The containing operation's existing semantics and
+outcome/error contract, including `messages`, continue to govern
+submitted-request and runtime outcomes. Request Constraints add no outcome or
+error code.
+
+### Examples
+
+#### Basket-wide and targeted quantities
+
+The following Cart responses are alternatives that illustrate different scopes.
+
+=== "Basket-wide"
+
+    <!-- ucp:example schema=shopping/cart op=read direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "request_constraints": {
+          "path": "$['line_items'][*]",
+          "properties": {
+            "quantity": {"const": 1}
+          }
+        }
+      },
+      "id": "cart_123",
+      "line_items": [
+        {
+          "id": "line_123",
+          "item": {
+            "id": "sku_123",
+            "title": "Bulk screws",
+            "price": 1200
+          },
+          "quantity": 1,
+          "totals": [
+            {"type": "subtotal", "amount": 1200},
+            {"type": "total", "amount": 1200}
+          ]
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {"type": "subtotal", "amount": 1200},
+        {"type": "total", "amount": 1200}
+      ]
+    }
+    ```
+
+=== "Targeted"
+
+    <!-- ucp:example schema=shopping/cart op=read direction=response -->
+    ```json
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}"
+      },
+      "id": "cart_123",
+      "line_items": [
+        {
+          "id": "line_123",
+          "item": {
+            "id": "sku_123",
+            "title": "Bulk screws",
+            "price": 1200
+          },
+          "quantity": 100,
+          "totals": [
+            {"type": "subtotal", "amount": 120000},
+            {"type": "total", "amount": 120000}
+          ],
+          "ucp": {
+            "request_constraints": {
+              "path": "$['line_items'][?@['id'] == 'line_123']",
+              "properties": {
+                "quantity": {"const": 100}
+              }
+            }
+          }
+        }
+      ],
+      "currency": "USD",
+      "totals": [
+        {"type": "subtotal", "amount": 120000},
+        {"type": "total", "amount": 120000}
+      ]
+    }
+    ```
+
+The basket-wide response emits a root constraint that applies quantity `1` to
+every Line Item in the next request. The targeted response uses ambient local
+authoring and a stable-ID path to apply quantity `100` only to the Line Item
+whose `id` is `line_123`; stable-ID rebinding survives reorder. If that path
+finds no match, it selects zero objects and has no effect. These are separate
+responses and alternatives. Combining them as written would create
+contradictory constraints for `line_123` and is a Business authoring error.
+
+#### Locked negotiated discount codes
+
+This Checkout response has the Discount extension active and advertises Request
+Constraints for the next Checkout Update request. Because `request_constraints`
+is in the Checkout response root's `ucp`, omitting `path` derives that
+structured response object's Normalized Path. For this root placement, the
+derived path is `$`, which selects the next request root.
+
+<!-- ucp:example schema=shopping/discount def=dev.ucp.shopping.checkout op=update direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {"version": "{{ ucp_version }}"}
+      ],
+      "dev.ucp.shopping.discount": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    },
+    "payment_handlers": {},
+    "request_constraints": {
+      "required": ["discounts"],
+      "properties": {
+        "discounts": {
+          "required": ["codes"],
+          "properties": {
+            "codes": {"const": ["ACME-X7Q9-L2M4"]}
+          }
+        }
+      }
+    }
+  },
+  "id": "checkout_123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "line_123",
+      "item": {
+        "id": "sku_123",
+        "title": "Bulk screws",
+        "price": 1200
+      },
+      "quantity": 24,
+      "totals": [
+        {"type": "subtotal", "amount": 28800},
+        {"type": "total", "amount": 28800}
+      ]
+    }
+  ],
+  "totals": [
+    {"type": "subtotal", "amount": 28800},
+    {"type": "total", "amount": 28800}
+  ],
+  "links": [
+    {
+      "type": "terms_of_service",
+      "url": "https://business.example/terms"
+    }
+  ],
+  "discounts": {
+    "codes": ["ACME-X7Q9-L2M4"]
+  }
+}
+```
+
+The next Checkout Update request is valid only if it satisfies the resolved
+request schema, contains `discounts.codes`, and supplies exactly
+`["ACME-X7Q9-L2M4"]`.
+
+#### Billing address on a submitted card instrument
+
+In this example, a Business emits `ucp.request_constraints` on an available card
+instrument to require `billing_address` in the next request if it contains a
+matching submitted card instrument:
+
+<!-- ucp:example schema=common/types/available_payment_instrument op=read direction=response -->
+```json
+{
+  "type": "card",
+  "ucp": {
+    "request_constraints": {
+      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
+      "required": ["billing_address"]
+    }
+  }
+}
+```
+
+This fragment assumes its containing authoritative response payment-handler
+declaration has `id: processor_1`. The explicit `path` crosses from the
+response's `available_instruments[]` shape to submitted `payment.instruments[]`
+and matches instruments by `handler_id` and `type`. If the next request contains
+a match, the constraint requires `billing_address` on every matching instrument.
+The payment-handler or instrument contract defines any stronger association.
+This example does not define card brands, credentials, support, availability, or
+payment policy.
+
+#### Alternative verification requirements on a submitted credential
+
+A Business accepts more than one credential shape and requires different
+verification data for each. In this example, a PAN must carry a `cvc`, and a
+network token must carry a `cryptogram` with its `eci_value`. Each credential
+family is its own schema, so every branch discriminates on the credential's own
+`type` and no rule has to branch on a sibling field:
+
+<!-- ucp:example schema=common/types/available_payment_instrument op=read direction=response -->
+```json
+{
+  "type": "card",
+  "ucp": {
+    "request_constraints": {
+      "path": "$['payment']['instruments'][?@['handler_id'] == 'processor_1' && @['type'] == 'card']",
+      "required": ["credential"],
+      "properties": {
+        "credential": {
+          "anyOf": [
+            {
+              "properties": {"type": {"const": "pan"}},
+              "required": ["cvc"]
+            },
+            {
+              "properties": {"type": {"const": "network_token"}},
+              "required": ["cryptogram", "eci_value"]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+One path selects the submitted instrument, and one Object Constraint describes
+it. The sibling `required` applies to every matching instrument; the `anyOf`
+branches then apply to the nested `credential` object, which must satisfy at
+least one. Each branch pins `type` with `const`, so a branch matches only the
+credential family it describes;
+[`payment_credential.json`](site:schemas/common/types/payment_credential.json)
+already requires `type` on every credential, so no branch has to name it in
+`required`. A [PAN credential](site:schemas/common/types/pan_credential.json)
+without a `cvc` fails, as does a [network
+token](site:schemas/common/types/network_token_credential.json) missing its
+`eci_value`.
+
+Because every branch pins the discriminator, the branch set also closes the
+accepted credential families. A handler
+[token credential](site:schemas/common/types/token_credential.json) is a valid
+credential at this position but satisfies neither branch, so this Business does
+not accept it at this path. A Business that later accepts another family adds a
+branch for it.
+
+Two separately targeted constraints cannot express this rule. Request
+Constraints conjoin, so one value requiring `cvc` and another requiring
+`cryptogram` would require both. Discriminating through the path filter instead
+— selecting `pan` credentials in one value and `network_token` credentials in
+another — moves conditional logic into the selector, which paths do not carry.
+
+## Actions
+
+An Action is an outstanding unit of extension-defined work for a Platform to
+process. Its presence means the effect defined by its Action type is gated.
+Actions appear only in responses, under the `actions` map. The common
+fields identify the work but do not define how to process it; the active
+extension does.
+
+This section defines the common Actions shape and the invariants every adopting
+response shares. The shape is reusable, but a capability supports Actions only
+when its specification explicitly adopts it and defines the parent-specific
+behavior: where Actions appear, the effect each Action type gates, how Messages
+apply, and how a later response reflects processing. Schema composition alone
+does not establish support. Cart, Checkout, and Catalog adopt this shape; see
+[Cart — Actions](../shopping/cart/index.md#actions),
+[Checkout — Actions](../shopping/checkout/index.md#actions), and
+[Catalog — Actions](../shopping/catalog/index.md#actions) for their parent-specific
+contracts.
+
+Actions and Messages have different roles. An Action represents outstanding
+work: it carries an identity and extension-owned processing configuration. A
+Message communicates explanatory or diagnostic context about the current
+response and can identify an exact Action occurrence through its RFC 9535
+`path`. When a Message includes `path`, the Business **MUST** make it an RFC
+9535 JSONPath expression relative to the root of the containing UCP response
+object.
+Messages do not define how an Action is processed or determine its outcome, and
+neither an Action nor a Message requires the other.
+
+For example, a Business can surface one outstanding Action beside an
+explanatory Message (an illustrative, partial fragment):
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "actions": {
+    "com.example.identity.student_verification": [
+      {
+        "id": "verify-student-1",
+        "config": {
+          "verification_url": "https://business.example.com/verify/abc"
+        }
+      }
+    ]
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "eligibility_accepted",
+      "content": "Student discount applied provisionally. Verify your status.",
+      "path": "$.actions['com.example.identity.student_verification'][0]"
+    }
+  ]
+}
+```
+
+The Action identifies the outstanding work and carries extension-owned
+processing configuration under `config`. The Message's `path` selects the exact
+Action occurrence it explains. The
+[checkout eligibility example](../shopping/checkout/index.md#eligibility-verification-at-completion)
+composes this pattern into a complete Student Verification flow.
+
+For a newly processed successful response from a capability that adopts Actions,
+the Business **MUST** include every outstanding Action and **MUST** omit
+`actions` when none are outstanding.
+
+Cart and Checkout define request idempotency separately. Duplicate requests
+follow those existing rules and can return the original cached response,
+including its `actions` (see
+[Message Signatures — Replay Protection](../signatures.md#replay-protection)).
+
+An Action's gate and an operation-specific outcome are orthogonal. Neither a
+parent status nor a Message's type or severity determines whether an Action
+gates its Action-defined effect. A Message explains the response or reports the
+outcome of a particular requested effect. A Business **MAY** include an info or
+warning Message whose `path` selects an outstanding Action to explain the
+current response without reporting an operation failure. For a state-changing
+operation whose requested effect was not applied because of an Action, the
+Business **MUST** instead return the current resource with a `recoverable` error
+Message whose `path` selects the exact Action occurrence.
+
+The Business's response is authoritative for the state after an operation: the
+returned resource, together with any parent lifecycle its capability defines, is
+the source of truth. The Action-type contract defines how the Business observes
+processing, and the Platform then follows the containing capability's operation
+contract.
+
+When an Action prevents a Cart or Checkout operation from succeeding,
+processing the Action does not repeat that operation. If the Platform wants to
+try again, it submits a new operation under the existing
+[Replay Protection](../signatures.md#replay-protection) rules.
+
+Each Action key is a reverse-domain **Action type**: the name identifies the
+type of outstanding work, which is not necessarily the name of the extension
+that declares it. An active extension declares each Action type and defines its
+`config`, how a Platform processes it, its trust and fallback, and its outcomes.
+A single extension can declare more than one Action type. Each declaring
+extension contributes its Action-type keys to the containing capability's
+schema through `allOf` composition (see
+[Schema Composition](#schema-composition)), and capability negotiation selects
+which extensions are active. Negotiating an extension activates the whole
+contract it declares, including every Action type within it.
+
+Action type keys follow existing [Namespace Governance](#namespace-governance)
+rules: an extension can declare only types within a reverse-domain namespace
+controlled by its schema authority. An extension can use its own name as the key
+for a single Action type — as the
+[Student Verification example](../shopping/checkout/index.md#eligibility-verification-at-completion)
+does — or declare several Action types under distinct keys. Each value is a
+non-empty array of outstanding instances of that one Action type. The key
+identifies the type, so an instance carries no separate type discriminator; a
+Business surfaces multiple outstanding instances of the same type as multiple
+entries in that array.
+
+The `actions` map does not define a processing order across Action types. Within
+a single type's array, JSON preserves the order of its instances, and the
+extension that declares the type defines whether that order carries processing
+meaning. When ordering across Action types matters, the declaring extension
+defines the sequencing and which Action types become outstanding at each step.
+
+For example (illustrative only), a negotiated vendor extension
+`com.example.payment.authentication` declares two Action types:
+`com.example.payment.authentication.device_data_collection`, an invisible
+device- and browser-data collection step, and
+`com.example.payment.authentication.three_ds_challenge`, a Buyer-facing
+authentication step. Because the collection step precedes the challenge, the
+Business can emit the `device_data_collection` type first and, once its instance
+is processed, emit the `three_ds_challenge` type in a later response. This shows
+one extension declaring multiple Action types and sequencing them across
+responses; it does not standardize device data collection or the authentication
+challenge, which are illustrative here.
+
+Every instance shares a set of common fields:
+
+- `id` — a non-empty identifier for the Action instance.
+- `config` — an optional extension-owned configuration object.
+
+`id` is required on every instance; `config` is optional. An extension defines
+the instance-specific data a Platform needs to process its work under `config`;
+`config` is the extension-owned channel for that data.
+
+An Action instance also remains open to additional top-level fields for forward
+compatibility. A Platform **MUST** tolerate and ignore Action instance
+fields it does not recognize.
+
+The Business **MUST** use a distinct `id` for each Action instance in a response.
+
+When successive responses represent the same parent resource, the Business
+**MUST** keep the same Action type key and `id` while the same work remains
+outstanding. Replacement work **MUST** have a new `id`, and the Business
+**MUST NOT** reuse an `id` during that resource's lifetime.
+
+Otherwise, the common Actions contract defines no identity relationship between
+Actions in independent responses. Equal `id` values alone do not identify the
+same work.
+
+A Business **MUST** emit an Action type only when an extension that declares it
+is active for the containing capability in the negotiated intersection. The
+composed JSON Schema can validate the common fields and each declared type's key
+and `config` shape, but confirming that the declaring extension is active also
+requires the negotiated capability context.
+
+### Trust and Execution Boundaries
+
+Negotiating an extension confirms support for its complete Action-type contract
+before runtime. That agreement does not make every future runtime value or
+delegate trusted. Each instance remains subject to the composed schema, the
+Action-type contract, and Platform policy.
+
+The active Action-type contract defines which `config` fields a Platform processes
+and what they mean. A Platform **MUST NOT** treat any other field as an
+instruction to load content, render HTML, execute code, run a shell command, or
+invoke a native API.
+
+A Platform **MAY** apply additional trust or runtime policy and **MAY** decline
+any instance that does not satisfy it. Supporting a whole extension does not
+require a Platform to accept every runtime value.
+
+A Platform **MUST NOT** assume that the effect gated by an Action succeeded
+merely because an Action surface or external interaction completed. A later
+response from the Business, together with any parent lifecycle its capability
+defines, remains authoritative for that outcome.
+
+The declaring extension defines the concrete trust, execution, and fallback rules.
+The common Actions contract defines no generic machinery: no URL scheme, origin,
+or delegate policy; no sandbox, permission, or presentation model; no timeout,
+failure, or recovery model; and no callback, result, state, polling, or
+executor. Each concrete Action type adds only the machinery its own processing
+requires.
 
 ## Policies
 
