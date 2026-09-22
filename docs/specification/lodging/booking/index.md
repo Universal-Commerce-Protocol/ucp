@@ -783,23 +783,6 @@ property-collected charges and flexible payment terms integration.
         "selected_term_id": "pt_deposit_balance",
         "terms": [
           {
-            "id": "pt_pay_now",
-            "title": "Pay now",
-            "description": {
-              "plain": "Save $50 by paying for your stay today."
-            },
-            "schedules": [
-              {
-                "id": "sched_full",
-                "type": "immediate",
-                "description": {
-                  "plain": "Due today when you book."
-                },
-                "amount": 130000
-              }
-            ]
-          },
-          {
             "id": "pt_deposit_balance",
             "title": "First night now, balance at check-in",
             "description": {
