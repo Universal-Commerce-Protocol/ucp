@@ -38,6 +38,8 @@ from __future__ import annotations
 from pathlib import Path
 import re
 
+from markdown.extensions.toc import slugify as _toc_slugify
+
 # Repository root, resolved from this file so the extractor can be invoked
 # from any working directory.
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -73,6 +75,82 @@ EXCLUDED_FILES = frozenset(
 # declaration and before the (not yet implemented) nav and link tiers.
 CAPABILITY_BY_PREFIX = {
   "docs/specification/shopping/checkout": "dev.ucp.shopping.checkout",
+}
+
+# ---------------------------------------------------------------------------
+# Readable identifiers
+# ---------------------------------------------------------------------------
+#
+# Identifiers are REQ-<CAPABILITY>-[<DOCUMENT>-]<SECTION>-<ORDINAL>, for
+# example REQ-CHECKOUT-WARNING-PRESENTATION-03. They are meant to be read and
+# grepped, so a test binding says what it binds to.
+#
+# The ordinal is positional, which means inserting a requirement renumbers the
+# ones after it. That is why every record also publishes `content_digest`: the
+# identifier locates a requirement, and the digest says whether the rule it
+# names still has the same text. A maintenance check comparing both can tell
+# "this test's requirement was reworded" from "this test is orphaned", which
+# neither field can do alone.
+READABLE_ID_PREFIX = "REQ"
+
+# Short capability token for the identifier. Keyed by the reverse-DNS name so
+# widening scope does not mean parsing the identifier apart.
+CAPABILITY_SHORT_NAME = {
+  "dev.ucp.shopping.checkout": "CHECKOUT",
+}
+
+# Binding token per document. `index.md` is the capability's core document and
+# takes no token, which keeps its identifiers short and matches the way the
+# specification refers to core behavior.
+DOCUMENT_TOKEN = {
+  "index.md": None,
+  "rest.md": "REST",
+  "mcp.md": "MCP",
+  "a2a.md": "A2A",
+  "embedded.md": "EP",
+}
+
+# Section tokens are cut to this length on a word boundary. Long enough to stay
+# unambiguous, short enough that an identifier fits in a test name.
+MAX_SECTION_TOKEN_LENGTH = 24
+
+# Ordinals are zero-padded to this width so identifiers sort lexically.
+ORDINAL_WIDTH = 2
+
+# ---------------------------------------------------------------------------
+# Published URLs
+# ---------------------------------------------------------------------------
+
+# Anchors are derived with `markdown.extensions.toc.slugify`, which is what
+# renders the site: mkdocs.yml configures `toc` with only `permalink: true`,
+# so headings use Python-Markdown's default slugify. The `pymdownx.slugs`
+# entry in mkdocs.yml applies to `pymdownx.tabbed`, not to headings -- using
+# it for headings instead produces anchors that differ on some of them.
+SITE_BASE_URL = "https://ucp.dev"
+
+# Path segment under the site root. Documents map to a directory-style URL,
+# and `index.md` maps to the parent directory itself.
+DOCS_URL_ROOT = "docs"
+INDEX_DOCUMENT = "index.md"
+
+# ---------------------------------------------------------------------------
+# Published actor vocabulary
+# ---------------------------------------------------------------------------
+
+# Internal lowercase actor keys map to the uppercase names published in the
+# catalog. The vocabulary follows the specification's own prose, which says
+# Business rather than Merchant.
+PUBLISHED_ACTOR = {
+  "business": "BUSINESS",
+  "platform": "PLATFORM",
+  "agent": "AGENT",
+  "handler": "PAYMENT_HANDLER",
+  "buyer": "BUYER",
+  "host": "HOST",
+  "auth_server": "AUTHORIZATION_SERVER",
+  "embedded_checkout": "EMBEDDED_CHECKOUT",
+  "implementation": "IMPLEMENTATION",
+  "extension": "EXTENSION",
 }
 
 # Matches the declaration bullet, anchored on the list marker and bold label so
@@ -247,6 +325,31 @@ DEFAULT_REPORT_PATH = OUTPUT_DIR / "extraction_report.json"
 CATALOG_SCHEMA_VERSION = "1.0.0"
 EXTRACTOR_VERSION = "0.1.0"
 
+# Published identifier of the record schema, and where it lives in-repo.
+#
+# The schema sits beside the tool rather than in source/schemas, which holds
+# protocol entity schemas that the specification's examples are validated
+# against by the ucp-schema binary. The catalog is tooling output, not a
+# protocol entity, and adding it there enlists it in a validation pass it has
+# nothing to do with.
+CATALOG_SCHEMA_URL = "https://ucp.dev/schemas/requirements-catalog-v1.json"
+CATALOG_SCHEMA_PATH = (
+  Path(__file__).resolve().parent / "schema" / "requirements-catalog-v1.json"
+)
+
+# Envelope fields excluded when comparing a regenerated document against the
+# one on disk, because neither is a function of the specification.
+#
+# `generated_at` is a wall clock reading, so comparing it would fail on every
+# invocation.
+#
+# `commit_sha` is subtler: it cannot be known at generation time for the
+# commit that will contain the catalog. Writing the file changes the tree,
+# committing changes HEAD, and the recorded SHA is then always one commit
+# behind. Including it would mean the catalog invalidated itself the moment
+# it was committed.
+NON_DETERMINISTIC_FIELDS = frozenset({"generated_at", "commit_sha"})
+
 
 def spec_version() -> str:
   """Return the UCP release the specification tree represents.
@@ -372,3 +475,123 @@ def resolve_capability(
       return CAPABILITY_BY_PREFIX[prefix]
 
   return None
+
+
+def heading_anchor(heading: str) -> str:
+  """Return the HTML anchor the site generates for a heading.
+
+  Delegates to the renderer's own slugify rather than reimplementing it.
+  A hand-rolled version has to match exactly or the published link 404s,
+  and nothing would catch the drift.
+
+  Args:
+    heading: Heading text as it appears in the Markdown source.
+
+  Returns:
+    The anchor, without a leading '#'.
+
+  """
+  return _toc_slugify(heading, "-")
+
+
+def published_url(rel_path: str, section: str | None, version: str) -> str:
+  """Return the public URL for the clause's section.
+
+  Args:
+    rel_path: Repository-relative POSIX path to the source document.
+    section: Heading breadcrumb, or None.
+    version: Spec version segment, such as "draft".
+
+  Returns:
+    An absolute URL, anchored on the deepest heading when one is known.
+
+  """
+  path = Path(rel_path)
+  # `docs/specification/...` renders at `/<version>/specification/...`.
+  parts = list(path.parts)
+  if parts and parts[0] == DOCS_URL_ROOT:
+    parts = parts[1:]
+  # A page renders as a directory; index.md *is* its parent directory.
+  if parts and parts[-1] == INDEX_DOCUMENT:
+    parts = parts[:-1]
+  elif parts:
+    parts[-1] = Path(parts[-1]).stem
+
+  url = "/".join([SITE_BASE_URL, version, *parts]) + "/"
+
+  if section:
+    crumbs = [crumb.strip() for crumb in section.split(">") if crumb.strip()]
+    if crumbs:
+      url += "#" + heading_anchor(crumbs[-1])
+  return url
+
+
+def published_actor(actor: str | None) -> str | None:
+  """Return the uppercase published name for an internal actor key.
+
+  Args:
+    actor: Internal lowercase key, or None when unresolved.
+
+  Returns:
+    The published name, or None. A key with no mapping is converted to upper
+    case rather than dropped, so a lexicon addition cannot silently lose an
+    attribution.
+
+  """
+  if actor is None:
+    return None
+  return PUBLISHED_ACTOR.get(actor, actor.upper())
+
+
+def section_token(section: str | None) -> str:
+  """Return the section component of a readable identifier.
+
+  Uses the deepest heading, since that is the one that names the rule. The
+  first breadcrumb is the document title and is dropped as redundant.
+
+  Args:
+    section: Heading breadcrumb, or None.
+
+  Returns:
+    An uppercase hyphenated token, truncated on a word boundary.
+
+  """
+  if not section:
+    return "GENERAL"
+  crumbs = [crumb.strip() for crumb in section.split(">") if crumb.strip()]
+  if len(crumbs) > 1:
+    crumbs = crumbs[1:]
+  if not crumbs:
+    return "GENERAL"
+
+  token = re.sub(r"[^A-Za-z0-9]+", "-", crumbs[-1].replace("`", ""))
+  token = token.strip("-").upper()
+  if not token:
+    return "GENERAL"
+  if len(token) <= MAX_SECTION_TOKEN_LENGTH:
+    return token
+
+  # Only walk back to a word boundary when the cut lands mid-word; trimming
+  # unconditionally drops a whole word when the limit falls on a hyphen.
+  if token[MAX_SECTION_TOKEN_LENGTH] == "-":
+    return token[:MAX_SECTION_TOKEN_LENGTH]
+  cut = token[:MAX_SECTION_TOKEN_LENGTH]
+  if "-" in cut:
+    cut = cut[: cut.rfind("-")]
+  return cut or token[:MAX_SECTION_TOKEN_LENGTH]
+
+
+def document_token(rel_path: str) -> str | None:
+  """Return the binding token for a document, or None for the core document.
+
+  Args:
+    rel_path: Repository-relative POSIX path to the source document.
+
+  Returns:
+    An uppercase token such as "REST", or None when the document takes none.
+
+  """
+  name = Path(rel_path).name
+  if name in DOCUMENT_TOKEN:
+    return DOCUMENT_TOKEN[name]
+  return Path(name).stem.replace("-", "").upper()

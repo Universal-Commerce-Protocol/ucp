@@ -131,10 +131,15 @@ def digest_input(
   )
 
 
-def requirement_id(
+def requirement_digest(
   capability: str | None, compound_parent: str | None, normalized: str
 ) -> str:
-  """Return the identifier for a requirement, before duplicate resolution.
+  """Return the content digest for a requirement.
+
+  This is the stable half of a requirement's identity. It depends only on
+  what the clause says, never on where it sits, so reformatting the document
+  or moving a section leaves it untouched. The readable identifier carries
+  location; this carries content.
 
   Args:
     capability: Reverse-DNS capability identifier.
@@ -142,18 +147,13 @@ def requirement_id(
     normalized: Canonical clause text from `normalize`.
 
   Returns:
-    An identifier of the form ``UCP-SHOPPING-CHECKOUT-a1b2c3d4e5``.
+    The leading `config.ID_DIGEST_LENGTH` hex characters of the SHA-256 of
+    `digest_input`.
 
   """
   hash_input = digest_input(capability, compound_parent, normalized)
   digest = hashlib.sha256(hash_input.encode("utf-8")).hexdigest()
-  return "-".join(
-    (
-      config.ID_PREFIX,
-      config.capability_slug(capability),
-      digest[: config.ID_DIGEST_LENGTH],
-    )
-  )
+  return digest[: config.ID_DIGEST_LENGTH]
 
 
 def _order_key(clause: Clause) -> tuple[str, int, int]:
@@ -181,14 +181,61 @@ def _record(clause: Clause, **extra: object) -> dict[str, object]:
   return entry
 
 
+def readable_id(clause: Clause, ordinal: int) -> str:
+  """Return the readable identifier for a clause at a given ordinal.
+
+  Args:
+    clause: The clause being identified.
+    ordinal: 1-based position within its capability/document/section group.
+
+  Returns:
+    An identifier such as ``REQ-CHECKOUT-WARNING-PRESENTATION-03``.
+
+  """
+  capability = clause.capability or ""
+  parts = [
+    config.READABLE_ID_PREFIX,
+    config.CAPABILITY_SHORT_NAME.get(
+      capability, config.capability_slug(capability)
+    ),
+  ]
+  document = config.document_token(clause.source.file)
+  if document:
+    parts.append(document)
+  parts.append(config.section_token(clause.source.section))
+  parts.append(f"{ordinal:0{config.ORDINAL_WIDTH}d}")
+  return "-".join(parts)
+
+
+def _group_key(clause: Clause) -> str:
+  """Return the identifier prefix a clause's ordinal is counted within."""
+  capability = clause.capability or ""
+  parts = [
+    config.READABLE_ID_PREFIX,
+    config.CAPABILITY_SHORT_NAME.get(
+      capability, config.capability_slug(capability)
+    ),
+  ]
+  document = config.document_token(clause.source.file)
+  if document:
+    parts.append(document)
+  parts.append(config.section_token(clause.source.section))
+  return "-".join(parts)
+
+
 def assign_identities(
   clauses: list[Clause], report: ExtractionReport | None = None
 ) -> tuple[list[Requirement], ExtractionReport]:
   """Turn annotated clauses into identified requirements.
 
-  Clauses whose content and context are identical receive the same digest.
-  The first in source order keeps the bare identifier and each subsequent
-  one gains an ordinal, so an identifier is never silently shared.
+  Each requirement receives two identifiers. `id` is readable and counts an
+  ordinal within its section, allocated in source order so the catalog reads
+  in document sequence. `content_digest` is derived from the clause's content
+  alone and moves only when the obligation's wording does.
+
+  Clauses whose content and context are identical share a digest; that is
+  reported, but they still receive distinct identifiers, because the
+  identifier is positional and two copies occupy two positions.
 
   Args:
     clauses: Clauses that have been through classification and metadata.
@@ -201,28 +248,36 @@ def assign_identities(
   collected = report or ExtractionReport()
 
   normalized_by_clause = [normalize(clause.text) for clause in clauses]
-  base_ids = [
-    requirement_id(clause.capability, clause.compound_parent, normalized)
+  digests = [
+    requirement_digest(clause.capability, clause.compound_parent, normalized)
     for clause, normalized in zip(clauses, normalized_by_clause, strict=True)
   ]
 
-  grouped: dict[str, list[int]] = {}
-  for index, base in enumerate(base_ids):
-    grouped.setdefault(base, []).append(index)
+  # Ordinals run in source order within each group, so an identifier's number
+  # reflects where the requirement sits in the document rather than the order
+  # the parser happened to visit blocks.
+  order = sorted(range(len(clauses)), key=lambda i: _order_key(clauses[i]))
+  counters: dict[str, int] = {}
+  ids: list[str] = [""] * len(clauses)
+  for index in order:
+    key = _group_key(clauses[index])
+    counters[key] = counters.get(key, 0) + 1
+    ids[index] = readable_id(clauses[index], counters[key])
 
-  final_ids = list(base_ids)
-  for base, indices in grouped.items():
+  grouped: dict[str, list[int]] = {}
+  for index, digest in enumerate(digests):
+    grouped.setdefault(digest, []).append(index)
+
+  for digest, indices in grouped.items():
     if len(indices) == 1:
       continue
     ordered = sorted(indices, key=lambda i: _order_key(clauses[i]))
-    for ordinal, index in enumerate(ordered, start=1):
-      if ordinal > 1:
-        final_ids[index] = f"{base}-{ordinal}"
     collected.duplicate_requirements.append(
       _record(
         clauses[ordered[0]],
-        id=base,
+        content_digest=digest,
         copies=len(indices),
+        ids=[ids[i] for i in ordered],
         locations=[
           f"{clauses[i].source.file}:{clauses[i].source.line_start}"
           for i in ordered
@@ -239,11 +294,15 @@ def assign_identities(
           field.name: getattr(clause, field.name)
           for field in dataclasses.fields(clause)
         }
-        | {"normalized": normalized, "id": identifier}
+        | {
+          "normalized": normalized,
+          "id": identifier,
+          "content_digest": digest,
+        }
       )
     )
-    for clause, normalized, identifier in zip(
-      clauses, normalized_by_clause, final_ids, strict=True
+    for clause, normalized, identifier, digest in zip(
+      clauses, normalized_by_clause, ids, digests, strict=True
     )
   ]
   return requirements, collected

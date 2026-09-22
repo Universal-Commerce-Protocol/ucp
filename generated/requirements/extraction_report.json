@@ -2,11 +2,18 @@
   "schema_version": "1.0.0",
   "extractor_version": "0.1.0",
   "spec_version": "draft",
-  "scope": [
+  "generated_at": "2026-09-22T17:48:27Z",
+  "commit_sha": "3f5a6e2f77e4b75c6ea3337f5affa351f03f05b1",
+  "source_spec": [
     "docs/specification/shopping/checkout"
   ],
   "summary": {
-    "requirements": 224,
+    "total": 224,
+    "must_count": 99,
+    "must_not_count": 25,
+    "should_count": 51,
+    "should_not_count": 1,
+    "may_count": 48,
     "by_level": {
       "MAY": 48,
       "MUST": 99,
@@ -15,14 +22,14 @@
       "SHOULD NOT": 1
     },
     "by_actor": {
-      "UNRESOLVED": 55,
-      "business": 56,
-      "buyer": 1,
-      "embedded_checkout": 21,
-      "extension": 3,
-      "host": 31,
-      "implementation": 5,
-      "platform": 52
+      "BUSINESS": 56,
+      "BUYER": 1,
+      "EMBEDDED_CHECKOUT": 21,
+      "EXTENSION": 3,
+      "HOST": 31,
+      "IMPLEMENTATION": 5,
+      "PLATFORM": 52,
+      "UNRESOLVED": 55
     },
     "by_file": {
       "docs/specification/shopping/checkout/a2a.md": 1,
@@ -1020,8 +1027,12 @@
         "line": 779,
         "section": "Checkout Capability - MCP Binding > Message Signing > Response Signing",
         "text": "Response signatures are **RECOMMENDED** for:",
-        "id": "UCP-SHOPPING-CHECKOUT-9a9cfd1fd3",
+        "content_digest": "9a9cfd1fd3",
         "copies": 2,
+        "ids": [
+          "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-01",
+          "REQ-CHECKOUT-REST-RESPONSE-SIGNING-01"
+        ],
         "locations": [
           "docs/specification/shopping/checkout/mcp.md:779",
           "docs/specification/shopping/checkout/rest.md:1451"
@@ -1032,8 +1043,12 @@
         "line": 783,
         "section": "Checkout Capability - MCP Binding > Message Signing > Response Signing",
         "text": "Response signatures are **OPTIONAL** for:",
-        "id": "UCP-SHOPPING-CHECKOUT-66c8aff336",
+        "content_digest": "66c8aff336",
         "copies": 2,
+        "ids": [
+          "REQ-CHECKOUT-MCP-RESPONSE-SIGNING-02",
+          "REQ-CHECKOUT-REST-RESPONSE-SIGNING-02"
+        ],
         "locations": [
           "docs/specification/shopping/checkout/mcp.md:783",
           "docs/specification/shopping/checkout/rest.md:1455"

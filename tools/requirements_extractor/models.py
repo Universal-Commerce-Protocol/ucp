@@ -20,13 +20,18 @@ and the identity stage promotes each survivor to a `Requirement` by assigning
 an `id`.
 
 Nothing here performs I/O or parsing; keeping the models inert lets every other
-module import them without risking a circular dependency.
+module import them without risking a circular dependency. The one import is
+`config`, which is pure policy and imports nothing from this package -- the
+published field names, actor vocabulary and URL shape are naming decisions, so
+they belong there rather than hardcoded in a serializer.
 """
 
 from __future__ import annotations
 
 import dataclasses
 import enum
+
+from tools.requirements_extractor import config
 
 
 class Level(enum.Enum):
@@ -89,10 +94,11 @@ class BlockType(enum.Enum):
 class SourceRef:
   """Where a clause came from.
 
-  This is provenance only: none of these fields feed the requirement's
-  identifier. Section paths and file paths are both volatile (headings get
-  reorganized, files get moved), and including them would re-mint IDs on
-  changes that do not alter the obligation itself.
+  None of these fields feed `content_digest`. Section paths and file paths
+  are both volatile -- headings get reorganized, files get moved -- and
+  including them would re-mint the digest on changes that do not alter the
+  obligation itself. The readable `id` does incorporate the section, which
+  is precisely why it is paired with a digest that does not.
 
   Attributes:
     file: Repository-relative path, POSIX separators.
@@ -109,14 +115,24 @@ class SourceRef:
   section: str
   block_type: BlockType
 
-  def as_dict(self) -> dict[str, object]:
-    """Return a JSON-serializable form with enums reduced to strings."""
+  def as_dict(self, spec_version: str) -> dict[str, object]:
+    """Return a JSON-serializable form with enums reduced to strings.
+
+    Args:
+      spec_version: Release segment for the published URL.
+
+    Returns:
+      A dict whose keys match the published source schema. Line numbers are
+      published as `start_line`/`end_line`.
+
+    """
     return {
       "file": self.file,
-      "line_start": self.line_start,
-      "line_end": self.line_end,
+      "start_line": self.line_start,
+      "end_line": self.line_end,
       "section": self.section,
       "block_type": str(self.block_type),
+      "url": config.published_url(self.file, self.section, spec_version),
     }
 
 
@@ -172,23 +188,33 @@ class Clause:
 
 @dataclasses.dataclass
 class Requirement(Clause):
-  """A clause that has been assigned a stable, content-addressed identity.
+  """A clause that has been assigned a published identity.
 
-  The `id` digests `capability`, the normalized `compound_parent` and
-  `normalized`, joined by a unit separator; see identity.digest_input. All
-  three are published on the record, so an identifier can be recomputed and
-  checked without the spec or this code. Text alone would not do: the
-  obligation matrix reduces eight cells to "must" or "may", whose meaning
-  lives entirely in the row and column heading them.
+  Two identifiers are carried, because neither is sufficient alone.
+
+  `id` is readable and positional -- ``REQ-CHECKOUT-WARNING-PRESENTATION-03``
+  -- so a test binding says what it binds to. Being positional, it renumbers
+  when a requirement is inserted above it.
+
+  `content_digest` is a pure function of the clause's content: capability,
+  normalized `compound_parent` and `normalized`, joined by a unit separator
+  (see identity.digest_input). It does not move when the document does.
+
+  Carrying both lets a consumer distinguish "this requirement was reworded"
+  from "this requirement is gone", which is exactly the difference between a
+  test that needs review and a test that is orphaned. Text alone would not
+  serve as the digest input: the obligation matrix reduces eight cells to
+  "must" or "may", whose meaning lives entirely in the row and column
+  heading them.
 
   Attributes:
-    id: Identifier of the form ``UCP-<CAPABILITY-SLUG>-<10 hex>``, with an
-      optional ``-2``/``-3`` ordinal disambiguating requirements whose
-      content and context are genuinely identical.
+    id: Readable identifier, ``REQ-<CAPABILITY>-[<DOCUMENT>-]<SECTION>-<NN>``.
+    content_digest: Ten hex characters derived from the clause's content.
 
   """
 
   id: str = ""
+  content_digest: str = ""
 
   def as_dict(self, spec_version: str) -> dict[str, object]:
     """Return the JSON-serializable catalog record.
@@ -204,18 +230,19 @@ class Requirement(Clause):
     """
     return {
       "id": self.id,
+      "content_digest": self.content_digest,
       "capability": self.capability,
       "version": spec_version,
       "level": str(self.level) if self.level else None,
-      "actor": self.actor,
+      "target_actor": config.published_actor(self.actor),
       "actor_confidence": round(self.actor_confidence, 2),
-      "text": self.text,
+      "clause": self.text,
       "normalized": self.normalized,
       "condition": self.condition,
       "referenced_fields": list(self.referenced_fields),
       "compound_parent": self.compound_parent,
       "document_order": self.document_order,
-      "source": self.source.as_dict(),
+      "source": self.source.as_dict(spec_version),
     }
 
 

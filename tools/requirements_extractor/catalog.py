@@ -38,8 +38,10 @@ ordering on the digest.
 from __future__ import annotations
 
 import collections
+import datetime
 import json
 from pathlib import Path
+import subprocess
 
 from tools.requirements_extractor import (
   classifier,
@@ -96,12 +98,20 @@ def summarize(
   diagnostics = {
     name: len(entries) for name, entries in sorted(report.as_dict().items())
   }
+  by_level = _counter(
+    [str(r.level) for r in requirements if r.level is not None]
+  )
   return {
-    "requirements": len(requirements),
-    "by_level": _counter(
-      [str(r.level) for r in requirements if r.level is not None]
+    "total": len(requirements),
+    "must_count": by_level.get("MUST", 0),
+    "must_not_count": by_level.get("MUST NOT", 0),
+    "should_count": by_level.get("SHOULD", 0),
+    "should_not_count": by_level.get("SHOULD NOT", 0),
+    "may_count": by_level.get("MAY", 0),
+    "by_level": by_level,
+    "by_actor": _counter(
+      [config.published_actor(r.actor) or "UNRESOLVED" for r in requirements]
     ),
-    "by_actor": _counter([r.actor or "UNRESOLVED" for r in requirements]),
     "by_file": _counter([r.source.file for r in requirements]),
     "with_condition": sum(1 for r in requirements if r.condition),
     "with_referenced_fields": sum(
@@ -114,15 +124,54 @@ def summarize(
   }
 
 
+def _commit_sha() -> str | None:
+  """Return the current commit, or None outside a git checkout.
+
+  Provenance that survives the file being copied out of the repository. It
+  is stable for a given tree, so unlike a timestamp it does not by itself
+  make two runs differ.
+  """
+  try:
+    completed = subprocess.run(
+      ["git", "rev-parse", "HEAD"],
+      cwd=config.REPO_ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=10,
+    )
+  except (OSError, subprocess.SubprocessError):
+    return None
+  sha = completed.stdout.strip()
+  return sha or None
+
+
 def _envelope(spec_version: str) -> dict[str, object]:
-  """Return the provenance header shared by both documents."""
+  """Return the provenance header shared by both documents.
+
+  `$schema` is deliberately not here. Both documents share provenance, but
+  only the catalog has a published schema; claiming it on the report would
+  assert a shape the report does not have.
+
+  `generated_at` is the one field here that changes between runs of the same
+  input. It is published because a consumer reading the catalog outside the
+  repository has no other way to date it, but it is excluded from the
+  comparison `--check` performs -- otherwise every run would report the
+  committed catalog as stale and the CI gate would be worthless.
+  """
   return {
     "schema_version": config.CATALOG_SCHEMA_VERSION,
     "extractor_version": config.EXTRACTOR_VERSION,
     "spec_version": spec_version,
+    "generated_at": datetime.datetime.now(datetime.UTC).strftime(
+      "%Y-%m-%dT%H:%M:%SZ"
+    ),
+    "commit_sha": _commit_sha(),
     # POSIX strings rather than Path objects, so the document is
     # serializable and identical regardless of the host platform.
-    "scope": sorted(directory.as_posix() for directory in config.SPEC_DIRS),
+    "source_spec": sorted(
+      directory.as_posix() for directory in config.SPEC_DIRS
+    ),
   }
 
 
@@ -141,6 +190,7 @@ def catalog_document(
   """
   spec_version = config.spec_version()
   return {
+    "$schema": config.CATALOG_SCHEMA_URL,
     **_envelope(spec_version),
     "summary": summarize(requirements, report),
     "requirements": [r.as_dict(spec_version) for r in requirements],

@@ -40,6 +40,7 @@ Usage:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -51,7 +52,7 @@ from tools.requirements_extractor import catalog, config  # noqa: E402
 
 def _print_summary(summary: dict) -> None:
   """Print the run summary in a form that is readable in CI logs."""
-  print(f"requirements: {summary['requirements']}")
+  print(f"requirements: {summary['total']}")
 
   print("\n  by level:")
   for level, count in summary["by_level"].items():
@@ -98,6 +99,32 @@ def _display_path(path: Path) -> str:
     return str(path)
 
 
+def _comparable(text: str) -> str:
+  """Return a document's text with non-deterministic fields removed.
+
+  `generated_at` is a wall clock reading, so a byte comparison against the
+  committed file would fail every time. Stripping it from both sides keeps
+  the check meaningful: everything that is a function of the specification
+  still has to match exactly.
+
+  Args:
+    text: Serialized JSON document.
+
+  Returns:
+    Serialized JSON with `config.NON_DETERMINISTIC_FIELDS` removed, or the
+    input unchanged if it does not parse.
+
+  """
+  try:
+    document = json.loads(text)
+  except json.JSONDecodeError:
+    return text
+  if isinstance(document, dict):
+    for field in config.NON_DETERMINISTIC_FIELDS:
+      document.pop(field, None)
+  return catalog.serialize(document)
+
+
 def _check(paths_and_documents: list[tuple[Path, dict]]) -> int:
   """Compare regenerated documents against what is on disk.
 
@@ -110,10 +137,10 @@ def _check(paths_and_documents: list[tuple[Path, dict]]) -> int:
   """
   stale = []
   for path, document in paths_and_documents:
-    expected = catalog.serialize(document)
+    expected = _comparable(catalog.serialize(document))
     if not path.exists():
       stale.append((path, "missing"))
-    elif path.read_text(encoding="utf-8") != expected:
+    elif _comparable(path.read_text(encoding="utf-8")) != expected:
       stale.append((path, "out of date"))
 
   if not stale:
