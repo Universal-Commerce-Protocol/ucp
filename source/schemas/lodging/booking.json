@@ -83,7 +83,7 @@
     },
     "travel_purpose": {
       "type": "string",
-      "description": "Purpose of the trip or reservation. Well-known values: `business`, `leisure`. Businesses MAY implement and support additional values.",
+      "description": "Purpose of the trip or reservation, supplied by the Platform. Well-known values: `business`, `leisure`. Platforms MAY send additional values; a Business MUST ignore values it does not recognize and treat the purpose as unspecified.",
       "examples": [
         "business",
         "leisure"

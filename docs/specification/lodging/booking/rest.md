@@ -507,10 +507,19 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 ### Update Booking Session
 
-Update calls allow clients to progressively build optional fields
-(e.g., `guests`, `booker`, `travel_purpose`) across multiple calls.
-Each PUT replaces the entire session,
-so clients must include all previously set fields they wish to retain.
+This is a full replacement operation. The Platform **MUST** send the
+entire booking session resource, including any data updates to write-only
+fields; the supplied resource replaces the existing booking session state.
+The Platform **MUST NOT** start a new Update operation while the booking session is
+`complete_in_progress`. Duplicate requests remain subject to
+[Replay Protection](../../signatures.md#replay-protection). If the Business receives a
+new Update request in that state, it **MUST** leave the booking session
+unchanged and return the current booking session with a recoverable error message.
+
+All fields in `guests`, `booker`, and `travel_purpose` are optional, allowing
+the Platform to progressively build the booking session across multiple calls.
+Outside `complete_in_progress`, each Update replaces the entire booking session,
+so the Platform **MUST** include all previously set fields it intends to retain.
 
 If businesses have specific logic to enforce field existence in `guest`,
 `booker`, or addresses (i.e. `billing_address`), this is the right
@@ -1343,8 +1352,10 @@ operations unless otherwise noted.
 * **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Protocol Mechanics
 

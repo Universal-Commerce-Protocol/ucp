@@ -149,7 +149,7 @@
     },
     {
       "name": "complete_booking_session",
-      "summary": "Complete booking session and confirm room reservation",
+      "summary": "Complete booking session and confirm stay reservation",
       "params": [
         {
           "name": "meta",
