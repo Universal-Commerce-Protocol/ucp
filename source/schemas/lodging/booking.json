@@ -9,9 +9,8 @@
     "ucp",
     "id",
     "status",
-    "accommodation",
-    "room_rates",
-    "itinerary",
+    "property",
+    "stays",
     "currency",
     "totals",
     "links"
@@ -40,34 +39,21 @@
       "description": "Booking state indicating the current phase and required action. See Booking Status lifecycle documentation for state transition details.",
       "ucp_request": "omit"
     },
-    "accommodation": {
-      "$ref": "types/accommodation.json",
-      "description": "Accommodation location the booking is associated with.",
+    "property": {
+      "$ref": "types/property.json",
+      "description": "The physical establishment or geographic location where the lodging is situated (e.g., hotel, resort, villa estate, cabin park).",
       "ucp_request": {
         "create": "required",
         "update": "required",
         "complete": "omit"
       }
     },
-    "room_rates": {
+    "stays": {
       "type": "array",
       "items": {
-        "$ref": "types/room_rate.json"
+        "$ref": "types/stay.json"
       },
-      "description": "List of room and rate plan bindings for the booking.",
-      "ucp_request": {
-        "create": "required",
-        "update": "required",
-        "complete": "omit"
-      }
-    },
-    "itinerary": {
-      "$ref": "../common/types/date_interval.json",
-      "description": "Duration of the booking itinerary.",
-      "required": [
-        "start_date",
-        "end_date"
-      ],
+      "description": "List of stay line-items for the booking.",
       "ucp_request": {
         "create": "required",
         "update": "required",

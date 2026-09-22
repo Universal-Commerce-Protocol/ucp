@@ -75,10 +75,10 @@ Booking follows a progressive session lifecycle:
 
 ## Key Concepts
 
-* **Compound Room Rate Binding (`room_rate`)**: A lodging reservation is composed
-  of one or more room rate units. A `room_rate` is a compound binding linking
-  a physical room type (`room_type`), a commercial rate contract
-  (`rate_plan`), occupancy requirements (`occupancy`), and guest room
+* **Compound Stay Binding (`stay`)**: A lodging reservation is composed
+  of one or more stay units. A `stay` is a compound binding linking
+  a physical accommodation type (`accommodation_type`), a commercial rate contract
+  (`rate_plan`), stay dates (`stay_dates`), occupancy requirements (`occupancy`), and guest
   assignments (`guest_assignments`).
 * **Platform-Generated Guest Identifiers (`guest.id`)**: Unlike business-scoped
   catalog and room identifiers, guest identifiers are generated, allocated, and
@@ -91,12 +91,12 @@ Booking follows a progressive session lifecycle:
     * **Timing**: Platform **SHOULD NOT** send `guests[]` identity fields beyond `id` before the
       booking reaches `ready_for_complete`, and **SHOULD** send only the fields the business
       requests via `messages[]`.
-* **Guest Pool & Room Assignment Model**: Guest data is structured into a
+* **Guest Pool & Stay Assignment Model**: Guest data is structured into a
   two-level relational model:
     * **Root Guest Pool (`guests[]`)**: A flat collection of all individual guest
       profiles associated with the entire reservation.
-    * **Room Assignments (`room_rates[].guest_assignments[]`)**: Granular mappings
-      associating specific room units with guests from the root pool via
+    * **Stay Assignments (`stays[].guest_assignments[]`)**: Granular mappings
+      associating specific stay units with guests from the root pool via
       `guest_id` and designating occupancy roles (such as `primary_guest` or
       `additional_guest`).
 * **Separation of Booker and Guests**: The data model strictly separates the
@@ -129,9 +129,9 @@ occupancy taxes, or a remaining room balance).
 * **Authoritative Root Total (`totals`)**: The top-level `totals` array represents the binding,
   authoritative pricing breakdown and aggregate financial commitment for the entire reservation
   stay across all requested room units.
-* **Stay-Level Room Rate Total (`room_rates[].totals`)**: Each entry in `room_rates[].totals`
-  reflects the total charges for that specific room rate unit across the entire itinerary stay
-  duration (i.e., check-in to check-out), **NOT** a per-night figure.
+* **Stay-Level Total (`stays[].totals`)**: Each entry in `stays[].totals`
+  reflects the total charges for that specific stay unit across the entire stay
+  duration (`stay_dates`, i.e., check-in to check-out), **NOT** a per-night figure.
 * **Itemized Subtotals and Nightly Breakdown (`lines`)**: The `lines` array under a total item
   provides supplementary, itemized clarity:
     * `subtotal` total items **MAY** carry `lines` representing the per-night room rate breakdown.
@@ -457,8 +457,8 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 
 ### Platform
 
-* **MUST** supply valid `accommodation.id`, and either a pre-composed `room_rate.id`
-  OR both `room_type.id` and `rate_plan.id` identifiers sourced from upper-funnel
+* **MUST** supply valid `property.id`, and either a pre-composed `stay.id`
+  OR both `accommodation_type.id` and `rate_plan.id` identifiers sourced from upper-funnel
   discovery mechanisms when creating a booking session.
 * **MUST** identify a lead guest by providing `booker` details or designating at
   least one guest with `role: "primary_guest"` (including full legal name and contact
@@ -484,14 +484,14 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 
 ### Business
 
-* **MUST** evaluate requested `room_rate.id`, or the compound `room_type.id` and
+* **MUST** evaluate requested `stay.id`, or the compound `accommodation_type.id` and
   `rate_plan.id` bindings against real-time availability and inventory constraints,
-  echoing authoritative room metadata, pricing totals, and policy terms.
+  echoing authoritative metadata, pricing totals, and policy terms.
 * **MUST** preserve platform-supplied `guest.id` identifiers across session
   updates and responses without remapping, renaming, or mutating them.
-* **MUST** validate that all `room_rates[].guest_assignments[].guest_id`
+* **MUST** validate that all `stays[].guest_assignments[].guest_id`
   references match an existing entry in the root `guests[]` array.
-* **MUST** enforce physical room `capacity` limits against the total assigned
+* **MUST** enforce physical `capacity` limits against the total assigned
   occupants and guest ages.
 * **MUST** send a confirmation email after the booking has been completed when a
   valid email address is available in `booker` or primary guest details.
@@ -601,19 +601,15 @@ property-collected charges and flexible payment terms integration.
       "id": "bks_example_01",
       "status": "incomplete",
       "currency": "JPY",
-      "itinerary": {
-        "start_date": "2026-10-01",
-        "end_date": "2026-10-04"
-      },
-      "accommodation": {
-        "id": "acc_ginza_hotel",
+      "property": {
+        "id": "pp_ginza_hotel",
         "name": "Ginza Grand Hotel"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rr_dlx_king_std",
-          "room_type": {
-            "id": "rt_dlx_king",
+          "id": "stay_dlx_king_std",
+          "accommodation_type": {
+            "id": "at_dlx_king",
             "title": "Deluxe King Room"
           },
           "rate_plan": {
@@ -623,6 +619,10 @@ property-collected charges and flexible payment terms integration.
           "occupancy": {
             "adults": 2,
             "total": 2
+          },
+          "stay_dates": {
+            "start_date": "2026-10-01",
+            "end_date": "2026-10-04"
           },
           "totals": [
             {
@@ -742,19 +742,15 @@ property-collected charges and flexible payment terms integration.
       "id": "bks_example_02",
       "status": "incomplete",
       "currency": "USD",
-      "itinerary": {
-        "start_date": "2026-09-01",
-        "end_date": "2026-09-04"
-      },
-      "accommodation": {
-        "id": "acc_grand_hotel",
+      "property": {
+        "id": "pp_grand_hotel",
         "name": "Grand Hotel"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rr_king_std",
-          "room_type": {
-            "id": "rt_king",
+          "id": "stay_king_std",
+          "accommodation_type": {
+            "id": "at_king",
             "title": "King Room"
           },
           "rate_plan": {
@@ -764,6 +760,10 @@ property-collected charges and flexible payment terms integration.
           "occupancy": {
             "adults": 2,
             "total": 2
+          },
+          "stay_dates": {
+            "start_date": "2026-09-01",
+            "end_date": "2026-09-04"
           },
           "totals": [
             {
@@ -910,19 +910,15 @@ property-collected charges and flexible payment terms integration.
       "id": "bks_example_03",
       "status": "incomplete",
       "currency": "USD",
-      "itinerary": {
-        "start_date": "2026-09-01",
-        "end_date": "2026-09-04"
-      },
-      "accommodation": {
-        "id": "acc_grand_hotel",
+      "property": {
+        "id": "pp_grand_hotel",
         "name": "Grand Hotel"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rr_king_std",
-          "room_type": {
-            "id": "rt_king",
+          "id": "stay_king_std",
+          "accommodation_type": {
+            "id": "at_king",
             "title": "King Room"
           },
           "rate_plan": {
@@ -932,6 +928,10 @@ property-collected charges and flexible payment terms integration.
           "occupancy": {
             "adults": 2,
             "total": 2
+          },
+          "stay_dates": {
+            "start_date": "2026-09-01",
+            "end_date": "2026-09-04"
           },
           "totals": [
             {
@@ -1053,11 +1053,11 @@ Step-up action directives required to progress the booking session (e.g., 3D Sec
 
 {{ schema_fields('types/actions', 'lodging/booking') }}
 
-### Accommodation
+### Property
 
-Physical property details associated with the reservation.
+The physical establishment or geographic location where the lodging is situated (e.g., hotel, resort, villa estate, cabin park).
 
-{{ schema_fields('types/accommodation_resp', 'lodging/booking') }}
+{{ schema_fields('types/property_resp', 'lodging/booking') }}
 
 ### Booking Confirmation
 
@@ -1073,7 +1073,7 @@ The legal contracting party and primary point of contact making the reservation.
 
 ### Capacity
 
-Occupancy limits and child age thresholds supported by a physical room type.
+Occupancy limits and child age thresholds supported by a physical accommodation type.
 
 {{ schema_fields('types/capacity', 'lodging/booking') }}
 
@@ -1098,7 +1098,7 @@ uniquely identify the occupant within the booking session.
 
 ### Guest Assignment
 
-Relational link mapping a room unit to an occupant from the root `guests[]` pool
+Relational link mapping a stay unit to an occupant from the root `guests[]` pool
 via `guest_id` with a designated role.
 
 {{ schema_fields('types/guest_assignment', 'lodging/booking') }}
@@ -1123,7 +1123,7 @@ Compliance and legal links (e.g., Privacy Policy, Terms of Service).
 
 ### Occupancy
 
-Requested adult and child guest count breakdown for a room.
+Requested adult and child guest count breakdown for a stay.
 
 {{ schema_fields('types/occupancy', 'lodging/booking') }}
 
@@ -1135,8 +1135,8 @@ Payment details and collected payment instruments.
 
 ### Policy
 
-Policies (cancellation terms, house rules, and the like) that apply to the booking session or room rates.
-JSONPath targets in `applies_to` are relative to this response root (e.g., `$.room_rates[0]`).
+Policies (cancellation terms, house rules, and the like) that apply to the booking session or stays.
+JSONPath targets in `applies_to` are relative to this response root (e.g., `$.stays[0]`).
 See [Policies](../../overview/index.md#policies) for the full model.
 
 {{ schema_fields('types/policy', 'lodging/booking') }}
@@ -1148,18 +1148,18 @@ The `id` is discovered from upper-funnel search.
 
 {{ schema_fields('types/rate_plan', 'lodging/booking') }}
 
-### Room Rate
+### Stay
 
-Compound binding uniting physical room real estate (`room_type.id`),
-commercial rate terms (`rate_plan.id`), occupancy, and guest assignments.
+Compound binding uniting physical accommodation real estate (`accommodation_type.id`),
+commercial rate terms (`rate_plan.id`), stay dates (`stay_dates`), occupancy, and guest assignments.
 
-{{ schema_fields('types/room_rate', 'lodging/booking') }}
+{{ schema_fields('types/stay', 'lodging/booking') }}
 
-### Room Type
+### Accommodation Type
 
-Physical room real estate attributes and capacity limits.
+Category or specification of the rentable physical space (e.g., room, apartment, villa, campsite pitch) and capacity limits.
 
-{{ schema_fields('types/room_type', 'lodging/booking') }}
+{{ schema_fields('types/accommodation_type', 'lodging/booking') }}
 
 ### Signals
 
