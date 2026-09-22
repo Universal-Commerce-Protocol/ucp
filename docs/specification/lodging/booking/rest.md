@@ -103,7 +103,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 ### Create Booking Session
 
-#### Single-room Booking
+#### Single-stay Booking
 
 === "Request"
 
@@ -115,13 +115,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     ...other required headers...
 
     {
-      "accommodation": {
+      "property": {
         "id": "hotel_123"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen"
           },
           "rate_plan": {
@@ -130,13 +130,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "occupancy": {
             "adults": 2,
             "total": 2
+          },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
           }
         }
-      ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      }
+      ]
     }
     ```
 
@@ -163,7 +163,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       },
       "id": "booking_123",
       "status": "incomplete",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
         "address": {
@@ -174,10 +174,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "postal_code": "85004"
         }
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -205,6 +205,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             "adults": 2,
             "total": 2
           },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
+          },
           "totals": [
             {
               "type": "subtotal",
@@ -221,10 +225,6 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "currency": "USD",
       "totals": [
         {
@@ -290,7 +290,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     }
     ```
 
-#### Multi-room Booking
+#### Multi-stay Booking
 
 === "Request"
 
@@ -302,13 +302,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     ...other required headers...
 
     {
-      "accommodation": {
+      "property": {
         "id": "hotel_123"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen"
           },
           "rate_plan": {
@@ -317,11 +317,15 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "occupancy": {
             "adults": 2,
             "total": 2
+          },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
           }
         },
         {
-          "id": "rt_standard_king__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_standard_king__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_standard_king"
           },
           "rate_plan": {
@@ -330,13 +334,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "occupancy": {
             "adults": 1,
             "total": 1
+          },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
           }
         }
-      ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      }
+      ]
     }
     ```
 
@@ -363,7 +367,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
       },
       "id": "booking_124",
       "status": "incomplete",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
         "address": {
@@ -374,10 +378,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "postal_code": "85004"
         }
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -405,6 +409,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             "adults": 2,
             "total": 2
           },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
+          },
           "totals": [
             {
               "type": "subtotal",
@@ -421,8 +429,8 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           ]
         },
         {
-          "id": "rt_standard_king__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_standard_king__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_standard_king",
             "title": "Standard King Room",
             "capacity": {
@@ -437,6 +445,10 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           "occupancy": {
             "adults": 1,
             "total": 1
+          },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
           },
           "totals": [
             {
@@ -454,10 +466,6 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "currency": "USD",
       "totals": [
         {
@@ -499,13 +507,22 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 ### Update Booking Session
 
-Update calls allow clients to progressively build optional fields
-(e.g., `guests`, `booker`, `travel_purpose`) across multiple calls.
-Each PUT replaces the entire session,
-so clients must include all previously set fields they wish to retain.
+This is a full replacement operation. The Platform **MUST** send the
+entire booking session resource, including any data updates to write-only
+fields; the supplied resource replaces the existing booking session state.
+The Platform **MUST NOT** start a new Update operation while the booking session is
+`complete_in_progress`. Duplicate requests remain subject to
+[Replay Protection](../../signatures.md#replay-protection). If the Business receives a
+new Update request in that state, it **MUST** leave the booking session
+unchanged and return the current booking session with a recoverable error message.
 
-If businesses have specific logic to enforce field existence in `guest`,
-`booker`, or addresses (i.e. `billing_address`), this is the right
+All fields in `guests`, `booker`, `travel_purpose`, and `stays[].guest_assignments`
+are optional, allowing the Platform to progressively build the booking session across
+multiple calls. Outside `complete_in_progress`, each Update replaces the entire
+booking session, so the Platform **MUST** include all previously set fields it intends to retain.
+
+If businesses have specific logic to enforce field existence in `guests`,
+`booker`, `guest_assignments`, or addresses (i.e. `billing_address`), this is the right
 place to set these expectations via `messages`.
 
 === "Request"
@@ -518,13 +535,13 @@ place to set these expectations via `messages`.
     ...other required headers...
 
     {
-      "accommodation": {
+      "property": {
         "id": "hotel_123"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen"
           },
           "rate_plan": {
@@ -533,6 +550,10 @@ place to set these expectations via `messages`.
           "occupancy": {
             "adults": 2,
             "total": 2
+          },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
           },
           "guest_assignments": [
             {
@@ -546,10 +567,6 @@ place to set these expectations via `messages`.
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       // New data introduced in the update call.
       "guests": [
         {
@@ -606,7 +623,7 @@ place to set these expectations via `messages`.
       },
       "id": "booking_123",
       "status": "ready_for_complete",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
         "address": {
@@ -617,10 +634,10 @@ place to set these expectations via `messages`.
           "postal_code": "85004"
         }
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -648,6 +665,10 @@ place to set these expectations via `messages`.
             "adults": 2,
             "total": 2
           },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
+          },
           "guest_assignments": [
             {
               "guest_id": "gst_01",
@@ -674,10 +695,6 @@ place to set these expectations via `messages`.
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "guests": [
         {
           "id": "gst_01",
@@ -814,7 +831,7 @@ place to set these expectations via `messages`.
       },
       "id": "booking_123",
       "status": "completed",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
         "address": {
@@ -825,10 +842,10 @@ place to set these expectations via `messages`.
           "postal_code": "85004"
         }
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -856,6 +873,10 @@ place to set these expectations via `messages`.
             "adults": 2,
             "total": 2
           },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
+          },
           "guest_assignments": [
             {
               "guest_id": "gst_01",
@@ -882,10 +903,6 @@ place to set these expectations via `messages`.
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "guests": [
         {
           "id": "gst_01",
@@ -997,7 +1014,7 @@ place to set these expectations via `messages`.
       },
       "id": "booking_123",
       "status": "completed",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
         "address": {
@@ -1008,10 +1025,10 @@ place to set these expectations via `messages`.
           "postal_code": "85004"
         }
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -1039,6 +1056,10 @@ place to set these expectations via `messages`.
             "adults": 2,
             "total": 2
           },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
+          },
           "guest_assignments": [
             {
               "guest_id": "gst_01",
@@ -1065,10 +1086,6 @@ place to set these expectations via `messages`.
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "guests": [
         {
           "id": "gst_01",
@@ -1180,7 +1197,7 @@ place to set these expectations via `messages`.
       "id": "booking_123",
       // Status is updated upon a successful cancellation.
       "status": "canceled",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel",
         "address": {
@@ -1191,10 +1208,10 @@ place to set these expectations via `messages`.
           "postal_code": "85004"
         }
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -1222,6 +1239,10 @@ place to set these expectations via `messages`.
             "adults": 2,
             "total": 2
           },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
+          },
           "guest_assignments": [
             {
               "guest_id": "gst_01",
@@ -1248,10 +1269,6 @@ place to set these expectations via `messages`.
           ]
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "guests": [
         {
           "id": "gst_01",
@@ -1335,8 +1352,10 @@ operations unless otherwise noted.
 * **Idempotency-Key**: Operations that modify state **SHOULD** support
     idempotency. When provided, the server **MUST**:
     1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+    2. Return the cached result for duplicate keys whose request body matches the original.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -1391,14 +1410,14 @@ with HTTP 200 and the UCP envelope containing `messages`:
   },
   "id": "booking_123",
   "status": "incomplete",
-  "accommodation": {
+  "property": {
     "id": "hotel_123",
     "name": "Beautiful Scenery Hotel"
   },
-  "room_rates": [
+  "stays": [
     {
-      "id": "rt_luxury_queen__rp_avg_base_rate",
-      "room_type": {
+      "id": "stay_luxury_queen__rp_avg_base_rate",
+      "accommodation_type": {
         "id": "rt_luxury_queen",
         "title": "Luxury Queen Room with Two Queen Beds",
         "capacity": {
@@ -1425,13 +1444,13 @@ with HTTP 200 and the UCP envelope containing `messages`:
       "occupancy": {
         "adults": 6,
         "total": 6
+      },
+      "stay_dates": {
+        "start_date": "2026-07-15",
+        "end_date": "2026-07-21"
       }
     }
   ],
-  "itinerary": {
-    "start_date": "2026-07-15",
-    "end_date": "2026-07-21"
-  },
   "currency": "USD",
   "totals": [
     {
@@ -1460,7 +1479,7 @@ with HTTP 200 and the UCP envelope containing `messages`:
       "type": "error",
       "code": "occupancy_exceeded_capacity",
       "content": "Number of additional guests requested surpassed room capacity.",
-      "path": "$.room_rates[0]",
+      "path": "$.stays[0]",
       "severity": "recoverable"
     }
   ]

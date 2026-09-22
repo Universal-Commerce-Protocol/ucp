@@ -1,11 +1,11 @@
 {
-  "accommodation": {
-    "id": "acc_scaffold"
+  "property": {
+    "id": "pp_scaffold"
   },
-  "room_rates": [
+  "stays": [
     {
-      "id": "rr_scaffold",
-      "room_type": {
+      "id": "ss_scaffold",
+      "accommodation_type": {
         "id": "room_scaffold"
       },
       "rate_plan": {
@@ -15,6 +15,10 @@
         "adults": 1,
         "total": 1
       },
+      "stay_dates": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-01-05"
+      },
       "guest_assignments": [
         {
           "guest_id": "gst_scaffold",
@@ -23,10 +27,6 @@
       ]
     }
   ],
-  "itinerary": {
-    "start_date": "2026-01-01",
-    "end_date": "2026-01-05"
-  },
   "guests": [
     {
       "id": "gst_scaffold",

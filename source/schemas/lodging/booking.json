@@ -9,9 +9,8 @@
     "ucp",
     "id",
     "status",
-    "accommodation",
-    "room_rates",
-    "itinerary",
+    "property",
+    "stays",
     "currency",
     "totals",
     "links"
@@ -40,34 +39,21 @@
       "description": "Booking state indicating the current phase and required action. See Booking Status lifecycle documentation for state transition details.",
       "ucp_request": "omit"
     },
-    "accommodation": {
-      "$ref": "types/accommodation.json",
-      "description": "Accommodation location the booking is associated with.",
+    "property": {
+      "$ref": "types/property.json",
+      "description": "The physical establishment or geographic location where the lodging is situated (e.g., hotel, resort, villa estate, cabin park).",
       "ucp_request": {
         "create": "required",
         "update": "required",
         "complete": "omit"
       }
     },
-    "room_rates": {
+    "stays": {
       "type": "array",
       "items": {
-        "$ref": "types/room_rate.json"
+        "$ref": "types/stay.json"
       },
-      "description": "List of room and rate plan bindings for the booking.",
-      "ucp_request": {
-        "create": "required",
-        "update": "required",
-        "complete": "omit"
-      }
-    },
-    "itinerary": {
-      "$ref": "../common/types/date_interval.json",
-      "description": "Duration of the booking itinerary.",
-      "required": [
-        "start_date",
-        "end_date"
-      ],
+      "description": "List of stay line-items for the booking.",
       "ucp_request": {
         "create": "required",
         "update": "required",
@@ -97,7 +83,7 @@
     },
     "travel_purpose": {
       "type": "string",
-      "description": "Purpose of the trip or reservation. Well-known values: `business`, `leisure`. Businesses MAY implement and support additional values.",
+      "description": "Purpose of the trip or reservation, supplied by the Platform. Well-known values: `business`, `leisure`. Platforms MAY send additional values; a Business MUST ignore values it does not recognize and treat the purpose as unspecified.",
       "examples": [
         "business",
         "leisure"
@@ -127,7 +113,7 @@
     },
     "totals": {
       "$ref": "../common/types/totals.json",
-      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the authoritative all-in stay liability (immediate + deferred). When payment timing is split or property-collected charges apply, businesses provide `due_now` (immediate charge upon confirmation), `postpaid_*` entries, and `due_at_property` (aggregate property-collected charges) to convey timing breakdowns while maintaining full price transparency.",
+      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the authoritative all-in stay liability across all requested units. All non-total entries are price addends that sum to `total`. When payment timing is split across schedules or property-collected charges apply, timing breakdowns are conveyed via payment terms (`payment.terms[]`) schedules rather than within `totals`.",
       "ucp_request": "omit"
     },
     "actions": {

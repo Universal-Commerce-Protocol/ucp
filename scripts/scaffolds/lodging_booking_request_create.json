@@ -1,11 +1,11 @@
 {
-  "accommodation": {
-    "id": "acc_scaffold"
+  "property": {
+    "id": "pp_scaffold"
   },
-  "room_rates": [
+  "stays": [
     {
-      "id": "rr_scaffold",
-      "room_type": {
+      "id": "ss_scaffold",
+      "accommodation_type": {
         "id": "room_scaffold"
       },
       "rate_plan": {
@@ -14,11 +14,11 @@
       "occupancy": {
         "adults": 1,
         "total": 1
+      },
+      "stay_dates": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-01-05"
       }
     }
-  ],
-  "itinerary": {
-    "start_date": "2026-01-01",
-    "end_date": "2026-01-05"
-  }
+  ]
 }

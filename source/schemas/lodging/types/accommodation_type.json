@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/lodging/types/room_type.json",
-  "title": "Room Type",
-  "description": "Physical room real estate attributes.",
+  "$id": "https://ucp.dev/schemas/lodging/types/accommodation_type.json",
+  "title": "Accommodation Type",
+  "description": "Category or specification of the rentable physical space (e.g., room, apartment, villa, campsite pitch).",
   "type": "object",
   "required": [
     "id",
@@ -34,13 +34,12 @@
       "description": "Capacity details of the room type.",
       "ucp_request": "omit"
     },
-    "image_urls": {
+    "media": {
       "type": "array",
       "items": {
-        "type": "string",
-        "format": "uri"
+        "$ref": "../../common/types/media.json"
       },
-      "description": "List of image URIs for the room type.",
+      "description": "Accommodation type media (images, videos, 3D models). First item is the featured media for presentation.",
       "ucp_request": "omit"
     }
   }

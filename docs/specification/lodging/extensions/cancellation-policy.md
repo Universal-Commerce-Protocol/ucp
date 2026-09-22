@@ -213,7 +213,7 @@ complete terms still belong in `description`.
 
 A Business-resolved `fixed_fee` amount reflects the reservation terms used in
 its calculation; it is a snapshot, not a reusable formula. Changes to dates,
-room rates, or other governing terms may require an updated Business-provided
+stay rates, or other governing terms may require an updated Business-provided
 amount, even within the same booking session.
 
 For a well-known `kind`, a Business **MUST** emit only the fields defined for
@@ -233,7 +233,7 @@ To signal that a booking or rate is currently non-refundable, a Business
 When a Business requires that the current non-refundable classification be
 shown to the Booker before confirmation, it **MUST** emit a `messages[]` warning
 with `presentation: "disclosure"` and a `code` of
-`dev.ucp.lodging.policy.cancellation`. It sets `path` to the affected room-rate
+`dev.ucp.lodging.policy.cancellation`. It sets `path` to the affected stay
 node, or omits `path` for a response-wide policy. See [Presenting
 policies](../../overview/index.md#presenting-policies).
 
@@ -281,16 +281,16 @@ not introduce new wire fields or require a general prose-contradiction detector.
 
 Targeting and precedence are supplied by `policies[]` and are not redefined
 here. A policy without `applies_to` is the response-wide default. A policy that
-targets a room rate overrides a less-specific policy of the same type. See
+targets a stay overrides a less-specific policy of the same type. See
 [Targeting](../../overview/index.md#targeting) and
 [Precedence](../../overview/index.md#precedence).
 
 An outcome states the Business's penalty terms for the governed scope.
 Targeting determines which policy governs each node; it does not define
-whether a charge repeats per room, per night, or per cancelled reservation.
+whether a charge repeats per stay, per night, or per cancelled reservation.
 A Platform **MUST NOT** derive an aggregate cancellation quote by multiplying
 a fixed fee or unit deduction solely by the number of matched nodes. For
-example, a USD `7500` fixed fee governing two room rates does not by itself
+example, a USD `7500` fixed fee governing two stays does not by itself
 establish an aggregate charge of USD `15000`. Aggregation requires explicit
 Business terms and sufficient Booking data; otherwise the Platform presents
 the declared terms without an inferred aggregate.
@@ -393,11 +393,39 @@ resolves a template that lands in a nonexistent or repeated local-clock hour.
   "description": {
     "plain": "Non-refundable promotional rate."
   },
-  "applies_to": ["$.room_rates[0]"],
+  "applies_to": ["$.stays[0]"],
   "refundability": "non_refundable",
   "url": "https://example.com/cancellation-terms#non-refundable"
 }
 ```
+
+### Two stays with different arrival dates (non-normative)
+
+A Booking can contain stays with different `stay_dates`. In this synthetic
+example, each stay has its own targeted policy and explicit schedule anchor.
+Both policies use a free tier with `until: "PT48H"` and `buyer_bps: 10000`,
+followed by a Business-resolved fixed fee in the Booking's USD currency:
+
+| Policy target | Schedule anchor | Exclusive free-cancellation cutoff | Fixed fee after cutoff |
+| --- | --- | --- | --- |
+| `$.stays[0]` | `2026-12-22T20:00:00Z` | `2026-12-20T20:00:00Z` | `7500` minor units |
+| `$.stays[1]` | `2026-12-24T20:00:00Z` | `2026-12-22T20:00:00Z` | `12500` minor units |
+
+At `2026-12-20T20:00:00Z`, the first stay's policy selects its fixed fee,
+while the second stay's policy still selects the full-refund tier. The
+Platform first identifies the policy governing the requested stay, then
+evaluates that policy's supplied anchor. It does not substitute the first
+stay's arrival, a response-wide arrival, or a timestamp inferred from a
+date-only `stay_dates` value. These are separate per-scope outcomes, not an
+aggregate cancellation quote or instructions to move funds.
+
+The complete Booking response and expected per-stay results are in
+`scripts/fixtures/lodging_cancellation_booking.json`. Run
+`python3 scripts/test_cancellation_booking.py` to validate the composed
+Booking schema, the two explicit targets, and the before/at-cutoff outcomes.
+The check includes invalid-target and anchor-mix-up regressions; it is not a
+general JSONPath resolver or a complete policy-precedence suite. This separate
+integration fixture does not alter the existing schedule or agent-lab inputs.
 
 ## Evaluation examples
 

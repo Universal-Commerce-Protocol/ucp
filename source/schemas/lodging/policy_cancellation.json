@@ -31,7 +31,7 @@
         },
         "penalty": {
           "title": "Cancellation Penalty",
-          "description": "Cancellation penalty stated by the Business for the governed scope, regardless of whether it is retained from an earlier payment or charged later. Policy targeting alone does not define charge multiplicity across room rates or nights. The fields required within this object depend on the outcome `kind`.",
+          "description": "Cancellation penalty stated by the Business for the governed scope, regardless of whether it is retained from an earlier payment or charged later. Policy targeting alone does not define charge multiplicity across stays or nights. The fields required within this object depend on the outcome `kind`.",
           "type": "object",
           "properties": {
             "amount": {

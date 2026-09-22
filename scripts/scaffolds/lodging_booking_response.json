@@ -11,8 +11,8 @@
   },
   "id": "booking_scaffold",
   "status": "incomplete",
-  "accommodation": {
-    "id": "acc_scaffold",
+  "property": {
+    "id": "pp_scaffold",
     "name": "Scaffold Hotel",
     "address": {
       "street_address": "123 Scaffold Way",
@@ -22,10 +22,10 @@
       "postal_code": "94043"
     }
   },
-  "room_rates": [
+  "stays": [
     {
-      "id": "rr_scaffold",
-      "room_type": {
+      "id": "ss_scaffold",
+      "accommodation_type": {
         "id": "room_scaffold",
         "title": "Scaffold Room",
         "capacity": {
@@ -41,6 +41,10 @@
         "adults": 1,
         "total": 1
       },
+      "stay_dates": {
+        "start_date": "2026-01-01",
+        "end_date": "2026-01-05"
+      },
       "totals": [
         {
           "type": "subtotal",
@@ -53,10 +57,6 @@
       ]
     }
   ],
-  "itinerary": {
-    "start_date": "2026-01-01",
-    "end_date": "2026-01-05"
-  },
   "currency": "USD",
   "totals": [
     {

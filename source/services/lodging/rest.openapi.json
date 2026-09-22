@@ -170,7 +170,7 @@
       "put": {
         "operationId": "update_booking_session",
         "summary": "Update Booking Session",
-        "description": "If an optional field is provided in the request body, its value is treated as a complete replacement for the corresponding data. If optional field is omitted, then current booking session is unchanged.",
+        "description": "Update is a full replacement operation. A new Update operation is not permitted while the booking session status is `complete_in_progress`. Duplicate requests remain subject to replay protection. If the Business receives a new Update request in that state, it leaves the booking session unchanged and returns the current booking session with a recoverable error message.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
@@ -224,7 +224,7 @@
         },
         "responses": {
           "200": {
-            "description": "Booking session updated",
+            "description": "Current booking session state after the update request, whether the update was applied or rejected.",
             "headers": {
               "Signature": {
                 "$ref": "#/components/headers/signature"
@@ -256,7 +256,7 @@
       "post": {
         "operationId": "complete_booking_session",
         "summary": "Complete Booking Session",
-        "description": "Complete booking session and confirm room reservation.",
+        "description": "Complete booking session and confirm stay reservation.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"

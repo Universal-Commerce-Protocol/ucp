@@ -33,12 +33,11 @@
         "type": "object",
         "description": "Request metadata.",
         "required": [
-          "ucp_agent",
-          "idempotency_key"
+          "ucp-agent"
         ],
         "additionalProperties": true,
         "properties": {
-          "ucp_agent": {
+          "ucp-agent": {
             "type": "object",
             "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
             "required": [
@@ -52,7 +51,7 @@
               }
             }
           },
-          "idempotency_key": {
+          "idempotency-key": {
             "type": "string",
             "format": "uuid",
             "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
@@ -150,13 +149,23 @@
     },
     {
       "name": "complete_booking_session",
-      "summary": "Complete booking session and confirm room reservation",
+      "summary": "Complete booking session and confirm stay reservation",
       "params": [
         {
           "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/meta"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
           }
         },
         {
@@ -189,7 +198,17 @@
           "name": "meta",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/meta"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
           }
         },
         {

@@ -90,9 +90,8 @@ protocol metadata:
         "idempotency-key": "550e8400-e29b-41d4-a716-446655440000"
       },
       "booking": {
-        "accommodation": {...},
-        "room_rates": [...],
-        "itinerary": {...}
+        "property": {...},
+        "stays": [...]
       }
     }
   }
@@ -101,7 +100,7 @@ protocol metadata:
 
 The `meta["ucp-agent"]` field is **required** on all requests to enable
 [capability negotiation](../../overview/index.md#negotiation-protocol). The
-`complete_booking_session` operation also requires
+`complete_booking_session` and `cancel_booking_session` operations also require
 `meta["idempotency-key"]` for retry safety. Platforms **MAY** include
 additional metadata fields.
 
@@ -159,13 +158,13 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
             }
           },
           "booking": {
-            "accommodation": {
+            "property": {
               "id": "hotel_123"
             },
-            "room_rates": [
+            "stays": [
               {
-                "id": "rt_luxury_queen__rp_avg_base_rate",
-                "room_type": {
+                "id": "stay_luxury_queen__rp_avg_base_rate",
+                "accommodation_type": {
                   "id": "rt_luxury_queen"
                 },
                 "rate_plan": {
@@ -174,13 +173,13 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
                 "occupancy": {
                   "adults": 2,
                   "total": 2
+                },
+                "stay_dates": {
+                  "start_date": "2026-07-15",
+                  "end_date": "2026-07-21"
                 }
               }
-            ],
-            "itinerary": {
-              "start_date": "2026-07-15",
-              "end_date": "2026-07-21"
-            }
+            ]
           }
         }
       }
@@ -211,7 +210,7 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
           },
           "id": "booking_123",
           "status": "incomplete",
-          "accommodation": {
+          "property": {
             "id": "hotel_123",
             "name": "Beautiful Scenery Hotel",
             "address": {
@@ -222,10 +221,10 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
               "postal_code": "85004"
             }
           },
-          "room_rates": [
+          "stays": [
             {
-              "id": "rt_luxury_queen__rp_avg_base_rate",
-              "room_type": {
+              "id": "stay_luxury_queen__rp_avg_base_rate",
+              "accommodation_type": {
                 "id": "rt_luxury_queen",
                 "title": "Luxury Queen Room with Two Queen Beds",
                 "capacity": {
@@ -253,6 +252,10 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
                 "adults": 2,
                 "total": 2
               },
+              "stay_dates": {
+                "start_date": "2026-07-15",
+                "end_date": "2026-07-21"
+              },
               "totals": [
                 {
                   "type": "subtotal",
@@ -269,10 +272,6 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
               ]
             }
           ],
-          "itinerary": {
-            "start_date": "2026-07-15",
-            "end_date": "2026-07-21"
-          },
           "currency": "USD",
           "totals": [
             {
@@ -366,7 +365,7 @@ Maps to the [Get Booking Session](index.md#get-booking-session) operation.
 
 ### `update_booking_session`
 
-Maps to the [Update Booking](index.md#update-booking-session) operation.
+Maps to the [Update Booking Session](index.md#update-booking-session) operation.
 
 #### Input Schema
 
@@ -398,13 +397,13 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
           },
           "id": "booking_123",
           "booking": {
-            "accommodation": {
+            "property": {
               "id": "hotel_123"
             },
-            "room_rates": [
+            "stays": [
               {
-                "id": "rt_luxury_queen__rp_avg_base_rate",
-                "room_type": {
+                "id": "stay_luxury_queen__rp_avg_base_rate",
+                "accommodation_type": {
                   "id": "rt_luxury_queen"
                 },
                 "rate_plan": {
@@ -413,6 +412,10 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
                 "occupancy": {
                   "adults": 2,
                   "total": 2
+                },
+                "stay_dates": {
+                  "start_date": "2026-07-15",
+                  "end_date": "2026-07-21"
                 },
                 "guest_assignments": [
                   {
@@ -426,10 +429,6 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
                 ]
               }
             ],
-            "itinerary": {
-              "start_date": "2026-07-15",
-              "end_date": "2026-07-21"
-            },
             "guests": [
               {
                 "id": "gst_01",
@@ -474,7 +473,7 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
           },
           "id": "booking_123",
           "status": "ready_for_complete",
-          "accommodation": {
+          "property": {
             "id": "hotel_123",
             "name": "Beautiful Scenery Hotel",
             "address": {
@@ -485,10 +484,10 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
               "postal_code": "85004"
             }
           },
-          "room_rates": [
+          "stays": [
             {
-              "id": "rt_luxury_queen__rp_avg_base_rate",
-              "room_type": {
+              "id": "stay_luxury_queen__rp_avg_base_rate",
+              "accommodation_type": {
                 "id": "rt_luxury_queen",
                 "title": "Luxury Queen Room with Two Queen Beds",
                 "capacity": {
@@ -516,6 +515,10 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
                 "adults": 2,
                 "total": 2
               },
+              "stay_dates": {
+                "start_date": "2026-07-15",
+                "end_date": "2026-07-21"
+              },
               "guest_assignments": [
                 {
                   "guest_id": "gst_01",
@@ -542,10 +545,6 @@ Maps to the [Update Booking](index.md#update-booking-session) operation.
               ]
             }
           ],
-          "itinerary": {
-            "start_date": "2026-07-15",
-            "end_date": "2026-07-21"
-          },
           "guests": [
             {
               "id": "gst_01",
@@ -704,7 +703,7 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
           },
           "id": "booking_123",
           "status": "completed",
-          "accommodation": {
+          "property": {
             "id": "hotel_123",
             "name": "Beautiful Scenery Hotel",
             "address": {
@@ -715,10 +714,10 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
               "postal_code": "85004"
             }
           },
-          "room_rates": [
+          "stays": [
             {
-              "id": "rt_luxury_queen__rp_avg_base_rate",
-              "room_type": {
+              "id": "stay_luxury_queen__rp_avg_base_rate",
+              "accommodation_type": {
                 "id": "rt_luxury_queen",
                 "title": "Luxury Queen Room with Two Queen Beds",
                 "capacity": {
@@ -746,6 +745,10 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
                 "adults": 2,
                 "total": 2
               },
+              "stay_dates": {
+                "start_date": "2026-07-15",
+                "end_date": "2026-07-21"
+              },
               "guest_assignments": [
                 {
                   "guest_id": "gst_01",
@@ -772,10 +775,6 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
               ]
             }
           ],
-          "itinerary": {
-            "start_date": "2026-07-15",
-            "end_date": "2026-07-21"
-          },
           "guests": [
             {
               "id": "gst_01",
@@ -896,14 +895,14 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
       },
       "id": "booking_123",
       "status": "incomplete",
-      "accommodation": {
+      "property": {
         "id": "hotel_123",
         "name": "Beautiful Scenery Hotel"
       },
-      "room_rates": [
+      "stays": [
         {
-          "id": "rt_luxury_queen__rp_avg_base_rate",
-          "room_type": {
+          "id": "stay_luxury_queen__rp_avg_base_rate",
+          "accommodation_type": {
             "id": "rt_luxury_queen",
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
@@ -930,13 +929,13 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
           "occupancy": {
             "adults": 6,
             "total": 6
+          },
+          "stay_dates": {
+            "start_date": "2026-07-15",
+            "end_date": "2026-07-21"
           }
         }
       ],
-      "itinerary": {
-        "start_date": "2026-07-15",
-        "end_date": "2026-07-21"
-      },
       "currency": "USD",
       "totals": [
         {
@@ -965,7 +964,7 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
           "type": "error",
           "code": "occupancy_exceeded_capacity",
           "content": "Number of additional guests requested surpassed room capacity.",
-          "path": "$.room_rates[0]",
+          "path": "$.stays[0]",
           "severity": "recoverable"
         }
       ]
@@ -1022,7 +1021,9 @@ signature mechanism as REST. The signature is applied at the HTTP layer:
 | `Signature`              | Yes      | Contains the signature value             |
 | `Content-Digest`         | Yes      | SHA-256 hash of request body             |
 | `UCP-Agent`              | Yes      | Signer identity (profile URL)            |
-| `Idempotency-Key`        | Yes      | Unique key for replay protection         |
+| `Idempotency-Key`        | Cond.*   | Unique key for replay protection         |
+
+\* Required for `complete_booking_session` and `cancel_booking_session`
 
 **Example Signed Request:**
 

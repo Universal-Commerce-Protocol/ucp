@@ -84,6 +84,9 @@ jobs:
       - name: Validate cancellation lab fixtures
         run: uv run python scripts/test_cancellation_lab.py
 
+      - name: Validate cancellation multi-stay integration
+        run: uv run python scripts/test_cancellation_booking.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest

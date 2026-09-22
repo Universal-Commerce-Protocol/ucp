@@ -77,6 +77,19 @@ repos:
             |docs/specification/lodging/extensions/cancellation-policy\.md$
           )
         stages: [pre-commit, pre-push]
+      - id: validate-cancellation-booking
+        name: Validate cancellation multi-stay integration
+        entry: uv run --frozen python scripts/test_cancellation_booking.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_(schedule|booking)\.py$
+            |scripts/fixtures/lodging_cancellation_booking\.json$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
         entry: uv run --frozen python scripts/test_check_links.py
