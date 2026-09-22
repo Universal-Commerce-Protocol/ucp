@@ -79,7 +79,7 @@ A business that supports (a) a card with up to 2 redeemables, (b) up to 5 gift c
   "capabilities": [{
     "dev.ucp.common.payment.split_payments": [
       {
-        "version": "2026-01-23",
+        "version": "draft",
         "config": {
           "allowed_combinations": [
             [

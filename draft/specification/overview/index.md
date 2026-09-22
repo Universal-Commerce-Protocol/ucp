@@ -2380,11 +2380,11 @@ Version unsupported error — no resource is created:
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
-    "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
+    "content": "Version 2026-01-12 is not supported. This business implements version draft.",
     "severity": "unrecoverable"
   }],
   "continue_url": "https://merchant.com/"

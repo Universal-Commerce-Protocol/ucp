@@ -180,7 +180,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",
@@ -1310,7 +1310,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",

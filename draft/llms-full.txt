@@ -2411,11 +2411,11 @@ Version unsupported error — no resource is created:
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [{
     "type": "error",
     "code": "version_unsupported",
-    "content": "Version 2026-01-12 is not supported. This business implements version 2026-01-11.",
+    "content": "Version 2026-01-12 is not supported. This business implements version draft.",
     "severity": "unrecoverable"
   }],
   "continue_url": "https://merchant.com/"
@@ -6262,7 +6262,7 @@ When the business cannot create a new resource or the requested resource no long
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",
@@ -7330,7 +7330,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",
@@ -8460,7 +8460,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",
@@ -8863,7 +8863,7 @@ All items out of stock — no checkout resource is created:
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "draft", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -9197,7 +9197,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "draft", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -20704,7 +20704,7 @@ A business that supports (a) a card with up to 2 redeemables, (b) up to 5 gift c
   "capabilities": [{
     "dev.ucp.common.payment.split_payments": [
       {
-        "version": "2026-01-23",
+        "version": "draft",
         "config": {
           "allowed_combinations": [
             [

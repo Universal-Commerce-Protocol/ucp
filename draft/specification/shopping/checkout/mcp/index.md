@@ -317,7 +317,7 @@ All items out of stock — no checkout resource is created:
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "draft", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -651,7 +651,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "draft", "status": "error" },
       "messages": [
         {
           "type": "error",

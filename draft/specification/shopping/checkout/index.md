@@ -293,7 +293,7 @@ When the business cannot create a new resource or the requested resource no long
 
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "draft", "status": "error" },
   "messages": [
     {
       "type": "error",
