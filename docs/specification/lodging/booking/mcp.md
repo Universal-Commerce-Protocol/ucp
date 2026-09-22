@@ -365,7 +365,7 @@ Maps to the [Get Booking Session](index.md#get-booking-session) operation.
 
 ### `update_booking_session`
 
-Maps to the [Update Booking](index.md#update-booking-session) operation.
+Maps to the [Update Booking Session](index.md#update-booking-session) operation.
 
 #### Input Schema
 

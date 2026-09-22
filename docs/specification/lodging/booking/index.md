@@ -32,10 +32,10 @@ by the user through a trusted UI.
 
 Booking follows a progressive session lifecycle:
 
-1. **Session Initiation**: The Platform initiates a booking session using room,
-   rate, and itinerary details discovered from upper-funnel search.
+1. **Session Initiation**: The Platform initiates a booking session using property,
+   stay, rate plan, and stay date details discovered from upper-funnel search.
 2. **Progressive Enrichment**: The Platform updates the session with guest
-   profiles, room assignments, booker information, and payment details across
+   profiles, stay guest assignments, booker information, and payment details across
    one or more operations.
 3. **Session Completion**: The Platform finalizes the booking to create a
    confirmed, immutable reservation.
@@ -81,7 +81,7 @@ Booking follows a progressive session lifecycle:
   (`rate_plan`), stay dates (`stay_dates`), occupancy requirements (`occupancy`), and guest
   assignments (`guest_assignments`).
 * **Platform-Generated Guest Identifiers (`guest.id`)**: Unlike business-scoped
-  catalog and room identifiers, guest identifiers are generated, allocated, and
+  catalog, property, and stay identifiers, guest identifiers are generated, allocated, and
   managed by the Platform within the Platform's namespace. The Business treats
   `guest.id` as a stable, opaque reference. Guest identifiers are opaque strings
   scoped strictly to the individual booking session (e.g., `"gst_01"`, `"gst_02"`).
@@ -100,20 +100,20 @@ Booking follows a progressive session lifecycle:
       `guest_id` and designating occupancy roles (such as `primary_guest` or
       `additional_guest`).
 * **Separation of Booker and Guests**: The data model strictly separates the
-  legal purchaser from the physical room occupants:
+  legal purchaser from the physical accommodation occupants:
     * **`booker`**: The legal contracting party responsible for payment, contact
       obligations, and reservation ownership.
     * **`guests`**: The individuals who will physically occupy the accommodations.
       A booker **MAY** also be listed as a guest in the root pool, but the entities
-      remain decoupled to support corporate, proxy, and multi-room bookings.
+      remain decoupled to support corporate, proxy, and multi-stay bookings.
 * **Provisional Discovery vs. Authoritative Booking**:
-    * *Discovery Phase (Provisional)*: Search, quotation, and room lookup
-      responses provide provisional rates, available room types, and policy
+    * *Discovery Phase (Provisional)*: Search, quotation, and accommodation lookup
+      responses provide provisional rates, available accommodation types, and policy
       summaries based on search parameters.
     * *Booking Session (Authoritative)*: Creating a booking session transitions
       from provisional discovery to an authoritative state. The Business locks
       or evaluates real-time inventory, resolves binding rate rules, enforces
-      room capacity bounds, calculates totals (`totals[]`), and attaches
+      accommodation unit capacity bounds, calculates totals (`totals[]`), and attaches
       authoritative cancellation terms (`policies[]`).
 
 ### Pricing Scope
@@ -122,19 +122,19 @@ Lodging reservations follow strict all-in pricing rules to comply with consumer 
 (such as FTC and EU price transparency directives). In lodging, the full financial commitment for a stay
 is often divided between charges prepaid at the time of reservation confirmation and charges collected
 directly by the accommodation property upon check-in or check-out (e.g., resort fees, municipal
-occupancy taxes, or a remaining room balance).
+occupancy taxes, or a remaining stay balance).
 
 #### Pricing Architecture & Scope Guidelines
 
 * **Authoritative Root Total (`totals`)**: The top-level `totals` array represents the binding,
   authoritative pricing breakdown and aggregate financial commitment for the entire reservation
-  stay across all requested room units.
+  stay across all requested stay units.
 * **Stay-Level Total (`stays[].totals`)**: Each entry in `stays[].totals`
   reflects the total charges for that specific stay unit across the entire stay
   duration (`stay_dates`, i.e., check-in to check-out), **NOT** a per-night figure.
 * **Itemized Subtotals and Nightly Breakdown (`lines`)**: The `lines` array under a total item
   provides supplementary, itemized clarity:
-    * `subtotal` total items **MAY** carry `lines` representing the per-night room rate breakdown.
+    * `subtotal` total items **MAY** carry `lines` representing the per-night stay rate breakdown.
     * `tax` total items **MAY** carry `lines` delineating separate tax authorities (e.g., state
       sales tax vs. local occupancy or tourism tax).
     * `fee` total items **MAY** carry `lines` detailing mandatory charges (e.g., daily resort
@@ -143,79 +143,46 @@ occupancy taxes, or a remaining room balance).
   the guest is presented with the complete stay liability before booking confirmation. Hidden
   fees or undisclosed property charges violate price transparency standards.
 
-#### Immediate vs. Deferred Payment Breakdown
+#### Payment Timing & Terms (`dev.ucp.common.payment.terms`)
 
 * **Authoritative Stay Liability (`total`)**: In accordance with the core `totals.json`
   contract, the standard `type: "total"` entry strictly represents the authoritative all-in stay liability
-  (immediate charges plus deferred or property-collected amounts) for the entire reservation.
-  Every booking session **MUST** contain exactly one `total` entry, ensuring that Platforms display the full,
-  transparent cost of the stay upfront in compliance with applicable consumer price-display laws.
-* **Payment Timing Breakdown Types**: To clearly distinguish amounts charged immediately upon booking
-  confirmation from amounts collected later or at the property, the following well-known `type` values
-  are introduced:
-    * `due_now`: The immediate amount charged to the Buyer's payment instrument upon booking confirmation.
-      In full prepayment terms, `due_now` equals `total` (and **MAY** be omitted when no deferred balance exists).
-      In deposit-based or pay-at-property terms, `due_now` represents the upfront deposit and prepaid fees/taxes.
-      The sum of all prepaid items (`subtotal`, `fee`, `tax`, `discount`) **MUST** equal `due_now`.
-    * `postpaid_subtotal`: The lodging room rate balance collected directly at the property
-      (e.g., remaining room nights due at check-in after a partial deposit).
-    * `postpaid_fee`: Mandatory amenity, resort, cleaning, or facility fees collected directly
-      by the property during the stay.
-    * `postpaid_tax`: Mandatory municipal, occupancy, or tourism taxes collected locally by
-      the property (e.g., city accommodation tax).
-    * `due_at_property`: The aggregate sum of all property-collected charges
-      (`postpaid_subtotal` + `postpaid_fee` + `postpaid_tax`). Present whenever any postpaid charges exist.
-
-##### Well-Known Totals Types & Accounting Invariants
-
-| Type | Accounting Group | Description | Constraints & Invariants |
-| :--- | :--- | :--- | :--- |
-| `subtotal` | Immediate (Due Now) | Immediate room rate charges (or upfront deposit) | Exactly one entry in `totals[]` |
-| `fee` | Immediate (Due Now) | Prepaid service, processing, or booking fees | Optional, repeatable |
-| `tax` | Immediate (Due Now) | Prepaid state, value-added, or sales taxes | Optional, repeatable |
-| `discount` | Immediate (Due Now) | Rate reductions, promotional discounts, or pay-now savings | Optional, negative amount |
-| `due_now` | Immediate (Due Now) | Aggregate amount charged upon confirmation | Requires `display_text`; equals sum of immediate group (`subtotal + fee + tax + discount`) |
-| `postpaid_subtotal` | Deferred (Property) | Remaining room rate balance collected at hotel | Requires `display_text` |
-| `postpaid_fee` | Deferred (Property) | Mandatory resort, facility, or cleaning fees paid at hotel | Requires `display_text` |
-| `postpaid_tax` | Deferred (Property) | Municipal, city, or occupancy taxes paid at hotel | Requires `display_text` |
-| `due_at_property` | Deferred (Property) | Aggregate total collected upon arrival/departure | Requires `display_text`; equals sum of deferred group |
-| `total` | Summary | Authoritative all-in stay liability across all payment timings | Exactly one entry in `totals[]`; equals `due_now` + `due_at_property` |
+  for the entire reservation across all requested units. Every booking session **MUST** contain exactly one
+  `total` entry, ensuring that Platforms display the full, transparent cost of the stay upfront in compliance
+  with applicable consumer price-display laws.
+* **Pricing Breakdown vs. Payment Timing**: In lodging reservations, pricing breakdown and payment timing
+  are decoupled:
+    * `totals[]` defines the **pricing breakdown** (`subtotal`, `fee`, `tax`, and optional `discount`).
+      All non-total entries are price addends that sum to `total` (`sum(non-total entries) == total`).
+    * `payment.terms[]` (`dev.ucp.common.payment.terms`) defines the **payment timing** and schedules
+      for moving funds.
+* **Schedules and `totals` Alignment**:
+    * A payment term is composed of one or more `schedules[]`.
+    * The sum of all `schedules[].amount` within a term **MUST** equal `totals[].type: "total"`
+      (satisfying the core `common/payment_terms.json` invariant).
+    * Schedules with `type: "immediate"` represent payments due upon booking completion.
+    * Schedules with `type: "deferred"` represent payments due at a specified future date or
+      event (e.g., balance due upon check-in or a scheduled deposit date indicated in `description` or `due_at`).
+    * Schedules with `type: "at_property"` represent payments collected directly by the accommodation property
+      (e.g., local tourist taxes or mandatory resort fees paid upon arrival/departure).
+* **Payment Terms & Rate Plans**: In lodging distribution, pay-now savings or prepayment incentives are
+  typically modeled as separate rate plans (e.g., Non-Refundable Advance Purchase vs. Flexible Best Available Rate)
+  rather than alternative payment terms on the same rate plan. When flexible payment terms are offered for a rate plan
+  (such as deposit & balance), the Business provides the applicable schedule breakdown in `payment.terms[]`.
 
 #### Local Tax & Fee Disclosures
 
 When mandatory taxes or fees are collected locally by the lodging property and cannot be
 remitted at booking, the Business **SHOULD** provide a warning message in `messages[]` with
-`presentation: "disclosure"` and a `path` pointing directly to the relevant postpaid entry
-(e.g., `$.totals[4]`). This disclosure notice **MUST** state the applicable local rates,
+`presentation: "disclosure"` and a `path` pointing directly to the relevant payment schedule
+(e.g., `$.payment.terms[0].schedules[1]`). This disclosure notice **MUST** state the applicable local rates,
 exemptions, and payment instructions, complemented by formal policy links in `links[]`.
 
-#### Payment Terms Integration (`dev.ucp.common.payment.terms`)
-
-When a Business supports flexible payment timing, it advertises the `dev.ucp.common.payment.terms`
-capability and populates `payment.terms[]` with the available payment terms
-alongside `payment.selected_term_id` indicating the active selection:
-
-* **Schedules and `totals` Alignment**:
-    * A payment term is composed of one or more `schedules[]`.
-    * The sum of all `schedules[].amount` within a term **MUST** equal `totals[].type: "total"`
-      (satisfying the core `common/payment_terms.json` invariant).
-    * Schedules with `type: "immediate"` represent payments due today upon booking completion
-      and **MUST** sum to `totals[].type: "due_now"`.
-    * Schedules with `type: "deferred"` represent payments due at a specified future date or
-      event (e.g., `due_at` timestamp or check-in) and **MUST** sum to `totals[].type: "due_at_property"`.
-* **Selection Mutations**:
-    * When the Platform updates `payment.selected_term_id` via Update Booking Session
-      (e.g., switching from "Pay now" to "First night now, balance at check-in"),
-      the Business authoritatively recomputes `totals[]`.
-    * The recomputed `totals[]` reflects the newly selected term's immediate amount in `due_now`,
-      partitions remaining nights into `postpaid_subtotal` and `postpaid_tax`, updates
-      `due_at_property`, and updates `total` to reflect the all-in stay liability under that term.
-
-The following snippets illustrate how `totals[]` is structured across three canonical lodging pricing patterns:
+The following snippets illustrate how `totals[]` is structured alongside payment terms across canonical lodging pricing patterns:
 
 === "Pattern 1: Property-Collected Charges"
 
-    Prepaid room rate and service fee charged immediately (`due_now: 70400`), while resort fee and Tokyo Accommodation Tax are collected at check-in (`due_at_property: 6000`), totaling `total: 76400`:
+    A 3-night Tokyo hotel stay where base room rates (`64,000`) and prepaid service fees (`6,400`) are charged immediately, while mandatory resort fees (`6,000`) and Tokyo Accommodation Tax (`1,200`) are collected at the property. In `totals[]`, non-total addends sum strictly to the total stay cost (`77,600`):
 
     <!-- ucp:example schema=lodging/booking target=$.totals op=read -->
     ```json
@@ -231,91 +198,58 @@ The following snippets illustrate how `totals[]` is structured across three cano
         "amount": 6400
       },
       {
-        "type": "due_now",
-        "display_text": "Total Due Now (Charged Today)",
-        "amount": 70400
-      },
-      {
-        "type": "postpaid_fee",
+        "type": "fee",
         "display_text": "Resort & Facility Amenity Fee (Pay at hotel, ¥2,000/night)",
         "amount": 6000
       },
       {
-        "type": "postpaid_tax",
+        "type": "tax",
         "display_text": "Tokyo Accommodation Tax (Pay at hotel, ~¥200/guest/night)",
-        "amount": 0
-      },
-      {
-        "type": "due_at_property",
-        "display_text": "Total Due at Property (Pay upon Check-in)",
-        "amount": 6000
+        "amount": 1200
       },
       {
         "type": "total",
         "display_text": "Total Stay Cost",
-        "amount": 76400
+        "amount": 77600
       }
     ]
     ```
 
-=== "Pattern 2: Upfront Payment with Savings"
+=== "Pattern 2: Deposit & Check-in Balance"
 
-    Upfront payment term selected (`pt_pay_now`), offering a $50 discount (`discount: -5000`) for paying in full today. The upfront charge (`due_now: 130000`) covers the entire reservation liability (`total: 130000`), with no deferred balance remaining (`due_at_property: 0`):
-
-    <!-- ucp:example schema=lodging/booking target=$.totals op=read -->
-    ```json
-    [
-      { "type": "subtotal", "display_text": "Room Rate (3 nights)", "amount": 120000 },
-      { "type": "fee", "display_text": "Service Fee", "amount": 3000 },
-      { "type": "tax", "display_text": "State Lodging Tax (10%)", "amount": 12000 },
-      { "type": "discount", "display_text": "Pay-now saving", "amount": -5000 },
-      { "type": "due_now", "display_text": "Total Due Now (Charged Today)", "amount": 130000 },
-      { "type": "due_at_property", "display_text": "Total Due at Property", "amount": 0 },
-      { "type": "total", "display_text": "Total Stay Cost", "amount": 130000 }
-    ]
-    ```
-
-=== "Pattern 3: Deposit & Check-in Balance"
-
-    Deposit term selected (`pt_deposit_balance`), charging the 1st night deposit and initial taxes/fees today (`due_now: 47000`), with the remaining 2 nights rate and tax collected at check-in (`due_at_property: 88000`), yielding total stay liability `total: 135000`:
+    A 3-night stay under a deposit & balance term, with an itemized nightly breakdown in `subtotal.lines`. The upfront deposit covers the 1st night (`40,000`) plus service fee (`3,000`) and initial tax (`4,000`), while the remaining balance (`88,000`) is deferred until check-in. In `totals[]`, all room nights, fees, and taxes sum to the full stay liability (`135,000`):
 
     <!-- ucp:example schema=lodging/booking target=$.totals op=read -->
     ```json
     [
       {
         "type": "subtotal",
-        "display_text": "Room Deposit (1st night, 1 room)",
-        "amount": 40000
+        "display_text": "Room Rate (3 nights @ $400)",
+        "amount": 120000,
+        "lines": [
+          {
+            "display_text": "Night 1 (Deposit): Sep 1, 2026",
+            "amount": 40000
+          },
+          {
+            "display_text": "Night 2: Sep 2, 2026",
+            "amount": 40000
+          },
+          {
+            "display_text": "Night 3: Sep 3, 2026",
+            "amount": 40000
+          }
+        ]
       },
       {
         "type": "fee",
-        "display_text": "Service Fee (Prepaid)",
+        "display_text": "Service Fee",
         "amount": 3000
       },
       {
         "type": "tax",
-        "display_text": "State Lodging Tax on Deposit (10%)",
-        "amount": 4000
-      },
-      {
-        "type": "due_now",
-        "display_text": "Total Due Now (Deposit Charged Today)",
-        "amount": 47000
-      },
-      {
-        "type": "postpaid_subtotal",
-        "display_text": "Remaining Room Balance (2 nights @ $400, pay at hotel)",
-        "amount": 80000
-      },
-      {
-        "type": "postpaid_tax",
-        "display_text": "State Lodging Tax on Remaining Balance (10%, pay at hotel)",
-        "amount": 8000
-      },
-      {
-        "type": "due_at_property",
-        "display_text": "Total Due at Property (Pay upon Check-in)",
-        "amount": 88000
+        "display_text": "State Lodging Tax (10%)",
+        "amount": 12000
       },
       {
         "type": "total",
@@ -326,7 +260,7 @@ The following snippets illustrate how `totals[]` is structured across three cano
     ```
 
 > [!TIP]
-> For complete, end-to-end booking session payloads with room rate bindings, lead guest assignments,
+> For complete, end-to-end booking session payloads with stay bindings, lead guest assignments,
 > messages, and payment terms, see [Pricing & Payment Terms Examples](#pricing-examples).
 
 ### Payments
@@ -359,7 +293,7 @@ platform receives messages indicating what's needed to progress.
     inspect `messages` to understand what's needed. If any `recoverable` errors
     exist, resolve those first. Then hand off to user via `continue_url`.
 * **`ready_for_complete`**: Booking session has all necessary information
-    (confirmed pricing totals, valid itinerary dates, payment instrument
+    (confirmed pricing totals, valid stay dates, payment instrument
     collected if required, lead guest identification via `booker` or
     `primary_guest`, and all outstanding gating actions resolved) and platform
     can finalize programmatically. Platform can call Complete Booking Session.
@@ -415,12 +349,12 @@ Both result in user handoff, but represent different booking session states:
 
 #### Standard Errors
 
-| Code                          | Description                                                     |
-| :---------------------------- | :-------------------------------------------------------------- |
-| `inventory_exhausted`         | The selected room or inventory hold is no longer available      |
-| `occupancy_exceeded_capacity` | Number of assigned guests exceeds physical room capacity bounds |
-| `payment_failed`              | Payment processing failed                                       |
-| `eligibility_invalid`         | Eligibility claim could not be verified at completion           |
+| Code                          | Description                                                              |
+| :---------------------------- | :----------------------------------------------------------------------- |
+| `inventory_exhausted`         | The selected accommodation unit or inventory hold is no longer available |
+| `occupancy_exceeded_capacity` | Number of assigned guests exceeds physical capacity bounds               |
+| `payment_failed`              | Payment processing failed                                                |
+| `eligibility_invalid`         | Eligibility claim could not be verified at completion                    |
 
 ### Warning Presentation
 
@@ -430,7 +364,7 @@ rendering rules, see [Checkout — Warning Presentation](../../shopping/checkout
 
 #### Totals Changes
 
-When room rates, taxes, or mandatory fees fluctuate during an active booking
+When stay rates, taxes, or mandatory fees fluctuate during an active booking
 session, the Business returns the updated session with recomputed `totals[]` and
 **MUST** report the modification using a warning message in `messages[]` with
 `code: "totals_changed"` and `path: "$.totals"`.
@@ -470,7 +404,7 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **SHOULD NOT** send `guests[]` personal identity fields beyond `id` before the
   booking reaches `ready_for_complete`, and **SHOULD** send only the fields the
   business requests via `messages[]`.
-* **MAY** engage an agent to facilitate the booking session (e.g. select room,
+* **MAY** engage an agent to facilitate the booking session (e.g. select stay,
   dates, collect guest information). However, the agent must hand over
   the booking session to a trusted and deterministic UI for the user to review
   the booking details and complete the booking.
@@ -523,7 +457,7 @@ The Booking capability defines the following logical operations:
 ### Create Booking Session
 
 Invoked by the platform when the user expresses booking intent to initiate a
-session with upper-funnel room, rate, and itinerary parameters.
+session with upper-funnel property, stay, and stay date parameters.
 
 {{ method_fields('create_booking_session', 'lodging/rest.openapi.json', 'lodging/booking') }}
 
@@ -537,7 +471,7 @@ Retrieves the latest state of the booking session resource.
 
 Performs a full replacement of the booking session resource. The platform is
 **REQUIRED** to send the complete booking state containing any data updates
-(e.g., guest profiles, room assignments, booker details).
+(e.g., guest profiles, guest assignments, booker details).
 
 {{ method_fields('update_booking_session', 'lodging/rest.openapi.json', 'lodging/booking') }}
 
@@ -570,7 +504,7 @@ property-collected charges and flexible payment terms integration.
 
 === "Property-Collected Taxes & Fees"
 
-    A complete 3-night Tokyo hotel reservation where base room rates and service fees are prepaid immediately, while local Tokyo Accommodation Tax and resort fees are collected directly at check-in. Notice the tax disclosure warning in `messages[]` referencing the local tax line:
+    A complete 3-night Tokyo hotel reservation where base room rates and service fees are prepaid immediately, while local Tokyo Accommodation Tax and resort fees are collected directly at check-in. Payment timing is explicitly modeled via `payment.terms[]` under capability `dev.ucp.common.payment.terms`, and the tax disclosure warning in `messages[]` references the property-collected schedule:
 
     <!-- ucp:example schema=lodging/booking op=read -->
     ```json
@@ -579,6 +513,11 @@ property-collected charges and flexible payment terms integration.
         "version": "{{ ucp_version }}",
         "capabilities": {
           "dev.ucp.lodging.booking": [
+            {
+              "version": "{{ ucp_version }}"
+            }
+          ],
+          "dev.ucp.common.payment.terms": [
             {
               "version": "{{ ucp_version }}"
             }
@@ -639,7 +578,7 @@ property-collected charges and flexible payment terms integration.
       "totals": [
         {
           "type": "subtotal",
-          "display_text": "Room Rate (3 nights for 1 room, also includes 10% consumption tax)",
+          "display_text": "Room Rate (3 nights for 1 room, includes 10% consumption tax)",
           "amount": 64000
         },
         {
@@ -648,38 +587,28 @@ property-collected charges and flexible payment terms integration.
           "amount": 6400
         },
         {
-          "type": "due_now",
-          "display_text": "Total Due Now (Charged Today)",
-          "amount": 70400
-        },
-        {
-          "type": "postpaid_fee",
+          "type": "fee",
           "display_text": "Resort & Facility Amenity Fee (Pay at hotel, ¥2,000/night)",
           "amount": 6000
         },
         {
-          "type": "postpaid_tax",
+          "type": "tax",
           "display_text": "Tokyo Accommodation Tax (Pay at hotel, ~¥200/guest/night)",
-          "amount": 0
-        },
-        {
-          "type": "due_at_property",
-          "display_text": "Total Due at Property (Pay upon Check-in)",
-          "amount": 6000
+          "amount": 1200
         },
         {
           "type": "total",
           "display_text": "Total Stay Cost",
-          "amount": 76400
+          "amount": 77600
         }
       ],
       "messages": [
         {
           "type": "warning",
           "code": "local_tax",
-          "path": "$.totals[4]",
+          "path": "$.payment.terms[0].schedules[1]",
           "presentation": "disclosure",
-          "content": "**Tokyo Accommodation Tax Notice**: In accordance with Tokyo Metropolitan Government regulations, a local accommodation tax of JPY 200 per guest per night applies to room rates of JPY 15,000 or higher. This tax is not included in the booking total and must be paid directly to the property upon check-in.",
+          "content": "**Tokyo Accommodation Tax Notice**: In accordance with Tokyo Metropolitan Government regulations, a local accommodation tax of JPY 200 per guest per night applies to room rates of JPY 15,000 or higher. This tax is collected directly by the property upon check-in.",
           "content_type": "markdown",
           "url": "https://hotel.example.com/policies/tokyo-accommodation-tax"
         }
@@ -700,13 +629,43 @@ property-collected charges and flexible payment terms integration.
           "title": "Cancellation and Refund Policy",
           "url": "https://hotel.example.com/cancellation-policy"
         }
-      ]
+      ],
+      "payment": {
+        "selected_term_id": "pt_standard",
+        "terms": [
+          {
+            "id": "pt_standard",
+            "title": "Standard Settlement",
+            "description": {
+              "plain": "Pay room rate and service fee today; mandatory resort fee and Tokyo Accommodation Tax are paid at check-in."
+            },
+            "schedules": [
+              {
+                "id": "sched_room",
+                "type": "immediate",
+                "description": {
+                  "plain": "Due today when you book (Room rate + service fee)."
+                },
+                "amount": 70400
+              },
+              {
+                "id": "sched_property",
+                "type": "at_property",
+                "description": {
+                  "plain": "Due at check-in on October 1, 2026 (Resort fee + Tokyo Accommodation Tax)."
+                },
+                "amount": 7200
+              }
+            ]
+          }
+        ]
+      }
     }
     ```
 
-=== "Payment Terms — Pay Now"
+=== "Flexible Payment Terms — Deposit & Balance"
 
-    A complete booking session offering payment terms (`pt_pay_now` and `pt_deposit_balance`), where the buyer currently has `pt_pay_now` selected, paying $1,300.00 today and saving $50:
+    A complete 3-night hotel reservation offering a deposit and balance payment term (`pt_deposit_balance`). The first night's room rate along with prepaid fees and initial tax are charged immediately, while the remaining 2 nights' room rate and balance tax are deferred until check-in:
 
     <!-- ucp:example schema=lodging/booking op=read -->
     ```json
@@ -780,176 +739,22 @@ property-collected charges and flexible payment terms integration.
       "totals": [
         {
           "type": "subtotal",
-          "display_text": "Room Rate (3 nights)",
-          "amount": 120000
-        },
-        {
-          "type": "fee",
-          "display_text": "Service Fee",
-          "amount": 3000
-        },
-        {
-          "type": "tax",
-          "display_text": "State Lodging Tax (10%)",
-          "amount": 12000
-        },
-        {
-          "type": "discount",
-          "display_text": "Pay-now saving",
-          "amount": -5000
-        },
-        {
-          "type": "due_now",
-          "display_text": "Total Due Now (Charged Today)",
-          "amount": 130000
-        },
-        {
-          "type": "due_at_property",
-          "display_text": "Total Due at Property",
-          "amount": 0
-        },
-        {
-          "type": "total",
-          "display_text": "Total Stay Cost",
-          "amount": 130000
-        }
-      ],
-      "links": [
-        {
-          "type": "terms_of_service",
-          "title": "Terms of Service",
-          "url": "https://example.com/tos"
-        }
-      ],
-      "payment": {
-        "selected_term_id": "pt_pay_now",
-        "terms": [
-          {
-            "id": "pt_pay_now",
-            "title": "Pay now",
-            "description": {
-              "plain": "Save $50 by paying for your stay today."
-            },
-            "schedules": [
-              {
-                "id": "sched_full",
-                "type": "immediate",
-                "description": {
-                  "plain": "Due today when you book."
-                },
-                "amount": 130000
-              }
-            ]
-          },
-          {
-            "id": "pt_deposit_balance",
-            "title": "First night now, balance at check-in",
-            "description": {
-              "plain": "Hold your room with one night's rate plus initial taxes & fees."
-            },
-            "schedules": [
-              {
-                "id": "sched_first_night",
-                "type": "immediate",
-                "description": {
-                  "plain": "Due today when you book (Deposit: First night + service fee + tax)."
-                },
-                "amount": 47000
-              },
-              {
-                "id": "sched_balance",
-                "type": "deferred",
-                "description": {
-                  "plain": "Due at check-in on September 1, 2026 at 3:00 PM PDT (Remaining 2 nights + remaining tax)."
-                },
-                "due_at": "2026-09-01T15:00:00-07:00",
-                "amount": 88000
-              }
-            ]
-          }
-        ]
-      }
-    }
-    ```
-
-=== "Payment Terms — Deposit & Balance"
-
-    The recomputed booking session after selecting `pt_deposit_balance`, reflecting a $470.00 deposit charged today and an $880.00 balance due at check-in, for an all-in stay liability of $1,350.00:
-
-    <!-- ucp:example schema=lodging/booking op=read -->
-    ```json
-    {
-      "ucp": {
-        "version": "{{ ucp_version }}",
-        "capabilities": {
-          "dev.ucp.lodging.booking": [
+          "display_text": "Room Rate (3 nights @ $400)",
+          "amount": 120000,
+          "lines": [
             {
-              "version": "{{ ucp_version }}"
-            }
-          ],
-          "dev.ucp.common.payment.terms": [
-            {
-              "version": "{{ ucp_version }}"
-            }
-          ]
-        },
-        "payment_handlers": {
-          "com.example.card_handler": [
-            {
-              "id": "card_handler",
-              "version": "{{ ucp_version }}",
-              "available_instruments": [
-                {
-                  "type": "card"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "id": "bks_example_03",
-      "status": "incomplete",
-      "currency": "USD",
-      "property": {
-        "id": "pp_grand_hotel",
-        "name": "Grand Hotel"
-      },
-      "stays": [
-        {
-          "id": "stay_king_std",
-          "accommodation_type": {
-            "id": "at_king",
-            "title": "King Room"
-          },
-          "rate_plan": {
-            "id": "rp_flex",
-            "title": "Flexible Rate"
-          },
-          "occupancy": {
-            "adults": 2,
-            "total": 2
-          },
-          "stay_dates": {
-            "start_date": "2026-09-01",
-            "end_date": "2026-09-04"
-          },
-          "totals": [
-            {
-              "type": "subtotal",
-              "amount": 120000
+              "display_text": "Night 1 (Deposit): Sep 1, 2026",
+              "amount": 40000
             },
             {
-              "type": "total",
-              "amount": 120000
+              "display_text": "Night 2: Sep 2, 2026",
+              "amount": 40000
+            },
+            {
+              "display_text": "Night 3: Sep 3, 2026",
+              "amount": 40000
             }
           ]
-        }
-      ],
-      "totals": [
-        {
-          "type": "subtotal",
-          "display_text": "Room Deposit (1st night, 1 room)",
-          "amount": 40000
         },
         {
           "type": "fee",
@@ -958,28 +763,8 @@ property-collected charges and flexible payment terms integration.
         },
         {
           "type": "tax",
-          "display_text": "State Lodging Tax on Deposit (10%)",
-          "amount": 4000
-        },
-        {
-          "type": "due_now",
-          "display_text": "Total Due Now (Deposit Charged Today)",
-          "amount": 47000
-        },
-        {
-          "type": "postpaid_subtotal",
-          "display_text": "Remaining Room Balance (2 nights @ $400, pay at hotel)",
-          "amount": 80000
-        },
-        {
-          "type": "postpaid_tax",
-          "display_text": "State Lodging Tax on Remaining Balance (10%, pay at hotel)",
-          "amount": 8000
-        },
-        {
-          "type": "due_at_property",
-          "display_text": "Total Due at Property (Pay upon Check-in)",
-          "amount": 88000
+          "display_text": "State Lodging Tax (10%)",
+          "amount": 12000
         },
         {
           "type": "total",

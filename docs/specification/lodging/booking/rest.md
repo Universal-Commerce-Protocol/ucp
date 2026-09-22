@@ -103,7 +103,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
 
 ### Create Booking Session
 
-#### Single-room Booking
+#### Single-stay Booking
 
 === "Request"
 
@@ -290,7 +290,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     }
     ```
 
-#### Multi-room Booking
+#### Multi-stay Booking
 
 === "Request"
 
@@ -516,13 +516,13 @@ The Platform **MUST NOT** start a new Update operation while the booking session
 new Update request in that state, it **MUST** leave the booking session
 unchanged and return the current booking session with a recoverable error message.
 
-All fields in `guests`, `booker`, and `travel_purpose` are optional, allowing
-the Platform to progressively build the booking session across multiple calls.
-Outside `complete_in_progress`, each Update replaces the entire booking session,
-so the Platform **MUST** include all previously set fields it intends to retain.
+All fields in `guests`, `booker`, `travel_purpose`, and `stays[].guest_assignments`
+are optional, allowing the Platform to progressively build the booking session across
+multiple calls. Outside `complete_in_progress`, each Update replaces the entire
+booking session, so the Platform **MUST** include all previously set fields it intends to retain.
 
-If businesses have specific logic to enforce field existence in `guest`,
-`booker`, or addresses (i.e. `billing_address`), this is the right
+If businesses have specific logic to enforce field existence in `guests`,
+`booker`, `guest_assignments`, or addresses (i.e. `billing_address`), this is the right
 place to set these expectations via `messages`.
 
 === "Request"
