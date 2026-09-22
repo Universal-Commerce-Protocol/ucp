@@ -351,17 +351,35 @@ def on_post_build(config):
     doc_folder = docs_dir / "documentation"
     if doc_folder.exists():
       for md_file in doc_folder.rglob("*.md"):
+        if md_file.name == "index.md":
+          rel_dir = md_file.relative_to(docs_dir).parent
+          target = f"{base_path}{rel_dir.as_posix()}/"
+        else:
+          rel_dir = md_file.relative_to(docs_dir).with_suffix("")
+          target = f"{base_path}{rel_dir.as_posix()}/"
+
+        # Directory URL redirect (e.g. /documentation/foo/index.html)
+        dest_index = site_dir / rel_dir / "index.html"
+        dest_index.parent.mkdir(parents=True, exist_ok=True)
+        with Path.open(dest_index, "w") as f:
+          f.write(
+            "<!doctype html>"
+            f'<link rel="canonical" href="{target}">'
+            "<script>var a=location.hash.substr(1);"
+            f'location.href="{target}"+(a?"#"+a:"")</script>'
+            f'<meta http-equiv="refresh" content="0; url={target}">'
+          )
+
+        # Flat HTML redirect (e.g. /documentation/foo.html)
         rel_path = md_file.relative_to(docs_dir).with_suffix(".html")
         dest_file = site_dir / rel_path
-
-        # Target URL: base_path + relative_path
-        # (e.g. /ucp/documentation/foo.html)
-        target = f"{base_path}{rel_path.as_posix()}"
-
         dest_file.parent.mkdir(parents=True, exist_ok=True)
         with Path.open(dest_file, "w") as f:
           f.write(
             "<!doctype html>"
+            f'<link rel="canonical" href="{target}">'
+            "<script>var a=location.hash.substr(1);"
+            f'location.href="{target}"+(a?"#"+a:"")</script>'
             f'<meta http-equiv="refresh" content="0; url={target}">'
           )
 
@@ -372,6 +390,9 @@ def on_post_build(config):
     with Path.open(index_file, "w") as f:
       f.write(
         "<!doctype html>"
+        f'<link rel="canonical" href="{index_target}">'
+        "<script>var a=location.hash.substr(1);"
+        f'location.href="{index_target}"+(a?"#"+a:"")</script>'
         f'<meta http-equiv="refresh" content="0; url={index_target}">'
       )
 

@@ -4,7 +4,6 @@
   "title": "Shipping Destination",
   "description": "Shipping destination.",
   "type": "object",
-  "ucp_shared_request": true,
   "allOf": [
     {
       "$ref": "../../common/types/postal_address.json"

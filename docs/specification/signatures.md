@@ -120,7 +120,7 @@ additive option that unlocks Web Bot Auth (WBA) interop.
   (WBA's algorithm rules and the current deployment landscape are in
   [WBA Interop](#wba-interop).)
 * **AP2 mandate signing follows AP2's own algorithm rule** — see
-  [AP2 Mandates](ap2-mandates.md).
+  [AP2 Mandates](payment/extensions/ap2-mandates.md).
 * The algorithm is derived from the key's `kty`/`crv` field in the JWK;
   `alg` is **NOT** included in `Signature-Input` parameters.
 
@@ -130,7 +130,7 @@ algorithm is accepted by every audience it signs for; separate keys
 (selected by `kid`) are needed only when audiences impose incompatible
 algorithm constraints — for example, a WBA verifier that accepts only
 Ed25519 together with an AP2 mandate algorithm requirement that excludes
-it (see [AP2 Mandates](ap2-mandates.md)). When one algorithm satisfies
+it (see [AP2 Mandates](payment/extensions/ap2-mandates.md)). When one algorithm satisfies
 every audience, a single key serves all of them. See
 [Business Profile](overview/index.md#business-profile) for a two-key example.
 
@@ -414,7 +414,7 @@ derived identity).
 hashes the raw body bytes. This binds the message body to the signature without
 requiring JSON canonicalization. Implementations **MUST** use `sha-256`. For
 durable artifacts requiring canonicalization, see
-[AP2 Mandates - Canonicalization](ap2-mandates.md#canonicalization).
+[AP2 Mandates - Canonicalization](payment/extensions/ap2-mandates.md#canonicalization).
 
 **Intermediary Warning:** Proxies, API gateways, and other intermediaries
 **MUST NOT** re-serialize JSON bodies, as this would invalidate the signature.

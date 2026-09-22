@@ -505,7 +505,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/fulfillment",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/fulfillment",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment.json",
         config: {
           multi_destination: [],
@@ -520,7 +520,7 @@ const UcpData = {
       {
         extends: "dev.ucp.shopping.checkout",
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/discount",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/discount",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/discount.json"
       }
     ],
@@ -528,16 +528,16 @@ const UcpData = {
       {
         extends: ["dev.ucp.shopping.cart", "dev.ucp.shopping.checkout"],
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/buyer-consent",
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/buyer-consent",
         schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/buyer_consent.json"
       }
     ],
-    "dev.ucp.shopping.ap2_mandates": [
+    "dev.ucp.common.payment.ap2_mandate": [
       {
         extends: "dev.ucp.shopping.checkout",
         version: "{{ ucp_version }}",
-        spec: "https://ucp.dev/{{ ucp_version }}/specification/ap2-mandates",
-        schema: "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ap2_mandate.json"
+        spec: "https://ucp.dev/{{ ucp_version }}/specification/payment/extensions/ap2-mandates",
+        schema: "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_ap2_mandate.json"
       }
     ]
   },
@@ -551,7 +551,7 @@ const UcpData = {
     full: {
       label: "Full",
       description: "Supports core + Fulfillment and Discount extensions.",
-      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.shopping.ap2_mandates"]
+      caps: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order", "dev.ucp.shopping.fulfillment", "dev.ucp.shopping.discount", "dev.ucp.shopping.buyer_consent", "dev.ucp.common.payment.ap2_mandate"]
     }
   },
 

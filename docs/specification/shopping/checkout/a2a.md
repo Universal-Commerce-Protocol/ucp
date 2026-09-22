@@ -355,7 +355,7 @@ be submitted as part of a `DataPart` with attribute name
 `a2a.ucp.checkout.payment`. Signed checkout mandate must be specified in
 the `DataPart` as `ap2.checkout_mandate`. The `token` attribute of
 `payment` contains the payment mandate. Refer to
-[AP2 Mandates Extension](../../ap2-mandates.md) documentation for more details about
+[AP2 Mandates Extension](../../payment/extensions/ap2-mandates.md) documentation for more details about
 verification and processing of the mandates to complete the checkout.
 
 #### Request format

@@ -730,11 +730,11 @@ This example is illustrative. It uses a negotiated vendor extension,
 `com.example.identity.student_verification`, that declares a single Action type
 under a key of the same name in `actions` and defines the instance `config` and
 verification transport. It composes that extension with `context.eligibility`, a
-provisional [Discount](../../discount.md), an [Action](#actions), and
+provisional [Discount](../extensions/discount.md), an [Action](#actions), and
 `messages`.
 
 The provisional discount fields (`provisional`, `eligibility`) belong to the
-[Discount extension](../../discount.md#eligibility-claims) and are available only when
+[Discount extension](../extensions/discount.md#eligibility-claims) and are available only when
 that extension is active for the checkout.
 
 **1. Claim accepted, discount provisional, verification Action outstanding.**
@@ -1058,7 +1058,7 @@ should accept an additional `cart_id` field for cart-to-checkout conversion. See
 [Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion) for
 the field contract.
 
-{{ method_fields('create_checkout', 'rest.openapi.json', 'shopping/checkout') }}
+{{ method_fields('create_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
 ### Get Checkout
 
@@ -1071,7 +1071,7 @@ checkout.
 The platform will honor the TTL provided by the business via `expires_at` at the
 time of checkout session creation.
 
-{{ method_fields('get_checkout', 'rest.openapi.json', 'shopping/checkout') }}
+{{ method_fields('get_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
 ### Update Checkout
 
@@ -1083,7 +1083,7 @@ general replacement rule does not apply during `complete_in_progress` because
 Update Checkout is not permitted; see
 [Accepted completion](#accepted-completion) for the frozen operation contract.
 
-{{ method_fields('update_checkout', 'rest.openapi.json', 'shopping/checkout') }}
+{{ method_fields('update_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
 ### Complete Checkout
 
@@ -1124,7 +1124,7 @@ to construct the order representation (i.e. information like `line_items`,
 After the order is placed, other details will be updated through subsequent
 events as the order, and its associated items, move through the supply chain.
 
-{{ method_fields('complete_checkout', 'rest.openapi.json', 'shopping/checkout') }}
+{{ method_fields('complete_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
 ### Cancel Checkout
 
@@ -1134,7 +1134,7 @@ already canceled or completed), then businesses **SHOULD** send back an error
 indicating the operation is not allowed. Any checkout session with a status
 that is not equal to `completed` or `canceled` **SHOULD** be cancelable.
 
-{{ method_fields('cancel_checkout', 'rest.openapi.json', 'shopping/checkout') }}
+{{ method_fields('cancel_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
 ## Transport Bindings
 
@@ -1268,7 +1268,7 @@ this response root (e.g., `$.line_items[0]`). See
 
 #### Selected Payment Instrument
 
-{{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'shopping/checkout') }}
+{{ extension_schema_fields('../common/types/payment_instrument.json#/$defs/selected_payment_instrument', 'shopping/checkout') }}
 
 ### Payment Credential
 
