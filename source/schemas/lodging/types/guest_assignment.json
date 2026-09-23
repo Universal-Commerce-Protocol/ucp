@@ -15,7 +15,7 @@
     },
     "role": {
       "type": "string",
-      "description": "Role of the guest in this room. Well-known values: `primary_guest` (the guest the reservation is attached to), `additional_guest`. Businesses MAY define additional values; platforms MUST tolerate unknown values."
+      "description": "Role of the guest in this room. Well-known values: `primary` (the guest the reservation is attached to), `accompanying` (every other occupant). Platforms MAY send additional values; a Business MUST treat any value it does not recognize as `accompanying`."
     }
   }
 }

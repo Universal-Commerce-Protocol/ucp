@@ -6,7 +6,10 @@
   "type": "object",
   "required": [
     "id",
-    "stay_dates"
+    "stay_dates",
+    "accommodation_type",
+    "rate_plan",
+    "totals"
   ],
   "anyOf": [
     {
@@ -65,10 +68,6 @@
     "stay_dates": {
       "$ref": "../../common/types/date_interval.json",
       "description": "Stay duration (check-in and check-out dates) for this unit based on the local time of the property.",
-      "required": [
-        "start_date",
-        "end_date"
-      ],
       "ucp_request": {
         "create": "required",
         "update": "required",
@@ -77,11 +76,21 @@
     },
     "accommodation_type": {
       "$ref": "accommodation_type.json",
-      "description": "Category or specification of the rentable physical space (e.g. room, apartment, villa, campsite)."
+      "description": "Category or specification of the rentable physical space (e.g. room, apartment, villa, campsite).",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
     },
     "rate_plan": {
       "$ref": "rate_plan.json",
-      "description": "Commercial rate policy contract."
+      "description": "Commercial rate policy contract.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
     },
     "occupancy": {
       "$ref": "occupancy.json",

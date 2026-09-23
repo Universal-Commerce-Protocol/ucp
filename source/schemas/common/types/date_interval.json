@@ -4,14 +4,10 @@
   "title": "Date Interval",
   "description": "Represents a closed date range defined by start and end dates.",
   "type": "object",
-  "dependentRequired": {
-    "start_date": [
-      "end_date"
-    ],
-    "end_date": [
-      "start_date"
-    ]
-  },
+  "required": [
+    "start_date",
+    "end_date"
+  ],
   "properties": {
     "start_date": {
       "type": "string",

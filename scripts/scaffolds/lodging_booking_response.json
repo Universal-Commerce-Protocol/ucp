@@ -30,7 +30,17 @@
         "title": "Scaffold Room",
         "capacity": {
           "adults": 2,
-          "total": 2
+          "children": 2,
+          "child_age_ranges": [
+            {
+              "ages": {
+                "min": 0,
+                "max": 17
+              },
+              "limit": 2
+            }
+          ],
+          "total": 4
         }
       },
       "rate_plan": {

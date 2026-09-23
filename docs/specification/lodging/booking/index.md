@@ -97,8 +97,8 @@ Booking follows a progressive session lifecycle:
       profiles associated with the entire reservation.
     * **Stay Assignments (`stays[].guest_assignments[]`)**: Granular mappings
       associating specific stay units with guests from the root pool via
-      `guest_id` and designating occupancy roles (such as `primary_guest` or
-      `additional_guest`).
+      `guest_id` and designating occupancy roles (such as `primary` or
+      `accompanying`).
 * **Separation of Booker and Guests**: The data model strictly separates the
   legal purchaser from the physical accommodation occupants:
     * **`booker`**: The legal contracting party responsible for payment, contact
@@ -111,10 +111,12 @@ Booking follows a progressive session lifecycle:
       responses provide provisional rates, available accommodation types, and policy
       summaries based on search parameters.
     * *Booking Session (Authoritative)*: Creating a booking session transitions
-      from provisional discovery to an authoritative state. The Business locks
-      or evaluates real-time inventory, resolves binding rate rules, enforces
-      accommodation unit capacity bounds, calculates totals (`totals[]`), and attaches
-      authoritative cancellation terms (`policies[]`).
+      from provisional discovery to an authoritative state. The Business validates
+      real-time inventory availability (or establishes a temporary soft hold per its
+      policy), resolves binding rate rules, enforces accommodation unit
+      capacity bounds, calculates authoritative totals (`totals[]`), and attaches
+      binding cancellation terms (`policies[]`). A confirmed reservation is not created
+      until the session is finalized via Complete Booking Session.
 
 ### Pricing Scope
 
@@ -295,13 +297,30 @@ platform receives messages indicating what's needed to progress.
 * **`ready_for_complete`**: Booking session has all necessary information
     (confirmed pricing totals, valid stay dates, payment instrument
     collected if required, lead guest identification via `booker` or
-    `primary_guest`, and all outstanding gating actions resolved) and platform
+    primary guest assignment (`role: "primary"`), and all outstanding gating
+    actions resolved) and platform
     can finalize programmatically. Platform can call Complete Booking Session.
 * **`complete_in_progress`**: Business is processing the Complete Booking
-    request.
+    request. The response **MUST NOT** contain a `confirmation` field.
+    See [Accepted Completion](../../shopping/checkout/index.md#accepted-completion)
+    for permitted operations.
 * **`completed`**: Booking confirmed successfully.
 * **`canceled`**: Booking session is invalid or expired. Platform should
     start a new booking session if needed.
+
+#### Session Expiry & Inventory Management
+
+* **Ephemeral Session Lifetime (`expires_at`)**: A booking session is an in-flight,
+  pre-confirmation resource. The Business **MAY** provide an `expires_at` timestamp
+  indicating how long the session state, quoted pricing, and any temporary inventory
+  holds remain valid.
+* **Inventory Hold Strategies**: Businesses **MAY** place a temporary soft hold on inventory
+  for the duration of `expires_at`, or **MAY** employ optimistic concurrency by
+  verifying inventory availability in real-time on session updates and performing final allocation
+  upon Complete Booking Session.
+* **Release Mechanisms**: If the booking flow is abandoned, the Platform **MAY**
+  call Cancel Booking Session to explicitly release any held inventory and session state.
+  Otherwise any held resources are automatically released when `expires_at` elapses.
 
 ### Actions
 
@@ -394,9 +413,16 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **MUST** supply valid `property.id`, and either a pre-composed `stay.id`
   OR both `accommodation_type.id` and `rate_plan.id` identifiers sourced from upper-funnel
   discovery mechanisms when creating a booking session.
+* **MUST** present each `stays[]` entry as a unit — `accommodation_type.title`,
+  `rate_plan.title`, `rate_plan.description` (when present), `occupancy`, and the
+  entry's `totals` under the totals rendering contract — and **MUST NOT** merge or
+  de-duplicate entries that share a `accommodation_type` or `rate_plan`.
 * **MUST** identify a lead guest by providing `booker` details or designating at
-  least one guest with `role: "primary_guest"` (including full legal name and contact
-  details) prior to invoking Complete Booking Session.
+  least one guest with `role: "primary"` (including full legal name and contact
+  details) prior to invoking Complete Booking Session. A Platform that receives
+  `ready_for_complete` without an identified lead **MUST NOT** call Complete
+  Booking Session, and **SHOULD** correct the session via Update Booking Session
+  or escalate via `continue_url` if available.
 * **MUST** generate unique, stable, session-scoped string identifiers in the Platform
   namespace for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
 * **MUST** ensure every `guest_assignments[].guest_id` references a valid `id`
@@ -421,12 +447,27 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **MUST** evaluate requested `stay.id`, or the compound `accommodation_type.id` and
   `rate_plan.id` bindings against real-time availability and inventory constraints,
   echoing authoritative metadata, pricing totals, and policy terms.
+* **MUST** make `rate_plan.title` distinguish the rate plan and, together with
+  `rate_plan.description` when present,is sufficient for a Buyer to understand its
+  material commercial terms without having to read into `policies[]`; both
+  fields **MUST NOT** contradict `policies[]`.
 * **MUST** preserve platform-supplied `guest.id` identifiers across session
   updates and responses without remapping, renaming, or mutating them.
 * **MUST** validate that all `stays[].guest_assignments[].guest_id`
   references match an existing entry in the root `guests[]` array.
-* **MUST** enforce physical `capacity` limits against the total assigned
-  occupants and guest ages.
+* **MUST NOT** return a booking session with statuses `ready_for_complete`,
+  `complete_in_progress`, or `completed` without an identified lead - a `booker`
+  with full legal name and a contact channel, a guest in `guests[]` with full
+  legal name and a contact channel who is assigned as `primary` in some
+  `stays[].guest_assignments[]`, or in corporate or proxy bookings, a named primary guest
+  alongside a `booker` providing the contact channel. Additional identity fields
+  a Business needs (such as passport number, nationality, or date of birth)
+  **MUST** be negotiated per Business through `messages[]`.
+* **MUST** enforce physical `capacity` limits against the total assigned occupants and guest ages:
+    * Guest age is evaluated in completed years as of the stay check-in date.
+    * A guest whose age falls within a defined `child_age_ranges[].ages` bracket is classified as a child; any guest whose age falls in no child bracket is classified as an adult.
+    * The requested occupancy **MUST** satisfy: `occupancy.adults <= capacity.adults`, `occupancy.children <= capacity.children`, and `occupancy.total <= capacity.total`.
+    * For each entry in `child_age_ranges[]` with a `limit`, the number of children whose ages fall in that bracket **MUST NOT** exceed `limit`.
 * **MUST** send a confirmation email after the booking has been completed when a
   valid email address is available in `booker` or primary guest details.
 * **SHOULD** provide accurate error and warning messages.
