@@ -65,10 +65,6 @@
     "stay_dates": {
       "$ref": "../../common/types/date_interval.json",
       "description": "Stay duration (check-in and check-out dates) for this unit based on the local time of the property.",
-      "required": [
-        "start_date",
-        "end_date"
-      ],
       "ucp_request": {
         "create": "required",
         "update": "required",

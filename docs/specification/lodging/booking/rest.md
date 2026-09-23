@@ -182,16 +182,21 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
@@ -386,16 +391,21 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
@@ -558,11 +568,11 @@ place to set these expectations via `messages`.
           "guest_assignments": [
             {
               "guest_id": "gst_01",
-              "role": "primary_guest"
+              "role": "primary"
             },
             {
               "guest_id": "gst_02",
-              "role": "additional_guest"
+              "role": "accompanying"
             }
           ]
         }
@@ -642,16 +652,21 @@ place to set these expectations via `messages`.
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
@@ -672,11 +687,11 @@ place to set these expectations via `messages`.
           "guest_assignments": [
             {
               "guest_id": "gst_01",
-              "role": "primary_guest"
+              "role": "primary"
             },
             {
               "guest_id": "gst_02",
-              "role": "additional_guest"
+              "role": "accompanying"
             }
           ],
           "totals": [
@@ -850,16 +865,21 @@ place to set these expectations via `messages`.
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
@@ -880,11 +900,11 @@ place to set these expectations via `messages`.
           "guest_assignments": [
             {
               "guest_id": "gst_01",
-              "role": "primary_guest"
+              "role": "primary"
             },
             {
               "guest_id": "gst_02",
-              "role": "additional_guest"
+              "role": "accompanying"
             }
           ],
           "totals": [
@@ -1033,16 +1053,21 @@ place to set these expectations via `messages`.
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
@@ -1063,11 +1088,11 @@ place to set these expectations via `messages`.
           "guest_assignments": [
             {
               "guest_id": "gst_01",
-              "role": "primary_guest"
+              "role": "primary"
             },
             {
               "guest_id": "gst_02",
-              "role": "additional_guest"
+              "role": "accompanying"
             }
           ],
           "totals": [
@@ -1216,16 +1241,21 @@ place to set these expectations via `messages`.
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
@@ -1246,11 +1276,11 @@ place to set these expectations via `messages`.
           "guest_assignments": [
             {
               "guest_id": "gst_01",
-              "role": "primary_guest"
+              "role": "primary"
             },
             {
               "guest_id": "gst_02",
-              "role": "additional_guest"
+              "role": "accompanying"
             }
           ],
           "totals": [
@@ -1422,16 +1452,21 @@ with HTTP 200 and the UCP envelope containing `messages`:
         "title": "Luxury Queen Room with Two Queen Beds",
         "capacity": {
           "adults": 2,
-          "children": [
+          "children": 2,
+          "child_age_ranges": [
             {
-              "from_age": 0,
-              "to_age": 5,
-              "total": 1
+              "ages": {
+                "min": 0,
+                "max": 5
+              },
+              "limit": 1
             },
             {
-              "from_age": 6,
-              "to_age": 16,
-              "total": 1
+              "ages": {
+                "min": 6,
+                "max": 17
+              },
+              "limit": 1
             }
           ],
           "total": 4

@@ -97,8 +97,8 @@ Booking follows a progressive session lifecycle:
       profiles associated with the entire reservation.
     * **Stay Assignments (`stays[].guest_assignments[]`)**: Granular mappings
       associating specific stay units with guests from the root pool via
-      `guest_id` and designating occupancy roles (such as `primary_guest` or
-      `additional_guest`).
+      `guest_id` and designating occupancy roles (such as `primary` or
+      `accompanying`).
 * **Separation of Booker and Guests**: The data model strictly separates the
   legal purchaser from the physical accommodation occupants:
     * **`booker`**: The legal contracting party responsible for payment, contact
@@ -297,7 +297,8 @@ platform receives messages indicating what's needed to progress.
 * **`ready_for_complete`**: Booking session has all necessary information
     (confirmed pricing totals, valid stay dates, payment instrument
     collected if required, lead guest identification via `booker` or
-    `primary_guest`, and all outstanding gating actions resolved) and platform
+    primary guest assignment (`role: "primary"`), and all outstanding gating
+    actions resolved) and platform
     can finalize programmatically. Platform can call Complete Booking Session.
 * **`complete_in_progress`**: Business is processing the Complete Booking
     request. The response **MUST NOT** contain a `confirmation` field.
@@ -417,7 +418,7 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   entry's `totals` under the totals rendering contract — and **MUST NOT** merge or
   de-duplicate entries that share a `accommodation_type` or `rate_plan`.
 * **MUST** identify a lead guest by providing `booker` details or designating at
-  least one guest with `role: "primary_guest"` (including full legal name and contact
+  least one guest with `role: "primary"` (including full legal name and contact
   details) prior to invoking Complete Booking Session.
 * **MUST** generate unique, stable, session-scoped string identifiers in the Platform
   namespace for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
@@ -451,8 +452,11 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   updates and responses without remapping, renaming, or mutating them.
 * **MUST** validate that all `stays[].guest_assignments[].guest_id`
   references match an existing entry in the root `guests[]` array.
-* **MUST** enforce physical `capacity` limits against the total assigned
-  occupants and guest ages.
+* **MUST** enforce physical `capacity` limits against the total assigned occupants and guest ages:
+    * Guest age is evaluated in completed years as of the stay check-in date.
+    * A guest whose age falls within a defined `child_age_ranges[].ages` bracket is classified as a child; any guest whose age falls in no child bracket is classified as an adult.
+    * The requested occupancy **MUST** satisfy: `occupancy.adults <= capacity.adults`, `occupancy.children <= capacity.children`, and `occupancy.total <= capacity.total`.
+    * For each entry in `child_age_ranges[]` with a `limit`, the number of children whose ages fall in that bracket **MUST NOT** exceed `limit`.
 * **MUST** send a confirmation email after the booking has been completed when a
   valid email address is available in `booker` or primary guest details.
 * **SHOULD** provide accurate error and warning messages.

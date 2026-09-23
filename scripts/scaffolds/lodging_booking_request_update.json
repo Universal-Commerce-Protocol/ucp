@@ -22,7 +22,7 @@
       "guest_assignments": [
         {
           "guest_id": "gst_scaffold",
-          "role": "primary_guest"
+          "role": "primary"
         }
       ]
     }

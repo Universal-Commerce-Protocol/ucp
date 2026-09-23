@@ -229,16 +229,21 @@ Maps to the [Create Booking Session](index.md#create-booking-session) operation.
                 "title": "Luxury Queen Room with Two Queen Beds",
                 "capacity": {
                   "adults": 2,
-                  "children": [
+                  "children": 2,
+                  "child_age_ranges": [
                     {
-                      "from_age": 0,
-                      "to_age": 5,
-                      "total": 1
+                      "ages": {
+                        "min": 0,
+                        "max": 5
+                      },
+                      "limit": 1
                     },
                     {
-                      "from_age": 6,
-                      "to_age": 16,
-                      "total": 1
+                      "ages": {
+                        "min": 6,
+                        "max": 17
+                      },
+                      "limit": 1
                     }
                   ],
                   "total": 4
@@ -420,11 +425,11 @@ Maps to the [Update Booking Session](index.md#update-booking-session) operation.
                 "guest_assignments": [
                   {
                     "guest_id": "gst_01",
-                    "role": "primary_guest"
+                    "role": "primary"
                   },
                   {
                     "guest_id": "gst_02",
-                    "role": "additional_guest"
+                    "role": "accompanying"
                   }
                 ]
               }
@@ -492,16 +497,21 @@ Maps to the [Update Booking Session](index.md#update-booking-session) operation.
                 "title": "Luxury Queen Room with Two Queen Beds",
                 "capacity": {
                   "adults": 2,
-                  "children": [
+                  "children": 2,
+                  "child_age_ranges": [
                     {
-                      "from_age": 0,
-                      "to_age": 5,
-                      "total": 1
+                      "ages": {
+                        "min": 0,
+                        "max": 5
+                      },
+                      "limit": 1
                     },
                     {
-                      "from_age": 6,
-                      "to_age": 16,
-                      "total": 1
+                      "ages": {
+                        "min": 6,
+                        "max": 17
+                      },
+                      "limit": 1
                     }
                   ],
                   "total": 4
@@ -522,11 +532,11 @@ Maps to the [Update Booking Session](index.md#update-booking-session) operation.
               "guest_assignments": [
                 {
                   "guest_id": "gst_01",
-                  "role": "primary_guest"
+                  "role": "primary"
                 },
                 {
                   "guest_id": "gst_02",
-                  "role": "additional_guest"
+                  "role": "accompanying"
                 }
               ],
               "totals": [
@@ -722,16 +732,21 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
                 "title": "Luxury Queen Room with Two Queen Beds",
                 "capacity": {
                   "adults": 2,
-                  "children": [
+                  "children": 2,
+                  "child_age_ranges": [
                     {
-                      "from_age": 0,
-                      "to_age": 5,
-                      "total": 1
+                      "ages": {
+                        "min": 0,
+                        "max": 5
+                      },
+                      "limit": 1
                     },
                     {
-                      "from_age": 6,
-                      "to_age": 16,
-                      "total": 1
+                      "ages": {
+                        "min": 6,
+                        "max": 17
+                      },
+                      "limit": 1
                     }
                   ],
                   "total": 4
@@ -752,11 +767,11 @@ Maps to the [Complete Booking Session](index.md#complete-booking-session) operat
               "guest_assignments": [
                 {
                   "guest_id": "gst_01",
-                  "role": "primary_guest"
+                  "role": "primary"
                 },
                 {
                   "guest_id": "gst_02",
-                  "role": "additional_guest"
+                  "role": "accompanying"
                 }
               ],
               "totals": [
@@ -907,16 +922,21 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
             "title": "Luxury Queen Room with Two Queen Beds",
             "capacity": {
               "adults": 2,
-              "children": [
+              "children": 2,
+              "child_age_ranges": [
                 {
-                  "from_age": 0,
-                  "to_age": 5,
-                  "total": 1
+                  "ages": {
+                    "min": 0,
+                    "max": 5
+                  },
+                  "limit": 1
                 },
                 {
-                  "from_age": 6,
-                  "to_age": 16,
-                  "total": 1
+                  "ages": {
+                    "min": 6,
+                    "max": 17
+                  },
+                  "limit": 1
                 }
               ],
               "total": 4
