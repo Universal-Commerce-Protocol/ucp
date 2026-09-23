@@ -16,6 +16,11 @@
 
 # Booking Capability
 
+!!! note "Draft - Work in Progress"
+    This capability is in **draft status**. Implementers are cautioned that data
+    models, protocol bindings, and operational flows are under active iteration
+    and may undergo breaking changes as the specification evolves.
+
 * **Capability Name:** `dev.ucp.lodging.booking`
 
 ## Overview
