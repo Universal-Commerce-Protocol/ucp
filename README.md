@@ -27,7 +27,7 @@
 
 <p align="center">
   <a href="https://ucp.dev">Documentation</a> |
-  <a href="https://ucp.dev/specification/overview">Specification</a> |
+  <a href="https://ucp.dev/latest/specification/overview/">Specification</a> |
   <a href="https://github.com/Universal-Commerce-Protocol/ucp/discussions">Discussions</a>
 </p>
 
