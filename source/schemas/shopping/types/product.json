@@ -41,11 +41,11 @@
       "description": "Product categories with optional taxonomy identifiers."
     },
     "price_range": {
-      "$ref": "price_range.json",
+      "$ref": "../../common/types/price_range.json",
       "description": "Price range across all variants."
     },
     "list_price_range": {
-      "$ref": "price_range.json",
+      "$ref": "../../common/types/price_range.json",
       "description": "List price range before discounts (for strikethrough display)."
     },
     "media": {

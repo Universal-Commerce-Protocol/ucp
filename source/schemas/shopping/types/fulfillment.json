@@ -4,7 +4,6 @@
   "title": "Fulfillment",
   "description": "Container for fulfillment methods and availability.",
   "type": "object",
-  "ucp_shared_request": true,
   "properties": {
     "methods": {
       "type": "array",

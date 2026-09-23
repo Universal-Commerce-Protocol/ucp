@@ -92,6 +92,14 @@ def check_links():
     except Exception as e:
       print(f"Warning: Could not read .linkignore: {e}")
 
+  # When checking isolated specification builds (DOCS_MODE=spec), ignore links
+  # to documentation pages which only exist on the root site.
+  docs_mode = os.environ.get("DOCS_MODE", "root")
+  if docs_mode == "spec":
+    ignore_patterns.append(
+      re.compile(r"^(?:/|https?://[^/]+/|(?:\.\./)+)?documentation/.*")
+    )
+
   print(f"Scanning {ROOT_DIR} for broken links (Site URL: {SITE_URL})...")
 
   html_files = list(ROOT_DIR.rglob("*.html"))
@@ -147,20 +155,12 @@ def check_links():
     for link in parser.links:
       original_link = link
 
-      should_ignore = False
-      for pattern in ignore_patterns:
-        if pattern.search(original_link):
-          should_ignore = True
-          break
-      if should_ignore:
-        continue
-
       # Ignore external links
       if link.startswith(("mailto:", "tel:", "javascript:", "data:")):
         continue
 
       parsed = urlparse(link)
-      if parsed.scheme and parsed.scheme in ("http", "https"):
+      if parsed.scheme in ("http", "https"):
         parsed_site = urlparse(SITE_URL)
         if parsed.hostname == parsed_site.hostname:
           path = parsed.path if parsed.path else "/"
@@ -179,10 +179,36 @@ def check_links():
             continue  # External link
         else:
           continue  # External link
+      elif parsed.netloc or parsed.scheme:
+        # Anything else carrying a host (protocol-relative //host/path) or a
+        # scheme we do not resolve (ftp:, ws:, vscode:, ...) points off-site.
+        # Falling through would read its path as a site-absolute path and
+        # report a spurious "Not Found" against the local build.
+        continue
 
-      path_part = parsed.path
-      anchor_part = parsed.fragment
-      path_part = unquote(path_part)
+      path_part = unquote(parsed.path)
+      anchor_part = unquote(parsed.fragment)
+
+      # Built documentation should link to rendered pages, never copied source
+      # markdown. A raw .md target can exist and fool the ordinary existence
+      # check while sending readers to source text instead of the HTML page.
+      if path_part.lower().endswith(".md"):
+        errors_by_version[version][str(file_path)].append(
+          f"  Link: {original_link}\n"
+          "  Target is raw Markdown; link to the rendered page instead"
+        )
+        continue
+
+      # Ignore patterns may suppress ordinary existence and anchor checks, but
+      # never the raw-Markdown guard above: ignored version links must still
+      # resolve to rendered HTML for readers.
+      should_ignore = False
+      for pattern in ignore_patterns:
+        if pattern.search(original_link):
+          should_ignore = True
+          break
+      if should_ignore:
+        continue
 
       # If the path starts with the SITE_BASE_PATH (e.g. /ucp/), strip it
       # so it resolves correctly against the local ROOT_DIR.
@@ -190,7 +216,7 @@ def check_links():
         path_part = "/" + path_part[len(SITE_BASE_PATH) :]
 
       target_file = None
-      is_unbuilt_version = False
+      is_missing_version = False
 
       # Resolve Target File
       if not path_part:
@@ -212,7 +238,7 @@ def check_links():
           )
           and not (ROOT_DIR / parts[0]).exists()
         ):
-          is_unbuilt_version = True
+          is_missing_version = True
           stripped_path = parts[1]
           if (
             (ROOT_DIR / stripped_path).exists()
@@ -240,14 +266,14 @@ def check_links():
           if candidate.exists():
             target_file = candidate
           else:
-            if is_unbuilt_version:
+            if is_missing_version:
               continue
             errors_by_version[version][str(file_path)].append(
               f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
             )
             continue
         else:
-          if is_unbuilt_version:
+          if is_missing_version:
             continue
           errors_by_version[version][str(file_path)].append(
             f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
