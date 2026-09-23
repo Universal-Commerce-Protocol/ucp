@@ -111,10 +111,12 @@ Booking follows a progressive session lifecycle:
       responses provide provisional rates, available accommodation types, and policy
       summaries based on search parameters.
     * *Booking Session (Authoritative)*: Creating a booking session transitions
-      from provisional discovery to an authoritative state. The Business locks
-      or evaluates real-time inventory, resolves binding rate rules, enforces
-      accommodation unit capacity bounds, calculates totals (`totals[]`), and attaches
-      authoritative cancellation terms (`policies[]`).
+      from provisional discovery to an authoritative state. The Business validates
+      real-time inventory availability (or establishes a temporary soft hold per its
+      policy), resolves binding rate rules, enforces accommodation unit
+      capacity bounds, calculates authoritative totals (`totals[]`), and attaches
+      binding cancellation terms (`policies[]`). A confirmed reservation is not created
+      until the session is finalized via Complete Booking Session.
 
 ### Pricing Scope
 
@@ -298,10 +300,26 @@ platform receives messages indicating what's needed to progress.
     `primary_guest`, and all outstanding gating actions resolved) and platform
     can finalize programmatically. Platform can call Complete Booking Session.
 * **`complete_in_progress`**: Business is processing the Complete Booking
-    request.
+    request. The response **MUST NOT** contain a `confirmation` field.
+    See [Accepted Completion](../../shopping/checkout/index.md#accepted-completion)
+    for permitted operations.
 * **`completed`**: Booking confirmed successfully.
 * **`canceled`**: Booking session is invalid or expired. Platform should
     start a new booking session if needed.
+
+#### Session Expiry & Inventory Management
+
+* **Ephemeral Session Lifetime (`expires_at`)**: A booking session is an in-flight,
+  pre-confirmation resource. The Business **MAY** provide an `expires_at` timestamp
+  indicating how long the session state, quoted pricing, and any temporary inventory
+  holds remain valid.
+* **Inventory Hold Strategies**: Businesses **MAY** place a temporary soft hold on inventory
+  for the duration of `expires_at`, or **MAY** employ optimistic concurrency by
+  verifying inventory availability in real-time on session updates and performing final allocation
+  upon Complete Booking Session.
+* **Release Mechanisms**: If the booking flow is abandoned, the Platform **MAY**
+  call Cancel Booking Session to explicitly release any held inventory and session state.
+  Otherwise any held resources are automatically released when `expires_at` elapses.
 
 ### Actions
 
@@ -394,6 +412,10 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **MUST** supply valid `property.id`, and either a pre-composed `stay.id`
   OR both `accommodation_type.id` and `rate_plan.id` identifiers sourced from upper-funnel
   discovery mechanisms when creating a booking session.
+* **MUST** present each `stays[]` entry as a unit — `accommodation_type.title`,
+  `rate_plan.title`, `rate_plan.description` (when present), `occupancy`, and the
+  entry's `totals` under the totals rendering contract — and **MUST NOT** merge or
+  de-duplicate entries that share a `accommodation_type` or `rate_plan`.
 * **MUST** identify a lead guest by providing `booker` details or designating at
   least one guest with `role: "primary_guest"` (including full legal name and contact
   details) prior to invoking Complete Booking Session.
@@ -421,6 +443,10 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **MUST** evaluate requested `stay.id`, or the compound `accommodation_type.id` and
   `rate_plan.id` bindings against real-time availability and inventory constraints,
   echoing authoritative metadata, pricing totals, and policy terms.
+* **MUST** make `rate_plan.title` distinguish the rate plan and, together with
+  `rate_plan.description` when present,is sufficient for a Buyer to understand its
+  material commercial terms without having to read into `policies[]`; both
+  fields **MUST NOT** contradict `policies[]`.
 * **MUST** preserve platform-supplied `guest.id` identifiers across session
   updates and responses without remapping, renaming, or mutating them.
 * **MUST** validate that all `stays[].guest_assignments[].guest_id`
