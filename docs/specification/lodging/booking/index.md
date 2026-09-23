@@ -419,7 +419,10 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   de-duplicate entries that share a `accommodation_type` or `rate_plan`.
 * **MUST** identify a lead guest by providing `booker` details or designating at
   least one guest with `role: "primary"` (including full legal name and contact
-  details) prior to invoking Complete Booking Session.
+  details) prior to invoking Complete Booking Session. A Platform that receives
+  `ready_for_complete` without an identified lead **MUST NOT** call Complete
+  Booking Session, and **SHOULD** correct the session via Update Booking Session
+  or escalate via `continue_url` if available.
 * **MUST** generate unique, stable, session-scoped string identifiers in the Platform
   namespace for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
 * **MUST** ensure every `guest_assignments[].guest_id` references a valid `id`
@@ -452,6 +455,14 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   updates and responses without remapping, renaming, or mutating them.
 * **MUST** validate that all `stays[].guest_assignments[].guest_id`
   references match an existing entry in the root `guests[]` array.
+* **MUST NOT** return a booking session with statuses `ready_for_complete`,
+  `complete_in_progress`, or `completed` without an identified lead - a `booker`
+  with full legal name and a contact channel, a guest in `guests[]` with full
+  legal name and a contact channel who is assigned as `primary` in some
+  `stays[].guest_assignments[]`, or in corporate or proxy bookings, a named primary guest
+  alongside a `booker` providing the contact channel. Additional identity fields
+  a Business needs (such as passport number, nationality, or date of birth)
+  **MUST** be negotiated per Business through `messages[]`.
 * **MUST** enforce physical `capacity` limits against the total assigned occupants and guest ages:
     * Guest age is evaluated in completed years as of the stay check-in date.
     * A guest whose age falls within a defined `child_age_ranges[].ages` bracket is classified as a child; any guest whose age falls in no child bracket is classified as an adult.

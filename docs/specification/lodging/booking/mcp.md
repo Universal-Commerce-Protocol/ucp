@@ -953,7 +953,21 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
           "stay_dates": {
             "start_date": "2026-07-15",
             "end_date": "2026-07-21"
-          }
+          },
+          "totals": [
+            {
+              "type": "subtotal",
+              "amount": 350000
+            },
+            {
+              "type": "tax",
+              "amount": 42000
+            },
+            {
+              "type": "total",
+              "amount": 392000
+            }
+          ]
         }
       ],
       "currency": "USD",

@@ -170,5 +170,121 @@
       "description": "Details about the booking created from this specific session.",
       "ucp_request": "omit"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "confirmation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "requires_escalation"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "continue_url"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "ready_for_complete",
+              "complete_in_progress",
+              "completed"
+            ]
+          }
+        }
+      },
+      "then": {
+        "description": "Once the Business reports the session as ready to complete, in progress, or completed, it MUST carry an identified lead: a `booker` with legal name and a contact channel, a `guests[]` entry with legal name and a contact channel who is assigned as `primary` in some `stays[].guest_assignments[]`, or in corporate or proxy bookings, a `guests[]` entry with legal name assigned as `primary` in some `stays[].guest_assignments[]` alongside a `booker` providing the contact channel. Additional identity fields a Business needs are negotiated per Business through `messages[]`; this is the floor every reservation requires.",
+        "anyOf": [
+          {
+            "required": ["booker"],
+            "properties": {
+              "booker": {
+                "required": ["first_name", "last_name"],
+                "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+              }
+            }
+          },
+          {
+            "required": ["guests", "stays"],
+            "properties": {
+              "guests": {
+                "contains": {
+                  "required": ["first_name", "last_name"],
+                  "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+                }
+              },
+              "stays": {
+                "contains": {
+                  "required": ["guest_assignments"],
+                  "properties": {
+                    "guest_assignments": {
+                      "contains": {
+                        "required": ["role"],
+                        "properties": { "role": { "const": "primary" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "required": ["booker", "guests", "stays"],
+            "properties": {
+              "booker": {
+                "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+              },
+              "guests": {
+                "contains": {
+                  "required": ["first_name", "last_name"]
+                }
+              },
+              "stays": {
+                "contains": {
+                  "required": ["guest_assignments"],
+                  "properties": {
+                    "guest_assignments": {
+                      "contains": {
+                        "required": ["role"],
+                        "properties": { "role": { "const": "primary" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
 }
