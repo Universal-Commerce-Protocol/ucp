@@ -17,6 +17,11 @@
               "enum": ["rest", "mcp", "a2a", "embedded"],
               "description": "Transport protocol for this service binding."
             },
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL of the transport definition that declares this binding's operations. This is not a JSON Schema document: the artifact format is determined by `transport` — `rest` uses OpenAPI 3.x, `mcp` and `embedded` use OpenRPC, and `a2a` advertises an Agent Card via `endpoint` (so `schema` is not required). Paths or method names declared in this document are resolved against `endpoint`. Contrast `capability.schema`, which is a JSON Schema describing payload types."
+            },
             "endpoint": {
               "type": "string",
               "format": "uri",

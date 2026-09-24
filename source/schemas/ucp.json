@@ -88,7 +88,7 @@
         "schema": {
           "type": "string",
           "format": "uri",
-          "description": "URL to JSON Schema defining this entity's structure and payloads."
+          "description": "URL to the machine-readable definition for this entity. The artifact format depends on the entity type: capabilities reference a JSON Schema describing payload types, while service bindings reference a transport definition (OpenAPI or OpenRPC) as specified in `service.json`."
         },
         "id": {
           "type": "string",
