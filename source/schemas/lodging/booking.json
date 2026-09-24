@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/booking.json",
+  "name": "dev.ucp.lodging.booking",
+  "title": "Booking",
+  "description": "Base booking schema. Extensions compose onto this using allOf.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "id",
+    "status",
+    "property",
+    "stays",
+    "currency",
+    "totals",
+    "links"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_booking_schema",
+      "ucp_request": "omit"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the booking.",
+      "ucp_request": "omit"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "incomplete",
+        "requires_escalation",
+        "ready_for_complete",
+        "complete_in_progress",
+        "completed",
+        "canceled"
+      ],
+      "description": "Booking state indicating the current phase and required action. See Booking Status lifecycle documentation for state transition details.",
+      "ucp_request": "omit"
+    },
+    "property": {
+      "$ref": "types/property.json",
+      "description": "The physical establishment or geographic location where the lodging is situated (e.g., hotel, resort, villa estate, cabin park).",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "stays": {
+      "type": "array",
+      "items": {
+        "$ref": "types/stay.json"
+      },
+      "description": "List of stay line-items for the booking.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "booker": {
+      "$ref": "types/booker.json",
+      "description": "Representation of the legal contracting party making the reservation.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "guests": {
+      "type": "array",
+      "items": {
+        "$ref": "types/guest.json"
+      },
+      "description": "List of guest profiles associated with the booking.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "travel_purpose": {
+      "type": "string",
+      "description": "Purpose of the trip or reservation, supplied by the Platform. Well-known values: `business`, `leisure`. Platforms MAY send additional values; a Business MUST ignore values it does not recognize and treat the purpose as unspecified.",
+      "examples": [
+        "business",
+        "leisure"
+      ],
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "context": {
+      "$ref": "../common/types/context.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "signals": {
+      "$ref": "../common/types/signals.json",
+      "ucp_request": "optional"
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code reflecting the business's market determination. Derived from address, context, and geo IP—buyers provide signals, businesses determine currency.",
+      "ucp_request": "omit"
+    },
+    "totals": {
+      "$ref": "../common/types/totals.json",
+      "description": "Authoritative pricing breakdown for the booking. The `total` entry represents the authoritative all-in stay liability across all requested units. All non-total entries are price addends that sum to `total`. When payment timing is split across schedules or property-collected charges apply, timing breakdowns are conveyed via payment terms (`payment.terms[]`) schedules rather than within `totals`.",
+      "ucp_request": "omit"
+    },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this booking.",
+      "ucp_request": "omit"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/message.json"
+      },
+      "description": "List of messages with error and info about the booking session state.",
+      "ucp_request": "omit"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/link.json"
+      },
+      "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/policy.json"
+      },
+      "description": "Policies (e.g., cancellation terms) that apply to the booking session. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
+      "ucp_request": "omit"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp after which the booking session is no longer valid. Indicates how long session state, quoted pricing, and any temporary inventory holds remain valid. Businesses MUST NOT complete a booking at a modified price without first returning updated totals to the platform.",
+      "ucp_request": "omit"
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for booking handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
+      "ucp_request": "omit"
+    },
+    "payment": {
+      "$ref": "../common/types/payment.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "required"
+      }
+    },
+    "confirmation": {
+      "$ref": "types/booking_confirmation.json",
+      "description": "Details about the booking created from this specific session.",
+      "ucp_request": "omit"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "confirmation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "const": "requires_escalation"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "continue_url"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "ready_for_complete",
+              "complete_in_progress",
+              "completed"
+            ]
+          }
+        }
+      },
+      "then": {
+        "description": "Once the Business reports the session as ready to complete, in progress, or completed, it MUST carry an identified lead: a `booker` with legal name and a contact channel, a `guests[]` entry with legal name and a contact channel who is assigned as `primary` in some `stays[].guest_assignments[]`, or in corporate or proxy bookings, a `guests[]` entry with legal name assigned as `primary` in some `stays[].guest_assignments[]` alongside a `booker` providing the contact channel. Additional identity fields a Business needs are negotiated per Business through `messages[]`; this is the floor every reservation requires.",
+        "anyOf": [
+          {
+            "required": ["booker"],
+            "properties": {
+              "booker": {
+                "required": ["first_name", "last_name"],
+                "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+              }
+            }
+          },
+          {
+            "required": ["guests", "stays"],
+            "properties": {
+              "guests": {
+                "contains": {
+                  "required": ["first_name", "last_name"],
+                  "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+                }
+              },
+              "stays": {
+                "contains": {
+                  "required": ["guest_assignments"],
+                  "properties": {
+                    "guest_assignments": {
+                      "contains": {
+                        "required": ["role"],
+                        "properties": { "role": { "const": "primary" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "required": ["booker", "guests", "stays"],
+            "properties": {
+              "booker": {
+                "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+              },
+              "guests": {
+                "contains": {
+                  "required": ["first_name", "last_name"]
+                }
+              },
+              "stays": {
+                "contains": {
+                  "required": ["guest_assignments"],
+                  "properties": {
+                    "guest_assignments": {
+                      "contains": {
+                        "required": ["role"],
+                        "properties": { "role": { "const": "primary" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
