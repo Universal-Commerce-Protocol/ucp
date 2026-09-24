@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/nano_payment_instrument.json",
+  "title": "Nano Payment Instrument",
+  "description": "A payment instrument for Nano (XNO), a feeless, single-block-final settlement asset. The settlement block is itself the credential — no PCI-DSS surface, no PAN or network token, no dispute-window reconciliation. Per-checkout derived addresses bind a confirmed send to its checkout without a memo field.",
+  "$defs": {
+    "constraint_target": {
+      "title": "Nano Address Constraint Target",
+      "description": "The object an available Nano instrument's `constraints` describes. It declares the constrainable members and their types and is never carried in a payload.",
+      "type": "object",
+      "properties": {
+        "receive_address": {
+          "type": "string",
+          "description": "The handler-issued destination address for this checkout. The settlement block's `link` field must equal this address; because each checkout receives a unique derived address, the block hash is bound to exactly one checkout.",
+          "examples": [
+            "nano_1qno3zgq7qnr3rqbypqbs77wpan7aq3e3ou73go3rqx98eem3tckq1q4hie3"
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "nano",
+          "description": "Indicates this is a Nano payment instrument."
+        },
+        "receive_address": {
+          "type": "string",
+          "description": "The handler-issued Nano destination address for this checkout. Derived deterministically per checkout (e.g., BIP32-style hardened derivation at a checkout-index path) so that a confirmed send block is provably bound to exactly one checkout. MUST be a valid Nano account address beginning with `nano_`.",
+          "examples": [
+            "nano_1qno3zgq7qnr3rqbypqbs77wpan7aq3e3ou73go3rqx98eem3tckq1q4hie3"
+          ]
+        },
+        "settlement_block": {
+          "type": "string",
+          "description": "The Nano send block hash that settles this payment. Present after the buyer has submitted the send. The block is self-verifying: its `link` field MUST match `receive_address`, and its amount MUST equal the agreed checkout total. Verification can be performed against any Nano node or indexed explorer.",
+          "examples": [
+            "6EE79D2BA2A8995179E4C2E12B10BAA7F828C9AD5D7F2D00E8D5B8A8D5C96C29"
+          ]
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for this Nano payment instrument.",
+          "properties": {
+            "address_short": {
+              "type": "string",
+              "description": "Shortened display form of the Nano address (prefix + first 6 chars + '...' + last 6 chars). Presentational only.",
+              "examples": [
+                "nano_1qno3...4hie3"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "description": "An optional rich text description of the Nano payment to display to the user (e.g., 'Nano (XNO) — feeless, instant settlement')."
+            }
+          }
+        }
+      }
+    }
+  ]
+}
