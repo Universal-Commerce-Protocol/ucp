@@ -8,12 +8,14 @@
     "url": {
       "description": "The primary model file (e.g. GLB)."
     },
+    "width": {
+      "description": "Not applicable: a 3D model has no pixel dimensions."
+    },
+    "height": {
+      "description": "Not applicable: a 3D model has no pixel dimensions."
+    },
     "sources": {
-      "type": "array",
-      "description": "The complete set of available model encodings/file formats (glTF/GLB/USDZ). When present, the Business SHOULD include a source whose `url` equals the media `url`.",
-      "items": {
-        "$ref": "media_source.json"
-      }
+      "description": "Alternate file formats of the model (glTF/GLB/USDZ)."
     }
   }
 }

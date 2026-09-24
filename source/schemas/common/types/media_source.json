@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/media_source.json",
   "title": "Media Source",
-  "description": "A single encoded rendition of a parent Media item — one resolution/format of a video, or one file format of a 3D model. The Platform selects the best supported source.",
+  "description": "One encoded rendition of the parent media item: a format or resolution of an image or video, a streaming manifest, or a file format of a 3D model. The Platform selects a source by `mime_type` and dimensions.",
   "type": "object",
   "required": [
     "url"
@@ -11,25 +11,26 @@
     "url": {
       "type": "string",
       "format": "uri",
+      "pattern": "^https://",
       "description": "URL to this rendition's file or streaming manifest."
     },
     "mime_type": {
       "type": "string",
-      "description": "IANA media type of this source. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `video/mp4`, `video/webm`, `application/vnd.apple.mpegurl` (HLS), `application/dash+xml` (DASH), `model/gltf-binary` (GLB), `model/gltf+json` (glTF), `model/vnd.usdz+zip` (USDZ)."
+      "description": "IANA media type of this source. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `image/avif`, `image/webp`, `image/jpeg`, `video/mp4`, `video/webm`, `application/vnd.apple.mpegurl` (HLS), `application/dash+xml` (DASH), `model/gltf-binary` (GLB), `model/gltf+json` (glTF), `model/vnd.usdz+zip` (USDZ)."
     },
     "format": {
       "type": "string",
-      "description": "Short format token for display/selection. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `mp4`, `webm`, `m3u8`, `mpd`, `glb`, `gltf`, `usdz`."
+      "description": "Short format token for display/selection. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `avif`, `webp`, `jpg`, `mp4`, `webm`, `m3u8`, `mpd`, `glb`, `gltf`, `usdz`."
     },
     "width": {
       "type": "integer",
       "minimum": 1,
-      "description": "Pixel width of this rendition (video). Omitted for adaptive manifests and 3D models."
+      "description": "Pixel width of this rendition. Omitted for adaptive manifests and 3D models."
     },
     "height": {
       "type": "integer",
       "minimum": 1,
-      "description": "Pixel height of this rendition (video). Omitted for adaptive manifests and 3D models."
+      "description": "Pixel height of this rendition. Omitted for adaptive manifests and 3D models."
     },
     "filesize": {
       "type": "integer",

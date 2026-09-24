@@ -411,7 +411,23 @@ on option values and returns variants matching the selection.
             "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
             "alt_text": "Runner Pro in Blue",
             "width": 1600,
-            "height": 1600
+            "height": 1600,
+            "sources": [
+              {
+                "url": "https://cdn.example.com/products/runner-pro-blue.avif",
+                "mime_type": "image/avif",
+                "format": "avif",
+                "width": 1600,
+                "height": 1600
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+                "mime_type": "image/jpeg",
+                "format": "jpg",
+                "width": 1600,
+                "height": 1600
+              }
+            ]
           },
           {
             "type": "video",
@@ -471,9 +487,8 @@ on option values and returns variants matching the selection.
             ]
           },
           {
-            "type": "video",
-            "url": "https://videos.example.com/watch?v=abc123",
-            "embed_url": "https://videos.example.com/embed/abc123",
+            "type": "external_video",
+            "url": "https://videos.example.com/embed/123",
             "name": "Runner Pro trail review",
             "alt_text": "Reviewer running a trail in the Runner Pro",
             "duration": 212,

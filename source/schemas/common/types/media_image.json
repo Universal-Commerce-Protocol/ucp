@@ -8,11 +8,8 @@
     "url": {
       "description": "A directly displayable image."
     },
-    "width": {
-      "description": "Authoritative pixel width of the image."
-    },
-    "height": {
-      "description": "Authoritative pixel height of the image."
+    "sources": {
+      "description": "Alternate encodings and sizes of the image (e.g. `image/avif`, `image/webp`, `image/jpeg`; width variants for responsive layout). `url` SHOULD be the most broadly decodable rendition."
     }
   }
 }

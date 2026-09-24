@@ -358,6 +358,44 @@ fundamental protocol change (e.g., `checkout.status: open | completed | expired`
 If the set might grow as new use cases emerge, use an open string with well-known
 values documented in the `description`.
 
+### Per-Value Field Semantics
+
+An open `type` vocabulary can change what an existing field *means* without
+changing what validates. The media `type` above is the case in point: `url` is
+a displayable image for `image`, a playable file or streaming manifest for
+`video`, and a third-party player to embed for `external_video` — the same
+required `https` URL in every case. Keep one schema and one field set on the
+base, and express the per-value meaning as description-only overrides in a
+sibling schema file that the base selects with an `allOf` `if`/`then` branch on
+`type`:
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+// media.json — every field is defined here; a branch selects a sibling by `type`
+"allOf": [{
+  "if": { "properties": { "type": { "const": "video" } }, "required": ["type"] },
+  "then": { "$ref": "media_video.json" }
+}]
+
+// media_video.json — description-only overrides: no types, no constraints
+"properties": {
+  "url": { "description": "A playable rendition of the video: a progressive file or an adaptive-streaming manifest." },
+  "sources": { "description": "Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH)." }
+}
+```
+
+The branch carries no constraints. Every field lives on the base — including
+one that applies to only some values, such as `duration` for time-based media
+— with a description that names its scope. JSON Schema code generators do not
+project `if`/`then`, so a field defined only inside a branch is missing from
+the generated type, while a field on the base is present for every value. The
+`schema_fields` macro renders each sibling as a per-value table, completing
+type and requirement from the base that references it, so an override row
+reads `url | string | Required | <per-value description>`.
+
+If a value ever needs a real constraint — a field only it requires, a format
+only it accepts — the branch is already where it goes.
+
 ## Versioning Strategy
 
 ### UCP Services (`dev.ucp.*`)

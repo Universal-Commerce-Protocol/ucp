@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_external_video.json",
+  "title": "Media External Video",
+  "description": "Type-specific properties for a video presented through a third-party player.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "The third-party player the Platform embeds. A video the Business serves as files from any origin, including a CDN, is `video`, not `external_video`."
+    },
+    "sources": {
+      "description": "Not used: a video presented through a player has no renditions."
+    }
+  }
+}
