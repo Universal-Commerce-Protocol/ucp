@@ -27,7 +27,7 @@ image: assets/banner.png
     <div class="custom-banner-container">
       <img src="assets/UCP-small.svg" alt="UCP Logo" class="custom-banner-icon">
       <div class="custom-banner-text">
-        <div class="banner-title">UCP is expanding beyond retail: Lodging is now live. <strong>Food coming soon.</strong></div>
+        <div class="banner-title">UCP is expanding beyond retail: Lodging draft specification now available. <strong>Food coming soon.</strong></div>
       </div>
     </div>
     <button class="custom-banner-close" onclick="document.getElementById('announce-banner').style.display='none'; localStorage.setItem('ucp_banner_closed', 'true');" aria-label="Close banner">
@@ -902,7 +902,7 @@ image: assets/banner.png
               "id": "sched_balance_checkin",
               "type": "deferred",
               "description": {
-                "plain": "FlightBulb will charge you the remaining on May 10, 2026."
+                "plain": "FlightBulb will charge you the remaining on May 12, 2026."
               },
               "due_at": "2026-05-12T15:00:00-07:00",
               "amount": 8445
