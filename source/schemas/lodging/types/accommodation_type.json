@@ -12,7 +12,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier of the physical room type.",
+      "description": "Unique identifier of the accommodation type.",
       "ucp_request": {
         "create": "optional",
         "update": "optional",
@@ -21,17 +21,17 @@
     },
     "title": {
       "type": "string",
-      "description": "Human-readable title of the room type.",
+      "description": "Human-readable title of the accommodation type.",
       "ucp_request": "omit"
     },
     "description": {
       "type": "string",
-      "description": "Detailed description of the room type.",
+      "description": "Detailed description of the accommodation type.",
       "ucp_request": "omit"
     },
     "capacity": {
       "$ref": "capacity.json",
-      "description": "Capacity details of the room type.",
+      "description": "Capacity details of the accommodation type.",
       "ucp_request": "omit"
     },
     "media": {

@@ -31,7 +31,7 @@
     },
     "age": {
       "type": "integer",
-      "description": "Age of the guest, used to enforce any age-restriction for check-in and room occupancy.",
+      "description": "Age of the guest, used to enforce any age-restriction for check-in and accommodation occupancy.",
       "minimum": 0
     }
   }

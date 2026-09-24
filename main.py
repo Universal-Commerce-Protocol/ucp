@@ -21,8 +21,9 @@ bodies.
 """
 
 import json
-import subprocess
 from pathlib import Path
+import re
+import subprocess
 from typing import Any
 
 # --- CONFIGURATION ---
@@ -619,8 +620,12 @@ def define_env(env):
         stripped = line.strip()
         if not stripped:
           continue
-        if stripped.startswith("|") and stripped.endswith("|"):
-          parts = [p.strip() for p in stripped.split("|")]
+        if (
+          stripped.startswith("|")
+          and stripped.endswith("|")
+          and not stripped.endswith(r"\|")
+        ):
+          parts = [p.strip() for p in re.split(r"(?<!\\)\|", stripped)]
           # Exclude header and separator rows if any were embedded
           if len(parts) >= 5 and parts[1] not in ("Name", ":---"):
             field_name = parts[1]
@@ -628,12 +633,47 @@ def define_env(env):
             if prior is None:
               deduped_rows[field_name] = parts
             else:
-              # "any" is the renderer's placeholder for a branch that adds no
-              # `type`, so it defers to the base branch just like an empty cell.
-              deduped_rows[field_name] = [
-                new if new and new != "any" else (old or new)
-                for new, old in zip(parts, prior, strict=False)
-              ]
+              # Merge cell-by-cell:
+              # - Type (col 2): "any" is the renderer's placeholder for a branch
+              #   that adds no `type`, which defers to the base branch. Also,
+              #   generic "string" in a specialization should not overwrite a
+              #   more specific referenced type from the base branch.
+              # - Description (col 4): merge specialization description with
+              #   base description so protocol rules from base are not lost.
+              merged_parts = list(parts)
+              for i in range(len(parts)):
+                new_val = parts[i]
+                old_val = prior[i] if i < len(prior) else ""
+                if i == 2:  # Type column
+                  if new_val and new_val != "any":
+                    if (
+                      new_val == "string"
+                      and old_val
+                      and old_val not in ("any", "string")
+                    ):
+                      merged_parts[i] = old_val
+                    else:
+                      merged_parts[i] = new_val
+                  else:
+                    merged_parts[i] = old_val or new_val
+                elif i == 4:  # Description column
+                  if new_val and old_val and new_val != old_val:
+                    if old_val in new_val:
+                      merged_parts[i] = new_val
+                    elif new_val in old_val:
+                      merged_parts[i] = old_val
+                    else:
+                      sep = " " if new_val.endswith((".", "!", "?")) else ". "
+                      merged_parts[i] = f"{new_val}{sep}{old_val}"
+                  else:
+                    merged_parts[i] = new_val or old_val
+                else:
+                  merged_parts[i] = (
+                    new_val
+                    if new_val and new_val != "any"
+                    else (old_val or new_val)
+                  )
+              deduped_rows[field_name] = merged_parts
             continue
         other_lines.append(line)
 
@@ -870,6 +910,8 @@ def define_env(env):
 
         f_type = details.get("type", "any")
         ref = _deref_self(details.get("$ref"))
+        if not ref and details.get("$id") and details.get("$id") != self_id:
+          ref = details.get("$id")
 
         # Resolve UCP $defs references inline so properties render as
         # expanded tables (with anchors) instead of opaque links.
@@ -896,6 +938,8 @@ def define_env(env):
         # Check for Array specific logic
         items = details.get("items", {})
         items_ref = _deref_self(items.get("$ref"))
+        if not items_ref and items.get("$id") and items.get("$id") != self_id:
+          items_ref = items.get("$id")
 
         # Special handling for UCP version
         version_data = None
@@ -977,7 +1021,7 @@ def define_env(env):
         elif ref and not ref.startswith("#"):
           # No embedder description - inherit from ref'd type
           ref_clean = ref.split("#")[0]
-          ref_entity = ref_clean.replace(".json", "")
+          ref_entity = Path(ref_clean).stem
           ref_schema = _load_json_file(ref_entity)
           if ref_schema:
             desc += ref_schema.get("description", "")
