@@ -509,27 +509,7 @@ image: assets/banner.png
       "phone_number": "+16505550199"
     },
     "currency": "USD",
-    "totals": [
-      {
-        "type": "subtotal",
-        "amount": 44500
-      },
-      {
-        "type": "total",
-        "amount": 43600,
-        "display_text": "Estimated total (taxes calculated at checkout)"
-      },
-      {
-        "type": "discount",
-        "amount": -4500,
-        "display_text": "Spring Promotion"
-      },
-      {
-        "type": "tax",
-        "amount": 3600,
-        "display_text": "Estimated Sales Tax"
-      }
-    ],
+    "totals": [ ... ],
     "messages": [
       {
         "type": "info",
