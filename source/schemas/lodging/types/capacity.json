@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/lodging/types/capacity.json",
   "title": "Capacity",
-  "description": "Physical room capacity specifying maximum occupancy limits broken down by guest age.",
+  "description": "Physical accommodation capacity specifying maximum occupancy limits broken down by guest age.",
   "type": "object",
   "additionalProperties": true,
   "properties": {

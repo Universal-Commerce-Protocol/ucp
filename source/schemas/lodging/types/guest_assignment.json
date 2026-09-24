@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/lodging/types/guest_assignment.json",
   "title": "Guest Assignment",
-  "description": "Assignment linking a room unit to a guest profile in the root guests pool.",
+  "description": "Assignment linking an accommodation stay unit to a guest profile in the root guests pool.",
   "type": "object",
   "required": [
     "guest_id"
@@ -15,7 +15,7 @@
     },
     "role": {
       "type": "string",
-      "description": "Role of the guest in this room. Well-known values: `primary` (the guest the reservation is attached to), `accompanying` (every other occupant). Platforms MAY send additional values; a Business MUST treat any value it does not recognize as `accompanying`."
+      "description": "Role of the guest in this stay. Well-known values: `primary` (the guest the reservation is attached to), `accompanying` (every other occupant). Platforms MAY send additional values; a Business MUST treat any value it does not recognize as `accompanying`."
     }
   }
 }

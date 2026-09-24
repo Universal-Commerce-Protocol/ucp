@@ -153,7 +153,7 @@ so the booker can review full dynamic property policies.
     "description": {
       "plain": "Non-refundable promotional rate. This room reservation cannot be cancelled or modified for a refund."
     },
-    "applies_to": ["$.room_rates[0]"],
+    "applies_to": ["$.stays[0]"],
     "refundability": "non_refundable",
     "url": "https://example.com/cancellation-terms#non-refundable"
   }

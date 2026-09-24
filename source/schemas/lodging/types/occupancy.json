@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/lodging/types/occupancy.json",
   "title": "Occupancy",
-  "description": "Occupancy breakdown and guest count for a booked room.",
+  "description": "Occupancy breakdown and guest count for an accommodation stay.",
   "type": "object",
   "required": [
     "total"
@@ -12,12 +12,12 @@
     "adults": {
       "type": "integer",
       "minimum": 0,
-      "description": "Number of adults occupying the room."
+      "description": "Number of adults occupying the accommodation unit."
     },
     "children": {
       "type": "integer",
       "minimum": 0,
-      "description": "Number of children occupying the room."
+      "description": "Number of children occupying the accommodation unit."
     },
     "child_ages": {
       "type": "array",
@@ -26,12 +26,12 @@
         "minimum": 0,
         "maximum": 17
       },
-      "description": "Ages of children occupying the room. If present length(child_ages) MUST equal children."
+      "description": "Ages of children occupying the accommodation unit. If present length(child_ages) MUST equal children."
     },
     "total": {
       "type": "integer",
       "minimum": 1,
-      "description": "Total number of occupants in the room. If adults and/or children fields are specified, this MUST equal adults + children."
+      "description": "Total number of occupants in the accommodation unit. If adults and/or children fields are specified, this MUST equal adults + children."
     }
   }
 }
