@@ -927,10 +927,6 @@ image: assets/banner.png
             "address_region": "CA",
             "address_country": "US",
             "postal_code": "95014"
-          },
-          "credential": {
-            "type": "PAYMENT_GATEWAY",
-            "token": "tok_1N4examplePaymentToken"
           }
         }
       ]
