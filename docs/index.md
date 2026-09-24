@@ -323,14 +323,7 @@ image: assets/banner.png
 
   ```json {.yaml .no-copy}
   {
-    "ucp": {
-      "version": "2026-08-25",
-      "capabilities": {
-        "dev.ucp.shopping.catalog.search": [
-          {"version": "2026-08-25"}
-        ]
-      }
-    },
+    "ucp": { ... },
     "products": [
       {
         "id": "prod_abc123",
@@ -430,16 +423,7 @@ image: assets/banner.png
 
   ```json {.yaml .no-copy}
   {
-    "ucp": {
-      "version": "2026-08-25",
-      "capabilities": {
-        "dev.ucp.shopping.cart": [
-          {
-            "version": "2026-08-25"
-          }
-        ]
-      }
-    },
+    "ucp": { ... },
     "id": "cart_88392A",
     "line_items": [
       {
@@ -451,16 +435,7 @@ image: assets/banner.png
           "image_url": "https://example.com/images/carry-on-pro.jpg"
         },
         "quantity": 1,
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 26500
-          },
-          {
-            "type": "total",
-            "amount": 26500
-          }
-        ]
+        "totals": [ ... ]
       },
       {
         "id": "li_2",
@@ -471,16 +446,7 @@ image: assets/banner.png
           "image_url": "https://example.com/images/metro-backpack.jpg"
         },
         "quantity": 1,
-        "totals": [
-          {
-            "type": "subtotal",
-            "amount": 18000
-          },
-          {
-            "type": "total",
-            "amount": 18000
-          }
-        ]
+        "totals": [ ... ]
       }
     ],
     "context": {
