@@ -42,6 +42,7 @@ nav:
       - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview/index.md
+      - Getting Started: specification/getting-started.md
       - Common:
           - Identity Linking: specification/common/identity-linking/index.md
           - Location Capability:
@@ -389,6 +390,9 @@ plugins:
           - specification/overview/index.md: >-
               Master technical specification of UCP, discovery mechanisms,
               secure transports, capability negotiation, and error taxonomies.
+          - specification/getting-started.md: >-
+              Step-by-step developer guide for building a UCP checkout server
+              in Python (FastAPI) or Node.js (Express).
           - specification/glossary.md: >-
               Definitions of the protocol, commerce, payment, regulatory, and
               standards terms and acronyms used throughout the specification,
