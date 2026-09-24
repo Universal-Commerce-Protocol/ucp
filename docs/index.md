@@ -797,7 +797,7 @@ image: assets/banner.png
         <div class="pane-text">
           <h3>Booking</h3>
           <p>Enable high-quality booking flows within AI surfaces with real time pricing and availability checks for rooms, easy guest registration and secure checkout with complex payments schedules.</p>
-          <a href="latest/specification/lodging/booking/" class="learn-more-btn">Get Started</a>
+          <a href="draft/specification/lodging/booking/" class="learn-more-btn">Get Started</a>
         </div>
             <div class="pane-visuals">
               <div class="image-container">
