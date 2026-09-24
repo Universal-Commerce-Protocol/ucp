@@ -148,7 +148,7 @@
     "expires_at": {
       "type": "string",
       "format": "date-time",
-      "description": "RFC 3339 timestamp after which the booking session is no longer valid. Quoted pricing and availability are held until this time; businesses MUST NOT complete a booking at a modified price without first returning updated totals to the platform.",
+      "description": "RFC 3339 timestamp after which the booking session is no longer valid. Indicates how long session state, quoted pricing, and any temporary inventory holds remain valid. Businesses MUST NOT complete a booking at a modified price without first returning updated totals to the platform.",
       "ucp_request": "omit"
     },
     "continue_url": {

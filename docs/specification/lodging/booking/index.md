@@ -165,7 +165,7 @@ occupancy taxes, or a remaining stay balance).
       for moving funds.
 * **Schedules and `totals` Alignment**:
     * A payment term is composed of one or more `schedules[]`.
-    * The sum of all `schedules[].amount` within a term **MUST** equal `totals[].type: "total"`
+    * The sum of all `schedules[].amount` within the selected term **MUST** equal `totals[].type: "total"`
       (satisfying the core `common/payment_terms.json` invariant).
     * Schedules with `type: "immediate"` represent payments due upon booking completion.
     * Schedules with `type: "deferred"` represent payments due at a specified future date or
@@ -280,9 +280,17 @@ collected instrument data.
 
 The `payment` object is optional on booking session creation and update operations.
 At completion (`complete_booking_session`), `payment` is **REQUIRED** to establish the binding
-payment agreement. For immediate card payments, `payment.instruments` is populated; for deferred
-or pay-at-property reservations, `payment` conveys the finalized terms (e.g., via the Payment
-Terms extension) and `instruments` may be omitted if no upfront card guarantee is required.
+payment agreement:
+
+* **Immediate Card Payments**: For immediate charges or upfront card guarantees,
+  `payment.instruments` is populated with the collected instrument data.
+* **Payment Terms Confirmation**: Complete confirms the already-selected payment term;
+  it does **not** transmit finalized terms. `selected_term_id` is intentionally omitted on
+  Complete because term selection occurs through Update (`update_booking_session`)
+  which can change pricing and derived state before the session reaches `ready_for_complete`.
+* **No Instrument Required**: When no instrument is needed (e.g., deferred or pay-at-property reservations
+  requiring no upfront card guarantee), an empty payment object (`payment: {}`) validates
+  the completion requirement.
 
 ### Booking Status Lifecycle
 
