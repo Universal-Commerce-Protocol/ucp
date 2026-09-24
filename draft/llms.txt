@@ -90,6 +90,16 @@ specifications:
 - [Discounts](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md): Discount Extension, covering discount code discovery, applied discounts, allocation method stacking orders, rejected code message handling, and automatic or provisional eligibility promotions.
 - [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md): Buyer Consent Extension, defining data schemas for transmitting buyer privacy choices (analytics, marketing, personalization) to assist with privacy compliance (CCPA/GDPR).
 
+## Lodging Booking Capability
+
+- [Overview](http://ucp.dev/draft/specification/lodging/booking/index.md): Core Booking Capability specification detailing necessary data exchange and payment processing for finalizing reservations on a pre-selected room inventory.
+- [REST](http://ucp.dev/draft/specification/lodging/booking/rest/index.md): HTTP REST transport binding for Booking operations, including endpoints for session creation, modification, retrieval, and cancellation.
+- [MCP](http://ucp.dev/draft/specification/lodging/booking/mcp/index.md): Model Context Protocol (MCP) transport binding for Booking operations, mapping reservation session management to JSON-RPC tools for AI booking agents.
+
+## Lodging Extensions
+
+- [Cancellation Policy](http://ucp.dev/draft/specification/lodging/extensions/cancellation-policy/index.md): Lodging Cancellation Policy Extension, defining the dev.ucp.lodging.policy.cancellation type on the core policies[] primitive with a machine-readable refundability classification and a human-readable penalty schedule for lodging reservations.
+
 ## Payment
 
 - [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md): AP2 Mandates Extension, detailing secure, cryptographically bound checkout commitments (using SD-JWT+kb digital credentials and detached JWS signatures) between business, platform, and payment providers.

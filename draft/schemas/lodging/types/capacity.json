@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/lodging/types/capacity.json",
+  "title": "Capacity",
+  "description": "Physical accommodation capacity specifying maximum occupancy limits broken down by guest age.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "adults": {
+      "type": "integer",
+      "description": "Maximum number of adult occupants.",
+      "minimum": 0
+    },
+    "children": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Maximum number of child occupants."
+    },
+    "child_age_ranges": {
+      "type": "array",
+      "description": "Child age brackets and optional per-bracket capacity limits. A guest whose age falls within a bracket is counted as a child; otherwise as an adult.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "ages"
+        ],
+        "properties": {
+          "ages": {
+            "type": "object",
+            "description": "Age range this bracket covers.",
+            "required": [
+              "min",
+              "max"
+            ],
+            "properties": {
+              "min": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Lowest age in this bracket, inclusive, in completed years at check-in."
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Highest age in this bracket, inclusive, in completed years at check-in."
+              }
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Maximum number of children permitted within this age bracket (e.g., crib or extra bed limit). When absent, bounded only by overall capacity.children."
+          }
+        }
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of total occupants (adult or child). If adults and/or children are present, this MUST be greater than or equal to max(adults, children)."
+    }
+  }
+}

@@ -330,6 +330,43 @@
         }
       ]
     },
+    "response_booking_schema": {
+      "title": "UCP Booking Response Schema",
+      "description": "UCP metadata for booking responses.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "required": [
+            "payment_handlers"
+          ],
+          "properties": {
+            "services": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/service.json#/$defs/response_schema"
+                }
+              }
+            },
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/capability.json#/$defs/response_schema"
+                }
+              }
+            },
+            "payment_handlers": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/draft/schemas/payment_handler.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "response_order_schema": {
       "title": "UCP Order Response Schema",
       "description": "UCP metadata for order responses. No payment handlers needed post-purchase.",

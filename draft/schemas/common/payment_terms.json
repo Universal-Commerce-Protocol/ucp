@@ -86,7 +86,30 @@
           }
         }
       ]
+    },
+    "dev.ucp.lodging.booking": {
+      "title": "Booking with Payment Terms",
+      "description": "Booking extended with selectable payment terms.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/lodging/booking.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "$ref": "#/$defs/payment",
+              "description": "Payment details with available and selected payment terms.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "required"
+              }
+            }
+          }
+        }
+      ]
     }
   },
-  "version": "2026-09-23"
+  "version": "2026-09-24"
 }

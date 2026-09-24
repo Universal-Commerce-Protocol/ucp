@@ -793,4 +793,3 @@ UCP metadata for order responses. No payment handlers needed post-purchase.
 | services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
 | capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
 | payment_handlers | object | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
-| capabilities     | any    | Optional     |                                                                                                                                                |

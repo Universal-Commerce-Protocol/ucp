@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/lodging/types/guest_assignment.json",
+  "title": "Guest Assignment",
+  "description": "Assignment linking an accommodation stay unit to a guest profile in the root guests pool.",
+  "type": "object",
+  "required": [
+    "guest_id"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "guest_id": {
+      "type": "string",
+      "description": "Stable, opaque identifier of the assigned guest. MUST be consistent with platform supplied identifiers in the root `guests` pool."
+    },
+    "role": {
+      "type": "string",
+      "description": "Role of the guest in this stay. Well-known values: `primary` (the guest the reservation is attached to), `accompanying` (every other occupant). Platforms MAY send additional values; a Business MUST treat any value it does not recognize as `accompanying`."
+    }
+  }
+}
