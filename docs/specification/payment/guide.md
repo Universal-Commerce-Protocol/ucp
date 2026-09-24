@@ -574,13 +574,15 @@ Each variant has its own config schema tailored to its context:
 
 | Schema                                                                                     | Description                                                      |
 | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [`payment_instrument.json`](site:schemas/common/types/payment_instrument.json)             | Base: id, handler_id, type, billing_address, credential, display |
+| [`payment_instrument.json`](site:schemas/common/types/payment_instrument.json)             | Base: id, type, billing_address, credential, display             |
 | [`card_payment_instrument.json`](site:schemas/common/types/card_payment_instrument.json)   | Extends base with display: brand, last_digits, expiry, card art  |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec
 authors **MAY** extend any of the base instruments to add handler-specific
 display data or customize the credential reference. Handlers **MAY** define
 multiple instrument types for different payment flows.
+Checkout adds `handler_id` and `selected` through
+`selected_payment_instrument`.
 
 **Constraint Targets:**
 

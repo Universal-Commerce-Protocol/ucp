@@ -23,5 +23,8 @@
   "totals": [
     { "type": "subtotal", "amount": 1000 },
     { "type": "total", "amount": 1000 }
-  ]
+  ],
+  "payment": {
+    "maximum_amount": 1000
+  }
 }

@@ -535,6 +535,7 @@ disclosure moves with the term it governs:
     { "type": "total", "amount": 120000 }
   ],
   "payment": {
+    "maximum_amount": 120000,
     "accepted_term": {
       "id": "pt_deposit_balance",
       "title": "First night now, balance at check-in",

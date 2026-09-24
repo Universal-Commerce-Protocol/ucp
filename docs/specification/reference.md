@@ -25,6 +25,22 @@ within the UCP.
 
 {{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
 
+### Checkout Totals
+
+An ordered array of [Checkout Total](#checkout-total) entries.
+
+### Checkout Total
+
+{{ extension_schema_fields('../shopping/checkout.json#/$defs/checkout_total', 'reference') }}
+
+### Checkout Payment
+
+{{ extension_schema_fields('../shopping/checkout.json#/$defs/checkout_payment', 'reference') }}
+
+### Order Payment
+
+{{ extension_schema_fields('../shopping/order.json#/$defs/order_payment', 'reference') }}
+
 ## Type Schemas
 
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
@@ -34,6 +50,10 @@ within the UCP.
 ### Selected Payment Instrument {: #payment-instrument-selected-payment-instrument }
 
 {{ extension_schema_fields('types/payment_instrument.json#/$defs/selected_payment_instrument', 'reference') }}
+
+### Order Payment Instrument {: #payment-instrument-order-payment-instrument }
+
+{{ extension_schema_fields('types/payment_instrument.json#/$defs/order_payment_instrument', 'reference') }}
 
 ### Pagination Request {: #pagination-request }
 

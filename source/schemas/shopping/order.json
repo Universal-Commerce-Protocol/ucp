@@ -19,6 +19,25 @@
           "description": "URL where merchant sends order lifecycle events (webhooks)."
         }
       }
+    },
+    "order_payment": {
+      "title": "Order Payment",
+      "description": "Payment details returned on the Order, including the maximum amount the Buyer approved at Checkout.",
+      "type": "object",
+      "required": ["maximum_amount"],
+      "properties": {
+        "instruments": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/payment_instrument.json#/$defs/order_payment_instrument"
+          },
+          "description": "Payment instruments used on the Order."
+        },
+        "maximum_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Maximum amount the Buyer approved when completing the Checkout, in the Order currency's minor units. For a provisional Checkout total, this equals `checkout.payment.maximum_amount`; for a final total, it equals the aggregate Checkout total. It remains unchanged if the Buyer later approves an Order modification."
+        }
+      }
     }
   },
   "type": "object",
@@ -29,6 +48,7 @@
     "permalink_url",
     "line_items",
     "fulfillment",
+    "payment",
     "currency",
     "totals"
   ],
@@ -79,6 +99,11 @@
         }
       },
       "description": "Fulfillment data: buyer expectations and what actually happened."
+    },
+    "payment": {
+      "$ref": "#/$defs/order_payment",
+      "description": "Payment details returned on the Order. The instruments may change after purchase, but `maximum_amount` continues to record what the Buyer approved at Checkout.",
+      "ucp_request": "omit"
     },
     "adjustments": {
       "type": "array",

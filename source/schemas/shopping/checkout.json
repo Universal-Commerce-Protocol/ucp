@@ -4,6 +4,65 @@
   "name": "dev.ucp.shopping.checkout",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "$defs": {
+    "checkout_total": {
+      "title": "Checkout Total",
+      "description": "Checkout pricing entry. Only the aggregate total may state whether its amount is final.",
+      "allOf": [
+        { "$ref": "../common/types/total.json" },
+        {
+          "type": "object",
+          "properties": {
+            "amount_finality": {
+              "type": "string",
+              "enum": ["final", "provisional"],
+              "description": "Whether the aggregate total may change after the Buyer completes the Checkout. Omission means `final`. When `provisional`, `payment.maximum_amount` is the most the Business may authorize or collect under the Buyer's approval of this Checkout.",
+              "ucp_request": "omit"
+            }
+          },
+          "if": {
+            "properties": {
+              "type": { "const": "total" }
+            },
+            "required": ["type"]
+          },
+          "else": {
+            "not": {
+              "required": ["amount_finality"]
+            }
+          }
+        }
+      ]
+    },
+    "checkout_totals": {
+      "title": "Checkout Totals",
+      "description": "Checkout pricing breakdown in which only the aggregate total may state whether its amount is final.",
+      "allOf": [
+        { "$ref": "../common/types/totals.json" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/checkout_total" }
+        }
+      ]
+    },
+    "checkout_payment": {
+      "title": "Checkout Payment",
+      "description": "Checkout payment details, including the maximum amount approved by the Buyer when the total is provisional.",
+      "allOf": [
+        { "$ref": "../common/types/payment.json" },
+        {
+          "type": "object",
+          "properties": {
+            "maximum_amount": {
+              "$ref": "../common/types/amount.json",
+              "description": "Maximum amount, across all payment instruments and in the Checkout currency's minor units, that the Business may authorize or collect under the Buyer's approval of this Checkout. Required for a provisional total and omitted for a final total, where the aggregate total is the approved maximum.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  },
   "type": "object",
   "required": [
     "ucp",
@@ -81,7 +140,7 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "$ref": "../common/types/totals.json",
+      "$ref": "#/$defs/checkout_totals",
       "description": "Different cart totals.",
       "ucp_request": "omit"
     },
@@ -127,7 +186,7 @@
       "ucp_request": "omit"
     },
     "payment": {
-      "$ref": "../common/types/payment.json",
+      "$ref": "#/$defs/checkout_payment",
       "ucp_request": {
         "create": "optional",
         "update": "optional",
@@ -139,5 +198,38 @@
       "description": "Details about an order created for this checkout session.",
       "ucp_request": "omit"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "totals": {
+            "contains": {
+              "properties": {
+                "type": { "const": "total" },
+                "amount_finality": { "const": "provisional" }
+              },
+              "required": ["type", "amount_finality"]
+            }
+          }
+        },
+        "required": ["totals"]
+      },
+      "then": {
+        "properties": {
+          "payment": {
+            "required": ["maximum_amount"]
+          }
+        },
+        "required": ["payment"]
+      },
+      "else": {
+        "properties": {
+          "payment": {
+            "not": { "required": ["maximum_amount"] }
+          }
+        }
+      }
+    }
+  ]
 }

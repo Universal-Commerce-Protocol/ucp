@@ -231,6 +231,13 @@ The checkout mandate **MUST** contain the full checkout response including the
 `ap2.merchant_authorization` field. This creates a nested cryptographic binding
 where the platform's signature covers the business's signature.
 
+When the Checkout aggregate total is provisional, that signed response includes
+both `totals[].amount_finality` and `payment.maximum_amount`. The Checkout
+mandate therefore records the amount shown to the Buyer and the maximum they
+approved. The Business MUST NOT authorize or collect more than that maximum
+under the mandate. A higher amount requires separate Buyer approval and cannot
+rely on the original mandate.
+
 **Specification Boundary:** This extension defines *where* mandates are placed
 in UCP requests and responses. The mandate credential structure (claims,
 selective disclosure, key binding) is defined by the
