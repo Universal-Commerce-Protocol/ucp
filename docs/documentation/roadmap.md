@@ -61,7 +61,7 @@ We are scaling UCP across a broader range of industries, focusing on industries 
 New specifications are being developed with industry leaders across key industries including:
 
 * **Food:** New UCP capabilities and schema to enable restaurant and menu discovery across the wide array of modification options, dish selection to checkout with tipping and delivery notes.
-* **Lodging:** New UCP capabilities and schema beyond Booking, supporting for hotels discovery, room selection with various rate options as well as loyalty and discounts.
+* **Lodging:** New UCP capabilities and schema beyond Booking, supporting hotel discovery, room selection with various rate options, loyalty, and discounts.
 
 ## Build with us
 
