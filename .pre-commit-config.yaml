@@ -50,6 +50,46 @@ repos:
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
         stages: [pre-commit, pre-push]
+      - id: validate-cancellation-schedule
+        name: Validate cancellation schedule vectors
+        entry: uv run --frozen python scripts/test_cancellation_schedule.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_schedule\.py$
+            |scripts/fixtures/lodging_cancellation_schedule\.json$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
+      - id: validate-cancellation-lab
+        name: Validate cancellation lab fixtures
+        entry: uv run --frozen python scripts/test_cancellation_lab.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_(schedule|lab)\.py$
+            |scripts/fixtures/lodging_cancellation_(schedule|lab)\.json$
+            |scripts/fixtures/lodging_cancellation_lab\.md$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
+      - id: validate-cancellation-booking
+        name: Validate cancellation multi-stay integration
+        entry: uv run --frozen python scripts/test_cancellation_booking.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_(schedule|booking)\.py$
+            |scripts/fixtures/lodging_cancellation_booking\.json$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
         entry: uv run --frozen python scripts/test_check_links.py
