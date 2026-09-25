@@ -78,37 +78,44 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and any operation-specific idempotency key.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "checkout",
+          "description": "Checkout input used to create the session.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The created Checkout, or a UCP business outcome when no valid Checkout can be created.",
         "schema": {"$ref": "#/components/schemas/checkout_result"}
       }
     },
     {
       "name": "get_checkout",
       "summary": "Get checkout",
+      "description": "Get the latest state of a checkout session.",
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {"type": "string"}
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The current Checkout, or a UCP business outcome when no valid Checkout can be returned.",
         "schema": {"$ref": "#/components/schemas/checkout_result"}
       }
     },
@@ -119,31 +126,37 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and any operation-specific idempotency key.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {"type": "string"}
         },
         {
           "name": "checkout",
+          "description": "Replacement Checkout state for the session.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The authoritative Checkout after the update attempt, including any business outcome messages.",
         "schema": {"$ref": "#/components/schemas/checkout_result"}
       }
     },
     {
       "name": "complete_checkout",
       "summary": "Complete checkout and place order",
+      "description": "Complete a checkout session and place its order.",
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and the required idempotency key.",
           "required": true,
           "schema": {
             "allOf": [
@@ -154,26 +167,31 @@
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {"type": "string"}
         },
         {
           "name": "checkout",
+          "description": "Checkout state used to complete the session and place the order.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/checkout.json"}
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The Checkout after the completion attempt, including any business outcome messages.",
         "schema": {"$ref": "#/components/schemas/checkout_result"}
       }
     },
     {
       "name": "cancel_checkout",
       "summary": "Cancel checkout",
+      "description": "Cancel a checkout session.",
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and the required idempotency key.",
           "required": true,
           "schema": {
             "allOf": [
@@ -184,12 +202,14 @@
         },
         {
           "name": "id",
+          "description": "The unique identifier of the checkout session.",
           "required": true,
           "schema": {"type": "string"}
         }
       ],
       "result": {
         "name": "checkout",
+        "description": "The canceled Checkout, or a UCP business outcome when no valid Checkout can be returned.",
         "schema": {"$ref": "#/components/schemas/checkout_result"}
       }
     },
@@ -200,71 +220,85 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and any operation-specific idempotency key.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "cart",
+          "description": "Cart input used to create the session.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/cart.json"}
         }
       ],
       "result": {
         "name": "cart",
+        "description": "The created Cart, or a UCP business outcome when no valid Cart can be created.",
         "schema": {"$ref": "#/components/schemas/cart_result"}
       }
     },
     {
       "name": "get_cart",
       "summary": "Get cart",
+      "description": "Get the latest state of a cart session.",
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
+          "description": "The unique identifier of the cart session.",
           "required": true,
           "schema": {"type": "string"}
         }
       ],
       "result": {
         "name": "cart",
+        "description": "The current Cart, or a UCP business outcome when no valid Cart can be returned.",
         "schema": {"$ref": "#/components/schemas/cart_result"}
       }
     },
     {
       "name": "update_cart",
       "summary": "Update cart",
+      "description": "Replace the current state of a cart session.",
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and any operation-specific idempotency key.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
+          "description": "The unique identifier of the cart session.",
           "required": true,
           "schema": {"type": "string"}
         },
         {
           "name": "cart",
+          "description": "Replacement Cart state for the session.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/cart.json"}
         }
       ],
       "result": {
         "name": "cart",
+        "description": "The authoritative Cart after the update attempt, including any business outcome messages.",
         "schema": {"$ref": "#/components/schemas/cart_result"}
       }
     },
     {
       "name": "cancel_cart",
       "summary": "Cancel cart",
+      "description": "Cancel a cart session and return its state at cancellation.",
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification and the required idempotency key.",
           "required": true,
           "schema": {
             "allOf": [
@@ -275,12 +309,14 @@
         },
         {
           "name": "id",
+          "description": "The unique identifier of the cart session.",
           "required": true,
           "schema": {"type": "string"}
         }
       ],
       "result": {
         "name": "cart",
+        "description": "The canceled Cart, or a UCP business outcome when no valid Cart can be returned.",
         "schema": {"$ref": "#/components/schemas/cart_result"}
       }
     },
@@ -291,17 +327,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "catalog",
+          "description": "Catalog search query, filters, and pagination input.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"}
         }
       ],
       "result": {
         "name": "response",
+        "description": "Catalog search results and pagination state.",
         "schema": {"$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"}
       }
     },
@@ -312,17 +351,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "catalog",
+          "description": "Catalog identifiers and lookup input.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"}
         }
       ],
       "result": {
         "name": "response",
+        "description": "Catalog lookup results correlated to the requested identifiers.",
         "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"}
       }
     },
@@ -333,17 +375,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "id",
+          "description": "The unique identifier of the order.",
           "required": true,
-          "schema": {"type": "string", "description": "The unique identifier of the order."}
+          "schema": {"type": "string"}
         }
       ],
       "result": {
         "name": "order",
+        "description": "The current Order, or a UCP business outcome when no valid Order can be returned.",
         "schema": {"$ref": "#/components/schemas/order_result"}
       }
     },
@@ -354,17 +399,20 @@
       "params": [
         {
           "name": "meta",
+          "description": "UCP request metadata containing Platform identification.",
           "required": true,
           "schema": {"$ref": "#/components/schemas/meta"}
         },
         {
           "name": "catalog",
+          "description": "Product identifier and optional interactive option selections.",
           "required": true,
           "schema": {"$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"}
         }
       ],
       "result": {
         "name": "response",
+        "description": "Product details, or a UCP business outcome when no valid product can be returned.",
         "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
       }
     }
