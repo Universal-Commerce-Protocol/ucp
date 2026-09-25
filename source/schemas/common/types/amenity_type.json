@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/amenity_type.json",
+  "title": "Amenity Type",
+  "description": "A standardized open reverse-DNS string representing a physical feature, capability, or service provided by a location. Supports a 2-tier hierarchy when defining well-known values in UCP: 1) Common vocabulary for universal features that directly live on `dev.ucp.amenity` (e.g., dev.ucp.amenity.wi_fi) and 2) Industry-scoped features that MUST append their related service name on top of `dev.ucp.amenity` (e.g., dev.ucp.amenity.shopping.in_store_pickup). Businesses MAY define custom vocabulary in their own domain (e.g., com.example.amenity.auto_care_center).",
+  "$ref": "reverse_domain_name.json",
+  "examples": [
+    "dev.ucp.amenity.wi_fi",
+    "dev.ucp.amenity.parking",
+    "dev.ucp.amenity.shopping.in_store_pickup",
+    "dev.ucp.amenity.shopping.curbside_pickup"
+  ]
+}

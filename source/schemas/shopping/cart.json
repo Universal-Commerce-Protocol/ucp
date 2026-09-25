@@ -45,10 +45,7 @@
     "id": {
       "type": "string",
       "description": "Unique cart identifier.",
-      "ucp_request": {
-        "create": "omit",
-        "update": "required"
-      }
+      "ucp_request": "omit"
     },
     "line_items": {
       "type": "array",
@@ -56,40 +53,25 @@
         "$ref": "types/line_item.json"
       },
       "description": "Cart line items. Same structure as checkout. Full replacement on update.",
-      "ucp_request": {
-        "create": "required",
-        "update": "required"
-      }
+      "ucp_request": "required"
     },
     "context": {
-      "$ref": "types/context.json",
+      "$ref": "../common/types/context.json",
       "description": "Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "signals": {
-      "$ref": "types/signals.json",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "$ref": "../common/types/signals.json",
+      "ucp_request": "optional"
     },
     "attribution": {
       "$ref": "types/attribution.json",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "buyer": {
       "$ref": "types/buyer.json",
       "description": "Optional buyer information for personalized estimates.",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional"
-      }
+      "ucp_request": "optional"
     },
     "currency": {
       "type": "string",
@@ -97,7 +79,7 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "$ref": "types/totals.json",
+      "$ref": "../common/types/totals.json",
       "description": "Estimated cost breakdown. May be partial if shipping/tax not yet calculable.",
       "ucp_request": "omit"
     },
@@ -125,7 +107,7 @@
     "policies": {
       "type": "array",
       "items": {
-        "$ref": "types/policy.json"
+        "$ref": "../common/types/policy.json"
       },
       "description": "Policies (e.g., return/refund terms) that apply to the items in this cart. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"

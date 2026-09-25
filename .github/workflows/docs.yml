@@ -40,6 +40,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Don't run this workflow if this is a release branch creation event
     # (event.before SHA is all zeros)
     if: >-
@@ -80,6 +81,7 @@ jobs:
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
     permissions:
       contents: read
@@ -107,6 +109,7 @@ jobs:
   build_and_verify_release:
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: >-
       startsWith(github.ref, 'refs/heads/release/') ||
       startsWith(github.event.pull_request.base.ref, 'release/')
@@ -137,6 +140,14 @@ jobs:
   deploy_main:
     needs: build_and_verify_main
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Both deploy jobs write the gh-pages branch. Without a shared group two
+    # merges landing inside one deploy's runtime race and the loser's push is
+    # rejected, so that commit's docs never publish. Queue them instead of
+    # cancelling: a cancelled deploy is a deploy that did not happen.
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
     if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && github.ref == 'refs/heads/main'
     permissions:
       contents: write
@@ -190,6 +201,10 @@ jobs:
   deploy_release:
     needs: build_and_verify_release
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
     if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
@@ -226,6 +241,7 @@ jobs:
   create_release:
     needs: deploy_release
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
