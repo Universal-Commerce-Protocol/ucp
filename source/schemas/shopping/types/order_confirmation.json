@@ -21,6 +21,10 @@
       "type": "string",
       "format": "uri",
       "description": "Permalink to access the order on merchant site."
+    },
+    "access": {
+      "$ref": "order_access.json",
+      "description": "Credential granting the platform authorized access to this order. Businesses SHOULD issue it when the checkout completed without a linked user identity, so post-purchase order operations remain reachable without an account."
     }
   }
 }

@@ -656,8 +656,9 @@
       "get": {
         "operationId": "get_order",
         "summary": "Get Order",
-        "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot. The business verifies the requesting platform created the checkout that produced this order.",
+        "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot. The business authorizes the request by platform credentials, a user identity token, or an order credential issued at checkout completion.",
         "parameters": [
+          { "$ref": "#/components/parameters/order_access_token_query" },
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },
           { "$ref": "#/components/parameters/signature" },
@@ -801,6 +802,15 @@
         "in": "path",
         "required": true,
         "description": "The unique identifier of the order.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "order_access_token_query": {
+        "name": "access_token",
+        "in": "query",
+        "required": false,
+        "description": "Order credential issued at checkout completion, authorizing access to this order. Omit when the request is authorized by platform credentials or a user identity token. Businesses SHOULD keep this value out of access logs and MUST respond with Cache-Control: no-store.",
         "schema": {
           "type": "string"
         }
