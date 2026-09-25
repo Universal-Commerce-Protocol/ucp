@@ -48,11 +48,11 @@ Typical use cases:
 
 ### Request
 
-{{ extension_schema_fields('ask.json#/$defs/ask_request', 'ask') }}
+{{ extension_schema_fields('ask.json#/$defs/ask_request', 'shopping/ask') }}
 
 ### Response
 
-{{ extension_schema_fields('ask.json#/$defs/ask_response', 'ask') }}
+{{ extension_schema_fields('ask.json#/$defs/ask_response', 'shopping/ask') }}
 
 ## Scoping a Question
 
@@ -87,7 +87,7 @@ presents:
   posture is the business's to set.
 * **Authenticated user** — when the caller presents a bearer token the business
   recognizes for user authentication (see [Scopes](#scopes) and
-  [Identity Linking](../identity-linking.md)), the business **MAY** return
+  [Identity Linking](../../common/identity-linking/index.md)), the business **MAY** return
   personalized results — member pricing, entitlements, or gated availability.
   This tier is the `dev.ucp.shopping.ask:read` scope.
 
@@ -107,7 +107,7 @@ cannot be resolved, the business **SHOULD** start a new conversation and add an
 informational message to `messages` noting that the provided `conversation` was
 not found.
 
-{{ extension_schema_fields('ask.json#/$defs/conversation', 'ask') }}
+{{ extension_schema_fields('ask.json#/$defs/conversation', 'shopping/ask') }}
 
 ## Answer
 
@@ -120,7 +120,7 @@ trustworthy, businesses **SHOULD**:
   point the buyer there; and
 * state clearly when a question can't be answered.
 
-{{ schema_fields('types/description', 'ask') }}
+{{ schema_fields('types/description', 'shopping/ask') }}
 
 ## Context
 
@@ -129,23 +129,23 @@ and similar. These are provisional signals: implementations **MAY** ignore or
 down-rank them when higher-confidence inputs are available. The items the
 question is *about* live in `ids`, not in `context`.
 
-{{ schema_fields('types/context', 'ask') }}
+{{ schema_fields('types/context', 'shopping/ask') }}
 
 ## Signals
 
 Environment data provided by the platform to support authorization and abuse
 prevention. Signal values **MUST NOT** be buyer-asserted claims. See
-[Signals](../overview.md#signals) for details and privacy requirements.
+[Signals](../../overview/index.md#signals) for details and privacy requirements.
 
-{{ schema_fields('types/signals', 'ask') }}
+{{ schema_fields('types/signals', 'shopping/ask') }}
 
 ## Attribution
 
 Platform-provided referral and conversion-event context — campaign IDs, click
 identifiers, and source/medium markers communicated by the platform. See
-[Attribution](../overview.md#attribution) for details and consent requirements.
+[Attribution](../../overview/index.md#attribution) for details and consent requirements.
 
-{{ schema_fields('types/attribution', 'ask') }}
+{{ schema_fields('types/attribution', 'shopping/ask') }}
 
 ## Links
 
@@ -173,7 +173,7 @@ Each link also carries a `type` classifier. Well-known values are
 `faq`; a business **MAY** supply other `type` values (a product, a size guide, a
 store-locator page).
 
-{{ schema_fields('types/link', 'ask') }}
+{{ schema_fields('types/link', 'shopping/ask') }}
 
 ## Relationship to Catalog
 
@@ -198,20 +198,20 @@ a regional policy variant, or a note that the question was re-scoped. The
 
 Warnings with `presentation: "disclosure"` carry notices the platform **MUST NOT**
 hide or dismiss — for example, a safety, allergen, or regulated disclosure. See
-[Warning Presentation](../checkout.md#warning-presentation) for the rendering
+[Warning Presentation](../checkout/index.md#warning-presentation) for the rendering
 contract.
 
 ### Message (Error)
 
-{{ schema_fields('types/message_error', 'ask') }}
+{{ schema_fields('types/message_error', 'shopping/ask') }}
 
 ### Message (Warning)
 
-{{ schema_fields('types/message_warning', 'ask') }}
+{{ schema_fields('types/message_warning', 'shopping/ask') }}
 
 ### Message (Info)
 
-{{ schema_fields('types/message_info', 'ask') }}
+{{ schema_fields('types/message_info', 'shopping/ask') }}
 
 ## Scopes
 
@@ -224,7 +224,7 @@ access:
 
 Scope declaration, derivation, and rules for extending this set with custom
 scopes are defined in
-[Identity Linking — Scopes](../identity-linking.md#scopes).
+[Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
 ## Transport Bindings
 

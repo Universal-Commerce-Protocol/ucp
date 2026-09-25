@@ -97,13 +97,13 @@ Maps to the [Ask](index.md) capability.
 #### Ask Request
 
 {{ extension_schema_fields(
-  'ask.json#/$defs/ask_request', 'ask/mcp'
+  'ask.json#/$defs/ask_request', 'shopping/ask/mcp'
 ) }}
 
 #### Ask Response
 
 {{ extension_schema_fields(
-  'ask.json#/$defs/ask_response', 'ask/mcp'
+  'ask.json#/$defs/ask_response', 'shopping/ask/mcp'
 ) }}
 
 #### Ask Example
@@ -319,7 +319,7 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 Transport-level failures (authentication, rate limiting, unavailability) that
 prevent request processing are returned as JSON-RPC `error`. See the
-[Core Specification](../overview.md#error-codes) for the complete error code
+[Core Specification](../../overview/index.md#error-codes) for the complete error code
 registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
@@ -379,11 +379,11 @@ defers to the binding source.
 
 ### UCP Response Ask {: #ucp-response-ask-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'ask/mcp') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'shopping/ask/mcp') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'ask/mcp') }}
+{{ schema_fields('types/error_response', 'shopping/ask/mcp') }}
 
 ## Conformance
 

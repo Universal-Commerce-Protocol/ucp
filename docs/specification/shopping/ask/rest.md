@@ -64,7 +64,7 @@ Businesses advertise REST transport availability through their UCP profile at
 
 Maps to the [Ask](index.md) capability.
 
-{{ method_fields('ask_business', 'rest.openapi.json', 'ask/rest') }}
+{{ method_fields('ask_business', 'shopping/rest.openapi.json', 'shopping/ask/rest') }}
 
 #### Example
 
@@ -279,11 +279,11 @@ defers to the binding source.
 
 ### UCP Response Ask {: #ucp-response-ask-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'ask/rest') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'shopping/ask/rest') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'ask/rest') }}
+{{ schema_fields('types/error_response', 'shopping/ask/rest') }}
 
 ## Conformance
 
