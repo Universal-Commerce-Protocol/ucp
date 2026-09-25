@@ -55,7 +55,7 @@ specifications:
 - [REST](http://ucp.dev/draft/specification/shopping/checkout/rest/index.md): HTTP REST transport binding for Checkout operations, specifying standard headers, API endpoints, status codes, and payload structures.
 - [MCP](http://ucp.dev/draft/specification/shopping/checkout/mcp/index.md): Model Context Protocol (MCP) transport binding for Checkout operations, mapping UCP capabilities to JSON-RPC tools with agent metadata rules.
 - [A2A](http://ucp.dev/draft/specification/shopping/checkout/a2a/index.md): Agent2Agent Protocol (A2A) binding for Checkout Capability, detailing transport discovery, agent card profile advertisement, and message negotiation flows.
-- [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
+- [Embedded Protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
 - [Embedded](http://ucp.dev/draft/specification/shopping/checkout/embedded/index.md): Embedded Checkout Protocol (ECP) specification, detailing per-session delegation negotiation, URL parameters, native UI event mappings, W3C Payment Request conceptual alignment, and core lifecycle messages.
 
 ## Cart Capability
@@ -63,7 +63,7 @@ specifications:
 - [Overview](http://ucp.dev/draft/specification/shopping/cart/index.md): Pre-purchase Cart Capability, detailing item collection, state modification, and seamless transition handoff to active checkout sessions.
 - [REST](http://ucp.dev/draft/specification/shopping/cart/rest/index.md): HTTP REST transport binding for Cart operations, including endpoints for session creation, modification, retrieval, and cancellation.
 - [MCP](http://ucp.dev/draft/specification/shopping/cart/mcp/index.md): Model Context Protocol (MCP) transport binding for Cart operations, mapping item management to JSON-RPC tools for AI shopping agents.
-- [Embedded protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
+- [Embedded Protocol](http://ucp.dev/draft/specification/embedded-protocol/index.md): Core Embedded Protocol (EP) transport binding, defining message formats, handshake patterns, communication channels, security constraints, and shared error handling structures for iframe/webview integrations.
 - [Embedded](http://ucp.dev/draft/specification/shopping/cart/embedded/index.md): Embedded Cart Protocol (ECaP), enabling secure, cross-origin iframe communication and synchronized event states between platform agents and business websites.
 
 ## Permalink Capability
