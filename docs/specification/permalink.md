@@ -455,6 +455,11 @@ A Business MAY also require additional steps — such as verification, eligibili
 or age gating, or authentication — before it constructs purchasable state, and
 routes the buyer accordingly.
 
+A Business MUST require an explicit buyer action on rendered permalink state
+before merging that state into an authenticated buyer's existing cart. An
+automatic merge performed on page load, on redirect, or through a pre-filled
+submission does not satisfy this requirement.
+
 A Business SHOULD apply query parameters it understands. Applied parameters may
 affect server-side state or destination selection, and are not required to
 appear on the redirect URL. UCP field-path query parameters SHOULD be consumed
