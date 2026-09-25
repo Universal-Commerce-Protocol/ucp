@@ -698,6 +698,59 @@ See [Message Signatures](../../signatures.md) for more details.
 
 {{ method_fields('order_event_webhook', 'shopping/rest.openapi.json', 'shopping/order') }}
 
+When the originating checkout carried a
+[`platform_reference`](../checkout/index.md#platform-reference), the business
+includes it verbatim on every event for that order, which lets the platform
+correlate the event without consulting a stored mapping of business-assigned
+identifiers.
+
+**Example Event Body:**
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "id": "order_abc123",
+  "checkout_id": "checkout_xyz789",
+  "platform_reference": "01J9Z6R7NQ2K4T8V0X3Y5B7C9D",
+  "permalink_url": "https://business.example.com/orders/abc123",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_shoes",
+      "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+      "quantity": { "original": 3, "total": 3, "fulfilled": 3 },
+      "totals": [
+        {"type": "subtotal", "amount": 9000},
+        {"type": "total", "amount": 9000}
+      ],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_1",
+        "occurred_at": "2026-01-08T10:30:00Z",
+        "type": "delivered",
+        "line_items": [{ "id": "li_shoes", "quantity": 3 }],
+        "tracking_number": "123456789",
+        "description": "Delivered to front door"
+      }
+    ]
+  },
+  "totals": [
+    {"type": "subtotal", "amount": 9000},
+    {"type": "total", "amount": 9000}
+  ]
+}
+```
+
 ### Webhook URL Configuration
 
 The platform provides its webhook URL in the order capability's `config` field

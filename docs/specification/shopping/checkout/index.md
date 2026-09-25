@@ -981,6 +981,42 @@ platform can prefill checkout state when initiating a buy-now flow.
 > [REST transport binding](rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
+## Platform Reference
+
+An opaque, platform-supplied correlation value. A single platform instance may
+serve many buyers across many businesses, and `checkout_id` is business-scoped,
+so it is not unique across businesses. `platform_reference` gives the platform a
+key it assigns itself, which lets it correlate later order events back to its own
+records without depending on a stored mapping of business-assigned identifiers.
+
+The platform **MAY** set `platform_reference` on Create Checkout. It is
+**immutable** from that point on.
+
+**Business:**
+
+* **MUST** persist the value for the lifetime of the checkout and the resulting
+  order.
+* **MUST** echo the value verbatim on every checkout response.
+* **MUST** carry the value onto the order created from that checkout, and include
+  it in every order event webhook for that order.
+* **MUST** treat the value as opaque, and **MUST NOT** interpret, parse, or modify
+  it.
+
+**Platform:**
+
+* **MUST NOT** place personally identifiable information or credentials in this
+  field. It is persisted on the business order record and flows to downstream
+  systems, so it is not a confidential channel.
+* **MUST NOT** use it for authentication, authorization, or idempotency. It is a
+  correlation value only, and it is not a secret.
+
+`platform_reference` is not defined on the update or complete requests, so
+Update Checkout, which is otherwise a full replacement, does not clear it. The
+checkout object is open, so a resent value still validates against the schema.
+A business therefore **MUST** ignore a `platform_reference` received on an
+update or complete request, and **MUST** retain the value established at Create
+Checkout. See [Update Checkout](#update-checkout).
+
 ## Scopes
 
 The Checkout capability defines the following well-known scopes for
@@ -1082,6 +1118,10 @@ will replace the existing checkout session state on the business side. This
 general replacement rule does not apply during `complete_in_progress` because
 Update Checkout is not permitted; see
 [Accepted completion](#accepted-completion) for the frozen operation contract.
+
+`platform_reference` is not defined on the update request, so full replacement
+does not clear it. A business retains the value established at Create Checkout.
+See [Platform Reference](#platform-reference).
 
 {{ method_fields('update_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
