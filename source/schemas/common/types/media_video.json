@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_video.json",
+  "title": "Media Video",
+  "description": "Type-specific properties for video media.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "A playable rendition of the video: a progressive file or an adaptive-streaming manifest."
+    },
+    "width": {
+      "description": "Intrinsic pixel width of the video; a rendition's own dimensions are on its `sources` entry."
+    },
+    "height": {
+      "description": "Intrinsic pixel height of the video; a rendition's own dimensions are on its `sources` entry."
+    },
+    "sources": {
+      "description": "Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH)."
+    }
+  }
+}

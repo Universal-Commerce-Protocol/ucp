@@ -247,6 +247,54 @@ def define_env(env):
         continue
     return None
 
+  def _variant_base(schema_path):
+    """Return the schema that composes `schema_path` as an if/then variant.
+
+    A per-type variant (e.g. media_video.json) is selected by its base via
+    `allOf: [{"if": {...}, "then": {"$ref": "media_video.json"}}]`. The variant
+    carries no back-pointer, so the relationship is read from the siblings
+    that declare it rather than from a macro parameter a caller could omit.
+    """
+    for sibling in sorted(schema_path.parent.glob("*.json")):
+      if sibling == schema_path:
+        continue
+      try:
+        data = json.loads(sibling.read_text(encoding="utf-8"))
+      except (json.JSONDecodeError, OSError):
+        continue
+      for branch in data.get("allOf", []):
+        then = branch.get("then") if isinstance(branch, dict) else None
+        if isinstance(then, dict) and then.get("$ref") == schema_path.name:
+          return data
+    return None
+
+  def _inherit_base_fields(schema_data, base_schema):
+    """Complete a variant's description-only properties from its base.
+
+    A variant property that carries only a `description` refines a field the
+    base defines; its type, format, and requirement live on the base. Rendered
+    standalone, such a row shows `any` / `Optional` directly under a base table
+    that says `string` / `Required`. Copy the base definition and keep the
+    variant's description so the row renders what actually validates.
+
+    Returns the completed schema and the base's `required` list, to be passed
+    as `parent_required_list`.
+    """
+    base_props = base_schema.get("properties", {})
+    props = dict(schema_data.get("properties", {}))
+    for name, details in props.items():
+      if (
+        isinstance(details, dict)
+        and set(details) == {"description"}
+        and name in base_props
+      ):
+        merged = dict(base_props[name])
+        merged["description"] = details["description"]
+        props[name] = merged
+    completed = dict(schema_data)
+    completed["properties"] = props
+    return completed, base_schema.get("required", [])
+
   def _load_schema_variant(entity_name, context):
     """Load and resolve a schema for a specific operation.
 
@@ -1261,8 +1309,17 @@ def define_env(env):
         full_path, direction, operation, bundle=False
       )
       if resolved_schema:
+        parent_required = None
+        base_schema = _variant_base(full_path)
+        if base_schema is not None:
+          resolved_schema, parent_required = _inherit_base_fields(
+            resolved_schema, base_schema
+          )
         return _render_table_from_schema(
-          resolved_schema, spec_file_name, context=context
+          resolved_schema,
+          spec_file_name,
+          parent_required_list=parent_required,
+          context=context,
         )
       # ucp-schema failed - fail loudly, don't silently use raw JSON
       raise RuntimeError(
@@ -1409,8 +1466,14 @@ def define_env(env):
             output.pop()  # remove title
             continue
         else:
+          parent_required = None
+          base_schema = _variant_base(schema_file)
+          if base_schema is not None:
+            schema_data, parent_required = _inherit_base_fields(
+              schema_data, base_schema
+            )
           rendered_table = _render_table_from_schema(
-            schema_data, spec_file_name
+            schema_data, spec_file_name, parent_required_list=parent_required
           )
           if rendered_table == "_No properties defined._":
             continue

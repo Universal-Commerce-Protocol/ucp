@@ -219,9 +219,10 @@ requirements.
 
 A catalog item representing a sellable item with one or more purchasable variants.
 
-`media` and `variants` are ordered arrays. Businesses SHOULD return the most
-relevant variant and image first—default for lookups, best match based on query
-and context for search. Platforms SHOULD treat the first element as featured.
+`media` and `variants` are ordered arrays. Businesses **SHOULD** return the
+most relevant variant and media item first — default for lookups, best match
+based on query and context for search. Platforms **SHOULD** treat the first
+media item they present as featured.
 
 {{ schema_fields('types/product', 'shopping/catalog') }}
 
@@ -234,8 +235,9 @@ which request identifiers resolved to this variant, and whether the match
 was `exact` or `featured` (server-selected). See
 [Client Correlation](lookup.md#client-correlation) for details.
 
-`media` is an ordered array. Businesses SHOULD return the featured variant image
-as the first element. Platforms SHOULD treat the first element as featured.
+`media` is an ordered array. Businesses **SHOULD** return the featured variant
+media item as the first element. Platforms **SHOULD** treat the first media
+item they present as featured.
 
 {{ schema_fields('types/variant', 'shopping/catalog') }}
 
@@ -249,7 +251,73 @@ as the first element. Platforms SHOULD treat the first element as featured.
 
 ### Media
 
+One logical media item on a Product or Variant — such as an image, a video, or
+a 3D model. A media item is a resource the Platform renders: `url` identifies
+it, `sources` lists alternate renditions of it, `preview` is a still the
+Platform can show before or instead of it, and `width` and `height` are its
+intrinsic pixel dimensions. The `width` and `height` on `preview` and on each
+`sources` entry are the pixel dimensions of that still or rendition.
+
+`type` is an open string with four well-known values: `image`, `video`,
+`external_video`, and `model_3d`. A Platform **MUST NOT** reject a product or
+response because it does not recognize a media item's `type`. It **MAY**
+present such an item from `preview` and `name`, or omit it. Recognizing a
+`type` only enables type-specific presentation.
+
+A Platform **MAY** refuse to load or embed a media URL that does not use the
+`https` scheme.
+
+A Platform selects a rendition from `sources` by `mime_type` and dimensions. A
+Business that provides `sources` **SHOULD** include the rendition at `url`.
+
 {{ schema_fields('types/media', 'shopping/catalog') }}
+
+#### Image
+
+`url` is a directly displayable image. `sources`, when present, lists alternate
+encodings and sizes of it — for example `image/avif`, `image/webp`, and
+`image/jpeg`, or width variants for responsive layout. The Business **SHOULD**
+make `url` the most broadly decodable rendition, because a Platform that does
+not select from `sources` loads `url` directly.
+
+{{ schema_fields('types/media_image', 'shopping/catalog') }}
+
+#### Video
+
+`url` is a playable rendition of the video: a progressive file or an
+adaptive-streaming manifest. `sources`, when present, lists alternate
+renditions and manifests.
+
+{{ schema_fields('types/media_video', 'shopping/catalog') }}
+
+#### External Video
+
+A video presented through a third-party player. `url` is the player, which the
+Platform embeds; a video the Business serves as files from any origin,
+including a CDN, is `video`. A Platform that does not embed third-party players
+presents `preview` or omits the item.
+
+A Platform that embeds the player **MUST** isolate it so that it cannot
+navigate the top-level document or otherwise act as the Platform. On the web,
+the Platform renders the player in a sandboxed, credentialless iframe,
+granting only the capabilities the player needs:
+
+```html
+<iframe sandbox="allow-scripts allow-same-origin" allow="fullscreen" credentialless src="https://videos.example.com/embed/123"></iframe>
+```
+
+See
+[Iframe Sandbox Attributes](../../embedded-protocol.md#iframe-sandbox-attributes)
+and [Credentialless Iframes](../../embedded-protocol.md#credentialless-iframes).
+
+{{ schema_fields('types/media_external_video', 'shopping/catalog') }}
+
+#### 3D Model
+
+`url` is the primary model file, such as GLB. `sources`, when present, lists
+alternate formats such as glTF and USDZ.
+
+{{ schema_fields('types/media_model_3d', 'shopping/catalog') }}
 
 ### Product Option
 

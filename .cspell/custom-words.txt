@@ -194,3 +194,13 @@ Cupertino
 checkin
 cupt
 omni
+# rich media formats (video / 3D model source types)
+glb
+gltf
+m3u8
+mp4
+mpd
+mpegurl
+usdz
+vnd
+webm
