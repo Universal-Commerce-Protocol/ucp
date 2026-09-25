@@ -366,6 +366,22 @@
           }
         }
       ]
+    },
+    "response_feed_schema": {
+      "title": "UCP Feed Document Schema",
+      "description": "UCP metadata for feed list and manifest documents.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

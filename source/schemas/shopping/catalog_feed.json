@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_feed.json",
+  "name": "dev.ucp.shopping.catalog.feed",
+  "title": "Catalog Feed",
+  "description": "Catalog feed extension. Extends `dev.ucp.common.feed` with a record type: the records of a catalog feed are catalog Product objects with nested variants, the same records Catalog Search returns. Catalog Search and Lookup remain authoritative at serving time. A catalog feed manifest carries `filters`, in the Catalog Search filter vocabulary. Discovery, feed lists, manifests, files, and snapshot semantics are defined by the Feed capability.",
+  "$defs": {
+    "dev.ucp.common.feed": {
+      "title": "Catalog Feed Manifest",
+      "description": "Feed manifest whose records are catalog Products. Adds `filters` to the manifest, using the Catalog Search filter vocabulary.",
+      "allOf": [
+        {
+          "$ref": "../common/feed.json#/$defs/manifest"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "$ref": "types/search_filters.json",
+              "description": "Row-inclusion predicates the Business applied when generating this snapshot, using the same names and semantics as Catalog Search filters. Absent means no filter was applied.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
