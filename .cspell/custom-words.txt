@@ -99,6 +99,7 @@ gclid
 gpay
 grepable
 gtin
+hardbreak
 httpsig
 ietf
 ingestions
@@ -139,6 +140,7 @@ sandboxing
 schemas
 sdjwt
 shopify
+softbreak
 streamable
 superfences
 talla
