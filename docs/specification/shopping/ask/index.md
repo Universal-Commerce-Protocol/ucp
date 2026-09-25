@@ -86,9 +86,9 @@ presents:
 * **Public** — with no credential, `ask` answers from public business information
   and public catalog items (product and variant IDs).
 * **Resource reference** — a GID the caller holds for a specific resource, such
-  as a cart or checkout, is itself a bearer reference: where a business honors
-  it, possessing the GID is sufficient to ask about that resource, with no
-  separate authentication.
+  as a cart, checkout, or conversation, is itself a bearer reference: where a
+  business honors it, possessing the GID is sufficient to ask about that
+  resource, with no separate authentication.
 * **Business posture** — a business **MAY** require a stronger credential than a
   bare GID to reach a given resource (a gated catalog, for example). The required
   posture is the business's to set.
