@@ -39,6 +39,7 @@ The capability defines:
 
 * discovery of the permalink endpoint;
 * compact item path syntax;
+* the `ucp/version` protocol version;
 * the `continue_to` destination preference;
 * UCP field-path mapping for initialized shopping state;
 * redirect resolution semantics.
@@ -49,6 +50,16 @@ Businesses advertise permalink support with `dev.ucp.shopping.permalink`.
 Business declarations MUST include `config.endpoint`. The endpoint MUST be an
 absolute HTTPS browser endpoint with a non-empty authority and without
 userinfo, query, fragment, whitespace, backslashes, or trailing slash.
+
+The declaration is bound to the release of the profile that carries it. A
+profile with `ucp.version` `2026-08-25` advertises the permalink capability at
+version `2026-08-25` (see
+[Component Versioning and Release Snapshots](overview/index.md#component-versioning-and-release-snapshots)),
+and the `supported_versions` leaf profile for `2026-04-08` carries its own
+declaration at version `2026-04-08`, which MAY use a different endpoint. A
+Platform records the profile's `ucp.version` together with the endpoint it
+discovers, and every permalink it generates from that endpoint carries that
+release in [`ucp/version`](#protocol-version-ucpversion).
 
 Permalinks can also open native apps. A native app can register as a link
 handler for the endpoint's `https` URLs — Universal Links on iOS, App Links on
@@ -104,15 +115,24 @@ item_pair = item_id_token ":" quantity
 quantity  = positive base-10 integer without leading zeros
 ```
 
+The query string carries the `ucp/version` protocol version, the `continue_to`
+destination preference, UCP field-path query parameters, and non-UCP query
+parameters. A generated permalink always carries `ucp/version` (see
+[Protocol Version](#protocol-version-ucpversion)):
+
+```text
+https://merchant.example/buy/sku_123:1?ucp/version={{ ucp_version }}
+```
+
 If no compact items are present, the endpoint MAY still use UCP field-path
 query parameters when supported by the Business, for example:
 
 ```text
-https://merchant.example/buy?context/postal_code=94105&continue_to=/
+https://merchant.example/buy?ucp/version={{ ucp_version }}&context/postal_code=94105&continue_to=/
 ```
 
-This URL initializes shopping context with `postal_code` set to `94105` and
-requests continuation to `/`.
+This URL selects the release, initializes shopping context with `postal_code`
+set to `94105`, and requests continuation to `/`.
 
 The browser route binding is documented separately at:
 
@@ -222,10 +242,11 @@ a numeric key inside a `gid://…`).
 
 ## Query Processing
 
-The query string carries initialized shopping state, destination preferences,
-and non-UCP query parameters. Platforms construct UCP field names as JSON
-Pointer paths with the leading `/` omitted, such as `buyer/email` or
-`line_items/0/quantity`.
+The query string carries the protocol version, initialized shopping state,
+destination preferences, and non-UCP query parameters. Platforms construct UCP
+field names as JSON Pointer paths with the leading `/` omitted, such as
+`buyer/email` or `line_items/0/quantity`. The protocol version uses the same
+syntax to address the protocol envelope: `ucp/version`.
 
 A Business classifies each decoded query parameter name as follows:
 
@@ -235,16 +256,24 @@ A Business classifies each decoded query parameter name as follows:
    to `/buyer/email`, and `buyer` normalizes to `/buyer`.
 3. Parse the normalized pointer into JSON Pointer tokens. The first token is the
    UCP root candidate.
-4. If the root candidate matches a top-level field in a Business-supported UCP
+4. If the root candidate is `ucp`, process the parameter as a protocol
+   parameter. `/ucp/version` is the protocol version; every other `ucp` pointer
+   is reserved for UCP core and MUST be consumed and removed without being
+   applied.
+5. If the root candidate matches a top-level field in a Business-supported UCP
    Cart or Checkout schema, including active profiles and extensions, or a field
    defined by this capability, process the parameter as a UCP field-path query
    parameter.
-5. Otherwise, process the parameter as a non-UCP query parameter.
+6. Otherwise, process the parameter as a non-UCP query parameter.
+
+A Business MUST select the release from `ucp/version` before it resolves any
+UCP field-path query parameter or compact item token, since the release
+determines the schemas those inputs are interpreted against.
 
 Distinct raw keys can normalize to the same pointer (for example `buyer/email`
-and `/buyer/email`), and `continue_to` can appear more than once. A Business
-MUST detect these collisions after normalization and MUST NOT resolve them by
-query-parameter order; it handles them as ambiguous (see
+and `/buyer/email`), and `continue_to` or `ucp/version` can appear more than
+once. A Business MUST detect these collisions after normalization and MUST NOT
+resolve them by query-parameter order; it handles them as ambiguous (see
 [Merge Rules](#merge-rules) and [Error Handling](#error-handling)).
 
 For UCP field-path query parameters, the Business resolves the remaining pointer
@@ -258,6 +287,78 @@ Business SHOULD consume and remove it by default. A Business MAY expose selected
 field paths on the destination URL only when it explicitly selects and, where
 appropriate, rewrites them for a defined purpose, such as preserving
 attribution. A Business MUST NOT forward sensitive values.
+
+### Protocol Version (`ucp/version`)
+
+`ucp/version` pins the permalink to one UCP release — the same protocol version
+that `ucp.version` selects in a profile (see
+[Protocol Version](overview/index.md#protocol-version)). It is a protocol
+parameter, not shopping-state data, and it addresses the `ucp.version` envelope
+member using the same JSON Pointer syntax as UCP field paths:
+
+```text
+/buy/sku_123:1?ucp/version={{ ucp_version }}
+```
+
+A permalink is a browser navigation with no profile exchange, so there is no
+version negotiation when the link is opened: the Business cannot learn which
+release the author used from the request itself. A permalink also outlives the
+moment it was authored — it is copied, printed, and stored — while the Business
+continues to adopt new releases. Without a pin, a breaking change in a later
+release could silently reinterpret an existing link. `ucp/version` therefore
+fixes the release under which the Business interprets the entire URL: the
+compact item path, `continue_to`, and every UCP field-path query parameter,
+resolved against the Cart or Checkout schemas and the `dev.ucp.*` capability and
+extension versions of that release (see
+[Component Versioning and Release Snapshots](overview/index.md#component-versioning-and-release-snapshots)).
+
+The name and format of `ucp/version` are themselves release-independent so that
+a Business can select the release before it interprets the rest of the URL.
+
+#### Platform Requirements
+
+A Platform MUST include exactly one `ucp/version` query parameter in every
+permalink it generates. The value MUST be the `ucp.version` of the Business
+profile from which the Platform discovered the permalink endpoint, in
+`YYYY-MM-DD` format; it MUST NOT be a pre-release identifier (see
+[Pre-release Versions](overview/index.md#pre-release-versions)). Because the
+declaration is bound to its profile, this is also the `version` of the
+`dev.ucp.shopping.permalink` entry that supplied `config.endpoint`.
+
+#### Business Requirements
+
+A Business MUST accept `ucp/version` values equal to its current `ucp.version`
+and to every `supported_versions` key whose leaf profile advertises the
+permalink capability, and MUST interpret the request under the selected release.
+
+Links outlive discovery. When a Business stops advertising a release, it SHOULD
+continue to resolve permalinks pinned to that release for as long as its
+documented lifecycle policy requires (resolution-only compatibility), even
+though it no longer generates or advertises them. Version lifecycle is a
+Business policy decision; UCP does not prescribe a sunset schedule.
+
+When `ucp/version` is absent, the Business MUST resolve the request under a
+documented default release. The default SHOULD be the oldest release the
+Business still resolves permalinks for: an unpinned link most likely predates
+the Business's newer releases, and the oldest interpretation is the least likely
+to change its meaning. A Business MUST NOT reject a permalink solely because
+`ucp/version` is absent.
+
+When `ucp/version` is well-formed but names a release the Business does not
+resolve — because it never supported it or has retired it — the Business SHOULD
+fall forward to the oldest release it still resolves that is later than the
+requested one, or to its newest release when none is later, and handle inputs
+that do not apply under that release as handled shopping errors (see
+[Error Handling](#error-handling)). A Business MUST NOT answer with a UCP JSON
+`version_unsupported` error; a permalink response is always a browser redirect
+or, when the request cannot be safely interpreted, a `4xx`.
+
+A value that does not match `^\d{4}-\d{2}-\d{2}$` is malformed. More than one
+`ucp/version` parameter, after normalization, is ambiguous. Both are handled
+according to [Error Handling](#error-handling).
+
+The Business consumes `ucp/version`; it carries no meaning at the destination
+and SHOULD NOT appear on the redirect URL.
 
 ### Destination Preference (`continue_to`)
 
@@ -472,7 +573,7 @@ the `attribution/` prefix.
 For example, this permalink request:
 
 ```text
-/buy/sku_123:1?continue_to=/collections/spring&buyer/email=alice%40example.com&buyer/unknown=foo&attribution/utm_source=email&utm_medium=sms&color=black&access_token=secret
+/buy/sku_123:1?ucp/version={{ ucp_version }}&continue_to=/collections/spring&buyer/email=alice%40example.com&buyer/unknown=foo&attribution/utm_source=email&utm_medium=sms&color=black&access_token=secret
 ```
 
 can resolve to:
@@ -484,7 +585,8 @@ Location: https://merchant.example/collections/spring?utm_source=email&utm_mediu
 
 In this example:
 
-* consumed: `sku_123:1` initializes server-side shopping state, `continue_to`
+* consumed: `ucp/version` selects the release the rest of the URL is interpreted
+  under, `sku_123:1` initializes server-side shopping state, `continue_to`
   selects the destination path, and `buyer/email` is applied to server-side
   state;
 * dropped: `buyer/unknown` is a UCP field-path query parameter because `buyer`
@@ -512,10 +614,10 @@ after applying any safe inputs; otherwise it SHOULD route to a purchase,
 shopping, or remediation destination appropriate for the failure.
 
 Malformed or unsafe requests include malformed item tokens, invalid quantities,
-invalid base64url tokens, unsafe `continue_to` values, unparseable queries, or
-control characters. A Business SHOULD redirect malformed browser requests to a
-safe buyer-facing fallback when possible, but MAY return `4xx` when the request
-cannot be safely interpreted.
+invalid base64url tokens, malformed `ucp/version` values, unsafe `continue_to`
+values, unparseable queries, or control characters. A Business SHOULD redirect
+malformed browser requests to a safe buyer-facing fallback when possible, but
+MAY return `4xx` when the request cannot be safely interpreted.
 
 Error presentation SHOULD prefer server-side session state or destination-page
 state.
@@ -525,7 +627,7 @@ state.
 ### Single item default purchase
 
 ```text
-https://merchant.example/buy/sku_123:1
+https://merchant.example/buy/sku_123:1?ucp/version={{ ucp_version }}
 ```
 
 Initialized data:
@@ -552,7 +654,7 @@ Location: https://checkout.merchant.example/session/chk_123
 ### Campaign link with discount and continuation
 
 ```text
-https://merchant.example/buy/sku_123:1,sku_456:2?continue_to=/collections/spring&discounts/codes/0=SPRING10&attribution/utm_source=email
+https://merchant.example/buy/sku_123:1,sku_456:2?ucp/version={{ ucp_version }}&continue_to=/collections/spring&discounts/codes/0=SPRING10&attribution/utm_source=email
 ```
 
 Initialized data:
@@ -593,7 +695,7 @@ Location: https://merchant.example/collections/spring?utm_source=email
 ### Buyer-directed purchase link
 
 ```text
-https://merchant.example/buy/sku_kit:3,~Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC83MDg4MTQxMg:2?discounts/codes/0=VIP20&discounts/codes/1=WELCOME&buyer/email=alice%40foo.com&buyer/phone_number=123-456-7890&context/address_country=US&context/postal_code=94105&context/language=en-US&attribution/ref=creator_42&attribution/utm_source=social&context/payment/0/handler=com.example.wallet
+https://merchant.example/buy/sku_kit:3,~Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC83MDg4MTQxMg:2?ucp/version={{ ucp_version }}&discounts/codes/0=VIP20&discounts/codes/1=WELCOME&buyer/email=alice%40foo.com&buyer/phone_number=123-456-7890&context/address_country=US&context/postal_code=94105&context/language=en-US&attribution/ref=creator_42&attribution/utm_source=social&context/payment/0/handler=com.example.wallet
 ```
 
 Initialized data:
@@ -647,7 +749,7 @@ Location: https://checkout.merchant.example/session/chk_123
 ### Pickup with a pre-selected destination
 
 ```text
-https://merchant.example/buy/sku_123:1?fulfillment/methods/0/type=pickup&fulfillment/methods/0/selected_destination_id=loc_1375
+https://merchant.example/buy/sku_123:1?ucp/version={{ ucp_version }}&fulfillment/methods/0/type=pickup&fulfillment/methods/0/selected_destination_id=loc_1375
 ```
 
 Initialized data:
