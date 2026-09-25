@@ -12,10 +12,11 @@ To move beyond isolated transactions, we are expanding the protocol's scope to t
 
 - **Loyalty & Member benefits:** Capabilities to enable loyalty and member benefits to help users find the best value and businesses achieve a deeper connection with their consumers through account linking.
 - **Native cross-sell and upsell modules:** Capabilities for businesses to provide personalized recommendations and upsells based on user context.
+- **Local & Omni-Channel Journeys:** Protocol support for BOPIS and store locators, enabling deep local experiences such as grocery shopping, local buying, and seamless omni-channel purchasing experiences.
 
 ### Support for global markets
 
-We are building a scalable ecosystem that is inclusive of all business sizes and geographies, ensuring that "simple and open" means accessible to everyone. We plan to do this through a phased rollout across markets, including India, Indonesia, Latin America, and others. We are adapting the protocol to support broader regional use cases and localized payment interoperability.
+We are building a scalable ecosystem that is inclusive of all business sizes and geographies, ensuring that "simple and open" means accessible to everyone. We plan to do this through a phased rollout across markets, including India, Asia Pacific, Latin America, and others. We are adapting the protocol to support broader regional use cases and localized payment interoperability.
 
 ### Expanding across industries
 
@@ -24,7 +25,7 @@ We are scaling UCP across a broader range of industries, focusing on industries 
 New specifications are being developed with industry leaders across key industries including:
 
 - **Food:** New UCP capabilities and schema to enable restaurant and menu discovery across the wide array of modification options, dish selection to checkout with tipping and delivery notes.
-- **Lodging:** New UCP capabilities and schema for hotels discovery, room selection with various rate options, booking with guest details, provision, and payment scheduling.
+- **Lodging:** New UCP capabilities and schema beyond Booking, supporting hotel discovery, room selection with various rate options, loyalty, and discounts.
 
 ## Build with us
 

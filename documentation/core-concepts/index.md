@@ -78,6 +78,7 @@ The following are examples of capabilities defined in UCP — see the [Specifica
 | `dev.ucp.common.identity_linking` | OAuth-based account linking                               |
 | `dev.ucp.common.location.search`  | Search for physical stores and pickup locations           |
 | `dev.ucp.common.location.lookup`  | Retrieve location details, operating hours, and amenities |
+| `dev.ucp.lodging.booking`         | Initiates and completes booking session for hotels        |
 
 ### Extensions
 
