@@ -32,7 +32,7 @@ This enables product discovery before checkout, supporting use cases like:
 | :--- | :--- |
 | [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
 | [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. |
-| [`dev.ucp.shopping.catalog.feed`](feed.md) | List materialized catalog feeds for offline indexing. |
+| [`dev.ucp.shopping.catalog.feed`](feed.md) | Materialized catalog feeds for offline indexing; extends the common [Feed capability](../../common/feed/index.md) with a record type. |
 
 ## Key Concepts
 
@@ -523,7 +523,8 @@ Scope declaration, derivation, and rules for extending this set with
 custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
 
 [Catalog Feed](feed.md) access is Platform-level; no user-authenticated scope
-is defined for it.
+is defined for it (see the common
+[Feed capability](../../common/feed/index.md#scopes)).
 
 ## Transport Bindings
 
@@ -533,4 +534,5 @@ The capabilities above are bound to specific transport protocols:
 * [MCP Binding](mcp.md): Model Context Protocol mapping via JSON-RPC.
 
 [Catalog Feed](feed.md) is document-based and defines no transport binding; a
-Platform fetches its endpoint and documents directly.
+Platform fetches the endpoint and documents defined by the common
+[Feed capability](../../common/feed/index.md) directly.

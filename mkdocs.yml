@@ -44,6 +44,7 @@ nav:
       - Overview: specification/overview/index.md
       - Glossary: specification/glossary.md
       - Common:
+          - Feed Capability: specification/common/feed/index.md
           - Identity Linking: specification/common/identity-linking/index.md
           - Location Capability:
               - Overview: specification/common/location/index.md
@@ -406,6 +407,11 @@ plugins:
               including Capability, Extension, Action, Platform, Business, and
               Merchant of Record.
         Common:
+          - specification/common/feed/index.md: >-
+              Bulk record publication via the Feed Capability, specifying feed
+              endpoint discovery, the feed list, immutable snapshot manifests,
+              file formats, refresh etiquette, and supplemental feeds; record
+              types are defined by extensions such as Catalog Feed.
           - specification/common/identity-linking/index.md: >-
               User authentication via the Identity Linking Capability,
               specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
@@ -509,8 +515,9 @@ plugins:
               and interactive option selection.
           - specification/shopping/catalog/feed.md: >-
               Bulk catalog materialization via the Catalog Feed capability,
-              specifying feed discovery, immutable snapshot manifests,
-              file formats, and refresh etiquette.
+              an extension of the common Feed Capability whose records are
+              catalog Products, specifying record identity, market context,
+              Search Filters on manifests, and supplemental feeds.
           - specification/shopping/catalog/rest.md: >-
               HTTP REST transport binding for the Catalog Capability,
               detailing search, batch lookup, and product detail

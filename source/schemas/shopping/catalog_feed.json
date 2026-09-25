@@ -3,249 +3,26 @@
   "$id": "https://ucp.dev/schemas/shopping/catalog_feed.json",
   "name": "dev.ucp.shopping.catalog.feed",
   "title": "Catalog Feed",
-  "description": "Catalog feed capability. A feed publishes the same Product records Catalog Search returns, in bulk, as files described by a manifest, so a Platform can index them offline. The feed is point-in-time; Catalog Search and Lookup remain authoritative at serving time. The Business declares a feed endpoint in the capability `config`; a Platform fetches the feed list document from it, then fetches each feed's manifest and files. A catalog feed manifest carries `filters`, in the Catalog Search filter vocabulary.",
-  "type": "object",
+  "description": "Catalog feed extension. Extends `dev.ucp.common.feed` with a record type: the records of a catalog feed are catalog Product objects with nested variants, the same records Catalog Search returns. Catalog Search and Lookup remain authoritative at serving time. A catalog feed manifest carries `filters`, in the Catalog Search filter vocabulary. Discovery, feed lists, manifests, files, and snapshot semantics are defined by the Feed capability.",
   "$defs": {
-    "endpoint": {
-      "type": "string",
-      "format": "uri",
-      "description": "Absolute HTTPS URL from which a Platform fetches the feed list. The operator of this endpoint acts for the Business and may be the Business, its commerce platform, or a delegated feed publisher; the Business declares it in its profile."
-    },
-    "config": {
-      "type": "object",
-      "description": "Business feed endpoint configuration.",
-      "required": [
-        "endpoint"
-      ],
-      "properties": {
-        "endpoint": {
-          "$ref": "#/$defs/endpoint"
-        }
-      },
-      "additionalProperties": true
-    },
-    "dev.ucp.shopping.catalog.feed": {
-      "platform_schema": {
-        "title": "Catalog Feed Capability (Platform)",
-        "description": "Platform-level catalog feed capability declaration. Platforms advertise that they consume catalog feeds; the feed endpoint is business-specific, so no platform config is required.",
-        "allOf": [
-          {
-            "$ref": "../capability.json#/$defs/platform_schema"
-          }
-        ]
-      },
-      "business_schema": {
-        "title": "Catalog Feed Capability (Business)",
-        "description": "Business declaration for the catalog feed endpoint.",
-        "allOf": [
-          {
-            "$ref": "../capability.json#/$defs/business_schema"
-          },
-          {
-            "required": [
-              "config"
-            ],
-            "properties": {
-              "config": {
-                "$ref": "#/$defs/config"
-              }
+    "dev.ucp.common.feed": {
+      "title": "Catalog Feed Manifest",
+      "description": "Feed manifest whose records are catalog Products. Adds `filters` to the manifest, using the Catalog Search filter vocabulary.",
+      "allOf": [
+        {
+          "$ref": "../common/feed.json#/$defs/manifest"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "$ref": "types/search_filters.json",
+              "description": "Row-inclusion predicates the Business applied when generating this snapshot, using the same names and semantics as Catalog Search filters. Absent means no filter was applied.",
+              "ucp_request": "omit"
             }
           }
-        ]
-      },
-      "response_schema": {
-        "title": "Catalog Feed Capability (Response)",
-        "description": "Catalog feed capability reference in feed documents.",
-        "allOf": [
-          {
-            "$ref": "../capability.json#/$defs/response_schema"
-          }
-        ]
-      }
-    },
-    "feed_list": {
-      "type": "object",
-      "description": "The feed list document served at the capability's `config.endpoint`: the catalog feeds the Business makes available to the calling Platform.",
-      "required": [
-        "ucp",
-        "feeds"
-      ],
-      "properties": {
-        "ucp": {
-          "$ref": "../ucp.json#/$defs/response_catalog_schema",
-          "ucp_request": "omit"
-        },
-        "feeds": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/feed"
-          },
-          "description": "Feeds available to the calling Platform. May be empty. The document is provisioned for the caller: an unauthenticated fetch returns the Business's public feeds, if any; an authenticated fetch returns the feeds the Business has provisioned for that Platform. The order of entries carries no meaning, except that a Platform applies supplemental feeds of the same base feed in list order.",
-          "ucp_request": "omit"
-        },
-        "messages": {
-          "type": "array",
-          "items": {
-            "$ref": "../common/types/message.json"
-          },
-          "description": "Errors, warnings, or informational messages about the feed list.",
-          "ucp_request": "omit"
         }
-      }
-    },
-    "feed": {
-      "type": "object",
-      "description": "A feed list entry: the Business's advertisement of one feed and a pointer to its current snapshot. The entry is for discovery; the manifest is authoritative.",
-      "required": [
-        "id",
-        "context",
-        "format",
-        "interval",
-        "generated_at",
-        "manifest"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Business-assigned, stable identifier for the feed. Opaque to Platforms; unique within the Business's feed list. Identifies the feed across snapshots: `generated_at` advances, `id` does not.",
-          "ucp_request": "omit"
-        },
-        "context": {
-          "$ref": "../common/types/context.json",
-          "description": "The market for which every record in the feed was resolved, each member single-valued; `address_country`, `language` (BCP 47), and `currency` (ISO 4217) are its usual members. For a supplemental feed, the context of the composed result: the base feed with this feed applied.",
-          "ucp_request": "omit"
-        },
-        "format": {
-          "type": "string",
-          "description": "Wire encoding of every file in the feed's current snapshot. Equals the current manifest's `format`, which is authoritative. Lets a Platform select feeds it can read, and skip ones it cannot, without fetching manifests. Registered values are those listed for the manifest's `format`.",
-          "examples": [
-            "jsonl+gzip",
-            "parquet"
-          ],
-          "ucp_request": "omit"
-        },
-        "interval": {
-          "type": "string",
-          "format": "duration",
-          "description": "Expected cadence between snapshots as an ISO 8601 duration (RFC 3339 Appendix A), e.g. `P1D`, `PT2H`. A positive duration. Advisory: it states the Business's intent, not a guarantee. Platforms are expected to poll no more often than the shortest interval among the feeds they consume unless the Business agrees otherwise.",
-          "ucp_request": "omit"
-        },
-        "generated_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Copy of the current manifest's `generated_at`. Strictly increasing per feed. A Platform compares it with the value of the snapshot it holds to decide whether to fetch the manifest.",
-          "ucp_request": "omit"
-        },
-        "manifest": {
-          "type": "string",
-          "format": "uri",
-          "description": "Absolute HTTPS URL of the feed's current manifest. Each snapshot has its own manifest URL, and the document at a manifest URL does not change once published. It may be on any HTTPS origin; it is trusted because the feed list obtained from the Business's declared `config.endpoint` returned it.",
-          "ucp_request": "omit"
-        },
-        "extends": {
-          "type": "string",
-          "description": "`id` of the base feed this supplemental feed extends: another entry in this feed list that itself carries no `extends`. Present only for a supplemental feed, whose records are applied to the base records with the same `id`. Absent for a feed that stands alone.",
-          "ucp_request": "omit"
-        }
-      }
-    },
-    "manifest": {
-      "type": "object",
-      "description": "The document at a feed entry's `manifest` URL: a complete materialization of one feed as of `generated_at`. Identified by (`id`, `generated_at`); once published, neither the manifest document nor its files change, and a correction is a new snapshot with a later `generated_at`. The manifest is authoritative; the feed list entry is for discovery.",
-      "required": [
-        "ucp",
-        "id",
-        "format",
-        "context",
-        "generated_at",
-        "expires_at",
-        "files"
-      ],
-      "properties": {
-        "ucp": {
-          "$ref": "../ucp.json#/$defs/response_catalog_schema",
-          "description": "Declares the UCP version and the capabilities, including extensions, whose schemas the records in this snapshot conform to. Same envelope as a catalog response.",
-          "ucp_request": "omit"
-        },
-        "id": {
-          "type": "string",
-          "description": "The feed's identifier. Equals the `id` of the feed list entry whose `manifest` URL served this document.",
-          "ucp_request": "omit"
-        },
-        "format": {
-          "type": "string",
-          "description": "Wire encoding of every file in `files`. Open vocabulary; compression is part of the token, not a separate field. Registered values in this version: `jsonl+gzip` (one JSON record per line, gzip-compressed) and `parquet` (one Product per row across one or more files, with variants as a nested column; compression is internal to Parquet). A Platform that does not recognize the value does not consume the snapshot. An extension that changes the file layout registers its own `format` value; extensions that only add fields to records do not.",
-          "examples": [
-            "jsonl+gzip",
-            "parquet"
-          ],
-          "ucp_request": "omit"
-        },
-        "context": {
-          "$ref": "../common/types/context.json",
-          "description": "Equals the feed list entry's `context`; the manifest is authoritative. The market for which every record in the feed was resolved, each member single-valued; `address_country`, `language` (BCP 47), and `currency` (ISO 4217) are its usual members. For a supplemental feed, the context of the composed result: the base feed with this feed applied.",
-          "ucp_request": "omit"
-        },
-        "filters": {
-          "$ref": "types/search_filters.json",
-          "description": "Row-inclusion predicates the Business applied when generating this snapshot, using the same names and semantics as Catalog Search filters. Absent means no filter was applied.",
-          "ucp_request": "omit"
-        },
-        "extends": {
-          "type": "string",
-          "description": "Equals the feed list entry's `extends`: the `id` of the base feed this supplemental feed extends, an entry that itself carries no `extends`. Present only for a supplemental feed, whose records are applied to the base records with the same `id`.",
-          "ucp_request": "omit"
-        },
-        "generated_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Logical point in time of the snapshot. Every file in the manifest is consistent as of this instant. Strictly increasing per feed; equals the feed list entry's `generated_at` for the current snapshot.",
-          "ucp_request": "omit"
-        },
-        "expires_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Time after which the Business no longer guarantees that the manifest and its files remain retrievable. Retention, not validity: a snapshot does not become wrong at `expires_at`; it may become unavailable.",
-          "ucp_request": "omit"
-        },
-        "files": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/$defs/file"
-          },
-          "description": "Flat list of the files that together make up this snapshot; a single file is a one-element list. All files are mutually consistent as of `generated_at`, and the Business publishes every file before publishing the manifest that references it. A Platform that cannot retrieve every file does not treat the snapshot as complete.",
-          "ucp_request": "omit"
-        },
-        "messages": {
-          "type": "array",
-          "items": {
-            "$ref": "../common/types/message.json"
-          },
-          "description": "Errors, warnings, or informational messages about this snapshot.",
-          "ucp_request": "omit"
-        }
-      }
-    },
-    "file": {
-      "type": "object",
-      "description": "One file in a snapshot. Encoded per the manifest's `format`.",
-      "required": [
-        "url"
-      ],
-      "properties": {
-        "url": {
-          "type": "string",
-          "format": "uri-reference",
-          "description": "Location of the file: an absolute HTTPS URL, or a reference relative to the manifest's URL. May be on any origin.",
-          "ucp_request": "omit"
-        },
-        "digest": {
-          "type": "string",
-          "description": "RFC 9530 `Content-Digest` dictionary value for the file's bytes as served, e.g. `sha-256=:BASE64:`. Same syntax UCP uses for `Content-Digest` in signing. Optional but recommended. Verifies the file bytes against this manifest; it is not a signature and does not establish who published the file. A Platform that verifies and finds a mismatch treats the snapshot as incomplete.",
-          "ucp_request": "omit"
-        }
-      }
+      ]
     }
   }
 }
