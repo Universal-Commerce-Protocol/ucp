@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/availability.json",
   "title": "Availability",
-  "description": "Availability of an item: whether it can be obtained, and a qualifying status.",
+  "description": "Availability of an item: whether it can be obtained, a qualifying status, and optional inventory signals.",
   "type": "object",
   "properties": {
     "available": {
@@ -11,7 +11,17 @@
     },
     "status": {
       "type": "string",
-      "description": "Qualifies available with fulfillment state. Well-known values: `in_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`."
+      "description": "Qualifies available with fulfillment state. Well-known values: `in_stock`, `low_stock`, `backorder`, `preorder`, `out_of_stock`, `discontinued`."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Available stock quantity. Business MAY omit if it does not expose exact counts."
+    },
+    "restock_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 estimated restock timestamp. Business MAY include when status is `out_of_stock` or `backorder`."
     }
   }
 }
