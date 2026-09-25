@@ -179,10 +179,11 @@ identifiers, and source/medium markers communicated by the platform. See
 
 ## Links
 
-`links` are an array of addressable references to the resources the answer
-names. The array is optional in the schema, but a business **SHOULD** return a
-link for each resource the answer references, so the platform can act on the
-response provided to the buyer.
+`links` enumerate the entities the answer mentions — a product, a variant, a
+policy page — where an addressable resource exists for them. A Business
+**SHOULD** return one link per such entity. A Platform **MAY** use a link for
+follow-up operations; where a link carries an `id`, it **SHOULD** resolve the
+resource through the capability that owns it before acting on it.
 
 A link carries:
 
@@ -191,17 +192,20 @@ A link carries:
   heard about), so the platform can tie the link back to the text it rendered.
 * `url` — the page the platform can direct the buyer to. Required on every link.
 * `id` — when the link points to an addressable UCP resource (a product or
-  variant the answer recommends, say), the business **SHOULD** include the
+  variant the answer names, say), the Business **SHOULD** include the
   resource's `id` (a GID) alongside the `url`. The `url` is for display; the `id`
-  lets the platform act on the resource through the capability that owns it —
-  resolve it in `catalog`, add it to a `cart` — without re-deriving it from the
-  answer text. Omit `id` for resources without a UCP identifier, such as a
-  policy page.
+  is what the Platform resolves through
+  [Lookup](../catalog/lookup.md#supported-identifiers), which accepts product
+  and variant identifiers alike, so the Platform need not know which it holds.
+  What it then does with the resolved resource is its own decision (see
+  [Security Considerations](#security-considerations)). Omit `id` for
+  resources without a UCP identifier, such as a policy page.
 
 Each link also carries a `type` classifier. Well-known values are
 `refund_policy`, `shipping_policy`, `privacy_policy`, `terms_of_service`, and
-`faq`; a business **MAY** supply other `type` values (a product, a size guide, a
-store-locator page).
+`faq`; a Business **MAY** supply other `type` values (a product, a size guide, a
+store-locator page). `type` is a display hint; resolving an `id` does not
+depend on it.
 
 {{ schema_fields('types/link', 'shopping/ask') }}
 
