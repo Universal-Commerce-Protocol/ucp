@@ -1,0 +1,1423 @@
+{
+  "format_version": 1,
+  "description": "Ten synthetic pre-purchase disclosure scenarios. This envelope is test metadata, not a Booking wire schema. Only policy is a wire cancellation_item. Do not expose expected values, reference_schedule, category, defect, source notes, or other answer metadata to an agent.",
+  "proposal_snapshot": "185397d2195cedd4db6a678fc6c102f11be1bf0c",
+  "scope": "buyer_initiated_pre_purchase_disclosure",
+  "pairing": "Serve identical context and policy in both arms; remove only policy.schedule for the classification-plus-prose arm. Root Booking currency comes from context.currency. Context timestamps and timezone are test/reservation facts, not proposed new wire fields.",
+  "evaluation_scope": "Every query is hypothetical and earlier than check-in; no booking completion, cancellation or refund execution is authorized.",
+  "fixtures": [
+    {
+      "id": "phoenix_resolved_fee",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-10-01T12:00:00Z",
+        "check_in": "2026-10-16T22:00:00Z",
+        "property_timezone": "America/Phoenix",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Free cancellation strictly before 6:00 PM property-local time two calendar days before check-in. Cancellation at or after that time incurs one night's room rate, excluding taxes and fees. For this two-night reservation, the Business has resolved that penalty to USD 150.00 in total."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p01",
+        "schedule": {
+          "anchor": "2026-10-16T22:00:00Z",
+          "tiers": [
+            {
+              "until": "PT45H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {
+              "amount": 15000
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "source_note": "Adapted from the public synthetic example; one-second-after query added.",
+      "local_policy_example": "phoenix_local_template",
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-10-15T00:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-10-15T01:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-10-15T01:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "new_york_spring_resolved_fee",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-03-01T12:00:00Z",
+        "check_in": "2026-03-09T19:00:00Z",
+        "property_timezone": "America/New_York",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Free cancellation strictly before 6:00 PM property-local time two calendar days before check-in. Cancellation at or after that time incurs one night's room rate, excluding taxes and fees. For this two-night reservation, the Business has resolved that penalty to USD 150.00 in total."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p02",
+        "schedule": {
+          "anchor": "2026-03-09T19:00:00Z",
+          "tiers": [
+            {
+              "until": "PT44H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {
+              "amount": 15000
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "source_note": "Derived spring-forward variant, not a separate contributor-supplied policy.",
+      "local_policy_example": "new_york_spring_local_template",
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-03-07T22:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-03-07T23:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-03-07T23:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "new_york_fall_resolved_fee",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-10-01T12:00:00Z",
+        "check_in": "2026-11-02T20:00:00Z",
+        "property_timezone": "America/New_York",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Free cancellation strictly before 6:00 PM property-local time two calendar days before check-in. Cancellation at or after that time incurs one night's room rate, excluding taxes and fees. For this two-night reservation, the Business has resolved that penalty to USD 150.00 in total."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p03",
+        "schedule": {
+          "anchor": "2026-11-02T20:00:00Z",
+          "tiers": [
+            {
+              "until": "PT46H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {
+              "amount": 15000
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "source_note": "Derived fall-back variant, not a separate contributor-supplied policy.",
+      "local_policy_example": "new_york_fall_local_template",
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-10-31T21:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-10-31T22:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-10-31T22:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "multiple_resolved_tiers",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-12-01T12:00:00Z",
+        "check_in": "2026-12-31T12:00:00Z",
+        "property_timezone": "Etc/UTC",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Cancellation is free strictly before December 24, 2026 at 12:00 UTC. From that instant until, but not including, December 29, 2026 at 12:00 UTC, the total cancellation penalty is USD 75.00. At or after December 29 at 12:00 UTC, the total cancellation penalty is USD 150.00."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p04",
+        "schedule": {
+          "anchor": "2026-12-31T12:00:00Z",
+          "tiers": [
+            {
+              "until": "P7D",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            },
+            {
+              "until": "PT48H",
+              "outcome": {
+                "kind": "fixed_fee",
+                "penalty": {
+                  "amount": 7500
+                }
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {
+              "amount": 15000
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "evaluations": [
+        {
+          "id": "before_first_cutoff",
+          "at": "2026-12-24T11:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_first_cutoff",
+          "at": "2026-12-24T12:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/1/outcome"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 7500,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_first_cutoff",
+          "at": "2026-12-24T12:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/1/outcome"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 7500,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "before_last_cutoff",
+          "at": "2026-12-29T11:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/1/outcome"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 7500,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_last_cutoff",
+          "at": "2026-12-29T12:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_last_cutoff",
+          "at": "2026-12-29T12:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "non_refundable_from_confirmation",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-12-01T12:00:00Z",
+        "check_in": "2026-12-22T20:00:00Z",
+        "property_timezone": "Etc/UTC",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "This promotional reservation is non-refundable from confirmation: cancellation returns none of the prepaid accommodation charge. There is no free-cancellation interval. The prepaid charge amount is not included in this response."
+        },
+        "refundability": "non_refundable",
+        "url": "https://example.com/cancellation-terms#p05",
+        "schedule": {
+          "anchor": "2026-12-22T20:00:00Z",
+          "tiers": [
+            {
+              "until": "PT48H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 0
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          }
+        }
+      },
+      "schema_valid": true,
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-12-20T19:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 0
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 0
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No prepaid monetary basis is supplied; disclose the refund percentage without inventing a cash penalty."
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-12-20T20:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 0
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 0
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No prepaid monetary basis is supplied; disclose the refund percentage without inventing a cash penalty."
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-12-20T20:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 0
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 0
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No prepaid monetary basis is supplied; disclose the refund percentage without inventing a cash penalty."
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "symbolic_night_without_price",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-10-01T12:00:00Z",
+        "check_in": "2026-10-16T22:00:00Z",
+        "property_timezone": "America/Phoenix",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Free cancellation strictly before 6:00 PM property-local time two calendar days before check-in. At or after that time, the penalty is the first night's room rate, excluding taxes and fees. No nightly room-rate amounts or resolved cash penalty are supplied in this response."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p06",
+        "schedule": {
+          "anchor": "2026-10-16T22:00:00Z",
+          "tiers": [
+            {
+              "until": "PT45H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "unit_deduction",
+            "penalty": {
+              "measure": {
+                "value": 1,
+                "unit": "night",
+                "display_text": "night"
+              }
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "source": "https://github.com/Universal-Commerce-Protocol/ucp/pull/780#issuecomment-5607887511",
+      "source_note": "Symbolic variant of the public pattern; room-rate amount deliberately withheld.",
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-10-15T00:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-10-15T01:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "unit_deduction",
+              "penalty": {
+                "measure": {
+                  "value": 1,
+                  "unit": "night",
+                  "display_text": "night"
+                }
+              }
+            },
+            "intended_outcome": {
+              "kind": "unit_deduction",
+              "penalty": {
+                "measure": {
+                  "value": 1,
+                  "unit": "night",
+                  "display_text": "night"
+                }
+              }
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No room-rate amount or unambiguous monetary basis is supplied."
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-10-15T01:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "unit_deduction",
+              "penalty": {
+                "measure": {
+                  "value": 1,
+                  "unit": "night",
+                  "display_text": "night"
+                }
+              }
+            },
+            "intended_outcome": {
+              "kind": "unit_deduction",
+              "penalty": {
+                "measure": {
+                  "value": 1,
+                  "unit": "night",
+                  "display_text": "night"
+                }
+              }
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No room-rate amount or unambiguous monetary basis is supplied."
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "percentage_without_price_basis",
+      "category": "valid",
+      "context": {
+        "response_generated_at": "2026-12-01T12:00:00Z",
+        "check_in": "2026-12-22T20:00:00Z",
+        "property_timezone": "Etc/UTC",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Cancellation is free strictly before December 20, 2026 at 20:00 UTC. At or after that instant, 50% of the prepaid accommodation subtotal is refunded and 50% is retained. That subtotal is not supplied in this response."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p07",
+        "schedule": {
+          "anchor": "2026-12-22T20:00:00Z",
+          "tiers": [
+            {
+              "until": "PT48H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          }
+        }
+      },
+      "schema_valid": true,
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-12-20T19:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-12-20T20:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 5000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 5000
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No prepaid monetary basis is supplied; disclose the refund percentage without inventing a cash penalty."
+            },
+            "handling": "terms"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-12-20T20:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 5000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 5000
+            },
+            "penalty": {
+              "status": "not_resolved",
+              "reason": "No prepaid monetary basis is supplied; disclose the refund percentage without inventing a cash penalty."
+            },
+            "handling": "terms"
+          }
+        }
+      ]
+    },
+    {
+      "id": "missing_fixed_fee_amount",
+      "category": "invalid_schedule",
+      "context": {
+        "response_generated_at": "2026-10-01T12:00:00Z",
+        "check_in": "2026-10-16T22:00:00Z",
+        "property_timezone": "America/Phoenix",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Free cancellation strictly before 6:00 PM property-local time two calendar days before check-in. Cancellation at or after that time incurs one night's room rate, excluding taxes and fees. For this two-night reservation, the Business has resolved that penalty to USD 150.00 in total."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p08",
+        "schedule": {
+          "anchor": "2026-10-16T22:00:00Z",
+          "tiers": [
+            {
+              "until": "PT45H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {}
+          }
+        }
+      },
+      "schema_valid": false,
+      "reference_schedule": {
+        "anchor": "2026-10-16T22:00:00Z",
+        "tiers": [
+          {
+            "until": "PT45H",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "fixed_fee",
+          "penalty": {
+            "amount": 15000
+          }
+        }
+      },
+      "defect": "The fixed_fee penalty is missing its required amount. The whole schedule is invalid even before that outcome would be selected.",
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-10-15T00:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-10-15T01:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-10-15T01:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        }
+      ]
+    },
+    {
+      "id": "reversed_tier_order",
+      "category": "invalid_schedule",
+      "context": {
+        "response_generated_at": "2026-12-01T12:00:00Z",
+        "check_in": "2026-12-31T12:00:00Z",
+        "property_timezone": "Etc/UTC",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Cancellation is free strictly before December 24, 2026 at 12:00 UTC. From that instant until, but not including, December 29, 2026 at 12:00 UTC, the total cancellation penalty is USD 75.00. At or after December 29 at 12:00 UTC, the total cancellation penalty is USD 150.00."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p09",
+        "schedule": {
+          "anchor": "2026-12-31T12:00:00Z",
+          "tiers": [
+            {
+              "until": "PT48H",
+              "outcome": {
+                "kind": "fixed_fee",
+                "penalty": {
+                  "amount": 7500
+                }
+              }
+            },
+            {
+              "until": "P7D",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {
+              "amount": 15000
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "reference_schedule": {
+        "anchor": "2026-12-31T12:00:00Z",
+        "tiers": [
+          {
+            "until": "P7D",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          },
+          {
+            "until": "PT48H",
+            "outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "fixed_fee",
+          "penalty": {
+            "amount": 15000
+          }
+        }
+      },
+      "defect": "The tiers are reversed: PT48H precedes P7D. Schema validation passes but the required decreasing-duration order fails.",
+      "evaluations": [
+        {
+          "id": "before_first_cutoff",
+          "at": "2026-12-24T11:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "at_first_cutoff",
+          "at": "2026-12-24T12:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 7500,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "after_first_cutoff",
+          "at": "2026-12-24T12:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 7500,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "before_last_cutoff",
+          "at": "2026-12-29T11:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 7500,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "at_last_cutoff",
+          "at": "2026-12-29T12:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        },
+        {
+          "id": "after_last_cutoff",
+          "at": "2026-12-29T12:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "unavailable",
+              "reason": "invalid_schedule"
+            },
+            "selected_outcome": null,
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "prose_fallback"
+          }
+        }
+      ]
+    },
+    {
+      "id": "description_schedule_amount_conflict",
+      "category": "description_conflict",
+      "context": {
+        "response_generated_at": "2026-10-01T12:00:00Z",
+        "check_in": "2026-10-16T22:00:00Z",
+        "property_timezone": "America/Phoenix",
+        "stay_nights": 2,
+        "currency": "USD"
+      },
+      "policy": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "Free cancellation strictly before 6:00 PM property-local time two calendar days before check-in. Cancellation at or after that time incurs one night's room rate, excluding taxes and fees. For this two-night reservation, the Business has resolved that penalty to USD 150.00 in total."
+        },
+        "refundability": "refundable",
+        "url": "https://example.com/cancellation-terms#p10",
+        "schedule": {
+          "anchor": "2026-10-16T22:00:00Z",
+          "tiers": [
+            {
+              "until": "PT45H",
+              "outcome": {
+                "kind": "percentage",
+                "buyer_bps": 10000
+              }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": {
+              "amount": 7500
+            }
+          }
+        }
+      },
+      "schema_valid": true,
+      "reference_schedule": {
+        "anchor": "2026-10-16T22:00:00Z",
+        "tiers": [
+          {
+            "until": "PT45H",
+            "outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            }
+          }
+        ],
+        "after_last_tier": {
+          "kind": "fixed_fee",
+          "penalty": {
+            "amount": 15000
+          }
+        }
+      },
+      "defect": "The prose states USD 150.00 after the cutoff, but the structurally valid schedule states USD 75.00. No independent contradiction signal is supplied to the agent. Detection is an exploratory observation, not a mandated prose-parsing conformance test.",
+      "evaluations": [
+        {
+          "id": "before_cutoff",
+          "at": "2026-10-15T00:59:59Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/tiers/0/outcome"
+            },
+            "selected_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "intended_outcome": {
+              "kind": "percentage",
+              "buyer_bps": 10000
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 0,
+              "currency": "USD"
+            },
+            "handling": "conflict_probe"
+          }
+        },
+        {
+          "id": "at_cutoff",
+          "at": "2026-10-15T01:00:00Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "conflict_probe"
+          }
+        },
+        {
+          "id": "after_cutoff",
+          "at": "2026-10-15T01:00:01Z",
+          "expected": {
+            "schedule_result": {
+              "status": "selected",
+              "pointer": "/schedule/after_last_tier"
+            },
+            "selected_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 7500
+              }
+            },
+            "intended_outcome": {
+              "kind": "fixed_fee",
+              "penalty": {
+                "amount": 15000
+              }
+            },
+            "penalty": {
+              "status": "resolved",
+              "amount": 15000,
+              "currency": "USD"
+            },
+            "handling": "conflict_probe"
+          }
+        }
+      ]
+    }
+  ]
+}

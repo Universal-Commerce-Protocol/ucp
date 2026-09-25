@@ -37,6 +37,9 @@ on:
       - "source/**"
       - "scripts/**"
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -49,7 +52,7 @@ jobs:
         github.event.before == '0000000000000000000000000000000000000000')
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
@@ -60,7 +63,7 @@ jobs:
 
       - name: Check for changed files in source
         id: source_files_changed
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: source/**
 
@@ -78,6 +81,15 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Validate cancellation schedule vectors
+        run: uv run python scripts/test_cancellation_schedule.py
+
+      - name: Validate cancellation lab fixtures
+        run: uv run python scripts/test_cancellation_lab.py
+
+      - name: Validate cancellation multi-stay integration
+        run: uv run python scripts/test_cancellation_booking.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
@@ -88,7 +100,7 @@ jobs:
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
@@ -118,7 +130,7 @@ jobs:
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
@@ -154,7 +166,7 @@ jobs:
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -211,7 +223,7 @@ jobs:
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -247,7 +259,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
