@@ -73,6 +73,7 @@ nav:
               - Overview: specification/shopping/catalog/index.md
               - Search: specification/shopping/catalog/search.md
               - Lookup: specification/shopping/catalog/lookup.md
+              - Feed: specification/shopping/catalog/feed.md
               - Transports:
                   - REST: specification/shopping/catalog/rest.md
                   - MCP: specification/shopping/catalog/mcp.md
@@ -506,6 +507,10 @@ plugins:
               Direct item retrieval via the Lookup Catalog capability,
               specifying variant resolution logic, batch identifiers,
               and interactive option selection.
+          - specification/shopping/catalog/feed.md: >-
+              Bulk catalog materialization via the Catalog Feed capability,
+              specifying feed discovery, immutable snapshot manifests,
+              file formats, and refresh etiquette.
           - specification/shopping/catalog/rest.md: >-
               HTTP REST transport binding for the Catalog Capability,
               detailing search, batch lookup, and product detail
