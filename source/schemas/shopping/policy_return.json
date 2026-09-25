@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/policy_return.json",
+  "name": "dev.ucp.shopping.policy.return",
+  "title": "Return Policy Extension",
+  "description": "Defines the `dev.ucp.shopping.policy.return` policy type on the core `policies[]` primitive, enabling businesses to advertise return terms across one or more supported capabilities (catalog, cart, checkout, and order).",
+  "$defs": {
+    "return_body": {
+      "title": "Return Policy",
+      "description": "Return terms for a `dev.ucp.shopping.policy.return` policy.",
+      "type": "object",
+      "properties": {
+        "final_sale": {
+          "type": "boolean",
+          "description": "When `true`, the covered items cannot be returned. When `false` or omitted, the items are returnable subject to the other fields."
+        },
+        "window": {
+          "title": "Return Window",
+          "description": "Return window as a policy statement. Omit for an unlimited or unstated window.",
+          "type": "object",
+          "required": ["days", "anchor"],
+          "properties": {
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Length of the return window in whole days from `anchor`."
+            },
+            "anchor": {
+              "type": "string",
+              "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`."
+            }
+          }
+        },
+        "supported_resolutions": {
+          "type": "array",
+          "description": "Accepted return outcomes, as an unordered set. Well-known values: `original_payment_method`, `store_credit`, `gift_card`, `exchange`, `replacement`.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "methods": {
+          "type": "array",
+          "description": "Permitted return channels and the logistics cost of each.",
+          "items": {
+            "$ref": "#/$defs/return_method"
+          }
+        },
+        "restocking_fee": {
+          "title": "Restocking Fee",
+          "description": "A refund deduction applied regardless of return channel. Provide `percentage_bps`, `amount`, or both.",
+          "type": "object",
+          "properties": {
+            "percentage_bps": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "description": "Restocking fee in basis points of the item price (e.g., `1500` = 15%)."
+            },
+            "amount": {
+              "$ref": "../common/types/amount.json",
+              "description": "Restocking fee as a flat charge in ISO 4217 minor units."
+            },
+            "display_text": {
+              "type": "string",
+              "description": "Human-readable fee label (e.g., '15% restocking fee')."
+            }
+          }
+        }
+      }
+    },
+    "fee": {
+      "title": "Return Method Fee",
+      "description": "Logistics cost of using a return channel. Open vocabulary.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Cost structure. Well-known values: `free`, `fixed_fee` (see `fixed_fee`), `customer_responsibility`."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable fee label (e.g., 'Return shipping')."
+        }
+      }
+    },
+    "fixed_fee": {
+      "title": "Fixed Fee Return Method Fee",
+      "description": "Fixed logistics fee charged for a return channel.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/fee"
+        }
+      ],
+      "required": [
+        "type",
+        "amount"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "fixed_fee"
+        },
+        "amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Flat channel fee in ISO 4217 minor units. Required when type is fixed_fee."
+        }
+      }
+    },
+    "return_method": {
+      "title": "Return Method",
+      "description": "A return channel and its logistics cost.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Return channel. Well-known values: `in_store`, `by_mail`, `kiosk`."
+        },
+        "fee": {
+          "$ref": "#/$defs/fee",
+          "description": "Logistics cost of using this channel."
+        }
+      }
+    },
+    "return_policy": {
+      "title": "Return Policy",
+      "description": "A return policy statement with type `dev.ucp.shopping.policy.return`.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dev.ucp.shopping.policy.return"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/return_body"
+        }
+      ]
+    },
+    "policies_item": {
+      "description": "A `policies[]` entry; validates against `return_policy` when `type` is `dev.ucp.shopping.policy.return`.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dev.ucp.shopping.policy.return"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/return_policy"
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Return Policy",
+      "description": "Cart extended with return policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Return Policy",
+      "description": "Checkout extended with return policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Return Policy",
+      "description": "Order extended with return policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with return policy (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with return policy (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    }
+  }
+}
