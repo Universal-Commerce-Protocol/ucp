@@ -281,6 +281,10 @@ defers to the binding source.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'shopping/ask/rest') }}
 
+### Conversation {: #conversation }
+
+{{ extension_schema_fields('ask.json#/$defs/conversation', 'shopping/ask/rest') }}
+
 ### Error Response {: #error-response }
 
 {{ schema_fields('types/error_response', 'shopping/ask/rest') }}
