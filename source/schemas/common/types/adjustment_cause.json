@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/adjustment_cause.json",
+  "title": "Adjustment Cause",
+  "description": "Structured account of why a post-order adjustment occurred. Adjustment `type` records what was done about it (a refund, a credit, a dispute); this records what went wrong. The three axes are independent and MUST NOT be collapsed: `category` is what failed, `attributed_to` is which party the recording system holds responsible, and `nature` is whether it appears deliberate. A mistake by a business and abuse by a business share a category and differ in nature; an incorrect amount can originate with any party. All fields are optional, and a recording system SHOULD omit any axis it cannot determine rather than guessing. Values are assertions by the system recording them, not adjudications: the same event may be recorded differently by a platform and a business, and nothing here establishes liability.",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "What went wrong. Open string; the values below are the well-known set and implementations MAY use others. Most are not specific to agent-originated transactions and apply equally where a person transacted directly.",
+      "examples": [
+        "unauthorized",
+        "authority_exceeded",
+        "intent_mismatch",
+        "amount_divergence",
+        "duplicate_execution",
+        "counterparty_manipulation",
+        "misrepresentation",
+        "fulfillment_mismatch",
+        "availability_failure",
+        "terms_not_honored",
+        "technical_fault",
+        "undetermined"
+      ]
+    },
+    "category_description": {
+      "type": "string",
+      "description": "Human-readable account of the cause, for categories the well-known set does not capture."
+    },
+    "attributed_to": {
+      "type": "string",
+      "description": "The role the recording system considers responsible. Open string; the values below are the well-known set. `none` records that the cause was established and no party is held responsible, which is distinct from omitting the field because responsibility is unknown.",
+      "examples": [
+        "principal",
+        "platform",
+        "buyer_agent",
+        "business",
+        "seller_agent",
+        "payment_service_provider",
+        "credential_provider",
+        "service_provider",
+        "third_party",
+        "none",
+        "undetermined"
+      ]
+    },
+    "nature": {
+      "type": "string",
+      "enum": [
+        "error",
+        "fault",
+        "abuse",
+        "fraud",
+        "compromise",
+        "disagreement",
+        "undetermined"
+      ],
+      "description": "Whether the cause appears deliberate, and if so of what kind. `error` is an honest mistake by a party acting in good faith. `fault` is a technical failure with no intent. `abuse` is deliberate exploitation of the rules as written by a party that asserted nothing false: it is who it claims to be and its statements were true. `fraud` is a false assertion — of identity, entitlement, or a material fact — made to obtain what would not otherwise be given. The distinction between the two is whether a false assertion was made, and it is not merely descriptive: fraud carries reporting obligations under payment scheme rules and applicable law that abuse does not, so a party that cannot make the determination MUST record `undetermined` rather than choose. `compromise` is a party whose behavior was directed by someone else, including through manipulated content; the compromised party asserted nothing false and is not the deceiver. `disagreement` is a case where no party malfunctioned and the parties read the same transaction differently. `undetermined` records that the question was considered and not resolved."
+    },
+    "layer": {
+      "type": "string",
+      "enum": [
+        "intent",
+        "authority",
+        "identity",
+        "interaction",
+        "payment",
+        "fulfillment"
+      ],
+      "description": "Where in the transaction the cause arose. `intent` is what the principal wanted; `authority` is what the acting party was permitted to do; `identity` is who a party was; `interaction` is the exchange between the parties, including anything a counterparty supplied that influenced it; `payment` is the movement of money; `fulfillment` is the delivery of what was purchased. A cause can be recorded at the layer it arose in even when it surfaced later."
+    },
+    "scope": {
+      "type": "object",
+      "description": "The level at which the cause is expressed. A single transaction can be unremarkable on its own and anomalous as part of a task, a pattern by one actor, or a period. Recording the level distinguishes an adjustment for one bad transaction from one covering a run of them.",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "transaction",
+            "task",
+            "actor",
+            "counterparty",
+            "period"
+          ],
+          "description": "`transaction` is this order alone. `task` is a set of transactions carried out toward one objective, which may span businesses. `actor` is a pattern in one party's behavior across tasks. `counterparty` is a pattern in dealings with one other party. `period` is an aggregate over time, such as a spending window."
+        },
+        "reference": {
+          "type": "string",
+          "description": "Identifier for the scope instance, where one exists: a task identifier, an actor identifier, or a period label. Resolvable by the recording system; opaque to others."
+        },
+        "affected_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of transactions the cause is understood to affect, where known. Present when the adjustment addresses one of several."
+        }
+      },
+      "additionalProperties": false
+    },
+    "authority_reference": {
+      "type": "string",
+      "description": "Reference to the grant of authority the transaction was carried out under, where the cause concerns authority or intent. Resolvable by the party that issued it."
+    },
+    "evidence_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "Location of the record supporting this cause — a transaction log, an execution record, a signed attestation. Access is governed by the publishing party; the field records that evidence exists and where to ask for it."
+    },
+    "determined_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp when the cause was determined, which may be substantially later than the adjustment's `occurred_at`."
+    },
+    "determined_by": {
+      "type": "string",
+      "description": "The role that made this determination, using the same well-known values as `attributed_to`. A cause recorded by the party it attributes responsibility to carries different weight than one recorded by a counterparty, and a reader cannot tell the two apart without this field."
+    }
+  },
+  "additionalProperties": false
+}
