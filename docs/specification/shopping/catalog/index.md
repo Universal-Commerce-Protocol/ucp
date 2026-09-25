@@ -39,6 +39,11 @@ This enables product discovery before checkout, supporting use cases like:
   variants.
 * **Variant**: A purchasable item with specific option selections (e.g., "Blue /
   Large"), price, and availability.
+* **Offer** (optional): An offer for a variant from a specific seller. When a variant
+  carries `offers[]`, each offer names the Business acting as Merchant of Record
+  (`offers[].seller.domain`) and the item ID (`offers[].item_id`) that Business's
+  checkout recognizes. A variant with no `offers[]` is sold directly by the Business
+  serving the catalog.
 * **Price**: Price values include both amount (in minor currency units) and
   currency code, enabling multi-currency catalogs.
 * **Sale basis**: How quantity is denominated—as whole items (`each`, the
@@ -47,9 +52,13 @@ This enables product discovery before checkout, supporting use cases like:
 
 ### Relationship to Checkout
 
-Catalog operations return product and variant IDs that can be used directly in
-checkout `line_items[].item.id`. The variant ID from catalog retrieval should match
-the item ID expected by checkout.
+Catalog operations return product and variant IDs. When a variant is sold directly
+by the Business serving the catalog (no `offers[]`), its variant ID is the checkout
+token and is used directly in checkout `line_items[].item.id`. When a variant carries
+`offers[]`, each offer is attributed to a seller (`offers[].seller.domain`, the
+Merchant of Record) and the item ID at checkout is that offer's `offers[].item_id`. In
+that case the Platform **MUST** use the selected `offers[].item_id` as
+`line_items[].item.id` and **MUST NOT** use the variant ID.
 
 Catalog responses (pricing, availability, etc.) reflect the Business's current
 terms for the given request but are not transactional commitments — checkout
@@ -170,6 +179,50 @@ A `get_product` response for bananas sold by the pound. The variant advertises
 }
 ```
 
+The same variant may be offered by more than one seller. Each offer names its own
+Merchant of Record (`offers[].seller.domain`) and the item ID (`offers[].item_id`) the
+Platform uses for that seller; `variants[].price` is a display summary while each
+`offers[].price` is authoritative:
+
+<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}" },
+  "product": {
+    "id": "prod_trail_runner",
+    "title": "Trail Runner",
+    "description": { "plain": "Lightweight trail running shoe." },
+    "price_range": {
+      "min": { "amount": 8900, "currency": "USD" },
+      "max": { "amount": 9500, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_trail_blue_10",
+        "title": "Blue / 10",
+        "description": { "plain": "Trail Runner, Blue, US 10." },
+        "price": { "amount": 8900, "currency": "USD" },
+        "availability": { "available": true },
+        "offers": [
+          {
+            "seller": { "domain": "shop-a.example", "name": "Shop A" },
+            "item_id": "SHOEA-TR-BLUE-10",
+            "price": { "amount": 8900, "currency": "USD" },
+            "availability": { "available": true }
+          },
+          {
+            "seller": { "domain": "shop-b.example", "name": "Shop B" },
+            "item_id": "blue-10",
+            "price": { "amount": 9500, "currency": "USD" },
+            "availability": { "available": true }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ## Shared Entities
 
 ### Context
@@ -238,6 +291,17 @@ was `exact` or `featured` (server-selected). See
 as the first element. Platforms SHOULD treat the first element as featured.
 
 {{ schema_fields('types/variant', 'shopping/catalog') }}
+
+### Offer
+
+An offer for a variant from a specific seller, present only when a catalog aggregates
+offers from more than one Merchant of Record. Each offer names its own seller
+(`offers[].seller.domain`, the Merchant of Record) and carries that seller's item ID
+(`item_id`) and authoritative `price`. See
+[Relationship to Checkout](#relationship-to-checkout) for how the checkout item ID is
+resolved.
+
+{{ schema_fields('types/offer', 'shopping/catalog') }}
 
 ### Price
 
