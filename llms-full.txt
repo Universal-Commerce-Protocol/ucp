@@ -657,7 +657,7 @@ The following are examples of capabilities defined in UCP — see the [Specifica
 
 ### Extensions
 
-Extensions optionally augment a base capability. They use the `extends` field to declare their parent(s) and compose onto the base schema using JSON Schema `allOf`. Extensions appear in `ucp.capabilities[]` alongside core capabilities.
+Extensions optionally augment a base capability. They use the `extends` field to declare their parent(s) and compose onto the base schema using JSON Schema `allOf`. Extensions appear in `ucp.capabilities{}` alongside core capabilities.
 
 ```json
 {
