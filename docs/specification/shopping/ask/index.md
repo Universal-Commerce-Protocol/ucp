@@ -25,10 +25,17 @@ policies, and services. A platform (acting on behalf of the buyer) asks a
 free-form question and receives a text answer with an optional set of related
 links. A question may target specific products (via `ids`) or apply to the
 storefront broadly, such as a return-policy question. `ask` is the open-question
-complement to UCP's structured shopping capabilities: a question that maps to a
-dedicated operation is owned by that capability; `ask` covers open questions and
-business-specific facts and knowledge that may not be directly available through
-the structured resources exposed by other capabilities.
+complement to UCP's structured shopping capabilities: it covers open questions
+and business-specific facts and knowledge that may not be directly available
+through the structured resources exposed by other capabilities.
+
+`ask` answers; it does not act. A Business **MUST NOT** change the state of any
+resource exposed through another UCP capability in response to an `ask`
+request — it **MUST NOT** create or modify a cart, checkout, or order, apply a
+discount, or reserve inventory. Where a question implies an action ("add two of
+these to my cart"), the Business answers without acting; the Platform **MUST**
+perform the action through the capability that owns it and **MUST NOT** treat an
+`ask` response as evidence that it happened.
 
 `ask` draws on public business information and on resources the caller can address
 by a GID it holds — products and variants, and optionally a cart or checkout.
@@ -112,12 +119,22 @@ not found.
 ## Answer
 
 The answer is free-form content authored by the business, in one or more
-formats — plain text, HTML, or Markdown. To keep answers useful and
-trustworthy, businesses **SHOULD**:
+formats — plain text, HTML, or Markdown.
 
-* indicate how authoritative or provisional an answer is;
-* link to the related and authoritative sources behind it, so the platform can
-  point the buyer there; and
+An answer is indicative, not authoritative. Prices, availability, totals, taxes,
+fulfillment estimates, and policy terms stated in an `answer` are not
+commitments. Where an `answer` conflicts with the representation returned by the
+capability that owns the resource (`catalog`, `cart`, `checkout`, `order`), that
+representation is authoritative and the Platform **MUST** prefer it. A Platform
+**MUST NOT** treat an `answer` as the binding disclosure for a safety, allergen,
+or regulatory claim.
+
+To keep answers useful and trustworthy, a Business **SHOULD**:
+
+* link to the authoritative source behind an answer (a policy page, the product
+  itself) so the Platform can point the Buyer there;
+* carry any safety, allergen, or regulatory notice as a warning with
+  `presentation: "disclosure"` rather than only in the answer text; and
 * state clearly when a question can't be answered.
 
 {{ schema_fields('types/description', 'shopping/ask') }}
