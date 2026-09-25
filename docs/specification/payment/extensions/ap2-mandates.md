@@ -129,17 +129,85 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-This extension uses the cryptographic primitives defined in the
-[Message Signatures](../../signatures.md) specification:
+This extension reuses the JWK format, key discovery, and key rotation
+mechanisms defined in the
+[Message Signatures](../../signatures.md) specification.
+For the merchant-signed Checkout (`ap2.merchant_authorization`), AP2's
+Checkout JWT signing rule permits the following JWS algorithm/key pairs:
+
+| JWS `alg` | JWK `kty` / `crv` | Hash |
+| :-------- | :---------------- | :--- |
+| `ES256` | `EC` / `P-256` | SHA-256 |
+| `ES384` | `EC` / `P-384` | SHA-384 |
+| `ES512` | `EC` / `P-521` | SHA-512 |
+
+This table describes permitted Checkout signing algorithms and their key
+bindings; it does not establish a mandatory-to-implement algorithm set for
+AP2 verifiers. Signers should choose an algorithm supported by their intended
+verifiers. A verifier **MUST NOT** accept a signature unless it can verify it
+using an algorithm that it both supports and permits. Other mandate credential
+formats follow AP2's own verification rules.
+
+These Checkout JWS algorithms do not add P-521 to the UCP HTTP Message
+Signatures algorithm table or change its universal `ES256` implementation
+baseline. If an HTTP Message Signature references a P-521 key that the HTTP
+verifier does not support, that candidate signature fails with
+`algorithm_unsupported`; the verifier **MUST NOT** reject the whole key set and
+tries other candidates, if present, under the existing
+[HTTP signature rules](../../signatures.md#signature-algorithms).
 
 * **Algorithm:** per AP2's Checkout JWT signing rule — AP2 v0.2 requires
-  ECDSA (`ES256`/`ES384`/`ES512`); see the note below.
+  ECDSA (`ES256`/`ES384`/`ES512`); see the note below and
+  [RFC 7518 Section 3.4](https://datatracker.ietf.org/doc/html/rfc7518#section-3.4).
 * **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 * **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
 * **Key Discovery:** `keys[]` in `/.well-known/ucp` (see
   [Key Discovery](../../overview/index.md#key-discovery))
 
 See [Message Signatures](../../signatures.md) for key format and rotation.
+
+When verifying `merchant_authorization`, a verifier **MUST** ensure that the
+protected JWS `alg` is permitted by its independently configured algorithm
+policy and matches the selected key's `kty` and `crv` according to the table
+above. This binding follows
+[RFC 8725 Section 3.1](https://datatracker.ietf.org/doc/html/rfc8725#section-3.1).
+Businesses **SHOULD** include `alg` in JWKs published for Checkout signing.
+When present, the JWK `alg` **MUST** match the protected JWS `alg`; a mismatch
+makes the signature invalid. When the JWK `alg` is absent, the verifier uses
+the table's `kty`/`crv` mapping to enforce the same binding. Its absence alone
+does not invalidate the signature. The protected JWS header's `alg` remains
+required.
+
+The verification flows below use this binding check. A failed assertion
+terminates verification without accepting the signature:
+
+```text
+assert_alg_bound_to_key(public_key, alg):
+    curve_algorithms = {"P-256": "ES256", "P-384": "ES384", "P-521": "ES512"}
+    assert public_key is not None
+    assert public_key.kty == "EC"
+    assert public_key.crv in curve_algorithms
+    assert alg == curve_algorithms[public_key.crv]
+    if "alg" in public_key:
+        assert public_key.alg == alg
+```
+
+The profile JWK vocabulary is open, so a P-521 key used for an AP2 `ES512`
+signature can be published in the same `keys[]` array used for other UCP
+signing keys:
+
+<!-- ucp:example schema=profile extract=$ target=$.keys[0] -->
+```json
+{
+  "kid": "ap2-es512-2026",
+  "kty": "EC",
+  "crv": "P-521",
+  "x": "ARG3XiQ6SghrNHZSoDSsD-IoCNbhIpNaIvEDBgSSGi4QfON2O80u0QrXbKiy3Bj9vEgzjWy7_ruLCTvWhiOrIvah",
+  "y": "ACG_vmqFWdLoa5eDAWhr7wN-ZPAhGJg43EUO_Qsmv7bK6PVNbKqXogTsCpM00YelW0Q6lN6izF8NoVnOlV_ZJLJM",
+  "use": "sig",
+  "alg": "ES512"
+}
+```
 
 > **Note (algorithm requirement).** AP2 binds the Payment Mandate to the
 > Checkout via `hash(checkout_jwt)`; the underlying security property is
@@ -311,7 +379,9 @@ with `ap2.merchant_authorization` embedded in the response body.
 }
 ```
 
-The platform **MUST** verify the signature:
+The platform **MUST** verify the signature. In both verification flows below,
+`verifier_allowed_algorithms` is the verifier's independently configured set
+of supported and permitted algorithms, not a set derived from the JWS header:
 
 ```text
 verify_merchant_authorization(checkout, merchant_profile):
@@ -322,6 +392,7 @@ verify_merchant_authorization(checkout, merchant_profile):
     // Decode and validate header
     header = json_decode(base64url_decode(encoded_header))
     assert header.alg in ap2_accepted_algorithms  // ES256/ES384/ES512 per AP2 v0.2
+    assert header.alg in verifier_allowed_algorithms
 
     // Reconstruct signed payload (checkout minus ap2)
     payload = checkout without "ap2" field
@@ -330,8 +401,9 @@ verify_merchant_authorization(checkout, merchant_profile):
     // Reconstruct signing input (header + payload)
     signing_input = encoded_header + "." + base64url_encode(canonical_bytes)
 
-    // Get business's public key and verify
+    // Get business's public key, bind the algorithm to its curve, and verify
     public_key = get_key_by_kid(merchant_profile.keys, header.kid)
+    assert_alg_bound_to_key(public_key, header.alg)
     return verify(encoded_signature, signing_input, public_key, header.alg)
 ```
 
@@ -432,12 +504,15 @@ Upon receiving the `complete` request, the business **MUST**:
     jws = embedded_checkout.ap2.merchant_authorization
     [encoded_header, _, encoded_signature] = jws.split(".")
     header = json_decode(base64url_decode(encoded_header))
+    assert header.alg in ap2_accepted_algorithms
+    assert header.alg in verifier_allowed_algorithms
 
     payload = embedded_checkout without "ap2" field
     signing_input = encoded_header + "." + base64url_encode(jcs_canonicalize(payload))
 
     my_key = get_key_by_kid(my_keys, header.kid)
-    verify(encoded_signature, signing_input, my_key, header.alg)
+    assert_alg_bound_to_key(my_key, header.alg)
+    assert verify(encoded_signature, signing_input, my_key, header.alg)
     ```
 
 2. **Verify Terms Match:** Confirm the embedded checkout terms match the
