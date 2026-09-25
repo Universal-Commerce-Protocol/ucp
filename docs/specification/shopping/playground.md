@@ -795,10 +795,11 @@ class UcpBackend {
         li.status = "fulfilled";
     });
 
+    // The webhook POST body is the order entity; the event id and timestamp
+    // travel in the Webhook-Id and Webhook-Timestamp headers (see the Order
+    // Event Webhook section of order.md).
     const webhookPayload = {
-        ...order,
-        event_id: eventId,
-        created_time: eventTime
+        ...order
     };
 
     return webhookPayload;
