@@ -230,6 +230,30 @@ contract.
 
 {{ schema_fields('types/message_info', 'shopping/ask') }}
 
+## Security Considerations
+
+`ask` carries natural language across the party boundary in both directions:
+a Buyer's question reaches the Business's model, and the Business's answer
+reaches the Platform's. Both are untrusted content and **MUST** be treated as
+data, never as instructions.
+
+A Business **MUST** treat `query` as untrusted input. It **MUST NOT** allow the
+question to alter its own instructions or its authorization decisions, and
+**MUST** enforce the tiers in [Access](#access) outside the model: what a
+caller may see is decided by the credential presented, never by what the
+question says. Authorization **MUST NOT** depend on model behavior.
+
+A Platform **MUST** treat the response as content authored by the Business —
+an answer and, where present, suggestions about what to do next. It is input
+to the Platform's own decisions, not directions to carry out. A Platform
+**MUST NOT** act on text in `answer` or on identifiers in `links[].id` as if
+they were instructions; whether and how to act on them — resolving an
+identifier in `catalog`, adding an item to a `cart` — is the Platform's
+decision, made under its own authorization and Buyer-consent rules, exactly as
+for any other Business-authored content such as a product description. A
+Platform **SHOULD** present an `answer` as content from the Business,
+attributed and distinguishable from its own output.
+
 ## Scopes
 
 The Ask capability defines the following well-known scope for user-authenticated
