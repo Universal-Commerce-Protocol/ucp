@@ -19,12 +19,12 @@
 ## Overview
 
 The Return Policy Extension defines the `dev.ucp.shopping.policy.return` policy
-type on the core [`policies[]`](overview.md#policies) primitive. It adds
-pre-purchase, machine-readable return terms to policies that carry this type, so
-platforms and agents can answer questions like "How long do I have to return
-this?", "Do I get my money back or store credit?", "Where and at what cost do I
-send it back?", and "Can I return this at all?" without leaving to read a policy
-page.
+type on the core [`policies[]`](../../overview/index.md#policies) primitive.
+It adds pre-purchase, machine-readable return terms to policies that carry this
+type, so platforms and agents can answer questions like "How long do I have to
+return this?", "Do I get my money back or store credit?", "Where and at what
+cost do I send it back?", and "Can I return this at all?" without leaving to
+read a policy page.
 
 **Key features:**
 
@@ -37,7 +37,8 @@ page.
 
 **Dependencies:**
 
-- The core `policies[]` primitive (see [Policies](overview.md#policies)).
+- The core `policies[]` primitive (see
+  [Policies](../../overview/index.md#policies)).
 - One or more of the parent capabilities this type extends: Catalog Search,
   Catalog Lookup, Cart, Checkout, or Order.
 
@@ -67,7 +68,7 @@ surface that carries `policies[]`:
             "dev.ucp.shopping.checkout",
             "dev.ucp.shopping.order"
           ],
-          "spec": "https://ucp.dev/{{ ucp_version }}/specification/return",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/return-policy",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/policy_return.json"
         }
       ]
@@ -92,19 +93,19 @@ return policy with no structured fields is still presentable from its
 
 ### Return Policy
 
-{{ extension_schema_fields('policy_return.json#/$defs/return_body', 'return') }}
+{{ extension_schema_fields('policy_return.json#/$defs/return_body', 'shopping/extensions/return-policy') }}
 
 ### Return Method
 
-{{ extension_schema_fields('policy_return.json#/$defs/return_method', 'return') }}
+{{ extension_schema_fields('policy_return.json#/$defs/return_method', 'shopping/extensions/return-policy') }}
 
 ### Return Method Fee
 
-{{ extension_schema_fields('policy_return.json#/$defs/fee', 'return') }}
+{{ extension_schema_fields('policy_return.json#/$defs/fee', 'shopping/extensions/return-policy') }}
 
 ### Fixed Fee
 
-{{ extension_schema_fields('policy_return.json#/$defs/fixed_fee', 'return') }}
+{{ extension_schema_fields('policy_return.json#/$defs/fixed_fee', 'shopping/extensions/return-policy') }}
 
 ## Return terms
 
@@ -137,7 +138,7 @@ When a business requires the buyer to be shown that an item is final sale, it
 emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal
 to `dev.ucp.shopping.policy.return`, targeting the item. The disclosure pairs
 with the governing return policy at that node, as defined in
-[Presenting policies](overview.md#presenting-policies).
+[Presenting policies](../../overview/index.md#presenting-policies).
 
 ### Two kinds of cost
 
@@ -163,7 +164,8 @@ Targeting and precedence are provided by the `policies[]` primitive and are not
 redefined here. In short: a policy with no `applies_to` is the response-wide
 default; a policy that targets specific items overrides it where they overlap,
 with the narrowest same-type target winning. See
-[Targeting](overview.md#targeting) and [Precedence](overview.md#precedence).
+[Targeting](../../overview/index.md#targeting) and
+[Precedence](../../overview/index.md#precedence).
 
 For return policies this means a business states a single default return policy
 once, then adds targeted overrides only for the exceptions (a final-sale item, a

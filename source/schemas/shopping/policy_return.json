@@ -129,7 +129,7 @@
       "description": "A return policy statement with type `dev.ucp.shopping.policy.return`.",
       "allOf": [
         {
-          "$ref": "types/policy.json"
+          "$ref": "../common/types/policy.json"
         },
         {
           "type": "object",
@@ -152,7 +152,7 @@
       "description": "A `policies[]` entry; validates against `return_policy` when `type` is `dev.ucp.shopping.policy.return`.",
       "allOf": [
         {
-          "$ref": "types/policy.json"
+          "$ref": "../common/types/policy.json"
         },
         {
           "if": {
