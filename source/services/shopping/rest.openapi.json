@@ -92,7 +92,12 @@
                 }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -160,7 +165,11 @@
                 }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       },
       "put": {
@@ -237,7 +246,12 @@
                 }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -317,7 +331,12 @@
                 "schema": { "$ref": "#/components/schemas/checkout_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -391,7 +410,12 @@
                 }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -436,7 +460,12 @@
                 "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -474,7 +503,11 @@
                 "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       },
       "put": {
@@ -517,7 +550,12 @@
                 "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -557,7 +595,12 @@
                 "schema": { "$ref": "#/components/schemas/cart_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "409": { "$ref": "#/components/responses/idempotency_conflict" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -601,7 +644,11 @@
                 "schema": { "$ref": "#/components/schemas/catalog_search_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -645,7 +692,11 @@
                 "schema": { "$ref": "#/components/schemas/catalog_lookup_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -683,7 +734,11 @@
                 "schema": { "$ref": "#/components/schemas/order_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     },
@@ -727,7 +782,11 @@
                 "schema": { "$ref": "#/components/schemas/catalog_get_product_response" }
               }
             }
-          }
+          },
+          "400": { "$ref": "#/components/responses/bad_request" },
+          "401": { "$ref": "#/components/responses/unauthorized" },
+          "403": { "$ref": "#/components/responses/forbidden" },
+          "500": { "$ref": "#/components/responses/internal_error" }
         }
       }
     }
@@ -965,6 +1024,32 @@
           "type": "string"
         },
         "description": "JCS-canonicalized body digest per RFC 8785. Format: `sha-256=:<base64-digest>:`."
+      }
+    },
+    "responses": {
+      "bad_request": {
+        "description": "The request could not be processed because its transport input was malformed or invalid. Business validation outcomes are returned through the operation's successful response."
+      },
+      "unauthorized": {
+        "description": "Authentication is required and is missing or invalid.",
+        "headers": {
+          "WWW-Authenticate": {
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Authentication challenge describing how to obtain valid credentials."
+          }
+        }
+      },
+      "forbidden": {
+        "description": "The caller is authenticated but is not authorized to perform this operation."
+      },
+      "idempotency_conflict": {
+        "description": "The Idempotency-Key was previously used with a different request payload. The operation was not executed."
+      },
+      "internal_error": {
+        "description": "The server encountered an unexpected condition before it could complete the operation."
       }
     },
     "schemas": {
