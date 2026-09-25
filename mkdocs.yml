@@ -76,6 +76,11 @@ nav:
               - Transports:
                   - REST: specification/shopping/catalog/rest.md
                   - MCP: specification/shopping/catalog/mcp.md
+          - Ask Capability:
+              - Overview: specification/shopping/ask/index.md
+              - Transports:
+                  - REST: specification/shopping/ask/rest.md
+                  - MCP: specification/shopping/ask/mcp.md
           - Order Capability:
               - Overview: specification/shopping/order/index.md
               - Transports:
@@ -514,6 +519,19 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Catalog
               Capability, mapping discovery operations to JSON-RPC tools with
               metadata validation rules.
+        Ask Capability:
+          - specification/shopping/ask/index.md: >-
+              Core Ask Capability, defining natural-language Q&A about a
+              business's products, policies, and FAQs, returning an answer
+              with optional related links.
+          - specification/shopping/ask/rest.md: >-
+              HTTP REST transport binding for the Ask Capability, detailing
+              the `POST /ask` endpoint, request and response payloads, and
+              the non-authoritative answer contract.
+          - specification/shopping/ask/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the Ask
+              Capability, mapping the `ask` tool to JSON-RPC with metadata
+              validation rules and related-link conventions.
         Order Capability:
           - specification/shopping/order/index.md: >-
               Post-purchase tracking via the Order Capability, detailing line
