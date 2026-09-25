@@ -137,11 +137,18 @@ or regulatory claim.
 
 To keep answers useful and trustworthy, a Business **SHOULD**:
 
+* provide `plain` alongside any richer format, so a Platform that renders
+  neither Markdown nor HTML still has an answer to show;
+* keep the answer to what fits in conversation and link to the resource — a
+  size chart, a compatibility table — rather than inlining it;
 * link to the authoritative source behind an answer (a policy page, the product
   itself) so the Platform can point the Buyer there;
 * carry any safety, allergen, or regulatory notice as a warning with
   `presentation: "disclosure"` rather than only in the answer text; and
 * state clearly when a question can't be answered.
+
+A Platform renders the richest encoding of `answer` it can vouch for and
+ignores any encoding it does not recognize.
 
 {{ schema_fields('types/description', 'shopping/ask') }}
 
