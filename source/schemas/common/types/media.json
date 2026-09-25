@@ -16,7 +16,6 @@
     "url": {
       "type": "string",
       "format": "uri",
-      "pattern": "^https://",
       "description": "URL of the media resource the Platform renders; interpretation is specialized per `type`."
     },
     "name": {
@@ -52,7 +51,6 @@
         "url": {
           "type": "string",
           "format": "uri",
-          "pattern": "^https://",
           "description": "URL of the preview image."
         },
         "width": {

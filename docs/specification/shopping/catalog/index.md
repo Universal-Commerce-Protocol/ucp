@@ -264,10 +264,8 @@ response because it does not recognize a media item's `type`. It **MAY**
 present such an item from `preview` and `name`, or omit it. Recognizing a
 `type` only enables type-specific presentation.
 
-The Business **MUST** use the `https` scheme for every media URL — `url`,
-`preview.url`, and each `sources[].url`. A Platform **MUST NOT** fetch, embed,
-or navigate to a media URL with any other scheme. An item the Platform cannot
-render does not appear.
+A Platform **MAY** refuse to load or embed a media URL that does not use the
+`https` scheme.
 
 A Platform selects a rendition from `sources` by `mime_type` and dimensions. A
 Business that provides `sources` **SHOULD** include the rendition at `url`.

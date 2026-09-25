@@ -11,7 +11,6 @@
     "url": {
       "type": "string",
       "format": "uri",
-      "pattern": "^https://",
       "description": "URL to this rendition's file or streaming manifest."
     },
     "mime_type": {

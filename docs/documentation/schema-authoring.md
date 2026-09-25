@@ -364,7 +364,7 @@ An open `type` vocabulary can change what an existing field *means* without
 changing what validates. The media `type` above is the case in point: `url` is
 a displayable image for `image`, a playable file or streaming manifest for
 `video`, and a third-party player to embed for `external_video` — the same
-required `https` URL in every case. Keep one schema and one field set on the
+required URL in every case. Keep one schema and one field set on the
 base, and express the per-value meaning as description-only overrides in a
 sibling schema file that the base selects with an `allOf` `if`/`then` branch on
 `type`:
