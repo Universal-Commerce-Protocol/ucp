@@ -261,10 +261,11 @@ The response config includes runtime token lifecycle information.
 Upon receiving a checkout with a token credential:
 
 1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID.
-2. **Detokenize or Delegate:**
+2. **Validate Binding:** Validate `credential.binding` according to the handler's binding policy.
+3. **Detokenize or Delegate:**
    * **Option A (Direct):** Call the platform's **credential provider** `/detokenize` endpoint directly, then process payments.
    * **Option B (Delegated):** Forward the token to a PSP for detokenization and payment processing.
-3. **Return Response:** Respond with the finalized checkout state.
+4. **Return Response:** Respond with the finalized checkout state.
 
 For option B, see section [PSP Integration](#psp-integration).
 
@@ -397,7 +398,14 @@ Content-Type: application/json
         },
         "credential": {
           "type": "token",
-          "token": "ptok_x9y8z7w6v5u4"
+          "token": "ptok_x9y8z7w6v5u4",
+          "binding": {
+            "type": "dev.ucp.shopping.checkout",
+            "id": "checkout_789"
+          },
+          "identity": {
+            "access_token": "business_abc123"
+          }
         }
       }
     ]
@@ -408,6 +416,10 @@ Content-Type: application/json
   }
 }
 ```
+
+The Platform **MUST** copy `binding` and any `identity` unchanged from the token
+issuance context. Before detokenization or delegation, the Business **MUST**
+validate the binding according to the handler's binding policy.
 
 ---
 
