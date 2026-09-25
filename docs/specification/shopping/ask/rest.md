@@ -45,7 +45,7 @@ Businesses advertise REST transport availability through their UCP profile at
     "capabilities": {
       "dev.ucp.shopping.ask": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/ask",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/ask",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ask.json"
       }]
     },
