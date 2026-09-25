@@ -83,6 +83,7 @@ nav:
           - Extensions:
               - Fulfillment: specification/shopping/extensions/fulfillment.md
               - Discounts: specification/shopping/extensions/discount.md
+              - Offers: specification/shopping/extensions/offer.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
@@ -333,6 +334,8 @@ plugins:
           specification/shopping/extensions/discount.md
         specification/fulfillment.md:
           specification/shopping/extensions/fulfillment.md
+        specification/offer.md:
+          specification/shopping/extensions/offer.md
   - llmstxt:
       full_output: llms-full.txt
       markdown_description: |
@@ -525,6 +528,11 @@ plugins:
               discounts, allocation method stacking orders, rejected code
               message handling, and automatic or provisional eligibility
               promotions.
+          - specification/shopping/extensions/offer.md: >-
+              Offer Extension, defining state-bound Business-proposed cart
+              transitions surfaced as extension-defined cart Actions, their
+              validity and identity rules, reference-based application, and the
+              authorization boundary.
           - specification/shopping/extensions/buyer-consent.md: >-
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
