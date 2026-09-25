@@ -188,9 +188,3 @@ refundability
 Refundability
 ginza
 Ginza
-Anza
-BOPIS
-Cupertino
-checkin
-cupt
-omni
