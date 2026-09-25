@@ -99,7 +99,7 @@ sequenceDiagram
     Server-->>-Platform: 201 Created (Checkout Response)
 
     Note over Platform,Server: Retrieve Checkout Session (Polling)
-    Platform->>+Server: GET /checkout-sessions/{id}
+    Platform->>+Server: GET /checkout-sessions/{id} (with Headers)
     Server->>DB: Fetch Session
     Server-->>-Platform: 200 OK (Checkout Response)
 ```
@@ -417,7 +417,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
 
 ### 5. Get Checkout Endpoint
 
-Implement the retrieval route so the platform can fetch the checkout state.
+Implement the retrieval route so the platform can fetch the checkout state. Per [UCP Header Requirements](shopping/checkout/rest.md#specific-header-requirements), UCP requires the `UCP-Agent` header on all requests (not just mutating operations like create, update, or complete).
 
 === "Python"
 
@@ -428,7 +428,10 @@ Implement the retrieval route so the platform can fetch the checkout state.
         response_model=Checkout,
         response_model_exclude_none=True
     )
-    async def get_checkout(id: str):
+    async def get_checkout(
+        id: str,
+        ucp_agent: Annotated[str, Header(alias="UCP-Agent")]
+    ):
         """Retrieve an existing checkout session."""
         if id not in checkout_sessions:
             raise HTTPException(status_code=404, detail="Checkout session not found")
@@ -440,6 +443,14 @@ Implement the retrieval route so the platform can fetch the checkout state.
     ```typescript
     // server.ts
     app.get('/checkout-sessions/:id', (req, res) => {
+      // 1. Validate required UCP headers
+      const ucpAgent = req.header('UCP-Agent');
+      if (!ucpAgent) {
+        return res.status(400).json({
+          error: 'Missing required header (UCP-Agent)'
+        });
+      }
+
       const session = checkoutSessions[req.params.id];
       if (!session) {
         return res.status(404).json({ error: 'Checkout session not found' });
@@ -616,13 +627,15 @@ Retrieve the session using the `id` returned from the previous step:
 === "Python"
 
     ```bash
-    curl http://127.0.0.1:8080/checkout-sessions/<replace-with-your-checkout-id>
+    curl http://127.0.0.1:8080/checkout-sessions/<replace-with-your-checkout-id> \
+      -H "UCP-Agent: profile=\"https://platform.example/profile\""
     ```
 
 === "Node.js"
 
     ```bash
-    curl http://127.0.0.1:3000/checkout-sessions/<replace-with-your-checkout-id>
+    curl http://127.0.0.1:3000/checkout-sessions/<replace-with-your-checkout-id> \
+      -H "UCP-Agent: profile=\"https://platform.example/profile\""
     ```
 
 ---
@@ -759,7 +772,10 @@ If you want to verify your code, expand the section below to see the complete fi
             response_model=Checkout,
             response_model_exclude_none=True
         )
-        async def get_checkout(id: str):
+        async def get_checkout(
+            id: str,
+            ucp_agent: Annotated[str, Header(alias="UCP-Agent")]
+        ):
             """Retrieve an existing checkout session."""
             if id not in checkout_sessions:
                 raise HTTPException(status_code=404, detail="Checkout session not found")
@@ -894,6 +910,14 @@ If you want to verify your code, expand the section below to see the complete fi
         });
 
         app.get('/checkout-sessions/:id', (req, res) => {
+          // 1. Validate required UCP headers
+          const ucpAgent = req.header('UCP-Agent');
+          if (!ucpAgent) {
+            return res.status(400).json({
+              error: 'Missing required header (UCP-Agent)'
+            });
+          }
+
           const session = checkoutSessions[req.params.id];
           if (!session) {
             return res.status(404).json({ error: 'Checkout session not found' });
