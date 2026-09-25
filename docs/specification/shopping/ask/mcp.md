@@ -84,6 +84,9 @@ protocol metadata:
 Requests **MUST** include `meta["ucp-agent"]` for version compatibility and
 capability negotiation.
 
+A request that carries a `conversation` **SHOULD** also include
+`meta["idempotency-key"]`; see [Conversation](index.md#conversation).
+
 ## Tools
 
 | Tool | Capability | Description |
@@ -246,7 +249,8 @@ Turn 2, request — replay the GID to continue:
       "meta": {
         "ucp-agent": {
           "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
-        }
+        },
+        "idempotency-key": "7c9e6679-7425-40de-944b-e07fc1f90ae7"
       },
       "ask": {
         "query": "And is it waterproof?",

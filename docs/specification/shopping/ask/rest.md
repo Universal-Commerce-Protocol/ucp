@@ -164,6 +164,7 @@ Turn 2, request — replay the GID to continue:
 POST /ask HTTP/1.1
 Host: business.example.com
 Content-Type: application/json
+Idempotency-Key: 7c9e6679-7425-40de-944b-e07fc1f90ae7
 
 {
   "query": "And is it waterproof?",
@@ -212,6 +213,28 @@ with a populated `answer` stating the limitation.
   }
 }
 ```
+
+## HTTP Headers
+
+The following headers are defined for the HTTP binding.
+
+{{ header_fields('ask_business', 'shopping/rest.openapi.json') }}
+
+### Specific Header Requirements
+
+* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
+    containing the platform profile URI using Dictionary Structured Field syntax
+    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
+    Format: `profile="https://platform.example/profile"`.
+* **Idempotency-Key**: A Platform **SHOULD** include an `Idempotency-Key` on
+    any request that carries a `conversation`, and **MAY** on any other. When
+    present, the Business **MUST**:
+    1. Store the key with the result for at least 24 hours.
+    2. Return the cached result for a duplicate key whose request body matches
+       the original, without appending a second turn.
+    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    See [Message Signatures — Replay Protection](../../signatures.md#replay-protection)
+    for the full payload-matching contract.
 
 ## Error Handling
 

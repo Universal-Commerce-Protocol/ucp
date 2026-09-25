@@ -114,6 +114,12 @@ cannot be resolved, the business **SHOULD** start a new conversation and add an
 informational message to `messages` noting that the provided `conversation` was
 not found.
 
+A Platform **SHOULD** include an idempotency key on every request that carries
+a `conversation`, so a retried turn returns the earlier answer rather than
+appending a duplicate — as `Idempotency-Key` over [REST](rest.md#http-headers),
+as `meta["idempotency-key"]` over [MCP](mcp.md#request-metadata). A Business
+that recognizes a duplicate by its key **MUST NOT** append a second turn.
+
 {{ extension_schema_fields('ask.json#/$defs/conversation', 'shopping/ask') }}
 
 ## Answer
