@@ -26,6 +26,62 @@
           }
         }
       ]
+    },
+    "create_request": {
+      "title": "Cart Create Request",
+      "description": "Request body for create_cart. Includes only buyer-writable fields; server-assigned fields are omitted per the ucp_request annotations on the base schema, which remain the source of truth (equivalent to `ucp-schema resolve --request --op create`).",
+      "type": "object",
+      "required": [
+        "line_items"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "line_items": {
+          "$ref": "#/properties/line_items"
+        },
+        "context": {
+          "$ref": "#/properties/context"
+        },
+        "signals": {
+          "$ref": "#/properties/signals"
+        },
+        "attribution": {
+          "$ref": "#/properties/attribution"
+        },
+        "buyer": {
+          "$ref": "#/properties/buyer"
+        }
+      }
+    },
+    "update_request": {
+      "title": "Cart Update Request",
+      "description": "Request body for update_cart. Server-assigned fields are omitted per the ucp_request annotations on the base schema, which remain the source of truth (equivalent to `ucp-schema resolve --request --op update`).",
+      "type": "object",
+      "required": [
+        "id",
+        "line_items"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "$ref": "#/properties/id"
+        },
+        "line_items": {
+          "$ref": "#/properties/line_items"
+        },
+        "context": {
+          "$ref": "#/properties/context"
+        },
+        "signals": {
+          "$ref": "#/properties/signals"
+        },
+        "attribution": {
+          "$ref": "#/properties/attribution"
+        },
+        "buyer": {
+          "$ref": "#/properties/buyer"
+        }
+      }
     }
   },
   "type": "object",
