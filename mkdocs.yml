@@ -42,6 +42,7 @@ nav:
       - Announcements: documentation/announcements.md
   - Specification:
       - Overview: specification/overview/index.md
+      - Glossary: specification/glossary.md
       - Common:
           - Identity Linking: specification/common/identity-linking/index.md
           - Location Capability:
@@ -117,6 +118,7 @@ nav:
                   - Encrypted Credential:
                       specification/payment/examples/encrypted-credential-payment-handler.md
       - Signatures: specification/signatures.md
+      - Embedded Protocol: specification/embedded-protocol.md
       - Reference: specification/reference.md
 
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
