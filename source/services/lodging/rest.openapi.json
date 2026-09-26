@@ -274,7 +274,7 @@
             "$ref": "#/components/parameters/content_digest"
           },
           {
-            "$ref": "#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key_required"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -360,7 +360,7 @@
             "$ref": "#/components/parameters/content_digest"
           },
           {
-            "$ref": "#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key_required"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -467,6 +467,16 @@
         "description": "Body digest per RFC 9530. Format: `sha-256=:<base64-digest>:`."
       },
       "idempotency_key": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Ensures duplicate operations don't happen during retries."
+      },
+      "idempotency_key_required": {
         "name": "Idempotency-Key",
         "in": "header",
         "required": true,
