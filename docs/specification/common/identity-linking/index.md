@@ -89,10 +89,10 @@ business **MAY** populate it from stored state on the response (for example,
 `buyer` and `payment.instruments[]`).
 
 Identity linking provides the authenticated user context for these values.
-Subject to the scopes that gate the operation, a business **MAY** return the
+When the request is user-authenticated, a business **MAY** return the
 user's loyalty membership in `loyalty` (see [Loyalty](../extensions/loyalty.md)), saved
 payment instruments in `payment.instruments[]` (see [Checkout](../../shopping/checkout/index.md)), or
-buyer profile data in `buyer`.
+buyer profile data in `buyer`, subject to the limits below.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is
 user-authenticated and authorized for the operation. They **MUST** only return
