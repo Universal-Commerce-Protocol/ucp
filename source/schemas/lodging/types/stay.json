@@ -67,7 +67,7 @@
     },
     "stay_dates": {
       "$ref": "../../common/types/date_interval.json",
-      "description": "Stay duration (check-in and check-out dates) for this unit based on the local time of the property.",
+      "description": "Check-in and check-out dates for this stay, in the property's local time. `start_date` is the check-in date. `end_date` is the check-out date and is not a night stayed: the stay covers the nights from `start_date` through the day before `end_date`, so the number of nights equals the number of days between the two dates."
       "ucp_request": {
         "create": "required",
         "update": "required",
