@@ -20,7 +20,8 @@
               "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.",
               "ucp_request": {
                 "create": "optional",
-                "update": "omit"
+                "update": "omit",
+                "complete": "omit"
               }
             }
           }
