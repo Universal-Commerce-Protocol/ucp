@@ -12,11 +12,11 @@
       "properties": {
         "final_sale": {
           "type": "boolean",
-          "description": "When `true`, the covered items cannot be returned. When `false` or omitted, the items are returnable subject to the other fields."
+          "description": "When `true`, the covered items cannot be returned and `window`, `supported_resolutions`, `methods`, and `restocking_fee` MUST be omitted. When `false` or omitted, the items are returnable subject to the other fields."
         },
         "window": {
           "title": "Return Window",
-          "description": "Return window as a policy statement. Omit for an unlimited or unstated window.",
+          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit for an unlimited or unstated window.",
           "type": "object",
           "required": ["days", "anchor"],
           "properties": {
@@ -33,22 +33,33 @@
         },
         "supported_resolutions": {
           "type": "array",
-          "description": "Accepted return outcomes, as an unordered set. Well-known values: `original_payment_method`, `store_credit`, `gift_card`, `exchange`, `replacement`.",
+          "description": "Return outcomes guaranteed for every eligible return, as an unordered set; not an exhaustive list. Well-known values: `original_payment_method`, `store_credit`, `gift_card`, `exchange`, `replacement`.",
+          "minItems": 1,
+          "uniqueItems": true,
           "items": {
             "type": "string"
           }
         },
         "methods": {
           "type": "array",
-          "description": "Permitted return channels and the logistics cost of each.",
+          "description": "Return channels guaranteed for every eligible return, each with its maximum logistics cost where stated; not an exhaustive list. Omit when channels are not stated structurally.",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/return_method"
           }
         },
         "restocking_fee": {
           "title": "Restocking Fee",
-          "description": "A refund deduction applied regardless of return channel. Provide `percentage_bps`, `amount`, or both.",
+          "description": "Maximum refund deduction, applied regardless of return channel. Omitted means no restocking fee is charged. Provide `percentage_bps`, `amount`, or both; when both are present, each is a cap and the deduction never exceeds either (e.g., 15% up to $50).",
           "type": "object",
+          "anyOf": [
+            {
+              "required": ["percentage_bps"]
+            },
+            {
+              "required": ["amount"]
+            }
+          ],
           "properties": {
             "percentage_bps": {
               "type": "integer",
@@ -58,13 +69,31 @@
             },
             "amount": {
               "$ref": "../common/types/amount.json",
-              "description": "Restocking fee as a flat charge in ISO 4217 minor units."
+              "description": "Restocking fee as a flat charge in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces)."
             },
             "display_text": {
               "type": "string",
-              "description": "Human-readable fee label (e.g., '15% restocking fee')."
+              "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., '15% restocking fee on opened items')."
             }
           }
+        }
+      },
+      "if": {
+        "properties": {
+          "final_sale": {
+            "const": true
+          }
+        },
+        "required": [
+          "final_sale"
+        ]
+      },
+      "then": {
+        "properties": {
+          "window": false,
+          "supported_resolutions": false,
+          "methods": false,
+          "restocking_fee": false
         }
       }
     },
@@ -73,14 +102,15 @@
       "description": "Logistics cost of using a return channel. Open vocabulary.",
       "type": "object",
       "required": ["type"],
+      "additionalProperties": true,
       "properties": {
         "type": {
           "type": "string",
-          "description": "Cost structure. Well-known values: `free`, `fixed_fee` (see `fixed_fee`), `customer_responsibility`."
+          "description": "Cost structure. Well-known values: `free`, `fixed_fee` (see `fixed_fee`), `customer_responsibility` (the buyer arranges and pays for return shipping; no maximum is stated). An unrecognized value states no cost."
         },
         "display_text": {
           "type": "string",
-          "description": "Human-readable fee label (e.g., 'Return shipping')."
+          "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., 'Return shipping, free for defective items')."
         }
       }
     },
@@ -104,7 +134,7 @@
         },
         "amount": {
           "$ref": "../common/types/amount.json",
-          "description": "Flat channel fee in ISO 4217 minor units. Required when type is fixed_fee."
+          "description": "Maximum channel fee in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces). Required when type is fixed_fee."
         }
       }
     },
@@ -120,9 +150,37 @@
         },
         "fee": {
           "$ref": "#/$defs/fee",
-          "description": "Logistics cost of using this channel."
+          "description": "Maximum logistics cost of using this channel. Omitted means the cost is not stated, not that the channel is free."
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "fee": {
+                "properties": {
+                  "type": {
+                    "const": "fixed_fee"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "fee"
+            ]
+          },
+          "then": {
+            "properties": {
+              "fee": {
+                "$ref": "#/$defs/fixed_fee"
+              }
+            }
+          }
+        }
+      ]
     },
     "return_policy": {
       "title": "Return Policy",
@@ -281,7 +339,8 @@
               "type": "array",
               "items": {
                 "$ref": "#/$defs/policies_item"
-              }
+              },
+              "ucp_request": "omit"
             }
           }
         }

@@ -544,7 +544,7 @@ plugins:
           - specification/shopping/extensions/return-policy.md: >-
               Return Policy Extension, defining the
               dev.ucp.shopping.policy.return type on the core policies
-              primitive with pre-purchase return terms: window and anchor,
+              primitive with machine-readable return terms: window and anchor,
               supported resolutions, return channels and logistics fees, a
               policy-level restocking fee, and a final-sale flag across
               catalog, cart, checkout, and order.
