@@ -55,8 +55,8 @@ disclosure through `messages[]` are defined once by the primitive and are
 
 ## Discovery
 
-Businesses advertise return policy support in their profile. The type extends any
-surface that carries `policies[]`:
+Businesses advertise return policy support in their profile. The type extends
+any surface that carries `policies[]`:
 
 <!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
@@ -92,8 +92,9 @@ return body is purely additive.
 ## Schema
 
 When this type is active, a `policies[]` entry whose `type` is
-`dev.ucp.shopping.policy.return` MAY carry the following fields in addition to the
-base `type`, `description`, `applies_to`, and `url`. All fields are optional; a
+`dev.ucp.shopping.policy.return` MAY carry the following fields in addition to
+the base `type`, `description`, `applies_to`, and `url`. All fields are
+optional, and an omitted field means the term is not stated structurally; a
 return policy with no structured fields is still presentable from its
 `description`.
 
@@ -117,8 +118,8 @@ return policy with no structured fields is still presentable from its
 
 ### Window and anchor
 
-`window.days` is the length of the return window as a **policy statement**, not a
-live countdown. It is a guaranteed minimum: a return started within the window
+`window.days` is the length of the return window as a **policy statement**, not
+a live countdown. It is a guaranteed minimum: a return started within the window
 is accepted with any listed resolution through any listed method. A platform
 computes that guaranteed deadline by adding `days` to the event named by
 `window.anchor`.
@@ -130,16 +131,28 @@ with 30 days for a refund and 60 days for store credit sets `days` to `30`,
 lists both resolutions, and describes the store-credit extension (see
 [Different windows per resolution](#different-windows-per-resolution)).
 
-Businesses differ on whether the clock starts at delivery, purchase, shipment, or
-fulfillment, so when `window` is present a business MUST provide both `days` and
-`anchor`. There is no default anchor, and a platform MUST NOT assume one. Omit
-`window` entirely for an unlimited window, or when the window is not stated
+Businesses differ on whether the clock starts at delivery, purchase, shipment,
+or fulfillment, so when `window` is present a business MUST provide both `days`
+and `anchor`. There is no default anchor, and a platform MUST NOT assume one.
+Omit `window` entirely for an unlimited window, or when the window is not stated
 structurally, and convey it in `description`.
 
-The resolved, absolute cutoff is an Order-time fact: once the anchor event has
-occurred, a business republishes the policy on the Order as the source of truth
-(see [Order-time resolution](#order-time-resolution)). Pre-purchase, the window
-stays a duration plus an anchor.
+`anchor` is an open vocabulary. The well-known values are:
+
+| Anchor | The clock starts when |
+| :-- | :-- |
+| `purchased` | The order is placed. |
+| `shipped` | The items are handed to a carrier. |
+| `fulfilled` | The business completes its fulfillment step for the method: shipping the items, readying them for pickup, or making a digital item available. |
+| `delivered` | The buyer receives the items, including collecting a pickup order or gaining access to a digital item. |
+
+`fulfilled` and `delivered` differ in whose action starts the clock: the
+business completing its step, or the buyer receiving the items. A platform that
+does not recognize an `anchor` value MUST NOT compute a deadline from it.
+
+Pre-purchase, the window is a duration plus an anchor. Resolving it to an
+absolute cutoff after the anchor event is future work (see
+[Order-time resolution](#order-time-resolution)).
 
 ### Non-returnable items
 
@@ -165,31 +178,48 @@ Returns carry two independent costs, modeled separately:
 - **Logistics cost** is the price of using a channel (return shipping or
   handling). It lives on each `methods[].fee` because it varies by channel: an
   in-store drop-off may be `free` while a mailed return is a `fixed_fee`.
-- **Restocking fee** is a deduction from the refund charged regardless of how the
-  item comes back. It lives once at the policy level as `restocking_fee`.
+- **Restocking fee** is a deduction from the refund charged regardless of how
+  the item comes back. It lives once at the policy level as `restocking_fee`.
 
-Keeping them separate lets a business express, for example, "free returns by mail
-with a 15% restocking fee" - which a single per-method fee cannot represent. A
-percentage restocking fee uses `restocking_fee.percentage_bps`; a flat or
-precomputed amount uses `restocking_fee.amount`. A `restocking_fee` MUST carry
-at least one of them. When both are present, each is a cap and the deduction
-never exceeds either: `percentage_bps` of `1500` with an `amount` of `5000`
-means 15% of the item price, up to $50.00 in a USD checkout.
+Keeping them separate lets a business express, for example, "free returns by
+mail with a 15% restocking fee" - which a single per-method fee cannot
+represent. A percentage restocking fee uses `restocking_fee.percentage_bps`; a
+flat or precomputed amount uses `restocking_fee.amount`. A `restocking_fee`
+MUST carry at least one of them.
 
-Both costs are maximums: `restocking_fee` and each method's `fee` state the most
-the buyer is charged. A fee that applies only in some cases, such as a
-restocking fee on opened items, states its full value, and its `display_text`
-names the condition. An omitted `restocking_fee` means no restocking fee is
-charged, so a business that may charge one MUST provide it.
+Each amount has a defined basis, so every platform computes the same maximum:
 
-A method's logistics cost, by contrast, is stated only by its `fee`. A method
-with no `fee`, or with a `fee.type` the platform does not recognize, states no
-cost, and `customer_responsibility` means the buyer arranges and pays for the
-return shipping, with no maximum stated. A platform MUST NOT present any of
-these as free.
+- `restocking_fee.percentage_bps` applies to the amount paid for the returned
+  quantity, after item-level discounts and excluding tax and shipping. On
+  catalog surfaces, where nothing has been paid, the basis is the covered
+  product's price.
+- `restocking_fee.amount` is charged per returned unit of quantity.
+- `methods[].fee.amount` (a `fixed_fee`) is charged per return shipment.
 
-When a return method's `fee.type` is `fixed_fee`, `amount` MUST be present, so the
-charge is never left uninterpretable.
+When both `percentage_bps` and `amount` are present, each is a cap computed
+over the same returned quantity, and the deduction never exceeds either:
+`percentage_bps` of `1500` with an `amount` of `5000` means 15% of the amount
+paid, up to $50.00 per unit in a USD checkout. For 3 units bought at $200.00
+each, the deduction is at most 3 × min($30.00, $50.00) = $90.00.
+
+Both costs are maximums: `restocking_fee` and each method's `fee` state the
+most the buyer is charged. A business whose actual charge is lower, or is
+computed on a different basis, remains conformant as long as it never charges
+more. A fee that applies only in some cases, such as a restocking fee on opened
+items, states its full value, and its `display_text` names the condition.
+
+An omitted `restocking_fee` means the fee is not stated structurally, not that
+none is charged; a platform MUST NOT present it as "no restocking fee". To state
+that no restocking fee is charged, a business sets `percentage_bps` to `0`.
+
+A method's logistics cost is likewise stated only by its `fee`. A method with
+no `fee`, or with a `fee.type` the platform does not recognize, states no cost,
+and `customer_responsibility` means the buyer arranges and pays for the return
+shipping, with no maximum stated. A platform MUST NOT present any of these as
+free.
+
+When a return method's `fee.type` is `fixed_fee`, `amount` MUST be present, so
+the charge is never left uninterpretable.
 
 Amounts (`methods[].fee.amount` and `restocking_fee.amount`) carry no currency
 of their own. They are in the `currency` of the enclosing cart, checkout, or
@@ -209,16 +239,16 @@ once, then adds targeted overrides only for the exceptions (a final-sale item, a
 category with a different window), rather than repeating a policy on every line.
 An override replaces the default for the items it governs and inherits none of
 its terms, so a business MUST restate in the override every term that still
-applies. This includes `restocking_fee`: an override that omits it states that
-no restocking fee is charged.
+applies. A term the override omits, including `restocking_fee`, is not stated
+for the items it governs.
 
 ## Responsibilities
 
 Return policies are business-stated facts. They are response-only data
-(`ucp_request: omit` on cart, checkout, and order) that a platform never submits;
-there is no buyer selection and no request-side machinery. They carry no
-buyer-asserted claims and no PII, so they cross no new trust boundary beyond the
-base response.
+(`ucp_request: omit` on cart, checkout, and order) that a platform never
+submits; there is no buyer selection and no request-side machinery. They carry
+no buyer-asserted claims and no PII, so they cross no new trust boundary beyond
+the base response.
 
 The return-term fields (`window`, `supported_resolutions`, `methods`, and
 `restocking_fee`) are guarantees that hold for every eligible return in the
@@ -233,13 +263,12 @@ every case.
 
 A business SHOULD populate the fields it can state as guarantees and MUST NOT
 populate a field with a value that does not hold for every eligible return. It
-omits `window`, `supported_resolutions`, or `methods` when it cannot state them
-as guarantees, and conveys the term in `description` or links to it through
-`url`; an omitted `restocking_fee`, by contrast, means none is charged. Where a
-term depends on something known when the response is built, such as the seller,
-the purchase date, an authenticated buyer's membership, or a selected payment
-instrument, a business SHOULD resolve it, scoping policies with `applies_to`
-where it differs per item.
+omits a field when it cannot state the term as a guarantee, and conveys the
+term in `description` or links to it through `url`. Where a term depends on
+something known when the response is built, such as the seller, the purchase
+date, an authenticated buyer's membership, or a selected payment instrument, a
+business SHOULD resolve it, scoping policies with `applies_to` where it differs
+per item.
 
 A policy's `description` and its structured fields are two representations of
 the same policy. The `description` MAY state better terms than a field (a longer
@@ -250,19 +279,23 @@ does not model the type. A platform SHOULD surface `url` alongside the
 structured terms so the buyer can review the full policy.
 
 A platform that models this type MAY compute a guaranteed return deadline and a
-worst-case net refund from these fields, where every cost involved is stated
-(see [Two kinds of cost](#two-kinds-of-cost)). It MUST NOT treat an elapsed
-`window` as making an item non-returnable, since the `description` may allow
-later returns; only `final_sale` signals that.
+worst-case net refund from these fields. It computes a worst-case net refund
+only when `restocking_fee` is present and every method the buyer may use states
+its cost (see [Two kinds of cost](#two-kinds-of-cost)). It MUST NOT treat an
+elapsed `window` as making an item non-returnable, since the `description` may
+allow later returns; only `final_sale` signals that.
 
 ## Order-time resolution
 
+This section is informative and describes planned future work.
+
 Pre-purchase, the return window is a duration plus an anchor. The concrete
-deadline a buyer actually has can only be computed once the anchor event (for
-example, delivery) has occurred. That resolution is an Order-time concern: on the
-Order, a business republishes the same return policy carrying the resolved cutoff,
-so the platform reads it rather than tracking fulfillment events and recomputing.
-Modeling the resolved deadline field is deferred to that Order-side work.
+deadline a buyer has can only be computed once the anchor event (for example,
+delivery) has occurred. A future revision is expected to let a business carry
+that resolved cutoff on the Order, so a platform can read it rather than track
+fulfillment events and recompute. Until that field is defined, Order `policies`
+remain the snapshot of the policies that applied at checkout, and a platform
+computes the deadline from `window` as it does pre-purchase.
 
 ## Examples
 
@@ -339,10 +372,11 @@ resolution the policy guarantees, and its `description` rules out any other:
 
 ### Different windows per resolution
 
-A business offers refunds for 30 days after delivery and store credit for 60.
-Precedence lets only one return policy govern an item, so a single policy
-carries both: `window` states the 30 days in which either resolution is
-guaranteed, and the `description` states the longer store-credit window:
+A business offers refunds for 30 days after delivery and store credit for 60,
+with no restocking fee. Precedence lets only one return policy govern an item,
+so a single policy carries both: `window` states the 30 days in which either
+resolution is guaranteed, the `description` states the longer store-credit
+window, and `percentage_bps` of `0` states that no restocking fee is charged:
 
 <!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
 ```json
@@ -350,15 +384,17 @@ guaranteed, and the `description` states the longer store-credit window:
   {
     "type": "dev.ucp.shopping.policy.return",
     "description": {
-      "plain": "Return within 30 days of delivery for a refund to your original payment method, or within 60 days for store credit."
+      "plain": "Return within 30 days of delivery for a refund to your original payment method, or within 60 days for store credit. No restocking fee."
     },
     "window": { "days": 30, "anchor": "delivered" },
     "supported_resolutions": ["original_payment_method", "store_credit"],
+    "restocking_fee": { "percentage_bps": 0 },
     "url": "https://example.com/returns"
   }
 ]
 ```
 
 A platform can tell the buyer that either resolution is guaranteed until 30
-days after delivery. After that, it relies on the `description`, which offers
-store credit until day 60, rather than reporting the item as non-returnable.
+days after delivery, with no restocking fee. After that, it relies on the
+`description`, which offers store credit until day 60, rather than reporting the
+item as non-returnable.
