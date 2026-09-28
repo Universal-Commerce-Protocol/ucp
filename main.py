@@ -1604,7 +1604,7 @@ def define_env(env):
       "    1. Store the key with the operation result for at least 24 hours.\n"
       "    2. Return the cached result for duplicate keys whose request body matches the original.\n"
       "    3. Return `409 Conflict` if the key is reused with a mismatched body.\n"
-      "    See [Message Signatures — Idempotency Key Requirements](/specification/signatures/#replay-protection)\n"
+      "    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)\n"
       "    for the full payload-matching contract."
     ),
   }
