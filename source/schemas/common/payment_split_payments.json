@@ -53,6 +53,35 @@
         }
       ]
     },
+    "dev.ucp.lodging.booking": {
+      "title": "Booking with Split Payments",
+      "description": "Booking extended with split payment instrument amounts.",
+      "allOf": [
+        { "$ref": "../lodging/booking.json" },
+        {
+          "type": "object",
+          "properties": {
+            "payment": {
+              "type": "object",
+              "properties": {
+                "instruments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/payment_instrument"
+                  },
+                  "description": "Payment instruments in allocation priority order.",
+                  "ucp_request": {
+                    "create": "optional",
+                    "update": "optional",
+                    "complete": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "dev.ucp.common.payment.split_payments": {
       "business_schema": {
         "title": "Split Payments Capability (Business)",

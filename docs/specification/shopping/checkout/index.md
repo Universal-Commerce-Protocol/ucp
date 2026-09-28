@@ -523,7 +523,7 @@ items are unavailable:
 <!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "error" },
   "messages": [
     {
       "type": "error",

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/property.json",
+  "title": "Property",
+  "description": "A property (e.g., hotel, rental property) location.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/types/location_summary.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "../../common/types/media.json"
+          },
+          "description": "Property media (images, videos, 3D models). First item is the featured media for presentation.",
+          "ucp_request": "omit"
+        }
+      }
+    }
+  ]
+}
