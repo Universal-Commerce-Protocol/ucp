@@ -6,7 +6,7 @@
   "description": "Defines the `dev.ucp.shopping.policy.return` policy type on the core `policies[]` primitive, enabling businesses to advertise return terms across one or more supported capabilities (catalog, cart, checkout, and order).",
   "$defs": {
     "return_body": {
-      "title": "Return Policy",
+      "title": "Return Policy Terms",
       "description": "Return terms for a `dev.ucp.shopping.policy.return` policy.",
       "type": "object",
       "properties": {
@@ -149,15 +149,14 @@
           "description": "Return channel. Well-known values: `in_store`, `by_mail`, `kiosk`."
         },
         "fee": {
-          "$ref": "#/$defs/fee",
-          "description": "Maximum logistics cost of using this channel. Omitted means the cost is not stated, not that the channel is free."
-        }
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "fee": {
+          "type": "object",
+          "description": "Maximum logistics cost of using this channel. Omitted means the cost is not stated, not that the channel is free.",
+          "allOf": [
+            {
+              "$ref": "#/$defs/fee"
+            },
+            {
+              "if": {
                 "properties": {
                   "type": {
                     "const": "fixed_fee"
@@ -166,21 +165,14 @@
                 "required": [
                   "type"
                 ]
-              }
-            },
-            "required": [
-              "fee"
-            ]
-          },
-          "then": {
-            "properties": {
-              "fee": {
+              },
+              "then": {
                 "$ref": "#/$defs/fixed_fee"
               }
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "return_policy": {
       "title": "Return Policy",
