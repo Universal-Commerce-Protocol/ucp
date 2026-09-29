@@ -43,6 +43,20 @@ This guide applies to:
 - **Handlers** (e.g., `com.google.pay`, `dev.shopify.shop_pay`) — Specific
   payment method implementations
 
+> **Note on Self-Hosting Payment Handlers:**
+> This guide and the accompanying [template](template.md) are provided so
+> payment providers and platforms can author interoperable UCP handler
+> specifications. Vendor- or organization-specific payment handlers (e.g.,
+> `com.example.pay`) **must be self-hosted** on the provider's own domain
+> matching their reverse-DNS namespace (see
+> [Namespace Governance](../overview/index.md#namespace-governance))—for
+> example, see the self-hosted
+> [Google Pay](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler){ target="_blank" }
+> and
+> [Shop Pay](https://shopify.dev/docs/agents/checkout/shop-pay-handler){ target="_blank" }
+> handlers. Do not open a Pull Request to add vendor-specific payment handlers
+> or schemas to this repository.
+
 ---
 
 ## Core Concepts
