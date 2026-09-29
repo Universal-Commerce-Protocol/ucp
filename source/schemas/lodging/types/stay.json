@@ -4,13 +4,7 @@
   "title": "Stay",
   "description": "Compound binding schema linking a physical accommodation type, commercial rate plan, occupancy, guest assignments, stay dates, and pricing totals.",
   "type": "object",
-  "required": [
-    "id",
-    "stay_dates",
-    "accommodation_type",
-    "rate_plan",
-    "totals"
-  ],
+  "required": ["id", "stay_dates", "accommodation_type", "rate_plan", "totals"],
   "anyOf": [
     {
       "properties": {
@@ -24,10 +18,7 @@
       }
     },
     {
-      "required": [
-        "accommodation_type",
-        "rate_plan"
-      ],
+      "required": ["accommodation_type", "rate_plan"],
       "properties": {
         "accommodation_type": {
           "properties": {

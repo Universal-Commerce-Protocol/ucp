@@ -3,9 +3,7 @@
     "version": "2026-01-01",
     "status": "success",
     "capabilities": {
-      "dev.ucp.lodging.booking": [
-        { "version": "2026-01-01" }
-      ]
+      "dev.ucp.lodging.booking": [{ "version": "2026-01-01" }]
     },
     "payment_handlers": {}
   },

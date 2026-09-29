@@ -4,10 +4,7 @@
   "title": "Selected Option",
   "description": "A specific option selection on a variant (e.g., Size: Large).",
   "type": "object",
-  "required": [
-    "name",
-    "label"
-  ],
+  "required": ["name", "label"],
   "properties": {
     "name": {
       "type": "string",

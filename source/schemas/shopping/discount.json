@@ -8,10 +8,7 @@
     "allocation": {
       "type": "object",
       "description": "Breakdown of how a discount amount was allocated to a specific target.",
-      "required": [
-        "path",
-        "amount"
-      ],
+      "required": ["path", "amount"],
       "properties": {
         "path": {
           "type": "string",
@@ -26,10 +23,7 @@
     "applied_discount": {
       "type": "object",
       "description": "A discount that was successfully applied.",
-      "required": [
-        "title",
-        "amount"
-      ],
+      "required": ["title", "amount"],
       "properties": {
         "code": {
           "type": "string",
@@ -50,10 +44,7 @@
         },
         "method": {
           "type": "string",
-          "enum": [
-            "each",
-            "across"
-          ],
+          "enum": ["each", "across"],
           "description": "Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value."
         },
         "priority": {

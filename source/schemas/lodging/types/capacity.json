@@ -22,17 +22,12 @@
       "items": {
         "type": "object",
         "additionalProperties": true,
-        "required": [
-          "ages"
-        ],
+        "required": ["ages"],
         "properties": {
           "ages": {
             "type": "object",
             "description": "Age range this bracket covers.",
-            "required": [
-              "min",
-              "max"
-            ],
+            "required": ["min", "max"],
             "properties": {
               "min": {
                 "type": "integer",

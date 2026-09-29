@@ -84,10 +84,7 @@
     "travel_purpose": {
       "type": "string",
       "description": "Purpose of the trip or reservation, supplied by the Platform. Well-known values: `business`, `leisure`. Platforms MAY send additional values; a Business MUST ignore values it does not recognize and treat the purpose as unspecified.",
-      "examples": [
-        "business",
-        "leisure"
-      ],
+      "examples": ["business", "leisure"],
       "ucp_request": {
         "create": "optional",
         "update": "optional",
@@ -174,9 +171,7 @@
   "allOf": [
     {
       "if": {
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "const": "completed"
@@ -184,16 +179,12 @@
         }
       },
       "then": {
-        "required": [
-          "confirmation"
-        ]
+        "required": ["confirmation"]
       }
     },
     {
       "if": {
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "const": "requires_escalation"
@@ -201,23 +192,15 @@
         }
       },
       "then": {
-        "required": [
-          "continue_url"
-        ]
+        "required": ["continue_url"]
       }
     },
     {
       "if": {
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
-            "enum": [
-              "ready_for_complete",
-              "complete_in_progress",
-              "completed"
-            ]
+            "enum": ["ready_for_complete", "complete_in_progress", "completed"]
           }
         }
       },
@@ -229,7 +212,10 @@
             "properties": {
               "booker": {
                 "required": ["first_name", "last_name"],
-                "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+                "anyOf": [
+                  { "required": ["email"] },
+                  { "required": ["phone_number"] }
+                ]
               }
             }
           },
@@ -239,7 +225,10 @@
               "guests": {
                 "contains": {
                   "required": ["first_name", "last_name"],
-                  "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+                  "anyOf": [
+                    { "required": ["email"] },
+                    { "required": ["phone_number"] }
+                  ]
                 }
               },
               "stays": {
@@ -261,7 +250,10 @@
             "required": ["booker", "guests", "stays"],
             "properties": {
               "booker": {
-                "anyOf": [{ "required": ["email"] }, { "required": ["phone_number"] }]
+                "anyOf": [
+                  { "required": ["email"] },
+                  { "required": ["phone_number"] }
+                ]
               },
               "guests": {
                 "contains": {

@@ -69,10 +69,7 @@
     },
     "lookup_response": {
       "type": "object",
-      "required": [
-        "ucp",
-        "locations"
-      ],
+      "required": ["ucp", "locations"],
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_location_schema"

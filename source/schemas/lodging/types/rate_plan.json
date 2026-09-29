@@ -4,10 +4,7 @@
   "title": "Rate Plan",
   "description": "Commercial rate contract.",
   "type": "object",
-  "required": [
-    "id",
-    "title"
-  ],
+  "required": ["id", "title"],
   "additionalProperties": true,
   "properties": {
     "id": {

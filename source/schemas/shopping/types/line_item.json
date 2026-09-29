@@ -4,12 +4,7 @@
   "title": "Line Item",
   "type": "object",
   "description": "Line item object. Expected to use the currency of the parent object.",
-  "required": [
-    "id",
-    "item",
-    "quantity",
-    "totals"
-  ],
+  "required": ["id", "item", "quantity", "totals"],
   "properties": {
     "id": {
       "type": "string",

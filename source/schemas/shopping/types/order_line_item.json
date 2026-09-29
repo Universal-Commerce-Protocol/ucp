@@ -3,13 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/types/order_line_item.json",
   "title": "Order Line Item",
   "type": "object",
-  "required": [
-    "id",
-    "item",
-    "quantity",
-    "totals",
-    "status"
-  ],
+  "required": ["id", "item", "quantity", "totals", "status"],
   "properties": {
     "id": {
       "type": "string",
@@ -53,12 +47,7 @@
     },
     "status": {
       "type": "string",
-      "enum": [
-        "processing",
-        "partial",
-        "fulfilled",
-        "removed"
-      ],
+      "enum": ["processing", "partial", "fulfilled", "removed"],
       "description": "Derived status: removed if quantity.total == 0, fulfilled if quantity.total > 0 and quantity.fulfilled == quantity.total, partial if quantity.total > 0 and quantity.fulfilled > 0, otherwise processing."
     },
     "parent_id": {

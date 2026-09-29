@@ -4,10 +4,7 @@
   "title": "Accommodation Type",
   "description": "Category or specification of the rentable physical space (e.g., room, apartment, villa, campsite pitch).",
   "type": "object",
-  "required": [
-    "id",
-    "title"
-  ],
+  "required": ["id", "title"],
   "additionalProperties": true,
   "properties": {
     "id": {

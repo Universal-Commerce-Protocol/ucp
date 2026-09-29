@@ -29,13 +29,7 @@
     }
   },
   "type": "object",
-  "required": [
-    "ucp",
-    "id",
-    "line_items",
-    "currency",
-    "totals"
-  ],
+  "required": ["ucp", "id", "line_items", "currency", "totals"],
   "additionalProperties": true,
   "properties": {
     "ucp": {
