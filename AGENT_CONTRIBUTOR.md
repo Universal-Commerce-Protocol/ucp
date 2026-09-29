@@ -17,6 +17,7 @@ Adhere strictly to the following parameters when editing the repository:
 * **Documentation Navigation:** Sync any MkDocs navigation additions (`mkdocs.yml` `nav`) with `plugins.llmstxt.sections` so new pages remain discoverable via `llms.txt`.
 * **JSON Examples:** Annotate every fenced `json` code block in `docs/**/*.md` with `<!-- ucp:example schema=... -->` or `<!-- ucp:example skip reason="..." -->`.
 * **Quality Guardrails:** Never bypass or comment out linter rules, pre-commit hooks, or test assertions.
+* **Namespace & Scope Boundary:** Keep this repository scoped to generic, cross-organization specifications and schemas under `dev.ucp.*`. Do not add organization- or vendor-specific capabilities, extensions, or payment handlers (`com.{vendor}.*`, `org.{org}.*`); self-host those on the organization's authority domain instead (see `docs/specification/overview/index.md` under `#namespace-governance`).
 * **Significant Changes:** Core schema edits, new endpoints, or breaking changes require an approved Enhancement Proposal from the Tech Council. See [CONTRIBUTING.md](https://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md#significant-changes) and `docs/documentation/contributing.md`.
 
 ## 2. Local Command Reference
