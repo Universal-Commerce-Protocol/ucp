@@ -172,6 +172,14 @@ than by comparing responses.
 This extension does not change how instruments are supplied. The Buyer's
 instruments fund the checkout under the selected term.
 
+Where the selected payment term is fully deferred and requires no upfront
+payment capture or instrument guarantee (e.g., cash payment upon arrival, or
+deferred invoicing where no tokens or instruments are submitted at checkout),
+no payment instruments need to be supplied. In this case, because
+`checkout.payment` is required on completion but `selected_term_id` is omitted on
+complete requests, the Platform **MUST** provide an empty payment object
+(`"payment": {}`) in the complete request.
+
 Checkout-specific handler and instrument eligibility is a **runtime result**.
 Profiles advertise broad support; the Business resolves that support against the
 Checkout context and any instruments already supplied, then returns the
@@ -493,6 +501,17 @@ The deposit terms live in a policy that targets the term they apply to:
     }
   }
 ]
+```
+
+**Complete request — completing under fully deferred payment terms:**
+
+When completing a checkout with a selected payment term that requires no upfront
+payment capture or payment instruments, `selected_term_id` is omitted and the
+Platform sends an empty `payment` object:
+
+<!-- ucp:example schema=common/payment_terms def=payment op=complete direction=request -->
+```json
+{}
 ```
 
 On completion, the accepted term travels to the Order, so the Buyer can still
