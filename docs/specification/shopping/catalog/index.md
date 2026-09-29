@@ -297,10 +297,13 @@ Platform embeds; a video the Business serves as files from any origin,
 including a CDN, is `video`. A Platform that does not embed third-party players
 presents `preview` or omits the item.
 
-A Platform that embeds the player **MUST** isolate it so that it cannot
-navigate the top-level document or otherwise act as the Platform. On the web,
-the Platform renders the player in a sandboxed, credentialless iframe,
-granting only the capabilities the player needs:
+A Platform that embeds the player **MUST** isolate it from the Platform's
+authority: no Platform credentials, no access to Platform APIs or agent tools,
+no protocol messaging privileges, and no navigation of the host application.
+Before embedding, it **MUST** decline the item unless `url` is an absolute
+`https` URL without userinfo that is not same-site with the Platform. On the
+web, the player is one iframe whose `src` is `url`, sandboxed and
+credentialless, granting only the capabilities the player needs:
 
 ```html
 <iframe sandbox="allow-scripts allow-same-origin" allow="fullscreen" credentialless src="https://videos.example.com/embed/123"></iframe>
