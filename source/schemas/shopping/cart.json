@@ -21,7 +21,13 @@
               "ucp_request": {
                 "create": "optional",
                 "update": "omit",
-                "complete": "omit"
+                "complete": {
+                  "transition": {
+                    "from": "optional",
+                    "to": "omit",
+                    "description": "Cart contents are bound at checkout creation, so cart_id has no effect on complete and should be omitted."
+                  }
+                }
               }
             }
           }
