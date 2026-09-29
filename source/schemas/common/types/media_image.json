@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/media_image.json",
+  "title": "Media Image",
+  "description": "Type-specific properties for image media.",
+  "type": "object",
+  "properties": {
+    "url": {
+      "description": "A directly displayable image."
+    },
+    "sources": {
+      "description": "Alternate encodings and sizes of the image (e.g. `image/avif`, `image/webp`, `image/jpeg`; width variants for responsive layout). `url` SHOULD be the most broadly decodable rendition."
+    }
+  }
+}
