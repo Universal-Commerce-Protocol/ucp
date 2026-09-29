@@ -14595,7 +14595,7 @@ Platform-emitted referral and conversion-event context — campaign identifiers,
 
 A catalog item representing a sellable item with one or more purchasable variants.
 
-`media` and `variants` are ordered arrays. Businesses SHOULD return the most relevant variant and image first—default for lookups, best match based on query and context for search. Platforms SHOULD treat the first element as featured.
+`media` and `variants` are ordered arrays. Businesses **SHOULD** return the most relevant variant and media item first — default for lookups, best match based on query and context for search. Platforms **SHOULD** treat the first media item they present as featured.
 
 | Name             | Type                                                                      | Requirement  | Description                                                                                      |
 | ---------------- | ------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------ |
@@ -14620,7 +14620,7 @@ A purchasable item with specific option selections, price, and availability.
 
 In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](http://ucp.dev/draft/specification/shopping/catalog/lookup/#client-correlation) for details.
 
-`media` is an ordered array. Businesses SHOULD return the featured variant image as the first element. Platforms SHOULD treat the first element as featured.
+`media` is an ordered array. Businesses **SHOULD** return the featured variant media item as the first element. Platforms **SHOULD** treat the first media item they present as featured.
 
 | Name          | Type                                                                        | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                               |
 | ------------- | --------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -14660,13 +14660,73 @@ In lookup responses, each variant carries an `inputs` array for correlation: whi
 
 ### Media
 
-| Name     | Type    | Requirement  | Description                                                  |
-| -------- | ------- | ------------ | ------------------------------------------------------------ |
-| type     | string  | **Required** | Media type. Well-known values: `image`, `video`, `model_3d`. |
-| url      | string  | **Required** | URL to the media resource.                                   |
-| alt_text | string  | Optional     | Accessibility text describing the media.                     |
-| width    | integer | Optional     | Width in pixels (for images/video).                          |
-| height   | integer | Optional     | Height in pixels (for images/video).                         |
+One logical media item on a Product or Variant — such as an image, a video, or a 3D model. A media item is a resource the Platform renders: `url` identifies it, `sources` lists alternate renditions of it, `preview` is a still the Platform can show before or instead of it, and `width` and `height` are its intrinsic pixel dimensions. The `width` and `height` on `preview` and on each `sources` entry are the pixel dimensions of that still or rendition.
+
+`type` is an open string with four well-known values: `image`, `video`, `external_video`, and `model_3d`. A Platform **MUST NOT** reject a product or response because it does not recognize a media item's `type`. It **MAY** present such an item from `preview` and `name`, or omit it. Recognizing a `type` only enables type-specific presentation.
+
+A Platform **MAY** refuse to load or embed a media URL that does not use the `https` scheme.
+
+A Platform selects a rendition from `sources` by `mime_type` and dimensions. A Business that provides `sources` **SHOULD** include the rendition at `url`.
+
+| Name     | Type                                                                  | Requirement  | Description                                                                                                                                                                                                                                                        |
+| -------- | --------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type     | string                                                                | **Required** | Media type. Well-known values: `image`, `video`, `external_video`, `model_3d`. A Platform MUST NOT reject the containing object for an unrecognized value; it MAY present the item from `preview` and `name`, or omit it.                                          |
+| url      | string                                                                | **Required** | URL of the media resource the Platform renders; interpretation is specialized per `type`.                                                                                                                                                                          |
+| name     | string                                                                | Optional     | Human-readable title or label for the media, distinct from `alt_text` (accessibility text). Often present for `video` and `model_3d`.                                                                                                                              |
+| alt_text | string                                                                | Optional     | Accessibility text describing the media.                                                                                                                                                                                                                           |
+| width    | integer                                                               | Optional     | Intrinsic pixel width of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry.                                                                                                                                       |
+| height   | integer                                                               | Optional     | Intrinsic pixel height of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry.                                                                                                                                      |
+| duration | integer                                                               | Optional     | Duration in seconds, for time-based media such as `video` and `external_video`.                                                                                                                                                                                    |
+| preview  | object                                                                | Optional     | Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for `video`, `external_video`, and `model_3d` unless no suitable still exists, and MAY provide it for `image` as a low-resolution placeholder. |
+| sources  | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate renditions of the resource at `url`. The Business SHOULD include the rendition at `url`.                                                                                                                                                                 |
+
+#### Image
+
+`url` is a directly displayable image. `sources`, when present, lists alternate encodings and sizes of it — for example `image/avif`, `image/webp`, and `image/jpeg`, or width variants for responsive layout. The Business **SHOULD** make `url` the most broadly decodable rendition, because a Platform that does not select from `sources` loads `url` directly.
+
+| Name    | Type                                                                  | Requirement  | Description                                                                                                                                                                             |
+| ------- | --------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url     | string                                                                | **Required** | A directly displayable image.                                                                                                                                                           |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate encodings and sizes of the image (e.g. `image/avif`, `image/webp`, `image/jpeg`; width variants for responsive layout). `url` SHOULD be the most broadly decodable rendition. |
+
+#### Video
+
+`url` is a playable rendition of the video: a progressive file or an adaptive-streaming manifest. `sources`, when present, lists alternate renditions and manifests.
+
+| Name    | Type                                                                  | Requirement  | Description                                                                                   |
+| ------- | --------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| url     | string                                                                | **Required** | A playable rendition of the video: a progressive file or an adaptive-streaming manifest.      |
+| width   | integer                                                               | Optional     | Intrinsic pixel width of the video; a rendition's own dimensions are on its `sources` entry.  |
+| height  | integer                                                               | Optional     | Intrinsic pixel height of the video; a rendition's own dimensions are on its `sources` entry. |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH).                            |
+
+#### External Video
+
+A video presented through a third-party player. `url` is the player, which the Platform embeds; a video the Business serves as files from any origin, including a CDN, is `video`. A Platform that does not embed third-party players presents `preview` or omits the item.
+
+A Platform that embeds the player **MUST** isolate it from the Platform's authority: no Platform credentials, no access to Platform APIs or agent tools, no protocol messaging privileges, and no navigation of the host application. Before embedding, it **MUST** decline the item unless `url` is an absolute `https` URL without userinfo that is not same-site with the Platform. On the web, the player is one iframe whose `src` is `url`, sandboxed and credentialless, granting only the capabilities the player needs:
+
+```html
+<iframe sandbox="allow-scripts allow-same-origin" allow="fullscreen" credentialless src="https://videos.example.com/embed/123"></iframe>
+```
+
+See [Iframe Sandbox Attributes](http://ucp.dev/draft/specification/embedded-protocol/#iframe-sandbox-attributes) and [Credentialless Iframes](http://ucp.dev/draft/specification/embedded-protocol/#credentialless-iframes).
+
+| Name    | Type                                                                  | Requirement  | Description                                                                                                                                          |
+| ------- | --------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url     | string                                                                | **Required** | The third-party player the Platform embeds. A video the Business serves as files from any origin, including a CDN, is `video`, not `external_video`. |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Not used: a video presented through a player has no renditions.                                                                                      |
+
+#### 3D Model
+
+`url` is the primary model file, such as GLB. `sources`, when present, lists alternate formats such as glTF and USDZ.
+
+| Name    | Type                                                                  | Requirement  | Description                                          |
+| ------- | --------------------------------------------------------------------- | ------------ | ---------------------------------------------------- |
+| url     | string                                                                | **Required** | The primary model file (e.g. GLB).                   |
+| width   | integer                                                               | Optional     | Not applicable: a 3D model has no pixel dimensions.  |
+| height  | integer                                                               | Optional     | Not applicable: a 3D model has no pixel dimensions.  |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate file formats of the model (glTF/GLB/USDZ). |
 
 ### Product Option
 
@@ -15621,7 +15681,94 @@ Content-Type: application/json
       {
         "type": "image",
         "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
-        "alt_text": "Runner Pro in Blue"
+        "alt_text": "Runner Pro in Blue",
+        "width": 1600,
+        "height": 1600,
+        "sources": [
+          {
+            "url": "https://cdn.example.com/products/runner-pro-blue.avif",
+            "mime_type": "image/avif",
+            "format": "avif",
+            "width": 1600,
+            "height": 1600
+          },
+          {
+            "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+            "mime_type": "image/jpeg",
+            "format": "jpg",
+            "width": 1600,
+            "height": 1600
+          }
+        ]
+      },
+      {
+        "type": "video",
+        "url": "https://cdn.example.com/products/runner-pro-demo-720p.mp4",
+        "name": "Runner Pro flex demo",
+        "alt_text": "Runner Pro shoe flexing to show sole cushioning",
+        "duration": 24,
+        "preview": {
+          "url": "https://cdn.example.com/products/runner-pro-demo-poster.jpg",
+          "width": 1280,
+          "height": 720
+        },
+        "sources": [
+          {
+            "url": "https://cdn.example.com/products/runner-pro-demo-720p.mp4",
+            "mime_type": "video/mp4",
+            "format": "mp4",
+            "width": 1280,
+            "height": 720,
+            "filesize": 4200000
+          },
+          {
+            "url": "https://cdn.example.com/products/runner-pro-demo-1080p.mp4",
+            "mime_type": "video/mp4",
+            "format": "mp4",
+            "width": 1920,
+            "height": 1080,
+            "filesize": 8480000
+          },
+          {
+            "url": "https://cdn.example.com/products/runner-pro-demo.m3u8",
+            "mime_type": "application/vnd.apple.mpegurl",
+            "format": "m3u8"
+          }
+        ]
+      },
+      {
+        "type": "model_3d",
+        "url": "https://cdn.example.com/products/runner-pro.glb",
+        "alt_text": "Runner Pro 3D model",
+        "preview": {
+          "url": "https://cdn.example.com/products/runner-pro-3d-thumb.jpg"
+        },
+        "sources": [
+          {
+            "url": "https://cdn.example.com/products/runner-pro.glb",
+            "mime_type": "model/gltf-binary",
+            "format": "glb",
+            "filesize": 4200000
+          },
+          {
+            "url": "https://cdn.example.com/products/runner-pro.usdz",
+            "mime_type": "model/vnd.usdz+zip",
+            "format": "usdz",
+            "filesize": 5100000
+          }
+        ]
+      },
+      {
+        "type": "external_video",
+        "url": "https://videos.example.com/embed/123",
+        "name": "Runner Pro trail review",
+        "alt_text": "Reviewer running a trail in the Runner Pro",
+        "duration": 212,
+        "preview": {
+          "url": "https://cdn.example.com/products/runner-pro-review-poster.jpg",
+          "width": 1280,
+          "height": 720
+        }
       }
     ],
     "options": [
@@ -16384,7 +16531,94 @@ Request body for single-product retrieval. Supports interactive variant narrowin
           {
             "type": "image",
             "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
-            "alt_text": "Runner Pro in Blue"
+            "alt_text": "Runner Pro in Blue",
+            "width": 1600,
+            "height": 1600,
+            "sources": [
+              {
+                "url": "https://cdn.example.com/products/runner-pro-blue.avif",
+                "mime_type": "image/avif",
+                "format": "avif",
+                "width": 1600,
+                "height": 1600
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro-blue.jpg",
+                "mime_type": "image/jpeg",
+                "format": "jpg",
+                "width": 1600,
+                "height": 1600
+              }
+            ]
+          },
+          {
+            "type": "video",
+            "url": "https://cdn.example.com/products/runner-pro-demo-720p.mp4",
+            "name": "Runner Pro flex demo",
+            "alt_text": "Runner Pro shoe flexing to show sole cushioning",
+            "duration": 24,
+            "preview": {
+              "url": "https://cdn.example.com/products/runner-pro-demo-poster.jpg",
+              "width": 1280,
+              "height": 720
+            },
+            "sources": [
+              {
+                "url": "https://cdn.example.com/products/runner-pro-demo-720p.mp4",
+                "mime_type": "video/mp4",
+                "format": "mp4",
+                "width": 1280,
+                "height": 720,
+                "filesize": 4200000
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro-demo-1080p.mp4",
+                "mime_type": "video/mp4",
+                "format": "mp4",
+                "width": 1920,
+                "height": 1080,
+                "filesize": 8480000
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro-demo.m3u8",
+                "mime_type": "application/vnd.apple.mpegurl",
+                "format": "m3u8"
+              }
+            ]
+          },
+          {
+            "type": "model_3d",
+            "url": "https://cdn.example.com/products/runner-pro.glb",
+            "alt_text": "Runner Pro 3D model",
+            "preview": {
+              "url": "https://cdn.example.com/products/runner-pro-3d-thumb.jpg"
+            },
+            "sources": [
+              {
+                "url": "https://cdn.example.com/products/runner-pro.glb",
+                "mime_type": "model/gltf-binary",
+                "format": "glb",
+                "filesize": 4200000
+              },
+              {
+                "url": "https://cdn.example.com/products/runner-pro.usdz",
+                "mime_type": "model/vnd.usdz+zip",
+                "format": "usdz",
+                "filesize": 5100000
+              }
+            ]
+          },
+          {
+            "type": "external_video",
+            "url": "https://videos.example.com/embed/123",
+            "name": "Runner Pro trail review",
+            "alt_text": "Reviewer running a trail in the Runner Pro",
+            "duration": 212,
+            "preview": {
+              "url": "https://cdn.example.com/products/runner-pro-review-poster.jpg",
+              "width": 1280,
+              "height": 720
+            }
           }
         ],
         "options": [
@@ -28267,13 +28501,70 @@ ______________________________________________________________________
 
 ### Media
 
-| Name     | Type    | Requirement  | Description                                                  |
-| -------- | ------- | ------------ | ------------------------------------------------------------ |
-| type     | string  | **Required** | Media type. Well-known values: `image`, `video`, `model_3d`. |
-| url      | string  | **Required** | URL to the media resource.                                   |
-| alt_text | string  | Optional     | Accessibility text describing the media.                     |
-| width    | integer | Optional     | Width in pixels (for images/video).                          |
-| height   | integer | Optional     | Height in pixels (for images/video).                         |
+| Name     | Type                                                                  | Requirement  | Description                                                                                                                                                                                                                                                        |
+| -------- | --------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type     | string                                                                | **Required** | Media type. Well-known values: `image`, `video`, `external_video`, `model_3d`. A Platform MUST NOT reject the containing object for an unrecognized value; it MAY present the item from `preview` and `name`, or omit it.                                          |
+| url      | string                                                                | **Required** | URL of the media resource the Platform renders; interpretation is specialized per `type`.                                                                                                                                                                          |
+| name     | string                                                                | Optional     | Human-readable title or label for the media, distinct from `alt_text` (accessibility text). Often present for `video` and `model_3d`.                                                                                                                              |
+| alt_text | string                                                                | Optional     | Accessibility text describing the media.                                                                                                                                                                                                                           |
+| width    | integer                                                               | Optional     | Intrinsic pixel width of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry.                                                                                                                                       |
+| height   | integer                                                               | Optional     | Intrinsic pixel height of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry.                                                                                                                                      |
+| duration | integer                                                               | Optional     | Duration in seconds, for time-based media such as `video` and `external_video`.                                                                                                                                                                                    |
+| preview  | object                                                                | Optional     | Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for `video`, `external_video`, and `model_3d` unless no suitable still exists, and MAY provide it for `image` as a low-resolution placeholder. |
+| sources  | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate renditions of the resource at `url`. The Business SHOULD include the rendition at `url`.                                                                                                                                                                 |
+
+______________________________________________________________________
+
+### Media External Video
+
+| Name    | Type                                                                  | Requirement  | Description                                                                                                                                          |
+| ------- | --------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url     | string                                                                | **Required** | The third-party player the Platform embeds. A video the Business serves as files from any origin, including a CDN, is `video`, not `external_video`. |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Not used: a video presented through a player has no renditions.                                                                                      |
+
+______________________________________________________________________
+
+### Media Image
+
+| Name    | Type                                                                  | Requirement  | Description                                                                                                                                                                             |
+| ------- | --------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url     | string                                                                | **Required** | A directly displayable image.                                                                                                                                                           |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate encodings and sizes of the image (e.g. `image/avif`, `image/webp`, `image/jpeg`; width variants for responsive layout). `url` SHOULD be the most broadly decodable rendition. |
+
+______________________________________________________________________
+
+### Media Model 3D
+
+| Name    | Type                                                                  | Requirement  | Description                                          |
+| ------- | --------------------------------------------------------------------- | ------------ | ---------------------------------------------------- |
+| url     | string                                                                | **Required** | The primary model file (e.g. GLB).                   |
+| width   | integer                                                               | Optional     | Not applicable: a 3D model has no pixel dimensions.  |
+| height  | integer                                                               | Optional     | Not applicable: a 3D model has no pixel dimensions.  |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate file formats of the model (glTF/GLB/USDZ). |
+
+______________________________________________________________________
+
+### Media Source
+
+| Name      | Type    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------- | ------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url       | string  | **Required** | URL to this rendition's file or streaming manifest.                                                                                                                                                                                                                                                                                                                                                   |
+| mime_type | string  | Optional     | IANA media type of this source. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `image/avif`, `image/webp`, `image/jpeg`, `video/mp4`, `video/webm`, `application/vnd.apple.mpegurl` (HLS), `application/dash+xml` (DASH), `model/gltf-binary` (GLB), `model/gltf+json` (glTF), `model/vnd.usdz+zip` (USDZ). |
+| format    | string  | Optional     | Short format token for display/selection. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `avif`, `webp`, `jpg`, `mp4`, `webm`, `m3u8`, `mpd`, `glb`, `gltf`, `usdz`.                                                                                                                                        |
+| width     | integer | Optional     | Pixel width of this rendition. Omitted for adaptive manifests and 3D models.                                                                                                                                                                                                                                                                                                                          |
+| height    | integer | Optional     | Pixel height of this rendition. Omitted for adaptive manifests and 3D models.                                                                                                                                                                                                                                                                                                                         |
+| filesize  | integer | Optional     | File size in bytes. Lets the Platform decide whether to prefetch a large asset (e.g. a multi-megabyte 3D model). Omitted for adaptive-streaming manifests, whose total size is not fixed.                                                                                                                                                                                                             |
+
+______________________________________________________________________
+
+### Media Video
+
+| Name    | Type                                                                  | Requirement  | Description                                                                                   |
+| ------- | --------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| url     | string                                                                | **Required** | A playable rendition of the video: a progressive file or an adaptive-streaming manifest.      |
+| width   | integer                                                               | Optional     | Intrinsic pixel width of the video; a rendition's own dimensions are on its `sources` entry.  |
+| height  | integer                                                               | Optional     | Intrinsic pixel height of the video; a rendition's own dimensions are on its `sources` entry. |
+| sources | Array\[[Media Source](/draft/specification/reference/#media-source)\] | Optional     | Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH).                            |
 
 ______________________________________________________________________
 

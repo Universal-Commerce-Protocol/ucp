@@ -3670,6 +3670,61 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#media-external-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media External Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-model-3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Model 3D
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#message" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6033,6 +6088,61 @@
     <span class="md-ellipsis">
       
         Media
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-external-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media External Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-model-3d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Model 3D
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#media-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Video
       
     </span>
   </a>
@@ -9295,13 +9405,19 @@ within the UCP.</p>
 <td style="text-align: left;">type</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">Media type. Well-known values: <code>image</code>, <code>video</code>, <code>model_3d</code>.</td>
+<td style="text-align: left;">Media type. Well-known values: <code>image</code>, <code>video</code>, <code>external_video</code>, <code>model_3d</code>. A Platform MUST NOT reject the containing object for an unrecognized value; it MAY present the item from <code>preview</code> and <code>name</code>, or omit it.</td>
 </tr>
 <tr>
 <td style="text-align: left;">url</td>
 <td style="text-align: left;">string</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">URL to the media resource.</td>
+<td style="text-align: left;">URL of the media resource the Platform renders; interpretation is specialized per <code>type</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Human-readable title or label for the media, distinct from <code>alt_text</code> (accessibility text). Often present for <code>video</code> and <code>model_3d</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;">alt_text</td>
@@ -9313,13 +9429,209 @@ within the UCP.</p>
 <td style="text-align: left;">width</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Width in pixels (for images/video).</td>
+<td style="text-align: left;">Intrinsic pixel width of the media item, for image and video types; a rendition's own dimensions are on its <code>sources</code> entry.</td>
 </tr>
 <tr>
 <td style="text-align: left;">height</td>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">Optional</td>
-<td style="text-align: left;">Height in pixels (for images/video).</td>
+<td style="text-align: left;">Intrinsic pixel height of the media item, for image and video types; a rendition's own dimensions are on its <code>sources</code> entry.</td>
+</tr>
+<tr>
+<td style="text-align: left;">duration</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Duration in seconds, for time-based media such as <code>video</code> and <code>external_video</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">preview</td>
+<td style="text-align: left;">object</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for <code>video</code>, <code>external_video</code>, and <code>model_3d</code> unless no suitable still exists, and MAY provide it for <code>image</code> as a low-resolution placeholder.</td>
+</tr>
+<tr>
+<td style="text-align: left;">sources</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#media-source">Media Source</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Alternate renditions of the resource at <code>url</code>. The Business SHOULD include the rendition at <code>url</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="media-external-video">Media External Video<a class="headerlink" href="#media-external-video" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The third-party player the Platform embeds. A video the Business serves as files from any origin, including a CDN, is <code>video</code>, not <code>external_video</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">sources</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#media-source">Media Source</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Not used: a video presented through a player has no renditions.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="media-image">Media Image<a class="headerlink" href="#media-image" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">A directly displayable image.</td>
+</tr>
+<tr>
+<td style="text-align: left;">sources</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#media-source">Media Source</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Alternate encodings and sizes of the image (e.g. <code>image/avif</code>, <code>image/webp</code>, <code>image/jpeg</code>; width variants for responsive layout). <code>url</code> SHOULD be the most broadly decodable rendition.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="media-model-3d">Media Model 3D<a class="headerlink" href="#media-model-3d" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The primary model file (e.g. GLB).</td>
+</tr>
+<tr>
+<td style="text-align: left;">width</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Not applicable: a 3D model has no pixel dimensions.</td>
+</tr>
+<tr>
+<td style="text-align: left;">height</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Not applicable: a 3D model has no pixel dimensions.</td>
+</tr>
+<tr>
+<td style="text-align: left;">sources</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#media-source">Media Source</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Alternate file formats of the model (glTF/GLB/USDZ).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="media-source">Media Source<a class="headerlink" href="#media-source" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">URL to this rendition's file or streaming manifest.</td>
+</tr>
+<tr>
+<td style="text-align: left;">mime_type</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">IANA media type of this source. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: <code>image/avif</code>, <code>image/webp</code>, <code>image/jpeg</code>, <code>video/mp4</code>, <code>video/webm</code>, <code>application/vnd.apple.mpegurl</code> (HLS), <code>application/dash+xml</code> (DASH), <code>model/gltf-binary</code> (GLB), <code>model/gltf+json</code> (glTF), <code>model/vnd.usdz+zip</code> (USDZ).</td>
+</tr>
+<tr>
+<td style="text-align: left;">format</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Short format token for display/selection. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: <code>avif</code>, <code>webp</code>, <code>jpg</code>, <code>mp4</code>, <code>webm</code>, <code>m3u8</code>, <code>mpd</code>, <code>glb</code>, <code>gltf</code>, <code>usdz</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">width</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Pixel width of this rendition. Omitted for adaptive manifests and 3D models.</td>
+</tr>
+<tr>
+<td style="text-align: left;">height</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Pixel height of this rendition. Omitted for adaptive manifests and 3D models.</td>
+</tr>
+<tr>
+<td style="text-align: left;">filesize</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">File size in bytes. Lets the Platform decide whether to prefetch a large asset (e.g. a multi-megabyte 3D model). Omitted for adaptive-streaming manifests, whose total size is not fixed.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="media-video">Media Video<a class="headerlink" href="#media-video" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">url</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">A playable rendition of the video: a progressive file or an adaptive-streaming manifest.</td>
+</tr>
+<tr>
+<td style="text-align: left;">width</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Intrinsic pixel width of the video; a rendition's own dimensions are on its <code>sources</code> entry.</td>
+</tr>
+<tr>
+<td style="text-align: left;">height</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Intrinsic pixel height of the video; a rendition's own dimensions are on its <code>sources</code> entry.</td>
+</tr>
+<tr>
+<td style="text-align: left;">sources</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#media-source">Media Source</a>]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH).</td>
 </tr>
 </tbody>
 </table>
