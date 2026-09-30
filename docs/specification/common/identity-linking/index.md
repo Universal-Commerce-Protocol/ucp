@@ -618,8 +618,137 @@ providers, IdPs **SHOULD** include relevant
 grant when available and the user has consented. Businesses
 **SHOULD NOT** auto-link accounts across IdPs by matching email or any
 other claim, and **SHOULD** require user-mediated linking (the user
-authenticating to the existing account) before merging identities. See
+authenticating to the existing account) before merging identities,
+except as permitted by
+[Authoritative Email Matching](#authoritative-email-matching). See
 [Security Considerations](#security-considerations).
+
+#### Authoritative Email Matching
+
+A business **MAY** resolve a JWT authorization grant to an existing
+account by matching the grant's `email` claim when the grant's issuer is
+the **authoritative email verification issuer** for the email's domain.
+The email domain owner establishes this authority by DNS delegation, as
+defined in
+[draft-hardt-email-verification §3](https://www.ietf.org/archive/id/draft-hardt-email-verification-02.html#section-3){ target="_blank" }.
+Only the domain owner can publish the delegation. As a result, a
+verified email asserted by the delegated issuer is as strong as proof of
+mailbox control, and it does not extend any other provider's
+verification process into the business's account namespace (see
+[Security Considerations](#security-considerations)).
+
+This check is **OPTIONAL**. Businesses that do not implement it
+**MUST** apply the default rule in
+[Business Token Issuance](#business-token-issuance): no auto-linking by
+email.
+
+**Preconditions.** Email matching is permitted only when **all** of the
+following hold:
+
+1. The grant has been fully validated per
+   [Business Token Issuance](#business-token-issuance) (signature, `iss`,
+   `aud`, `exp`, `jti`).
+2. The grant contains an `email` claim and an `email_verified` claim
+   whose value is the JSON boolean `true`. Businesses **MUST NOT** accept
+   string values such as `"true"`.
+3. The grant's `iss` is the authoritative issuer for the email domain,
+   as determined by the
+   [Authoritative Issuer Check](#authoritative-issuer-check).
+4. The business itself verified the existing account's email address
+   (e.g., via a confirmation link or code). Businesses **MUST NOT**
+   match against unverified account emails. This prevents
+   pre-account hijacking, where an attacker registers the victim's
+   address before the victim links.
+5. The existing account is not already linked to a different `sub` from
+   the same `iss`. If it is, the business **MUST NOT** auto-link, because
+   the domain owner may have reassigned the address.
+
+Businesses **MUST** compare the complete email address using the same
+normalization they apply for account uniqueness. They **MUST NOT** apply
+provider-specific transformations such as removing dots or `+` tags.
+
+If any precondition fails, the business **MUST** treat the grant as
+having no email match and apply the default rule: resolve by
+`(iss, sub)` only, and require user-mediated linking before merging with
+an existing account.
+
+##### Authoritative Issuer Check
+
+1. **Extract the email domain.** Take the portion of the `email` claim
+   after the last `@` as `EMAIL_DOMAIN`. Convert it to lowercase and,
+   for internationalized domain names, to its A-label form.
+2. **Resolve the DNS delegation.** Query the DNS `TXT` record for
+   `_email-verification.EMAIL_DOMAIN`. There **MUST** be exactly one
+   such record, and its value **MUST** start with `iss=` followed by the
+   issuer identifier (`ISSUER_FQDN`). If there are zero records, more
+   than one record, or a malformed value, no authoritative issuer exists.
+3. **Derive `ISSUER_ORIGIN` from the record.** The record carries
+   Fully Qualified Domain Name (FQDN). `ISSUER_ORIGIN` is the HTTPS
+   origin of `ISSUER_FQDN`: the string `https://` followed by
+   `ISSUER_FQDN`, with no port, no path, and no trailing slash.
+   Reject any `ISSUER_FQDN` value that is not a bare FQDN.
+4. **Fetch the issuer metadata.** Fetch
+   `ISSUER_ORIGIN/.well-known/email-verification` and parse it
+   as JSON. The response **MUST** contain an `issuer` member.
+5. **Compare issuers.** The metadata `issuer` value **MUST** match
+   the `ISSUER_ORIGIN` byte-for-byte, and **MUST** match the
+   JWT authorization grant's `iss` claim byte-for-byte, without
+   normalization (see `issuer` exactness in
+   [Security Considerations](#security-considerations)).
+
+The business **MUST** fail closed if DNS resolution fails, times out, or
+returns `SERVFAIL`, or if the metadata fetch returns a non-`2xx`
+response. In that case it treats the issuer as non-authoritative and
+applies the default rule. Businesses **SHOULD** validate DNSSEC where the
+zone is signed. They **MAY** cache DNS results for no longer than the
+record TTL, and metadata for no longer than its HTTP cache lifetime.
+
+The check establishes **authority only**. The business **MUST** still
+verify the grant's signature against the `jwks_uri` in the IdP's OAuth
+authorization server metadata (see
+[Business Token Issuance](#business-token-issuance)). It **MUST NOT** use
+keys published in the email verification metadata, which apply to a
+different credential format.
+
+**Example.** A business lists `https://accounts.example-login.app` in
+`config.providers`. It receives a grant with
+`iss: "https://accounts.example-login.app"`,
+`email: "jane@mail.example"`, and `email_verified: true`. The business
+looks up the DNS record:
+
+```text
+_email-verification.mail.example. TXT "iss=accounts.example-login.app"
+```
+
+It calculates issuer origin as `https://accounts.example-login.app`.
+
+It then fetches `https://accounts.example-login.app/.well-known/email-verification`:
+
+<!-- ucp:example skip reason="Email verification issuer metadata, not UCP payload" -->
+```json
+{
+  "issuer": "https://accounts.example-login.app",
+  "issuance_endpoint": "https://accounts.example-login.app/email-verification/issue",
+  "jwks_uri": "https://accounts.example-login.app/email-verification/jwks",
+  "signing_alg_values_supported": ["EdDSA"]
+}
+```
+
+The `issuer` value equals issuer origin and equals the grant's `iss`,
+so the IdP is authoritative for `mail.example`. Suppose the business
+has an account whose verified email is `jane@mail.example`, and that
+account is not linked to another `sub` from this `iss`. The business
+**MAY** then link the grant's `(iss, sub)` to that account. If the
+DNS record named a different issuer, or no record existed, the
+business **MUST NOT** auto-link by email.
+
+**After matching.** Once the accounts are linked, the business **MUST**
+record the `(iss, sub)` pair against the account and use it, not
+`email`, for all later resolution. A later change to the `email` claim
+**MUST NOT** re-target the link. Businesses **SHOULD** notify the account
+holder through an existing channel (e.g., the account's email) when email
+matching creates a new IdP link, and **SHOULD** provide a way to remove
+it.
 
 ### Chaining Errors at the Token Endpoint
 
@@ -698,6 +827,15 @@ authorization grants when the user has consented to share them — at
 minimum `email` and `email_verified` when applicable — to support
 account provisioning and UX hints at the business. Standard claims are
 advisory; stable per-IdP identification remains `(iss, sub)`.
+
+IdPs **MUST** set `email_verified` to `true` only for addresses whose
+mailbox control they have verified, or for which they are the
+authoritative email verification issuer. Some IdPs are delegated
+email verification issuers for one or more domains and want businesses
+to rely on [Authoritative Email Matching](#authoritative-email-matching).
+Such an IdP **MUST** use the same value for the `issuer` member of its
+`/.well-known/email-verification` metadata and the `iss` claim of its
+JWT authorization grants.
 
 ## Scopes
 
@@ -1035,6 +1173,19 @@ field conveys the business's value prompt to the platform (e.g.,
   Businesses **SHOULD** require user-mediated linking — the user
   demonstrating control of the existing account via current-session
   authentication or equivalent — before merging accounts across IdPs.
+* **Authoritative email matching.**
+  [Authoritative Email Matching](#authoritative-email-matching) is the
+  only exception to the cross-IdP linking guidance above. When the email
+  domain owner has delegated email verification to the grant's issuer
+  via DNS, only that issuer can assert `email_verified=true` for the
+  domain. This closes the cross-provider takeover path described above.
+  The remaining risks are domain expiry followed by re-registration, and
+  mailbox reassignment by the domain owner. Neither exceeds the exposure
+  of the business's own email-based account recovery: whoever controls
+  the domain can already receive a password-reset email. The
+  same-`iss`/different-`sub` conflict check, DNSSEC validation, and link
+  notifications further limit these risks. Businesses that do not accept
+  this exposure **SHOULD NOT** enable email matching.
 
 ## Future Extensibility
 
