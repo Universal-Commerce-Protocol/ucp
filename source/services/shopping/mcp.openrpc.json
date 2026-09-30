@@ -340,6 +340,11 @@
           "name": "id",
           "required": true,
           "schema": {"type": "string", "description": "The unique identifier of the order."}
+        },
+        {
+          "name": "access_token",
+          "required": false,
+          "schema": {"type": "string", "description": "Order credential issued at checkout completion, authorizing access to this order. Omit when the request is authorized by platform credentials or a user identity token."}
         }
       ],
       "result": {
