@@ -394,8 +394,10 @@ whose `iss` does not match a listed `oauth2` mechanism entry (see
     business domain via [Discovery](#discovery).
 * **When present:** platforms **MAY** select a mechanism entry whose
     `type` they support and chain identity via the
-    [Accelerated IdP Flow](#accelerated-idp-flow) — typically one
-    belonging to an IdP they already hold a valid upstream token for.
+    [Accelerated IdP Flow](#accelerated-idp-flow). For `oauth2`
+    entries, selection is anchored to an issuer the platform already
+    recognizes, never to the provider key (see
+    [Provider Selection](#provider-selection)).
     If no listed mechanism is supported or suitable, platforms **MUST**
     fall back to direct OAuth on the business domain.
 * **Self-listing forbidden.** Businesses **MUST NOT** list their own
@@ -413,8 +415,12 @@ namespace; its value is an array of mechanism entries.
 A provider key is a reverse-domain **identifier**, not a schema-bearing entity:
 it declares no `schema` URL, so the
 [Authority Binding](../../overview/index.md#authority-binding) (which binds an entity's
-`schema` URL to its namespace authority) does not apply here. A provider's trust
-anchor is its `auth_url`, governed by the discovery rules below; binding
+`schema` URL to its namespace authority) does not apply here. The `auth_url`
+of an entry names the issuer identifier the business accepts in the `iss` of a
+JWT authorization grant (see
+[Business Token Issuance](#business-token-issuance)). A platform trusts an
+entry only when its `auth_url` is an issuer the platform already recognizes
+(see [Provider Selection](#provider-selection)); binding
 `auth_url` to the provider's namespace authority is a possible future hardening,
 tracked separately.
 
@@ -431,8 +437,9 @@ The `type` value is an open string, not a closed enumeration. Platforms
 out (see [Provider Selection](#provider-selection)) rather than rejecting the
 business's configuration.
 
-For `oauth2` providers, platforms **MUST** discover the authorization server
-metadata from `auth_url` using the same two-tier metadata hierarchy as
+For a selected `oauth2` entry (see [Provider Selection](#provider-selection)),
+platforms **MUST** discover the authorization server metadata from its
+`auth_url` using the same two-tier metadata hierarchy as
 [Discovery](#discovery) Step 2 (RFC 8414 primary with §3.1 path insertion,
 OIDC fallback on 404 only), treating `auth_url` as the issuer. The
 protected-resource step does not apply — `auth_url` is already the IdP
@@ -443,10 +450,35 @@ issuer — and the business validates the JWT grant's `iss` against it per
 
 Platforms iterate over the `(provider key, mechanism entry)` pairs in
 the business's `config.providers` map and select an entry they support
-— typically one belonging to an IdP they already hold a valid upstream
-token for, enabling the [Accelerated IdP Flow](#accelerated-idp-flow).
+that meets the requirements below, enabling the
+[Accelerated IdP Flow](#accelerated-idp-flow).
 Mechanism entries under the same provider key are alternatives; a
 platform may match any one of them.
+
+**Issuer anchoring.** `config.providers` is input supplied by the
+business. A platform recognizes an issuer when it has a client
+relationship with that IdP established independently of any business
+profile: it is a registered OAuth client there and it obtained the
+issuer identifier
+([RFC 8414 §2](https://datatracker.ietf.org/doc/html/rfc8414#section-2){ target="_blank" })
+from its own configuration, from metadata discovery it initiated
+from that configuration, or as the `iss` of a token it has validated as
+issued by that IdP, never from a business profile. For
+`oauth2` entries, platforms **MUST** select an entry only when its
+`auth_url` is identical to a recognized issuer identifier, compared as
+character strings with no normalization, as
+[RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }
+requires for issuer identifiers (see `issuer` exactness in
+[Security Considerations](#security-considerations)). The
+`subject_token` presented in the [Flow](#flow) **MUST** have been
+issued by that IdP. Platforms **MUST NOT** run metadata discovery
+against, authenticate to, or present a `subject_token` to any endpoint
+derived from an `auth_url` that fails this check. The provider key is
+a namespace identifier, not grounds for selection: a familiar key with
+an unrecognized `auth_url` is not a match. An `oauth2` entry that fails
+this check is not suitable; when no listed entry is suitable, platforms
+fall back to direct OAuth on the business domain as required in
+[Identity Providers](#identity-providers).
 
 A mechanism's `type` determines whether it participates in the token
 and scope model. The `oauth2` type chains identity via token exchange
@@ -455,7 +487,8 @@ and contributes to the scopes of the business-issued token. Other types
 participation in the scope or token-issuance model. Selection turns on
 whether the platform *supports* a mechanism's `type` and holds (or can
 obtain) a suitable upstream identity, independent of whether that type
-issues a token.
+issues a token. For `oauth2` entries, selection also requires the issuer
+anchoring above.
 
 When a mechanism entry declares `required_claims`, platforms **SHOULD**
 filter out that entry during selection if their upstream identity lacks
@@ -505,8 +538,10 @@ direct OAuth flows (always available via discovery):
 }
 ```
 
-The platform can use the Accelerated IdP Flow with `app.example.login` if
-it already holds a valid token there; otherwise it runs the standard
+The platform can use the Accelerated IdP Flow with this entry only if its
+`auth_url` is an issuer the platform already recognizes and it holds, or can
+obtain, a token there (see [Provider Selection](#provider-selection));
+otherwise it runs the standard
 [Account Linking Flow](#account-linking-flow) against the business domain
 via [Discovery](#discovery).
 
@@ -527,7 +562,9 @@ mandate: `aud` **MUST** be a single-valued URI plus a unique `jti` (see
 ### Flow
 
 1. Platform discovers `config.providers` in the business's identity linking
-   capability and selects a provider it already holds a valid token for.
+   capability and selects an `oauth2` entry whose `auth_url` is an issuer
+   it already recognizes and holds, or can obtain, a valid token for (see
+   [Provider Selection](#provider-selection)).
 2. Platform requests a JWT authorization grant from the IdP via token
    exchange ([RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693){ target="_blank" })
    at the IdP's token endpoint:
@@ -988,6 +1025,26 @@ field conveys the business's value prompt to the platform (e.g.,
   return `iss` in every authorization response. Without `iss` validation,
   an attacker that controls one authorization server can redirect a
   victim's authorization code to a different server.
+* **Issuer anchoring for provider selection.** In the
+  [Accelerated IdP Flow](#accelerated-idp-flow), `config.providers` is
+  input supplied by the business, while the `subject_token` the platform
+  exchanges is a bearer credential issued by its own IdP. Platforms
+  **MUST** apply the issuer anchoring rule in
+  [Provider Selection](#provider-selection) before any discovery from the
+  `auth_url` of an entry or any token exchange. Without it, a business that lists a familiar provider
+  key with an `auth_url` it controls leads a platform that matches on
+  the key to discover a token endpoint the business controls and present
+  its `subject_token` there, together with any client credential it uses at
+  the IdP token endpoint. As
+  [RFC 9700 §4.4.2](https://datatracker.ietf.org/doc/html/rfc9700#section-4.4.2){ target="_blank" }
+  notes for mix-up, storing an authorization server URL is not sufficient,
+  since an attacker can pair a familiar URL with a token endpoint under
+  their own control.
+  This is the chaining path counterpart of the Mix-Up Attack above:
+  RFC 9207 binds the authorization response to the issuer the platform
+  chose; issuer anchoring binds provider selection to an issuer the
+  platform already recognizes, one layer earlier, before any code or
+  grant exists.
 * **Authentication challenges.** Businesses **MUST** emit
   `WWW-Authenticate: Bearer` challenges per
   [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
