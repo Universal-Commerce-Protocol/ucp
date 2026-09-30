@@ -10,7 +10,7 @@
     "id": {
       "type": "string",
       "description": "Group identifier for referencing merchant-generated groups in updates.",
-      "ucp_request": {"create": "omit", "update": "required"}
+      "ucp_request": { "create": "omit", "update": "required" }
     },
     "line_item_ids": {
       "type": "array",

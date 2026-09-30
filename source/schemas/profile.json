@@ -46,27 +46,42 @@
       "allOf": [
         {
           "title": "EC keys carry crv, x, y",
-          "if": { "properties": { "kty": { "const": "EC" } }, "required": ["kty"] },
+          "if": {
+            "properties": { "kty": { "const": "EC" } },
+            "required": ["kty"]
+          },
           "then": { "required": ["crv", "x", "y"] }
         },
         {
           "title": "OKP keys carry crv, x",
-          "if": { "properties": { "kty": { "const": "OKP" } }, "required": ["kty"] },
+          "if": {
+            "properties": { "kty": { "const": "OKP" } },
+            "required": ["kty"]
+          },
           "then": { "required": ["crv", "x"] }
         },
         {
           "title": "P-256 pairs with ES256",
-          "if": { "properties": { "crv": { "const": "P-256" } }, "required": ["crv"] },
+          "if": {
+            "properties": { "crv": { "const": "P-256" } },
+            "required": ["crv"]
+          },
           "then": { "properties": { "alg": { "const": "ES256" } } }
         },
         {
           "title": "P-384 pairs with ES384",
-          "if": { "properties": { "crv": { "const": "P-384" } }, "required": ["crv"] },
+          "if": {
+            "properties": { "crv": { "const": "P-384" } },
+            "required": ["crv"]
+          },
           "then": { "properties": { "alg": { "const": "ES384" } } }
         },
         {
           "title": "Ed25519 pairs with EdDSA",
-          "if": { "properties": { "crv": { "const": "Ed25519" } }, "required": ["crv"] },
+          "if": {
+            "properties": { "crv": { "const": "Ed25519" } },
+            "required": ["crv"]
+          },
           "then": { "properties": { "alg": { "const": "EdDSA" } } }
         }
       ],

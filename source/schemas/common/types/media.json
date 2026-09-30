@@ -4,10 +4,7 @@
   "title": "Media",
   "description": "One logical media item — such as an image, a video, or a 3D model. `url` identifies the resource the Platform renders; `sources` lists alternate renditions; `preview` is a still.",
   "type": "object",
-  "required": [
-    "type",
-    "url"
-  ],
+  "required": ["type", "url"],
   "properties": {
     "type": {
       "type": "string",
@@ -44,9 +41,7 @@
     "preview": {
       "type": "object",
       "description": "Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for `video`, `external_video`, and `model_3d` unless no suitable still exists, and MAY provide it for `image` as a low-resolution placeholder.",
-      "required": [
-        "url"
-      ],
+      "required": ["url"],
       "properties": {
         "url": {
           "type": "string",

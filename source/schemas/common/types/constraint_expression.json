@@ -19,17 +19,14 @@
       "description": "Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.",
       "minProperties": 1,
       "additionalProperties": {
-        "oneOf": [
-          {"$ref": "#"},
-          {"$ref": "#/$defs/value_constraint"}
-        ]
+        "oneOf": [{ "$ref": "#" }, { "$ref": "#/$defs/value_constraint" }]
       }
     },
     "anyOf": {
       "type": "array",
       "description": "Alternative Object Constraints. The constrained object must satisfy at least one. A branch must be non-empty: an empty branch is satisfied by every object and neutralizes the alternation.",
       "minItems": 1,
-      "items": {"$ref": "#", "minProperties": 1}
+      "items": { "$ref": "#", "minProperties": 1 }
     }
   },
   "additionalProperties": false,
@@ -37,10 +34,7 @@
     "value_constraint": {
       "type": "object",
       "description": "A Value Constraint containing `enum`, `const`, or both.",
-      "anyOf": [
-        {"required": ["enum"]},
-        {"required": ["const"]}
-      ],
+      "anyOf": [{ "required": ["enum"] }, { "required": ["const"] }],
       "properties": {
         "enum": {
           "type": "array",

@@ -32,17 +32,13 @@
       "meta": {
         "type": "object",
         "description": "Request metadata.",
-        "required": [
-          "ucp-agent"
-        ],
+        "required": ["ucp-agent"],
         "additionalProperties": true,
         "properties": {
           "ucp-agent": {
             "type": "object",
             "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
-            "required": [
-              "profile"
-            ],
+            "required": ["profile"],
             "properties": {
               "profile": {
                 "type": "string",
@@ -160,10 +156,7 @@
                 "$ref": "#/components/schemas/meta"
               },
               {
-                "required": [
-                  "ucp-agent",
-                  "idempotency-key"
-                ]
+                "required": ["ucp-agent", "idempotency-key"]
               }
             ]
           }
@@ -203,10 +196,7 @@
                 "$ref": "#/components/schemas/meta"
               },
               {
-                "required": [
-                  "ucp-agent",
-                  "idempotency-key"
-                ]
+                "required": ["ucp-agent", "idempotency-key"]
               }
             ]
           }

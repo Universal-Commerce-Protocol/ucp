@@ -4,10 +4,7 @@
   "title": "Rating",
   "description": "Product rating aggregate.",
   "type": "object",
-  "required": [
-    "value",
-    "scale_max"
-  ],
+  "required": ["value", "scale_max"],
   "properties": {
     "value": {
       "type": "number",

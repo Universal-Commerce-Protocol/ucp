@@ -1,9 +1,4 @@
 {
-  "extends": [
-    "stylelint-config-standard"
-  ],
-  "ignoreFiles": [
-    "local_preview/**/*",
-    "site/**/*"
-  ]
+  "extends": ["stylelint-config-standard"],
+  "ignoreFiles": ["local_preview/**/*", "site/**/*"]
 }
