@@ -218,11 +218,11 @@ Define the endpoint to create a checkout session. UCP requires `Idempotency-Key`
       const body = validation.data;
 
       // Generate a unique checkout session ID
-      const sessionId = `chk_${uuidv4().substring(0, 10)}`;
+      const sessionId = `chk_${uuidv4().replace(/-/g, '').substring(0, 10)}`;
     ```
 
 !!! note
-    If the required UCP headers are missing, FastAPI (Python) will automatically return an **HTTP 422 Unprocessable Entity** error due to its built-in validation. In our Express (Node.js) implementation, we manually return an **HTTP 400 Bad Request** error.
+    If the required UCP headers are missing, FastAPI (Python) will automatically return an **HTTP 422 Unprocessable Entity** error due to its built-in validation. In our Express (Node.js) implementation, we manually return an **HTTP 400 Bad Request** error. For simplicity, this quickstart returns plain JSON errors (such as `{"error": "..."}` or FastAPI's `{"detail": "..."}`) for missing headers, validation failures, and `404` responses; production servers must return the specification's standard error format (see [Error Responses](shopping/checkout/rest.md#error-responses) and [Core Specification — Error Handling](overview/index.md#error-handling)).
 
 ### 3. Business Logic (Process Items & Calculate Totals)
 
@@ -627,14 +627,14 @@ Retrieve the session using the `id` returned from the previous step:
 === "Python"
 
     ```bash
-    curl http://127.0.0.1:8080/checkout-sessions/<replace-with-your-checkout-id> \
+    curl "http://127.0.0.1:8080/checkout-sessions/<replace-with-your-checkout-id>" \
       -H "UCP-Agent: profile=\"https://platform.example/profile\""
     ```
 
 === "Node.js"
 
     ```bash
-    curl http://127.0.0.1:3000/checkout-sessions/<replace-with-your-checkout-id> \
+    curl "http://127.0.0.1:3000/checkout-sessions/<replace-with-your-checkout-id>" \
       -H "UCP-Agent: profile=\"https://platform.example/profile\""
     ```
 
@@ -824,7 +824,7 @@ If you want to verify your code, expand the section below to see the complete fi
           const body = validation.data;
 
           // Generate a unique checkout session ID
-          const sessionId = `chk_${uuidv4().substring(0, 10)}`;
+          const sessionId = `chk_${uuidv4().replace(/-/g, '').substring(0, 10)}`;
 
           // Map input line items to output line items with pricing
           const outputLineItems = body.line_items.map((item, index) => {
