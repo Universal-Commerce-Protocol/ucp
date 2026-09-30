@@ -630,7 +630,7 @@ account by matching the grant's `email` claim when the grant's issuer is
 the **authoritative email verification issuer** for the email's domain.
 The email domain owner establishes this authority by DNS delegation, as
 defined in
-[draft-hardt-email-verification §3](https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#section-3){ target="_blank" }.
+[draft-hardt-email-verification §3](https://www.ietf.org/archive/id/draft-hardt-email-verification-02.html#section-3){ target="_blank" }.
 Only the domain owner can publish the delegation. As a result, a
 verified email asserted by the delegated issuer is as strong as proof of
 mailbox control, and it does not extend any other provider's
@@ -680,12 +680,18 @@ an existing account.
 2. **Resolve the DNS delegation.** Query the DNS `TXT` record for
    `_email-verification.EMAIL_DOMAIN`. There **MUST** be exactly one
    such record, and its value **MUST** start with `iss=` followed by the
-   issuer identifier (`ISSUER`). If there are zero records, more than one
-   record, or a malformed value, no authoritative issuer exists.
-3. **Fetch the issuer metadata.** Fetch
-   `https://ISSUER/.well-known/email-verification` and parse it as JSON.
-   The response **MUST** contain an `issuer` member.
-4. **Compare issuers.** The metadata `issuer` value **MUST** match the
+   issuer identifier (`ISSUER_FQDN`). If there are zero records, more
+   than one record, or a malformed value, no authoritative issuer exists.
+3. **Derive `ISSUER_ORIGIN` from the record.** The record carries
+   Fully Qualified Domain Name (FQDN). `ISSUER_ORIGIN` is the HTTPS
+   origin of `ISSUER_FQDN`: the string `https://` followed by
+   `ISSUER_FQDN`, with no port, no path, and no trailing slash.
+   Reject any `ISSUER_FQDN` value that is not a bare FQDN.
+4. **Fetch the issuer metadata.** Fetch
+   `ISSUER_ORIGIN/.well-known/email-verification` and parse it
+   as JSON. The response **MUST** contain an `issuer` member.
+5. **Compare issuers.** The metadata `issuer` value **MUST** match
+   the `ISSUER_ORIGIN` byte-for-byte, and **MUST** match the
    JWT authorization grant's `iss` claim byte-for-byte, without
    normalization (see `issuer` exactness in
    [Security Considerations](#security-considerations)).
@@ -714,6 +720,8 @@ looks up the DNS record:
 _email-verification.mail.example. TXT "iss=accounts.example-login.app"
 ```
 
+It calculates issuer origin as `https://accounts.example-login.app`.
+
 It then fetches `https://accounts.example-login.app/.well-known/email-verification`:
 
 <!-- ucp:example skip reason="Email verification issuer metadata, not UCP payload" -->
@@ -726,12 +734,13 @@ It then fetches `https://accounts.example-login.app/.well-known/email-verificati
 }
 ```
 
-The `issuer` value equals the grant's `iss`, so the IdP is authoritative
-for `mail.example`. Suppose the business has an account whose verified
-email is `jane@mail.example`, and that account is not linked to another
-`sub` from this `iss`. The business **MAY** then link the grant's
-`(iss, sub)` to that account. If the DNS record named a different issuer,
-or no record existed, the business **MUST NOT** auto-link by email.
+The `issuer` value equals issuer origin and equals the grant's `iss`,
+so the IdP is authoritative for `mail.example`. Suppose the business
+has an account whose verified email is `jane@mail.example`, and that
+account is not linked to another `sub` from this `iss`. The business
+**MAY** then link the grant's `(iss, sub)` to that account. If the
+DNS record named a different issuer, or no record existed, the
+business **MUST NOT** auto-link by email.
 
 **After matching.** Once the accounts are linked, the business **MUST**
 record the `(iss, sub)` pair against the account and use it, not
