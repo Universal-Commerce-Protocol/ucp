@@ -17,6 +17,10 @@
       "type": "string",
       "description": "ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP').",
       "pattern": "^[A-Z]{3}$"
+    },
+    "price_treatment": {
+      "$ref": "price_treatment.json",
+      "description": "How the amount should be interpreted for display and downstream calculation. When omitted, treatment follows the resolved market."
     }
   }
 }

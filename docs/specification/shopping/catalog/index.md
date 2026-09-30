@@ -189,7 +189,13 @@ Businesses determine market assignment—including currency—based on context
 signals. Price filter values are denominated in `context.currency`; when
 the presentment currency differs, businesses SHOULD convert before applying
 (see [Price Filter](search.md#price-filter)). Response prices include
-explicit currency codes confirming the resolution.
+explicit currency codes confirming the resolution. Where tax treatment
+varies by market, `price_treatment.tax.inclusion` states whether the
+amount includes tax as resolved for that market, so agents do not have
+to infer it from the country. An absent field is equivalent to
+`not_asserted`. Prices within a single product response **SHOULD**
+share the same tax treatment. During checkout, the itemized `totals`
+breakdown remains authoritative.
 
 When `context.eligibility` claims are present, Businesses that accept them
 **MAY** adjust `price` / `list_price` directly for strikethrough display and
