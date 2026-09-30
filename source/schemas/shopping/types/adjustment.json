@@ -16,8 +16,7 @@
       "description": "Adjustment event identifier."
     },
     "type": {
-      "type": "string",
-      "description": "Type of adjustment (open string). Typically money-related like: refund, return, credit, price_adjustment, dispute, cancellation. Can be any value that makes sense for the merchant's business."
+      "$ref": "adjustment_type.json"
     },
     "occurred_at": {
       "type": "string",

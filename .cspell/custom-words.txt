@@ -82,6 +82,7 @@ atok
 backorder
 barcodes
 cartebancaire
+chargeback
 checkout
 cimd
 credentialization
