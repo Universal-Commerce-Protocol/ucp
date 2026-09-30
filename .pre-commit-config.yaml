@@ -97,6 +97,20 @@ repos:
         pass_filenames: false
         files: ^scripts/(check_links|test_check_links)\.py$
         stages: [pre-commit, pre-push]
+      - id: validate-cancellation-publication
+        # Publication completeness is separate from schedule selection.
+        name: Validate cancellation publication safety
+        entry: uv run --frozen python scripts/test_cancellation_publication.py
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            source/schemas/
+            |scripts/test_cancellation_(schedule|lab|publication)\.py$
+            |scripts/fixtures/lodging_cancellation_publication\.json$
+            |docs/specification/lodging/extensions/cancellation-policy\.md$
+          )
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:

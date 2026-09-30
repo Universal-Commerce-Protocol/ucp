@@ -90,6 +90,9 @@ jobs:
       - name: Validate cancellation multi-stay integration
         run: uv run python scripts/test_cancellation_booking.py
 
+      - name: Validate cancellation publication safety
+        run: uv run python scripts/test_cancellation_publication.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest

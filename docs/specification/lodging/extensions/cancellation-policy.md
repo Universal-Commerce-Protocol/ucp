@@ -21,9 +21,11 @@
 The Cancellation Policy Extension defines the
 `dev.ucp.lodging.policy.cancellation` policy type on the core
 [`policies[]`](../../overview/index.md#policies) primitive for the lodging
-service. It adds pre-purchase machine-readable cancellation terms so Platforms
-can answer whether cancellation is free, which cutoff applies, and what outcome
-follows without parsing legal prose.
+service. For policies that can be represented faithfully, it adds pre-purchase
+machine-readable cancellation terms so Platforms can identify the applicable
+cutoff and outcome without parsing legal prose. Policies that cannot be
+represented faithfully retain their complete human-readable terms without a
+structured schedule.
 
 **Key features:**
 
@@ -112,9 +114,10 @@ replace it with a classification derived from an outcome kind or an inferred
 monetary basis.
 
 `refundability` is a point-in-time summary. For evaluation at an explicit `at`
-instant, `schedule` governs: a Platform **MUST** select the applicable schedule
-outcome and **MUST NOT** extrapolate `refundability` to that instant. Crossing a
-cutoff later does not make the earlier response contradictory.
+instant, a valid schedule governs, subject to the completeness and fallback
+rules below. A Platform **MUST NOT** extrapolate `refundability` to that instant
+or use it to repair unavailable structured evaluation. Crossing a cutoff later
+does not make the earlier response contradictory.
 
 ### Deterministic schedule
 
@@ -122,6 +125,44 @@ cutoff later does not make the earlier response contradictory.
 is unavailable; it does not mean that the booking is non-refundable. When
 present, `anchor`, a non-empty `tiers` array, and `after_last_tier` form one
 atomic value.
+
+#### Publication completeness
+
+A Business **MUST** ensure that a published schedule faithfully represents all
+material conditions that affect its declared cancellation outcomes for the
+policy's governed scope and reservation context. This obligation covers the
+represented timeline, not only the response-generation instant. Agreement at
+one instant does not make a schedule complete.
+
+If an applicable exception, qualification, or unresolved condition can change
+an outcome and cannot be represented faithfully by this version, the Business
+**MUST** omit `schedule` and preserve the complete terms in `description`.
+The Business **MUST NOT** publish only the representable part as if it were
+sufficient. Schema validation establishes the shape of the data, not fidelity
+to the source policy; the absence of a validation error does not establish
+permission to publish a schedule.
+
+For example, an arrival-relative schedule alone is insufficient when an
+applicable booking-relative grace period changes the result from a partial to
+a full refund. A pre-purchase response **MUST NOT** substitute session creation,
+response generation, or the current time for an unknown booking-completion
+instant. If authoritative reservation context resolves a condition, the
+Business may emit a schedule only when the resulting complete timeline is
+faithfully representable; merely assuming the condition is inapplicable is
+not sufficient. A change to that governing context requires reassessment.
+
+This version defines neither `booking_grace` nor a partial-schedule marker.
+A Business **MUST NOT** rely on an additional member that a consumer may ignore
+to qualify or override the defined schedule semantics. Adding `partial` or an
+unrecognized grace member does not make an incomplete schedule safe. This
+does not prohibit unrelated extension metadata; support for new outcome-changing
+semantics is a separate extension-design and compatibility question.
+
+The publication obligation belongs to the Business, which knows its terms.
+It does not require Platforms to parse arbitrary legal prose to discover
+missing clauses. A Platform that independently knows that a material condition
+is missing or unresolved **MUST** treat structured evaluation as unavailable,
+even if the schedule passes schema validation, and follow the fallback rules.
 
 #### Representation
 
@@ -155,6 +196,14 @@ an elapsed duration. That difference can change across daylight-saving time
 transitions. `P2D` always means 48 elapsed hours, not two local-calendar days.
 This producer-side explanation does not add a timezone or policy-template
 field, or define a general template compiler.
+
+The Business **MUST** resolve the anchor and each cutoff according to its
+actual enforced terms, including the property timezone and boundary behavior.
+Phrases such as "20 days before check-in" or a date-only `stay_dates` value do
+not by themselves specify a cutoff time, calendar-day arithmetic, or whether
+the exact boundary is included. Neither party may silently choose midnight or
+check-in time to fill that gap. If those choices are unresolved and affect the
+outcome, the Business **MUST** omit `schedule` until they are clarified.
 
 #### Evaluation
 
@@ -203,6 +252,17 @@ Percentage and unit-deduction outcomes are deterministic symbolic terms, but
 they do not necessarily imply a cash amount. A Platform **MUST NOT** calculate
 money unless the targeted Booking data supplies an unambiguous basis.
 
+The governed scope and monetary basis are distinct. For example, a refund of
+50% of the accommodation charge plus all cleaning fees and taxes is not a 50%
+refund of the whole booking. A Business **MUST NOT** apply one component's
+refund percentage to the whole booking or classify the whole
+scope as non-refundable merely because the accommodation charge is
+non-refundable. If the component terms cannot be represented faithfully for
+the governed scope, the Business **MUST** omit `schedule`. The Platform
+**MUST NOT** assume that `subtotal`, `total`, the amount paid, or a deposit is
+the percentage basis. Keeping a percentage symbolic does not make a known
+scope or basis mismatch safe.
+
 A `night` measure specifies a count, not a machine-readable pricing basis. Its
 `display_text` does not identify which night's rate applies or encode whether
 taxes and fees are excluded. If the Business has resolved a reservation's
@@ -247,10 +307,14 @@ states applies when the response is created. When present, `schedule`
 **MUST NOT** contradict `description`.
 
 Detecting contradictions does not require a Platform to parse legal prose. If a
-contradiction is independently known, the schedule is invalid, ordered-tier
-constraints are violated, or a selected outcome is unsupported, the Platform
+contradiction or material omission is independently known, a necessary condition
+is unresolved, the schedule is invalid, ordered-tier constraints are violated,
+or a selected outcome is unsupported, the Platform
 **MUST NOT** present a guessed structured result and **SHOULD** present
-`description` and `url`.
+`description` and `url`. When a known discrepancy or unresolved condition prevents
+a reliable answer, the Platform **MUST** make that limitation visible rather
+than silently choosing one conflicting representation. Falling back to prose
+does not itself resolve an ambiguous policy or authorize a numerical answer.
 
 ### Consumer interpretation examples (non-normative)
 
@@ -304,6 +368,9 @@ emits `schedule`, it **MUST** emit a valid ordered schedule and keep it
 consistent with `description`. Its outcome at response generation **MUST**
 agree with the `refundability` snapshot. The Business preserves the complete
 legal summary in `description` and **SHOULD** link the full terms with `url`.
+The Business **MUST** apply the publication-completeness rule before emitting
+the schedule; a Platform's possible detection of a missing clause is not a
+substitute for this check.
 
 ### Platform
 
@@ -456,6 +523,25 @@ template checks use IANA timezone data to verify the local-to-instant
 derivations before testing schedule selection. Running these checks requires
 IANA timezone data; they are not a general policy-template compiler or tests
 of nonexistent/repeated-hour resolution.
+
+A separate synthetic publication-safety suite is provided in
+`scripts/fixtures/lodging_cancellation_publication.json` and checked with
+`python3 scripts/test_cancellation_publication.py`. It contrasts schema-valid
+but incomplete candidate schedules with the policy the Business may publish.
+Cases cover booking-grace eligibility and exact boundaries, unknown completion
+time, unresolved date-only cutoffs, a resolved New York calendar cutoff across
+daylight-saving time, and component-specific percentage bases. For example,
+20 calendar days before November 12, 2026 at 16:00 in `America/New_York`, at the
+same local time, is October 23 at 16:00: 481 elapsed hours before the anchor,
+not `P20D` (480 hours).
+
+The source terms, decisions and expected outcomes in this suite are explicit
+test metadata, not new wire fields or an automatic legal-prose completeness
+detector. The policies and boundary choices are synthetic, not verified
+interpretations of an external operator's policy. Mutation checks reject
+reintroducing an incomplete candidate into the published payload. The existing
+schedule oracle remains responsible only for structural/selection checks;
+passing it alone does not establish that a policy is safe to publish.
 
 A separate non-normative agent-disclosure study package is provided in
 `scripts/fixtures/lodging_cancellation_lab.json`, with usage and interpretation
