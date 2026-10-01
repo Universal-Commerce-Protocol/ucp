@@ -322,7 +322,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
             "com.example.mock_pay": [
                 PaymentHandlerResponse(
                     id="mock_pay_handler_1",
-                    version="2026-08-25",
+                    version="{{ ucp_version }}",
                     available_instruments=[
                         AvailablePaymentInstrument(type="mock_instrument")
                     ]
@@ -333,7 +333,7 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
         # Construct UCP protocol metadata
         # (In production, populate active capabilities from UCP-Agent negotiation)
         ucp_metadata = ResponseCheckoutSchema(
-            version="2026-08-25",
+            version="{{ ucp_version }}",
             status="success",
             payment_handlers=payment_handlers
         )
@@ -368,14 +368,14 @@ Construct the UCP metadata block, advertising supported payment handlers, and as
       // Configure available payment handlers.
       // We advertise support for a generic mock payment handler.
       const ucpMetadata = {
-        version: '2026-08-25',
+        version: '{{ ucp_version }}',
         status: 'success' as const,
         capabilities: {}, // In production, populate via capability negotiation from UCP-Agent
         payment_handlers: {
           'com.example.mock_pay': [
             {
               id: 'mock_pay_handler_1',
-              version: '2026-08-25',
+              version: '{{ ucp_version }}',
               available_instruments: [
                 { type: 'mock_instrument' }
               ]
@@ -549,12 +549,12 @@ You should receive a response containing the UCP metadata, calculated totals, an
 ```json
 {
   "ucp": {
-    "version": "2026-08-25",
+    "version": "{{ ucp_version }}",
     "status": "success",
     "payment_handlers": {
       "com.example.mock_pay": [
         {
-          "version": "2026-08-25",
+          "version": "{{ ucp_version }}",
           "id": "mock_pay_handler_1",
           "available_instruments": [
             {
@@ -729,7 +729,7 @@ If you want to verify your code, expand the section below to see the complete fi
                 "com.example.mock_pay": [
                     PaymentHandlerResponse(
                         id="mock_pay_handler_1",
-                        version="2026-08-25",
+                        version="{{ ucp_version }}",
                         available_instruments=[
                             AvailablePaymentInstrument(type="mock_instrument")
                         ]
@@ -740,7 +740,7 @@ If you want to verify your code, expand the section below to see the complete fi
             # Construct UCP protocol metadata
             # (In production, populate active capabilities from UCP-Agent negotiation)
             ucp_metadata = ResponseCheckoutSchema(
-                version="2026-08-25",
+                version="{{ ucp_version }}",
                 status="success",
                 payment_handlers=payment_handlers
             )
@@ -863,14 +863,14 @@ If you want to verify your code, expand the section below to see the complete fi
           // Configure available payment handlers.
           // We advertise support for a generic mock payment handler.
           const ucpMetadata = {
-            version: '2026-08-25',
+            version: '{{ ucp_version }}',
             status: 'success' as const,
             capabilities: {}, // In production, populate via capability negotiation from UCP-Agent
             payment_handlers: {
               'com.example.mock_pay': [
                 {
                   id: 'mock_pay_handler_1',
-                  version: '2026-08-25',
+                  version: '{{ ucp_version }}',
                   available_instruments: [
                     { type: 'mock_instrument' }
                   ]
