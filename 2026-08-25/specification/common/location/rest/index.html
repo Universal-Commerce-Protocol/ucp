@@ -4006,13 +4006,13 @@ Location capabilities through their UCP profile at <code>/.well-known/ucp</code>
 </tr>
 <tr>
 <td style="text-align: left;">address</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#postal-address">Postal Address</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Physical address of the location.</td>
 </tr>
 <tr>
 <td style="text-align: left;">geo</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#geo">Geo</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Geographic coordinates for the location.</td>
 </tr>
@@ -4024,13 +4024,13 @@ Location capabilities through their UCP profile at <code>/.well-known/ucp</code>
 </tr>
 <tr>
 <td style="text-align: left;">hours</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#daily-hour">Daily Hour</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire <code>hours</code> property means the regular schedule is unknown.</td>
 </tr>
 <tr>
 <td style="text-align: left;">exception_hours</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#exception-hour">Exception Hour</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.</td>
 </tr>

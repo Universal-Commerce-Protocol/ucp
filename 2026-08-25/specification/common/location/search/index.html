@@ -3539,31 +3539,31 @@ current item availability.</p>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">distance</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#location-distance">Location Distance</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional explicit-center radius predicate. When present, it combines with <code>serves</code> and every supplied <code>filters</code> predicate using AND.</td>
 </tr>
 <tr>
 <td style="text-align: left;">serves</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#location-serves">Location Serves</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional authoritative service-target predicate. When present, it combines with <code>distance</code> and every supplied <code>filters</code> predicate using AND.</td>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#location-filter">Location Filter</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.</td>
 </tr>
@@ -3594,7 +3594,7 @@ current item availability.</p>
 </tr>
 <tr>
 <td style="text-align: left;">locations</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#location">Location</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Locations matching the search criteria.</td>
 </tr>
@@ -3606,7 +3606,7 @@ current item availability.</p>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the search results.</td>
 </tr>

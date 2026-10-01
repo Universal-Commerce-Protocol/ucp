@@ -3725,7 +3725,7 @@ terms and the selected term.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">terms</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#payment-term">Payment Term</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment terms the Buyer can choose from. An unselected term's amounts are indicative; the selected term's schedule amounts sum to the checkout total.</td>
 </tr>
@@ -3760,7 +3760,7 @@ what happened after.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">accepted_term</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment-term">Payment Term</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The payment term the Buyer accepted at checkout. Businesses MUST carry it forward so the Order states the amounts owed and when, and MUST ensure its schedule amounts sum to the Order total. The available terms are checkout state and are not projected.</td>
 </tr>

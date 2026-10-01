@@ -607,20 +607,20 @@ UCP metadata for catalog responses.
 
 A product in a get_product response, extended with effective selections and availability signals on option values.
 
-| Name     | Type          | Requirement | Description                                                                                                                                                                                          |
-| -------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| selected | Array[object] | Optional    | Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes. |
-| options  | Array[object] | Optional    | Product options with availability signals relative to the effective selections.                                                                                                                      |
+| Name     | Type                                                                             | Requirement | Description                                                                                                                                                                                          |
+| -------- | -------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| selected | Array\[[Selected Option](/2026-08-25/specification/reference/#selected-option)\] | Optional    | Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes. |
+| options  | Array[object]                                                                    | Optional    | Product options with availability signals relative to the effective selections.                                                                                                                      |
 
 ### Get Product Response
 
-| Name     | Type          | Requirement  | Description                                                                                                                                                                    |
-| -------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ucp      | any           | **Required** | UCP metadata for catalog responses.                                                                                                                                            |
-| product  | object        | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                                                                                        |
-| actions  | object        | Optional     | Outstanding extension-defined Actions for this product response.                                                                                                               |
-| messages | Array[object] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                                                     |
-| policies | Array[object] | Optional     | Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
+| Name     | Type                                                             | Requirement  | Description                                                                                                                                                                    |
+| -------- | ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp      | any                                                              | **Required** | UCP metadata for catalog responses.                                                                                                                                            |
+| product  | object                                                           | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                                                                                        |
+| actions  | [Actions](/2026-08-25/specification/reference/#actions)          | Optional     | Outstanding extension-defined Actions for this product response.                                                                                                               |
+| messages | Array\[[Message](/2026-08-25/specification/reference/#message)\] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                                                     |
+| policies | Array\[[Policy](/2026-08-25/specification/reference/#policy)\]   | Optional     | Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 ### Error Response
 

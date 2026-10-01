@@ -3439,13 +3439,13 @@ allocation, not processing sequence.</p>
 </tr>
 <tr>
 <td style="text-align: left;">billing_address</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#postal-address">Postal Address</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The billing address associated with this payment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">credential</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment-credential">Payment Credential</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The base definition for any payment credential. Handlers define specific credential types.</td>
 </tr>
@@ -3457,7 +3457,7 @@ allocation, not processing sequence.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's <code>currency</code>. On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed).</td>
 </tr>

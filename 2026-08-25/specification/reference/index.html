@@ -10608,13 +10608,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">billing_address</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#postal-address">Postal Address</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The billing address associated with this payment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">credential</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment-credential">Payment Credential</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The base definition for any payment credential. Handlers define specific credential types.</td>
 </tr>
@@ -10952,7 +10952,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#product">Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the search criteria.</td>
 </tr>
@@ -10964,19 +10964,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this catalog search response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the search results.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in these search results. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11034,31 +11034,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
@@ -11070,31 +11070,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this cart.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this cart. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11144,31 +11144,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -11186,31 +11186,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11228,13 +11228,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -11320,31 +11320,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -11362,31 +11362,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11404,13 +11404,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -11452,31 +11452,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -11494,31 +11494,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11536,13 +11536,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -11620,13 +11620,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">billing_address</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#postal-address">Postal Address</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The billing address associated with this payment method.</td>
 </tr>
 <tr>
 <td style="text-align: left;">credential</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment-credential">Payment Credential</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The base definition for any payment credential. Handlers define specific credential types.</td>
 </tr>
@@ -11638,7 +11638,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Contribution amount for this instrument expressed in ISO 4217 minor units of the containing capability object's <code>currency</code>. On request: the platform's requested contribution (omit for open-amount). On response: the actual amount authorized or charged (omitted when not finally processed).</td>
 </tr>
@@ -11670,31 +11670,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -11712,31 +11712,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11754,13 +11754,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -11800,13 +11800,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Supplementary context for the title (e.g. 'Save 5% by paying today'). Directly renderable; MUST NOT repeat the title.</td>
 </tr>
 <tr>
 <td style="text-align: left;">schedules</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#payment-schedule">Payment Schedule</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment schedules that settle this checkout under this term, in the order they come due.</td>
 </tr>
@@ -11826,7 +11826,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">terms</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#payment-term">Payment Term</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment terms the Buyer can choose from. An unselected term's amounts are indicative; the selected term's schedule amounts sum to the checkout total.</td>
 </tr>
@@ -11852,7 +11852,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">accepted_term</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment-term">Payment Term</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The payment term the Buyer accepted at checkout. Businesses MUST carry it forward so the Order states the amounts owed and when, and MUST ensure its schedule amounts sum to the Order total. The available terms are checkout state and are not projected.</td>
 </tr>
@@ -11884,31 +11884,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -11926,31 +11926,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -11968,13 +11968,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -12030,7 +12030,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#order-line-item">Order Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Line items representing what was purchased — can change post-order via edits or exchanges.</td>
 </tr>
@@ -12042,7 +12042,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">adjustments</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#adjustment">Adjustment</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.</td>
 </tr>
@@ -12054,25 +12054,25 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different totals for the order.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. <code>applies_to</code> targets are relative to the response root.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Snapshot of the attribution associated with the originating checkout. Read-only on the order.</td>
 </tr>
@@ -12118,7 +12118,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional links providing context (e.g., privacy policy, terms).</td>
 </tr>
@@ -12162,7 +12162,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional segment-specific links (e.g., channel terms or privacy disclosures).</td>
 </tr>
@@ -12240,31 +12240,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
@@ -12276,31 +12276,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this cart.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this cart. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -12350,31 +12350,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -12392,31 +12392,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -12434,13 +12434,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -12474,7 +12474,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Amount allocated to this target in ISO 4217 minor units.</td>
 </tr>
@@ -12506,7 +12506,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Total discount amount in ISO 4217 minor units.</td>
 </tr>
@@ -12536,7 +12536,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">eligibility</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#reverse-domain-name">Reverse Domain Name</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts.</td>
 </tr>
@@ -12600,31 +12600,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Cart line items. Same structure as checkout. Full replacement on update.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer signals for localization (country, region, postal_code). Merchant uses for pricing, availability, currency. Falls back to geo-IP if omitted.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional buyer information for personalized estimates.</td>
 </tr>
@@ -12636,31 +12636,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Estimated cost breakdown. May be partial if shipping/tax not yet calculable.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this cart.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Validation messages, warnings, or informational notices.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional merchant links (policies, FAQs).</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this cart. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -12710,31 +12710,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -12752,31 +12752,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -12794,13 +12794,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
@@ -12840,7 +12840,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Supplementary context for the title (e.g. 'Arrives in 4 business days', 'Arrives Dec 12-15 via FedEx'). Directly renderable; MUST NOT repeat the title.</td>
 </tr>
@@ -12864,7 +12864,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#total">Total</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Fulfillment option totals breakdown.</td>
 </tr>
@@ -12896,7 +12896,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#fulfillment-option">Fulfillment Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Available fulfillment options for this group.</td>
 </tr>
@@ -12940,7 +12940,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">destinations</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#fulfillment-destination">Fulfillment Destination</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Available destinations for this method. In Business responses, each destination carries a <code>type</code> and <code>id</code>.</td>
 </tr>
@@ -12952,7 +12952,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">groups</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#fulfillment-group">Fulfillment Group</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.</td>
 </tr>
@@ -13010,13 +13010,13 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">methods</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#fulfillment-method">Fulfillment Method</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment methods for cart items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">available_methods</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#fulfillment-available-method">Fulfillment Available Method</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Inventory availability hints.</td>
 </tr>
@@ -13042,13 +13042,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Short buyer-facing summary (e.g. 'Ships in 2–4 business days').</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#availability">Availability</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Availability of this variant via this method at the specified or inferred location.</td>
 </tr>
@@ -13060,7 +13060,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#fulfillment-option-base">Fulfillment Option Base</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representative fulfillment options for this method (e.g. Standard, Express). Without a destination or full cart, a Business SHOULD preview meaningful boundary options (e.g. cheapest, fastest); more specific options are negotiated in Checkout once line items and destination are known.</td>
 </tr>
@@ -13130,7 +13130,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Variant description in one or more formats.</td>
 </tr>
@@ -13142,55 +13142,55 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">categories</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#category">Category</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant categories with optional taxonomy identifiers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price">Price</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Current selling price. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>. Line total is <code>price × quantity × 10^-scale</code>, computed and rounded once by the Business; <code>totals</code> remain authoritative.</td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity_unit</td>
-<td style="text-align: left;">any</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#quantity-unit">Quantity Unit</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Sale basis this variant's <code>quantity</code> is denominated in. The default sale basis is <code>each</code>, whose machine identity is (<code>C62</code>, 0); <code>C62</code> is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An <code>increment</code> advertises the ordering granularity in steps (for example, <code>scale</code> 2 with <code>increment</code> 25 sells in 0.25-unit multiples).</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price">Price</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List price before discounts (for strikethrough display).</td>
 </tr>
 <tr>
 <td style="text-align: left;">unit_price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#unit-price">Unit Price</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#availability">Availability</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant availability for purchase.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#selected-option">Selected Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Option values that define this variant (e.g., Color: Blue, Size: Large).</td>
 </tr>
 <tr>
 <td style="text-align: left;">media</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#media">Media</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant media (images, videos, 3D models). First item is the featured media for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rating</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#rating">Rating</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant rating.</td>
 </tr>
@@ -13252,7 +13252,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product description in one or more formats.</td>
 </tr>
@@ -13264,43 +13264,43 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">categories</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#category">Category</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product categories with optional taxonomy identifiers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price_range</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price-range">Price Range</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Price range across all variants.</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price_range</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price-range">Price Range</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List price range before discounts (for strikethrough display).</td>
 </tr>
 <tr>
 <td style="text-align: left;">media</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#media">Media</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product media (images, videos, 3D models). First item is the featured media for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#product-option">Product Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product options (Size, Color, etc.).</td>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#variant">Variant</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rating</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#rating">Rating</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Aggregate product rating.</td>
 </tr>
@@ -13368,7 +13368,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Variant description in one or more formats.</td>
 </tr>
@@ -13380,55 +13380,55 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">categories</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#category">Category</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant categories with optional taxonomy identifiers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price">Price</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Current selling price. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>. Line total is <code>price × quantity × 10^-scale</code>, computed and rounded once by the Business; <code>totals</code> remain authoritative.</td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity_unit</td>
-<td style="text-align: left;">any</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#quantity-unit">Quantity Unit</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Sale basis this variant's <code>quantity</code> is denominated in. The default sale basis is <code>each</code>, whose machine identity is (<code>C62</code>, 0); <code>C62</code> is the UN/CEFACT Rec20 code for one/each. An absent catalog descriptor encodes that default. An <code>increment</code> advertises the ordering granularity in steps (for example, <code>scale</code> 2 with <code>increment</code> 25 sells in 0.25-unit multiples).</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price">Price</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List price before discounts (for strikethrough display).</td>
 </tr>
 <tr>
 <td style="text-align: left;">unit_price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#unit-price">Unit Price</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Price per standard unit of measurement, for shelf-style comparison display. MAY be omitted when unit pricing does not apply.</td>
 </tr>
 <tr>
 <td style="text-align: left;">availability</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#availability">Availability</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant availability for purchase.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#selected-option">Selected Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Option values that define this variant (e.g., Color: Blue, Size: Large).</td>
 </tr>
 <tr>
 <td style="text-align: left;">media</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#media">Media</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant media (images, videos, 3D models). First item is the featured media for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rating</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#rating">Rating</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Variant rating.</td>
 </tr>
@@ -13452,7 +13452,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">inputs</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#input-correlation">Input Correlation</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Which request identifiers resolved to this variant, and how. Each entry maps a request ID to its match type.</td>
 </tr>
@@ -13496,7 +13496,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">description</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#description">Description</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product description in one or more formats.</td>
 </tr>
@@ -13508,43 +13508,43 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">categories</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#category">Category</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product categories with optional taxonomy identifiers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">price_range</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price-range">Price Range</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Price range across all variants.</td>
 </tr>
 <tr>
 <td style="text-align: left;">list_price_range</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price-range">Price Range</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List price range before discounts (for strikethrough display).</td>
 </tr>
 <tr>
 <td style="text-align: left;">media</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#media">Media</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product media (images, videos, 3D models). First item is the featured media for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#product-option">Product Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product options (Size, Color, etc.).</td>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#variant">Variant</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rating</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#rating">Rating</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Aggregate product rating.</td>
 </tr>
@@ -13582,7 +13582,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">selected</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#selected-option">Selected Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Effective option selections that anchor the featured variant and availability signals. Required when the product has configurable options; may be empty or omitted for products with no option axes.</td>
 </tr>
@@ -13620,13 +13620,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">price</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#price-filter">Price Filter</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Price range filter denominated in context.currency. When context.currency matches the presentment currency, businesses apply the filter directly. When it differs, businesses SHOULD convert filter values to the presentment currency before applying; if conversion is not supported, businesses MAY ignore the filter and SHOULD indicate this via a message. When context.currency is absent, filter denomination is ambiguous and businesses MAY ignore it.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfills_to</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#fulfillment-destination-filter">Fulfillment Destination Filter</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Explicit destination where items are fulfilled. It may differ from the locality or Business Location supplied in <code>context</code> (e.g. a gift delivered directly to the recipient). The filter restricts results to what can be fulfilled there and seeds method <code>availability</code>. It supersedes <code>context</code> only for fulfillment destination and availability resolution.</td>
 </tr>
@@ -13657,25 +13657,25 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#search-filters">Search Filters</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter criteria to narrow search results. All specified filters combine with AND logic.</td>
 </tr>
@@ -13712,7 +13712,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#product">Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the search criteria.</td>
 </tr>
@@ -13724,19 +13724,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this catalog search response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the search results.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in these search results. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -13767,25 +13767,25 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#search-filters">Search Filters</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter criteria to narrow returned products and variants. All specified filters combine with AND logic.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -13822,19 +13822,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this catalog lookup response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Errors, warnings, or informational messages about the requested items.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in this response. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -13865,7 +13865,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#selected-option">Selected Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Partial or full option selections for interactive variant narrowing. When provided, response option values include availability signals (available, exists) relative to these selections.</td>
 </tr>
@@ -13877,25 +13877,25 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#search-filters">Search Filters</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter criteria to narrow returned variants. All specified filters combine with AND logic.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -13932,19 +13932,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this product response.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Warnings or informational messages about the product (e.g., price recently changed, limited availability).</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to this product. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -13982,31 +13982,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">line_items</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">List of line items being checked out.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Representation of the buyer.</td>
 </tr>
 <tr>
 <td style="text-align: left;">context</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#context">Context</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Provisional buyer signals for relevance and localization—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data. Context SHOULD be non-identifying and can be disclosed progressively—coarse signals early, finer resolution as the session progresses. Higher-resolution data (shipping address, billing address) supersedes context.</td>
 </tr>
 <tr>
 <td style="text-align: left;">signals</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#signals">Signals</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Environment data provided by the platform to support authorization and abuse prevention. Values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or independently verifiable third-party attestations. All signal keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
 <tr>
 <td style="text-align: left;">attribution</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#attribution">Attribution</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.</td>
 </tr>
@@ -14024,31 +14024,31 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">totals</td>
-<td style="text-align: left;">Array[Total]</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#totals">Totals</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Different cart totals.</td>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">messages</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#message">Message</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of messages with error and info about the checkout session state.</td>
 </tr>
 <tr>
 <td style="text-align: left;">links</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#link">Link</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.</td>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/2026-08-25/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -14066,19 +14066,19 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
 <tr>
 <td style="text-align: left;">order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#order-confirmation">Order Confirmation</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Details about an order created for this checkout session.</td>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/2026-08-25/specification/reference/#fulfillment">Fulfillment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment details.</td>
 </tr>
