@@ -827,6 +827,8 @@ def define_env(env):
 
         f_type = details.get("type", "any")
         ref = _deref_self(details.get("$ref"))
+        if not ref and details.get("$id") and details.get("$id") != self_id:
+          ref = details.get("$id")
 
         # Resolve UCP $defs references inline so properties render as
         # expanded tables (with anchors) instead of opaque links.
@@ -853,6 +855,8 @@ def define_env(env):
         # Check for Array specific logic
         items = details.get("items", {})
         items_ref = _deref_self(items.get("$ref"))
+        if not items_ref and items.get("$id") and items.get("$id") != self_id:
+          items_ref = items.get("$id")
 
         # Special handling for UCP version
         version_data = None
