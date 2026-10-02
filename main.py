@@ -211,6 +211,62 @@ def _resolve_schema_bundled(
   return _resolve_schema(schema_path, direction, operation, bundle=True)
 
 
+def _restore_fragment_refs(
+  bundled_def: dict[str, Any], raw_def: dict[str, Any] | None
+) -> dict[str, Any]:
+  """Restore cross-file `$defs` fragment refs that bundling left unlinked.
+
+  Bundling inlines every `$ref`. A ref to a whole schema file keeps that
+  file's `$id`, which the table renderer turns back into a type link, but a
+  ref into another file's `$defs` fragment (e.g.
+  `types/pagination.json#/$defs/request`) is inlined without one, so its Type
+  cell falls back to `object`. Copy such refs from the unbundled definition
+  onto the matching bundled properties (and their array `items`). Same-file
+  refs (`#/$defs/...`) are left alone: only some of the pages that render
+  them define a matching anchor, and `create_link` cannot tell which.
+  `ucp.json` fragments are skipped too: the renderer inlines those itself.
+
+  Args:
+    bundled_def: The bundled definition to be rendered.
+    raw_def: The same definition resolved without bundling.
+
+  Returns:
+    bundled_def, with fragment refs restored where they were lost.
+
+  """
+  props = bundled_def.get("properties")
+  if not isinstance(raw_def, dict) or not isinstance(props, dict):
+    return bundled_def
+  raw_props = raw_def.get("properties") or {}
+
+  def _lost_fragment_ref(bundled, raw):
+    if not isinstance(bundled, dict) or not isinstance(raw, dict):
+      return None
+    ref = raw.get("$ref", "")
+    if (
+      "#/$defs/" in ref
+      and not ref.startswith("#")
+      and "ucp.json" not in ref
+      and "$ref" not in bundled
+      and "$id" not in bundled
+    ):
+      return ref
+    return None
+
+  restored = {}
+  for name, details in props.items():
+    raw = raw_props.get(name)
+    ref = _lost_fragment_ref(details, raw)
+    if ref:
+      details = {**details, "$ref": ref}
+    elif isinstance(details, dict) and isinstance(raw, dict):
+      items_ref = _lost_fragment_ref(details.get("items"), raw.get("items"))
+      if items_ref:
+        details = {**details, "items": {**details["items"], "$ref": items_ref}}
+    restored[name] = details
+  return {**bundled_def, "properties": restored}
+
+
 def define_env(env):
   """Injects custom macros into the MkDocs environment.
 
@@ -462,7 +518,7 @@ def define_env(env):
       fragment_text = (
         fragment.replace("_", " ").replace(".", " ").replace("-", " ").title()
       )
-      link_text = f"{base_text} {fragment_text}"
+      link_text = f"{base_text} {fragment_text}".strip()
     else:
       link_text = (
         raw_name.replace("_", " ").replace(".", " ").replace("-", " ").title()
@@ -848,6 +904,17 @@ def define_env(env):
         return self_ref_name
       return ref_value
 
+    def _branch_ref(branch):
+      # The type an allOf branch names: its $ref, or the $id that bundling
+      # preserved when it inlined a whole schema file.
+      if not isinstance(branch, dict):
+        return None
+      if branch.get("$ref"):
+        return _deref_self(branch["$ref"])
+      if branch.get("$id") and branch.get("$id") != self_id:
+        return branch["$id"]
+      return None
+
     # If schema is ONLY a oneOf, render as prose instead of table
     if (
       "oneOf" in schema_data
@@ -1022,6 +1089,20 @@ def define_env(env):
           else:
             # Direct Reference
             f_type = create_link(ref, spec_file_name, context)
+        elif f_type == "any" and isinstance(details.get("allOf"), list):
+          # Composed property with no inline type (e.g. a base type narrowed
+          # by extra constraints): link the base type, as for array items
+          # below, instead of falling back to the uninformative "any". Only
+          # when exactly one branch names a type in another schema file:
+          # several bases are ambiguous, and same-file "#/$defs/..." branches
+          # (e.g. ucp.json#/$defs/base) have no documented anchor.
+          base_refs = [
+            r
+            for r in map(_branch_ref, details["allOf"])
+            if r and not r.startswith("#")
+          ]
+          if len(base_refs) == 1:
+            f_type = create_link(base_refs[0], spec_file_name, context)
         elif f_type == "array" and items_ref:
           # Array of References
           link = create_link(items_ref, spec_file_name, context)
@@ -1042,10 +1123,9 @@ def define_env(env):
             for branch in branches:
               if not isinstance(branch, dict):
                 continue
-              if branch.get("$ref"):
-                inner_type = create_link(
-                  _deref_self(branch["$ref"]), spec_file_name, context
-                )
+              branch_ref = _branch_ref(branch)
+              if branch_ref:
+                inner_type = create_link(branch_ref, spec_file_name, context)
                 break
               if branch.get("title"):
                 inner_type = branch["title"]
@@ -1137,6 +1217,12 @@ def define_env(env):
                 new_all_of.append(item)
             embedded_schema_data = embedded_schema_data.copy()
             embedded_schema_data["allOf"] = new_all_of
+
+          # Bundling drops cross-file $defs refs; restore them for links.
+          raw_def = _resolve_json_pointer(def_path, _resolve_schema(full_path))
+          embedded_schema_data = _restore_fragment_refs(
+            embedded_schema_data, raw_def
+          )
 
           table = _render_table_from_schema(
             embedded_schema_data,
