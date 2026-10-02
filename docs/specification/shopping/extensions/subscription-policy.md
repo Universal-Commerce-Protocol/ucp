@@ -213,18 +213,23 @@ and another that begins, so the step-up is visible in structure.
 
 ### Start dates and the current purchase
 
-The current purchase is the first order. Everything the buyer owes today is in
-the checkout `totals` and is paid at completion; the first schedule's
-`starts_at` is when the first recurring order **after** it is placed, stated as
-an absolute RFC 3339 date-time. An order is either this checkout or a recurring
-order under a schedule, never both. A later schedule's `starts_at` is when the
-first order on its terms is placed.
+The current purchase is the first order. Everything the buyer owes for it is in
+the checkout `totals`, paid at completion or on the
+[payment term](../../payment/extensions/terms.md) the buyer selected; the first
+schedule's `starts_at` is when the first recurring order **after** it is
+placed, stated as an absolute RFC 3339 date-time. An order is either this
+checkout or a recurring order under a schedule, never both. A later schedule's
+`starts_at` is when the first order on its terms is placed.
 
-A free trial is a checkout whose `totals` are zero and whose first schedule
-starts when the trial ends. No separate trial field is needed. A trial
-followed by recurring orders is a subscription; a purchase whose payment is
-merely collected later is a [payment term](../../payment/extensions/terms.md),
-not a subscription, and carries no subscription policy.
+A free trial composes the two. The first order is placed at checkout with its
+payment **deferred** to the end of the trial — a payment schedule that is due
+on that date unless the buyer cancels first — and the recurring orders follow
+on this policy's schedules from the next cycle. Nothing is paid today, but the
+first order is this checkout's, and nothing about the recurring orders is owed.
+No trial field is needed on either side. A first order that is genuinely free
+is simply a checkout whose `totals` are zero. A purchase whose payment is
+merely collected later, with nothing recurring, is a payment term alone and
+carries no subscription policy.
 
 `starts_at` is supplementary to `description`, never a replacement for it. It
 **MAY** be omitted where the Business cannot yet determine it — on a catalog
@@ -393,174 +398,353 @@ Platforms **MAY**:
 
 ## Examples
 
-### Checkout with a monthly subscription
+Each example shows the whole checkout — what is paid for today's order, and
+the recurring orders that follow from each schedule's `starts_at` — because
+the two are different things and a reader should see both at once.
 
-A buyer takes two bags of coffee on a "subscribe & save" plan. The checkout
-`totals` settle today's two bags; the policy's one schedule states the
-recurring orders, with the saving against the $10 one-time price visible as a
-`discount`. The policy targets the line, and a paired disclosure compels the
+### Monthly subscription, paid today
+
+Two bags of coffee on a "subscribe & save" plan. Today's order is priced and
+paid at completion like any other; the policy's one schedule states the
+recurring orders, with the same saving against the $10 one-time price visible
+in both. The policy targets the line, and a paired disclosure compels the
 buyer-facing notice.
 
-<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout target=$.policies -->
+<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout op=read -->
 ```json
-[
-  {
-    "type": "dev.ucp.shopping.policy.subscription",
-    "description": { "plain": "Monthly coffee subscription. Manage or cancel anytime at example.com/account." },
-    "applies_to": ["$.line_items[0]"],
-    "url": "https://example.com/subscription-terms",
-    "schedules": [
-      {
-        "description": { "plain": "$17.00 plus applicable tax and shipping every month from November 2, 2026, until you cancel." },
-        "totals": [
-          { "type": "subtotal", "amount": 2000 },
-          { "type": "discount", "amount": -300, "display_text": "Subscribe & save 15%" },
-          { "type": "total", "amount": 1700 }
-        ],
-        "starts_at": "2026-11-02T00:00:00Z"
-      }
-    ]
-  }
-]
-```
-
-<!-- ucp:example schema=shopping/checkout target=$.messages -->
-```json
-[
-  {
-    "type": "warning",
-    "code": "dev.ucp.shopping.policy.subscription",
-    "path": "$.line_items[0]",
-    "presentation": "disclosure",
-    "content": "You'll be charged $17.00 plus tax and shipping every month starting November 2, 2026, until you cancel.",
-    "url": "https://example.com/subscription-terms"
-  }
-]
-```
-
-### Introductory price
-
-Two schedules: an introductory rate for three months, then the standing rate
-until cancelled. The first ends where the second begins; the Business computed
-both dates, and the deeper introductory `discount` simply stops appearing.
-
-<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout target=$.policies -->
-```json
-[
-  {
-    "type": "dev.ucp.shopping.policy.subscription",
-    "description": { "plain": "Monthly coffee subscription with an introductory rate for your first three months. Cancel anytime." },
-    "applies_to": ["$.line_items[0]"],
-    "url": "https://example.com/subscription-terms",
-    "schedules": [
-      {
-        "description": { "plain": "$10.00 plus applicable tax and shipping every month for three months, from November 2, 2026." },
-        "totals": [
-          { "type": "subtotal", "amount": 2000 },
-          { "type": "discount", "amount": -1000, "display_text": "Introductory rate" },
-          { "type": "total", "amount": 1000 }
-        ],
-        "starts_at": "2026-11-02T00:00:00Z"
-      },
-      {
-        "description": { "plain": "Then $17.00 plus applicable tax and shipping every month from February 2, 2027, until you cancel." },
-        "totals": [
-          { "type": "subtotal", "amount": 2000 },
-          { "type": "discount", "amount": -300, "display_text": "Subscribe & save 15%" },
-          { "type": "total", "amount": 1700 }
-        ],
-        "starts_at": "2027-02-02T00:00:00Z"
-      }
-    ]
-  }
-]
+{
+  "ucp": { ... },
+  "id": "chk_coffee",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "gid://example/Variant/coffee-340g", "title": "House Blend 340g", "price": 1000 },
+      "quantity": 2,
+      "totals": [
+        { "type": "subtotal", "amount": 2000 },
+        { "type": "items_discount", "amount": -300 },
+        { "type": "total", "amount": 1700 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 2000 },
+    { "type": "items_discount", "display_text": "Subscribe & save 15%", "amount": -300 },
+    { "type": "fulfillment", "display_text": "Shipping", "amount": 0 },
+    { "type": "tax", "amount": 136 },
+    { "type": "total", "amount": 1836 }
+  ],
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Monthly coffee subscription. Manage or cancel anytime at example.com/account." },
+      "applies_to": ["$.line_items[0]"],
+      "url": "https://example.com/subscription-terms",
+      "schedules": [
+        {
+          "description": { "plain": "$17.00 plus applicable tax and shipping every month from November 2, 2026, until you cancel." },
+          "totals": [
+            { "type": "subtotal", "amount": 2000 },
+            { "type": "discount", "amount": -300, "display_text": "Subscribe & save 15%" },
+            { "type": "total", "amount": 1700 }
+          ],
+          "starts_at": "2026-11-02T00:00:00Z"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "dev.ucp.shopping.policy.subscription",
+      "path": "$.line_items[0]",
+      "presentation": "disclosure",
+      "content": "$18.36 today. Then $17.00 plus tax and shipping every month from November 2, 2026, until you cancel.",
+      "url": "https://example.com/subscription-terms"
+    }
+  ],
+  "links": [ ... ]
+}
 ```
 
 ### Free trial
 
-The checkout `totals` are zero. The schedule starts when the trial ends and
-the first recurring order is placed; `payment` is still submitted at
-completion so the Business holds an instrument for it.
+A payment term and a subscription policy, composed. The first order is placed
+today at its full price, with payment deferred fourteen days under a
+`deferred` payment schedule that is due unless the buyer cancels first. The
+recurring orders follow a month after that. Nothing is paid at completion, and
+nothing about the recurring orders is owed.
 
-<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout target=$.policies -->
+<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout op=read -->
 ```json
-[
-  {
-    "type": "dev.ucp.shopping.policy.subscription",
-    "description": { "plain": "Pro plan with a 14-day free trial. Cancel anytime." },
-    "applies_to": ["$.line_items[0]"],
-    "schedules": [
+{
+  "ucp": { ... },
+  "id": "chk_trial",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "gid://example/Variant/pro-plan", "title": "Pro plan", "price": 1200 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 1200 },
+        { "type": "total", "amount": 1200 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1200 },
+    { "type": "total", "amount": 1200 }
+  ],
+  "payment": {
+    "terms": [
       {
-        "description": { "plain": "Free for 14 days, then $12.00 per month starting October 16, 2026, until you cancel." },
-        "totals": [
-          { "type": "subtotal", "amount": 1200 },
-          { "type": "total", "amount": 1200 }
-        ],
-        "starts_at": "2026-10-16T00:00:00Z"
+        "id": "pt_trial",
+        "title": "Free for 14 days",
+        "description": { "plain": "Nothing today. Cancel before October 16, 2026 and you owe nothing." },
+        "schedules": [
+          {
+            "id": "sched_after_trial",
+            "type": "deferred",
+            "description": { "plain": "$12.00 due October 16, 2026, unless you cancel before then." },
+            "due_at": "2026-10-16T00:00:00Z",
+            "amount": 1200
+          }
+        ]
       }
-    ]
-  }
-]
+    ],
+    "selected_term_id": "pt_trial"
+  },
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Pro plan, monthly. Cancel anytime." },
+      "applies_to": ["$.line_items[0]"],
+      "schedules": [
+        {
+          "description": { "plain": "$12.00 every month from November 16, 2026, until you cancel." },
+          "totals": [
+            { "type": "subtotal", "amount": 1200 },
+            { "type": "total", "amount": 1200 }
+          ],
+          "starts_at": "2026-11-16T00:00:00Z"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "dev.ucp.shopping.policy.subscription",
+      "path": "$.line_items[0]",
+      "presentation": "disclosure",
+      "content": "Free for 14 days. $12.00 on October 16, 2026 unless you cancel before then, and $12.00 every month after."
+    }
+  ],
+  "links": [ ... ]
+}
+```
+
+### Introductory price
+
+Today's order is the first of three months at an introductory rate. Two
+schedules follow: the remaining two introductory months, then the standing
+rate until cancelled. The first ends where the second begins — the Business
+computed both dates — and the deeper introductory `discount` simply stops
+appearing.
+
+<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout op=read -->
+```json
+{
+  "ucp": { ... },
+  "id": "chk_intro",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "gid://example/Variant/coffee-340g", "title": "House Blend 340g", "price": 1000 },
+      "quantity": 2,
+      "totals": [
+        { "type": "subtotal", "amount": 2000 },
+        { "type": "items_discount", "amount": -1000 },
+        { "type": "total", "amount": 1000 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 2000 },
+    { "type": "items_discount", "display_text": "Introductory rate", "amount": -1000 },
+    { "type": "tax", "amount": 80 },
+    { "type": "total", "amount": 1080 }
+  ],
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Monthly coffee subscription with an introductory rate for your first three months, today's order included. Cancel anytime." },
+      "applies_to": ["$.line_items[0]"],
+      "url": "https://example.com/subscription-terms",
+      "schedules": [
+        {
+          "description": { "plain": "$10.00 plus applicable tax and shipping on November 2 and December 2, 2026." },
+          "totals": [
+            { "type": "subtotal", "amount": 2000 },
+            { "type": "discount", "amount": -1000, "display_text": "Introductory rate" },
+            { "type": "total", "amount": 1000 }
+          ],
+          "starts_at": "2026-11-02T00:00:00Z"
+        },
+        {
+          "description": { "plain": "Then $17.00 plus applicable tax and shipping every month from January 2, 2027, until you cancel." },
+          "totals": [
+            { "type": "subtotal", "amount": 2000 },
+            { "type": "discount", "amount": -300, "display_text": "Subscribe & save 15%" },
+            { "type": "total", "amount": 1700 }
+          ],
+          "starts_at": "2027-01-02T00:00:00Z"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "dev.ucp.shopping.policy.subscription",
+      "path": "$.line_items[0]",
+      "presentation": "disclosure",
+      "content": "$10.80 today, then $10.00 plus tax and shipping on November 2 and December 2, then $17.00 plus tax and shipping every month from January 2, 2027, until you cancel."
+    }
+  ],
+  "links": [ ... ]
+}
 ```
 
 ### Cadence that changes
 
-Weekly for the first year, then monthly. The amount happens not to change;
-the cadence does, so the two runs are two schedules.
+Weekly for the first year, then monthly. Today's order is the first weekly
+delivery. The amount happens not to change; the cadence does, so the two runs
+are two schedules.
 
-<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout target=$.policies -->
+<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout op=read -->
 ```json
-[
-  {
-    "type": "dev.ucp.shopping.policy.subscription",
-    "description": { "plain": "Weekly for the first year, then monthly. Cancel anytime." },
-    "applies_to": ["$.line_items[0]"],
-    "schedules": [
-      {
-        "description": { "plain": "$15.00 plus applicable tax and shipping every week from October 9, 2026 through October 1, 2027." },
-        "totals": [
-          { "type": "subtotal", "amount": 1500 },
-          { "type": "total", "amount": 1500 }
-        ],
-        "starts_at": "2026-10-09T00:00:00Z"
-      },
-      {
-        "description": { "plain": "Then $15.00 plus applicable tax and shipping every month from October 8, 2027, until you cancel." },
-        "totals": [
-          { "type": "subtotal", "amount": 1500 },
-          { "type": "total", "amount": 1500 }
-        ],
-        "starts_at": "2027-10-08T00:00:00Z"
-      }
-    ]
-  }
-]
+{
+  "ucp": { ... },
+  "id": "chk_weekly",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "gid://example/Variant/coffee-340g", "title": "House Blend 340g", "price": 1500 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 1500 },
+        { "type": "total", "amount": 1500 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1500 },
+    { "type": "tax", "amount": 120 },
+    { "type": "total", "amount": 1620 }
+  ],
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Weekly for the first year, then monthly. Cancel anytime." },
+      "applies_to": ["$.line_items[0]"],
+      "schedules": [
+        {
+          "description": { "plain": "$15.00 plus applicable tax and shipping every week from October 9, 2026 through October 1, 2027." },
+          "totals": [
+            { "type": "subtotal", "amount": 1500 },
+            { "type": "total", "amount": 1500 }
+          ],
+          "starts_at": "2026-10-09T00:00:00Z"
+        },
+        {
+          "description": { "plain": "Then $15.00 plus applicable tax and shipping every month from October 8, 2027, until you cancel." },
+          "totals": [
+            { "type": "subtotal", "amount": 1500 },
+            { "type": "total", "amount": 1500 }
+          ],
+          "starts_at": "2027-10-08T00:00:00Z"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "dev.ucp.shopping.policy.subscription",
+      "path": "$.line_items[0]",
+      "presentation": "disclosure",
+      "content": "$16.20 today. Then $15.00 plus tax and shipping every week from October 9, 2026 through October 1, 2027, and every month from October 8, 2027, until you cancel."
+    }
+  ],
+  "links": [ ... ]
+}
 ```
 
 ### Finite subscription
 
-A filter pack every two weeks for one year. One schedule whose `description`
-states the end.
+A filter pack every two weeks for one year. Today's order is the first pack;
+one schedule whose `description` states the end.
 
-<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout target=$.policies -->
+<!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.checkout op=read -->
 ```json
-[
-  {
-    "type": "dev.ucp.shopping.policy.subscription",
-    "description": { "plain": "Filter replenishment for one year. Does not renew after that." },
-    "applies_to": ["$.line_items[0]"],
-    "schedules": [
-      {
-        "description": { "plain": "$6.00 plus applicable tax and shipping every 2 weeks from October 16, 2026 through October 1, 2027 (26 shipments), then stops." },
-        "totals": [
-          { "type": "subtotal", "amount": 600 },
-          { "type": "total", "amount": 600 }
-        ],
-        "starts_at": "2026-10-16T00:00:00Z"
-      }
-    ]
-  }
-]
+{
+  "ucp": { ... },
+  "id": "chk_filters",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": { "id": "gid://example/Variant/filters-50", "title": "Filters (50)", "price": 600 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 600 },
+        { "type": "total", "amount": 600 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 600 },
+    { "type": "tax", "amount": 48 },
+    { "type": "total", "amount": 648 }
+  ],
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Filter replenishment for one year. Does not renew after that." },
+      "applies_to": ["$.line_items[0]"],
+      "schedules": [
+        {
+          "description": { "plain": "$6.00 plus applicable tax and shipping every 2 weeks from October 16, 2026 through October 1, 2027 (26 recurring orders), then stops." },
+          "totals": [
+            { "type": "subtotal", "amount": 600 },
+            { "type": "total", "amount": 600 }
+          ],
+          "starts_at": "2026-10-16T00:00:00Z"
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "dev.ucp.shopping.policy.subscription",
+      "path": "$.line_items[0]",
+      "presentation": "disclosure",
+      "content": "$6.48 today. Then $6.00 plus tax and shipping every 2 weeks from October 16, 2026 through October 1, 2027, then stops."
+    }
+  ],
+  "links": [ ... ]
+}
 ```
 
 ### Catalog
@@ -592,32 +776,36 @@ for one unit; the start date is not yet known, so it is omitted.
 
 ### Order
 
-The Order carries the agreed policy, re-targeted to its line. The disclosure
-travels with it, and `permalink_url` is where the buyer manages the
-subscription.
+The Order for the first example carries the agreed policy, re-targeted to its
+line. Its own `totals` record what today's order cost; the schedule records
+what each recurring order will. The disclosure travels with it, and
+`permalink_url` is where the buyer manages the subscription.
 
 <!-- ucp:example schema=shopping/policy_subscription def=dev.ucp.shopping.order op=read -->
 ```json
 {
   "ucp": { ... },
   "id": "ord_8f3e2a",
-  "checkout_id": "chk_abc123",
+  "checkout_id": "chk_coffee",
   "permalink_url": "https://example.com/orders/8f3e2a",
   "currency": "USD",
   "line_items": [
     {
       "id": "li_1",
-      "item": { "id": "gid://example/Variant/coffee-340g", "title": "House Blend 340g", "price": 850 },
+      "item": { "id": "gid://example/Variant/coffee-340g", "title": "House Blend 340g", "price": 1000 },
       "quantity": { "original": 2, "total": 2, "fulfilled": 0 },
       "totals": [
-        { "type": "subtotal", "amount": 1700 },
+        { "type": "subtotal", "amount": 2000 },
+        { "type": "items_discount", "amount": -300 },
         { "type": "total", "amount": 1700 }
       ],
       "status": "processing"
     }
   ],
   "totals": [
-    { "type": "subtotal", "amount": 1700 },
+    { "type": "subtotal", "amount": 2000 },
+    { "type": "items_discount", "display_text": "Subscribe & save 15%", "amount": -300 },
+    { "type": "fulfillment", "display_text": "Shipping", "amount": 0 },
     { "type": "tax", "amount": 136 },
     { "type": "total", "amount": 1836 }
   ],
@@ -647,7 +835,7 @@ subscription.
       "code": "dev.ucp.shopping.policy.subscription",
       "path": "$.line_items[0]",
       "presentation": "disclosure",
-      "content": "You'll be charged $17.00 plus tax and shipping every month starting November 2, 2026, until you cancel."
+      "content": "$17.00 plus tax and shipping every month from November 2, 2026, until you cancel."
     }
   ]
 }
