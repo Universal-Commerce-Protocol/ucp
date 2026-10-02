@@ -3085,6 +3085,7 @@ A Business publishes well-known and custom policies. Every policy carries a
 | :-- | :-- |
 | `dev.ucp.shopping.policy.return` | Return terms. |
 | `dev.ucp.shopping.policy.warranty` | Warranty terms. |
+| `dev.ucp.shopping.policy.subscription` | Terms for the recurring orders that follow a purchase. See the [Subscription Policy Extension](../shopping/extensions/subscription-policy.md). |
 | `dev.ucp.lodging.policy.cancellation` | Cancellation terms for lodging reservations. |
 
 A Business **MAY** define custom types in its own domain (e.g.,
