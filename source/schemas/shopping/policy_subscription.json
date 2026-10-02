@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/policy_subscription.json",
+  "name": "dev.ucp.shopping.policy.subscription",
+  "title": "Subscription Policy Extension",
+  "description": "Defines the body of the `dev.ucp.shopping.policy.subscription` policy type on the core `policies[]` primitive: the recurring orders that follow the purchase of the items the policy governs, as one or more consecutive schedules. Composes onto catalog search, catalog lookup, cart, checkout, and order. The container, `applies_to` targeting, same-type precedence, and `messages[]` disclosure are defined by the primitive and unchanged here.",
+  "$defs": {
+    "subscription_policy": {
+      "title": "Subscription Policy",
+      "description": "A policy statement with type `dev.ucp.shopping.policy.subscription`. Its `description` summarizes the subscription; `schedules` state its runs of recurring orders, each with its own complete description supplemented by `totals` and a `starts_at`. One policy describes one subscription, so exactly one governs a line and a sequence of terms is consecutive schedules within it. Items on different subscriptions are governed by separate policies targeting separate nodes.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dev.ucp.shopping.policy.subscription",
+              "description": "Policy discriminator for recurring order terms."
+            }
+          }
+        },
+        {
+          "$ref": "../common/types/subscription_terms.json"
+        }
+      ]
+    },
+    "policies_item": {
+      "description": "A `policies[]` entry; validates against `subscription_policy` when `type` is `dev.ucp.shopping.policy.subscription`.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dev.ucp.shopping.policy.subscription"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/subscription_policy"
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Subscription Policy",
+      "description": "Cart extended with subscription terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Subscription Policy",
+      "description": "Checkout extended with subscription terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Subscription Policy",
+      "description": "Order extended with subscription terms on `policies[]`: the snapshot of the terms the buyer agreed to at checkout.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with subscription policy (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with subscription policy (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    }
+  }
+}

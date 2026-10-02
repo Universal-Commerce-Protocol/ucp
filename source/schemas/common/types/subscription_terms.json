@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/subscription_terms.json",
+  "title": "Subscription Terms",
+  "description": "The recurring orders that follow a purchase, as one or more consecutive subscription schedules in the order they take effect. Most subscriptions have one. An introductory price followed by a standing price, or a cadence that changes after a period, has one schedule per run; each continues until the next takes effect, and the last until the subscription ends, as its description states. Shared by the subscription policy type, where it binds the items the policy governs, and by purchase options, where it previews what selecting an option would commit to.",
+  "type": "object",
+  "properties": {
+    "schedules": {
+      "type": "array",
+      "items": {
+        "$ref": "subscription_schedule.json"
+      },
+      "minItems": 1,
+      "description": "Consecutive runs of recurring orders in the order they take effect. Every schedule's `starts_at`, where present, is later than the previous one's."
+    }
+  }
+}
