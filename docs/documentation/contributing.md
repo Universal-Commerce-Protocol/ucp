@@ -8,19 +8,18 @@ We welcome community contributions, patches, and feedback to help build and evol
 
 Find something to work on:
 
-* **Documentation Improvements**: Improve code snippets, clarify specification text, fix typos or update broken links.
+* **Documentation Improvements**: Improve code snippets, clarify specification text, improve documentation or update broken links.
 * **Good First Issues**: Browse open issues tagged with `status:needs-triage`.
-* **Schema Examples**: Create or update schema example payloads (`source/schemas/` or `specification/examples/`) to illustrate protocol capabilities.
+* **Schema Examples**: Create or update schema example payloads (`source/schemas/` or `docs/specification/`) to illustrate protocol capabilities.
 * **SDK & Conformance Enhancements**: Fix bugs or expand test coverage in `python-sdk`, `js-sdk`, or `conformance`.
 
 ### Small Changes (Direct PR)
 
 Routine fixes and minor updates can be submitted directly as pull requests:
 
-* Bug fixes and typo corrections
+* Bug fixes
 * Clarifications to documentation or schema property descriptions
 * Schema examples and tutorial additions
-* Non-breaking SDK adjustments and test improvements
 
 ### Major Changes (Enhancement Proposal Required)
 
@@ -32,6 +31,8 @@ Significant changes include:
 * **Protocol Changes**: Altering communication flows or expected capability behaviors (Checkout, Cart, Catalog, Order, Identity Linking).
 * **New API Endpoints / Transports**: Introducing new transport bindings (REST, MCP, A2A, Embedded) or new protocol endpoints.
 * **Backwards Incompatibility**: Any breaking change requiring a major version increment.
+
+**Feature Request vs Enhancement Proposal**: For new feature suggestions without an implementation plan, please submit a standard "Feature Request" issue. If you are proposing a feature alongside its technical design, please submit an "Enhancement Proposal" issue and reference the corresponding implementation in your Pull Request(s).
 
 ---
 
@@ -46,7 +47,7 @@ flowchart LR
 ```
 
 | Phase | Status & Description |
-|---|---|
+| --- | --- |
 | **Proposal** | Submitted by any community member; debated publicly by the community and Domain Tech Council. |
 | **Provisional** | Approved by DTC majority vote; enters working draft iteration and prototyping phase. |
 | **Implemented** | Finalized by DTC majority vote; code, schemas, and documentation are complete and merged. |
@@ -91,10 +92,10 @@ sequenceDiagram
    Before writing full implementation code or opening a mergeable PR, submit the EP Issue. *(Optional: You may open a **Draft PR** linked to the EP Issue if concrete JSON Schema diffs or prototype code help illustrate your design, but implementation PRs will not be merged before the EP reaches `Provisional` status.)*
 2. **Design Review & Provisional Approval (`Proposal` → `Provisional`)**:
    Triagers label the EP Issue by functional domain (e.g., `area:shopping`, `area:payments`, `area:lodging`, `area:food`, `area:common`) and route it to the relevant **Domain Working Group (DWG)** and **Domain Tech Council (DTC)**. Once open design questions are resolved, the DTC votes on whether to accept the proposal as **Provisional** and records the decision in the issue's `Implementation History` section.
-3. **Submit Implementation PRs (`Provisional` / `Working Draft`)**:
-   Once the EP Issue is approved as **Provisional**, open (or mark *Ready for Review*) your implementation PR(s) referencing `Part of #<EP-issue-number>`. Larger proposals often span multiple PRs across repositories (for example, landing the core schema and spec in `ucp`, followed by validation rules in `ucp-schema`, SDK support in `python-sdk`/`js-sdk`, and tests in `conformance`).
-4. **Iterate Toward Graduation (`Candidate` → `Implemented`)**:
-   As implementation PRs merge and real-world adoption feedback is addressed, maintainers update the `Implementation History` in the EP Issue. Once graduation criteria and conformance testing are satisfied, the DTC holds a final vote to promote the capability to **Stable** (`Implemented`), and the EP Issue is closed.
+3. **Submit Implementation PRs (`Provisional` Phase)**:
+   Once the EP Issue is approved as **Provisional** (entering the `Working Draft` capability maturity level), open (or mark *Ready for Review*) your implementation PR(s) referencing `Part of #<EP-issue-number>`. Larger proposals often span multiple PRs across repositories (for example, landing the core schema and spec in `ucp`, followed by validation rules in `ucp-schema`, SDK support in `python-sdk`/`js-sdk`, and tests in `conformance`).
+4. **Iterate Toward Graduation (`Provisional` → `Implemented`)**:
+   As implementation PRs merge and real-world adoption feedback is addressed, maintainers update the `Implementation History` in the EP Issue as the capability advances from `Working Draft` to `Candidate` and `Stable`. Once graduation criteria and conformance testing are satisfied, the DTC holds a final vote to mark the EP **Implemented** (promoting the capability to **Stable**), and the EP Issue is closed.
 
 ---
 
@@ -109,7 +110,7 @@ flowchart LR
 ```
 
 | Level | Version Tag | Stability Guarantee | Purpose | Exit Criteria |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **Working Draft** | `Working Draft` | Breaking changes expected | Prototyping, gathering feedback, iterating on design | DTC majority vote to advance |
 | **Candidate** | `Candidate` | API surface stable; implementation details evolve | Early adopter implementations, production pilots | DTC majority vote to advance |
 | **Stable** | `YYYY-MM-DD` | Full backward compatibility within major version | Production deployments | Date-based version assigned |
@@ -140,8 +141,6 @@ The Universal Commerce Protocol ecosystem is organized into dedicated Git reposi
 
 ## Getting Started
 
-### Get started today
+Ready to jump in? Head over to the [UCP GitHub organization](https://github.com/Universal-Commerce-Protocol){ target="_blank" } to explore the repositories, browse [open issues](https://github.com/Universal-Commerce-Protocol/ucp/issues){ target="_blank" }, or submit your first pull request.
 
-Interested in contributing to UCP but not sure where to start? Take a look at our [Core Concepts](core-concepts.md) page to learn about the protocol architecture or the [Contributing](http://github.com/Universal-Commerce-Protocol/.github/blob/main/CONTRIBUTING.md) page on GitHub to learn more about the contributing process, submitting a PR and our community guidelines.
-
-You can also review our [samples](https://github.com/Universal-Commerce-Protocol/samples) for implementation examples and don’t forget to join our [GitHub Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).
+If you are new to the protocol, start with [Core Concepts](core-concepts.md) to learn about the architecture, explore our [samples](https://github.com/Universal-Commerce-Protocol/samples){ target="_blank" } for reference implementations, and join the conversation in [GitHub Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions){ target="_blank" }.
