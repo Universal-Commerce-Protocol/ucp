@@ -276,7 +276,20 @@ vocabulary); runtime messages carry per-request advisories.
     authorization server protecting the resource without relying on
     domain conventions and prepares the deployment for future delegated
     domain conventions. The business **MUST** publish this metadata when
-    the authorization server does not live on the business domain.
+    the authorization server does not live on the business domain. Every
+    entry in `authorization_servers` **MUST** be a canonical
+    [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
+    issuer identifier whose discovered metadata `issuer` field matches
+    that entry byte-for-byte
+    ([RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
+    Businesses that serve OAuth endpoints (`authorization_endpoint`,
+    `token_endpoint`) on a custom domain while issuing tokens under a
+    different canonical issuer URI **MUST** advertise the canonical
+    issuer URI in `authorization_servers` (and point the endpoint fields
+    in that issuer's metadata to the custom domain), or configure the
+    custom domain's metadata to declare the custom domain itself as
+    `issuer`. Businesses **MUST NOT** list a custom endpoint domain in
+    `authorization_servers` whose metadata reports a different `issuer`.
 * **SHOULD** support
     [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
     to signal revocation and account state changes to platforms.
@@ -303,18 +316,20 @@ path, not appended).
 
 1. **RFC 8414 (Primary):** Fetch
    `https://{host}/.well-known/oauth-authorization-server{path}`.
-    * `2xx` response: use this metadata. Discovery complete.
-    * `404 Not Found`: proceed to step 2.
+    * `2xx` response: use this metadata. Proceed to Step 3.
+    * `404 Not Found`: proceed to OIDC Discovery (item 2).
     * Any other non-2xx response, network error, or timeout: **MUST**
-      abort. **MUST NOT** proceed to step 2.
+      abort metadata resolution for this issuer. **MUST NOT** proceed to
+      item 2.
 
 2. **OIDC Discovery (Fallback):** Fetch
    `{issuer}/.well-known/openid-configuration`.
-    * `2xx` response: use this metadata. Discovery complete.
-    * Any non-2xx response, network error, or timeout: **MUST** abort.
+    * `2xx` response: use this metadata. Proceed to Step 3.
+    * Any non-2xx response, network error, or timeout: **MUST** abort
+      metadata resolution for this issuer.
 
-Platforms **MUST NOT** silently fall through on any error other than
-`404` in step 1.
+Platforms **MUST NOT** silently fall through to OIDC Discovery on any
+error other than `404` in item 1.
 
 **Step 3 — Validate the issuer.** The `issuer` value in the discovered
 metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
@@ -322,6 +337,14 @@ metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
 [RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
 Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
 comparison.
+
+When `authorization_servers` contains multiple entries, platforms
+**MUST** evaluate entries in array order and select the first entry that
+successfully completes both Step 2 and Step 3. If an entry fails Step 2
+or Step 3 (for example, because an entry's metadata returns a mismatched
+`issuer`), the platform **MUST** discard that entry's metadata and try
+the next entry in `authorization_servers`. Discovery **MUST** abort if
+no entry in `authorization_servers` satisfies both Step 2 and Step 3.
 
 ## Account Linking Flow
 
