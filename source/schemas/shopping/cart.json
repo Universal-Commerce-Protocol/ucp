@@ -25,7 +25,7 @@
                   "transition": {
                     "from": "optional",
                     "to": "omit",
-                    "description": "Cart contents are bound at checkout creation, so cart_id has no effect on complete and should be omitted."
+                    "description": "cart_id is only meaningful on create_checkout; cart contents are bound at checkout creation. Platforms SHOULD NOT send cart_id on complete_checkout; businesses MUST ignore it if present. Will become omit at the next version cut."
                   }
                 }
               }
