@@ -34,6 +34,7 @@ HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
 COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
 COMMON_TYPES_DIR = COMMON_SCHEMAS_DIR / "types"
 UCP_SCHEMA_PATH = SCHEMAS_DIR / "ucp.json"
+REFERENCE_DOC_PATH = Path("docs/specification/reference.md")
 
 
 # common/ is the protocol namespace; every other immediate subdir of
@@ -245,6 +246,51 @@ def define_env(env):
           return json.load(f)
       except FileNotFoundError:
         continue
+    return None
+
+  ucp_type_index = {}
+
+  def _ucp_type_index():
+    """Load ucp.json $defs and the anchors reference.md defines for them."""
+    if not ucp_type_index:
+      try:
+        with UCP_SCHEMA_PATH.open(encoding="utf-8") as f:
+          ucp_type_index["defs"] = json.load(f).get("$defs", {})
+      except (json.JSONDecodeError, OSError):
+        ucp_type_index["defs"] = {}
+      try:
+        reference_md = REFERENCE_DOC_PATH.read_text(encoding="utf-8")
+      except OSError:
+        reference_md = ""
+      ucp_type_index["anchors"] = set(
+        re.findall(r"\{: #(ucp-[a-z0-9-]+) \}", reference_md)
+      )
+    return ucp_type_index
+
+  def _ucp_def_type(def_name):
+    """Type cell for a field typed by a ucp.json $def.
+
+    Links to the reference section anchored for the def (e.g.
+    `{: #ucp-response-checkout-schema }`) when one exists, otherwise names
+    the def by its title, so the cell never falls back to "any".
+    """
+    index = _ucp_type_index()
+    resolved_def = index["defs"].get(def_name, {})
+    title = resolved_def.get("title") or (
+      "UCP " + def_name.replace("_", " ").title()
+    )
+    anchor = "ucp-" + def_name.replace("_", "-")
+    if anchor in index["anchors"]:
+      return f"[{title}](site:specification/reference/#{anchor})"
+    return title
+
+  def _ucp_def_name_for_title(title):
+    """Find the ucp.json $def a bundled (already inlined) schema came from."""
+    if not title:
+      return None
+    for def_name, def_schema in _ucp_type_index()["defs"].items():
+      if isinstance(def_schema, dict) and def_schema.get("title") == title:
+        return def_name
     return None
 
   def _variant_base(schema_path):
@@ -979,7 +1025,10 @@ def define_env(env):
                 if embedder_desc:
                   details["description"] = embedder_desc
                 ref = None
-                f_type = details.get("type", "any")
+                # The resolved def is usually an allOf with no top-level
+                # type; name it (and link its reference section) rather
+                # than falling back to "any".
+                f_type = details.get("type") or _ucp_def_type(def_name)
           except (json.JSONDecodeError, OSError):
             pass
 
@@ -1052,6 +1101,34 @@ def define_env(env):
                 break
             inner_type = inner_type or "object"
           f_type = f"Array[{inner_type}]"
+        elif f_type == "any" and _ucp_def_name_for_title(details.get("title")):
+          # A ucp.json $def already inlined by bundled resolution: the $ref
+          # is gone, but its title still identifies it.
+          f_type = _ucp_def_type(_ucp_def_name_for_title(details["title"]))
+        elif f_type == "any" and isinstance(details.get("allOf"), list):
+          # Composed type (e.g. a $ref plus extra constraints). Show the
+          # referenced type(s) instead of "any".
+          links = [
+            create_link(_deref_self(branch["$ref"]), spec_file_name, context)
+            for branch in details["allOf"]
+            if isinstance(branch, dict) and branch.get("$ref")
+          ]
+          if len(links) == 1:
+            f_type = links[0]
+          elif links:
+            f_type = f"AllOf[{', '.join(links)}]"
+          elif details.get("title"):
+            f_type = details["title"]
+          else:
+            # Bundled resolution inlines the branches; if they agree on a
+            # JSON type, that is still more precise than "any".
+            branch_types = {
+              branch.get("type")
+              for branch in details["allOf"]
+              if isinstance(branch, dict)
+            }
+            if len(branch_types) == 1 and None not in branch_types:
+              f_type = branch_types.pop()
 
         # --- Handle Description ---
         desc = ""
