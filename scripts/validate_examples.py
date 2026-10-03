@@ -83,6 +83,12 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
   - Coverage walk: for each object in the example, verify every
     schema-required field is either present or elision-acknowledged.
   - The merged payload is validated by `ucp-schema validate`.
+  - Extension fields: if the payload carries a top-level field that
+    the annotated capability does not declare but an extension
+    composes onto it (under the extension's $defs/<capability name>,
+    e.g. checkout `fulfillment`), the payload is also validated
+    against that extension's composed schema. Capability schemas are
+    open, so without this such fields would go unchecked.
   - Validation errors whose path is an elided path (or descendant)
     are suppressed.
 
@@ -813,6 +819,105 @@ def validate_payload_with_schema(
 
 
 # -----------------------------------------------------------
+# Extension validation
+# -----------------------------------------------------------
+
+_extension_cache: dict[Path, tuple[dict, dict]] = {}
+
+
+def load_extensions(schema_base: Path) -> tuple[dict, dict]:
+  """Index capabilities and the extensions that compose onto them.
+
+  Returns (capabilities, extensions). capabilities maps a capability
+  name (e.g. dev.ucp.shopping.checkout) to its schema path. extensions
+  maps a capability name to (schema path, added fields) for every other
+  schema that composes onto it under $defs/<capability name>, where
+  added fields are the properties the extension's own allOf branches
+  declare.
+  """
+  key = schema_base.resolve()
+  if key in _extension_cache:
+    return _extension_cache[key]
+
+  schemas = {}
+  for path in sorted(schema_base.rglob("*.json")):
+    rel = path.relative_to(schema_base).with_suffix("").as_posix()
+    schemas[rel] = json.loads(path.read_text(encoding="utf-8"))
+
+  capabilities = {
+    schema["name"]: rel
+    for rel, schema in schemas.items()
+    if str(schema.get("name", "")).startswith("dev.ucp.")
+  }
+  extensions: dict[str, list[tuple[str, frozenset[str]]]] = {}
+  for rel, schema in schemas.items():
+    for name, composed in schema.get("$defs", {}).items():
+      if name not in capabilities or capabilities[name] == rel:
+        continue
+      added = set(composed.get("properties", {}))
+      for branch in composed.get("allOf", []):
+        if "$ref" not in branch:
+          added.update(branch.get("properties", {}))
+      if added:
+        extensions.setdefault(name, []).append((rel, frozenset(added)))
+
+  _extension_cache[key] = (capabilities, extensions)
+  return capabilities, extensions
+
+
+def validate_extensions(
+  payload: dict,
+  schema_path: str,
+  schema_def: str | None,
+  resolved: dict,
+  direction: str,
+  op: str,
+  schema_base: Path,
+) -> list[tuple[str, list[dict]]]:
+  """Validate a payload against each extension whose fields it carries.
+
+  Capability schemas are open, so a field that only an extension
+  declares (e.g. checkout `fulfillment`) passes validation against the
+  capability unchecked. When the payload carries such a field, it is
+  also validated against that extension's composed schema. Fields the
+  capability itself declares (e.g. `payment`, `buyer`) do not trigger
+  this, since the capability already validates them.
+
+  Returns (extension schema path, errors) for each failing extension.
+  """
+  if not isinstance(payload, dict):
+    return []
+  capabilities, extensions = load_extensions(schema_base)
+  if schema_def:
+    capability = schema_def if schema_def in capabilities else None
+  else:
+    capability = resolved.get("name")
+  if capability not in extensions:
+    return []
+
+  base = resolve_schema(capabilities[capability], direction, op, schema_base)
+  declared = set(base.get("properties", {}))
+
+  failures = []
+  for ext_path, added in extensions[capability]:
+    if ext_path == schema_path and schema_def == capability:
+      continue
+    if not (added - declared) & payload.keys():
+      continue
+    composed = resolve_schema(ext_path, direction, op, schema_base)
+    valid, errors = validate_payload_with_schema(
+      payload,
+      composed["$defs"][capability],
+      direction,
+      op,
+      schema_base,
+    )
+    if not valid:
+      failures.append((ext_path, errors))
+  return failures
+
+
+# -----------------------------------------------------------
 # Scaffold loading
 # -----------------------------------------------------------
 
@@ -1082,6 +1187,19 @@ def process_block(
   except RuntimeError as e:
     return Result(file, line, "error", str(e), annotation)
 
+  # 10. Validate fields contributed by extensions
+  try:
+    extension_errors = validate_extensions(
+      merged, schema_path, schema_def, resolved, direction, op, schema_base
+    )
+  except RuntimeError as e:
+    return Result(file, line, "error", str(e), annotation)
+
+  def elided(err_path: str) -> bool:
+    return any(
+      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
+    )
+
   # Collect all failures
   messages: list[str] = []
   for ce in coverage_errors:
@@ -1089,11 +1207,17 @@ def process_block(
   for ve in val_errors:
     # Suppress errors at ellipsis-acknowledged paths
     err_path = ve.get("path", "")
-    if any(
-      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
-    ):
+    if elided(err_path):
       continue
     messages.append(f"validation: {err_path} \u2014 {ve.get('message', '')}")
+  for ext_path, errors in extension_errors:
+    for ve in errors:
+      err_path = ve.get("path", "")
+      if elided(err_path):
+        continue
+      messages.append(
+        f"extension {ext_path}: {err_path} \u2014 {ve.get('message', '')}"
+      )
 
   if messages:
     return Result(
