@@ -241,6 +241,11 @@ rely on the platform echoing them. Each request is fresh intent — the
 platform sets `amount` to specify a contribution or omits it for
 open-amount, independent of any prior response.
 
+Instruments in the response identify what was processed by `id`,
+`handler_id`, and `type`; they do not carry `credential`. Credentials flow
+Platform → Business only, and businesses **MUST NOT** echo them back (see
+[Credential Flow & PCI Scope](../../overview/index.md#credential-flow-pci-scope)).
+
 ## Examples
 
 ### Gift Card + Credit Card
@@ -284,14 +289,12 @@ Neither instrument includes `amount` — the business determines both.
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
         "amount": 1000
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 4000
       }
     ]
@@ -346,14 +349,12 @@ the rest.
         "id": "pi_lp_1",
         "handler_id": "example_handler_1",
         "type": "loyalty",
-        "credential": { "type": "loyalty", "token": "lp_abc123" },
         "amount": 500
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 4500
       }
     ]
@@ -409,21 +410,18 @@ credit card covers the remaining $45.
         "id": "pi_gc_1",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
         "amount": 2500
       },
       {
         "id": "pi_gc_2",
         "handler_id": "handler_gc",
         "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_def456" },
         "amount": 0
       },
       {
         "id": "pi_card_1",
         "handler_id": "handler_card",
         "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
         "amount": 7500
       }
     ]
@@ -454,14 +452,12 @@ per the atomic invariant):**
       {
         "id": "pi_gc_1",
         "handler_id": "example_handler_1",
-        "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" }
+        "type": "gift_card"
       },
       {
         "id": "pi_card_1",
         "handler_id": "example_handler_1",
-        "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" }
+        "type": "card"
       }
     ]
   },
