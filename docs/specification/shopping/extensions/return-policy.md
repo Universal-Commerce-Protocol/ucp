@@ -83,17 +83,17 @@ any surface that carries `policies[]`:
 }
 ```
 
-A business MAY advertise support on a subset of these surfaces. A platform that
-has negotiated this type validates the return body and MAY reason over it (for
-example, computing a return deadline). A platform that has not negotiated it
-still renders the policy from the base `type` and `description`, because the
-return body is purely additive.
+A business **MAY** advertise support on a subset of these surfaces. A platform
+that has negotiated this type validates the return body and **MAY** reason over
+it (for example, computing a return deadline). A platform that has not
+negotiated it still renders the policy from the base `type` and `description`,
+because the return body is purely additive.
 
 ## Schema
 
 When this type is active, a `policies[]` entry whose `type` is
-`dev.ucp.shopping.policy.return` MAY carry the following fields in addition to
-the base `type`, `description`, `applies_to`, and `url`. All fields are
+`dev.ucp.shopping.policy.return` **MAY** carry the following fields in addition
+to the base `type`, `description`, `applies_to`, and `url`. All fields are
 optional, and an omitted field means the term is not stated structurally; a
 return policy with no structured fields is still presentable from its
 `description`.
@@ -101,6 +101,14 @@ return policy with no structured fields is still presentable from its
 ### Return Policy
 
 {{ extension_schema_fields('policy_return.json#/$defs/return_body', 'shopping/extensions/return-policy') }}
+
+### Return Window
+
+{{ extension_schema_fields('policy_return.json#/$defs/return_window', 'shopping/extensions/return-policy') }}
+
+### Restocking Fee
+
+{{ extension_schema_fields('policy_return.json#/$defs/restocking_fee', 'shopping/extensions/return-policy') }}
 
 ### Return Method
 
@@ -132,10 +140,10 @@ lists both resolutions, and describes the store-credit extension (see
 [Different windows per resolution](#different-windows-per-resolution)).
 
 Businesses differ on whether the clock starts at delivery, purchase, shipment,
-or fulfillment, so when `window` is present a business MUST provide both `days`
-and `anchor`. There is no default anchor, and a platform MUST NOT assume one.
-Omit `window` entirely for an unlimited window, or when the window is not stated
-structurally, and convey it in `description`.
+or fulfillment, so when `window` is present a business **MUST** provide both
+`days` and `anchor`. There is no default anchor, and a platform **MUST NOT**
+assume one. Omit `window` entirely for an unlimited window, or when the window
+is not stated structurally, and convey it in `description`.
 
 `anchor` is an open vocabulary. The well-known values are:
 
@@ -148,7 +156,7 @@ structurally, and convey it in `description`.
 
 `fulfilled` and `delivered` differ in whose action starts the clock: the
 business completing its step, or the buyer receiving the items. A platform that
-does not recognize an `anchor` value MUST NOT compute a deadline from it.
+does not recognize an `anchor` value **MUST NOT** compute a deadline from it.
 
 Pre-purchase, the window is a duration plus an anchor. Resolving it to an
 absolute cutoff after the anchor event is future work (see
@@ -156,11 +164,11 @@ absolute cutoff after the anchor event is future work (see
 
 ### Non-returnable items
 
-To signal that the covered items cannot be returned, a business MUST set
+To signal that the covered items cannot be returned, a business **MUST** set
 `final_sale` to `true`. Because return terms do not apply, a final-sale policy
-MUST NOT carry `window`, `supported_resolutions`, `methods`, or
+**MUST NOT** carry `window`, `supported_resolutions`, `methods`, or
 `restocking_fee`; the schema rejects the combination, so no precedence between
-fields of one policy is ever needed. A business MUST NOT use an empty
+fields of one policy is ever needed. A business **MUST NOT** use an empty
 `supported_resolutions` or `methods` array to signal non-returnability, and the
 schema requires at least one entry in each; omit a field that is not stated
 structurally. `final_sale` is the single, unambiguous signal a platform acts on.
@@ -185,14 +193,14 @@ Keeping them separate lets a business express, for example, "free returns by
 mail with a 15% restocking fee" - which a single per-method fee cannot
 represent. A percentage restocking fee uses `restocking_fee.percentage_bps`; a
 flat or precomputed amount uses `restocking_fee.amount`. A `restocking_fee`
-MUST carry at least one of them.
+**MUST** carry at least one of them.
 
 Each amount has a defined basis, so every platform computes the same maximum:
 
 - `restocking_fee.percentage_bps` applies to the amount paid for the returned
-  quantity, after item-level discounts and excluding tax and shipping. On
-  catalog surfaces, where nothing has been paid, the basis is the covered
-  product's price.
+  quantity, after item-level discounts and excluding tax, shipping, and other
+  fees. On catalog surfaces, where nothing has been paid, the basis is the
+  covered product's price.
 - `restocking_fee.amount` is charged per returned unit of quantity.
 - `methods[].fee.amount` (a `fixed_fee`) is charged per return shipment.
 
@@ -209,21 +217,28 @@ more. A fee that applies only in some cases, such as a restocking fee on opened
 items, states its full value, and its `display_text` names the condition.
 
 An omitted `restocking_fee` means the fee is not stated structurally, not that
-none is charged; a platform MUST NOT present it as "no restocking fee". To state
-that no restocking fee is charged, a business sets `percentage_bps` to `0`.
+none is charged; a platform **MUST NOT** present it as "no restocking fee". To
+state that no restocking fee is charged, a business sets `percentage_bps` to `0`
+and omits `amount`. To state that a channel is free, it sets `fee.type` to
+`free`. Every `amount` is at least 1, so these are the only zero-cost signals.
 
-A method's logistics cost is likewise stated only by its `fee`. A method with
-no `fee`, or with a `fee.type` the platform does not recognize, states no cost,
-and `customer_responsibility` means the buyer arranges and pays for the return
-shipping, with no maximum stated. A platform MUST NOT present any of these as
-free.
+A method's logistics cost is likewise stated only by its `fee`. A method with no
+`fee`, or with a `fee.type` the platform does not recognize, states no cost, and
+`customer_responsibility` means the buyer arranges and pays for the return
+shipping, with no maximum stated. A platform **MUST NOT** present any of these
+as free.
 
-When a return method's `fee.type` is `fixed_fee`, `amount` MUST be present, so
-the charge is never left uninterpretable.
+When a return method's `fee.type` is `fixed_fee`, `amount` **MUST** be present,
+so the charge is never left uninterpretable.
 
 Amounts (`methods[].fee.amount` and `restocking_fee.amount`) carry no currency
 of their own. They are in the `currency` of the enclosing cart, checkout, or
 order, or, on catalog surfaces, in the currency of the covered product's price.
+Because a catalog response can price products in more than one currency, a
+catalog policy that carries an amount **MUST** cover only products priced in a
+single currency; a business scopes it with `applies_to` to achieve this. A
+platform **MUST NOT** interpret an amount on a policy whose covered products are
+priced in different currencies.
 
 ## Targeting and precedence
 
@@ -238,7 +253,7 @@ For return policies this means a business states a single default return policy
 once, then adds targeted overrides only for the exceptions (a final-sale item, a
 category with a different window), rather than repeating a policy on every line.
 An override replaces the default for the items it governs and inherits none of
-its terms, so a business MUST restate in the override every term that still
+its terms, so a business **MUST** restate in the override every term that still
 applies. A term the override omits, including `restocking_fee`, is not stated
 for the items it governs.
 
@@ -261,29 +276,36 @@ which an item stays returnable on different terms, such as opened or unopened,
 is not an eligibility requirement, so the fields state the terms that hold in
 every case.
 
-A business SHOULD populate the fields it can state as guarantees and MUST NOT
-populate a field with a value that does not hold for every eligible return. It
-omits a field when it cannot state the term as a guarantee, and conveys the
-term in `description` or links to it through `url`. Where a term depends on
-something known when the response is built, such as the seller, the purchase
-date, an authenticated buyer's membership, or a selected payment instrument, a
-business SHOULD resolve it, scoping policies with `applies_to` where it differs
-per item.
+A business **SHOULD** populate the fields it can state as guarantees and
+**MUST NOT** populate a field with a value that does not hold for every eligible
+return. It omits a field when it cannot state the term as a guarantee, and
+conveys the term in `description` or links to it through `url`. Where a term
+depends on something known when the response is built, such as the seller, the
+purchase date, an authenticated buyer's membership, or a selected payment
+instrument, a business **SHOULD** resolve it, scoping policies with `applies_to`
+where it differs per item.
 
 A policy's `description` and its structured fields are two representations of
-the same policy. The `description` MAY state better terms than a field (a longer
-window for one resolution) or the conditions under which a fee applies, but a
-business MUST NOT let it state terms worse for the buyer than a field. It is the
-human-readable summary a platform renders, and the fallback for a platform that
-does not model the type. A platform SHOULD surface `url` alongside the
-structured terms so the buyer can review the full policy.
+the same policy. The `description` **MAY** state better terms than a field (a
+longer window for one resolution) or the conditions under which a fee applies,
+but a business **MUST NOT** let it state terms worse for the buyer than a field.
+It is the human-readable summary a platform renders, and the fallback for a
+platform that does not model the type. A platform **SHOULD** surface `url`
+alongside the structured terms so the buyer can review the full policy.
 
-A platform that models this type MAY compute a guaranteed return deadline and a
-worst-case net refund from these fields. It computes a worst-case net refund
-only when `restocking_fee` is present and every method the buyer may use states
-its cost (see [Two kinds of cost](#two-kinds-of-cost)). It MUST NOT treat an
-elapsed `window` as making an item non-returnable, since the `description` may
-allow later returns; only `final_sale` signals that.
+A platform that models this type **MAY** compute a guaranteed return deadline
+and a worst-case net refund from these fields. It computes a worst-case net
+refund only when `restocking_fee` is present and every method the buyer may use
+states its cost (see [Two kinds of cost](#two-kinds-of-cost)). The worst-case
+net refund for a return of a given quantity in one shipment through a method is
+the amount paid for that quantity, less the maximum restocking fee for that
+quantity, less the method's logistics cost (zero for `free`). When the buyer has
+not chosen a method, the worst case is the lowest result across the listed
+methods. A `fixed_fee` is charged per shipment, not per unit, so returning
+several units together incurs it once; a buyer who splits a return across
+shipments pays it for each one. It
+**MUST NOT** treat an elapsed `window` as making an item non-returnable, since
+the `description` may allow later returns; only `final_sale` signals that.
 
 ## Order-time resolution
 

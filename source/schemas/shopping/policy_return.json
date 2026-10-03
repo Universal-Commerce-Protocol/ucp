@@ -15,21 +15,8 @@
           "description": "When `true`, the covered items cannot be returned and `window`, `supported_resolutions`, `methods`, and `restocking_fee` MUST be omitted. When `false` or omitted, the items are returnable subject to the other fields."
         },
         "window": {
-          "title": "Return Window",
-          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit for an unlimited or unstated window.",
-          "type": "object",
-          "required": ["days", "anchor"],
-          "properties": {
-            "days": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Length of the return window in whole days from `anchor`."
-            },
-            "anchor": {
-              "type": "string",
-              "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`."
-            }
-          }
+          "$ref": "#/$defs/return_window",
+          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit for an unlimited or unstated window."
         },
         "supported_resolutions": {
           "type": "array",
@@ -49,33 +36,8 @@
           }
         },
         "restocking_fee": {
-          "title": "Restocking Fee",
-          "description": "Maximum refund deduction, applied regardless of return channel. Omitted means the fee is not stated structurally, not that none is charged; set `percentage_bps` to `0` to state that no restocking fee is charged. Provide `percentage_bps`, `amount`, or both; when both are present, each is a cap computed over the same returned quantity and the deduction never exceeds either (e.g., 15% up to $50 per unit).",
-          "type": "object",
-          "anyOf": [
-            {
-              "required": ["percentage_bps"]
-            },
-            {
-              "required": ["amount"]
-            }
-          ],
-          "properties": {
-            "percentage_bps": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 10000,
-              "description": "Restocking fee in basis points of the amount paid for the returned quantity, after item-level discounts and excluding tax and shipping (e.g., `1500` = 15%). On catalog surfaces, where no amount has been paid, the basis is the covered product's price."
-            },
-            "amount": {
-              "$ref": "../common/types/amount.json",
-              "description": "Restocking fee as a flat charge per returned unit of quantity, in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces)."
-            },
-            "display_text": {
-              "type": "string",
-              "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., '15% restocking fee on opened items')."
-            }
-          }
+          "$ref": "#/$defs/restocking_fee",
+          "description": "Maximum refund deduction, applied regardless of return channel. Omitted means the fee is not stated structurally, not that none is charged; set `percentage_bps` to `0` to state that no restocking fee is charged. Provide `percentage_bps`, `amount`, or both; when both are present, each is a cap computed over the same returned quantity and the deduction never exceeds either (e.g., 15% up to $50 per unit)."
         }
       },
       "if": {
@@ -94,6 +56,53 @@
           "supported_resolutions": false,
           "methods": false,
           "restocking_fee": false
+        }
+      }
+    },
+    "return_window": {
+      "title": "Return Window",
+      "description": "A return window measured in whole days from an anchor event.",
+      "type": "object",
+      "required": ["days", "anchor"],
+      "properties": {
+        "days": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Length of the return window in whole days from `anchor`."
+        },
+        "anchor": {
+          "type": "string",
+          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`."
+        }
+      }
+    },
+    "restocking_fee": {
+      "title": "Restocking Fee",
+      "description": "A deduction from the refund, stated as a percentage, a flat amount per unit, or both.",
+      "type": "object",
+      "anyOf": [
+        {
+          "required": ["percentage_bps"]
+        },
+        {
+          "required": ["amount"]
+        }
+      ],
+      "properties": {
+        "percentage_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Restocking fee in basis points of the amount paid for the returned quantity, after item-level discounts and excluding tax, shipping, and other fees (e.g., `1500` = 15%). On catalog surfaces, where no amount has been paid, the basis is the covered product's price. `0` states that no restocking fee is charged."
+        },
+        "amount": {
+          "$ref": "../common/types/amount.json",
+          "minimum": 1,
+          "description": "Restocking fee as a flat charge per returned unit of quantity, in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces). At least 1; state no fee with `percentage_bps` of `0`."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., '15% restocking fee on opened items')."
         }
       }
     },
@@ -134,7 +143,8 @@
         },
         "amount": {
           "$ref": "../common/types/amount.json",
-          "description": "Maximum channel fee per return shipment, in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces). Required when type is fixed_fee."
+          "minimum": 1,
+          "description": "Maximum channel fee per return shipment, in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces). Required when type is fixed_fee. At least 1; state a free channel with fee type `free`."
         }
       }
     },
