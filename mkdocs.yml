@@ -55,6 +55,7 @@ nav:
                   - MCP: specification/common/location/mcp.md
           - Extensions:
               - Loyalty: specification/common/extensions/loyalty.md
+              - UI: specification/common/extensions/ui.md
       - Shopping:
           - Checkout Capability:
               - Overview: specification/shopping/checkout/index.md
@@ -419,6 +420,11 @@ plugins:
               for memberships, tiers, benefits, and reward earning forecasts
               while managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/common/extensions/ui.md: >-
+              UI Extension, attaching optional declarative UI renditions
+              (A2UI) to catalog and cart responses with the response as the
+              rendition's data, and binding MCP Apps views on UCP tools, with
+              interactions mediated by the platform as standard UCP operations.
         Location Capability:
           - specification/common/location/index.md: >-
               Core Location Capability, detailing physical Location discovery,
