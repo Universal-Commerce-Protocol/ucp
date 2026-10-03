@@ -1303,6 +1303,7 @@ method.
                     {
                         "id": "method_1",
                         "type": "shipping",
+                        "line_item_ids": ["li_1"],
                         "selected_destination_id": "address_123",
                         "destinations": [
                             {
@@ -1350,6 +1351,7 @@ rather than attempting to merge the new data with existing state.
                     {
                         "id": "method_1",
                         "type": "shipping",
+                        "line_item_ids": ["li_1"],
                         "selected_destination_id": "address_789",
                         "destinations": [
                             {
