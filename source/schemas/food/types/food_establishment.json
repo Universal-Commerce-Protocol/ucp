@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/food_establishment.json",
+  "title": "Food Establishment",
+  "description": "A food service establishment (e.g., restaurant, cafe, ghost kitchen) where food orders are prepared and fulfilled.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/types/location_summary.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "../../common/types/media.json"
+          },
+          "description": "Food establishment media assets (e.g., storefront images, logos, hero banners). First item is the featured media for presentation in food ordering surfaces.",
+          "ucp_request": "omit"
+        }
+      }
+    }
+  ]
+}

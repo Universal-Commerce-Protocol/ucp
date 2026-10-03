@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/fulfillment_method.json",
+  "title": "Fulfillment Method",
+  "description": "A fulfillment method (delivery or pickup) with destinations and groups.",
+  "type": "object",
+  "required": ["id", "type"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fulfillment method identifier.",
+      "ucp_request": {"create": "omit", "update": "optional"}
+    },
+    "type": {
+      "type": "string",
+      "enum": ["delivery", "pickup"],
+      "description": "Fulfillment method type.",
+      "ucp_request": {"create": "required", "update": "optional"}
+    },
+    "destination": {
+      "$ref": "fulfillment_destination.json",
+      "description": "The destination for fulfillment. For delivery: customer address. For pickup: food establishment location."
+    },
+    "requested_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Platform-requested fulfillment time as an RFC 3339 timestamp. When omitted, the business MUST interpret the request as ASAP fulfillment. When present, the business SHOULD return the nearest available fulfillment option matching the requested time. If the requested time is unavailable, the business SHOULD return a recoverable error with available alternatives in the fulfillment options array."
+    },
+    "options": {
+      "type": "array",
+      "description": "Fulfillment options for selection.",
+      "items": { "$ref": "fulfillment_option.json" },
+      "ucp_request": "omit"
+    },
+    "selected_option_id": {
+      "type": "string",
+      "description": "Identifier of the selected fulfillment option."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional input from the buyer for the fulfillment method. Common examples include delivery instructions."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "delivery"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "destinations": {
+            "type": "array",
+            "description": "Platform-authored delivery addresses for this method.",
+            "ucp_request": "optional",
+            "items": {
+              "$ref": "delivery_destination.json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "pickup"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "destinations": {
+            "type": "array",
+            "description": "Business-authored locations able to fulfill this method. Response-only.",
+            "ucp_request": "omit",
+            "items": {
+              "$ref": "location_destination.json"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "dependentRequired": {
+    "destinations": [
+      "type"
+    ]
+  }
+}

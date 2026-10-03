@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/modification.json",
+  "title": "Modification",
+  "description": "Modification object. Expected to use the currency of the parent object.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "price"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The modification identifier. Should be recognized by both the Platform and the Business."
+    },
+    "title": {
+      "type": "string",
+      "description": "Modification title.",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Modification description.",
+      "ucp_request": "omit"
+    },
+    "price": {
+      "$ref": "../../common/types/amount.json",
+      "description": "Unit price in ISO 4217 minor units.",
+      "ucp_request": "omit"
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/media.json"
+      },
+      "description": "Modification media assets (e.g., modification photos). First item is the featured media for presentation in food ordering surfaces.",
+      "ucp_request": "omit"
+    }
+  }
+}
