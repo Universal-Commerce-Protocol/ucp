@@ -262,7 +262,7 @@ non-total entries sum to the single `total` entry.
   jurisdictions.
 * **Gratuity (`tip`)**: A **food-defined total type**. Because `tip` is not in
   the common well-known set, Businesses **MUST** include `display_text` on it.
-  See [Tips & Gratuity](#tips--gratuity).
+  See [Tips & Gratuity](#tips-and-gratuity).
 
 The following snippets illustrate canonical food pricing patterns:
 
@@ -340,7 +340,7 @@ Courier Tip (18%)                                              $9.00
 Total                                                         $71.87
 ```
 
-### Tips & Gratuity
+### Tips and Gratuity
 
 Gratuity for couriers and counter staff is part of the checkout itself,
 not an afterthought. The top-level [Tip](#tip) object separates what the
