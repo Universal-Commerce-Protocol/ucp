@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/cart.json",
+  "name": "dev.ucp.food.cart",
+  "title": "Cart",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states.",
+  "$defs": {
+    "checkout": {
+      "title": "Checkout with Cart",
+      "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cart_id": {
+              "type": "string",
+              "description": "Cart ID to convert to checkout. Business MUST use cart contents (dishes, food establishment, context, buyer) and MUST ignore overlapping fields in checkout payload.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "omit",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

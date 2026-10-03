@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/fulfillment_available_method.json",
+  "title": "Fulfillment Available Method",
+  "description": "Inventory availability hint for a fulfillment method type.",
+  "type": "object",
+  "required": ["type"],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["delivery", "pickup"],
+      "description": "Fulfillment method type this availability applies to.",
+      "ucp_request": "omit"
+    },
+    "fulfillable_on": {
+      "type": "string",
+      "description": "'now' for immediate availability, or ISO 8601 date for future (e.g., dinner-time only pickup offering).",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable availability info (e.g., 'Available for pickup at restaurant today after 5pm').",
+      "ucp_request": "omit"
+    }
+  }
+}

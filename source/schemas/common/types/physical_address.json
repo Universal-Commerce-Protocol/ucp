@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/physical_address.json",
+  "title": "Physical Address",
+  "description": "A physical address expressed as a postal address, geographic coordinates, or both. At least one of postal_address or geo MUST be provided.",
+  "type": "object",
+  "properties": {
+    "postal_address": {
+      "$ref": "postal_address.json",
+      "description": "Structured postal address of the physical address."
+    },
+    "geo": {
+      "$ref": "geo.json",
+      "description": "WGS 84 coordinates of the physical address. Preferred where formal postal addressing is unreliable."
+    }
+  },
+  "anyOf": [
+    { "required": ["postal_address"] },
+    { "required": ["geo"] }
+  ]
+}
