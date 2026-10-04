@@ -488,7 +488,7 @@ direct OAuth flows (always available via discovery):
             "app.example.login": [
               {
                 "type": "oauth2",
-                "auth_url": "https://accounts.example-login.app/",
+                "auth_url": "https://accounts.example-login.app",
                 "required_claims": ["email"]
               }
             ]
@@ -659,13 +659,28 @@ following hold:
    match against unverified account emails. This prevents
    pre-account hijacking, where an attacker registers the victim's
    address before the victim links.
-5. The existing account is not already linked to a different `sub` from
-   the same `iss`. If it is, the business **MUST NOT** auto-link, because
-   the domain owner may have reassigned the address.
+5. The existing account is not currently, and has not previously been,
+   linked to a different `sub` from the same `iss`. If it is, the
+   business **MUST NOT** auto-link, because the domain owner may have
+   reassigned the address; when this check fails, businesses **SHOULD**
+   notify the account holder and treat the event as a possible takeover
+   attempt.
 
 Businesses **MUST** compare the complete email address using the same
 normalization they apply for account uniqueness. They **MUST NOT** apply
 provider-specific transformations such as removing dots or `+` tags.
+
+**Account risk gates.** Even when all preconditions hold, businesses:
+
+* **SHOULD NOT** silently auto-link an existing account that has
+  multi-factor authentication (MFA) or a passkey enrolled unless the
+  grant satisfies a comparable authentication assurance policy (e.g., via
+  `acr`/`amr`), and **SHOULD** instead require user-mediated step-up or
+  issue a reduced scope set until the link is confirmed.
+* **SHOULD NOT** silently auto-link an existing account that has been
+  dormant (no sign-in or email re-verification) for longer than a
+  business-defined period (e.g., 12 months), as inactive mailboxes are
+  more likely to have been recycled or reassigned.
 
 If any precondition fails, the business **MUST** treat the grant as
 having no email match and apply the default rule: resolve by
@@ -679,27 +694,44 @@ an existing account.
    for internationalized domain names, to its A-label form.
 2. **Resolve the DNS delegation.** Query the DNS `TXT` record for
    `_email-verification.EMAIL_DOMAIN`. There **MUST** be exactly one
-   such record, and its value **MUST** start with `iss=` followed by the
-   issuer identifier (`ISSUER_FQDN`). If there are zero records, more
-   than one record, or a malformed value, no authoritative issuer exists.
-3. **Derive `ISSUER_ORIGIN` from the record.** The record carries
-   Fully Qualified Domain Name (FQDN). `ISSUER_ORIGIN` is the HTTPS
-   origin of `ISSUER_FQDN`: the string `https://` followed by
-   `ISSUER_FQDN`, with no port, no path, and no trailing slash.
-   Reject any `ISSUER_FQDN` value that is not a bare FQDN.
-4. **Fetch the issuer metadata.** Fetch
-   `ISSUER_ORIGIN/.well-known/email-verification` and parse it
-   as JSON. The response **MUST** contain an `issuer` member.
-5. **Compare issuers.** The metadata `issuer` value **MUST** match
-   the `ISSUER_ORIGIN` byte-for-byte, and **MUST** match the
-   JWT authorization grant's `iss` claim byte-for-byte, without
+   such record. If the `TXT` record contains multiple character-strings,
+   concatenate them with no separator per
+   [RFC 1035 §3.3.14](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.14){ target="_blank" }
+   before parsing. The resulting string **MUST** consist solely of `iss=`
+   followed immediately by the issuer host name (`ISSUER_HOST`), with no
+   leading or trailing whitespace, parameters, or extra characters. If
+   there are zero records, more than one record, or a malformed value,
+   no authoritative issuer exists.
+3. **Derive `ISSUER_ORIGIN` and compare to `iss`.** `ISSUER_HOST`
+   **MUST** be a lowercase ASCII (or A-label) host name with no trailing
+   dot, port, or path; reject any value that does not conform.
+   `ISSUER_ORIGIN` is the HTTPS origin of `ISSUER_HOST`: the string
+   `https://` followed by `ISSUER_HOST`, with no port, no path, and no
+   trailing slash. Verify that `ISSUER_ORIGIN` matches the JWT
+   authorization grant's `iss` claim byte-for-byte, without
    normalization (see `issuer` exactness in
-   [Security Considerations](#security-considerations)).
+   [Security Considerations](#security-considerations)). If it does not
+   match, stop: the grant's issuer is not authoritative for
+   `EMAIL_DOMAIN`.
+4. **Fetch the issuer metadata.** Fetch
+   `ISSUER_ORIGIN/.well-known/email-verification` and parse it as JSON.
+   The business **MUST NOT** follow cross-origin `3xx` redirects when
+   fetching this metadata. The response **MUST** contain an `issuer`
+   member.
+5. **Validate metadata issuer.** The metadata `issuer` value **MUST**
+   match `ISSUER_ORIGIN` byte-for-byte, without normalization.
 
 The business **MUST** fail closed if DNS resolution fails, times out, or
 returns `SERVFAIL`, or if the metadata fetch returns a non-`2xx`
-response. In that case it treats the issuer as non-authoritative and
-applies the default rule. Businesses **SHOULD** validate DNSSEC where the
+response: it **MUST NOT** auto-link by email. When no existing account
+matches the email, or when the check definitively indicates the issuer
+is not authoritative (e.g., `NXDOMAIN`, no or multiple `TXT` records,
+`iss` mismatch, or `404`), the business applies the default rule. When
+an existing account matches the verified email and the check fails
+transiently (e.g., DNS timeout, `SERVFAIL`, or HTTP `5xx`), the business
+**SHOULD** return a retryable error (or reject with `invalid_grant` to
+require user-mediated linking) rather than auto-provisioning a duplicate
+account for `(iss, sub)`. Businesses **SHOULD** validate DNSSEC where the
 zone is signed. They **MAY** cache DNS results for no longer than the
 record TTL, and metadata for no longer than its HTTP cache lifetime.
 
@@ -730,7 +762,7 @@ It then fetches `https://accounts.example-login.app/.well-known/email-verificati
   "issuer": "https://accounts.example-login.app",
   "issuance_endpoint": "https://accounts.example-login.app/email-verification/issue",
   "jwks_uri": "https://accounts.example-login.app/email-verification/jwks",
-  "signing_alg_values_supported": ["EdDSA"]
+  "signing_alg_values_supported": ["Ed25519", "ES256"]
 }
 ```
 
@@ -746,9 +778,14 @@ business **MUST NOT** auto-link by email.
 record the `(iss, sub)` pair against the account and use it, not
 `email`, for all later resolution. A later change to the `email` claim
 **MUST NOT** re-target the link. Businesses **SHOULD** notify the account
-holder through an existing channel (e.g., the account's email) when email
-matching creates a new IdP link, and **SHOULD** provide a way to remove
-it.
+holder through an out-of-band channel other than the matched email when
+available (e.g., SMS, push notification, secondary contact, or existing
+signed-in sessions) when email matching creates a new IdP link, and
+**SHOULD** provide a way to remove it. On the first token issued after
+an email-matched link, businesses **MAY** withhold high-risk scopes
+(e.g., changing the account email, recovery settings, or stored payment
+methods) until the link is confirmed or the account has been used
+normally.
 
 ### Chaining Errors at the Token Endpoint
 
@@ -828,14 +865,15 @@ minimum `email` and `email_verified` when applicable — to support
 account provisioning and UX hints at the business. Standard claims are
 advisory; stable per-IdP identification remains `(iss, sub)`.
 
-IdPs **MUST** set `email_verified` to `true` only for addresses whose
-mailbox control they have verified, or for which they are the
-authoritative email verification issuer. Some IdPs are delegated
-email verification issuers for one or more domains and want businesses
-to rely on [Authoritative Email Matching](#authoritative-email-matching).
-Such an IdP **MUST** use the same value for the `issuer` member of its
-`/.well-known/email-verification` metadata and the `iss` claim of its
-JWT authorization grants.
+IdPs **MUST** set `email_verified` to `true` only when they have verified
+that the grant's subject (`sub`) controls the mailbox for that address.
+For any email domain that delegates to the IdP via `_email-verification`
+(see [Authoritative Email Matching](#authoritative-email-matching)), the
+IdP **MUST** set `email_verified` to `true` in JWT authorization grants
+only when the user's account is an authoritative mailbox managed by the
+IdP for that domain, and **MUST NOT** set `email_verified` to `true`
+based on a point-in-time mailbox verification (such as an unmanaged or
+conflicting consumer account).
 
 ## Scopes
 
@@ -1177,15 +1215,20 @@ field conveys the business's value prompt to the platform (e.g.,
   [Authoritative Email Matching](#authoritative-email-matching) is the
   only exception to the cross-IdP linking guidance above. When the email
   domain owner has delegated email verification to the grant's issuer
-  via DNS, only that issuer can assert `email_verified=true` for the
-  domain. This closes the cross-provider takeover path described above.
-  The remaining risks are domain expiry followed by re-registration, and
-  mailbox reassignment by the domain owner. Neither exceeds the exposure
-  of the business's own email-based account recovery: whoever controls
-  the domain can already receive a password-reset email. The
-  same-`iss`/different-`sub` conflict check, DNSSEC validation, and link
-  notifications further limit these risks. Businesses that do not accept
-  this exposure **SHOULD NOT** enable email matching.
+  via DNS, the business only accepts `email_verified=true` for
+  auto-linking when asserted by that delegated issuer. This closes the
+  cross-provider takeover path described above.
+  The remaining risks are domain expiry followed by re-registration,
+  recycled consumer mailboxes, and mailbox reassignment by the domain
+  owner. Because identity chaining occurs without a per-business login
+  prompt and notifications sent to the matched email reach the current
+  mailbox holder, businesses rely on the defenses in
+  [Authoritative Email Matching](#authoritative-email-matching) to bound
+  these risks: rejecting current or historical same-`iss`/different-`sub`
+  conflicts, gating MFA-protected and dormant accounts, validating
+  DNSSEC, sending out-of-band link notifications, and limiting high-risk
+  scopes on newly matched links. Businesses that do not accept this
+  residual exposure **SHOULD NOT** enable email matching.
 
 ## Future Extensibility
 

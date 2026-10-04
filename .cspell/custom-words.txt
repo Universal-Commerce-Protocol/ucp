@@ -21,6 +21,7 @@ Commerce
 CReq
 CRes
 Credentialless
+DNSSEC
 DDC
 Depot
 Diffie
@@ -99,6 +100,7 @@ gclid
 gpay
 grepable
 gtin
+hardt
 httpsig
 ietf
 ingestions
