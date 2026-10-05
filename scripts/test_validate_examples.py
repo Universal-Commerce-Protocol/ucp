@@ -745,6 +745,104 @@ def test_extension_validation() -> None:
   )
 
 
+def test_export_corpus() -> None:
+  """Only complete examples are exported, with their merged payload.
+
+  An example that passes because elided fields were suppressed is not a
+  complete payload, so it must not reach the corpus that SDKs and other
+  implementations test against.
+  """
+  with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp)
+    out = root / "examples.json"
+    v.write_corpus(
+      [
+        {"file": str(root / "docs" / "b.md"), "line": 3, "payload": {}},
+        {"file": str(root / "docs" / "a.md"), "line": 9, "payload": {}},
+        {"file": str(root / "docs" / "a.md"), "line": 2, "payload": {}},
+      ],
+      out,
+      root,
+    )
+    written = json.loads(out.read_text(encoding="utf-8"))["examples"]
+  _check(
+    "corpus_sorted_with_repo_relative_paths",
+    [(e["file"], e["line"]) for e in written]
+    == [("docs/a.md", 2), ("docs/a.md", 9), ("docs/b.md", 3)],
+    f"got {written}",
+  )
+
+  if not _has_ucp_schema():
+    _check(
+      "export_corpus_integration",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  def process(md: str, corpus: list[dict]) -> v.Result:
+    blocks = v.extract_blocks(_write_md(md))
+    return v.process_block(blocks[0], _SCHEMA_BASE, _SCAFFOLDS_DIR, corpus)
+
+  corpus: list[dict] = []
+  md = (
+    "<!-- ucp:example schema=common/identity_linking def=scope_policy -->\n"
+    '```json\n{ "description": { "plain": "Manage orders" } }\n```\n'
+  )
+  result = process(md, corpus)
+  entry = corpus[0] if corpus else {}
+  _check(
+    "corpus_includes_complete_example",
+    result.status == "ok"
+    and len(corpus) == 1
+    and entry.get("schema") == "common/identity_linking"
+    and entry.get("op") == "read"
+    and entry.get("direction") == "response"
+    and entry.get("def") == "scope_policy"
+    and entry.get("payload") == {"description": {"plain": "Manage orders"}},
+    f"got {result.status}: {corpus}",
+  )
+
+  corpus = []
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read -->\n"
+    "```json\n"
+    '{ "ucp": { "...": "..." }, "id": "chk_1", "status": "incomplete", "currency": "USD",'  # noqa: E501
+    ' "line_items": [ ... ], "totals": [ ... ], "links": [ ... ] }\n'
+    "```\n"
+  )
+  result = process(md, corpus)
+  _check(
+    "corpus_excludes_example_passing_only_by_elision",
+    result.status == "ok" and corpus == [],
+    f"got {result.status}: {corpus}",
+  )
+
+  corpus = []
+  md = (
+    "<!-- ucp:example schema=common/identity_linking def=scope_policy -->\n"
+    '```json\n{ "description": "not an object" }\n```\n'
+  )
+  result = process(md, corpus)
+  _check(
+    "corpus_excludes_failing_example",
+    result.status == "fail" and corpus == [],
+    f"got {result.status}: {corpus}",
+  )
+
+  corpus = []
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=cancel direction=request -->\n"  # noqa: E501
+    "```json\n{}\n```\n"
+  )
+  result = process(md, corpus)
+  _check(
+    "corpus_skips_empty_body",
+    result.status == "ok" and corpus == [],
+    f"got {result.status}: {corpus}",
+  )
+
+
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
   original_run = v.subprocess.run
@@ -798,6 +896,7 @@ def main() -> int:
   test_resolve_schema_cache_key()
   test_process_block_integration()
   test_extension_validation()
+  test_export_corpus()
   return _report()
 
 

@@ -1018,6 +1018,12 @@ The `--audit` mode lists blocks without validating them — useful for counting
 skips and identifying unannotated blocks. `--file` accepts one or more paths
 for incremental validation.
 
+`--export-corpus PATH` also writes every example that validates completely
+(no errors suppressed by elision) to `PATH` as JSON, with its schema,
+operation, direction and merged payload. Each release attaches this file to
+its GitHub release as `examples.json`, so SDKs and other implementations can
+test against the same payloads the specification documents.
+
 #### What runs automatically
 
 The "schema drift breaks CI" claim above is enforced by three surfaces:

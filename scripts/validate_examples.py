@@ -110,8 +110,17 @@ CLI
   validate_examples.py --schema-base source/schemas/
   validate_examples.py --schema-base source/schemas/ --file FILE
   validate_examples.py --schema-base source/schemas/ --audit
+  validate_examples.py --schema-base source/schemas/ --export-corpus PATH
 
 Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
+
+--export-corpus writes every block that validates with no errors at
+all (none suppressed by elision) as {"examples": [...]}, sorted by
+file and line. Each entry has file (repo-relative), line, schema, op,
+direction, def (when given) and payload: the merged payload that was
+validated. Empty bodies and skipped blocks are not exported. The
+{{ ucp_version }} template renders as the placeholder date above, not
+the release version.
 """
 
 import argparse
@@ -1018,6 +1027,7 @@ def process_block(
   block: dict,
   schema_base: Path,
   scaffolds_dir: Path,
+  corpus: list[dict] | None = None,
 ) -> Result:
   """Run the validation pipeline on one block.
 
@@ -1025,6 +1035,9 @@ def process_block(
     Layer 1→2: reduce_to_canonical_json (text → strict JSON)
     Layer 2→3: parse_example (JSON → tree + elided paths)
     Layer 3:    coverage + scaffold merge + schema validate
+
+  If `corpus` is given, a block that validates with no errors at all
+  (none suppressed by elision) appends its merged payload to it.
   """
   file, line = block["file"], block["line"]
   annotation = block["annotation"]
@@ -1228,7 +1241,44 @@ def process_block(
       annotation,
     )
 
+  if corpus is not None and not val_errors and not extension_errors:
+    entry = {
+      "file": str(file),
+      "line": line,
+      "schema": schema_path,
+      "op": op,
+      "direction": direction,
+    }
+    if schema_def:
+      entry["def"] = schema_def
+    entry["payload"] = merged
+    corpus.append(entry)
+
   return Result(file, line, "ok", annotation=annotation)
+
+
+# -----------------------------------------------------------
+# Example corpus
+# -----------------------------------------------------------
+
+
+def write_corpus(corpus: list[dict], path: Path, repo_root: Path) -> None:
+  """Write collected examples as JSON, sorted by source location.
+
+  File paths are made relative to the repo root so the output does not
+  depend on where the checkout lives.
+  """
+  entries = []
+  for entry in corpus:
+    file = Path(entry["file"]).resolve()
+    if file.is_relative_to(repo_root.resolve()):
+      file = file.relative_to(repo_root.resolve())
+    entries.append({**entry, "file": file.as_posix()})
+  entries.sort(key=lambda e: (e["file"], e["line"]))
+  path.write_text(
+    json.dumps({"examples": entries}, indent=2, ensure_ascii=False) + "\n",
+    encoding="utf-8",
+  )
 
 
 # -----------------------------------------------------------
@@ -1271,6 +1321,16 @@ def main() -> int:
     "--audit",
     action="store_true",
     help="Just list blocks without validating",
+  )
+  parser.add_argument(
+    "--export-corpus",
+    type=Path,
+    default=None,
+    metavar="PATH",
+    help=(
+      "Write every example that validates with no errors suppressed by"
+      " elision to PATH as JSON."
+    ),
   )
   args = parser.parse_args()
 
@@ -1320,9 +1380,13 @@ def main() -> int:
 
   # Validate
   results: list[Result] = []
+  corpus: list[dict] | None = [] if args.export_corpus else None
   for block in all_blocks:
-    result = process_block(block, schema_base, scaffolds_dir)
+    result = process_block(block, schema_base, scaffolds_dir, corpus)
     results.append(result)
+
+  if corpus is not None:
+    write_corpus(corpus, args.export_corpus, repo_root)
 
   # Report
   passed = sum(1 for r in results if r.status == "ok")
