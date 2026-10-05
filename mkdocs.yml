@@ -89,6 +89,8 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
               - Subscription Policy:
                   specification/shopping/extensions/subscription-policy.md
+              - Purchase Options:
+                  specification/shopping/extensions/purchase-options.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -552,6 +554,13 @@ plugins:
               schedules, each a complete buyer-facing description supplemented
               by the order's totals and an absolute start date, its paired
               buyer disclosure, and its snapshot on the Order.
+          - specification/shopping/extensions/purchase-options.md: >-
+              Purchase Options Extension, letting a business advertise the
+              ways a variant can be bought (once, subscription, pre-order) as
+              purchase_options[] on catalog variants and cart or checkout
+              lines, a platform select one by
+              selected_purchase_option_id, and the Order preserve the selected
+              option; recurring terms are carried by the subscription policy.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
