@@ -231,15 +231,7 @@ Returns the current-state snapshot of an order.
 
 ### Specific Header Requirements
 
-**UCP-Agent** (required on all requests):
-
-Platform identification using
-[RFC 8941 Dictionary](https://www.rfc-editor.org/rfc/rfc8941#name-dictionaries){ target="_blank" }
-syntax:
-
-```http
-UCP-Agent: profile="https://platform.example/.well-known/ucp"
-```
+{{ header_requirements('ucp_agent') }}
 
 ## Message Signing
 
