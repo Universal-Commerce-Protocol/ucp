@@ -240,10 +240,7 @@ first order date depends on. It **SHOULD** be present once a checkout is
 
 A subscription that ends on its own — twelve monthly orders, a filter pack
 every two weeks for a year — states its end in its last schedule's
-`description`. A prepaid purchase that does **not** renew is not a
-subscription: it is one purchase with a delivery schedule, carries no
-subscription policy, and its future deliveries are described in the item's own
-terms until a capability for scheduled fulfillment exists.
+`description`.
 
 ## Disclosure and agreement
 
@@ -360,10 +357,9 @@ in their own right, not adjustments to this one.
   terms; structured fields for estimates and caps are additive follow-ups to
   the shared type.
 - **Delivery cadence.** Order cadence and fulfillment cadence are independent;
-  a prepaid order delivered monthly is one order with several fulfillments, and
-  a monthly order does not imply a monthly delivery. Future deliveries are
-  described in `description` until a capability for scheduled fulfillment
-  exists.
+  an order may be fulfilled in several shipments, and a monthly order does not
+  imply a monthly delivery. Future deliveries are described in `description`
+  until a capability for scheduled fulfillment exists.
 - **Subscription identity and management.** Status, modification, pause, and
   cancellation operations, and the lifecycle of the recurring orders
   themselves, are a separate capability. It defines how a subscription is
