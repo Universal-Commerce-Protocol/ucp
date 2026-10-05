@@ -1741,20 +1741,24 @@ def define_env(env):
       ) from e
 
   # --- Shared "Specific Header Requirements" prose ---
-  HEADER_REQUIREMENTS = {
+  header_requirements_map = {
     "ucp_agent": (
       "* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header\n"
-      "    containing the platform profile URI using Dictionary Structured Field syntax\n"
-      '    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).\n'
+      "    containing the platform profile URI using Dictionary Structured\n"
+      "    Field syntax ([RFC 8941]"
+      '(https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).\n'
       '    Format: `profile="https://platform.example/profile"`.'
     ),
     "idempotency_key": (
       "* **Idempotency-Key**: Operations that modify state **SHOULD** support\n"
       "    idempotency. When provided, the server **MUST**:\n"
       "    1. Store the key with the operation result for at least 24 hours.\n"
-      "    2. Return the cached result for duplicate keys whose request body matches the original.\n"
-      "    3. Return `409 Conflict` if the key is reused with a mismatched body.\n"
-      "    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)\n"
+      "    2. Return the cached result for duplicate keys whose request body"
+      " matches the original.\n"
+      "    3. Return `409 Conflict` if the key is reused with a mismatched"
+      " body.\n"
+      "    See [Message Signatures — Idempotency Key Requirements]"
+      "(../../signatures.md#replay-protection)\n"
       "    for the full payload-matching contract."
     ),
   }
@@ -1763,11 +1767,11 @@ def define_env(env):
   def header_requirements(*keys):
     """Render shared 'Specific Header Requirements' bullets by key."""
     try:
-      return "\n".join(HEADER_REQUIREMENTS[k] for k in keys)
+      return "\n".join(header_requirements_map[k] for k in keys)
     except KeyError as exc:
       raise ValueError(
         f"Unknown header requirement {exc}{get_error_context()}."
-      )
+      ) from exc
 
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
