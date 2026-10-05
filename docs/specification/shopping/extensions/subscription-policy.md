@@ -187,9 +187,10 @@ line item does: `totals` is a breakdown of each recurring order placed under
 that schedule, for the items the policy governs, at the quantities in the
 response — a policy over a line with `quantity` 2 states the order for both.
 On a catalog surface, where there is no quantity, it is the breakdown for one
-unit of the targeted variant. Amounts are in the response currency's minor
-units, or on a catalog surface in the currency of the targeted variant's
-`price`.
+unit of the targeted variant or purchase option. A policy targeting an option
+under a line states it at that line's quantity, as the line's policy does.
+Amounts are in the response currency's minor units, or on a catalog surface in
+the currency of the targeted node's `price`.
 
 A schedule's `totals` follow the [line-item contract](../checkout/index.md#totals):
 entries carry a `type` and a signed `amount`, a Platform renders them in the
@@ -299,6 +300,18 @@ declare that everything in the response recurs. See
 [Targeting](../../overview/index.md#targeting) and
 [Precedence](../../overview/index.md#precedence).
 
+A subscription policy **MAY** also target a node that represents a way of
+buying the item that has not been chosen — a purchase option on a catalog
+variant, or an unselected option on a cart or checkout line — to state the
+recurring orders that choosing it would entail. Such a policy is
+**prospective**: it governs that node only, it pairs with no disclosure, and
+it is not carried onto the Order, exactly as a policy on a payment term the
+buyer did not accept is not. Once a way of buying is selected, the policy that
+binds targets the line; because a target covers everything nested under it,
+that policy also governs the selected option's node, so the chosen terms
+appear once. This is the same relationship a policy has to `$.payment.terms[N]`
+before and after a term is selected.
+
 Nested line items are siblings in `line_items[]`, not JSON descendants of
 their parent, so a policy that targets a parent line does not cover its
 components. A bundle whose components recur on different terms carries one
@@ -313,8 +326,9 @@ An Order carries the subscription policies that governed its lines at checkout
 as part of its `policies[]` snapshot, with `applies_to` re-targeted to the
 Order's lines. A Business **MUST** carry forward every subscription policy the
 buyer agreed to, along with the disclosure that paired with it, its `path`
-naming the Order line. This snapshot is the authoritative record of the terms
-that were disclosed and agreed; a dispute is resolved against it.
+naming the Order line, and **MUST NOT** carry a policy that targeted a way of
+buying the buyer did not choose. This snapshot is the authoritative record of
+the terms that were disclosed and agreed; a dispute is resolved against it.
 
 The Order is also where the buyer manages the subscription. Every Order carries
 a `permalink_url` to the Business's order page, and a subscription entered into
@@ -333,9 +347,11 @@ in their own right, not adjustments to this one.
 
 - **The choice to subscribe.** A policy describes; it never offers a choice.
   Where a variant can be bought once or as a subscription, the selection is a
-  purchase option on the line, defined by a separate extension. A product that
-  is only sold as a subscription needs no selection: the policy alone carries
-  its terms.
+  purchase option on the line, defined by a separate extension; a subscription
+  policy describes what choosing an option would entail by targeting it (see
+  [Targeting and precedence](#targeting-and-precedence)). A product that is
+  only sold as a subscription needs no selection: the policy alone carries its
+  terms.
 - **A recurrence engine.** Cadence, cycle counts, anchors, alignment, and
   time zones are not on the wire. A schedule's `description` states how often
   and until when; the Business computes dates and states them absolutely.
