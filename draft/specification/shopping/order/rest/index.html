@@ -4101,12 +4101,12 @@ order capability is defined in the <code>rest.endpoint</code> field of the busin
 </tbody>
 </table>
 <h3 id="specific-header-requirements">Specific Header Requirements<a class="headerlink" href="#specific-header-requirements" title="Permanent link">&para;</a></h3>
-<p><strong>UCP-Agent</strong> (required on all requests):</p>
-<p>Platform identification using
-<a href="https://www.rfc-editor.org/rfc/rfc8941#name-dictionaries" target="_blank">RFC 8941 Dictionary</a>
-syntax:</p>
-<div class="language-http highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">UCP-Agent: profile=&quot;https://platform.example/.well-known/ucp&quot;</span>
-</span></code></pre></div>
+<ul>
+<li><strong>UCP-Agent</strong>: All requests <strong>MUST</strong> include the <code>UCP-Agent</code> header
+    containing the platform profile URI using Dictionary Structured
+    Field syntax (<a href="https://datatracker.ietf.org/doc/html/rfc8941" target="_blank">RFC 8941</a>).
+    Format: <code>profile="https://platform.example/profile"</code>.</li>
+</ul>
 <h2 id="message-signing">Message Signing<a class="headerlink" href="#message-signing" title="Permanent link">&para;</a></h2>
 <p>Request and response signatures follow the
 <a href="../../../signatures/">Message Signatures</a> specification using RFC 9421 HTTP Message

@@ -234,13 +234,7 @@ Content-Type: application/json
 
 ### Specific Header Requirements
 
-**UCP-Agent** (required on all requests):
-
-Platform identification using [RFC 8941 Dictionary](https://www.rfc-editor.org/rfc/rfc8941#name-dictionaries) syntax:
-
-```http
-UCP-Agent: profile="https://platform.example/.well-known/ucp"
-```
+- **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header containing the platform profile URI using Dictionary Structured Field syntax ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)). Format: `profile="https://platform.example/profile"`.
 
 ## Message Signing
 
