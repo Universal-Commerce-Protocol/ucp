@@ -9341,7 +9341,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">address</td>
-<td style="text-align: left;">any</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#locality">Locality</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Coarse locality of the service target.</td>
 </tr>
@@ -11785,13 +11785,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">measure</td>
-<td style="text-align: left;">any</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#measure">Measure</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Product quantity in packaging/content (for example, a 750 mL bottle), distinct from <code>quantity_unit</code>, which defines the sale basis. Its integer <code>value</code> MUST be at least 1.</td>
 </tr>
 <tr>
 <td style="text-align: left;">reference</td>
-<td style="text-align: left;">any</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#measure">Measure</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Denominator for unit price display (for example, per 100 mL or per 1 kg). Its integer <code>value</code> MUST be at least 1.</td>
 </tr>
@@ -15590,7 +15590,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[Variant]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#variant">Variant</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
@@ -15926,7 +15926,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[Variant]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#variant">Variant</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
@@ -16062,7 +16062,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
-<td style="text-align: left;">Array[Product]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#product">Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the search criteria.</td>
 </tr>
@@ -16154,7 +16154,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
-<td style="text-align: left;">Array[Product]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#product">Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.</td>
 </tr>

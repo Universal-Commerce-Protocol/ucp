@@ -126,11 +126,11 @@ Maps to the [Location Lookup](http://ucp.dev/draft/specification/common/location
 
 **Output**
 
-| Name      | Type                                                                                    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
-| --------- | --------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp       | any                                                                                     | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
-| locations | Array\[ [Lookup Location](/draft/specification/common/location/rest/#lookup-location)\] | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
-| messages  | Array\[[Message](/draft/specification/reference/#message)\]                             | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
+| Name      | Type                                                                                   | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | -------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp       | any                                                                                    | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
+| locations | Array\[[Lookup Location](/draft/specification/common/location/rest/#lookup-location)\] | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
+| messages  | Array\[[Message](/draft/specification/reference/#message)\]                            | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
 
 #### Binding envelope example
 
@@ -267,10 +267,10 @@ Location with required correlation metadata for lookup responses.
 
 ### Location Serves
 
-| Name    | Type                                       | Requirement | Description                               |
-| ------- | ------------------------------------------ | ----------- | ----------------------------------------- |
-| point   | [Geo](/draft/specification/reference/#geo) | Optional    | WGS 84 coordinates of the service target. |
-| address | any                                        | Optional    | Coarse locality of the service target.    |
+| Name    | Type                                                 | Requirement | Description                               |
+| ------- | ---------------------------------------------------- | ----------- | ----------------------------------------- |
+| point   | [Geo](/draft/specification/reference/#geo)           | Optional    | WGS 84 coordinates of the service target. |
+| address | [Locality](/draft/specification/reference/#locality) | Optional    | Coarse locality of the service target.    |
 
 ### Error Response
 
