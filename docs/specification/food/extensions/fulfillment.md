@@ -146,7 +146,7 @@ requests; the method `type` determines which destination contract applies:
 
 | Method `type` | Destination `type` | Authored by | Contents |
 | :--- | :--- | :--- | :--- |
-| `delivery` | `delivery_address` | Platform (address, coordinates, selections) + Business (`preference_options[]`) | [Physical Address](../../reference.md#physical-address) (`postal_address` and/or `geo`), drop-off preferences |
+| `delivery` | `delivery_address` | Platform (address, coordinates, selections) + Business (`preference_options[]`) | [Physical Address](#physical-address) (`address` and/or `geo`), drop-off preferences |
 | `pickup` | `business_location` | Business only (response-only) | [Location Summary](../../reference.md#location-summary) of the establishment |
 
 ### Delivery Address
@@ -164,7 +164,7 @@ choices it supports.
   "destination": {
     "id": "dest_home",
     "type": "delivery_address",
-    "postal_address": {
+    "address": {
       "street_address": "450 Serra Mall",
       "extended_address": "Apt 3B",
       "address_locality": "Stanford",
@@ -187,7 +187,7 @@ choices it supports.
   "destination": {
     "id": "dest_home",
     "type": "delivery_address",
-    "postal_address": {
+    "address": {
       "street_address": "450 Serra Mall",
       "extended_address": "Apt 3B",
       "address_locality": "Stanford",
@@ -227,7 +227,7 @@ choices it supports.
 ### Delivery to Coordinates
 
 In markets where formal postal addressing is unreliable, the destination **MAY** be expressed as WGS 84 coordinates instead of,
-or in addition to, a postal address. At least one of `postal_address` or `geo` **MUST** be provided.
+or in addition to, a postal address. At least one of `address` or `geo` **MUST** be provided.
 
 <!-- ucp:example schema=food/types/fulfillment_method op=read -->
 ```json
@@ -374,7 +374,7 @@ and offers alternatives instead of failing.
       "destination": {
         "id": "dest_home",
         "type": "delivery_address",
-        "postal_address": {
+        "address": {
           "street_address": "450 Serra Mall",
           "address_locality": "Stanford",
           "address_region": "CA",
@@ -411,7 +411,7 @@ and offers alternatives instead of failing.
       "destination": {
         "id": "dest_home",
         "type": "delivery_address",
-        "postal_address": {
+        "address": {
           "street_address": "450 Serra Mall",
           "address_locality": "Stanford",
           "address_region": "CA",
@@ -597,12 +597,12 @@ $0 pickup window, and updated totals without the delivery fee.
 
 A `destination` with type `delivery_address` carries precise Buyer location data. The following considerations mirror the
 [Location capability's Security & Privacy Considerations](../../common/location/index.md#security-privacy-considerations)
-and apply to any `postal_address` or `geo` exchanged through this extension.
+and apply to any `address` or `geo` exchanged through this extension.
 
 ### Consistency
 
-`postal_address` and `geo` **MAY** both be present on a `destination`. When they are, Businesses **SHOULD** treat `geo`
-as authoritative for dispatch and routing, since it is unambiguous, and treat `postal_address` as authoritative for
+`address` and `geo` **MAY** both be present on a `destination`. When they are, Businesses **SHOULD** treat `geo`
+as authoritative for dispatch and routing, since it is unambiguous, and treat `address` as authoritative for
 display and manual verification. Platforms and Businesses **SHOULD** keep the two in sync when either is updated, and Businesses
 **SHOULD** flag a destination for review rather than silently discarding one value if the two appear to resolve
 to materially different physical locations.

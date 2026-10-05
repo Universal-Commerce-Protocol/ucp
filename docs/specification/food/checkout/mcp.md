@@ -473,7 +473,7 @@ resolved tip line.
                   "type": "delivery",
                   "destination": {
                     "type": "delivery_address",
-                    "postal_address": {
+                    "address": {
                       "street_address": "450 Serra Mall",
                       "extended_address": "Apt 3B",
                       "address_locality": "Stanford",
@@ -538,7 +538,7 @@ resolved tip line.
                 "destination": {
                   "id": "dest_home",
                   "type": "delivery_address",
-                  "postal_address": {
+                  "address": {
                     "street_address": "450 Serra Mall",
                     "extended_address": "Apt 3B",
                     "address_locality": "Stanford",
