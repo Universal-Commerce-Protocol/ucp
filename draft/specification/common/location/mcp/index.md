@@ -287,7 +287,7 @@ Location with required correlation metadata for lookup responses.
 
 | Name         | Type                                                        | Requirement  | Description                                                       |
 | ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
-| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| ucp          | UCP Error                                                   | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
 | messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
 | continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
 

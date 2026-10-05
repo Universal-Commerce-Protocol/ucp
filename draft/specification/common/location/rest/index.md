@@ -65,12 +65,12 @@ Maps to the [Location Search](http://ucp.dev/draft/specification/common/location
 
 **Output**
 
-| Name       | Type                                                                       | Requirement  | Description                                                           |
-| ---------- | -------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
-| ucp        | any                                                                        | **Required** | UCP metadata for location responses.                                  |
-| locations  | Array\[[Location](/draft/specification/reference/#location)\]              | **Required** | Locations matching the search criteria.                               |
-| pagination | [Pagination Response](/draft/specification/reference/#pagination-response) | Optional     | Cursor-based pagination for list operations.                          |
-| messages   | Array\[[Message](/draft/specification/reference/#message)\]                | Optional     | Errors, warnings, or informational messages about the search results. |
+| Name       | Type                                                                                         | Requirement  | Description                                                           |
+| ---------- | -------------------------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
+| ucp        | [UCP Location Response Schema](/draft/specification/reference/#ucp-response-location-schema) | **Required** | UCP metadata for location responses.                                  |
+| locations  | Array\[[Location](/draft/specification/reference/#location)\]                                | **Required** | Locations matching the search criteria.                               |
+| pagination | [Pagination Response](/draft/specification/reference/#pagination-response)                   | Optional     | Cursor-based pagination for list operations.                          |
+| messages   | Array\[[Message](/draft/specification/reference/#message)\]                                  | Optional     | Errors, warnings, or informational messages about the search results. |
 
 #### Binding envelope example
 
@@ -126,11 +126,11 @@ Maps to the [Location Lookup](http://ucp.dev/draft/specification/common/location
 
 **Output**
 
-| Name      | Type                                                                                   | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
-| --------- | -------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ucp       | any                                                                                    | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
-| locations | Array\[[Lookup Location](/draft/specification/common/location/rest/#lookup-location)\] | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
-| messages  | Array\[[Message](/draft/specification/reference/#message)\]                            | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
+| Name      | Type                                                                                         | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                    |
+| --------- | -------------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ucp       | [UCP Location Response Schema](/draft/specification/reference/#ucp-response-location-schema) | **Required** | UCP metadata for location responses.                                                                                                                                                                                                                                                                                                                           |
+| locations | Array\[[Lookup Location](/draft/specification/common/location/rest/#lookup-location)\]       | **Required** | Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding `inputs` entries. |
+| messages  | Array\[[Message](/draft/specification/reference/#message)\]                                  | Optional     | Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers.                                                                                                                                                                      |
 
 #### Binding envelope example
 
@@ -276,7 +276,7 @@ Location with required correlation metadata for lookup responses.
 
 | Name         | Type                                                        | Requirement  | Description                                                       |
 | ------------ | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
-| ucp          | any                                                         | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
+| ucp          | UCP Error                                                   | **Required** | UCP protocol metadata. Status MUST be 'error' for error response. |
 | messages     | Array\[[Message](/draft/specification/reference/#message)\] | **Required** | Array of messages describing why the operation failed.            |
 | continue_url | string                                                      | Optional     | URL for buyer handoff or session recovery.                        |
 
