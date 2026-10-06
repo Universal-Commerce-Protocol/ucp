@@ -38,7 +38,8 @@ perform the action through the capability that owns it and **MUST NOT** treat an
 `ask` response as evidence that it happened.
 
 `ask` draws on public business information and on resources the caller can address
-by a GID it holds — products and variants, and optionally a cart or checkout.
+by a GID it holds — products and variants, and optionally a cart or checkout —
+subject to [Access](#access).
 
 Typical use cases:
 
@@ -80,23 +81,38 @@ from a photo.
 
 ## Access
 
-What a business may reveal through `ask` depends on the credential the caller
-presents:
+What a Business may reveal through `ask` depends on the access it grants the
+current request. `ask` may draw on public information and, when authorized, on
+personalized or protected data — including data also represented by other UCP
+capabilities. Authorization never changes the read-only boundary of `ask`:
+regardless of the credential presented, a Business **MUST NOT** change the
+state of any resource exposed through another UCP capability in response to
+`ask`. Any such state change requires a separate request to the capability
+that owns the operation. Using protected data in an answer does not make the
+answer authoritative over the capability that represents it (see
+[Answer](#answer)).
 
-* **Public** — with no credential, `ask` answers from public business information
-  and public catalog items (product and variant IDs).
-* **Resource reference** — a GID the caller holds for a specific resource, such
-  as a cart, checkout, or conversation, is itself a bearer reference: where a
-  business honors it, possessing the GID is sufficient to ask about that
-  resource, with no separate authentication.
-* **Business posture** — a business **MAY** require a stronger credential than a
-  bare GID to reach a given resource (a gated catalog, for example). The required
-  posture is the business's to set.
-* **Authenticated user** — when the caller presents a bearer token the business
-  recognizes for user authentication (see [Scopes](#scopes) and
-  [Identity Linking](../../common/identity-linking/index.md)), the business **MAY** return
-  personalized results — member pricing, entitlements, or gated availability.
-  This tier is the `dev.ucp.shopping.ask:read` scope.
+* **Public** — with no credential, `ask` answers from public Business
+  information and public resources.
+* **Resource reference** — an identifier in `ids` grounds the question in a
+  specific resource. Before using a protected resource — a cart or checkout,
+  for example — a Business **MUST** apply its normal access policy for that
+  resource. Depending on that policy, the Business **MAY** treat possession of
+  the identifier as sufficient, require an additional credential, or decline
+  to use the resource in its answer (see
+  [Messages and Error Handling](#messages-and-error-handling)).
+* **Authenticated Buyer** — when the caller presents a user identity token the
+  Business recognizes
+  ([user-authenticated access](../../common/identity-linking/index.md#access-levels);
+  see [Scopes](#scopes)), the Business **MAY** return personalized answers
+  permitted by its policy — member pricing, entitlements, gated availability,
+  or information derived from protected resources. This tier is the
+  `dev.ucp.shopping.ask:read` scope.
+
+The `dev.ucp.shopping.ask:read` scope permits personalized `ask` responses; it
+is not a blanket entitlement to all of a Buyer's data. The Business remains
+responsible for authorizing every protected resource and every item of
+information it uses in an answer.
 
 ## Conversation
 
