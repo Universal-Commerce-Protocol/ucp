@@ -39,12 +39,12 @@ category and price, and pagination.
 ## Search Inputs
 
 A valid search request **MUST** include at least one of: a `query` string,
-`reference_ids` (paired with `purpose`), `purpose` (such as contextual
-`recommendation`), one or more `filters`, or an extension-defined input. When
-`query` and `reference_ids` are omitted, a filter-based request represents a
-browse operation where the Business returns products matching the provided
-filters without text-relevance ranking. Extensions **MAY** define additional
-inputs (e.g., visual similarity).
+`reference_ids` (paired with `purpose`), a non-`search` `purpose` (such as
+contextual `recommendation`), one or more `filters`, or an extension-defined
+input. When `query` and `reference_ids` are omitted, a filter-based request
+represents a browse operation where the Business returns products matching the
+provided filters without text-relevance ranking. Extensions **MAY** define
+additional inputs (e.g., visual similarity).
 
 A Business **MUST** validate that incoming requests contain at least one
 recognized input and **SHOULD** reject empty or invalid requests with an
@@ -69,7 +69,9 @@ following rules:
 
 1. **Pairing**: When `reference_ids` is present, `purpose` **MUST** also be
     provided (`dependentRequired`) and **MUST NOT** be `search`. When `purpose`
-    is `swap`, `reference_ids` **MUST** be provided. A Business **MUST** reject
+    is `search` (or omitted), the request **MUST** include at least one of
+    `query`, `filters`, or an extension-defined input. When `purpose` is
+    `swap`, `reference_ids` **MUST** be provided. A Business **MUST** reject
     requests that violate these pairing rules. Multiple `reference_ids` are
     evaluated jointly; for `swap`, a Platform **SHOULD** supply a single
     identifier per request so returned substitutes map to one target item.

@@ -16,7 +16,7 @@
         },
         "purpose": {
           "type": "string",
-          "description": "The retrieval purpose for the search request. Well-known values: `search` (general search or filter browse; default when omitted), `recommendation` (complementary or related items anchored to `reference_ids` and/or `context`), `swap` (functional substitute items for the anchor items in `reference_ids`). Businesses MUST reject or return an empty `products` array with an error message for unsupported values rather than falling back to a general browse.",
+          "description": "The retrieval purpose for the search request. Well-known values: `search` (general search or filter browse requiring `query`, `filters`, or an extension input; default when omitted), `recommendation` (complementary or related items anchored to `reference_ids` and/or `context`), `swap` (functional substitute items requiring `reference_ids`). Businesses MUST reject or return an empty `products` array with an error message for unsupported values rather than falling back to a general browse.",
           "examples": ["search", "recommendation", "swap"]
         },
         "reference_ids": {
