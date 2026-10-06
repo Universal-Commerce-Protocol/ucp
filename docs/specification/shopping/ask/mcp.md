@@ -165,6 +165,7 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
             }
           },
           "answer": {
+            "plain": "Sale items can be returned within 14 days of delivery for store credit. Items returned to a different region may be subject to local return rules — see the refund policy for details.",
             "markdown": "Sale items can be returned within **14 days** of delivery for store credit. Items returned to a different region may be subject to local return rules — see the refund policy for details."
           },
           "links": [
@@ -358,6 +359,7 @@ defers to the binding source.
         }
       },
       "answer": {
+        "plain": "This nut butter is made with almonds. For complete allergen information, please consult the on-product allergen disclosure, which is the authoritative source.",
         "markdown": "This nut butter is made with almonds. For complete allergen information, please consult the on-product allergen disclosure, which is the authoritative source."
       },
       "links": [

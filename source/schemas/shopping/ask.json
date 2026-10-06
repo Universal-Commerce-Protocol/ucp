@@ -57,8 +57,14 @@
           "$ref": "../ucp.json#/$defs/response_ask_schema"
         },
         "answer": {
-          "$ref": "../common/types/description.json",
-          "description": "Answer provided by the business, as free-form content in one or more formats (plain text, HTML, or Markdown)."
+          "allOf": [
+            { "$ref": "../common/types/description.json" },
+            {
+              "type": "object",
+              "required": ["plain"]
+            }
+          ],
+          "description": "Answer provided by the Business. Plain text is required; Markdown and HTML are optional alternative encodings."
         },
         "conversation": {
           "$ref": "#/$defs/conversation",

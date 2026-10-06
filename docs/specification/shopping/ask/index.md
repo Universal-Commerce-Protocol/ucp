@@ -160,8 +160,13 @@ that recognizes a duplicate by its key **MUST NOT** append a second turn.
 
 ## Answer
 
-The answer is free-form content authored by the business, in one or more
-formats — plain text, HTML, or Markdown.
+The answer is free-form content authored by the Business. A Business **MUST**
+include `plain` — the answer as plain text — in every `answer`, and **MAY**
+additionally include `markdown` or `html` as alternative encodings of the same
+answer. `plain` is the universal fallback: a Platform **MAY** render a richer
+encoding it supports and can vouch for, and otherwise renders `plain`,
+ignoring any encoding it does not recognize. An `answer` without `plain` is
+schema-invalid and is rejected like any other invalid payload.
 
 An answer is indicative, not authoritative. Prices, availability, totals, taxes,
 fulfillment estimates, and policy terms stated in an `answer` are not
@@ -175,8 +180,6 @@ safety, allergen, or regulatory claim.
 
 To keep answers useful and trustworthy, a Business **SHOULD**:
 
-* provide `plain` alongside any richer format, so a Platform that renders
-  neither Markdown nor HTML still has an answer to show;
 * keep the answer to what fits in conversation and link to the resource — a
   size chart, a compatibility table — rather than inlining it;
 * link to the authoritative source behind an answer (a policy page, the product
@@ -185,10 +188,7 @@ To keep answers useful and trustworthy, a Business **SHOULD**:
   `presentation: "disclosure"` rather than only in the answer text; and
 * state clearly when a question can't be answered.
 
-A Platform renders the richest encoding of `answer` it can vouch for and
-ignores any encoding it does not recognize.
-
-{{ schema_fields('types/description', 'shopping/ask') }}
+{{ extension_schema_fields('ask.json#/$defs/ask_response/properties/answer', 'shopping/ask') }}
 
 ## Context
 
