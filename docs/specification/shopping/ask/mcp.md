@@ -91,7 +91,7 @@ A request that carries a `conversation` **SHOULD** also include
 
 | Tool | Capability | Description |
 | :--- | :--- | :--- |
-| `ask_business` | [Ask](index.md) | Ask the business about products, policies, services, and questions other capabilities can't answer. |
+| `ask_business` | [Ask](index.md) | Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. |
 
 ### `ask_business`
 
@@ -111,10 +111,11 @@ Maps to the [Ask](index.md) capability.
 
 #### Ask Example
 
-The buyer asks a policy question about a specific product. `ids` grounds the
-question against specific items and accepts product IDs, variant IDs, and
-secondary identifiers such as SKU, handle, or URL — so the platform can pass
-whichever it already has, here the product page URL.
+The Buyer asks a policy question about a specific product, identified here by
+its page URL. `ids` grounds the question in any Business resource, by a
+Business-issued Global ID (GID) or by a secondary identifier the Business
+recognizes — a SKU, handle, or URL — so the Platform can pass whichever it
+already has (see [Scoping a Question](index.md#scoping-a-question)).
 
 === "Request"
 
@@ -180,11 +181,12 @@ whichever it already has, here the product page URL.
 
 #### Multi-turn Example
 
-A business that supports multi-turn conversations returns a `conversation` GID
-the platform replays on the next turn. Turn 1 omits `conversation` (new
-conversation); turn 2 replays the GID to build on it.
+A Business that supports multi-turn conversations returns a `conversation`
+whose opaque `id` the Platform replays on the next turn. Turn 1 omits
+`conversation` (a new conversation); turn 2 replays the identifier to build
+on it.
 
-Turn 1, request — a new conversation (no GID):
+Turn 1, request — a new conversation (no `conversation`):
 
 <!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
 ```json
@@ -209,7 +211,7 @@ Turn 1, request — a new conversation (no GID):
 }
 ```
 
-Turn 1, response — the business issues a `conversation` GID:
+Turn 1, response — the Business issues a conversation identifier:
 
 <!-- ucp:example schema=shopping/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
 ```json
@@ -235,7 +237,7 @@ Turn 1, response — the business issues a `conversation` GID:
 }
 ```
 
-Turn 2, request — replay the GID to continue:
+Turn 2, request — replay the identifier to continue:
 
 <!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
 ```json

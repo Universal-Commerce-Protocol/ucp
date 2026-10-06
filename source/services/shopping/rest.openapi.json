@@ -735,7 +735,7 @@
       "post": {
         "operationId": "ask_business",
         "summary": "Ask the business a question",
-        "description": "Ask the business about its products, policies, and services — returns, shipping, warranty, store hours, fit and suitability, and questions other capabilities can't answer. Returns a text answer with related links; pass item IDs to ask about specific products.",
+        "description": "Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. Returns a text answer with related links; pass resource identifiers to ground the question in Business resources across commerce domains, such as a product, location, cart, order, or booking.",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },

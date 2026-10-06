@@ -20,13 +20,14 @@
 
 ## Overview
 
-The Ask capability provides natural-language Q&A about a business's products,
-policies, and services. A platform (acting on behalf of the buyer) asks a
+The Ask capability provides natural-language Q&A about a Business's resources,
+policies, and services. A Platform (acting on behalf of the Buyer) asks a
 free-form question and receives a text answer with an optional set of related
-links. A question may target specific products (via `ids`) or apply to the
-storefront broadly, such as a return-policy question. `ask` is the open-question
-complement to UCP's structured shopping capabilities: it covers open questions
-and business-specific facts and knowledge that may not be directly available
+links. A question may be grounded in specific Business resources (via `ids`) —
+a product, a location, an order — or apply to the Business broadly, such as a
+return-policy question. `ask` is the open-question complement to UCP's
+structured commerce capabilities: it covers open questions and
+Business-specific facts and knowledge that may not be directly available
 through the structured resources exposed by other capabilities.
 
 `ask` answers; it does not act. A Business **MUST NOT** change the state of any
@@ -48,16 +49,18 @@ the Buyer's original request rather than from the `ask` response, and subject
 to that capability's authorization, consent, and idempotency requirements (see
 [Security Considerations](#security-considerations)).
 
-`ask` draws on public business information and on resources the caller can address
-by a GID it holds — products and variants, and optionally a cart or checkout —
-subject to [Access](#access).
+`ask` draws on public Business information and on any resource the caller can
+address by a Global ID (GID) or other identifier it holds, subject to
+[Access](#access) (see [Scoping a Question](#scoping-a-question)).
 
 Typical use cases:
 
 * Product questions — fit, materials, compatibility, comparisons.
 * Policy questions — returns, shipping, warranty, refunds.
 * FAQ / how-to — store hours, shipping timelines, accepted payment methods.
-* Pre-purchase clarification about a specific item, grounded via `ids`.
+* Clarification about a specific resource, grounded via `ids` — an item before
+  purchase, parking or accessibility at a location, the cancellation terms of
+  a booking.
 
 ## Operation
 
@@ -76,15 +79,21 @@ Typical use cases:
 ## Scoping a Question
 
 A request carries a natural-language `query` and, optionally, a set of `ids`
-identifying the resources the question is about. With `ids`, the answer can be
-grounded against specific items ("is this washable?"); without them, it applies
-to the storefront broadly ("what is your return policy?").
+identifying the resources the question is about. With `ids`, the answer is
+grounded in specific resources ("is this washable?", "does this location have
+parking?"); without them, it applies to the Business broadly ("what is your
+return policy?").
 
-`ids` is **optional**. A business **SHOULD** accept the identifiers that ground a
-question, with product and variant IDs as the recommended minimum; it **MAY**
-also accept secondary identifiers (SKU, handle, URL) and other resources it holds
-a GID for, such as a cart or checkout. How a business authorizes access to those
-resources is described under [Access](#access).
+`ids` is **optional** and may reference any resource the Business holds — a
+product or variant, a location, a cart, an order, a booking. A Business
+**SHOULD** accept its own GIDs, unless its access policy for a resource says
+otherwise (see [Access](#access)), and **MAY** also accept recognized
+secondary identifiers such as a SKU, a handle, or a URL. A GID self-describes
+to the Business that issued it, so a Platform can send one as an opaque
+grounding reference. A Business that does not recognize an identifier, or
+declines to use it, still answers what it can and **MAY** note the unresolved
+reference with an informational message (see
+[Messages and Error Handling](#messages-and-error-handling)).
 
 **Future direction.** A later version may add an `attachments` array — for
 example, an image — for multimodal grounding, such as asking about a product
@@ -157,10 +166,12 @@ formats — plain text, HTML, or Markdown.
 An answer is indicative, not authoritative. Prices, availability, totals, taxes,
 fulfillment estimates, and policy terms stated in an `answer` are not
 commitments. Where an `answer` conflicts with the representation returned by the
-capability that owns the resource (`catalog`, `cart`, `checkout`, `order`), that
-representation is authoritative and the Platform **MUST** prefer it. A Platform
-**MUST NOT** treat an `answer` as the binding disclosure for a safety, allergen,
-or regulatory claim.
+capability that owns the resource — `catalog`, `cart`, `checkout`, `order`, or
+`booking`, for example — that representation is authoritative and the Platform
+**MUST** prefer it (see
+[Relationship to Structured Capabilities](#relationship-to-structured-capabilities)).
+A Platform **MUST NOT** treat an `answer` as the binding disclosure for a
+safety, allergen, or regulatory claim.
 
 To keep answers useful and trustworthy, a Business **SHOULD**:
 
@@ -183,7 +194,7 @@ ignores any encoding it does not recognize.
 
 Market and localization context for the question — country, language, intent,
 and similar. These are provisional signals: implementations **MAY** ignore or
-down-rank them when higher-confidence inputs are available. The items the
+down-rank them when higher-confidence inputs are available. The resources the
 question is *about* live in `ids`, not in `context`.
 
 {{ schema_fields('types/context', 'shopping/ask') }}
@@ -206,43 +217,53 @@ identifiers, and source/medium markers communicated by the platform. See
 
 ## Links
 
-`links` enumerate the entities the answer mentions — a product, a variant, a
-policy page — where an addressable resource exists for them. A Business
-**SHOULD** return one link per such entity. A Platform **MAY** use a link for
-follow-up operations; where a link carries an `id`, it **SHOULD** resolve the
-resource through the capability that owns it before acting on it.
+`links` enumerate the entities the answer mentions — a product, a location, an
+order, a policy page — where an addressable resource or page exists for them.
+A Business **SHOULD** return one link per such entity, so the Platform can tie
+the answer to the resources it names. A Platform **MAY** use a link for
+follow-up.
 
 A link carries:
 
 * `title` — display text that **SHOULD** capture the resource the link points to
-  as it appears in the `answer` (the product, policy, or page the buyer just
-  heard about), so the platform can tie the link back to the text it rendered.
-* `url` — the page the platform can direct the buyer to. Required on every link.
-* `id` — when the link points to an addressable UCP resource (a product or
-  variant the answer names, say), the Business **SHOULD** include the
-  resource's `id` (a GID) alongside the `url`. The `url` is for display; the `id`
-  is what the Platform resolves through
-  [Lookup](../catalog/lookup.md#supported-identifiers), which accepts product
-  and variant identifiers alike, so the Platform need not know which it holds.
-  What it then does with the resolved resource is its own decision (see
-  [Security Considerations](#security-considerations)). Omit `id` for
-  resources without a UCP identifier, such as a policy page.
+  as it appears in the `answer` (the product, policy, or page the Buyer just
+  heard about), so the Platform can tie the link back to the text it rendered.
+* `url` — the page the Platform can direct the Buyer to. Required on every
+  link; it is the fallback when a link carries no `id` or the `id` is not
+  resolved.
+* `id` — when the link refers to an addressable UCP resource, the Business
+  **SHOULD** include the resource's GID alongside the `url`, unless the
+  resource has no UCP identifier — a policy page, for example — in which case
+  `id` is omitted. A Platform **MAY** use the GID, on a best-effort basis, to
+  match the resource to an appropriate operation exposed by a capability it
+  has negotiated with the Business. UCP does not prescribe how a Platform
+  performs that match and does not guarantee that every GID resolves; the
+  `url` remains the fallback. What a Platform does with a matched resource is
+  its own decision (see [Security Considerations](#security-considerations)).
 
 Each link also carries a `type` classifier. Well-known values are
 `refund_policy`, `shipping_policy`, `privacy_policy`, `terms_of_service`, and
 `faq`; a Business **MAY** supply other `type` values (a product, a size guide, a
-store-locator page). `type` is a display hint; resolving an `id` does not
-depend on it.
+store-locator page). `type` is a display hint, not a routing discriminator:
+matching an `id` to an operation does not depend on it. A Platform **SHOULD**
+handle a `type` it does not recognize gracefully — display the link by its
+`title`, or omit it — rather than reject the response.
 
 {{ schema_fields('types/link', 'shopping/ask') }}
 
-## Relationship to Catalog
+## Relationship to Structured Capabilities
 
-`ask` and `catalog` are independent capabilities that **MAY** be adopted
-separately. A business **SHOULD** offer them together where possible: `catalog`
-lets a platform find and resolve products, and `ask` answers the open-ended
-questions buyers have about them — together covering a complete pre-purchase
-path.
+`ask` and UCP's structured capabilities — `catalog`, `cart`, `checkout`,
+`order`, `booking`, and others — are independently adoptable: a Business
+**MAY** offer `ask` alone or alongside any of them, and advertising one does
+not imply another. `ask` is not coupled to `catalog` or to any single resource
+domain: a question may be grounded in, and an answer may link to, resources
+from any domain the Business exposes.
+
+The two serve different needs. `ask` returns indicative, human-readable
+content; a structured capability returns the machine-readable representation
+of a resource, which is authoritative over the `answer` (see
+[Answer](#answer)).
 
 ## Messages and Error Handling
 
@@ -255,7 +276,7 @@ a regional policy variant, or a note that the question was re-scoped. The
 | :--- | :--- | :--- |
 | `error` | Business-level errors — e.g., a question requires a scope the caller's token lacks | `insufficient_scope` |
 | `warning` | Important conditions or disclaimers about the answer | `disclaimer` |
-| `info` | Additional context or non-blocking notes — e.g., a referenced item could not be resolved, or the `query` asked for an operation `ask` does not perform | `not_found`, `operation_not_performed`, `promotion` |
+| `info` | Additional context or non-blocking notes — e.g., a referenced resource could not be resolved, or the `query` asked for an operation `ask` does not perform | `not_found`, `operation_not_performed`, `promotion` |
 
 Warnings with `presentation: "disclosure"` carry notices the platform **MUST NOT**
 hide or dismiss — for example, a safety, allergen, or regulated disclosure. See
@@ -337,11 +358,12 @@ an answer and, where present, suggestions about what to do next. It is input
 to the Platform's own decisions, not directions to carry out. A Platform
 **MUST NOT** act on text in `answer` or on identifiers in `links[].id` as if
 they were instructions; whether and how to act on them — resolving an
-identifier in `catalog`, adding an item to a `cart` — is the Platform's
-decision, made under its own authorization and Buyer-consent rules, exactly as
-for any other Business-authored content such as a product description. A
-Platform **SHOULD** present an `answer` as content from the Business,
-attributed and distinguishable from its own output.
+identifier through a negotiated capability, adding an item to a cart,
+directing the Buyer to a `url` — is the Platform's decision, made under its
+own authorization and Buyer-consent rules, exactly as for any other
+Business-authored content such as a product description. A Platform
+**SHOULD** present an `answer` as content from the Business, attributed and
+distinguishable from its own output.
 
 ## Scopes
 
@@ -350,7 +372,7 @@ access:
 
 | Scope | Description |
 | :--- | :--- |
-| `dev.ucp.shopping.ask:read` | Ask on behalf of the authenticated user — personalized answers reflecting member pricing, entitlements, or gated availability. |
+| `dev.ucp.shopping.ask:read` | Ask on behalf of the authenticated Buyer — personalized answers reflecting member pricing, entitlements, or gated availability. |
 
 Scope declaration, derivation, and rules for extending this set with custom
 scopes are defined in

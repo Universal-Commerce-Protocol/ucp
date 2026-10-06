@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/ask.json",
   "name": "dev.ucp.shopping.ask",
   "title": "Ask",
-  "description": "Natural-language Q&A with a business. A platform, on behalf of the buyer, asks a free-form question — about the business's products, policies, and services — and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured shopping capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and business-specific facts and knowledge not exposed by other capabilities. Optionally pass item IDs to ground the answer in specific products.",
+  "description": "Natural-language Q&A with a Business. A Platform, on behalf of the Buyer, asks a free-form question about the Business's resources, policies, and services and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured commerce capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and Business-specific facts and knowledge not exposed by other capabilities. Optionally pass identifiers to ground the answer in Business resources across commerce domains.",
   "type": "object",
   "$defs": {
     "conversation": {
@@ -36,7 +36,7 @@
         "ids": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Optional identifiers for the resources the question is about. A business SHOULD accept identifiers that ground the question, with product and variant IDs as the recommended minimum, and MAY also accept secondary identifiers (SKU, handle, URL) and other resources it holds a GID for, such as a cart or checkout."
+          "description": "Optional identifiers that ground the question in any Business resource. A Business SHOULD accept its own Global IDs (GIDs) and MAY accept recognized secondary identifiers such as SKU, handle, or URL. GIDs self-describe to the Business; a Platform may send them as opaque grounding references. Examples include a product, location, cart, order, or booking."
         },
         "context": {
           "$ref": "../common/types/context.json"
@@ -67,7 +67,7 @@
         "links": {
           "type": "array",
           "items": { "$ref": "../common/types/link.json" },
-          "description": "Optional additional links and references related to the answer, where relevant."
+          "description": "Optional links and references related to the answer. When a link refers to an addressable UCP resource, the Business SHOULD include its GID in the link's `id`."
         },
         "messages": {
           "type": "array",
