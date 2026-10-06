@@ -737,17 +737,17 @@ example:
       "com.google.pay": [
         {
           "id": "gpay_1234",
-          "version": "2024-12-03",
-          "spec": "https://developers.google.com/merchant/ucp/guides/gpay-payment-handler",
-          "schema": "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/gpay_config.json"
+          "version": "2026-01-23",
+          "spec": "https://pay.google.com/gp/p/ucp/2026-01-23/",
+          "schema": "https://pay.google.com/gp/p/ucp/2026-01-23/schemas/config.json"
         }
       ],
       "dev.shopify.shop_pay": [
         {
           "id": "shop_pay_1234",
-          "version": "{{ ucp_version }}",
-          "spec": "https://shopify.dev/ucp/shop-pay-handler",
-          "schema": "https://shopify.dev/ucp/schemas/shop-pay-config.json",
+          "version": "2026-04-08",
+          "spec": "https://shopify.dev/ucp/shop-pay-handler/2026-04-08/spec.md",
+          "schema": "https://shopify.dev/ucp/shop-pay-handler/2026-04-08/schema.json",
           "available_instruments": [
             {"type": "shop_pay"}
           ]
