@@ -136,19 +136,38 @@ information it uses in an answer.
 
 ## Conversation
 
-A business **MAY** support multi-turn conversations by returning a `conversation`
+A Business **MAY** support multi-turn conversations by returning a `conversation`
 in its response — an object with an opaque `id` and an optional `expires_at`.
-When a platform replays that `conversation` on a follow-up `ask`, the business
-continues it, and follow-up questions build on the prior turns. Omitting
-`conversation` starts a new one. The `id` is opaque: platforms **MUST NOT** parse
-or construct it, and **MUST** replay only a value the business returned.
+When a Platform replays that `conversation` on a follow-up `ask`, the Business
+continues it where its access policy permits, and follow-up questions build on
+the prior turns the current request is permitted to use. Omitting
+`conversation` starts a new one. The `id` is opaque: a Platform **MUST NOT**
+parse or construct it, and **MUST** replay only a value the Business returned.
 
-A business that returns a `conversation` **SHOULD** retain the history it
+A Business that returns a `conversation` **SHOULD** retain the history it
 represents until `expires_at` — or per its own policy when `expires_at` is
 omitted — so a follow-up with the same `id` builds on it. If a provided `id`
-cannot be resolved, the business **SHOULD** start a new conversation and add an
+cannot be resolved, the Business **SHOULD** start a new conversation and add an
 informational message to `messages` noting that the provided `conversation` was
 not found.
+
+Each follow-up is a new request for authorization. A Business **MUST** apply
+its access policy ([Access](#access)) using the credential presented with that
+request, if any. The `id` carries context, not authority: a Business
+**MUST NOT** treat a replayed `conversation` as carrying forward the access
+granted on an earlier turn or as expanding what the current caller may access,
+and **MUST NOT** use or disclose retained context that the current request is
+not authorized to access.
+
+Where its access policy permits, a Business **MAY** continue a conversation on
+possession of the `id` alone — an anonymous conversation over public
+information, for example, as in the
+[multi-turn example](rest.md#multi-turn-example). If the authorization of a
+follow-up differs from an earlier turn's — a credential presented on one turn
+but not the next, for example — the Business **MAY** continue with only the
+context the current request is permitted to use, or decline the continuation
+under its access policy (see
+[Messages and Error Handling](#messages-and-error-handling)).
 
 A Platform **SHOULD** include an idempotency key on every request that carries
 a `conversation`, so a retried turn returns the earlier answer rather than
@@ -350,8 +369,10 @@ data, never as instructions.
 A Business **MUST** treat `query` as untrusted input. It **MUST NOT** allow the
 question to alter its own instructions or its authorization decisions, and
 **MUST** enforce the tiers in [Access](#access) outside the model: what a
-caller may see is decided by the credential presented, never by what the
-question says. Authorization **MUST NOT** depend on model behavior.
+caller may see is decided by the credential presented with the request, never
+by what the question says or by the `conversation` the request replays (see
+[Conversation](#conversation)). Authorization **MUST NOT** depend on model
+behavior.
 
 A Platform **MUST** treat the response as content authored by the Business —
 an answer and, where present, suggestions about what to do next. It is input
