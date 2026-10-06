@@ -378,17 +378,15 @@ by what the question says or by the `conversation` the request replays (see
 [Conversation](#conversation)). Authorization **MUST NOT** depend on model
 behavior.
 
-A Platform **MUST** treat the response as content authored by the Business —
-an answer and, where present, suggestions about what to do next. It is input
-to the Platform's own decisions, not directions to carry out. A Platform
-**MUST NOT** act on text in `answer` or on identifiers in `links[].id` as if
-they were instructions; whether and how to act on them — resolving an
-identifier through a negotiated capability, adding an item to a cart,
-directing the Buyer to a `url` — is the Platform's decision, made under its
-own authorization and Buyer-consent rules, exactly as for any other
-Business-authored content such as a product description. A Platform
-**SHOULD** present an `answer` as content from the Business, distinguishable
-from its own output.
+A Platform **MUST** treat all Business-authored response content, including
+content contributed by negotiated extensions, as data rather than
+instructions. A Platform **MUST NOT** allow merely receiving or rendering that
+content to trigger a capability call or state change.
+
+Whether and how to act on an `answer`, an identifier in `links[].id`, or an
+extension-defined affordance is the Platform's decision, made under its own
+authorization and Buyer-consent rules. A Platform **SHOULD** present an
+`answer` as content from the Business, distinguishable from its own output.
 
 ## Scopes
 
