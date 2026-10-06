@@ -23,8 +23,8 @@ This document specifies the Model Context Protocol (MCP) binding for the
 
 ### Discovery
 
-Businesses advertise MCP transport availability through their UCP profile at
-`/.well-known/ucp`.
+Businesses advertise MCP transport availability for the Common service and
+the Ask capability through their UCP profile at `/.well-known/ucp`.
 
 <!-- ucp:example schema=profile def=business_schema -->
 ```json
@@ -32,21 +32,21 @@ Businesses advertise MCP transport availability through their UCP profile at
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": [
+      "dev.ucp.common": [
         {
           "version": "{{ ucp_version }}",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "mcp",
-          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/common/mcp.openrpc.json",
           "endpoint": "https://business.example.com/ucp/mcp"
         }
       ]
     },
     "capabilities": {
-      "dev.ucp.shopping.ask": [{
+      "dev.ucp.common.ask": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/ask",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ask.json"
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/ask",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/ask.json"
       }]
     },
     "payment_handlers": {}
@@ -56,10 +56,13 @@ Businesses advertise MCP transport availability through their UCP profile at
 
 ### Request Metadata
 
-MCP clients **MUST** include a `meta` object in every request containing
-protocol metadata:
+A Platform using MCP **MUST** include a `meta` object with
+`meta["ucp-agent"].profile` in every request. The field identifies the
+Platform's UCP profile for version compatibility checks and capability
+negotiation. Protocol metadata stays in `meta`, separate from the domain
+request in `ask`:
 
-<!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -70,7 +73,7 @@ protocol metadata:
     "arguments": {
       "meta": {
         "ucp-agent": {
-          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
         }
       },
       "ask": {
@@ -81,11 +84,11 @@ protocol metadata:
 }
 ```
 
-Requests **MUST** include `meta["ucp-agent"]` for version compatibility and
-capability negotiation.
-
-A request that carries a `conversation` **SHOULD** also include
-`meta["idempotency-key"]`; see [Conversation](index.md#conversation).
+The Common service's `meta` also defines an optional `idempotency-key`, the MCP
+counterpart of the HTTP `Idempotency-Key` header. A Platform **SHOULD** include
+`meta["idempotency-key"]` on any request that carries a `conversation`, and
+**MAY** include it on any other; see [Conversation](index.md#conversation) for
+the retry contract.
 
 ## Tools
 
@@ -100,13 +103,13 @@ Maps to the [Ask](index.md) capability.
 #### Ask Request
 
 {{ extension_schema_fields(
-  'ask.json#/$defs/ask_request', 'shopping/ask/mcp'
+  'ask.json#/$defs/ask_request', 'common/ask/mcp'
 ) }}
 
 #### Ask Response
 
 {{ extension_schema_fields(
-  'ask.json#/$defs/ask_response', 'shopping/ask/mcp'
+  'ask.json#/$defs/ask_response', 'common/ask/mcp'
 ) }}
 
 #### Ask Example
@@ -119,7 +122,7 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+    <!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -130,7 +133,7 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
         "arguments": {
           "meta": {
             "ucp-agent": {
-              "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+              "profile": "https://platform.example/profiles/v2026-01/agent.json"
             }
           },
           "ask": {
@@ -149,7 +152,7 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+    <!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
     ```json
     {
       "jsonrpc": "2.0",
@@ -159,7 +162,7 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
           "ucp": {
             "version": "{{ ucp_version }}",
             "capabilities": {
-              "dev.ucp.shopping.ask": [
+              "dev.ucp.common.ask": [
                 {"version": "{{ ucp_version }}"}
               ]
             }
@@ -189,7 +192,7 @@ on it.
 
 Turn 1, request — a new conversation (no `conversation`):
 
-<!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -200,7 +203,7 @@ Turn 1, request — a new conversation (no `conversation`):
     "arguments": {
       "meta": {
         "ucp-agent": {
-          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
         }
       },
       "ask": {
@@ -214,7 +217,7 @@ Turn 1, request — a new conversation (no `conversation`):
 
 Turn 1, response — the Business issues a conversation identifier:
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -224,7 +227,7 @@ Turn 1, response — the Business issues a conversation identifier:
       "ucp": {
         "version": "{{ ucp_version }}",
         "capabilities": {
-          "dev.ucp.shopping.ask": [
+          "dev.ucp.common.ask": [
             {"version": "{{ ucp_version }}"}
           ]
         }
@@ -240,7 +243,7 @@ Turn 1, response — the Business issues a conversation identifier:
 
 Turn 2, request — replay the identifier to continue:
 
-<!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -251,7 +254,7 @@ Turn 2, request — replay the identifier to continue:
     "arguments": {
       "meta": {
         "ucp-agent": {
-          "profile": "https://platform.example/profiles/v2026-01/shopping-agent.json"
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
         },
         "idempotency-key": "7c9e6679-7425-40de-944b-e07fc1f90ae7"
       },
@@ -266,7 +269,7 @@ Turn 2, request — replay the identifier to continue:
 
 Turn 2, response:
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -276,7 +279,7 @@ Turn 2, response:
       "ucp": {
         "version": "{{ ucp_version }}",
         "capabilities": {
-          "dev.ucp.shopping.ask": [
+          "dev.ucp.common.ask": [
             {"version": "{{ ucp_version }}"}
           ]
         }
@@ -292,10 +295,10 @@ Turn 2, response:
 
 #### "Can't Answer" Example
 
-When the business cannot address the question, the response is still a
+When the Business cannot address the question, the response is still a
 successful result with a populated `answer` stating the limitation.
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -305,7 +308,7 @@ successful result with a populated `answer` stating the limitation.
       "ucp": {
         "version": "{{ ucp_version }}",
         "capabilities": {
-          "dev.ucp.shopping.ask": [
+          "dev.ucp.common.ask": [
             {"version": "{{ ucp_version }}"}
           ]
         }
@@ -343,7 +346,7 @@ the binding disclosure is referenced as a warning with
 `presentation: "disclosure"`. The answer itself states the limitation and
 defers to the binding source.
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
 ```json
 {
   "jsonrpc": "2.0",
@@ -353,7 +356,7 @@ defers to the binding source.
       "ucp": {
         "version": "{{ ucp_version }}",
         "capabilities": {
-          "dev.ucp.shopping.ask": [
+          "dev.ucp.common.ask": [
             {"version": "{{ ucp_version }}"}
           ]
         }
@@ -387,18 +390,19 @@ defers to the binding source.
 
 ### UCP Response Ask {: #ucp-response-ask-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'shopping/ask/mcp') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'common/ask/mcp') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'shopping/ask/mcp') }}
+{{ schema_fields('types/error_response', 'common/ask/mcp') }}
 
 ## Conformance
 
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0.
-2. When `dev.ucp.shopping.ask` is advertised in the business's UCP profile, expose the `ask_business` tool.
+2. When `dev.ucp.common.ask` is advertised in the Business's UCP profile, expose
+   the `ask_business` tool at the `dev.ucp.common` service's MCP `endpoint`.
 3. Validate tool inputs against the [Ask schema](index.md).
 4. Return a successful JSON-RPC result for every well-formed, authorized,
    in-limits request; convey business outcomes through the `answer` and

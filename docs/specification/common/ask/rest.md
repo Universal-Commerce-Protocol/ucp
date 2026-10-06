@@ -23,8 +23,8 @@ This document specifies the HTTP/REST binding for the
 
 ### Discovery
 
-Businesses advertise REST transport availability through their UCP profile at
-`/.well-known/ucp`.
+Businesses advertise REST transport availability for the Common service and
+the Ask capability through their UCP profile at `/.well-known/ucp`.
 
 <!-- ucp:example schema=profile def=business_schema -->
 ```json
@@ -32,21 +32,21 @@ Businesses advertise REST transport availability through their UCP profile at
   "ucp": {
     "version": "{{ ucp_version }}",
     "services": {
-      "dev.ucp.shopping": [
+      "dev.ucp.common": [
         {
           "version": "{{ ucp_version }}",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
           "transport": "rest",
-          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/common/rest.openapi.json",
           "endpoint": "https://business.example.com/ucp"
         }
       ]
     },
     "capabilities": {
-      "dev.ucp.shopping.ask": [{
+      "dev.ucp.common.ask": [{
         "version": "{{ ucp_version }}",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/ask",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ask.json"
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/ask",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/ask.json"
       }]
     },
     "payment_handlers": {}
@@ -64,7 +64,7 @@ Businesses advertise REST transport availability through their UCP profile at
 
 Maps to the [Ask](index.md) capability.
 
-{{ method_fields('ask_business', 'shopping/rest.openapi.json', 'shopping/ask/rest') }}
+{{ method_fields('ask_business', 'common/rest.openapi.json', 'common/ask/rest') }}
 
 #### Example
 
@@ -76,7 +76,7 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
 
 === "Request"
 
-    <!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request -->
+    <!-- ucp:example schema=common/ask def=ask_request op=create direction=request -->
     ```json
     POST /ask HTTP/1.1
     Host: business.example.com
@@ -95,13 +95,13 @@ already has (see [Scoping a Question](index.md#scoping-a-question)).
 
 === "Response"
 
-    <!-- ucp:example schema=shopping/ask def=ask_response op=read -->
+    <!-- ucp:example schema=common/ask def=ask_response op=read -->
     ```json
     {
       "ucp": {
         "version": "{{ ucp_version }}",
         "capabilities": {
-          "dev.ucp.shopping.ask": [
+          "dev.ucp.common.ask": [
             {"version": "{{ ucp_version }}"}
           ]
         }
@@ -129,7 +129,7 @@ on it.
 
 Turn 1, request — a new conversation (no `conversation`):
 
-<!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request -->
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request -->
 ```json
 POST /ask HTTP/1.1
 Host: business.example.com
@@ -143,13 +143,13 @@ Content-Type: application/json
 
 Turn 1, response — the Business issues a conversation identifier:
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read -->
+<!-- ucp:example schema=common/ask def=ask_response op=read -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.ask": [
+      "dev.ucp.common.ask": [
         {"version": "{{ ucp_version }}"}
       ]
     }
@@ -163,7 +163,7 @@ Turn 1, response — the Business issues a conversation identifier:
 
 Turn 2, request — replay the identifier to continue:
 
-<!-- ucp:example schema=shopping/ask def=ask_request op=create direction=request -->
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request -->
 ```json
 POST /ask HTTP/1.1
 Host: business.example.com
@@ -178,13 +178,13 @@ Idempotency-Key: 7c9e6679-7425-40de-944b-e07fc1f90ae7
 
 Turn 2, response:
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read -->
+<!-- ucp:example schema=common/ask def=ask_response op=read -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.ask": [
+      "dev.ucp.common.ask": [
         {"version": "{{ ucp_version }}"}
       ]
     }
@@ -198,16 +198,16 @@ Turn 2, response:
 
 #### "Can't Answer" Example
 
-When the business cannot address the question, the response is still HTTP 200
+When the Business cannot address the question, the response is still HTTP 200
 with a populated `answer` stating the limitation.
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read -->
+<!-- ucp:example schema=common/ask def=ask_response op=read -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.ask": [
+      "dev.ucp.common.ask": [
         {"version": "{{ ucp_version }}"}
       ]
     }
@@ -222,17 +222,17 @@ with a populated `answer` stating the limitation.
 
 The following headers are defined for the HTTP binding.
 
-{{ header_fields('ask_business', 'shopping/rest.openapi.json') }}
+{{ header_fields('ask_business', 'common/rest.openapi.json') }}
 
 ### Specific Header Requirements
 
-* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
-    containing the platform profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
-    Format: `profile="https://platform.example/profile"`.
-* **Idempotency-Key**: A Platform **SHOULD** include an `Idempotency-Key` on
-    any request that carries a `conversation`, and **MAY** on any other. When
-    present, the Business **MUST**:
+{{ header_requirements('ucp_agent') }}
+
+* **Idempotency-Key**: The Common service declares `Idempotency-Key` as an
+    optional request header. A Platform **SHOULD** include it on any request
+    that carries a `conversation`, and **MAY** include it on any other (see
+    [Conversation](index.md#conversation)). When present, the Business
+    **MUST**:
     1. Store the key with the result for at least 24 hours.
     2. Return the cached result for a duplicate key whose request body matches
        the original, without appending a second turn.
@@ -269,13 +269,13 @@ the binding disclosure is referenced as a warning with
 `presentation: "disclosure"`. The answer itself states the limitation and
 defers to the binding source.
 
-<!-- ucp:example schema=shopping/ask def=ask_response op=read -->
+<!-- ucp:example schema=common/ask def=ask_response op=read -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
-      "dev.ucp.shopping.ask": [
+      "dev.ucp.common.ask": [
         {"version": "{{ ucp_version }}"}
       ]
     }
@@ -307,21 +307,22 @@ defers to the binding source.
 
 ### UCP Response Ask {: #ucp-response-ask-schema }
 
-{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'shopping/ask/rest') }}
+{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'common/ask/rest') }}
 
 ### Conversation {: #conversation }
 
-{{ extension_schema_fields('ask.json#/$defs/conversation', 'shopping/ask/rest') }}
+{{ extension_schema_fields('ask.json#/$defs/conversation', 'common/ask/rest') }}
 
 ### Error Response {: #error-response }
 
-{{ schema_fields('types/error_response', 'shopping/ask/rest') }}
+{{ schema_fields('types/error_response', 'common/ask/rest') }}
 
 ## Conformance
 
 A conforming REST transport implementation **MUST**:
 
-1. When `dev.ucp.shopping.ask` is advertised in the business's UCP profile, expose `POST /ask`.
+1. When `dev.ucp.common.ask` is advertised in the Business's UCP profile, expose
+   `POST /ask` under the `dev.ucp.common` service's REST `endpoint`.
 2. Validate request bodies against the [Ask schema](index.md).
 3. Return HTTP 200 for every well-formed, authorized, in-limits request; convey
    business outcomes through the `answer` and `messages` array, and use HTTP

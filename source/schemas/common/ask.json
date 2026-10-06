@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ucp.dev/schemas/shopping/ask.json",
-  "name": "dev.ucp.shopping.ask",
+  "$id": "https://ucp.dev/schemas/common/ask.json",
+  "name": "dev.ucp.common.ask",
   "title": "Ask",
   "description": "Natural-language Q&A with a Business. A Platform, on behalf of the Buyer, asks a free-form question about the Business's resources, policies, and services and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured commerce capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and Business-specific facts and knowledge not exposed by other capabilities. Optionally pass identifiers to ground the answer in Business resources across commerce domains.",
   "type": "object",
@@ -39,13 +39,10 @@
           "description": "Optional identifiers that ground the question in any Business resource. A Business SHOULD accept its own Global IDs (GIDs) and MAY accept recognized secondary identifiers such as SKU, handle, or URL. GIDs self-describe to the Business; a Platform may send them as opaque grounding references. Examples include a product, location, cart, order, or booking."
         },
         "context": {
-          "$ref": "../common/types/context.json"
+          "$ref": "types/context.json"
         },
         "signals": {
-          "$ref": "../common/types/signals.json"
-        },
-        "attribution": {
-          "$ref": "types/attribution.json"
+          "$ref": "types/signals.json"
         }
       }
     },
@@ -58,7 +55,7 @@
         },
         "answer": {
           "allOf": [
-            { "$ref": "../common/types/description.json" },
+            { "$ref": "types/description.json" },
             {
               "type": "object",
               "required": ["plain"]
@@ -72,12 +69,12 @@
         },
         "links": {
           "type": "array",
-          "items": { "$ref": "../common/types/link.json" },
+          "items": { "$ref": "types/link.json" },
           "description": "Optional links and references related to the answer. When a link refers to an addressable UCP resource, the Business SHOULD include its GID in the link's `id`."
         },
         "messages": {
           "type": "array",
-          "items": { "$ref": "../common/types/message.json" },
+          "items": { "$ref": "types/message.json" },
           "description": "Errors, warnings, or informational messages about the answer or its grounding."
         }
       }

@@ -730,50 +730,6 @@
           }
         }
       }
-    },
-    "/ask": {
-      "post": {
-        "operationId": "ask_business",
-        "summary": "Ask the business a question",
-        "description": "Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. Returns a text answer with related links; pass resource identifiers to ground the question in Business resources across commerce domains, such as a product, location, cart, order, or booking.",
-        "parameters": [
-          { "$ref": "#/components/parameters/authorization" },
-          { "$ref": "#/components/parameters/x_api_key" },
-          { "$ref": "#/components/parameters/signature" },
-          { "$ref": "#/components/parameters/signature_input" },
-          { "$ref": "#/components/parameters/content_digest" },
-          { "$ref": "#/components/parameters/request_id" },
-          { "$ref": "#/components/parameters/user_agent" },
-          { "$ref": "#/components/parameters/ucp_agent" },
-          { "$ref": "#/components/parameters/content_type" },
-          { "$ref": "#/components/parameters/accept" },
-          { "$ref": "#/components/parameters/accept_language" },
-          { "$ref": "#/components/parameters/accept_encoding" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/ask_request" }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Answer",
-            "headers": {
-              "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
-            },
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ask_response" }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "webhooks": {
@@ -1065,12 +1021,6 @@
           { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
-      },
-      "ask_request": {
-        "$ref": "../../schemas/shopping/ask.json#/$defs/ask_request"
-      },
-      "ask_response": {
-        "$ref": "../../schemas/shopping/ask.json#/$defs/ask_response"
       }
     }
   }
