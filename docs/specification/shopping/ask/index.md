@@ -32,10 +32,21 @@ through the structured resources exposed by other capabilities.
 `ask` answers; it does not act. A Business **MUST NOT** change the state of any
 resource exposed through another UCP capability in response to an `ask`
 request — it **MUST NOT** create or modify a cart, checkout, or order, apply a
-discount, or reserve inventory. Where a question implies an action ("add two of
-these to my cart"), the Business answers without acting; the Platform **MUST**
-perform the action through the capability that owns it and **MUST NOT** treat an
-`ask` response as evidence that it happened.
+discount, or reserve inventory. When all or part of a `query` requests an
+operation that another capability owns ("add two of these to my cart — do they
+come in blue?"), the Business **MUST** return a populated `answer` stating
+clearly that `ask` did not perform the requested operation. The Business
+**MAY** answer any informational part of the question from data it is permitted
+to use under [Access](#access), and **MAY** add an informational message with
+code `operation_not_performed` (see
+[Messages and Error Handling](#messages-and-error-handling)).
+
+A Platform **MUST NOT** treat the `answer` or the message as evidence that the
+operation occurred, or as an instruction to perform it. Whether to invoke the
+capability that owns the operation is the Platform's own decision, made from
+the Buyer's original request rather than from the `ask` response, and subject
+to that capability's authorization, consent, and idempotency requirements (see
+[Security Considerations](#security-considerations)).
 
 `ask` draws on public business information and on resources the caller can address
 by a GID it holds — products and variants, and optionally a cart or checkout —
@@ -235,7 +246,7 @@ path.
 
 ## Messages and Error Handling
 
-Ask responses **MAY** include a `messages` array of errors, warnings, or
+A Business **MAY** include a `messages` array of errors, warnings, or
 informational notes about the answer — for example, a warning that it draws on
 a regional policy variant, or a note that the question was re-scoped. The
 `answer` remains the primary response.
@@ -244,12 +255,57 @@ a regional policy variant, or a note that the question was re-scoped. The
 | :--- | :--- | :--- |
 | `error` | Business-level errors — e.g., a question requires a scope the caller's token lacks | `insufficient_scope` |
 | `warning` | Important conditions or disclaimers about the answer | `disclaimer` |
-| `info` | Additional context or non-blocking notes — e.g., a referenced item could not be resolved | `not_found`, `promotion` |
+| `info` | Additional context or non-blocking notes — e.g., a referenced item could not be resolved, or the `query` asked for an operation `ask` does not perform | `not_found`, `operation_not_performed`, `promotion` |
 
 Warnings with `presentation: "disclosure"` carry notices the platform **MUST NOT**
 hide or dismiss — for example, a safety, allergen, or regulated disclosure. See
 [Warning Presentation](../checkout/index.md#warning-presentation) for the rendering
 contract.
+
+### Well-Known Codes
+
+Message codes are open strings — the shared message schemas accept any code —
+and well-known codes carry standardized meaning. `ask` defines one:
+
+| Type | Code | Meaning |
+| :--- | :--- | :--- |
+| `info` | `operation_not_performed` | The `query` requested an operation outside the read-only boundary of `ask`, and the Business performed no corresponding state change. |
+
+The message reports that nothing changed. It does not instruct the Platform to
+invoke another capability, and it supplements — never replaces — the `answer`
+stating that `ask` did not perform the operation (see [Overview](#overview)).
+
+For example, a Buyer asks: "Add three more widgets and tell me whether that
+qualifies for the volume discount." The `query` mixes an operation `ask` does
+not perform (adding to the cart) with a question it can answer (the discount
+condition). The Business answers the question and states that it did not
+change the cart, repeating that fact as an informational message. It performs
+no cart operation, and nothing in the response directs the Platform to a
+capability that would.
+
+<!-- ucp:example schema=shopping/ask def=ask_response op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.ask": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "answer": {
+    "plain": "I haven't added anything to your cart; it is unchanged. Orders of 10 or more widgets qualify for the volume discount, which takes 15% off each widget."
+  },
+  "messages": [
+    {
+      "type": "info",
+      "code": "operation_not_performed",
+      "content": "No cart operation was performed."
+    }
+  ]
+}
+```
 
 ### Message (Error)
 
