@@ -58,8 +58,9 @@ Every Enhancement Proposal issue must follow the standard template requiring:
 
 * **Summary**: High-level executive summary of the change.
 * **Motivation**: Problem statement and user value.
+* **Goals & Non-Goals**: Specific, measurable outcomes and explicit out-of-scope boundaries to prevent scope creep.
 * **Detailed Design**: Technical specification, schema impact, API surface, and edge cases.
-* **Risks**: Compatibility, migration considerations, and security implications.
+* **Risks and Mitigations**: Compatibility, migration considerations, performance, and security implications.
 * **Test Plan**: Verification strategy across transports and conformance suites.
 * **Graduation Criteria**: Requirements for advancing to Candidate and Stable tiers.
 
