@@ -7,7 +7,7 @@
   "properties": {
     "tax": {
       "$ref": "tax_treatment.json",
-      "description": "Tax treatment of the amount."
+      "description": "Tax treatment of the amount. When omitted, the price makes no statement about tax."
     }
   }
 }
