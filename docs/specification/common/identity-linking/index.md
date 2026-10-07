@@ -655,20 +655,30 @@ following hold:
    as determined by the
    [Authoritative Issuer Check](#authoritative-issuer-check).
 4. The business itself verified the existing account's email address
-   (e.g., via a confirmation link or code). Businesses **MUST NOT**
-   match against unverified account emails. This prevents
-   pre-account hijacking, where an attacker registers the victim's
-   address before the victim links.
-5. The existing account is not currently, and has not previously been,
-   linked to a different `sub` from the same `iss`. If it is, the
-   business **MUST NOT** auto-link, because the domain owner may have
+   (e.g., via a confirmation link or code) or previously verified it via
+   the domain's authoritative email verification issuer. Businesses
+   **MUST NOT** match against unverified account emails or emails marked
+   verified solely from a non-authoritative IdP's `email_verified`
+   claim. This prevents pre-account hijacking, where an attacker
+   registers the victim's address before the victim links.
+5. The grant's `(iss, sub)` is not currently, and has not previously
+   been, linked to a different account at the business, and the existing
+   account is not currently, and has not previously been, linked to a
+   different `sub` from the same `iss` (or to a different `iss` that
+   previously matched as the authoritative issuer for that email
+   address). If either is, the business **MUST NOT** auto-link, because
+   the domain may have changed ownership or the domain owner may have
    reassigned the address; when this check fails, businesses **SHOULD**
    notify the account holder and treat the event as a possible takeover
    attempt.
 
-Businesses **MUST** compare the complete email address using the same
-normalization they apply for account uniqueness. They **MUST NOT** apply
-provider-specific transformations such as removing dots or `+` tags.
+Businesses **MUST** normalize the domain portion (after the last `@`) to
+lowercase A-label form per Step 1 of the
+[Authoritative Issuer Check](#authoritative-issuer-check) and compare
+the local-part using the same case-sensitivity rules they apply for
+account uniqueness, except that they **MUST NOT** apply
+provider-specific local-part transformations such as removing dots or
+`+` tags even if used in uniqueness checks.
 
 **Account risk gates.** Even when all preconditions hold, businesses:
 
@@ -781,11 +791,15 @@ record the `(iss, sub)` pair against the account and use it, not
 holder through an out-of-band channel other than the matched email when
 available (e.g., SMS, push notification, secondary contact, or existing
 signed-in sessions) when email matching creates a new IdP link, and
-**SHOULD** provide a way to remove it. On the first token issued after
-an email-matched link, businesses **MAY** withhold high-risk scopes
-(e.g., changing the account email, recovery settings, or stored payment
-methods) until the link is confirmed or the account has been used
-normally.
+**SHOULD** provide a way to remove it. While an email-matched link
+remains unconfirmed (not only on the first token issued), businesses
+**MAY** withhold high-risk scopes (e.g., changing the account email,
+recovery settings, or stored payment methods) and stored account state
+on unscoped operations (such as `buyer` profile data, saved addresses,
+and saved payment instrument references in `payment.instruments[]`; see
+[Business-Populated Response Values](#business-populated-response-values))
+across all tokens resolved via that `(iss, sub)` link until the link is
+confirmed or the account has been used normally.
 
 ### Chaining Errors at the Token Endpoint
 
@@ -867,13 +881,22 @@ advisory; stable per-IdP identification remains `(iss, sub)`.
 
 IdPs **MUST** set `email_verified` to `true` only when they have verified
 that the grant's subject (`sub`) controls the mailbox for that address.
-For any email domain that delegates to the IdP via `_email-verification`
-(see [Authoritative Email Matching](#authoritative-email-matching)), the
+For any IdP that publishes `/.well-known/email-verification` (see
+[Authoritative Email Matching](#authoritative-email-matching)), the
 IdP **MUST** set `email_verified` to `true` in JWT authorization grants
 only when the user's account is an authoritative mailbox managed by the
-IdP for that domain, and **MUST NOT** set `email_verified` to `true`
+IdP for that email's domain, and **MUST NOT** set `email_verified` to `true`
 based on a point-in-time mailbox verification (such as an unmanaged or
-conflicting consumer account).
+conflicting consumer account), regardless of whether the email domain
+currently publishes an `_email-verification` DNS record.
+
+An IdP that acts as a delegated email verification issuer and wants
+businesses to rely on
+[Authoritative Email Matching](#authoritative-email-matching) **MUST**
+use a bare HTTPS origin (`https://<host>`, with no port, path, or
+trailing slash) as its `auth_url`, the `iss` claim of its JWT
+authorization grants, and the `issuer` member of its
+`/.well-known/email-verification` metadata.
 
 ## Scopes
 
