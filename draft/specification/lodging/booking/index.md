@@ -842,11 +842,12 @@ Relational link mapping a stay unit to an occupant from the root `guests[]` pool
 
 Compliance and legal links (e.g., Privacy Policy, Terms of Service).
 
-| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                          |
-| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
-| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
-| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
+| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                                                  |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link.                         |
+| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                                                      |
+| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                                                 |
+| id    | string | Optional     | Optional identifier for the linked resource when it is an addressable UCP resource (for example, a product or variant), so a platform can act on it through the capability that owns it. Omit for resources without a UCP identifier, such as a policy page. |
 
 ### Message Error
 

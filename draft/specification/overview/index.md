@@ -1617,6 +1617,7 @@ UCP defines a set of standard capabilities:
 
 | Capability Name      | ID (URI)                                                                | Description                                                                                                  |
 | -------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Ask**              | [schemas/common/ask.json](/draft/schemas/common/ask.json)               | Answers natural-language questions about a business's resources, policies, and services; read-only.          |
 | **Cart**.            | [schemas/shopping/cart.json](/draft/schemas/shopping/cart.json)         | Enables basket building before purchase intent is established.                                               |
 | **Checkout**         | [schemas/shopping/checkout.json](/draft/schemas/shopping/checkout.json) | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
 | **Identity Linking** | -                                                                       | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |

@@ -2,8 +2,8 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Common Service",
-    "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility.",
-    "version": "2026-10-05"
+    "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Ask and Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility.",
+    "version": "2026-10-07"
   },
   "servers": [
     {
@@ -41,6 +41,11 @@
                 "description": "URL to the Platform's UCP profile document."
               }
             }
+          },
+          "idempotency-key": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
           }
         }
       }
@@ -98,6 +103,33 @@
         "name": "response",
         "schema": {
           "$ref": "https://ucp.dev/draft/schemas/common/location_lookup.json#/$defs/lookup_response"
+        }
+      }
+    },
+    {
+      "name": "ask_business",
+      "summary": "Ask the business a question",
+      "description": "Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. Returns a text answer with related links; pass resource identifiers to ground the question in Business resources across commerce domains, such as a product, location, cart, order, or booking.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "ask",
+          "required": true,
+          "schema": {
+            "$ref": "https://ucp.dev/draft/schemas/common/ask.json#/$defs/ask_request"
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {
+          "$ref": "https://ucp.dev/draft/schemas/common/ask.json#/$defs/ask_response"
         }
       }
     }

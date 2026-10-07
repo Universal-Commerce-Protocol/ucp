@@ -4,6 +4,12 @@ This page provides a reference for all the capability data models and types used
 
 ## Capability Schemas
 
+### Ask
+
+Natural-language Q&A with a Business. A Platform, on behalf of the Buyer, asks a free-form question about the Business's resources, policies, and services and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured commerce capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and Business-specific facts and knowledge not exposed by other capabilities. Optionally pass identifiers to ground the answer in Business resources across commerce domains.
+
+______________________________________________________________________
+
 ### Location Lookup
 
 Location lookup by identifiers. Supports batch retrieval and single-location detail.
@@ -312,11 +318,12 @@ ______________________________________________________________________
 
 ### Link
 
-| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                          |
-| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
-| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
-| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
+| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                                                  |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link.                         |
+| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                                                      |
+| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                                                 |
+| id    | string | Optional     | Optional identifier for the linked resource when it is an addressable UCP resource (for example, a product or variant), so a platform can act on it through the capability that owns it. Omit for resources without a UCP identifier, such as a policy page. |
 
 ______________________________________________________________________
 

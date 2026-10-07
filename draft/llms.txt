@@ -46,6 +46,12 @@ specifications:
 - [REST](http://ucp.dev/draft/specification/common/location/rest/index.md): HTTP REST transport binding for the Location Capability, detailing search and lookup endpoints with JSON payload examples.
 - [MCP](http://ucp.dev/draft/specification/common/location/mcp/index.md): Model Context Protocol (MCP) transport binding for the Location Capability, mapping discovery operations to JSON-RPC tools with metadata validation rules.
 
+## Ask Capability
+
+- [Overview](http://ucp.dev/draft/specification/common/ask/index.md): Core Ask Capability (`dev.ucp.common.ask`), defining natural-language Q&A about a business's resources, policies, and services, grounded in any business resource across verticals and returning a read-only, non-authoritative answer with optional related links.
+- [REST](http://ucp.dev/draft/specification/common/ask/rest/index.md): HTTP REST transport binding for the Ask Capability on the Common service, detailing the `POST /ask` endpoint, request and response payloads, and the non-authoritative answer contract.
+- [MCP](http://ucp.dev/draft/specification/common/ask/mcp/index.md): Model Context Protocol (MCP) transport binding for the Ask Capability on the Common service, mapping the `ask_business` tool to JSON-RPC with metadata validation rules and related-link conventions.
+
 ## Message Signatures
 
 - [Signatures](http://ucp.dev/draft/specification/signatures/index.md): Implementation details for RFC 9421 HTTP Message Signatures and RFC 9530 Content-Digests to achieve secure, transport-agnostic request authentication and replay protection.
@@ -78,6 +84,10 @@ specifications:
 - [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md): Direct item retrieval via the Lookup Catalog capability, specifying variant resolution logic, batch identifiers, and interactive option selection.
 - [REST](http://ucp.dev/draft/specification/shopping/catalog/rest/index.md): HTTP REST transport binding for the Catalog Capability, detailing search, batch lookup, and product detail endpoints with JSON payload examples.
 - [MCP](http://ucp.dev/draft/specification/shopping/catalog/mcp/index.md): Model Context Protocol (MCP) transport binding for the Catalog Capability, mapping discovery operations to JSON-RPC tools with metadata validation rules.
+
+## Ask Capability (Shopping)
+
+- [Ask Capability](http://ucp.dev/draft/specification/shopping/ask/index.md): Thin integration guide mapping Shopping concerns (products, carts, checkouts, orders) onto their owning structured capabilities while using the Common Ask capability unchanged.
 
 ## Order Capability
 
