@@ -30,7 +30,9 @@ Significant changes include:
 * **Core Schema Modifications**: Adding, removing, or modifying fields or descriptions in JSON schemas.
 * **Protocol Changes**: Altering communication flows or expected capability behaviors (Checkout, Cart, Catalog, Order, Identity Linking).
 * **New API Endpoints / Transports**: Introducing new transport bindings (REST, MCP, A2A, Embedded) or new protocol endpoints.
-* **Backwards Incompatibility**: Any breaking change requiring a major version increment.
+* **Backwards Incompatibility**: Any breaking change to an existing capability or schema (requires Governing Council approval and a 2-week advance notice in Discussions; see [Versioning](../versioning.md)).
+
+**Vendor Extensions vs. Core (`dev.ucp.*`)**: UCP is designed to keep the core protocol light. New capabilities or extensions for vendor-specific or emerging use cases should first be self-hosted under a vendor namespace (e.g., `com.{vendor}.*`; see [Namespace Governance](../specification/overview/index.md#namespace-governance)) and proposed for adoption into `dev.ucp.*` once there is broad multi-party ecosystem adoption.
 
 **Feature Request vs Enhancement Proposal**: For new feature suggestions without an implementation plan, please submit a standard "Feature Request" issue. If you are proposing a feature alongside its technical design, please submit an "Enhancement Proposal" issue and reference the corresponding implementation in your Pull Request(s).
 
