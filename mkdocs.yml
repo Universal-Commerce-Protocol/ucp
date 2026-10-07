@@ -117,6 +117,7 @@ nav:
               - Guide: specification/payment/guide.md
               - Template: specification/payment/template.md
               - Tokenization Guide: specification/payment/tokenization.md
+              - Nano Payment Instrument: specification/payment/nano-payment-instrument.md
               - Examples:
                   - Processor Tokenizer:
                       specification/payment/examples/processor-tokenizer-payment-handler.md
@@ -623,6 +624,10 @@ plugins:
               Shared API, security requirements, and lifecycle policies
               (single-use, TTL, session-scoped) for building compliant
               tokenization payment handlers.
+          - specification/payment/nano-payment-instrument.md: >-
+              Handler rules for the Nano (XNO) payment instrument: the
+              business-issued binding, the single-use claim on a settlement
+              block, confirmation before completion, and amount mismatch.
           - specification/payment/examples/processor-tokenizer-payment-handler.md: >-
               Concrete payment handler example utilizing a 'Tokenize to Process'
               flow, where a single enterprise vault or PSP tokenizes

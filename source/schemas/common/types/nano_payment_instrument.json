@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/nano_payment_instrument.json",
+  "title": "Nano Payment Instrument",
+  "description": "A payment instrument for Nano (XNO), a feeless settlement asset with deterministic block confirmation. The business issues a unique receive address per checkout, which is the binding; the confirmed send block to that address is the proof of payment. This instrument carries no `credential`: there is no PAN, network token or other bearer secret. Handler rules that JSON Schema cannot express (single-use claim, confirmation, amount mismatch) are defined in the Nano Payment Instrument handler specification.",
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "nano",
+          "description": "Indicates this is a Nano payment instrument."
+        },
+        "receive_address": {
+          "type": "string",
+          "pattern": "^nano_[13][13456789a-km-uw-z]{59}$",
+          "description": "The Nano account address the business issued for this checkout, unique to it (e.g., derived at a checkout-index path). Business-issued and published in checkout responses; platforms do not submit it. When verifying `settlement_block`, the business MUST compare against the address it issued for this checkout, re-derived from the checkout session or looked up in its own records, and MUST NOT use a `receive_address` carried in a request. If a submitted instrument carries a `receive_address` that differs from the issued address, the business MUST reject the instrument.",
+          "ucp_request": "omit",
+          "examples": [
+            "nano_1qno3zgq7qnr3rqbypqbs77wpan7aq3e3ou73go3rqx98eem3tckq1q4hie3"
+          ]
+        },
+        "amount_raw": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$",
+          "description": "The exact amount due for this checkout in raw, the smallest Nano unit (1 XNO = 10^30 raw), as a decimal integer string. Business-issued with `receive_address` and subject to the same rule: the business MUST compare the settlement block's amount against the amount it issued, MUST NOT use an `amount_raw` carried in a request, and MUST reject a submitted instrument whose `amount_raw` differs from the issued amount.",
+          "ucp_request": "omit",
+          "examples": [
+            "2500000000000000000000000000000"
+          ]
+        },
+        "settlement_block": {
+          "type": "string",
+          "pattern": "^[0-9A-Fa-f]{64}$",
+          "description": "The hash of the Nano send block that pays this checkout, submitted by the platform after the send. It is the proof of payment, not a credential. It proves payment only when the business, using its own view of the Nano ledger, finds a confirmed send block whose destination (`link`, read as an account) equals the `receive_address` the business issued for this checkout and whose amount equals the issued `amount_raw`. A block hash settles at most one checkout.",
+          "examples": [
+            "6EE79D2BA2A8995179E4C2E12B10BAA7F828C9AD5D7F2D00E8D5B8A8D5C96C29"
+          ]
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for this Nano payment instrument.",
+          "properties": {
+            "address_short": {
+              "type": "string",
+              "description": "Shortened display form of the receive address (prefix and first 6 characters, '...', last 6 characters). Presentational only.",
+              "examples": [
+                "nano_1qno3z...q4hie3"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "description": "An optional rich text description of the Nano payment to display to the user (e.g., 'Nano (XNO), feeless, instant settlement')."
+            }
+          }
+        }
+      }
+    }
+  ]
+}
