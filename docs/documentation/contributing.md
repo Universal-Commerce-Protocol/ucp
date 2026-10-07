@@ -116,7 +116,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | **Working Draft** | `Working Draft` | Breaking changes expected | Prototyping, gathering feedback, iterating on design | DTC majority vote to advance |
 | **Candidate** | `Candidate` | API surface stable; implementation details evolve | Early adopter implementations, production pilots | DTC majority vote to advance |
-| **Stable** | `YYYY-MM-DD` | Full backward compatibility within major version | Production deployments | Date-based version assigned |
+| **Stable** | `YYYY-MM-DD` | Full backward compatibility (see [Versioning](../versioning.md)) | Production deployments | Date-based version assigned |
 
 ---
 
