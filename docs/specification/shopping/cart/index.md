@@ -64,9 +64,11 @@ by providing `cart_id` in the Create Checkout request. The cart contents
 }
 ```
 
-Business MUST use cart contents and MUST ignore overlapping fields in checkout payload.
-The `cart_id` parameter is only available when the cart capability is advertised
-in the business profile.
+Because the cart checkout extension composes onto the base Checkout schema,
+`line_items` remains a required request field; the platform SHOULD pass an empty
+array (`"line_items": []`). The business MUST use the cart contents and MUST
+ignore overlapping fields in the checkout payload. The `cart_id` parameter is
+only available when the cart capability is advertised in the business profile.
 
 **Idempotent conversion:**
 
