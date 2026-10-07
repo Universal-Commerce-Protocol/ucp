@@ -46,6 +46,7 @@ Lowe's
 Macy's
 Marriott
 Mastercard
+NXDOMAIN
 OKP
 Paymentech
 Paypal
