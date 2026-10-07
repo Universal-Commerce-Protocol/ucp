@@ -5,9 +5,7 @@
   "description": "Booking details available at the time of session completion.",
   "type": "object",
   "additionalProperties": true,
-  "required": [
-    "id"
-  ],
+  "required": ["id"],
   "properties": {
     "id": {
       "type": "string",

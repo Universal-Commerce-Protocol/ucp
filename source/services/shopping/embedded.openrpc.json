@@ -82,7 +82,7 @@
       "params": [
         {
           "name": "type",
-          "schema": {"$ref": "#/components/schemas/type"}
+          "schema": { "$ref": "#/components/schemas/type" }
         }
       ],
       "result": {
@@ -358,8 +358,12 @@
       }
     },
 
-    { "$ref": "../../schemas/shopping/fulfillment.json#/embedded/methods/ec.fulfillment.change" },
-    { "$ref": "../../schemas/shopping/fulfillment.json#/embedded/methods/ec.fulfillment.address_change_request" },
+    {
+      "$ref": "../../schemas/shopping/fulfillment.json#/embedded/methods/ec.fulfillment.change"
+    },
+    {
+      "$ref": "../../schemas/shopping/fulfillment.json#/embedded/methods/ec.fulfillment.address_change_request"
+    },
 
     {
       "name": "ep.cart.ready",
@@ -381,7 +385,7 @@
         },
         {
           "name": "auth",
-          "schema": {"$ref": "#/components/schemas/auth"}
+          "schema": { "$ref": "#/components/schemas/auth" }
         }
       ],
       "result": {
@@ -425,7 +429,7 @@
       "params": [
         {
           "name": "type",
-          "schema": {"$ref": "#/components/schemas/type"}
+          "schema": { "$ref": "#/components/schemas/type" }
         }
       ],
       "result": {
@@ -583,11 +587,7 @@
       "type": {
         "type": "string",
         "description": "The type of authorization data business is requesting from the host.",
-        "examples": [
-          "oauth",
-          "api_key",
-          "jwt"
-        ]
+        "examples": ["oauth", "api_key", "jwt"]
       },
       "auth": {
         "type": "object",
@@ -597,5 +597,10 @@
       }
     }
   },
-  "x-delegations": ["payment.instruments_change", "payment.credential", "fulfillment.address_change", "window.open"]
+  "x-delegations": [
+    "payment.instruments_change",
+    "payment.credential",
+    "fulfillment.address_change",
+    "window.open"
+  ]
 }

@@ -4,9 +4,7 @@
   "title": "Occupancy",
   "description": "Occupancy breakdown and guest count for an accommodation stay.",
   "type": "object",
-  "required": [
-    "total"
-  ],
+  "required": ["total"],
   "additionalProperties": true,
   "properties": {
     "adults": {

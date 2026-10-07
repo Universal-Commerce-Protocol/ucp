@@ -4,11 +4,7 @@
   "title": "Fulfillment Method",
   "description": "A fulfillment method with destinations and groups.",
   "type": "object",
-  "required": [
-    "id",
-    "type",
-    "line_item_ids"
-  ],
+  "required": ["id", "type", "line_item_ids"],
   "properties": {
     "id": {
       "type": "string",
@@ -46,10 +42,7 @@
       }
     },
     "selected_destination_id": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "description": "ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`."
     },
     "groups": {
@@ -68,9 +61,7 @@
             "const": "shipping"
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "then": {
         "properties": {
@@ -92,9 +83,7 @@
             "const": "pickup"
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "then": {
         "properties": {
@@ -111,8 +100,6 @@
     }
   ],
   "dependentRequired": {
-    "destinations": [
-      "type"
-    ]
+    "destinations": ["type"]
   }
 }

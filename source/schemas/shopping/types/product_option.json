@@ -4,10 +4,7 @@
   "title": "Product Option",
   "description": "A product option such as size, color, or material.",
   "type": "object",
-  "required": [
-    "name",
-    "values"
-  ],
+  "required": ["name", "values"],
   "properties": {
     "name": {
       "type": "string",

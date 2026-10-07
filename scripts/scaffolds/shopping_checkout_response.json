@@ -10,7 +10,11 @@
   "line_items": [
     {
       "id": "li_scaffold",
-      "item": { "id": "item_scaffold", "title": "Scaffold Item", "price": 1000 },
+      "item": {
+        "id": "item_scaffold",
+        "title": "Scaffold Item",
+        "price": 1000
+      },
       "quantity": 1,
       "totals": [
         { "type": "subtotal", "amount": 1000 },
@@ -22,7 +26,5 @@
     { "type": "subtotal", "amount": 1000 },
     { "type": "total", "amount": 1000 }
   ],
-  "links": [
-    { "type": "terms_of_service", "url": "https://example.com/terms" }
-  ]
+  "links": [{ "type": "terms_of_service", "url": "https://example.com/terms" }]
 }

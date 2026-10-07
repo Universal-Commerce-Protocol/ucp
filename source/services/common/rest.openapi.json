@@ -40,7 +40,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/location_search_request" }
+              "schema": {
+                "$ref": "#/components/schemas/location_search_request"
+              }
             }
           }
         },
@@ -49,12 +51,18 @@
             "description": "Search results",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/location_search_response" }
+                "schema": {
+                  "$ref": "#/components/schemas/location_search_response"
+                }
               }
             }
           }
@@ -84,7 +92,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/location_lookup_request" }
+              "schema": {
+                "$ref": "#/components/schemas/location_lookup_request"
+              }
             }
           }
         },
@@ -93,12 +103,18 @@
             "description": "Lookup results",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/location_lookup_response" }
+                "schema": {
+                  "$ref": "#/components/schemas/location_lookup_response"
+                }
               }
             }
           }

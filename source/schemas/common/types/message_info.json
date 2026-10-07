@@ -3,10 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/types/message_info.json",
   "title": "Message Info",
   "type": "object",
-  "required": [
-    "type",
-    "content"
-  ],
+  "required": ["type", "content"],
   "properties": {
     "type": {
       "type": "string",
@@ -22,10 +19,7 @@
     },
     "content_type": {
       "type": "string",
-      "enum": [
-        "plain",
-        "markdown"
-      ],
+      "enum": ["plain", "markdown"],
       "default": "plain",
       "description": "Content format, default = plain."
     },

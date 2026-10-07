@@ -4,9 +4,7 @@
   "title": "Guest Assignment",
   "description": "Assignment linking an accommodation stay unit to a guest profile in the root guests pool.",
   "type": "object",
-  "required": [
-    "guest_id"
-  ],
+  "required": ["guest_id"],
   "additionalProperties": true,
   "properties": {
     "guest_id": {

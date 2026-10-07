@@ -155,37 +155,73 @@
     "fulfillment_search_request": {
       "allOf": [
         { "$ref": "catalog_search.json#/$defs/search_request" },
-        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+        {
+          "type": "object",
+          "properties": {
+            "filters": { "$ref": "#/$defs/fulfillment_search_filters" }
+          }
+        }
       ]
     },
     "fulfillment_search_response": {
       "allOf": [
         { "$ref": "catalog_search.json#/$defs/search_response" },
-        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_product" } } } }
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/fulfillment_product" }
+            }
+          }
+        }
       ]
     },
     "fulfillment_lookup_request": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/lookup_request" },
-        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+        {
+          "type": "object",
+          "properties": {
+            "filters": { "$ref": "#/$defs/fulfillment_search_filters" }
+          }
+        }
       ]
     },
     "fulfillment_lookup_response": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/lookup_response" },
-        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/fulfillment_lookup_product" } } } }
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/fulfillment_lookup_product" }
+            }
+          }
+        }
       ]
     },
     "fulfillment_get_product_request": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/get_product_request" },
-        { "type": "object", "properties": { "filters": { "$ref": "#/$defs/fulfillment_search_filters" } } }
+        {
+          "type": "object",
+          "properties": {
+            "filters": { "$ref": "#/$defs/fulfillment_search_filters" }
+          }
+        }
       ]
     },
     "fulfillment_get_product_response": {
       "allOf": [
         { "$ref": "catalog_lookup.json#/$defs/get_product_response" },
-        { "type": "object", "properties": { "product": { "$ref": "#/$defs/fulfillment_detail_product" } } }
+        {
+          "type": "object",
+          "properties": {
+            "product": { "$ref": "#/$defs/fulfillment_detail_product" }
+          }
+        }
       ]
     },
     "dev.ucp.shopping.catalog.search": {
@@ -200,8 +236,12 @@
       "$defs": {
         "lookup_request": { "$ref": "#/$defs/fulfillment_lookup_request" },
         "lookup_response": { "$ref": "#/$defs/fulfillment_lookup_response" },
-        "get_product_request": { "$ref": "#/$defs/fulfillment_get_product_request" },
-        "get_product_response": { "$ref": "#/$defs/fulfillment_get_product_response" }
+        "get_product_request": {
+          "$ref": "#/$defs/fulfillment_get_product_request"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/fulfillment_get_product_response"
+        }
       }
     },
     "dev.ucp.shopping.checkout": {
@@ -265,9 +305,7 @@
     }
   },
   "embedded": {
-    "delegations": [
-      "fulfillment.address_change"
-    ],
+    "delegations": ["fulfillment.address_change"],
     "methods": {
       "ec.fulfillment.change": {
         "name": "ec.fulfillment.change",

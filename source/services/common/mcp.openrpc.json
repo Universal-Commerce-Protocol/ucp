@@ -55,17 +55,21 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "location",
           "required": true,
-          "schema": {"$ref": "../../schemas/common/location_search.json#/$defs/search_request"}
+          "schema": {
+            "$ref": "../../schemas/common/location_search.json#/$defs/search_request"
+          }
         }
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/common/location_search.json#/$defs/search_response"}
+        "schema": {
+          "$ref": "../../schemas/common/location_search.json#/$defs/search_response"
+        }
       }
     },
     {
@@ -76,17 +80,21 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": { "$ref": "#/components/schemas/meta" }
         },
         {
           "name": "location",
           "required": true,
-          "schema": {"$ref": "../../schemas/common/location_lookup.json#/$defs/lookup_request"}
+          "schema": {
+            "$ref": "../../schemas/common/location_lookup.json#/$defs/lookup_request"
+          }
         }
       ],
       "result": {
         "name": "response",
-        "schema": {"$ref": "../../schemas/common/location_lookup.json#/$defs/lookup_response"}
+        "schema": {
+          "$ref": "../../schemas/common/location_lookup.json#/$defs/lookup_response"
+        }
       }
     },
     {

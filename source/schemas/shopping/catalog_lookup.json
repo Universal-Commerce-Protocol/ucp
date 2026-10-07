@@ -51,10 +51,7 @@
     },
     "lookup_response": {
       "type": "object",
-      "required": [
-        "ucp",
-        "products"
-      ],
+      "required": ["ucp", "products"],
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_catalog_schema"
@@ -164,10 +161,7 @@
     },
     "get_product_response": {
       "type": "object",
-      "required": [
-        "ucp",
-        "product"
-      ],
+      "required": ["ucp", "product"],
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_catalog_schema"

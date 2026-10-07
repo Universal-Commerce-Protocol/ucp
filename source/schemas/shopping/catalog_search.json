@@ -32,10 +32,7 @@
     },
     "search_response": {
       "type": "object",
-      "required": [
-        "ucp",
-        "products"
-      ],
+      "required": ["ucp", "products"],
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_catalog_schema"
