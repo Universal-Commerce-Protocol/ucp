@@ -4941,7 +4941,14 @@ unchanged and return the current Checkout with a recoverable error Message.</p>
 </li>
 <li><code>id</code> (String): <strong>Required</strong>. The ID of the checkout session.</li>
 <li><code>checkout</code> (<a href="../#complete-checkout">Checkout</a>): <strong>Required</strong>.
-    Contains payment credentials and other finalization data to execute the transaction.</li>
+    Contains payment credentials and other finalization data to execute the transaction.<ul>
+<li>Extensions (Optional):<ul>
+<li><code>dev.ucp.shopping.buyer_consent</code>: <a href="../../extensions/buyer-consent/">Buyer Consent</a></li>
+<li><code>dev.ucp.common.payment.ap2_mandate</code>: <a href="../../../payment/extensions/ap2-mandates/">AP2 Mandates</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <h4 id="output-schema_3">Output Schema<a class="headerlink" href="#output-schema_3" title="Permanent link">&para;</a></h4>
 <ul>
