@@ -122,14 +122,14 @@ flowchart LR
 
 ## Repository Structure
 
-The Universal Commerce Protocol ecosystem is organized into dedicated Git repositories under the Universal-Commerce-Protocol GitHub organization:
+The Universal Commerce Protocol ecosystem is organized into dedicated Git repositories under the [Universal-Commerce-Protocol](https://github.com/Universal-Commerce-Protocol){ target="_blank" } GitHub organization:
 
-* **`🏠 /ucp`**: Core specification repository, protocol definitions, website (ucp.dev), and specification site generator.
-* **`📜 /ucp-schema`**: JSON schemas and Rust-based validation and generation tooling.
-* **`🧪 /conformance`**: Protocol conformance test suite written in pytest.
-* **`⚙️ /python-sdk` & `/js-sdk`**: Official language SDKs generated from protocol schemas.
-* **`🔎 /samples`**: Reference merchant implementations (FastAPI, Node.js).
-* **`♥️ /.github`**: Organization-wide health files, issue templates (`enhancement-proposal.yml`, `bug-report.yml`), and community governance defaults.
+* **🏠 [`/ucp`](https://github.com/Universal-Commerce-Protocol/ucp){ target="_blank" }**: Core specification repository, protocol definitions, website (ucp.dev), and specification site generator.
+* **📜 [`/ucp-schema`](https://github.com/Universal-Commerce-Protocol/ucp-schema){ target="_blank" }**: JSON schemas and Rust-based validation and generation tooling.
+* **🧪 [`/conformance`](https://github.com/Universal-Commerce-Protocol/conformance){ target="_blank" }**: Protocol conformance test suite written in pytest.
+* **⚙️ [`/python-sdk`](https://github.com/Universal-Commerce-Protocol/python-sdk){ target="_blank" } & [`/js-sdk`](https://github.com/Universal-Commerce-Protocol/js-sdk){ target="_blank" }**: Official language SDKs generated from protocol schemas.
+* **🔎 [`/samples`](https://github.com/Universal-Commerce-Protocol/samples){ target="_blank" }**: Reference merchant implementations (FastAPI, Node.js).
+* **♥️ [`/.github`](https://github.com/Universal-Commerce-Protocol/.github){ target="_blank" }**: Organization-wide health files, issue templates (`enhancement-proposal.yml`, `bug-report.yml`), and community governance defaults.
 
 ---
 
