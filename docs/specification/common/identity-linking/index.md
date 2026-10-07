@@ -893,7 +893,7 @@ currently publishes an `_email-verification` DNS record.
 An IdP that acts as a delegated email verification issuer and wants
 businesses to rely on
 [Authoritative Email Matching](#authoritative-email-matching) **MUST**
-use a bare HTTPS origin (`https://<host>`, with no port, path, or
+use the same bare HTTPS origin (`https://<host>`, with no port, path, or
 trailing slash) as its `auth_url`, the `iss` claim of its JWT
 authorization grants, and the `issuer` member of its
 `/.well-known/email-verification` metadata.
