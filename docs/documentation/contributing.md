@@ -1,6 +1,6 @@
 # Contributing to UCP
 
-We welcome community contributions, patches, and feedback to help build and evolve the Universal Commerce Protocol (UCP). Whether you are fixing typos, improving documentation, writing SDK code, or proposing protocol extensions, your participation helps establish an open standard for agentic commerce.
+We welcome community contributions, patches, and feedback in the [Universal Commerce Protocol (UCP) GitHub repository](https://github.com/Universal-Commerce-Protocol/ucp){ target="_blank" } to help build and evolve the standard. Whether you are fixing typos, improving documentation, writing SDK code, or proposing protocol extensions, your participation helps establish an open standard for agentic commerce.
 
 ---
 
