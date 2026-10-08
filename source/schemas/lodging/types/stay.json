@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/stay.json",
+  "title": "Stay",
+  "description": "Compound binding schema linking a physical accommodation type, commercial rate plan, occupancy, guest assignments, stay dates, and pricing totals.",
+  "type": "object",
+  "required": [
+    "id",
+    "stay_dates",
+    "accommodation_type",
+    "rate_plan",
+    "totals"
+  ],
+  "anyOf": [
+    {
+      "properties": {
+        "id": {
+          "ucp_request": {
+            "create": "required",
+            "update": "required",
+            "complete": "omit"
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "accommodation_type",
+        "rate_plan"
+      ],
+      "properties": {
+        "accommodation_type": {
+          "properties": {
+            "id": {
+              "ucp_request": {
+                "create": "required",
+                "update": "required",
+                "complete": "omit"
+              }
+            }
+          }
+        },
+        "rate_plan": {
+          "properties": {
+            "id": {
+              "ucp_request": {
+                "create": "required",
+                "update": "required",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, opaque unique identifier of the stay binding.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "stay_dates": {
+      "$ref": "../../common/types/date_interval.json",
+      "description": "Stay duration (check-in and check-out dates) for this unit based on the local time of the property.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "accommodation_type": {
+      "$ref": "accommodation_type.json",
+      "description": "Category or specification of the rentable physical space (e.g. room, apartment, villa, campsite).",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "rate_plan": {
+      "$ref": "rate_plan.json",
+      "description": "Commercial rate policy contract.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "occupancy": {
+      "$ref": "occupancy.json",
+      "description": "Occupancy breakdown and guest count for this stay."
+    },
+    "guest_assignments": {
+      "type": "array",
+      "items": {
+        "$ref": "guest_assignment.json"
+      },
+      "description": "List of guest assignments for this stay."
+    },
+    "totals": {
+      "$ref": "../../common/types/totals.json",
+      "description": "Totals breakdown for this stay.",
+      "ucp_request": "omit"
+    }
+  }
+}

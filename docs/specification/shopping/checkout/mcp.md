@@ -355,7 +355,7 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
       "id": 1,
       "result": {
         "structuredContent": {
-          "ucp": { "version": "2026-01-11", "status": "error" },
+          "ucp": { "version": "{{ ucp_version }}", "status": "error" },
           "messages": [
             {
               "type": "error",
@@ -615,6 +615,9 @@ Maps to the [Complete Checkout](index.md#complete-checkout) operation.
 * `id` (String): **Required**. The ID of the checkout session.
 * `checkout` ([Checkout](index.md#complete-checkout)): **Required**.
     Contains payment credentials and other finalization data to execute the transaction.
+    * Extensions (Optional):
+        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 
@@ -713,7 +716,7 @@ JSON-RPC `result` with `structuredContent` containing the UCP envelope and `mess
   "id": 1,
   "result": {
     "structuredContent": {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
