@@ -780,7 +780,9 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 ```
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON
-canonicalization is required.
+canonicalization is required for signing. For payload matching, the
+payload-carrying class canonicalizes `params.arguments` with JCS, as
+defined under [Message Signatures - Replay Protection](../../signatures.md#replay-protection).
 
 See [Message Signatures - MCP Transport](../../signatures.md#mcp-transport)
 for details.
