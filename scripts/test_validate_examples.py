@@ -659,6 +659,53 @@ def test_process_block_integration() -> None:
     f"got {result.status}: {result.message}",
   )
 
+  # The requires_escalation rule in checkout.json (continue_url required when
+  # the status is requires_escalation), exercised end to end so that dropping
+  # the clause shows up here. Required fields are acknowledged with elision
+  # markers so the coverage layer passes and the schema layer is what decides.
+  # The third case pins the rule to the condition: an unconditional
+  # `required: ["continue_url"]` would pass the first two and fail that one.
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read direction=response -->\n"
+    '```json\n{ "id": "...", "currency": "...", "status": "requires_escalation",\n'  # noqa: E501
+    '  "line_items": [ ... ], "totals": [ ... ], "links": [ ... ],\n'
+    '  "ucp": { ... } }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "process_escalation_without_continue_url_rejected",
+    result.status == "fail"
+    and '"continue_url" is a required property' in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read direction=response -->\n"
+    '```json\n{ "id": "...", "currency": "...", "status": "requires_escalation",\n'  # noqa: E501
+    '  "continue_url": "https://example.com/continue",\n'
+    '  "line_items": [ ... ], "totals": [ ... ], "links": [ ... ],\n'
+    '  "ucp": { ... } }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "process_escalation_with_continue_url_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read direction=response -->\n"
+    '```json\n{ "id": "...", "currency": "...", "status": "incomplete",\n'
+    '  "line_items": [ ... ], "totals": [ ... ], "links": [ ... ],\n'
+    '  "ucp": { ... } }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "process_non_escalation_without_continue_url_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
 
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
