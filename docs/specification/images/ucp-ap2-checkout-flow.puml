@@ -1,0 +1,107 @@
+@startuml
+' Editable visual reconstruction of the UCP AP2 checkout-flow diagram.
+' Kept in sync with docs/specification/payment/extensions/ap2-mandates.md.
+' The source PNG itself is not a PlantUML source file.
+!pragma teoz true
+scale 1.0
+hide footbox
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam titleFontSize 15
+skinparam titleFontColor #111111
+skinparam sequence {
+    ArrowColor #171717
+    ArrowThickness 1.1
+    LifeLineBorderColor #555555
+    LifeLineBackgroundColor #FFFFFF
+    ParticipantBorderColor #333333
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontColor #111111
+    ParticipantFontSize 13
+    ActorBorderColor #333333
+    ActorBackgroundColor #FFFFFF
+    ActorFontColor #111111
+    GroupBorderColor #555555
+    NoteBorderColor #C8C8C8
+    NoteBackgroundColor #FFFFFF
+    NoteFontColor #151515
+    DividerFontColor #111111
+    DividerFontSize 13
+    DividerBorderThickness 0
+    DividerBorderColor #FFFFFF
+}
+title AP2 Mandate Flow in UCP
+actor "User" as User
+participant "Platform (w/ Trusted UI)" as Platform
+participant "Business Backend" as Business
+participant "Credential Provider\n(Payment Handler)" as CredProvider
+participant "Payment Service Provider" as PSP
+
+== Phase 1: Discovery & Binding (The Handshake) ==
+User -> Platform: "Buy this item"
+Platform -> Business: POST /ucp/checkout-sessions\n(platform profile exposes "keys")
+activate Business #EEEEEE
+note right of Business #FFFFFF
+  1. Fetch platform profile, compute
+     capability intersection
+  2. Detect "dev.ucp.common.payment.ap2_mandate"
+     -> session is Security Locked
+  3. Sign checkout: JCS(checkout minus "ap2")
+     as detached JWS
+end note
+Business --> Platform: 201 Created (Checkout Object)\nBody: ap2.merchant_authorization = <header>..<signature>
+deactivate Business
+Platform -> Platform: verify_merchant_authorization()\n(reject if key unresolvable or signature invalid)
+
+== Phase 2: User Consent & Mandate Generation ==
+Platform -> User: Display Order Summary & Total\n(Rendered native by Platform)
+User -> Platform: "Confirm Pay"
+Platform -> Platform: Generate "Checkout Mandate" (SD-JWT+kb)\nembeds full checkout incl. ap2.merchant_authorization
+Platform -> Platform: Generate "Payment Mandate" (SD-JWT+kb)
+note right of Platform #FFFFFF
+  Signed either by a trusted platform
+  provider (server-side key) or by the
+  user's wallet via OpenID4VP (+kb).
+end note
+
+== Phase 3: Payment Mandate Verification & Token Issuance ==
+Platform -> CredProvider: POST /tokenize\ncredential: { type: "ap2_payment_mandate",\n  payment_mandate, checkout_jwt }\nbinding: { type: dev.ucp.shopping.checkout, id }
+activate CredProvider #EEEEEE
+note right of CredProvider #FFFFFF
+  1. Verify mandate (SD-JWT sig, +kb, exp)
+  2. Verify merchant signature on checkout_jwt
+  3. Correlate hash(checkout_jwt) with the
+     mandate's transaction identifier
+  4. Confirm tokenization binding
+end note
+alt any verification step fails
+    CredProvider --> Platform: Error (handler-defined surface)\nMUST NOT issue a token
+else all checks pass
+    CredProvider --> Platform: { "token": "tok_abc123xyz789" }\n(ordinary opaque token; mandate not embedded)
+end
+deactivate CredProvider
+
+== Phase 4: Submission & Verification ==
+Platform -> Business: POST /ucp/checkout-sessions/{id}/complete\n\nBody includes:\n1. ap2.checkout_mandate\n2. payment.instruments[*].credential.token
+activate Business #EEEEEE
+note right of Business #FFFFFF
+  1. Verify "Checkout Mandate" (sig, +kb, exp)
+  2. Extract embedded checkout
+  3. Verify own ap2.merchant_authorization
+  4. Verify terms match session state
+  No credential from a verified payment
+  mandate -> payment_mandate_required
+end note
+Business -> PSP: Process Payment (token)
+activate PSP #EEEEEE
+PSP -> PSP: Resolve token to the mandate it was\nissued against (already verified in Phase 3)
+PSP --> Business: Success
+deactivate PSP
+Business -> Business: Create Order
+Business --> Platform: 200 OK (Order Object)
+deactivate Business
+Platform -> User: Display "Order Confirmed"
+@enduml

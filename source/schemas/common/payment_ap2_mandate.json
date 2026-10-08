@@ -17,6 +17,12 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
     },
+    "payment_mandate": {
+      "title": "Payment Mandate",
+      "description": "SD-JWT+kb credential proving user authorization of the funds transfer. Presented to the Credential Provider at token issuance and verified before a payment token is issued; it is not carried in any UCP request or response. Its claim structure is defined by the AP2 Protocol Specification.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
+    },
     "ap2_with_merchant_authorization": {
       "type": "object",
       "description": "AP2 extension data including merchant authorization.",
@@ -112,7 +118,8 @@
         "mandate_expired",
         "mandate_scope_mismatch",
         "merchant_authorization_invalid",
-        "merchant_authorization_missing"
+        "merchant_authorization_missing",
+        "payment_mandate_required"
       ]
     }
   }
