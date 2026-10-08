@@ -964,7 +964,7 @@
         "schema": {
           "type": "string"
         },
-        "description": "JCS-canonicalized body digest per RFC 8785. Format: `sha-256=:<base64-digest>:`."
+        "description": "Body digest per RFC 9530 for response. Format: `sha-256=:<base64-digest>:`."
       }
     },
     "schemas": {
