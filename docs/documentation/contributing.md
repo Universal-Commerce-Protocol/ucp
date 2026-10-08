@@ -135,10 +135,11 @@ The Universal Commerce Protocol ecosystem is organized into dedicated Git reposi
 
 ## Checklist Before Opening Your First PR
 
-* [x] **Pre-flight**: Is there an existing issue tracking this bug/feature, and is it assigned to you?
-* [x] **Branching**: Are you branching off `main` and keeping commits atomic?
-* [x] **Validation**: Did you run the local linters, schema validator, and conformance suite?
-* [x] **PR Description**: Does your PR clearly state **Why** the change was made, **What** changed, and link to the relevant issue?
+* [ ] **CLA**: Have you signed the [Google Contributor License Agreement (CLA)](https://cla.developers.google.com/){ target="_blank" }?
+* [ ] **Pre-flight**: Is there an existing issue tracking this bug/feature, and is it assigned to you?
+* [ ] **Branching**: Are you branching off `main` and keeping commits atomic?
+* [ ] **Validation**: Did you run the local linters (`pre-commit`), schema validator (`ucp-schema lint source/`), and conformance suite?
+* [ ] **PR Title & Description**: Does your PR title follow **Conventional Commits** (e.g., `feat: ...`, `fix: ...`, `docs: ...`, or `feat!: ...` for breaking changes), and does the description state **Why** and **What** changed with a link to the relevant issue?
 
 ---
 
