@@ -27,6 +27,31 @@
       "minimum": 1,
       "maximum": 9007199254740991
     },
+    "required_declared_fields": {
+      "type": "array",
+      "description": "Response-only Reverse-DNS keys from checkout.config whose schemas apply to this line item.",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"
+      },
+      "uniqueItems": true,
+      "ucp_request": "omit"
+    },
+    "declared_fields": {
+      "type": "object",
+      "description": "Item-level values provided by the buyer for schemas referenced by this line item's required_declared_fields.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
     "totals": {
       "type": "array",
       "items": {
