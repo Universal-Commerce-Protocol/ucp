@@ -846,11 +846,12 @@ was first used with and, where one exists, the target resource
 identifier (the path parameter for REST, the top-level `id` argument
 for MCP). Businesses **MUST** reject, without executing, any request
 that reuses a stored key with a different operation or a different
-target resource identifier. Within that binding, payload identity is
-defined per operation, by whether the operation's arguments carry
-anything beyond `meta` and the target resource identifier — a class
-decidable from the operation's input schema alone, not from the
-transport envelope:
+target resource identifier, returning `409 Conflict` (REST) or
+`-32000` (MCP) as for a mismatched payload. Within that binding,
+payload identity is defined per operation, by whether the operation's
+arguments carry anything beyond `meta` and the target resource
+identifier — a class decidable from the operation's input schema
+alone, not from the transport envelope:
 
 * **Target-only operations.** The operation's arguments carry nothing
   beyond `meta` and the target resource identifier (the path parameter
