@@ -87,8 +87,6 @@ nav:
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
-              - Subscription Policy:
-                  specification/shopping/extensions/subscription-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
           - Playground: specification/shopping/playground.md
@@ -547,20 +545,16 @@ plugins:
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
-          - specification/shopping/extensions/subscription-policy.md: >-
-              Subscription Policy Extension, defining the
-              dev.ucp.shopping.policy.subscription type on the core policies[]
-              primitive: a subscription's recurring orders as consecutive
-              schedules, each a complete buyer-facing description supplemented
-              by the order's totals and an absolute start date, its paired
-              buyer disclosure, and its snapshot on the Order.
           - specification/shopping/extensions/purchase-options.md: >-
               Purchase Options Extension, letting a business advertise the
               ways a variant can be bought (once, subscription, pre-order) as
               purchase_options[] on catalog variants and cart or checkout
               lines, a platform select one by
               selected_purchase_option_id, and the Order preserve the selected
-              option; recurring terms are carried by the subscription policy.
+              option. An option's schedules state the recurring orders it
+              results in; the extension also defines the
+              dev.ucp.shopping.policy.subscription policy type, its required
+              buyer disclosure, and the Platform obligations that come with it.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
