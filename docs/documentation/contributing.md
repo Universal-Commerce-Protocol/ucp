@@ -9,9 +9,9 @@ We welcome community contributions, patches, and feedback in the [Universal Comm
 Find something to work on:
 
 * **Documentation Improvements**: Improve code snippets, clarify specification text, improve documentation or update broken links.
-* **Good First Issues**: Browse open issues tagged with `status:needs-triage`.
+* **Good First Issues**: Browse [open issues](https://github.com/Universal-Commerce-Protocol/ucp/issues){ target="_blank" } tagged with `good first issue` or `help wanted`.
 * **Schema Examples**: Create or update schema example payloads (`source/schemas/` or `docs/specification/`) to illustrate protocol capabilities.
-* **SDK & Conformance Enhancements**: Fix bugs or expand test coverage in `python-sdk`, `js-sdk`, or `conformance`.
+* **SDK & Conformance Enhancements**: Fix bugs or expand test coverage in [`python-sdk`](https://github.com/Universal-Commerce-Protocol/python-sdk){ target="_blank" }, [`js-sdk`](https://github.com/Universal-Commerce-Protocol/js-sdk){ target="_blank" }, or [`conformance`](https://github.com/Universal-Commerce-Protocol/conformance){ target="_blank" }.
 
 ### Small Changes (Direct PR)
 
