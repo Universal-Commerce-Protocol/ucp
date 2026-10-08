@@ -234,9 +234,11 @@ The following headers are defined for the HTTP binding.
     [Conversation](index.md#conversation)). When present, the Business
     **MUST**:
     1. Store the key with the result for at least 24 hours.
-    2. Return the cached result for a duplicate key whose request body matches
-       the original, without appending a second turn.
-    3. Return `409 Conflict` if the key is reused with a mismatched body.
+    2. Return the cached result for a duplicate key whose operation, target
+       resource, and payload all match the stored record, without appending a
+       second turn.
+    3. Return `409 Conflict` if the key is reused with a different operation, a
+       different target resource, or a different payload.
     See [Message Signatures — Replay Protection](../../signatures.md#replay-protection)
     for the full payload-matching contract.
 
