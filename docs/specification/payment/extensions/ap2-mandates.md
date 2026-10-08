@@ -52,7 +52,7 @@ responses. This design provides:
 * **Capability signal** — Presence of `ap2` object clearly indicates AP2
     is active.
 
-## Discovery & Negotiation
+## Discovery and Negotiation
 
 This extension follows the standard UCP negotiation protocol. It is activated
 only when it appears in the **Capability Intersection** of both the business
@@ -147,7 +147,7 @@ See [Message Signatures](../../signatures.md) for key format and rotation.
 > per-session Checkout `id` supplies structurally. AP2 v0.2 is internally
 > inconsistent on how to require this: `specification.md` states an
 > algorithm-class rule (non-deterministic only, e.g. ECDSA), while the
-> Security & Privacy considerations state an entropy rule satisfied by any
+> Security and Privacy considerations state an entropy rule satisfied by any
 > algorithm given sufficient payload entropy.
 > [AP2 #268](https://github.com/google-agentic-commerce/AP2/issues/268)
 > tracks converging on the entropy formulation. Follow AP2 for the
@@ -222,16 +222,16 @@ sign_checkout(checkout, private_key, kid, alg="ES256"):
 Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform
 **MUST** produce two distinct mandate artifacts:
 
-| Mandate              | Presented to                               | UCP Placement                                                      | Purpose                                              |
-| :------------------- | :----------------------------------------- | :----------------------------------------------------------------- | :--------------------------------------------------- |
-| **checkout_mandate** | the business, at `complete`                | `ap2.checkout_mandate`                                             | Proof bound to checkout terms, protects business     |
-| **payment_mandate**  | the Credential Provider, at token issuance | not carried in the `complete` request; the token it produced is, at `payment.instruments[*].credential.token` | Proof bound to payment authorization, protects funds |
+| Mandate              | Presented to                               | UCP Placement                         | Purpose                                              |
+| :------------------- | :----------------------------------------- | :------------------------------------ | :--------------------------------------------------- |
+| **checkout_mandate** | the business, at `complete`                | `ap2.checkout_mandate`                | Proof bound to checkout terms, protects business     |
+| **payment_mandate**  | the Credential Provider, at token issuance | not carried in the `complete` request | Proof bound to payment authorization, protects funds |
 
 The two mandates travel to different parties. The checkout mandate is submitted
 to the business, which verifies the terms it committed to. The payment mandate
 is presented to the Credential Provider, which verifies it and issues a payment
 token in exchange (see
-[Step 3](#step-3-payment-mandate-verification-token-issuance)). The business
+[Step 3](#step-3-payment-mandate-verification-and-token-issuance)). The business
 receives that token, not the mandate.
 
 The checkout mandate **MUST** contain the full checkout response including the
@@ -279,7 +279,7 @@ is locked into the following flow. Both parties **MUST** follow these steps to
 ensure cryptographic integrity; any attempt to bypass these steps or submit
 a completion request without mandates **MUST** result in a session failure.
 
-### Step 1: Checkout Creation & Signing
+### Step 1: Checkout Creation and Signing
 
 The platform initiates the session. The business returns the `Checkout` object
 with `ap2.merchant_authorization` embedded in the response body.
@@ -342,7 +342,7 @@ verify_merchant_authorization(checkout, merchant_profile):
     return verify(encoded_signature, signing_input, public_key, header.alg)
 ```
 
-### Step 2: User Consent & Mandate Generation
+### Step 2: User Consent and Mandate Generation
 
 When the user confirms the purchase, the platform **MUST** facilitate the
 generation of cryptographically verifiable mandates.
@@ -369,7 +369,7 @@ private key associated with their payment credential.
 The business trusts the Credential Issuer (Bank) and verifies the user's Key
 Binding (+kb) signature.
 
-### Step 3: Payment Mandate Verification & Token Issuance
+### Step 3: Payment Mandate Verification and Token Issuance
 
 The payment mandate is not submitted to the business. It is presented to the
 **Credential Provider** — the participant that issues payment tokens for the
@@ -499,7 +499,7 @@ If the AP2 extension is negotiated and the selected instrument carries no
 credential derived from a verified payment mandate, the business **MUST**
 reject the request with `payment_mandate_required`.
 
-## Verification & Processing
+## Verification and Processing
 
 ### Business Verification
 
@@ -539,7 +539,7 @@ Upon receiving the `complete` request, the business **MUST**:
 ### PSP Verification
 
 Payment mandate verification happens at issuance
-([Step 3](#step-3-payment-mandate-verification-token-issuance)), not at
+([Step 3](#step-3-payment-mandate-verification-and-token-issuance)), not at
 processing. By the time the business passes the `token` to their Payment
 Handler / PSP, the mandate behind it has already been verified against the
 [AP2 Protocol Specification](https://ap2-protocol.org/specification) —
@@ -576,7 +576,7 @@ UCP request or response.
 ### AP2 Payment Mandate Credential
 
 The source credential a platform presents to a payment handler in
-[Step 3](#step-3-payment-mandate-verification-token-issuance). Defined in
+[Step 3](#step-3-payment-mandate-verification-and-token-issuance). Defined in
 `source/schemas/common/types/ap2_payment_mandate_credential.json`; it is a
 tokenization input, not a member of any UCP request or response.
 
@@ -596,16 +596,16 @@ The `ap2` object included in COMPLETE checkout requests.
 
 {{ extension_schema_fields('payment_ap2_mandate.json#/$defs/error_code', 'payment/extensions/ap2-mandates') }}
 
-| Error Code                       | Description                                                       |
-| :------------------------------- | :---------------------------------------------------------------- |
-| `mandate_required`               | AP2 was negotiated, but the request lacks `ap2.checkout_mandate`. |
-| `agent_missing_key`              | Platform profile lacks a valid `keys` entry.                      |
-| `mandate_invalid_signature`      | The mandate signature cannot be verified.                         |
-| `mandate_expired`                | The mandate `exp` timestamp has passed.                           |
-| `mandate_scope_mismatch`         | The mandate is bound to a different checkout.                     |
-| `merchant_authorization_invalid` | The business authorization signature could not be verified.       |
-| `merchant_authorization_missing` | The checkout response omits `ap2.merchant_authorization`.         |
-| `payment_mandate_required`       | AP2 was negotiated, but the selected instrument carries no credential derived from a verified payment mandate. |
+| Error Code                       | Description                                                                   |
+| :------------------------------- | :---------------------------------------------------------------------------- |
+| `mandate_required`               | AP2 was negotiated, but the request lacks `ap2.checkout_mandate`.             |
+| `agent_missing_key`              | Platform profile lacks a valid `keys` entry.                                  |
+| `mandate_invalid_signature`      | The mandate signature cannot be verified.                                     |
+| `mandate_expired`                | The mandate `exp` timestamp has passed.                                       |
+| `mandate_scope_mismatch`         | The mandate is bound to a different checkout.                                 |
+| `merchant_authorization_invalid` | The business authorization signature could not be verified.                   |
+| `merchant_authorization_missing` | The checkout response omits `ap2.merchant_authorization`.                     |
+| `payment_mandate_required`       | AP2 was negotiated, but the instrument carries no mandate-derived credential. |
 
 Failures during payment mandate verification at issuance are returned by the
 payment handler through its own error surface, which is handler-defined; they
