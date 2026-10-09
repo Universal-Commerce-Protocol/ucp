@@ -16,6 +16,18 @@
       }
     }
   ],
+  "security": [
+    {},
+    {
+      "oauth2_bearer": []
+    },
+    {
+      "api_key": []
+    },
+    {
+      "mutual_tls": []
+    }
+  ],
   "paths": {
     "/booking-sessions": {
       "post": {
@@ -23,12 +35,6 @@
         "summary": "Create Booking Session",
         "description": "Create a new booking session.",
         "parameters": [
-          {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
           {
             "$ref": "#/components/parameters/signature"
           },
@@ -49,12 +55,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -110,12 +110,6 @@
         "description": "Get the latest state of a booking session.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -129,12 +123,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -173,12 +161,6 @@
         "description": "Update is a full replacement operation. A new Update operation is not permitted while the booking session status is `complete_in_progress`. Duplicate requests remain subject to replay protection. If the Business receives a new Update request in that state, it leaves the booking session unchanged and returns the current booking session with a recoverable error message.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -198,12 +180,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -259,12 +235,6 @@
         "description": "Complete booking session and confirm stay reservation.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -284,12 +254,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -345,12 +309,6 @@
         "description": "Cancel an in-flight booking session",
         "parameters": [
           {
-            "$ref": "#/components/parameters/authorization"
-          },
-          {
-            "$ref": "#/components/parameters/x_api_key"
-          },
-          {
             "$ref": "#/components/parameters/signature"
           },
           {
@@ -370,12 +328,6 @@
           },
           {
             "$ref": "#/components/parameters/ucp_agent"
-          },
-          {
-            "$ref": "#/components/parameters/content_type"
-          },
-          {
-            "$ref": "#/components/parameters/accept"
           },
           {
             "$ref": "#/components/parameters/accept_language"
@@ -411,6 +363,23 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "oauth2_bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "OAuth 2.0 access token issued by the business's authorization server, which platforms locate through RFC 9728 protected-resource metadata and RFC 8414 server metadata. Covers both platform self-authentication (client_credentials) and platform authentication on behalf of an end user (authorization_code). See the Identity Linking specification."
+      },
+      "api_key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Reusable API key allocated to the platform by the business."
+      },
+      "mutual_tls": {
+        "type": "mutualTLS",
+        "description": "Mutual TLS client authentication, for high-security environments."
+      }
+    },
     "parameters": {
       "booking_id_path": {
         "name": "id",
@@ -420,24 +389,6 @@
         "schema": {
           "type": "string"
         }
-      },
-      "authorization": {
-        "name": "Authorization",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Should contain oauth token representing the following 2 schemes: 1. Platform self authenticating (client_credentials). 2. Platform authenticating on behalf of end user (authorization_code)."
-      },
-      "x_api_key": {
-        "name": "X-API-Key",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Authenticates the platform with a reusable api key allocated to the platform by the business."
       },
       "signature": {
         "name": "Signature",
@@ -503,24 +454,6 @@
           "type": "string"
         },
         "description": "Identifies the UCP agent making the call. All requests MUST include the UCP-Agent header containing the signer's profile URI using RFC 8941 Dictionary syntax. The URL MUST point to /.well-known/ucp. Format: profile=\"https://example.com/.well-known/ucp\"."
-      },
-      "content_type": {
-        "name": "Content-Type",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Representation Metadata. Tells the receiver what the data in the message body actually is."
-      },
-      "accept": {
-        "name": "Accept",
-        "in": "header",
-        "required": false,
-        "schema": {
-          "type": "string"
-        },
-        "description": "Content Negotiation. The client tells the server what data formats it is capable of understanding."
       },
       "accept_language": {
         "name": "Accept-Language",
