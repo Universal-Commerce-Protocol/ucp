@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/tax_treatment.json",
+  "title": "Tax Treatment",
+  "description": "Tax treatment of a price amount.",
+  "type": "object",
+  "required": [
+    "inclusion"
+  ],
+  "properties": {
+    "inclusion": {
+      "type": "string",
+      "description": "Whether the amount includes tax (e.g. VAT, GST) as resolved for the market. Well-known values: `included` (tax is part of the amount), `excluded` (tax is added downstream), `not_applicable` (no tax applies to this amount). Platforms MUST treat an unrecognized value as if `tax` were absent.",
+      "examples": [
+        "included",
+        "excluded",
+        "not_applicable"
+      ]
+    }
+  }
+}

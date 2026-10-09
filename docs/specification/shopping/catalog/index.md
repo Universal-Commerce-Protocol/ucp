@@ -189,7 +189,27 @@ Businesses determine market assignment—including currency—based on context
 signals. Price filter values are denominated in `context.currency`; when
 the presentment currency differs, businesses SHOULD convert before applying
 (see [Price Filter](search.md#price-filter)). Response prices include
-explicit currency codes confirming the resolution.
+explicit currency codes confirming the resolution. Where tax treatment
+varies by market, `price_treatment.tax.inclusion` states whether the
+amount includes tax as resolved for that market, so agents do not have
+to infer it from the country. When `price_treatment` or its `tax`
+member is absent, the price makes no statement about tax and agents
+fall back to their own inference. Prices within a single product
+response **SHOULD** share the same tax treatment. During checkout, the
+itemized `totals` breakdown remains authoritative.
+
+A tax-inclusive EU catalog price:
+
+<!-- ucp:example schema=common/types/price -->
+```json
+{
+  "amount": 12000,
+  "currency": "EUR",
+  "price_treatment": {
+    "tax": { "inclusion": "included" }
+  }
+}
+```
 
 When `context.eligibility` claims are present, Businesses that accept them
 **MAY** adjust `price` / `list_price` directly for strikethrough display and
