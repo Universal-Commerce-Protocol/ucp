@@ -450,7 +450,8 @@ verification.
 **Signature Generation:**
 
 ```text
-sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
+sign_rest_request(method, path, query, body_bytes, ucp_agent, signature_agent,
+                  idempotency_key, private_key, kid):
     // 1. Compute body digest (if body present)
     if body_bytes:
         digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
@@ -459,9 +460,11 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
     // 2. Build component list
     components = ["@method", "@authority", "@path"]
     if query: components.append("@query")
+    // WBA-shape: bind the key source, tagged with the signature label
+    if signature_agent: components.append("signature-agent;key=\"sig1\"")
     if ucp_agent: components.append("ucp-agent")
     if idempotency_key: components.append("idempotency-key")
-    if body: components.extend(["content-digest", "content-type"])
+    if body_bytes: components.extend(["content-digest", "content-type"])
 
     // 3. Build signature base (RFC 9421)
     signature_base = build_signature_base(
@@ -470,6 +473,8 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
         path=path,
         query=query,
         headers={
+            "ucp-agent": ucp_agent,
+            "signature-agent": signature_agent,
             "idempotency-key": idempotency_key,
             "content-digest": digest_header,
             "content-type": "application/json"
