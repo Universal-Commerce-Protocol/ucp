@@ -78,6 +78,9 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Run schema table macro tests
+        run: uv run python scripts/test_schema_tables.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
