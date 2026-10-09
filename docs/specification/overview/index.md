@@ -2077,7 +2077,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.payload.signature" // Signed proof of checkout terms
   }
 }
 ```
