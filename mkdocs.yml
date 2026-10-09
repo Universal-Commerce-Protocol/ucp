@@ -40,6 +40,7 @@ nav:
       - Schema Authoring: documentation/schema-authoring.md
       - Versioning: versioning.md
       - Announcements: documentation/announcements.md
+      - Contributing: documentation/contributing.md
   - Specification:
       - Overview: specification/overview/index.md
       - Getting Started: specification/getting-started.md
@@ -402,6 +403,10 @@ plugins:
           - documentation/announcements.md: >-
               General announcements, release notes, and community updates for
               the Universal Commerce Protocol.
+          - documentation/contributing.md: >-
+              Guidelines for contributing to the Universal Commerce Protocol,
+              including the Enhancement Proposal (EP) lifecycle, capability
+              maturity levels, and repository workflows.
         Specification:
           - specification/overview/index.md: >-
               Master technical specification of UCP, discovery mechanisms,
