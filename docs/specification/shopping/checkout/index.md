@@ -1434,3 +1434,37 @@ when provided.
 ### Error Response <span id="error-response"></span>
 
 {{ schema_fields('types/error_response', 'shopping/checkout') }}
+
+## Declared Fields
+
+Businesses sometimes need to collect incidental, workflow-specific data during checkout, such as gift messages, engraving text, or delivery instructions. Declared Fields lets a Business publish standard JSON Schemas and bind them explicitly to Checkout or line-item scope.
+
+### Discovery and Configuration
+
+The Business advertises schemas in the response `config` map. Each key MUST use a Reverse-DNS name, and each value MUST be a valid JSON Schema.
+
+The response-only `required_declared_fields` array binds those schemas to a scope:
+
+* `checkout.required_declared_fields` identifies Checkout-level requirements.
+* `line_items[].required_declared_fields` identifies requirements for that line item.
+
+Every referenced key MUST exist in `checkout.config`. Arrays MUST NOT contain duplicate keys. A Business MAY reference different keys for different line items, including multiple schema variants from the same family.
+
+### Rendering and Submission
+
+A Platform MUST render only the schemas referenced by `required_declared_fields` at the corresponding scope. It SHOULD derive controls and client-side validation from standard JSON Schema keywords such as `type`, `title`, `description`, `enum`, `anyOf`, `maxLength`, and `maxItems`.
+
+The Platform submits native JSON values through Update Checkout:
+
+* Checkout-level answers go in `checkout.declared_fields`.
+* Item-level answers go in the corresponding `line_items[].declared_fields`.
+
+Submitted keys MUST match `required_declared_fields` at the same scope. Requirements and values MUST NOT be moved implicitly between Checkout and line-item scope.
+
+### Lifecycle and Validation
+
+`config` and `required_declared_fields` are Business-authored response fields. `declared_fields` carries Platform-submitted values and may be echoed by the Business when appropriate.
+
+All required values MUST be accepted through Create or Update before the Business returns `ready_for_complete`. Missing schema references, unknown submitted keys, missing required values, and schema validation failures MUST be reported through `messages[]` as recoverable errors.
+
+Complete Checkout is reserved for payment and finalization. `config`, `required_declared_fields`, and `declared_fields` are omitted from the Complete Checkout request.

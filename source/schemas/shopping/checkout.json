@@ -20,10 +20,46 @@
       "$ref": "../ucp.json#/$defs/response_checkout_schema",
       "ucp_request": "omit"
     },
+    "config": {
+      "type": "object",
+      "description": "Response configuration containing JSON Schemas keyed by Reverse-DNS names.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$": {
+          "$ref": "https://json-schema.org/draft/2020-12/schema"
+        }
+      },
+      "additionalProperties": false,
+      "ucp_request": "omit"
+    },
+    "required_declared_fields": {
+      "type": "array",
+      "description": "Response-only Reverse-DNS keys from config whose schemas apply at Checkout scope.",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"
+      },
+      "uniqueItems": true,
+      "ucp_request": "omit"
+    },
     "id": {
       "type": "string",
       "description": "Unique identifier of the checkout session.",
       "ucp_request": "omit"
+    },
+    "declared_fields": {
+      "type": "object",
+      "description": "Checkout-level values provided by the buyer for schemas referenced by the Checkout's required_declared_fields.",
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
     },
     "line_items": {
       "type": "array",
