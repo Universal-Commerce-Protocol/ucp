@@ -15,6 +15,8 @@
 
 name: Docs Build and Deploy
 
+permissions: {}
+
 on:
   workflow_dispatch:
 
@@ -39,6 +41,8 @@ on:
 
 jobs:
   lint:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Don't run this workflow if this is a release branch creation event
