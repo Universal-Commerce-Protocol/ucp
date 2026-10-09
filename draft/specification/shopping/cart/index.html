@@ -4440,9 +4440,11 @@ by providing <code>cart_id</code> in the Create Checkout request. The cart conte
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;line_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Business MUST use cart contents and MUST ignore overlapping fields in checkout payload.
-The <code>cart_id</code> parameter is only available when the cart capability is advertised
-in the business profile.</p>
+<p>Because the cart checkout extension composes onto the base Checkout schema,
+<code>line_items</code> remains a required request field; the platform MUST include line_items and SHOULD set it to an empty array (<code>"line_items": []</code>).
+array (<code>"line_items": []</code>). The business MUST use the cart contents and MUST
+ignore overlapping fields in the checkout payload. The <code>cart_id</code> parameter is
+only available when the cart capability is advertised in the business profile.</p>
 <p><strong>Idempotent conversion:</strong></p>
 <p>If an incomplete checkout already exists for the given <code>cart_id</code>, the business
 MUST return the existing checkout session rather than creating a new one. This
