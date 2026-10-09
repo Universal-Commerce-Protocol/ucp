@@ -1,0 +1,15 @@
+{
+  "ucp": {
+    "version": "2026-01-01"
+  },
+  "answer": {
+    "plain": "Sale items can be returned within 14 days of delivery for store credit."
+  },
+  "links": [
+    {
+      "type": "refund_policy",
+      "url": "https://business.example.com/policies/refunds",
+      "title": "Refund Policy"
+    }
+  ]
+}
