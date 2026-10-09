@@ -65,7 +65,7 @@ by providing `cart_id` in the Create Checkout request. The cart contents
 ```
 
 Because the cart checkout extension composes onto the base Checkout schema,
-`line_items` remains a required request field; the platform SHOULD pass an empty
+`line_items` remains a required request field; the platform MUST include line_items and SHOULD set it to an empty array (`"line_items": []`).
 array (`"line_items": []`). The business MUST use the cart contents and MUST
 ignore overlapping fields in the checkout payload. The `cart_id` parameter is
 only available when the cart capability is advertised in the business profile.
