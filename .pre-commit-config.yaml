@@ -50,6 +50,13 @@ repos:
         pass_filenames: false
         files: ^scripts/(validate_examples|test_validate_examples)\.py$
         stages: [pre-commit, pre-push]
+      - id: schema-tables-tests
+        name: Schema table macro tests
+        entry: uv run --frozen python scripts/test_schema_tables.py
+        language: system
+        pass_filenames: false
+        files: ^(main\.py|scripts/test_schema_tables\.py|source/schemas/ucp\.json|docs/specification/reference\.md)$
+        stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
         entry: uv run --frozen python scripts/test_check_links.py
