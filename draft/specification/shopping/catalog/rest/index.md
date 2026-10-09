@@ -713,13 +713,13 @@ A product in a get_product response, extended with effective selections and avai
 
 ### Get Product Response
 
-| Name     | Type                                                        | Requirement  | Description                                                                                                                                                                    |
-| -------- | ----------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ucp      | any                                                         | **Required** | UCP metadata for catalog responses.                                                                                                                                            |
-| product  | object                                                      | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                                                                                        |
-| actions  | [Actions](/draft/specification/reference/#actions)          | Optional     | Outstanding extension-defined Actions for this product response.                                                                                                               |
-| messages | Array\[[Message](/draft/specification/reference/#message)\] | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                                                     |
-| policies | Array\[[Policy](/draft/specification/reference/#policy)\]   | Optional     | Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
+| Name     | Type                                                                                       | Requirement  | Description                                                                                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ucp      | [UCP Catalog Response Schema](/draft/specification/reference/#ucp-response-catalog-schema) | **Required** | UCP metadata for catalog responses.                                                                                                                                            |
+| product  | object                                                                                     | **Required** | The requested product with full detail. Singular — this is a single-resource operation.                                                                                        |
+| actions  | [Actions](/draft/specification/reference/#actions)                                         | Optional     | Outstanding extension-defined Actions for this product response.                                                                                                               |
+| messages | Array\[[Message](/draft/specification/reference/#message)\]                                | Optional     | Warnings or informational messages about the product (e.g., price recently changed, limited availability).                                                                     |
+| policies | Array\[[Policy](/draft/specification/reference/#policy)\]                                  | Optional     | Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`. |
 
 ### Error Response
 

@@ -26,12 +26,12 @@ Request body for location search. The `distance` and `serves` relations and ever
 
 ### Response
 
-| Name       | Type                                                                       | Requirement  | Description                                                           |
-| ---------- | -------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
-| ucp        | any                                                                        | **Required** | UCP metadata for location responses.                                  |
-| locations  | Array\[[Location](/draft/specification/reference/#location)\]              | **Required** | Locations matching the search criteria.                               |
-| pagination | [Pagination Response](/draft/specification/reference/#pagination-response) | Optional     | Pagination information in responses.                                  |
-| messages   | Array\[[Message](/draft/specification/reference/#message)\]                | Optional     | Errors, warnings, or informational messages about the search results. |
+| Name       | Type                                                                                         | Requirement  | Description                                                           |
+| ---------- | -------------------------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
+| ucp        | [UCP Location Response Schema](/draft/specification/reference/#ucp-response-location-schema) | **Required** | UCP metadata for location responses.                                  |
+| locations  | Array\[[Location](/draft/specification/reference/#location)\]                                | **Required** | Locations matching the search criteria.                               |
+| pagination | [Pagination Response](/draft/specification/reference/#pagination-response)                   | Optional     | Pagination information in responses.                                  |
+| messages   | Array\[[Message](/draft/specification/reference/#message)\]                                  | Optional     | Errors, warnings, or informational messages about the search results. |
 
 ## Request Grammar
 
