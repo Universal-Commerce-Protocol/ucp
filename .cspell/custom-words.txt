@@ -22,6 +22,7 @@ Commerce
 CReq
 CRes
 Credentialless
+DNSSEC
 DDC
 Depot
 Diffie
@@ -46,6 +47,7 @@ Lowe's
 Macy's
 Marriott
 Mastercard
+NXDOMAIN
 OKP
 Paymentech
 Paypal
@@ -100,6 +102,7 @@ gclid
 gpay
 grepable
 gtin
+hardt
 httpsig
 ietf
 ingestions
