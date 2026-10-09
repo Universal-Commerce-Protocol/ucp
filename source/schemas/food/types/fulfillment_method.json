@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/food/types/fulfillment_method.json",
   "title": "Fulfillment Method",
-  "description": "A fulfillment method (delivery or pickup) with destinations and groups.",
+  "description": "A fulfillment method (delivery or pickup) with a destination and options.",
   "type": "object",
   "required": ["id", "type"],
   "additionalProperties": true,
@@ -56,13 +56,10 @@
       },
       "then": {
         "properties": {
-          "destinations": {
-            "type": "array",
-            "description": "Platform-authored delivery addresses for this method.",
-            "ucp_request": "optional",
-            "items": {
-              "$ref": "delivery_destination.json"
-            }
+          "destination": {
+            "$ref": "delivery_destination.json",
+            "description": "Platform-authored delivery address for this method.",
+            "ucp_request": "optional"
           }
         }
       }
@@ -80,20 +77,17 @@
       },
       "then": {
         "properties": {
-          "destinations": {
-            "type": "array",
-            "description": "Business-authored locations able to fulfill this method. Response-only.",
-            "ucp_request": "omit",
-            "items": {
-              "$ref": "location_destination.json"
-            }
+          "destination": {
+            "$ref": "location_destination.json",
+            "description": "Business-authored location able to fulfill this method. Response-only.",
+            "ucp_request": "omit"
           }
         }
       }
     }
   ],
   "dependentRequired": {
-    "destinations": [
+    "destination": [
       "type"
     ]
   }

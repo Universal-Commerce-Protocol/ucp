@@ -17,7 +17,7 @@
     }
   ],
   "paths": {
-    "/checkouts": {
+    "/checkout-sessions": {
       "post": {
         "operationId": "create_checkout",
         "summary": "Create Checkout",
@@ -96,7 +96,7 @@
         }
       }
     },
-    "/checkouts/{id}": {
+    "/checkout-sessions/{id}": {
       "parameters": [
         { "$ref": "#/components/parameters/checkout_session_id_path" }
       ],
@@ -241,7 +241,7 @@
         }
       }
     },
-    "/checkouts/{id}/complete": {
+    "/checkout-sessions/{id}/complete": {
       "parameters": [
         { "$ref": "#/components/parameters/checkout_session_id_path" }
       ],
@@ -321,7 +321,7 @@
         }
       }
     },
-    "/checkouts/{id}/cancel": {
+    "/checkout-sessions/{id}/cancel": {
       "parameters": [
         { "$ref": "#/components/parameters/checkout_session_id_path" }
       ],

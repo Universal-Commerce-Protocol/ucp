@@ -30,6 +30,12 @@
       "description": "Unit price in ISO 4217 minor units.",
       "ucp_request": "omit"
     },
+    "quantity": {
+      "type": "integer",
+      "description": "Quantity of the modification. Defaults to 1 when omitted.",
+      "minimum": 1,
+      "default": 1
+    },
     "media": {
       "type": "array",
       "items": {
