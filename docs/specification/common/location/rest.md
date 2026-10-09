@@ -167,6 +167,20 @@ Maps to the [Location Lookup](lookup.md) capability. See the
     }
     ```
 
+## HTTP Headers
+
+The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.
+
+{{ header_fields('search_locations', 'common/rest.openapi.json') }}
+
+### Specific Header Requirements
+
+* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
+    containing the platform profile URI using Dictionary Structured Field syntax
+    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
+    Format: `profile="https://platform.example/profile"`.
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport-level errors from business outcomes.
