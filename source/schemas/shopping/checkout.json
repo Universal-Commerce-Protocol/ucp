@@ -139,5 +139,14 @@
       "description": "Details about an order created for this checkout session.",
       "ucp_request": "omit"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["status"],
+        "properties": { "status": { "const": "requires_escalation" } }
+      },
+      "then": { "required": ["continue_url"] }
+    }
+  ]
 }
