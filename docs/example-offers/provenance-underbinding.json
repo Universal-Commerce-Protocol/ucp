@@ -1,0 +1,38 @@
+{
+  "_comment": "Non-normative illustrative fixture, not a schema. Accompanies docs/documentation/offer-decision-integrity-notes.md. Two Offer-shaped objects, commercially identical in applies_to/proposed_update/impact/expires_at, differing only in an illustrative 'provenance' field. A digest computed only over the former fields is identical for both -- the digest subject under-binds the two objects; this is not a cryptographic hash collision.",
+  "organic_merchandising_example": {
+    "id": "offer_example_01",
+    "revision": "1",
+    "applies_to": { "cart_id": "cart_123", "state_ref": "state_0" },
+    "expires_at": "2026-08-27T00:00:00Z",
+    "proposed_update": {
+      "line_items": [
+        { "id": "li_laptop", "item": { "id": "laptop_32gb" }, "quantity": 1 },
+        { "id": "li_hub", "item": { "id": "usb_hub" }, "quantity": 1 }
+      ]
+    },
+    "impact": { "total_delta": 2400 },
+    "provenance": {
+      "actor": { "id": "merchant.example", "role": "merchant" },
+      "basis": "seller_merchandising"
+    }
+  },
+  "sponsored_placement_example": {
+    "id": "offer_example_01",
+    "revision": "1",
+    "applies_to": { "cart_id": "cart_123", "state_ref": "state_0" },
+    "expires_at": "2026-08-27T00:00:00Z",
+    "proposed_update": {
+      "line_items": [
+        { "id": "li_laptop", "item": { "id": "laptop_32gb" }, "quantity": 1 },
+        { "id": "li_hub", "item": { "id": "usb_hub" }, "quantity": 1 }
+      ]
+    },
+    "impact": { "total_delta": 2400 },
+    "provenance": {
+      "actor": { "id": "marketplace.example", "role": "marketplace" },
+      "basis": "paid_placement"
+    }
+  },
+  "note": "Both objects' applies_to/proposed_update/impact/expires_at are byte-for-byte identical; only provenance differs. A digest computed only over the former four fields is therefore identical for both -- illustrating digest-subject underbinding, not a hash collision. See docs/documentation/offer-decision-integrity-notes.md section 1."
+}
