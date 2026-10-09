@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/tip.json",
+  "title": "Tip",
+  "description": "Tip object.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "options": {
+      "type": "array",
+      "items": {
+        "$ref": "tip_option.json"
+      },
+      "description": "Available tip options.",
+      "ucp_request": "omit"
+    },
+    "selected_option_id": {
+      "type": "string",
+      "description": "The ID of the selected tip option."
+    },
+    "custom_amount": {
+      "$ref": "../../common/types/amount.json",
+      "description": "Custom tip amount in ISO 4217 minor units."
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["selected_option_id"],
+      "not": { "required": ["custom_amount"] }
+    },
+    {
+      "required": ["custom_amount"],
+      "not": { "required": ["selected_option_id"] }
+    },
+    {
+      "not": {
+        "anyOf": [
+          { "required": ["selected_option_id"] },
+          { "required": ["custom_amount"] }
+        ]
+      }
+    }
+  ]
+}
