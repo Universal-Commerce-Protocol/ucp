@@ -166,7 +166,7 @@
       "put": {
         "operationId": "update_checkout",
         "summary": "Update Checkout",
-        "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message.",
+        "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message. Captured `buyer.consent` is an exception when the buyer-consent capability is active: an update that omits `consent` MUST NOT clear previously submitted consent. See the Buyer Consent extension (`dev.ucp.shopping.buyer_consent`) for the persistence rule.",
         "parameters": [
           {
             "$ref": "#/components/parameters/authorization"
