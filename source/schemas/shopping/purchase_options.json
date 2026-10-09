@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/purchase_options.json",
+  "name": "dev.ucp.shopping.purchase_options",
+  "title": "Purchase Options Extension",
+  "description": "Extends Catalog, Cart, Checkout, and Order so a Business can advertise the ways a variant can be bought, a Platform can select one by opaque identifier, and the resulting Order preserves the selected option. Where a variant carries `purchase_options`, exactly one is selected, the way exactly one payment term or fulfillment option is. An option that results in recurring orders states them as `schedules`. Also defines the `dev.ucp.shopping.policy.subscription` policy type, which governs every line whose selected option carries `schedules` and carries its disclosure.",
+  "$defs": {
+    "purchase_option": {
+      "$ref": "types/purchase_option.json"
+    },
+    "variant_purchase_options": {
+      "title": "Variant Purchase Options",
+      "description": "The purchase option fields added to a catalog variant.",
+      "type": "object",
+      "properties": {
+        "purchase_options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/purchase_option"
+          },
+          "minItems": 1,
+          "description": "The ways this variant can be bought, in the Business's order of preference. The first entry is the default: the option the Business selects when a Platform adds the variant without choosing one, and whose `price` the variant's own `price` states. Where a variant can also be bought once, the one-time purchase is listed as an option; a list with no one-time option means the variant is sold only through the options listed. Absent when the variant is bought the ordinary way at its `price`.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "purchase_options_variant": {
+      "description": "A catalog variant carrying purchase options.",
+      "allOf": [
+        {
+          "$ref": "types/variant.json"
+        },
+        {
+          "$ref": "#/$defs/variant_purchase_options"
+        }
+      ]
+    },
+    "purchase_options_lookup_variant": {
+      "description": "A lookup variant (carrying input correlation) carrying purchase options.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_variant"
+        },
+        {
+          "$ref": "#/$defs/variant_purchase_options"
+        }
+      ]
+    },
+    "purchase_options_product": {
+      "description": "A catalog product whose variants carry purchase options. Used by search.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purchase_options_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "purchase_options_lookup_product": {
+      "description": "A lookup product whose variants carry purchase options, preserving input correlation. Used by lookup.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purchase_options_lookup_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "purchase_options_detail_product": {
+      "description": "A get_product detail product whose variants carry purchase options. Used by get_product.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/detail_product"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purchase_options_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purchase_options_product"
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purchase_options_lookup_product"
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "product": {
+              "$ref": "#/$defs/purchase_options_detail_product"
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "line_item": {
+      "title": "Line Item with Purchase Options",
+      "description": "Line item extended with the options its variant can be bought through and the one selected. `purchase_options` and `selected_purchase_option_id` are present together: a list of options without a selection would price the line under no stated option.",
+      "allOf": [
+        {
+          "$ref": "types/line_item.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "purchase_options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purchase_option"
+              },
+              "minItems": 1,
+              "description": "The ways this line's variant can be bought, priced for this cart or checkout, in the Business's order of preference. Unselected options are indicative; the selected option's price is the line's `item.price`. Absent when the variant is bought the ordinary way.",
+              "ucp_request": "omit"
+            },
+            "selected_purchase_option_id": {
+              "type": "string",
+              "description": "ID of the selected purchase option. MUST match one `purchase_options[].id` from the catalog or the latest cart or checkout response. Present in a response whenever `purchase_options` is, and absent when it is not. Where the Platform has made no choice, the Business selects the default. A selection that no longer resolves is replaced by the default and reported with a `purchase_option_changed` warning; the Business never substitutes silently. Omitted on complete because the option is already agreed by then.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              },
+              "ucp_response": "optional"
+            }
+          },
+          "dependentRequired": {
+            "purchase_options": [
+              "selected_purchase_option_id"
+            ]
+          }
+        }
+      ]
+    },
+    "order_purchase_option": {
+      "title": "Order Purchase Option",
+      "description": "Frozen record of the purchase option a line was bought through, including the recurring orders agreed to. Historical Order state, not a live catalog reference: the Business preserves it if the catalog option is later renamed, changed, or withdrawn, and a Platform MUST NOT assume `id` still resolves.",
+      "type": "object",
+      "required": [
+        "id",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The option's identifier as accepted at checkout."
+        },
+        "title": {
+          "type": "string",
+          "description": "The option's title as presented at checkout."
+        },
+        "schedules": {
+          "type": "array",
+          "items": {
+            "$ref": "types/subscription_schedule.json"
+          },
+          "minItems": 1,
+          "description": "The schedules of the selected option as agreed at checkout, unchanged afterwards: the agreement, not the subscription's live state. Present when the option resulted in recurring orders."
+        }
+      }
+    },
+    "order_line_item": {
+      "title": "Order Line Item with Purchase Option",
+      "description": "Order line extended with the purchase option it was bought through.",
+      "allOf": [
+        {
+          "$ref": "types/order_line_item.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "purchase_option": {
+              "$ref": "#/$defs/order_purchase_option",
+              "description": "The purchase option selected for this line at checkout, including an explicitly listed one-time option, with the schedules agreed to where it resulted in recurring orders. Absent when the line's variant carried no purchase options.",
+              "ucp_response": "optional"
+            }
+          }
+        }
+      ]
+    },
+    "subscription_policy": {
+      "title": "Subscription Policy",
+      "description": "A policy statement with type `dev.ucp.shopping.policy.subscription`, governing a line whose selected purchase option carries `schedules`. Its `description` states the terms of the subscription \u2014 that the line results in recurring orders and until when, how the buyer cancels, and where the buyer manages it; what each recurring order costs and when is stated by the option's `schedules`. One policy governs a line. Adds no fields to the base policy.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dev.ucp.shopping.policy.subscription",
+              "description": "Policy discriminator for subscription terms."
+            }
+          }
+        }
+      ]
+    },
+    "policies_item": {
+      "description": "A `policies[]` entry; validates against `subscription_policy` when `type` is `dev.ucp.shopping.policy.subscription`.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dev.ucp.shopping.policy.subscription"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/subscription_policy"
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with purchase options (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with purchase options (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Purchase Options",
+      "description": "Cart extended so each line can carry its variant's purchase options and the one selected, with subscription policies on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line_item"
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Purchase Options",
+      "description": "Checkout extended so each line can carry its variant's purchase options and the one selected, with subscription policies on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line_item"
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Purchase Options",
+      "description": "Order extended so each line preserves the purchase option it was bought through, with the subscription policies agreed to on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/order_line_item"
+              }
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

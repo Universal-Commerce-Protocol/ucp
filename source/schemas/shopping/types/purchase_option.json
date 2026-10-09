@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/purchase_option.json",
+  "title": "Purchase Option",
+  "description": "One way to buy a variant: once, as a subscription, on pre-order. The Business enumerates the options it sells; the Platform selects one by `id`. An option states how the line it is selected on is bought \u2014 its price now and, through `schedules`, the recurring orders that follow \u2014 and never adds, removes, or changes other lines.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "price"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque identifier for this option, sent back as `selected_purchase_option_id`. Stable for as long as the option is offered; a Platform treats it as indivisible and derives nothing from it."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short label that distinguishes this option from its siblings (e.g. 'One-time', 'Subscribe & save 15%', 'Pre-order')."
+    },
+    "description": {
+      "$ref": "../../common/types/description.json",
+      "description": "Supplementary buyer-facing context for the title (e.g. 'Cancel anytime', 'Ships in March'). Directly renderable; MUST NOT repeat the title."
+    },
+    "price": {
+      "$ref": "../../common/types/price.json",
+      "description": "What one unit costs in the current purchase under this option, after any discount or fixed pricing the option defines and before quantity, taxes, discounts, fees, and fulfillment. `0` means the current purchase is genuinely free; it never means a non-zero amount is merely collected later \u2014 a free trial is a first order at full price whose payment a payment term defers. Recurring orders are excluded; they are stated in `schedules`."
+    },
+    "list_price": {
+      "$ref": "../../common/types/price.json",
+      "description": "Reference price this option's `price` is a saving against, for strikethrough display and a derivable saving, mirroring `variant.list_price`: for a subscribe-and-save option, the one-time price. Absent when there is nothing to compare."
+    },
+    "schedules": {
+      "type": "array",
+      "items": {
+        "$ref": "subscription_schedule.json"
+      },
+      "minItems": 1,
+      "description": "The recurring orders that follow the current purchase when this option is selected, as one or more consecutive schedules in the order they take effect; each continues until the next one's `starts_at`, and the last until the subscription ends, as its description states. Present only on an option that results in recurring orders; its presence is what makes the option a subscription. Indicative while the option is unselected, like an unselected payment term; binding for the selected option on a cart or checkout line, where a subscription policy and its disclosure accompany it."
+    }
+  }
+}
