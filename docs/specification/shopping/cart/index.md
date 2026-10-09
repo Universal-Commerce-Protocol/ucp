@@ -89,6 +89,56 @@ SHOULD be linked for the duration of the checkout.
     on a cleared cart ID return `not_found`; the platform can start a new
     session with `create_cart`.
 
+## Continue URL
+
+The `continue_url` field hands a cart from the platform to the business UI, so
+a buyer can share, recover, or keep building the cart in a browser, or move on
+to purchase.
+
+### Destination
+
+The destination is the business's choice: its cart page, its checkout entry,
+an embedded flow, or any surface that fits its purchase path. Whatever the
+destination, it **SHOULD** present the cart's current `line_items`, with their
+quantities and selected variants, without requiring the buyer to add them
+again. A business **SHOULD NOT** point `continue_url` at a storefront page that
+cannot read the cart session: the business's UCP endpoint does not always share
+state with the storefront, and the buyer would land on an empty basket.
+
+A cart is not always still purchasable when the buyer follows the link: an item
+can be withdrawn, a selected variant discontinued, a quantity no longer
+available. The business then **SHOULD** route the buyer to a destination that
+presents what remains purchasable, and **MAY** route to a safe fallback, such
+as the storefront root or a buyer-facing remediation page, when nothing is.
+
+### Format
+
+The `continue_url` **MUST** be an absolute HTTPS URL and **SHOULD** carry or
+reference the cart contents. Businesses **MAY** use either of the two
+approaches the [checkout Continue URL format](../checkout/index.md#format)
+describes:
+
+* an opaque URL backed by server-side cart state, for example
+    `https://business.example.com/carts/{cart_id}`;
+* a stateless URL that encodes the cart's items, which the business resolves
+    into a cart or a checkout. A business that implements the
+    [permalink capability](../../permalink.md) can serve a shopping permalink
+    in this role.
+
+### When to surface the continue URL
+
+The platform **SHOULD** surface `continue_url` in the following situations:
+
+* the buyer asks to share, save, or continue the cart in a browser;
+* the buyer asks to complete the purchase and the platform cannot convert the
+    cart to a checkout, because the business does not expose the checkout
+    capability or the platform does not support it;
+* a cart response carries a message the platform cannot resolve, for example
+    a message whose `severity` is `unrecoverable` or `requires_buyer_input`
+    (see [Message](#message)).
+
+The platform **MAY** surface it at other times.
+
 ## Quantity and sale basis
 
 Cart line items apply the shared
@@ -142,13 +192,15 @@ custom scopes are defined in [Identity Linking — Scopes](../../common/identity
 
 * **MAY** use carts for pre-purchase exploration and session persistence.
 * **SHOULD** convert cart to checkout when user expresses purchase intent.
-* **MAY** display `continue_url` for handoff to business UI.
+* **SHOULD** surface `continue_url` in the situations listed under
+    [When to surface the continue URL](#when-to-surface-the-continue-url), and
+    **MAY** surface it at other times.
 * **SHOULD** handle `not_found` gracefully when cart expires or is canceled.
 
 ### Business
 
-* **SHOULD** provide `continue_url` for cart handoff and session recovery.
-* TODO: discuss `continue_url` destination - cart vs checkout.
+* **SHOULD** provide `continue_url` for cart handoff and session recovery. See
+    [Continue URL](#continue-url) for destination and format.
 * **SHOULD** provide estimated totals when calculable.
 * **MAY** omit fulfillment totals until checkout when address is unknown.
 * **SHOULD** return informational messages for validation warnings.
