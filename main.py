@@ -152,6 +152,89 @@ def _resolve_json_pointer(pointer: str, data: Any) -> Any | None:
   return current
 
 
+def _security_header_rows(data: dict, operation: dict) -> list[dict]:
+  """Header rows for the authentication schemes an operation accepts.
+
+  OpenAPI 3.1 ignores a header parameter named Authorization, so auth belongs
+  in security/securitySchemes; a header table built only from parameters
+  silently stops listing authentication once a spec declares it correctly.
+  """
+  requirements = operation.get("security", data.get("security", []))
+  schemes = data.get("components", {}).get("securitySchemes", {})
+  scheme_names: dict[str, list[str]] = {}
+  descriptions: dict[str, list[str]] = {}
+  for name in dict.fromkeys(n for r in requirements for n in r):
+    scheme = schemes.get(name, {})
+    kind = scheme.get("type")
+    if kind == "http":
+      header = "Authorization"
+      auth = scheme.get("scheme", "")
+      prefix = f"`{auth.capitalize()}` credentials. " if auth else ""
+    elif kind in ("oauth2", "openIdConnect"):
+      header = "Authorization"
+      prefix = "`Bearer` access token. "
+    elif kind == "apiKey" and scheme.get("in") == "header":
+      header = scheme.get("name", "")
+      prefix = ""
+    else:
+      continue
+    if not header:
+      continue
+    scheme_names.setdefault(header, []).append(name)
+    descriptions.setdefault(header, []).append(
+      prefix + scheme.get("description", "")
+    )
+  return [
+    {
+      "name": header,
+      # Required only when every alternative needs one of these schemes.
+      "required": all(any(n in r for n in names) for r in requirements),
+      "description": " ".join(descriptions[header]).strip(),
+    }
+    for header, names in scheme_names.items()
+  ]
+
+
+def _content_header_rows(data: dict, operation: dict) -> list[dict]:
+  """Content-Type/Accept rows derived from the operation's media types.
+
+  OpenAPI 3.1 ignores Content-Type and Accept header parameters; the request
+  body and response content maps are where those are actually declared.
+  """
+
+  def resolved(node: Any) -> dict:
+    if isinstance(node, dict) and "$ref" in node:
+      return _resolve_json_pointer(node["$ref"], data) or {}
+    return node if isinstance(node, dict) else {}
+
+  rows = []
+  body = resolved(operation.get("requestBody")).get("content", {})
+  if body:
+    types = ", ".join(f"`{t}`" for t in body)
+    rows.append(
+      {
+        "name": "Content-Type",
+        "required": False,
+        "description": f"Media type of the request body: {types}.",
+      }
+    )
+  for code, response in sorted(operation.get("responses", {}).items()):
+    if not str(code).startswith("2"):
+      continue
+    content = resolved(response).get("content")
+    if content:
+      types = ", ".join(f"`{t}`" for t in content)
+      rows.append(
+        {
+          "name": "Accept",
+          "required": False,
+          "description": f"Response media types the client accepts: {types}.",
+        }
+      )
+      break
+  return rows
+
+
 def _resolve_schema(
   schema_path: str | Path,
   direction: str = "response",
@@ -1977,6 +2060,23 @@ def define_env(env):
 
         if param.get("in") == "header":
           req_headers.append(param)
+
+      # A header still declared as a parameter keeps its own row, so a spec
+      # that has not moved to securitySchemes never lists a header twice.
+      declared = {h.get("name", "").lower() for h in req_headers}
+      req_headers = (
+        [
+          r
+          for r in _security_header_rows(data, operation)
+          if r["name"].lower() not in declared
+        ]
+        + req_headers
+        + [
+          r
+          for r in _content_header_rows(data, operation)
+          if r["name"].lower() not in declared
+        ]
+      )
 
       # 3. Extract Response Headers (Assumes 200 OK)
       res_headers_defs = (
