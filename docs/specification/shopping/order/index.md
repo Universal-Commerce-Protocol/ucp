@@ -740,6 +740,21 @@ to ensure authenticity and integrity. Signatures follow the
 | `Signature`      | Contains the signature value               |
 | `Content-Digest` | Body digest (RFC 9530)                     |
 
+`Webhook-Id` and `Webhook-Timestamp` are required headers on this delivery, so
+the covered-component rule in
+[REST Request Signing](../../signatures.md#rest-request-signing) requires the
+signature to cover them, and
+[REST Request Verification](../../signatures.md#rest-request-verification) requires
+platforms to reject a delivery that omits either. Webhooks carry no
+`Idempotency-Key`, so these two headers are the only per-delivery replay signal.
+
+An order webhook carries the full current state of the order rather than a delta, so
+a platform that applies deliveries in `Webhook-Timestamp` order, or reconciles
+through `GET /orders/{id}`, converges on the current state without keeping
+per-delivery state. Platforms **SHOULD** deduplicate on `Webhook-Id`, which
+short-circuits retries and separates events that share a `Webhook-Timestamp`, whose
+resolution is one second.
+
 **Example Webhook Request:**
 
 ```http
@@ -747,17 +762,21 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Webhook-Timestamp: 1737000000
+Webhook-Id: 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d
 Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
-Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="merchant-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
-{"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
+{"id":"order_abc123",...}
 ```
 
 #### Signing (Business)
 
 1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
-2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+2. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421),
+   covering every component
+   [REST Request Signing](../../signatures.md#rest-request-signing) requires
 3. Sign using a key from `keys` in the business's UCP profile
 4. Set `Signature-Input` and `Signature` headers
 
@@ -773,6 +792,9 @@ for complete algorithm.
 3. Locate key in `keys` with matching `kid`
 4. Verify `Content-Digest` matches SHA-256 of raw body
 5. Reconstruct signature base and verify signature
+6. Confirm every component
+   [REST Request Verification](../../signatures.md#rest-request-verification)
+   requires is among the signed components, and reject the delivery otherwise
 
 See [Message Signatures - REST Request Verification](../../signatures.md#rest-request-verification)
 for complete algorithm.

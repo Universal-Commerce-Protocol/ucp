@@ -1659,9 +1659,9 @@ below processes a single signature.
    request target (`@method`, `@authority`, `@path`; `@query` when a
    query string is present), the body when present (`content-digest`,
    `content-type`), and each of these request headers when present:
-   `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a
-   header added to UCP later is gate-required only if its defining
-   section says so). If any
+   `ucp-agent`, `signature-agent`, `idempotency-key`, `webhook-id`,
+   `webhook-timestamp` (a closed set — a header added to UCP later is
+   gate-required only if its defining section says so). If any
    such component is absent from the signature's covered set, **skip**
    this signature — a target, body, or header the signature does not
    cover is treated as unsigned. This prevents a signature satisfying only
