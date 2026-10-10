@@ -159,6 +159,7 @@ def check_links():
       if link.startswith(("mailto:", "tel:", "javascript:", "data:")):
         continue
 
+      path_is_site_relative = False
       parsed = urlparse(link)
       if parsed.scheme in ("http", "https"):
         parsed_site = urlparse(SITE_URL)
@@ -175,6 +176,7 @@ def check_links():
             fragment_part = f"#{parsed.fragment}" if parsed.fragment else ""
             link = rel_link_path + query_part + fragment_part
             parsed = urlparse(link)
+            path_is_site_relative = True
           else:
             continue  # External link
         else:
@@ -210,9 +212,14 @@ def check_links():
       if should_ignore:
         continue
 
-      # If the path starts with the SITE_BASE_PATH (e.g. /ucp/), strip it
-      # so it resolves correctly against the local ROOT_DIR.
-      if SITE_BASE_PATH != "/" and path_part.startswith(SITE_BASE_PATH):
+      # Absolute URLs above already have the mount path removed. Strip
+      # it only from root-relative links so a nested directory with the
+      # same name as the mount path remains part of the target.
+      if (
+        not path_is_site_relative
+        and SITE_BASE_PATH != "/"
+        and path_part.startswith(SITE_BASE_PATH)
+      ):
         path_part = "/" + path_part[len(SITE_BASE_PATH) :]
 
       target_file = None
