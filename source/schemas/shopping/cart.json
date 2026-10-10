@@ -17,10 +17,11 @@
           "properties": {
             "cart_id": {
               "type": "string",
-              "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.",
+              "description": "Cart ID to convert to checkout. Because line_items remains required by the base checkout schema, the platform SHOULD pass an empty array (\"line_items\": []). The business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in the checkout payload.",
               "ucp_request": {
                 "create": "optional",
-                "update": "omit"
+                "update": "omit",
+                "complete": "omit"
               }
             }
           }
