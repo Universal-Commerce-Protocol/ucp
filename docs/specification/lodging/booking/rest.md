@@ -1586,8 +1586,8 @@ Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
-Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"payment":{...}, ...}
 ```
@@ -1612,7 +1612,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
 Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="business-2026"
-Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"id":"booking_123","status":"completed","confirmation":{...}}
 ```
