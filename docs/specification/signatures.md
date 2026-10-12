@@ -434,7 +434,7 @@ verification.
 | `ucp-agent`         | Cond. `**`   | Profile URL (binds identity)                                 |
 | `signature-agent`   | Cond. `***`  | WBA key source (when [WBA Interop](#wba-interop) opted into) |
 | `idempotency-key`   | Cond. `****` | Idempotency header (state-changing)                          |
-| `webhook-id`        | Cond. `‡`    | Delivery identifier (webhooks)                               |
+| `webhook-id`        | Cond. `‡`    | Event identifier (webhooks)                                  |
 | `webhook-timestamp` | Cond. `‡`    | Event occurrence time (webhooks)                             |
 | `content-digest`    | Cond. `†`    | Body digest (if body present)                                |
 | `content-type`      | Cond. `†`    | Content-Type (if body present)                               |
@@ -445,12 +445,14 @@ verification.
 
 * `***` Required if `Signature-Agent` header is present (i.e., WBA-shape signature)
 
-* `****` Required for POST, PUT, DELETE, PATCH
+* `****` Required if the header is present. Whether a request must carry
+  `Idempotency-Key` at all is a binding-level rule, separate from this
+  coverage check
 
 * `‡` Required if the header is present. Webhook deliveries carry no
-  `Idempotency-Key`, so these two headers are the only per-delivery replay
+  `Idempotency-Key`, so these two headers are the only per-event replay
   signal; a signature omitting them leaves a signed delivery open to replay
-  with an altered identity or freshness value.
+  with an altered event identity or event time.
 
 * `†` Required if request has a body
 

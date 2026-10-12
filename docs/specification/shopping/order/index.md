@@ -745,8 +745,8 @@ the covered-component rule in
 [REST Request Signing](../../signatures.md#rest-request-signing) requires the
 signature to cover them, and
 [REST Request Verification](../../signatures.md#rest-request-verification) requires
-platforms to reject a delivery that omits either. Webhooks carry no
-`Idempotency-Key`, so these two headers are the only per-delivery replay signal.
+platforms to reject a delivery whose signature omits either. Webhooks carry no
+`Idempotency-Key`, so these two headers are the only per-event replay signal.
 
 An order webhook carries the full current state of the order rather than a delta, so
 a platform that applies deliveries in `Webhook-Timestamp` order, or reconciles
