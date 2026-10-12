@@ -31,4 +31,4 @@ New specifications are being developed with industry leaders across key industri
 
 The future of commerce cannot be built in a vacuum. We invite businesses, developers, and payment providers to join us in refining these specifications. Your feedback on our early builds helps us shape the standards that will power the next generation of global commerce.
 
-[Become a UCP contributor](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file)
+[Become a UCP contributor](http://ucp.dev/documentation/contributing/index.md)
