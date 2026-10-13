@@ -1,0 +1,35 @@
+{
+  "id": "V20-unknown-outcome-fails-safe",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Unknown outcome values are never success",
+  "spec_refs": [
+    "Outcomes"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "Business returns an outcome this Platform does not know",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2/modifications/mod_51j",
+        "headers": {
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"@query\" \"ucp-agent\" \"original-idempotency-key\")"
+        }
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "responses/unknown_outcome_value.json"
+      }
+    }
+  ],
+  "assertions": [
+    "The Platform treats the result as unresolved and not successful.",
+    "The aggregate status is treated as open.",
+    "The Platform re-reads the modification and the Order before reporting anything to the buyer."
+  ]
+}

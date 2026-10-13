@@ -1,0 +1,53 @@
+{
+  "modification_id": "mod_51h",
+  "order_id": "ord_9f2",
+  "base_order_version": "v14",
+  "atomicity": "atomic",
+  "status": "closed",
+  "results": [
+    {
+      "target": {
+        "type": "unit",
+        "id": "unit_goods_1"
+      },
+      "op": "cancel",
+      "outcome": "not_attempted",
+      "blocked_by": {
+        "type": "operation",
+        "target": {
+          "type": "unit",
+          "id": "unit_goods_2"
+        },
+        "reason_code": "atomic_group_not_committable"
+      }
+    },
+    {
+      "target": {
+        "type": "unit",
+        "id": "unit_goods_2"
+      },
+      "op": "cancel",
+      "outcome": "refused",
+      "reason_code": "stale_eligibility"
+    }
+  ],
+  "created_at": "2026-10-13T09:15:02Z",
+  "updated_at": "2026-10-13T09:15:02Z",
+  "retained_until": "2026-11-12T09:15:02Z",
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "2026-10-13"
+        }
+      ],
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "id": "V02-same-key-different-bytes",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Same key + different raw bytes is an idempotency conflict",
+  "spec_refs": [
+    "Idempotency and replay"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "first submission",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/pending.json"
+      }
+    },
+    {
+      "name": "same key, semantically equal JSON, different bytes (reordered members)",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json",
+        "raw_body": "reordered_members"
+      },
+      "response": {
+        "http_status": 409,
+        "body": {
+          "code": "idempotency_conflict",
+          "content": "Idempotency-Key reused with different request bytes."
+        }
+      }
+    },
+    {
+      "name": "same key, different content",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_order.json"
+      },
+      "response": {
+        "http_status": 409,
+        "body": {
+          "code": "idempotency_conflict",
+          "content": "Idempotency-Key reused with different request bytes."
+        }
+      }
+    }
+  ],
+  "assertions": [
+    "Payload matching compares SHA-256 of raw body bytes, not parsed JSON.",
+    "Neither conflicting request executes.",
+    "Only one modification record exists."
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "V18-unauthorized-mutation",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Mutation without sufficient authority is rejected",
+  "spec_refs": [
+    "Authorization and scope"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "token lacks dev.ucp.shopping.order:manage",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 403,
+        "body": {
+          "code": "insufficient_scope",
+          "content": "dev.ucp.shopping.order:manage is required."
+        }
+      }
+    },
+    {
+      "name": "platform did not create the checkout for this Order",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "errors/unauthorized.json"
+      }
+    }
+  ],
+  "assertions": [
+    "Possession of an Order ID alone is not authority.",
+    "No record is created and no key association is stored."
+  ]
+}

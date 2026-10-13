@@ -348,6 +348,204 @@
       }
     },
     {
+      "name": "create_modification",
+      "summary": "Create modification (cancellation attempt)",
+      "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; proposed, not approved.] Admit a cancellation attempt. State-changing; requires meta[\"idempotency-key\"]. Same key plus byte-identical request replays the original result. Idempotency key reuse with different bytes fails with HTTP 409 / JSON-RPC -32000. Over HTTP the response carries Cache-Control: no-store.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "The unique identifier of the order."
+          }
+        },
+        {
+          "name": "modification",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/order_modification.json#/$defs/create_request"
+          }
+        }
+      ],
+      "result": {
+        "name": "modification",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_modification.json#/$defs/create_response"
+            },
+            {
+              "$ref": "../../schemas/common/types/error_response.json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "get_modification",
+      "summary": "Get modification",
+      "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; proposed, not approved.] Read the authoritative current record of an admitted attempt. Read-only; no idempotency key. Over HTTP the response carries Cache-Control: no-store.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "The unique identifier of the order."
+          }
+        },
+        {
+          "name": "modification_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "modification",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_modification.json#/$defs/read_response"
+            },
+            {
+              "$ref": "../../schemas/common/types/error_response.json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "lookup_modification",
+      "summary": "Lookup modification by original idempotency key",
+      "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; proposed, not approved.] STRICTLY READ-ONLY: never installs a tombstone, claims a key, or changes whether the original request can commit; retrying or prefetching is safe. Recover an attempt whose create result was lost. The original key is a tool argument, not meta[\"idempotency-key\"]. Scope: authenticated Platform, id, operation, original key. Returns found or unresolved only; an authoritative negative requires `fence_modification`. Over HTTP the response carries Cache-Control: no-store.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "The unique identifier of the order."
+          }
+        },
+        {
+          "name": "operation",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "Operation type of the original attempt, for example `cancel`."
+          }
+        },
+        {
+          "name": "original_idempotency_key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 22,
+            "description": "The Idempotency-Key used on the original create_modification call."
+          }
+        }
+      ],
+      "result": {
+        "name": "lookup",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_modification.json#/$defs/lookup_response"
+            },
+            {
+              "$ref": "../../schemas/common/types/error_response.json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "fence_modification",
+      "summary": "Fence modification key",
+      "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; proposed, not approved.] State-changing and idempotent: requires meta[\"idempotency-key\"], its own fresh key distinct from the original key named in `original_idempotency_key`. Atomic compare-and-set on the scoped key: returns found (claimed, nothing fenced), unresolved (record expired, nothing fenced), or fenced (permanent tombstone installed; the original can never commit). Rejects with fence_not_supported if the Business cannot make the tombstone permanent. Over HTTP the response carries Cache-Control: no-store.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "The unique identifier of the order."
+          }
+        },
+        {
+          "name": "fence",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/order_modification.json#/$defs/fence_request"
+          }
+        }
+      ],
+      "result": {
+        "name": "fence",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_modification.json#/$defs/fence_response"
+            },
+            {
+              "$ref": "../../schemas/common/types/error_response.json"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "get_product",
       "summary": "Get product details",
       "description": "Retrieve complete product detail by identifier with optional interactive option selection.",

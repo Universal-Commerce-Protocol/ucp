@@ -1,0 +1,20 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "2026-10-13"
+        }
+      ],
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  },
+  "status": "unresolved",
+  "reason_code": "record_expired"
+}

@@ -1,0 +1,40 @@
+{
+  "id": "V09-stale-version-new-request",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Stale base_order_version fails before admission",
+  "spec_refs": [
+    "Version preconditions"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "Order advanced to v15; request still cites v14",
+      "setup_state": {
+        "order_version": "v15"
+      },
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "errors/stale_order_state.json"
+      }
+    }
+  ],
+  "assertions": [
+    "No modification record is created and no cancellation applied.",
+    "Version is checked before unit ids and policy."
+  ]
+}

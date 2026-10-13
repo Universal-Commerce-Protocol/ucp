@@ -1,0 +1,19 @@
+{
+  "base_order_version": "v14",
+  "operations": [
+    {
+      "op": "cancel",
+      "target": {
+        "type": "unit",
+        "id": "unit_goods_1"
+      }
+    },
+    {
+      "op": "cancel",
+      "target": {
+        "type": "unit",
+        "id": "unit_goods_2"
+      }
+    }
+  ]
+}
