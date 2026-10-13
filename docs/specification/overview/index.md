@@ -2309,7 +2309,7 @@ dev.ucp.common.location.lookup:updated
 ### Subscription via Capability Configuration
 
 Platforms and businesses negotiate event subscriptions through `config.webhook`
-on the declaring capability using the shared schemas in
+on `schemas/capability.json` using the shared schemas in
 `schemas/common/types/webhook.json`
 ([Platform Webhook Config](../reference.md#webhook-platform-config) and
 [Business Webhook Config](../reference.md#webhook-business-config)):
@@ -2376,12 +2376,20 @@ on the declaring capability using the shared schemas in
    A subsequent signed request from the platform carrying `config.webhook`
    re-establishes the subscription.
 
-### Event Envelope and Read-Back Semantics
+### Event Payloads and Read-Back Semantics
 
-Capability events (other than the full-snapshot
-[Order webhook](../shopping/order/index.md#events)) use the shared
-[Capability Event](../reference.md#capability-event) envelope
-(`schemas/common/types/event.json`):
+Capabilities use one of two webhook payload shapes depending on whether the
+resource is a per-transaction record or shared business state:
+
+- **Entity-snapshot payloads:** Transactional capabilities where each resource
+  belongs to a single originating platform (such as
+  [Order](../shopping/order/index.md#events)) deliver the capability's full
+  response entity as a current-state snapshot.
+- **Thin event notifications:** Shared or broadcast capabilities where multiple
+  platforms subscribe to business state (such as
+  [Location Lookup](../common/location/lookup.md#events)) use the shared
+  [Capability Event](../reference.md#capability-event) envelope
+  (`schemas/common/types/event.json`):
 
 <!-- ucp:example schema=common/location_lookup def=location_event -->
 ```json
@@ -2398,7 +2406,6 @@ Capability events (other than the full-snapshot
   },
   "type": "dev.ucp.common.location.lookup:updated",
   "occurred_at": "2026-12-14T15:02:11Z",
-  "consistency_token": "seq_1765724531000",
   "data": {
     "location_ids": ["loc_castro"],
     "changed_sections": ["exception_hours"]
@@ -2416,12 +2423,8 @@ Capability events (other than the full-snapshot
   current state through the capability's normal read operation, keeping
   resource content behind the business's standard access and filtering checks.
 - **Read-after-event consistency:** A business **SHOULD** emit an event only
-  after the underlying state change is committed. Because read replicas may lag
-  behind an event delivery, the business **MAY** include an opaque
-  `consistency_token` in the envelope, and capabilities **MAY** accept
-  `consistency_token` on read requests so the business can serve state at or
-  past the event. Platforms **MUST** treat an event as a signal to read rather
-  than as authoritative state.
+  after the underlying state change is committed. Platforms **MUST** treat a
+  thin event as a signal to read rather than as authoritative state.
 
 ### Webhook Delivery and Verification
 

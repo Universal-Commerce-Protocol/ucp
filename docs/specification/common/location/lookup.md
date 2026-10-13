@@ -390,7 +390,6 @@ subscribes via `config.webhook` in its platform profile per
   },
   "type": "dev.ucp.common.location.lookup:updated",
   "occurred_at": "2026-12-14T15:02:11Z",
-  "consistency_token": "seq_1765724531000",
   "data": {
     "location_ids": ["loc_downtown"],
     "changed_sections": ["exception_hours"]
@@ -399,8 +398,7 @@ subscribes via `config.webhook` in its platform profile per
 ```
 
 - **Read-back:** Upon receiving `updated` or `removed`, the Platform calls
-  `lookup_locations` with the affected `location_ids` (and `consistency_token`
-  when present) to retrieve current state.
+  `lookup_locations` with the affected `location_ids` to retrieve current state.
 - **Verifying removals:** Before delisting a Location following a `removed`
   event, the Platform **MUST** verify removal by issuing an unfiltered
   `lookup_locations` request for that identifier (without `distance`, `serves`,

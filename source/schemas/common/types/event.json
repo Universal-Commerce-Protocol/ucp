@@ -24,10 +24,6 @@
       "format": "date-time",
       "description": "RFC 3339 timestamp when the underlying business state change occurred."
     },
-    "consistency_token": {
-      "type": "string",
-      "description": "Optional opaque token representing the business state version at which the event occurred. Capabilities MAY accept this token on subsequent read requests so the business can serve state at or past the event."
-    },
     "data": {
       "type": "object",
       "description": "Capability-defined event payload carrying affected resource identifiers and optional change hints."
