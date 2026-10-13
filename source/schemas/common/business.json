@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/business.json",
+  "name": "dev.ucp.common.business",
+  "title": "Business Capability",
+  "description": "Capability schema for location-independent business and brand identity metadata in business discovery profiles.",
+  "$defs": {
+    "category": {
+      "type": "object",
+      "title": "Business Category",
+      "description": "A business category entry. The first entry in `categories` is the primary category.",
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The category code or label (e.g., `'5812'`, `'722511'`, `'Pizza restaurant'`)."
+        },
+        "taxonomy": {
+          "type": "string",
+          "description": "The classification system for `value`. Well-known values: `mcc` (ISO 18245 Merchant Category Code), `naics`, `isic`, `merchant` (free-form business-supplied label). Open vocabulary; a Platform MUST ignore unrecognized taxonomy values."
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "title": "Business Configuration",
+      "description": "Location-independent identity metadata for the business or brand represented by the profile.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable display name of the business or brand (e.g., `'Joe\\'s Pizza'`)."
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "types/media.json"
+          },
+          "description": "Business-level media items, such as a brand `logo` (`role: 'logo'`) or `cover` image (`role: 'cover'`)."
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "types/link.json"
+          },
+          "description": "Business-level links, such as the canonical customer-facing `website` storefront URL and business-wide policy links (`privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`)."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/category"
+          },
+          "description": "Ordered business categories; the first entry is the primary category."
+        }
+      },
+      "additionalProperties": true
+    },
+    "dev.ucp.common.business": {
+      "platform_schema": {
+        "title": "Business Capability (Platform)",
+        "description": "Platform-level business capability declaration.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" }
+        ]
+      },
+      "business_schema": {
+        "title": "Business Capability (Business)",
+        "description": "Business-level declaration carrying location-independent identity metadata for the business or brand.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "required": ["config"],
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/config"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
