@@ -1138,20 +1138,6 @@ def define_env(env):
           else:
             # Direct Reference
             f_type = create_link(ref, spec_file_name, context)
-        elif f_type == "any" and isinstance(details.get("allOf"), list):
-          # Composed property with no inline type (e.g. a base type narrowed
-          # by extra constraints): link the base type, as for array items
-          # below, instead of falling back to the uninformative "any". Only
-          # when exactly one branch names a type in another schema file:
-          # several bases are ambiguous, and same-file "#/$defs/..." branches
-          # (e.g. ucp.json#/$defs/base) have no documented anchor.
-          base_refs = [
-            r
-            for r in map(_branch_ref, details["allOf"])
-            if r and not r.startswith("#")
-          ]
-          if len(base_refs) == 1:
-            f_type = create_link(base_refs[0], spec_file_name, context)
         elif f_type == "array" and items_ref:
           # Array of References
           link = create_link(items_ref, spec_file_name, context)
