@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/webhook.json",
+  "title": "Webhook Configuration",
+  "description": "Shared capability configuration schemas for subscribing to and advertising capability event webhooks.",
+  "$defs": {
+    "platform_config": {
+      "title": "Platform Webhook Config",
+      "description": "Platform webhook subscription configuration declared under a capability's `config.webhook` in a platform profile.",
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "HTTPS URL where the Business delivers signed webhook notifications for this capability."
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "event_type.json"
+          },
+          "uniqueItems": true,
+          "description": "Event types the Platform subscribes to for this capability. When omitted, the Platform subscribes to all event types the Business emits for this capability."
+        }
+      }
+    },
+    "business_config": {
+      "title": "Business Webhook Config",
+      "description": "Business webhook advertisement in a discovery profile and subscription confirmation in capability response entries.",
+      "type": "object",
+      "required": ["events"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "event_type.json"
+          },
+          "uniqueItems": true,
+          "description": "In a Business discovery profile, the event types the Business emits for this capability. In a capability response entry (`ucp.capabilities`), the intersected event types confirmed for the active subscription."
+        }
+      }
+    }
+  }
+}

@@ -425,17 +425,19 @@ verification.
 
 **Signed Components:**
 
-| Component         | Required     | Description                                                  |
-| :---------------- | :----------- | :----------------------------------------------------------- |
-| `@method`         | Yes          | HTTP method (GET, POST, etc.)                                |
-| `@authority`      | Yes          | Target host (prevents cross-host relay)                      |
-| `@path`           | Yes          | Request path                                                 |
-| `@query`          | Cond. `*`    | Query string (if present)                                    |
-| `ucp-agent`       | Cond. `**`   | Profile URL (binds identity)                                 |
-| `signature-agent` | Cond. `***`  | WBA key source (when [WBA Interop](#wba-interop) opted into) |
-| `idempotency-key` | Cond. `****` | Idempotency header (state-changing)                          |
-| `content-digest`  | Cond. `†`    | Body digest (if body present)                                |
-| `content-type`    | Cond. `†`    | Content-Type (if body present)                               |
+| Component           | Required     | Description                                                  |
+| :------------------ | :----------- | :----------------------------------------------------------- |
+| `@method`           | Yes          | HTTP method (GET, POST, etc.)                                |
+| `@authority`        | Yes          | Target host (prevents cross-host relay)                      |
+| `@path`             | Yes          | Request path                                                 |
+| `@query`            | Cond. `*`    | Query string (if present)                                    |
+| `ucp-agent`         | Cond. `**`   | Profile URL (binds identity)                                 |
+| `signature-agent`   | Cond. `***`  | WBA key source (when [WBA Interop](#wba-interop) opted into) |
+| `idempotency-key`   | Cond. `****` | Idempotency header (state-changing)                          |
+| `webhook-id`        | Cond. `‡`    | Webhook event identifier (binds deduplication key)           |
+| `webhook-timestamp` | Cond. `‡`    | Webhook delivery timestamp (bounds replay window)            |
+| `content-digest`    | Cond. `†`    | Body digest (if body present)                                |
+| `content-type`      | Cond. `†`    | Content-Type (if body present)                               |
 
 * `*` Required if request has query parameters
 
@@ -443,14 +445,16 @@ verification.
 
 * `***` Required if `Signature-Agent` header is present (i.e., WBA-shape signature)
 
-* `****` Required for POST, PUT, DELETE, PATCH
+* `****` Required for POST, PUT, DELETE, PATCH requests (when `Idempotency-Key` header is present)
+
+* `‡` Required for webhook deliveries (`Webhook-Id` and `Webhook-Timestamp` headers)
 
 * `†` Required if request has a body
 
 **Signature Generation:**
 
 ```text
-sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
+sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid, webhook_id=None, webhook_timestamp=None):
     // 1. Compute body digest (if body present)
     if body_bytes:
         digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
@@ -461,6 +465,8 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
     if query: components.append("@query")
     if ucp_agent: components.append("ucp-agent")
     if idempotency_key: components.append("idempotency-key")
+    if webhook_id: components.append("webhook-id")
+    if webhook_timestamp: components.append("webhook-timestamp")
     if body: components.extend(["content-digest", "content-type"])
 
     // 3. Build signature base (RFC 9421)
@@ -709,11 +715,13 @@ verify_rest_request(request):
     // (Which requests must CARRY Idempotency-Key is a binding rule,
     // separate from this coverage check.)
     required = ["@method", "@authority", "@path"]
-    if request.query:                        required += ["@query"]
-    if request.has_body:                     required += ["content-digest", "content-type"]
-    if "Idempotency-Key" in request.headers: required += ["idempotency-key"]
-    if "UCP-Agent" in request.headers:       required += ["ucp-agent"]
-    if "Signature-Agent" in request.headers: required += ["signature-agent"]
+    if request.query:                              required += ["@query"]
+    if request.has_body:                           required += ["content-digest", "content-type"]
+    if "Idempotency-Key" in request.headers:       required += ["idempotency-key"]
+    if "Webhook-Id" in request.headers:            required += ["webhook-id"]
+    if "Webhook-Timestamp" in request.headers:     required += ["webhook-timestamp"]
+    if "UCP-Agent" in request.headers:             required += ["ucp-agent"]
+    if "Signature-Agent" in request.headers:       required += ["signature-agent"]
     for component in required:
         if component not in components:
             // coverage failure, a target/body/header the signature does not
@@ -739,7 +747,8 @@ verify_rest_request(request):
 
     return success()
 
-    // Note: Replay protection handled by the signed idempotency-key header
+    // Note: Replay protection handled by the signed idempotency-key header on
+    // requests and by the signed webhook-id and webhook-timestamp headers on webhooks
 ```
 
 ### REST Response Verification

@@ -167,6 +167,44 @@ Maps to the [Location Lookup](lookup.md) capability. See the
     }
     ```
 
+### Location Event Webhook {: #location-event-webhook }
+
+Businesses deliver [Location Lookup events](lookup.md#events) via HTTP `POST` to
+the Platform's `config.webhook.url` per
+[Capability Events — Webhook Delivery and Verification](../../overview/index.md#webhook-delivery-and-verification).
+
+{{ method_fields('location_event_webhook', 'common/rest.openapi.json', 'common/location/rest') }}
+
+<!-- ucp:example schema=common/location_lookup def=location_event -->
+```json
+POST /webhooks/ucp HTTP/1.1
+Host: platform.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://business.example.com/.well-known/ucp"
+Webhook-Id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+Webhook-Timestamp: 1765724532
+Content-Digest: sha-256=:X48E9q...:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "webhook-id" "webhook-timestamp" "content-digest" "content-type");keyid="business-2026"
+Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "type": "dev.ucp.common.location.lookup:updated",
+  "occurred_at": "2026-12-14T15:02:11Z",
+  "data": {
+    "location_ids": ["loc_downtown"],
+    "changed_sections": ["exception_hours"]
+  }
+}
+```
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport-level errors from business outcomes.

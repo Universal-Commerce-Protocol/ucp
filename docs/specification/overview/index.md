@@ -1359,6 +1359,8 @@ A root capability is relevant if it matches the operation type:
     `dev.ucp.shopping.checkout`
 - `create_cart` / `update_cart` → `dev.ucp.shopping.cart`
 - Order webhooks → `dev.ucp.shopping.order`
+- Capability event webhooks → the declaring capability (the capability prefix
+    of the event's `type`; see [Capability Events](#capability-events))
 
 **Extension Relevance:**
 
@@ -2277,6 +2279,182 @@ receive events as the user interacts with the interface and delegate key user
 actions.
 
 Initiation comes through a `continue_url` that is returned by the business.
+
+## Capability Events
+
+Capabilities can declare asynchronous events to notify subscribed platforms when
+business state changes outside a request-response session. This mechanism
+generalizes the [Order capability webhook](../shopping/order/index.md#events) so
+any capability can advertise, negotiate, and deliver event webhooks through a
+shared subscription and delivery contract.
+
+### Event Type Naming
+
+Capability event types use the `{capability}:{name}` format defined by
+[Capability Event Type](../reference.md#event-type)
+(`schemas/common/types/event_type.json`):
+
+```text
+dev.ucp.common.location.lookup:updated
+└──────── capability ────────┘ └ name ┘
+```
+
+- The prefix before `:` **MUST** be the reverse-domain name of the declaring
+  capability.
+- The suffix after `:` **MUST** match `^[a-z][a-z0-9_]*$`.
+- Because `:` cannot appear in a reverse-domain name, the declaring capability
+  is unambiguously the substring before `:`. Event types inherit the namespace
+  authority of their declaring capability.
+
+### Subscription via Capability Configuration
+
+Platforms and businesses negotiate event subscriptions through `config.webhook`
+on the declaring capability using the shared schemas in
+`schemas/common/types/webhook.json`
+([Platform Webhook Config](../reference.md#webhook-platform-config) and
+[Business Webhook Config](../reference.md#webhook-business-config)):
+
+- **Platform declaration (`config.webhook`):** A platform subscribes by adding
+  `webhook` (`url` required, `events` optional) to the capability's `config` in
+  its platform profile. Omitting `events` subscribes to all events the business
+  emits for that capability.
+- **Business declaration (`config.webhook.events`):** A business that emits
+  events for a capability lists the supported event types in `config.webhook.events`
+  on that capability in its business profile. A business that omits `webhook`
+  does not emit events for that capability.
+
+<!-- ucp:example schema=profile def=platform_schema target=$.ucp.capabilities -->
+```json
+{
+  "dev.ucp.common.location.lookup": [
+    {
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/location/lookup",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/location_lookup.json",
+      "config": {
+        "webhook": {
+          "url": "https://platform.example/webhooks/ucp",
+          "events": [
+            "dev.ucp.common.location.lookup:updated",
+            "dev.ucp.common.location.lookup:removed"
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+#### Subscription Lifecycle
+
+1. **Creation:** A business **MUST** create or update a webhook subscription
+   only from a request authenticated with a valid signature (see
+   [Message Signatures](../signatures.md)) from a recognized platform (see
+   [Fetching](#fetching)). A business **MUST NOT** create a subscription from an
+   unsigned request or an unrecognized platform profile.
+2. **Intersection:** The delivered event set is the intersection of the
+   business's `config.webhook.events` and the platform's `config.webhook.events`
+   (or all business-supported events when the platform omits `events`). The
+   business **MUST** ignore unrecognized event names in the platform's list so
+   platforms can list events from newer capability versions safely.
+3. **Confirmation:** On responses where the capability appears in
+   `ucp.capabilities`, a business that accepts the subscription **MUST** echo
+   the effective `config.webhook.events` in that capability's response entry.
+   Omitting `config.webhook` in the response entry indicates no active
+   subscription.
+4. **Lease and Revalidation:** The platform profile is the subscription lease.
+   The business **MUST** store active subscriptions durably and revalidate the
+   platform profile when its cached copy expires under HTTP cache headers before
+   delivering new events.
+5. **Termination:** A subscription ends when:
+    - The platform removes `config.webhook` (or the event type) from its profile,
+      effective at the business's next profile revalidation;
+    - The platform responds to a webhook delivery with HTTP `410 Gone`, which
+      terminates the subscription for the event's declaring capability only;
+    - Webhook deliveries exhaust the business's retry schedule; or
+    - The platform is no longer recognized by the business.
+   A subsequent signed request from the platform carrying `config.webhook`
+   re-establishes the subscription.
+
+### Event Envelope and Read-Back Semantics
+
+Capability events (other than the full-snapshot
+[Order webhook](../shopping/order/index.md#events)) use the shared
+[Capability Event](../reference.md#capability-event) envelope
+(`schemas/common/types/event.json`):
+
+<!-- ucp:example schema=common/location_lookup def=location_event -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {
+          "version": "{{ ucp_version }}"
+        }
+      ]
+    }
+  },
+  "type": "dev.ucp.common.location.lookup:updated",
+  "occurred_at": "2026-12-14T15:02:11Z",
+  "consistency_token": "seq_1765724531000",
+  "data": {
+    "location_ids": ["loc_castro"],
+    "changed_sections": ["exception_hours"]
+  }
+}
+```
+
+- **`ucp` metadata:** Carries the negotiated protocol `version` and the
+  declaring capability (plus any relevant extensions) in `ucp.capabilities` per
+  [Response Capability Selection](#response-capability-selection). If the
+  business and platform share no compatible version of the declaring capability,
+  the business **MUST NOT** deliver the event.
+- **Thin payloads:** `data` carries the identifiers of the affected resources
+  and optional change hints (such as `changed_sections`). Platforms retrieve
+  current state through the capability's normal read operation, keeping
+  resource content behind the business's standard access and filtering checks.
+- **Read-after-event consistency:** A business **SHOULD** emit an event only
+  after the underlying state change is committed. Because read replicas may lag
+  behind an event delivery, the business **MAY** include an opaque
+  `consistency_token` in the envelope, and capabilities **MAY** accept
+  `consistency_token` on read requests so the business can serve state at or
+  past the event. Platforms **MUST** treat an event as a signal to read rather
+  than as authoritative state.
+
+### Webhook Delivery and Verification
+
+All capability event webhooks follow a uniform HTTP delivery contract,
+regardless of whether the platform's request transport is REST or MCP:
+
+- **Transport and URL safety:** Businesses **MUST** deliver events via HTTP
+  `POST` to `config.webhook.url` and **MUST** apply the [Fetching](#fetching)
+  safety rules (HTTPS required, no redirects, no private or special-use IP
+  addresses on DNS resolution) when connecting to `webhook.url`.
+- **Standard Webhooks headers:** Every delivery **MUST** include `Webhook-Id`
+  (a unique UUID per logical event, kept identical across retries) and
+  `Webhook-Timestamp` (the Unix timestamp in seconds of the delivery attempt, as
+  defined by [Standard Webhooks](https://www.standardwebhooks.com/)). Note that
+  `occurred_at` in the payload records when the business change occurred, while
+  `Webhook-Timestamp` records when the delivery request was sent.
+- **RFC 9421 signing:** Businesses **MUST** include `UCP-Agent` identifying the
+  business profile URL and sign every webhook delivery per
+  [Message Signatures — REST Request Signing](../signatures.md#rest-request-signing).
+  The covered components **MUST** include `@method`, `@authority`, `@path`,
+  `@query` (when present), `content-digest`, `content-type`, `ucp-agent`,
+  `webhook-id`, and `webhook-timestamp`.
+- **Platform verification and authorization:** Platforms **MUST** verify the
+  signature per
+  [Message Signatures — REST Request Verification](../signatures.md#rest-request-verification),
+  reject deliveries whose `Webhook-Timestamp` falls outside their replay
+  tolerance window (recommended: 5 minutes), deduplicate deliveries by
+  `Webhook-Id`, and confirm that the verified signer profile is the business
+  associated with the affected resources.
+- **Acknowledgment and retries:** Platforms **MUST** respond quickly with a
+  `2xx` status code and process read-backs asynchronously, or return `410 Gone`
+  to terminate the capability subscription. Businesses **MUST** retry failed
+  deliveries (`5xx`, `429`, or network errors) with exponential backoff.
 
 ## Standard Capabilities
 

@@ -64,6 +64,11 @@
         },
         "signals": {
           "$ref": "types/signals.json"
+        },
+        "consistency_token": {
+          "type": "string",
+          "description": "Optional opaque token from a capability event envelope (`consistency_token`). When supplied, the Business SHOULD serve the lookup from a replica at or past that state version.",
+          "ucp_request": "optional"
         }
       }
     },
@@ -91,6 +96,201 @@
           },
           "description": "Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers."
         }
+      }
+    },
+    "updated_event": {
+      "title": "Location Updated Event",
+      "description": "Notification that one or more Locations were added or had lookup fields modified.",
+      "allOf": [
+        { "$ref": "types/event.json" },
+        {
+          "type": "object",
+          "properties": {
+            "ucp": {
+              "$ref": "../ucp.json#/$defs/response_location_schema"
+            },
+            "type": {
+              "const": "dev.ucp.common.location.lookup:updated"
+            },
+            "data": {
+              "type": "object",
+              "required": ["location_ids"],
+              "properties": {
+                "location_ids": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Canonical `Location.id` identifiers of the added or updated Locations."
+                },
+                "changed_sections": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true,
+                  "description": "Optional hint listing top-level `Location` fields that changed (e.g., `name`, `address`, `geo`, `hours`, `exception_hours`, `timezone`, `amenities`). Clients MUST tolerate unknown values. When omitted, any field may have changed."
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "removed_event": {
+      "title": "Location Removed Event",
+      "description": "Notification that one or more Locations are no longer served.",
+      "allOf": [
+        { "$ref": "types/event.json" },
+        {
+          "type": "object",
+          "properties": {
+            "ucp": {
+              "$ref": "../ucp.json#/$defs/response_location_schema"
+            },
+            "type": {
+              "const": "dev.ucp.common.location.lookup:removed"
+            },
+            "data": {
+              "type": "object",
+              "required": ["location_ids"],
+              "properties": {
+                "location_ids": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Canonical `Location.id` identifiers of the removed Locations."
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "location_event": {
+      "title": "Location Event",
+      "description": "Asynchronous webhook notification for location updates or removals.",
+      "allOf": [
+        { "$ref": "types/event.json" },
+        {
+          "type": "object",
+          "properties": {
+            "ucp": {
+              "$ref": "../ucp.json#/$defs/response_location_schema"
+            },
+            "type": {
+              "$ref": "types/event_type.json",
+              "description": "Location lookup event type (`dev.ucp.common.location.lookup:updated` or `dev.ucp.common.location.lookup:removed`)."
+            },
+            "data": {
+              "type": "object",
+              "required": ["location_ids"],
+              "properties": {
+                "location_ids": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Canonical `Location.id` identifiers of the affected Locations."
+                },
+                "changed_sections": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true,
+                  "description": "Optional hint listing top-level `Location` fields that changed (`dev.ucp.common.location.lookup:updated` only; e.g., `name`, `address`, `geo`, `hours`, `exception_hours`, `timezone`, `amenities`). Clients MUST tolerate unknown values. When omitted, any field may have changed."
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": { "const": "dev.ucp.common.location.lookup:updated" }
+                },
+                "required": ["type"]
+              },
+              "then": { "$ref": "#/$defs/updated_event" }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": { "const": "dev.ucp.common.location.lookup:removed" }
+                },
+                "required": ["type"]
+              },
+              "then": { "$ref": "#/$defs/removed_event" }
+            }
+          ]
+        }
+      ]
+    },
+    "dev.ucp.common.location.lookup": {
+      "platform_schema": {
+        "title": "Location Lookup (Platform)",
+        "description": "Platform-level location lookup capability declaration and optional webhook subscription.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "$ref": "types/webhook.json#/$defs/platform_config",
+                    "description": "Optional webhook subscription for location events."
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Location Lookup (Business)",
+        "description": "Business-level location lookup capability declaration and optional supported webhook events.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "$ref": "types/webhook.json#/$defs/business_config",
+                    "description": "Supported location webhook event types emitted by this Business."
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      },
+      "response_schema": {
+        "title": "Location Lookup (Response)",
+        "description": "Location lookup capability confirmation in responses, including echoed webhook subscription state.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/response_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "webhook": {
+                    "$ref": "types/webhook.json#/$defs/business_config",
+                    "description": "Confirmed webhook event types active for the requesting Platform."
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
       }
     }
   }

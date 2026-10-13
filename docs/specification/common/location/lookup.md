@@ -334,7 +334,79 @@ The Business evaluates `loc_downtown` and `loc_uptown` in request order.
 `loc_airport` was not evaluated and is not unresolved; the Platform can submit
 it in a subsequent request.
 
+## Events
+
+Businesses that support asynchronous location notifications push thin
+[Capability Events](../../overview/index.md#capability-events) to subscribed
+Platforms when Locations are added, modified, or removed. Platforms treat an
+event as a signal to call `lookup_locations` for the affected `location_ids`.
+
+| Event Type | Description |
+| :--- | :--- |
+| `dev.ucp.common.location.lookup:updated` | One or more Locations were added or had any field returned by `lookup_locations` modified. `data.changed_sections` optionally lists the changed top-level `Location` fields. |
+| `dev.ucp.common.location.lookup:removed` | One or more Locations are no longer served by the Business. |
+
+### Subscription Configuration
+
+A Business advertises the location events it emits under `config.webhook.events`
+on `dev.ucp.common.location.lookup` in its discovery profile, and a Platform
+subscribes via `config.webhook` in its platform profile per
+[Subscription via Capability Configuration](../../overview/index.md#subscription-via-capability-configuration).
+
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
+```json
+{
+  "dev.ucp.common.location.lookup": [
+    {
+      "version": "{{ ucp_version }}",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/location_lookup.json",
+      "config": {
+        "webhook": {
+          "events": [
+            "dev.ucp.common.location.lookup:updated",
+            "dev.ucp.common.location.lookup:removed"
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+### Event Delivery and Read-Back
+
+{{ method_fields('location_event_webhook', 'common/rest.openapi.json', 'common/location/lookup') }}
+
+<!-- ucp:example schema=common/location_lookup def=location_event -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.location.lookup": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "type": "dev.ucp.common.location.lookup:updated",
+  "occurred_at": "2026-12-14T15:02:11Z",
+  "consistency_token": "seq_1765724531000",
+  "data": {
+    "location_ids": ["loc_downtown"],
+    "changed_sections": ["exception_hours"]
+  }
+}
+```
+
+- **Read-back:** Upon receiving `updated` or `removed`, the Platform calls
+  `lookup_locations` with the affected `location_ids` (and `consistency_token`
+  when present) to retrieve current state.
+- **Verifying removals:** Before delisting a Location following a `removed`
+  event, the Platform **MUST** verify removal by issuing an unfiltered
+  `lookup_locations` request for that identifier (without `distance`, `serves`,
+  or `filters`) and confirming the Location is omitted from `locations[]`.
+
 ## Transport Bindings
 
-* [REST Binding](rest.md#post-locationslookup): `POST /locations/lookup`
+* [REST Binding](rest.md#post-locationslookup): `POST /locations/lookup` and [Location Event Webhook](rest.md#location-event-webhook)
 * [MCP Binding](mcp.md#lookup_locations): `lookup_locations` tool
