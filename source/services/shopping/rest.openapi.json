@@ -730,6 +730,660 @@
           }
         }
       }
+    },
+    "/orders/{id}/consultations": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "list_order_consultations",
+        "summary": "List Order Consultations",
+        "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] MANDATORY authoritative discovery path for actionable consultations. Lists consultations whose current revision matches `status` (default `open`). Notifications never replace it. Follow pagination to exhaustion before concluding that none is actionable.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          },
+          {
+            "$ref": "#/components/parameters/consultation_status_query"
+          },
+          {
+            "$ref": "#/components/parameters/consultation_cursor_query"
+          },
+          {
+            "$ref": "#/components/parameters/consultation_limit_query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation list",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_list_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`identity_required`: absent, expired, invalid, or unverifiable buyer identity token (with `WWW-Authenticate: Bearer`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope` or `decision_not_authorized`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`not_found`: unknown identifier, or not visible to this caller (also cross-buyer and cross-Order).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/consultations/{consultation_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/consultation_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "get_order_consultation",
+        "summary": "Get Order Consultation",
+        "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Current revision with status, the revision history index, and the authoritative decision receipt once a terminal decision is recorded.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`identity_required`: absent, expired, invalid, or unverifiable buyer identity token (with `WWW-Authenticate: Bearer`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope` or `decision_not_authorized`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`not_found`: unknown identifier, or not visible to this caller (also cross-buyer and cross-Order).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/consultations/{consultation_id}/revisions/{revision}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/consultation_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/consultation_revision_path"
+        }
+      ],
+      "get": {
+        "operationId": "get_order_consultation_revision",
+        "summary": "Get Consultation Revision",
+        "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Exact immutable terms of one historical or current revision. Only `status` varies over time; the digest recomputes from the terms.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation revision",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_revision_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`identity_required`: absent, expired, invalid, or unverifiable buyer identity token (with `WWW-Authenticate: Bearer`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope` or `decision_not_authorized`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`not_found`: unknown identifier, or not visible to this caller (also cross-buyer and cross-Order).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/consultations/{consultation_id}/decisions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/consultation_id_path"
+        }
+      ],
+      "post": {
+        "operationId": "decide_order_consultation",
+        "summary": "Record Consultation Decision",
+        "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] State-changing. Records exactly one terminal decision against the exact revision in the body. Requires a buyer-authenticated identity token carrying the `dev.ucp.shopping.order_consultation:decide` scope for the Order's owner; Platform credentials, read access, and `dev.ucp.shopping.order:manage` never suffice. Requires Idempotency-Key and Content-Digest; same-key identical-bytes retries replay the original response.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/consultation_decision_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Decision recorded, or the original response replayed.",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_decision_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`identity_required`: absent, expired, invalid, or unverifiable buyer identity token (with `WWW-Authenticate: Bearer`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope` or `decision_not_authorized`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`not_found`: unknown identifier, or not visible to this caller (also cross-buyer and cross-Order).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`proposal_expired`, `proposal_withdrawn`, `proposal_superseded`, `proposal_stale`, `decision_conflict`, or `idempotency_key_conflict`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`proposal_digest_mismatch` or `decision_scope_not_accepted`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`replay_store_unavailable`: failed closed; nothing recorded. Retry with the same key and body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "lookup_order_consultation_decision",
+        "summary": "Look Up Decision By Original Idempotency Key",
+        "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Read-only lost-response recovery. Not state-changing and not itself idempotency-keyed. Returns `recorded`, `in_flight`, or `not_recorded`; absence is provisional unless `final` is true.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          },
+          {
+            "$ref": "#/components/parameters/consultation_original_idempotency_key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lookup outcome",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_decision_lookup_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`identity_required`: absent, expired, invalid, or unverifiable buyer identity token (with `WWW-Authenticate: Bearer`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope` or `decision_not_authorized`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`not_found`: unknown identifier, or not visible to this caller (also cross-buyer and cross-Order).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/consultations/{consultation_id}/decisions/{decision_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/consultation_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/consultation_decision_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "get_order_consultation_decision",
+        "summary": "Get Decision Receipt",
+        "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Durable decision receipt with the current independent `application_status`.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decision receipt",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_decision_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`identity_required`: absent, expired, invalid, or unverifiable buyer identity token (with `WWW-Authenticate: Bearer`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`insufficient_scope` or `decision_not_authorized`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`not_found`: unknown identifier, or not visible to this caller (also cross-buyer and cross-Order).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/consultation_error_response"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -942,6 +1596,80 @@
           "format": "uuid"
         },
         "description": "The unique identifier of a webhook event."
+      },
+      "consultation_id_path": {
+        "name": "consultation_id",
+        "in": "path",
+        "required": true,
+        "description": "Consultation identifier.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "consultation_revision_path": {
+        "name": "revision",
+        "in": "path",
+        "required": true,
+        "description": "Exact revision number.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "consultation_decision_id_path": {
+        "name": "decision_id",
+        "in": "path",
+        "required": true,
+        "description": "Business-assigned decision identifier.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "consultation_status_query": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true,
+        "description": "Filter by current-revision status. Repeatable. Defaults to `open`.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "open"
+          ]
+        }
+      },
+      "consultation_cursor_query": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "description": "Opaque pagination cursor.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "consultation_limit_query": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Requested page size.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "consultation_original_idempotency_key": {
+        "name": "Original-Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "The Idempotency-Key of the original decision POST being recovered. A header, not a URL parameter, so it stays out of access logs. A lookup argument, not an idempotency key for the lookup. Lookup is scoped to the authenticated Platform, Order, consultation, and the decide operation; it never reveals another Platform's or buyer's decision.",
+        "schema": {
+          "type": "string",
+          "minLength": 22
+        }
       }
     },
     "headers": {
@@ -1021,6 +1749,27 @@
           { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
+      },
+      "consultation_list_response": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_list"
+      },
+      "consultation_response": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation"
+      },
+      "consultation_revision_response": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_revision"
+      },
+      "consultation_decision_response": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_receipt"
+      },
+      "consultation_decision_lookup_response": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_lookup"
+      },
+      "consultation_decision_request": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_request"
+      },
+      "consultation_error_response": {
+        "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
       }
     }
   }

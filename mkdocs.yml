@@ -94,6 +94,8 @@ nav:
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
+              - Order Consultation (Draft):
+                  specification/shopping/extensions/order-consultation.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -571,6 +573,11 @@ plugins:
               discounts, allocation method stacking orders, rejected code
               message handling, and automatic or provisional eligibility
               promotions.
+          - specification/shopping/extensions/order-consultation.md: >-
+              Order Consultation Extension (Working Draft), a Business-initiated
+              post-order proposal with immutable revisions, revision-bound
+              buyer decisions, durable receipts, idempotent lost-response
+              recovery, and separately reported Order application.
           - specification/shopping/extensions/buyer-consent.md: >-
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
