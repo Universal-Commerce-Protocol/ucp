@@ -942,6 +942,15 @@ a profile's `business_schema`, or a named sub-type — select it explicitly with
 **Empty body.** A `{}` payload (e.g. cancel, GET) validates trivially against
 the matching op + direction. No special syntax needed.
 
+**Extension fields.** Capability schemas are open, so a field that only an
+extension defines (e.g. `fulfillment` or `discounts` on checkout) would pass
+validation against the capability unchecked. When an example carries such a
+field, the validator also validates it against that extension's composition of
+the capability (`$defs/dev.ucp.shopping.checkout` in `shopping/fulfillment.json`,
+for instance). No annotation is needed: keep annotating the capability, and the
+extension fields are checked too. Fields the capability itself declares, such as
+`payment` or `buyer`, are validated by the capability and don't trigger this.
+
 ### Keep validator wiring invisible
 
 The validation contract is repo infrastructure: annotations, scaffolds, and
@@ -1008,6 +1017,12 @@ python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 The `--audit` mode lists blocks without validating them — useful for counting
 skips and identifying unannotated blocks. `--file` accepts one or more paths
 for incremental validation.
+
+`--export-corpus PATH` also writes every example that validates completely
+(no errors suppressed by elision) to `PATH` as JSON, with its schema,
+operation, direction and merged payload. Each release attaches this file to
+its GitHub release as `examples.json`, so SDKs and other implementations can
+test against the same payloads the specification documents.
 
 #### What runs automatically
 

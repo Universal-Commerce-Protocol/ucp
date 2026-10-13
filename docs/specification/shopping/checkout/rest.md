@@ -402,6 +402,7 @@ state.
         "methods": [
           {
             "type": "shipping",
+            "line_item_ids": ["li_1"],
             "destinations": [
               {
                 "street_address": "123 Main St",
@@ -530,7 +531,7 @@ state.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -541,7 +542,7 @@ state.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -729,7 +730,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -740,7 +741,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -931,7 +932,7 @@ for status and `order` semantics.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -942,7 +943,7 @@ for status and `order` semantics.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1091,7 +1092,7 @@ for status and `order` semantics.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1102,7 +1103,7 @@ for status and `order` semantics.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1249,7 +1250,7 @@ for status and `order` semantics.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1260,7 +1261,7 @@ for status and `order` semantics.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",

@@ -259,6 +259,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - uses: ./.github/actions/setup-build-env
+
+      # Every complete, validated documentation example, published with the
+      # release so SDKs and other implementations can test against it.
+      - name: Export example corpus
+        run: uv run python scripts/validate_examples.py --schema-base source/schemas/ --export-corpus examples.json
+
       - name: Create GitHub Release and Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -271,3 +278,5 @@ jobs:
             --generate-notes \
             --target "$GITHUB_REF_NAME" \
             || echo "Release $TAG_NAME already exists, skipping creation."
+
+          gh release upload "$TAG_NAME" examples.json --clobber
