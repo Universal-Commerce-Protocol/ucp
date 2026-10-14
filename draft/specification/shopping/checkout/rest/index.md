@@ -347,6 +347,7 @@ Content-Type: application/json
     "methods": [
       {
         "type": "shipping",
+        "line_item_ids": ["li_1"],
         "destinations": [
           {
             "street_address": "123 Main St",
@@ -472,7 +473,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -483,7 +484,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -665,7 +666,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -676,7 +677,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -857,7 +858,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -868,7 +869,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -1011,7 +1012,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -1022,7 +1023,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -1163,7 +1164,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -1174,7 +1175,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",

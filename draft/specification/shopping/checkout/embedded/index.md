@@ -1052,6 +1052,7 @@ Requests the host to present address selection UI for a shipping fulfillment met
                     {
                         "id": "method_1",
                         "type": "shipping",
+                        "line_item_ids": ["li_1"],
                         "selected_destination_id": "address_123",
                         "destinations": [
                             {
@@ -1092,6 +1093,7 @@ The host **MUST** respond with either an error, or the newly-selected address. I
                     {
                         "id": "method_1",
                         "type": "shipping",
+                        "line_item_ids": ["li_1"],
                         "selected_destination_id": "address_789",
                         "destinations": [
                             {

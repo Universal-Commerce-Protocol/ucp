@@ -1484,7 +1484,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.payload.signature" // Signed proof of checkout terms
   }
 }
 ```
@@ -9372,6 +9372,7 @@ Content-Type: application/json
     "methods": [
       {
         "type": "shipping",
+        "line_item_ids": ["li_1"],
         "destinations": [
           {
             "street_address": "123 Main St",
@@ -9497,7 +9498,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -9508,7 +9509,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -9690,7 +9691,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -9701,7 +9702,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -9882,7 +9883,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -9893,7 +9894,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -10036,7 +10037,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -10047,7 +10048,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -10188,7 +10189,7 @@ Content-Type: application/json
               {
                 "id": "standard",
                 "title": "Standard Shipping",
-                "description": "Arrives in 5-7 business days",
+                "description": { "plain": "Arrives in 5-7 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -10199,7 +10200,7 @@ Content-Type: application/json
               {
                 "id": "express",
                 "title": "Express Shipping",
-                "description": "Arrives in 2-3 business days",
+                "description": { "plain": "Arrives in 2-3 business days" },
                 "totals": [
                   {
                     "type": "total",
@@ -10682,7 +10683,7 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/shopping/checko
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -10693,7 +10694,7 @@ Maps to the [Create Checkout](http://ucp.dev/draft/specification/shopping/checko
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -10927,7 +10928,7 @@ The Platform **MUST NOT** start a new `update_checkout` operation while the Chec
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -10938,7 +10939,7 @@ The Platform **MUST NOT** start a new `update_checkout` operation while the Chec
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -13018,6 +13019,7 @@ Requests the host to present address selection UI for a shipping fulfillment met
                     {
                         "id": "method_1",
                         "type": "shipping",
+                        "line_item_ids": ["li_1"],
                         "selected_destination_id": "address_123",
                         "destinations": [
                             {
@@ -13058,6 +13060,7 @@ The host **MUST** respond with either an error, or the newly-selected address. I
                     {
                         "id": "method_1",
                         "type": "shipping",
+                        "line_item_ids": ["li_1"],
                         "selected_destination_id": "address_789",
                         "destinations": [
                             {
@@ -25855,7 +25858,7 @@ Businesses **MUST** embed their signature in the checkout response body under `a
   "totals": [ ... ],
   "links": [ ... ],
   "ap2": {
-    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
+    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..signature"
   }
 }
 ```
@@ -25981,7 +25984,7 @@ Checkout extended with AP2 mandate support.
   ],
   "links": [ ... ],
   "ap2": {
-    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
+    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..signature"
   }
 }
 ```
@@ -26065,7 +26068,7 @@ AP2 extension data including checkout mandate.
     ]
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.payload.signature" // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
   }
 }
 ```
