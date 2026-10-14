@@ -92,6 +92,45 @@
           "description": "Errors, warnings, or informational messages about the requested Locations, including `batch_limit_applied` when the Business processes only its configured maximum number of identifiers."
         }
       }
+    },
+    "location_event": {
+      "title": "Location Event",
+      "description": "Asynchronous webhook notification for location updates (`dev.ucp.common.location.lookup:updated`) or removals (`dev.ucp.common.location.lookup:removed`).",
+      "allOf": [
+        { "$ref": "types/event.json" },
+        {
+          "type": "object",
+          "properties": {
+            "ucp": {
+              "$ref": "../ucp.json#/$defs/response_location_schema"
+            },
+            "type": {
+              "$ref": "types/event_type.json",
+              "description": "Location lookup event type (`dev.ucp.common.location.lookup:updated` or `dev.ucp.common.location.lookup:removed`)."
+            },
+            "data": {
+              "type": "object",
+              "required": ["location_ids"],
+              "properties": {
+                "location_ids": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "Canonical `Location.id` identifiers of the affected Locations."
+                },
+                "changed_sections": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true,
+                  "description": "Optional hint listing top-level `Location` fields that changed (`dev.ucp.common.location.lookup:updated` only; e.g., `name`, `address`, `geo`, `hours`, `exception_hours`, `timezone`, `amenities`). Clients MUST tolerate unknown values. When omitted, any field may have changed."
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

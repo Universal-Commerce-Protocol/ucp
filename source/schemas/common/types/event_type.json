@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/event_type.json",
+  "title": "Capability Event Type",
+  "description": "Capability event type identifier formed by joining a reverse-domain capability name and a single-label event name with a colon: '{capability}:{name}' (e.g., 'dev.ucp.common.location.lookup:updated'). Event types inherit the namespace authority of their declaring capability.",
+  "type": "string",
+  "pattern": "^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+:[a-z][a-z0-9_]*$",
+  "examples": [
+    "dev.ucp.common.location.lookup:updated",
+    "dev.ucp.common.location.lookup:removed"
+  ]
+}

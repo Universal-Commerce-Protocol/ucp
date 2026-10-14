@@ -30,19 +30,69 @@
     "platform_schema": {
       "title": "Capability (Platform Schema)",
       "description": "Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.",
-      "allOf": [{ "$ref": "#/$defs/base" }, { "required": ["spec", "schema"] }]
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["spec", "schema"],
+          "properties": {
+            "config": {
+              "type": "object",
+              "properties": {
+                "webhook": {
+                  "$ref": "common/types/webhook.json#/$defs/platform_config",
+                  "description": "Optional webhook subscription configuration for capabilities that emit events."
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
     },
 
     "business_schema": {
       "title": "Capability (Business Schema)",
       "description": "Capability declaration for business/merchant discovery. Requires the `schema` URL so platforms can fetch and compose it during negotiation; may also include business-specific config overrides.",
-      "allOf": [{ "$ref": "#/$defs/base" }, { "required": ["schema"] }]
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["schema"],
+          "properties": {
+            "config": {
+              "type": "object",
+              "properties": {
+                "webhook": {
+                  "$ref": "common/types/webhook.json#/$defs/business_config",
+                  "description": "Optional supported webhook event types emitted by the Business for this capability."
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
     },
 
     "response_schema": {
       "title": "Capability (Response Schema)",
       "description": "Capability reference in responses. Only name/version required to confirm active capabilities.",
-      "allOf": [{ "$ref": "#/$defs/base" }]
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "config": {
+              "type": "object",
+              "properties": {
+                "webhook": {
+                  "$ref": "common/types/webhook.json#/$defs/business_config",
+                  "description": "Optional confirmed webhook event types active for the requesting Platform."
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
     }
   }
 }

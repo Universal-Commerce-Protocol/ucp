@@ -47,6 +47,18 @@ within the UCP.
 
 {{ extension_schema_fields('types/pagination.json#/$defs/response', 'reference') }}
 
+### Platform Webhook Config {: #webhook-platform-config }
+
+{{ extension_schema_fields('types/webhook.json#/$defs/platform_config', 'reference') }}
+
+### Business Webhook Config {: #webhook-business-config }
+
+{{ extension_schema_fields('types/webhook.json#/$defs/business_config', 'reference') }}
+
+### Capability Event Type {: #event-type }
+
+{{ schema_fields('types/event_type', 'reference') }}
+
 ### Error Code {: #error-code }
 
 {{ schema_fields('types/error_code', 'reference') }}

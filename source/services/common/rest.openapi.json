@@ -151,6 +151,40 @@
       }
     }
   },
+  "webhooks": {
+    "locationEvent": {
+      "post": {
+        "operationId": "location_event_webhook",
+        "summary": "Location Event Webhook",
+        "description": "Business sends location update or removal notifications to the Platform's subscribed webhook URL (`config.webhook.url` on `dev.ucp.common.location.lookup`).",
+        "parameters": [
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/webhook_timestamp" },
+          { "$ref": "#/components/parameters/webhook_id" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/location_event" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event received and acknowledged"
+          },
+          "410": {
+            "description": "Subscription terminated by the Platform for this capability"
+          }
+        }
+      }
+    }
+  },
   "components": {
     "parameters": {
       "authorization": {
@@ -271,6 +305,25 @@
           "type": "string"
         },
         "description": "Supported content-codings (compression)."
+      },
+      "webhook_timestamp": {
+        "name": "Webhook-Timestamp",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "Webhook delivery attempt unix timestamp (seconds since epoch)."
+      },
+      "webhook_id": {
+        "name": "Webhook-Id",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Unique identifier of the webhook event, stable across delivery retries."
       }
     },
     "headers": {
@@ -308,6 +361,9 @@
       },
       "location_lookup_response": {
         "$ref": "../../schemas/common/location_lookup.json#/$defs/lookup_response"
+      },
+      "location_event": {
+        "$ref": "../../schemas/common/location_lookup.json#/$defs/location_event"
       },
       "ask_request": {
         "$ref": "../../schemas/common/ask.json#/$defs/ask_request"

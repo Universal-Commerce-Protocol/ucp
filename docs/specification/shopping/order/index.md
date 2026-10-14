@@ -700,9 +700,12 @@ See [Message Signatures](../../signatures.md) for more details.
 
 ### Webhook URL Configuration
 
-The platform provides its webhook URL in the order capability's `config` field
-during capability negotiation. The business discovers this URL from the
-platform's profile and uses it to send order lifecycle events.
+The platform provides its webhook configuration in the Order capability's
+`config` field during capability negotiation using `config.webhook` (or the
+deprecated `config.webhook_url`; see
+[Capability Events — Subscription via Capability Configuration](../../overview/index.md#subscription-via-capability-configuration)).
+The business discovers this URL from the platform's profile and uses it to send
+order lifecycle events.
 
 {{ extension_schema_fields('order.json#/$defs/platform_schema', 'shopping/order') }}
 
@@ -717,7 +720,9 @@ platform's profile and uses it to send order lifecycle events.
       "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/order",
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/order.json",
       "config": {
-        "webhook_url": "https://platform.example.com/webhooks/ucp/orders"
+        "webhook": {
+          "url": "https://platform.example.com/webhooks/ucp/orders"
+        }
       }
     }
   ]
@@ -727,8 +732,8 @@ platform's profile and uses it to send order lifecycle events.
 ### Webhook Signature Verification
 
 Webhook payloads **MUST** be signed by the business and verified by the platform
-to ensure authenticity and integrity. Signatures follow the
-[Message Signatures](../../signatures.md) specification using the REST binding
+per [Capability Events — Webhook Delivery and Verification](../../overview/index.md#webhook-delivery-and-verification)
+and [Message Signatures](../../signatures.md) using the REST binding
 (RFC 9421).
 
 **Required Headers:**
@@ -747,8 +752,10 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Webhook-Id: 550e8400-e29b-41d4-a716-446655440000
+Webhook-Timestamp: 1736942400
 Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "webhook-id" "webhook-timestamp" "content-digest" "content-type");keyid="merchant-2026"
 Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
 {"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
