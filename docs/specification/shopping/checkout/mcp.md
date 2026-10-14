@@ -296,7 +296,7 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
                       {
                         "id": "standard",
                         "title": "Standard Shipping",
-                        "description": "Arrives in 5-7 business days",
+                        "description": { "plain": "Arrives in 5-7 business days" },
                         "totals": [
                           {
                             "type": "total",
@@ -307,7 +307,7 @@ Maps to the [Create Checkout](index.md#create-checkout) operation.
                       {
                         "id": "express",
                         "title": "Express Shipping",
-                        "description": "Arrives in 2-3 business days",
+                        "description": { "plain": "Arrives in 2-3 business days" },
                         "totals": [
                           {
                             "type": "total",
@@ -555,7 +555,7 @@ unchanged and return the current Checkout with a recoverable error Message.
                       {
                         "id": "standard",
                         "title": "Standard Shipping",
-                        "description": "Arrives in 5-7 business days",
+                        "description": { "plain": "Arrives in 5-7 business days" },
                         "totals": [
                           {
                             "type": "total",
@@ -566,7 +566,7 @@ unchanged and return the current Checkout with a recoverable error Message.
                       {
                         "id": "express",
                         "title": "Express Shipping",
-                        "description": "Arrives in 2-3 business days",
+                        "description": { "plain": "Arrives in 2-3 business days" },
                         "totals": [
                           {
                             "type": "total",
