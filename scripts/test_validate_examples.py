@@ -660,6 +660,91 @@ def test_process_block_integration() -> None:
   )
 
 
+def test_extension_validation() -> None:
+  """Fields an extension adds are validated against that extension.
+
+  Capability schemas are open, so a checkout example carrying
+  `fulfillment` passes the checkout schema whatever `fulfillment`
+  contains. The validator must also check it against the fulfillment
+  extension's composition of checkout.
+  """
+  capabilities, extensions = v.load_extensions(_SCHEMA_BASE)
+  checkout_exts = dict(extensions.get("dev.ucp.shopping.checkout", []))
+  _check(
+    "extensions_index_capability_path",
+    capabilities.get("dev.ucp.shopping.checkout") == "shopping/checkout",
+    f"got {capabilities.get('dev.ucp.shopping.checkout')!r}",
+  )
+  _check(
+    "extensions_index_fulfillment_fields",
+    "fulfillment" in checkout_exts.get("shopping/fulfillment", ()),
+    f"got {sorted(checkout_exts)}",
+  )
+  _check(
+    "extensions_index_excludes_capability_itself",
+    "shopping/checkout" not in checkout_exts,
+  )
+
+  if not _has_ucp_schema():
+    _check(
+      "extension_validation_integration",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  def option(description: str) -> str:
+    return (
+      "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+      "```json\n"
+      '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], '  # noqa: E501
+      '"groups": [ { "id": "g1", "line_item_ids": ["li_1"], "options": [ '
+      f'{{ "id": "o1", "title": "Standard", "description": {description}, '
+      '"totals": [ { "type": "total", "amount": 500 } ] } ] } ] } ] }\n'
+      "```\n"
+    )
+
+  result = _process(option('"Arrives soon"'))
+  _check(
+    "extension_field_type_error_fails",
+    result.status == "fail"
+    and "extension shopping/fulfillment:" in result.message
+    and "/description" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  result = _process(option('{ "plain": "Arrives soon" }'))
+  _check(
+    "extension_field_valid_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    '```json\n{ "methods": [ { "id": "m1", "type": "shipping" } ] }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "extension_missing_required_fails",
+    result.status == "fail" and '"line_item_ids"' in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    "```json\n"
+    '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], "groups": [ ... ] } ] }\n'  # noqa: E501
+    "```\n"
+  )
+  result = _process(md)
+  _check(
+    "extension_elided_paths_suppressed",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
   original_run = v.subprocess.run
@@ -712,6 +797,7 @@ def main() -> int:
   test_scaffold_resolution()
   test_resolve_schema_cache_key()
   test_process_block_integration()
+  test_extension_validation()
   return _report()
 
 
