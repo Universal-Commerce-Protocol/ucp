@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/delivery_destination.json",
+  "title": "Delivery Destination",
+  "description": "Delivery destination.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/types/physical_address.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID specific to this delivery destination.",
+          "ucp_request": "optional"
+        },
+        "type": {
+          "type": "string",
+          "const": "delivery_address",
+          "description": "Destination type discriminator.",
+          "ucp_request": "optional"
+        },
+        "preference_options": {
+          "type": "array",
+          "items": {
+            "$ref": "preference_option.json"
+          },
+          "ucp_request": "omit"
+        },
+        "selected_preference_option_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of identifiers for the selected preference options."
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/checkout.json",
+  "name": "dev.ucp.food.checkout",
+  "title": "Checkout",
+  "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "id",
+    "food_establishment",
+    "line_items",
+    "status",
+    "currency",
+    "totals",
+    "links"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_checkout_schema",
+      "ucp_request": "omit"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the checkout session.",
+      "ucp_request": "omit"
+    },
+    "food_establishment": {
+      "$ref": "types/food_establishment.json",
+      "description": "Food establishment location the checkout is associated with.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "types/line_item.json"
+      },
+      "description": "List of dishes being checked out.",
+      "ucp_request": {
+        "create": "required",
+        "update": "required",
+        "complete": "omit"
+      }
+    },
+    "buyer": {
+      "$ref": "types/buyer.json",
+      "description": "Representation of the buyer.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "context": {
+      "$ref": "../common/types/context.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "signals": {
+      "$ref": "../common/types/signals.json",
+      "ucp_request": "optional"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "incomplete",
+        "requires_escalation",
+        "ready_for_complete",
+        "complete_in_progress",
+        "completed",
+        "canceled"
+      ],
+      "description": "Checkout state indicating the current phase and required action. See Checkout Status lifecycle documentation for state transition details.",
+      "ucp_request": "omit"
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code reflecting the business's market determination. Derived from address, context, and geo IP—buyers provide signals, business determines currency.",
+      "ucp_request": "omit"
+    },
+    "totals": {
+      "$ref": "../common/types/totals.json",
+      "description": "Different checkout totals.",
+      "ucp_request": "omit"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/message.json"
+      },
+      "description": "List of messages with error and info about the checkout session state.",
+      "ucp_request": "omit"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/link.json"
+      },
+      "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 expiry timestamp. Default TTL is 6 hours from creation if not sent.",
+      "ucp_request": "omit"
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
+      "ucp_request": "omit"
+    },
+    "tip": {
+      "$ref": "types/tip.json",
+      "description": "Tip amounts requested by the platform on the checkout session. Business MUST return applied amounts in totals.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "payment": {
+      "$ref": "../common/types/payment.json",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "required"
+      }
+    },
+    "order": {
+      "$ref": "types/order_confirmation.json",
+      "description": "Details about an order created for this checkout session.",
+      "ucp_request": "omit"
+    }
+  }
+}

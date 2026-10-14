@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/tip_option.json",
+  "title": "Tip Option",
+  "description": "A selectable value for communicating user tip preference.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id",
+    "amount",
+    "unit"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for the tip option."
+    },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "percentage",
+        "absolute"
+      ],
+      "description": "The unit of the tip amount."
+    },
+    "amount": {
+      "type": "integer",
+      "description": "The amount of the tip. When unit is absolute, this is in the currency's minor unit as defined by ISO 4217.",
+      "minimum": 0
+    }
+  }
+}

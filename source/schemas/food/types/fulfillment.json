@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/fulfillment.json",
+  "title": "Fulfillment",
+  "description": "Container for fulfillment methods and availability.",
+  "type": "object",
+  "properties": {
+   "methods": {
+    "type": "array",
+    "description": "Fulfillment methods for dishes.",
+    "items": { "$ref": "fulfillment_method.json" }
+    },
+    "available_methods": {
+      "type": "array",
+      "description": "Fulfillment method availability hints.",
+      "items": { "$ref": "fulfillment_available_method.json" },
+      "ucp_request": "omit"
+    }
+  }
+}

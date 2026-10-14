@@ -1,0 +1,230 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Food Service",
+    "description": "Canonical MCP/JSON-RPC interface for UCP Food service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.food\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
+  },
+  "servers": [
+    {
+      "name": "business",
+      "url": "{endpoint}",
+      "description": "Business-provided endpoint from UCP discovery profile",
+      "variables": {
+        "endpoint": {
+          "default": "https://food.example.com/ucp/mcp",
+          "description": "Obtain from /.well-known/ucp → services[\"dev.ucp.food\"][transport=mcp].endpoint"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "checkout_result": {
+        "oneOf": [
+          {
+            "$ref": "../../schemas/food/checkout.json"
+          },
+          {
+            "$ref": "../../schemas/common/types/error_response.json"
+          }
+        ]
+      },
+      "meta": {
+        "type": "object",
+        "description": "Request metadata.",
+        "required": [
+          "ucp-agent"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "ucp-agent": {
+            "type": "object",
+            "description": "Platform agent identification. Maps to HTTP UCP-Agent header.",
+            "required": [
+              "profile"
+            ],
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the platform's UCP profile document."
+              }
+            }
+          },
+          "idempotency-key": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique key for retry safety. Maps to HTTP Idempotency-Key header."
+          }
+        }
+      }
+    }
+  },
+  "methods": [
+    {
+      "name": "create_checkout",
+      "summary": "Create a checkout",
+      "description": "Create a new checkout session.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/food/checkout.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "get_checkout",
+      "summary": "Get checkout",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "update_checkout",
+      "summary": "Update checkout",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/food/checkout.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "complete_checkout",
+      "summary": "Complete checkout and place order",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/food/checkout.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "cancel_checkout",
+      "summary": "Cancel checkout",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              },
+              {
+                "required": [
+                  "ucp-agent",
+                  "idempotency-key"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    }
+  ]
+}

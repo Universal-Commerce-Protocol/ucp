@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/dish.json",
+  "title": "Dish",
+  "description": "Dish object. Expected to use the currency of the parent object.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "price"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The dish identifier, required to resolve the associated dish details. Should be recognized by both the Platform and the Business."
+    },
+    "title": {
+      "type": "string",
+      "description": "Dish title.",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Dish description.",
+      "ucp_request": "omit"
+    },
+    "price": {
+      "$ref": "../../common/types/amount.json",
+      "description": "Unit price in ISO 4217 minor units.",
+      "ucp_request": "omit"
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/media.json"
+      },
+      "description": "Dish media assets (e.g., dish images, preparation videos). First item is the featured media for presentation in food ordering surfaces.",
+      "ucp_request": "omit"
+    },
+    "modifications": {
+      "type": "array",
+      "items": {
+        "$ref": "modification.json"
+      },
+      "description": "List of modifications associated with the dish."
+    },
+    "note": {
+      "type": "string",
+      "description": "Buyer-specified freeform note associated with the dish."
+    }
+  }
+}

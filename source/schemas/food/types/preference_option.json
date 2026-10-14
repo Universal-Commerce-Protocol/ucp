@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/preference_option.json",
+  "title": "Preference Option",
+  "description": "A selectable value for communicating user preference.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id",
+    "label"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for the preference option."
+    },
+    "label": {
+      "type": "string",
+      "description": "Display text for this option (e.g., 'Deliver to me', 'Leave at the door')"
+    }
+  }
+}

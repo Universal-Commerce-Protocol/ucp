@@ -195,6 +195,14 @@ Cupertino
 checkin
 cupt
 omni
+luigis
+margherita
+Arancini
+arancini
+foodborne
+Palo
+resends
+subpages
 # rich media formats (video / 3D model source types)
 glb
 gltf
