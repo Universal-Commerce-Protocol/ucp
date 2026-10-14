@@ -694,7 +694,7 @@ See [Message Signatures](../../signatures.md) for more details.
 | Header               | Description                                 |
 | :------------------- | :------------------------------------------ |
 | `Webhook-Timestamp`  | Event occurrence timestamp (unix)           |
-| `Webhook-Id`         | Unique event identifier                     |
+| `Webhook-Id`         | Event identifier; stable across retries     |
 
 {{ method_fields('order_event_webhook', 'shopping/rest.openapi.json', 'shopping/order') }}
 
@@ -754,6 +754,10 @@ through `GET /orders/{id}`, converges on the current state without keeping
 per-delivery state. Platforms **SHOULD** deduplicate on `Webhook-Id`, which
 short-circuits retries and separates events that share a `Webhook-Timestamp`, whose
 resolution is one second.
+
+Businesses **MUST** send retries with the original `Webhook-Id` and
+`Webhook-Timestamp`: a retry redelivers the same event, and the deduplication
+and ordering above rely on both values staying constant.
 
 **Example Webhook Request:**
 
@@ -832,6 +836,9 @@ zero-downtime key rotation procedures.
 * **MUST** send "Order created" event with fully populated order entity
 * **MUST** send full order entity on updates (not incremental deltas)
 * **MUST** retry failed webhook deliveries
+* **MUST** send retries with the original `Webhook-Id` and `Webhook-Timestamp`;
+  a retry redelivers the same event, and platforms deduplicate on `Webhook-Id`
+  and order deliveries by `Webhook-Timestamp`
 
 ## Entities
 
