@@ -3086,6 +3086,14 @@ a profile's <code>business_schema</code>, or a named sub-type — select it expl
 </span></code></pre></div>
 <p><strong>Empty body.</strong> A <code>{}</code> payload (e.g. cancel, GET) validates trivially against
 the matching op + direction. No special syntax needed.</p>
+<p><strong>Extension fields.</strong> Capability schemas are open, so a field that only an
+extension defines (e.g. <code>fulfillment</code> or <code>discounts</code> on checkout) would pass
+validation against the capability unchecked. When an example carries such a
+field, the validator also validates it against that extension's composition of
+the capability (<code>$defs/dev.ucp.shopping.checkout</code> in <code>shopping/fulfillment.json</code>,
+for instance). No annotation is needed: keep annotating the capability, and the
+extension fields are checked too. Fields the capability itself declares, such as
+<code>payment</code> or <code>buyer</code>, are validated by the capability and don't trigger this.</p>
 <h3 id="keep-validator-wiring-invisible">Keep validator wiring invisible<a class="headerlink" href="#keep-validator-wiring-invisible" title="Permanent link">&para;</a></h3>
 <p>The validation contract is repo infrastructure: annotations, scaffolds, and
 schema file paths. Readers of the rendered specification see only protocol
