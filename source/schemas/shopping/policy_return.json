@@ -16,7 +16,7 @@
         },
         "window": {
           "$ref": "#/$defs/return_window",
-          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit for an unlimited or unstated window."
+          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit when no window can be stated as a guarantee; an omitted window means not stated, never unlimited."
         },
         "supported_resolutions": {
           "type": "array",
@@ -72,7 +72,7 @@
         },
         "anchor": {
           "type": "string",
-          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`."
+          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`. Because the window is a guaranteed minimum, a business may name an event that never occurs after the one that starts its clock; `purchased` always qualifies."
         }
       }
     },

@@ -142,8 +142,21 @@ lists both resolutions, and describes the store-credit extension (see
 Businesses differ on whether the clock starts at delivery, purchase, shipment,
 or fulfillment, so when `window` is present a business **MUST** provide both
 `days` and `anchor`. There is no default anchor, and a platform **MUST NOT**
-assume one. Omit `window` entirely for an unlimited window, or when the window
-is not stated structurally, and convey it in `description`.
+assume one.
+
+Because `window` is a guaranteed minimum, a business **MAY** measure it from an
+event that never occurs after the one that starts its clock, since a return
+started before the resulting deadline is still accepted. This lets a business
+state a window when its clock starts at an event no well-known anchor names, or
+at whichever of two events comes first. `purchased` always qualifies, because
+it precedes every other well-known anchor. Likewise, a business with no time
+limit **MAY** state a finite window it guarantees and describe the unlimited
+term in `description`.
+
+A business omits `window` when it cannot state a window as a guarantee, and
+conveys the term in `description`. As with any omitted field, an omitted
+`window` means the window is not stated structurally, not that it is unlimited;
+a platform **MUST NOT** present it as unlimited.
 
 `anchor` is an open vocabulary. The well-known values are:
 
@@ -303,9 +316,9 @@ quantity, less the method's logistics cost (zero for `free`). When the buyer has
 not chosen a method, the worst case is the lowest result across the listed
 methods. A `fixed_fee` is charged per shipment, not per unit, so returning
 several units together incurs it once; a buyer who splits a return across
-shipments pays it for each one. It
-**MUST NOT** treat an elapsed `window` as making an item non-returnable, since
-the `description` may allow later returns; only `final_sale` signals that.
+shipments pays it for each one. It **MUST NOT** treat an elapsed `window` as
+making an item non-returnable, since the `description` may allow later
+returns; only `final_sale` signals that.
 
 ## Order-time resolution
 
