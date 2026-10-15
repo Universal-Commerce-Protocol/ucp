@@ -10,13 +10,9 @@
       "description": "Return terms for a `dev.ucp.shopping.policy.return` policy.",
       "type": "object",
       "properties": {
-        "final_sale": {
-          "type": "boolean",
-          "description": "When `true`, the covered items cannot be returned and `window`, `supported_resolutions`, `methods`, and `restocking_fee` MUST be omitted. When `false` or omitted, the items are returnable subject to the other fields."
-        },
-        "window": {
-          "$ref": "#/$defs/return_window",
-          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit when no window can be stated as a guarantee; an omitted window means not stated, never unlimited."
+        "eligibility": {
+          "$ref": "#/$defs/return_eligibility",
+          "description": "Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When `type` is `not_accepted`, the covered items cannot be returned and `supported_resolutions`, `methods`, and `restocking_fee` MUST be omitted."
         },
         "supported_resolutions": {
           "type": "array",
@@ -42,29 +38,37 @@
       },
       "if": {
         "properties": {
-          "final_sale": {
-            "const": true
+          "eligibility": {
+            "properties": {
+              "type": {
+                "const": "not_accepted"
+              }
+            },
+            "required": ["type"]
           }
         },
         "required": [
-          "final_sale"
+          "eligibility"
         ]
       },
       "then": {
         "properties": {
-          "window": false,
           "supported_resolutions": false,
           "methods": false,
           "restocking_fee": false
         }
       }
     },
-    "return_window": {
-      "title": "Return Window",
-      "description": "A return window measured in whole days from an anchor event.",
+    "return_eligibility": {
+      "title": "Return Eligibility",
+      "description": "An open return eligibility statement. `window` states a guaranteed minimum period for otherwise eligible returns; expiration does not signal non-returnability. `unlimited` states no time restriction, not unconditional eligibility. `not_accepted` states that the covered items cannot be returned. Unknown types establish no eligibility inference; consumers may use the base policy's `description`.",
       "type": "object",
-      "required": ["days", "anchor"],
+      "required": ["type"],
       "properties": {
+        "type": {
+          "type": "string",
+          "description": "Eligibility kind. Well-known values: `window`, `unlimited`, `not_accepted`. Unknown values establish no eligibility inference."
+        },
         "days": {
           "type": "integer",
           "minimum": 1,
@@ -72,9 +76,56 @@
         },
         "anchor": {
           "type": "string",
-          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`. Because the window is a guaranteed minimum, a business may name an event that never occurs after the one that starts its clock; `purchased` always qualifies."
+          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`."
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "window"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["days", "anchor"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "unlimited"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "days": false,
+              "anchor": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "not_accepted"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "days": false,
+              "anchor": false
+            }
+          }
+        }
+      ]
     },
     "restocking_fee": {
       "title": "Restocking Fee",

@@ -34,12 +34,12 @@ platform reads for an item are the ones that apply to it.
 
 **Key features:**
 
-- A return window as a policy statement (`window`), with an explicit anchor
+- A return eligibility statement (`eligibility`): a minimum return window with
+  an explicit anchor, no time limit, or returns not accepted
 - What the buyer receives on an accepted return (`supported_resolutions`)
 - Permitted return channels and their logistics cost (`methods`)
 - A restocking fee that deducts from the refund independent of channel
   (`restocking_fee`)
-- A hard `final_sale` flag for non-returnable items
 
 **Dependencies:**
 
@@ -85,26 +85,27 @@ any surface that carries `policies[]`:
 
 A business **MAY** advertise support on a subset of these surfaces. A platform
 that has negotiated this type validates the return body and **MAY** reason over
-it (for example, computing a return deadline). A platform that has not
-negotiated it still renders the policy from the base `type` and `description`,
-because the return body is purely additive.
+its structured fields (for example, computing a return deadline) only when the
+body passes schema validation. A platform that has not negotiated it still
+renders the policy from the base `type` and `description`, because the return
+body is purely additive.
 
 ## Schema
 
 When this type is active, a `policies[]` entry whose `type` is
 `dev.ucp.shopping.policy.return` **MAY** carry the following fields in addition
-to the base `type`, `description`, `applies_to`, and `url`. All fields are
-optional, and an omitted field means the term is not stated structurally; a
-return policy with no structured fields is still presentable from its
-`description`.
+to the base `type`, `description`, `applies_to`, and `url`. Each top-level
+field is optional, and an omitted field means the term is not stated
+structurally; a return policy with no structured fields is still presentable
+from its `description`.
 
 ### Return Policy
 
 {{ extension_schema_fields('policy_return.json#/$defs/return_body', 'shopping/extensions/return-policy') }}
 
-### Return Window
+### Return Eligibility
 
-{{ extension_schema_fields('policy_return.json#/$defs/return_window', 'shopping/extensions/return-policy') }}
+{{ extension_schema_fields('policy_return.json#/$defs/return_eligibility', 'shopping/extensions/return-policy') }}
 
 ### Restocking Fee
 
@@ -124,39 +125,61 @@ return policy with no structured fields is still presentable from its
 
 ## Return terms
 
+### Eligibility
+
+`eligibility` states whether, and for how long, the covered items can be
+returned. Its `type` is required and is an open vocabulary. The well-known
+kinds are:
+
+| `type` | States that |
+| :-- | :-- |
+| `window` | Otherwise eligible returns are accepted for at least `days` days from the event named by `anchor`; both are required (see [Window and anchor](#window-and-anchor)). |
+| `unlimited` | Otherwise eligible returns are subject to no time restriction. |
+| `not_accepted` | The covered items cannot be returned (see [Non-returnable items](#non-returnable-items)). |
+
+`days` and `anchor` have meaning only on a `window`, so a business **MUST NOT**
+carry them on an `unlimited` or `not_accepted` eligibility; the schema rejects
+the combination.
+
+`not_accepted` is an explicit policy-level prohibition on returning the covered
+items. `window` and `unlimited` state a time bound, not a verdict on a
+particular return: `window` guarantees a period for returns that are otherwise
+eligible, and `unlimited` removes the time restriction and nothing else, so
+neither kind alone establishes that a particular attempted return meets every
+requirement. A business **MAY** describe eligibility requirements beyond time,
+such as tags attached or original packaging, in `description`.
+
+An omitted `eligibility` means eligibility is not stated structurally; it
+states neither that returns are unrestricted nor that they are unavailable, and
+the `description` carries the terms. A platform **MUST NOT** infer eligibility
+from an omitted `eligibility` or from an eligibility `type` it does not
+recognize, for example by presenting the items as returnable without a time
+limit or as not returnable; it **MAY** present the policy from its
+`description`.
+
 ### Window and anchor
 
-`window.days` is the length of the return window as a **policy statement**, not
-a live countdown. It is a guaranteed minimum: a return started within the window
-is accepted with any listed resolution through any listed method. A platform
-computes that guaranteed deadline by adding `days` to the event named by
-`window.anchor`.
+A `window` eligibility states the length of the return window as a **policy
+statement**, not a live countdown. It is a guaranteed minimum for otherwise
+eligible returns: a return started within the window is accepted with any
+listed resolution through any listed method. A platform computes that
+guaranteed deadline by adding `days` to the event named by `anchor`. The window
+is a floor, not a ceiling: its expiry does not establish that an item is
+non-returnable (see [Responsibilities](#responsibilities)).
 
 When the window varies with something known only at return time, such as the
-item's condition or the resolution the buyer picks, `window` states the period
+item's condition or the resolution the buyer picks, `days` states the period
 that holds in every case, and `description` states the longer ones. A policy
 with 30 days for a refund and 60 days for store credit sets `days` to `30`,
 lists both resolutions, and describes the store-credit extension (see
 [Different windows per resolution](#different-windows-per-resolution)).
 
 Businesses differ on whether the clock starts at delivery, purchase, shipment,
-or fulfillment, so when `window` is present a business **MUST** provide both
-`days` and `anchor`. There is no default anchor, and a platform **MUST NOT**
-assume one.
-
-Because `window` is a guaranteed minimum, a business **MAY** measure it from an
-event that never occurs after the one that starts its clock, since a return
-started before the resulting deadline is still accepted. This lets a business
-state a window when its clock starts at an event no well-known anchor names, or
-at whichever of two events comes first. `purchased` always qualifies, because
-it precedes every other well-known anchor. Likewise, a business with no time
-limit **MAY** state a finite window it guarantees and describe the unlimited
-term in `description`.
-
-A business omits `window` when it cannot state a window as a guarantee, and
-conveys the term in `description`. As with any omitted field, an omitted
-`window` means the window is not stated structurally, not that it is unlimited;
-a platform **MUST NOT** present it as unlimited.
+or fulfillment, so a business that states a `window` **MUST** provide both
+`days` and `anchor`, and the schema requires them. There is no default anchor,
+and a platform **MUST NOT** assume one. A business states no time restriction
+with an `unlimited` eligibility; when the window is not stated structurally, it
+omits `eligibility` and conveys the terms in `description`.
 
 `anchor` is an open vocabulary. The well-known values are:
 
@@ -177,14 +200,15 @@ absolute cutoff after the anchor event is future work (see
 
 ### Non-returnable items
 
-To signal that the covered items cannot be returned, a business **MUST** set
-`final_sale` to `true`. Because return terms do not apply, a final-sale policy
-**MUST NOT** carry `window`, `supported_resolutions`, `methods`, or
-`restocking_fee`; the schema rejects the combination, so no precedence between
-fields of one policy is ever needed. A business **MUST NOT** use an empty
-`supported_resolutions` or `methods` array to signal non-returnability, and the
-schema requires at least one entry in each; omit a field that is not stated
-structurally. `final_sale` is the single, unambiguous signal a platform acts on.
+To state that the covered items cannot be returned, such as a final-sale item,
+a business **MUST** set `eligibility.type` to `not_accepted`. Because return
+terms do not apply, a business **MUST NOT** carry `supported_resolutions`,
+`methods`, or `restocking_fee` on a `not_accepted` policy; the schema rejects
+the combination, so no precedence between fields of one policy is ever needed.
+A business **MUST NOT** use an empty `supported_resolutions` or `methods` array
+to signal non-returnability, and the schema requires at least one entry in
+each; omit a field that is not stated structurally. A `not_accepted`
+eligibility is the single, unambiguous signal a platform acts on.
 
 When a business requires the buyer to be shown that an item is final sale, it
 emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal
@@ -278,16 +302,16 @@ submits; there is no buyer selection and no request-side machinery. They carry
 no buyer-asserted claims and no PII, so they cross no new trust boundary beyond
 the base response.
 
-The return-term fields (`window`, `supported_resolutions`, `methods`, and
+The return-term fields (`eligibility`, `supported_resolutions`, `methods`, and
 `restocking_fee`) are guarantees that hold for every eligible return in the
-policy's scope, not an exhaustive statement of its terms. Within `window`, any
-listed resolution is available through any listed method (see
+policy's scope, not an exhaustive statement of its terms. Within a `window`
+eligibility, any listed resolution is available through any listed method (see
 [Window and anchor](#window-and-anchor)), and each fee is a maximum (see
-[Two kinds of cost](#two-kinds-of-cost)). Eligibility requirements, such as tags
-attached or original packaging, are stated in `description`. A condition under
-which an item stays returnable on different terms, such as opened or unopened,
-is not an eligibility requirement, so the fields state the terms that hold in
-every case.
+[Two kinds of cost](#two-kinds-of-cost)). A business **MAY** describe
+eligibility requirements, such as tags attached or original packaging, in
+`description` (see [Eligibility](#eligibility)). A condition under which an
+item stays returnable on different terms, such as opened or unopened, is not an
+eligibility requirement, so the fields state the terms that hold in every case.
 
 A business **SHOULD** populate the fields it can state as guarantees and
 **MUST NOT** populate a field with a value that does not hold for every eligible
@@ -316,9 +340,10 @@ quantity, less the method's logistics cost (zero for `free`). When the buyer has
 not chosen a method, the worst case is the lowest result across the listed
 methods. A `fixed_fee` is charged per shipment, not per unit, so returning
 several units together incurs it once; a buyer who splits a return across
-shipments pays it for each one. It **MUST NOT** treat an elapsed `window` as
-making an item non-returnable, since the `description` may allow later
-returns; only `final_sale` signals that.
+shipments pays it for each one. It
+**MUST NOT** treat an elapsed window as making an item non-returnable, since
+the `description` may allow later returns; only a `not_accepted` eligibility
+states that.
 
 ## Order-time resolution
 
@@ -330,19 +355,19 @@ delivery) has occurred. A future revision is expected to let a business carry
 that resolved cutoff on the Order, so a platform can read it rather than track
 fulfillment events and recompute. Until that field is defined, Order `policies`
 remain the snapshot of the policies that applied at checkout, and a platform
-computes the deadline from `window` as it does pre-purchase.
+computes the deadline from a `window` eligibility as it does pre-purchase.
 
 ## Examples
 
 ### Checkout with a default policy and a final-sale override
 
 A response-wide return policy states the standard terms once. An item-scoped
-policy marks the engraved line (line 2) as final sale; because it names that
-line with a singular query (`$.line_items[2]`), it governs it under same-type
-precedence, outranking any Set match at the same depth, while every other line
-keeps the default. A paired disclosure compels the final-sale notice to be
-shown. The default policy's 15% restocking fee is a maximum; its `display_text`
-names the condition (opened items) under which it applies.
+`not_accepted` policy marks the engraved line (line 2) as final sale; because it
+names that line with a singular query (`$.line_items[2]`), it governs it under
+same-type precedence, outranking any Set match at the same depth, while every
+other line keeps the default. A paired disclosure compels the final-sale notice
+to be shown. The default policy's 15% restocking fee is a maximum; its
+`display_text` names the condition (opened items) under which it applies.
 
 <!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
 ```json
@@ -352,7 +377,7 @@ names the condition (opened items) under which it applies.
     "description": {
       "plain": "30-day returns from delivery. Refund to original payment or exchange. Free in-store; $5 return shipping by mail. 15% restocking fee on opened items."
     },
-    "window": { "days": 30, "anchor": "delivered" },
+    "eligibility": { "type": "window", "days": 30, "anchor": "delivered" },
     "supported_resolutions": ["original_payment_method", "exchange"],
     "methods": [
       { "type": "in_store", "fee": { "type": "free", "display_text": "Free in-store return" } },
@@ -365,7 +390,7 @@ names the condition (opened items) under which it applies.
     "type": "dev.ucp.shopping.policy.return",
     "description": { "plain": "This engraved item is final sale and cannot be returned." },
     "applies_to": ["$.line_items[2]"],
-    "final_sale": true,
+    "eligibility": { "type": "not_accepted" },
     "url": "https://example.com/returns#final-sale"
   }
 ]
@@ -399,7 +424,7 @@ resolution the policy guarantees, and its `description` rules out any other:
     "type": "dev.ucp.shopping.policy.return",
     "description": { "plain": "Returns accepted within 30 days for store credit only." },
     "applies_to": ["$.products[0]"],
-    "window": { "days": 30, "anchor": "purchased" },
+    "eligibility": { "type": "window", "days": 30, "anchor": "purchased" },
     "supported_resolutions": ["store_credit"]
   }
 ]
@@ -409,9 +434,10 @@ resolution the policy guarantees, and its `description` rules out any other:
 
 A business offers refunds for 30 days after delivery and store credit for 60,
 with no restocking fee. Precedence lets only one return policy govern an item,
-so a single policy carries both: `window` states the 30 days in which either
-resolution is guaranteed, the `description` states the longer store-credit
-window, and `percentage_bps` of `0` states that no restocking fee is charged:
+so a single policy carries both: a `window` eligibility states the 30 days in
+which either resolution is guaranteed, the `description` states the longer
+store-credit window, and `percentage_bps` of `0` states that no restocking fee
+is charged:
 
 <!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
 ```json
@@ -421,7 +447,7 @@ window, and `percentage_bps` of `0` states that no restocking fee is charged:
     "description": {
       "plain": "Return within 30 days of delivery for a refund to your original payment method, or within 60 days for store credit. No restocking fee."
     },
-    "window": { "days": 30, "anchor": "delivered" },
+    "eligibility": { "type": "window", "days": 30, "anchor": "delivered" },
     "supported_resolutions": ["original_payment_method", "store_credit"],
     "restocking_fee": { "percentage_bps": 0 },
     "url": "https://example.com/returns"
@@ -433,3 +459,25 @@ A platform can tell the buyer that either resolution is guaranteed until 30
 days after delivery, with no restocking fee. After that, it relies on the
 `description`, which offers store credit until day 60, rather than reporting the
 item as non-returnable.
+
+### Returns with no time limit
+
+A business accepts returns of items with their tags attached at any time, for
+store credit. An `unlimited` eligibility states that no time restriction
+applies, and only that: the tags-attached requirement is stated in the
+`description`, and the fields alone do not establish that a particular attempted
+return meets it. Stating `unlimited` differs from omitting `eligibility`, which
+says nothing structurally about time and leaves a platform to read any window
+from the `description`:
+
+<!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.return",
+    "description": { "plain": "Items with tags attached can be returned at any time for store credit." },
+    "eligibility": { "type": "unlimited" },
+    "supported_resolutions": ["store_credit"]
+  }
+]
+```

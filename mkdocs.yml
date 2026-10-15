@@ -575,10 +575,11 @@ plugins:
           - specification/shopping/extensions/return-policy.md: >-
               Return Policy Extension, defining the
               dev.ucp.shopping.policy.return type on the core policies
-              primitive with machine-readable return terms: window and anchor,
-              supported resolutions, return channels and logistics fees, a
-              policy-level restocking fee, and a final-sale flag across
-              catalog, cart, checkout, and order.
+              primitive with machine-readable return terms: an explicit
+              eligibility statement (a return window with anchor, no time
+              limit, or returns not accepted), supported resolutions, return
+              channels and logistics fees, and a policy-level restocking fee
+              across catalog, cart, checkout, and order.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
