@@ -20,7 +20,14 @@
               "description": "Cart ID to convert to checkout. Business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in checkout payload.",
               "ucp_request": {
                 "create": "optional",
-                "update": "omit"
+                "update": "omit",
+                "complete": {
+                  "transition": {
+                    "from": "optional",
+                    "to": "omit",
+                    "description": "cart_id is only meaningful on create_checkout; cart contents are bound at checkout creation. Platforms SHOULD NOT send cart_id on complete_checkout; businesses MUST ignore it if present. Will become omit at the next version cut."
+                  }
+                }
               }
             }
           }
