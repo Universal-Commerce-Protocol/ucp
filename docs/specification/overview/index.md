@@ -2077,7 +2077,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.payload.signature" // Signed proof of checkout terms
   }
 }
 ```
@@ -2284,6 +2284,7 @@ UCP defines a set of standard capabilities:
 
 | Capability Name      | ID (URI)                                                              | Description                                                                                                  |
 | :------------------- | :-------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Ask**              | [schemas/common/ask.json](site:schemas/common/ask.json)               | Answers natural-language questions about a business's resources, policies, and services; read-only.          |
 | **Cart**.            | [schemas/shopping/cart.json](site:schemas/shopping/cart.json)         | Enables basket building before purchase intent is established.                                               |
 | **Checkout**         | [schemas/shopping/checkout.json](site:schemas/shopping/checkout.json) | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
 | **Identity Linking** | -                                                                     | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |

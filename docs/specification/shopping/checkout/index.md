@@ -53,7 +53,7 @@ the buyer selects it. The
 this shape for a Shop Pay instrument. Returning user-specific saved state
 requires a user-authenticated request; see
 [Identity Linking](../../common/identity-linking/index.md#business-populated-response-values) for
-the access levels and scopes that gate it.
+the limits that apply.
 
 The `display` fields let the platform present a saved instrument and let the
 buyer recognize it. Whether the instrument can be charged as-is or still
