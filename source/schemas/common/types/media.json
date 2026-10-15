@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/media.json",
   "title": "Media",
-  "description": "Media item (image, video, etc.).",
+  "description": "One logical media item — such as an image, a video, or a 3D model. `url` identifies the resource the Platform renders; `sources` lists alternate renditions; `preview` is a still.",
   "type": "object",
   "required": [
     "type",
@@ -11,12 +11,16 @@
   "properties": {
     "type": {
       "type": "string",
-      "description": "Media type. Well-known values: `image`, `video`, `model_3d`."
+      "description": "Media type. Well-known values: `image`, `video`, `external_video`, `model_3d`. A Platform MUST NOT reject the containing object for an unrecognized value; it MAY present the item from `preview` and `name`, or omit it."
     },
     "url": {
       "type": "string",
       "format": "uri",
-      "description": "URL to the media resource."
+      "description": "URL of the media resource the Platform renders; interpretation is specialized per `type`."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable title or label for the media, distinct from `alt_text` (accessibility text). Often present for `video` and `model_3d`."
     },
     "alt_text": {
       "type": "string",
@@ -25,12 +29,86 @@
     "width": {
       "type": "integer",
       "minimum": 1,
-      "description": "Width in pixels (for images/video)."
+      "description": "Intrinsic pixel width of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry."
     },
     "height": {
       "type": "integer",
       "minimum": 1,
-      "description": "Height in pixels (for images/video)."
+      "description": "Intrinsic pixel height of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry."
+    },
+    "duration": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Duration in seconds, for time-based media such as `video` and `external_video`."
+    },
+    "preview": {
+      "type": "object",
+      "description": "Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for `video`, `external_video`, and `model_3d` unless no suitable still exists, and MAY provide it for `image` as a low-resolution placeholder.",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the preview image."
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pixel width of the preview image."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pixel height of the preview image."
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "description": "Alternate renditions of the resource at `url`. The Business SHOULD include the rendition at `url`.",
+      "items": {
+        "$ref": "media_source.json"
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "image" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_image.json"
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "video" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_video.json"
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "external_video" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_external_video.json"
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "model_3d" } },
+        "required": ["type"]
+      },
+      "then": {
+        "$ref": "media_model_3d.json"
+      }
+    }
+  ]
 }

@@ -4,6 +4,13 @@ Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we pos
 
 ______________________________________________________________________
 
+## September 25, 2026: UCP Lodging: Booking Capability Draft Spec Release
+
+We are excited to announce that the initial draft version of the Lodging Booking capability (`dev.ucp.lodging.booking`) has been merged into the Universal Commerce Protocol repository, marking the formal expansion of UCP into the Lodging domain. Developed by the Lodging Technical Council (Amadeus, Booking.com, Expedia, Google, Hilton, Marriott, and Trip.com) and open-source contributors, this capability unlocks foundational hotel reservation flows including real-time pricing and availability checks, guest registration, complex payment schedules, and cross-vertical primitive interoperability.
+
+Explore the [UCP Lodging Documentation](https://ucp.dev/draft/specification/lodging/booking/), and read the full announcement in [GitHub Discussion #864](https://github.com/Universal-Commerce-Protocol/ucp/discussions/864).
+______________________________________________________________________
+
 ## September 2, 2026: Payments Technical Council (Payments TC) Formed
 
 The nomination process for the Payments Technical Council (Payments TC) has officially closed. We are excited to welcome inaugural members Adyen NV, Ant International, Coinbase, Global Payments, Google, PayPal, Shopify, and Stripe to the Payments TC.
