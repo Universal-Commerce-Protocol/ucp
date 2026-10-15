@@ -510,6 +510,7 @@ The platform's payment credential provider verifies that:
 | **No Platform App access** | Platform applications **MUST NOT** handle sensitive data—only the compliant payment credential provider does. |
 | **Endpoint isolation** | `/detokenize` endpoint **MUST** be exposed by the payment credential provider, not the platform application. |
 | **Participant authentication** | Platform's credential provider **MUST** authenticate businesses/PSPs before accepting `/detokenize` calls. |
+| **Participant Identity** | `identity.access_token` is a participant identifier, not a credential. The Platform's credential provider authenticates the caller separately and **MUST NOT** accept `identity` as authentication. See [Binding](../tokenization.md#binding). |
 | **Issued to participant** | Tokens **MUST** be issued to the business's participant identifier (`config.business_id`) from the handler declaration. |
 | **Resource-bound** | Tokens **MUST** be bound to the specific `binding` resource. |
 | **Caller verification** | Platform **MUST** verify the authenticated caller is the participant the token was issued to (or is an authorized PSP). |
