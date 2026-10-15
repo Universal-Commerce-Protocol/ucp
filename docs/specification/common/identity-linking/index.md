@@ -1093,7 +1093,10 @@ require buyer-side wallet UX).
 Providers **MAY** include supporting metadata in the signed payload (e.g.,
 condition hashes, block height, attestation IDs) to enable later auditing
 or dispute resolution. Such metadata **MUST NOT** include the raw
-underlying values that the predicate evaluated.
+underlying values that the predicate evaluated, unless the party requesting
+the attestation explicitly asks for them, for example to receive a Merkle
+proof ([EIP-1186](https://eips.ethereum.org/EIPS/eip-1186){ target="_blank" })
+that lets a verifier check the evaluated value against the block header.
 
 ### Relationship to Scopes
 
@@ -1141,12 +1144,20 @@ The `WWW-Authenticate` header **MUST** include:
 
 and **SHOULD** include:
 
-* `expected_kid="<provider key identifier>"` — the `kid` value the
-    business expects to find in the attestation header. Allows platforms
-    to validate provider identity before issuing the request.
+* `expected_kid="<provider key identifier>"`: the `kid` value, or a
+    space-separated list of `kid` values, that the business expects to
+    find in the attestation header. Allows platforms to validate provider
+    identity before issuing the request.
 * `resource_metadata="<URI of the business's protected resource metadata>"`
     per
     [RFC 9728 §5.1](https://datatracker.ietf.org/doc/html/rfc9728#section-5.1){ target="_blank" }.
+
+`expected_kid` is a hint, not a pin. A provider can sign under more than one
+`kid` at a time, and adds keys when it rotates them. Businesses select the
+verification key by the attestation's own `kid` (see
+[Verification Procedure](#verification-procedure)), and **MUST NOT** reject
+an attestation solely because its `kid` is missing from `expected_kid` when
+that `kid` is published in the provider's JWKS.
 
 ```http
 HTTP/1.1 401 Unauthorized
