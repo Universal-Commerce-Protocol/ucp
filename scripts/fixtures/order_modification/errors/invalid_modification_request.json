@@ -1,0 +1,21 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "invalid_modification_request",
+      "severity": "recoverable",
+      "content": "Duplicate targets are not allowed in one request."
+    }
+  ]
+}

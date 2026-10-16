@@ -1,0 +1,21 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "stale_order_state",
+      "severity": "recoverable",
+      "content": "base_order_version v13 does not match current Order state."
+    }
+  ]
+}

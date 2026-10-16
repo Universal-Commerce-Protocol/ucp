@@ -1,0 +1,74 @@
+{
+  "id": "V22-get-lookup-never-changes-admission",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Retrying or prefetching the GET lookup cannot fence or block a valid request",
+  "spec_refs": [
+    "Safe methods",
+    "Scoped lookup"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "GET lookup before the original arrives (prefetch)",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2/modifications/lookup?operation=cancel",
+        "authenticated_platform": "platform-a",
+        "headers": {
+          "Original-Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"@query\" \"ucp-agent\" \"original-idempotency-key\")"
+        }
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "lookups/unresolved_admission_in_flight.json"
+      },
+      "repeat": 5
+    },
+    {
+      "name": "original POST arrives afterwards",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/pending.json"
+      }
+    },
+    {
+      "name": "GET lookup again",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2/modifications/lookup?operation=cancel",
+        "authenticated_platform": "platform-a",
+        "headers": {
+          "Original-Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"@query\" \"ucp-agent\" \"original-idempotency-key\")"
+        }
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "lookups/found.json"
+      }
+    }
+  ],
+  "assertions": [
+    "The GET installs no tombstone, claims no key, and writes no replay record.",
+    "Admission state before and after any number of lookups is identical.",
+    "Lookup responses carry Cache-Control: no-store so intermediaries cannot cache or prefetch a stale negative."
+  ]
+}

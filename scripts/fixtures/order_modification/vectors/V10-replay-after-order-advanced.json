@@ -1,0 +1,60 @@
+{
+  "id": "V10-replay-after-order-advanced",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Admitted attempt replays even if the Order advanced",
+  "spec_refs": [
+    "Version preconditions",
+    "Idempotency and replay"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "admitted at v14",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/pending.json"
+      }
+    },
+    {
+      "name": "Order advances to v15 (shipment)",
+      "event": "order_version_advances"
+    },
+    {
+      "name": "byte-identical retry",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json",
+        "raw_body": "identical"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/pending.json"
+      }
+    }
+  ],
+  "assertions": [
+    "The retry replays the original durable attempt; it is not revalidated as new and does not fail with stale_order_state."
+  ]
+}

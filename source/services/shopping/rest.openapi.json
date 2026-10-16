@@ -687,6 +687,584 @@
         }
       }
     },
+    "/orders/{id}/modifications": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        }
+      ],
+      "post": {
+        "operationId": "create_modification",
+        "summary": "Create Modification",
+        "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; see the extension specification. Proposed, not approved.] Admit a cancellation attempt against an Order. State-changing: requires a signed Idempotency-Key and Content-Digest. New requests are checked against `base_order_version` before admission; a stale version returns `stale_order_state` and creates no record. A same-key, identical-bytes retry replays the original response without re-execution, even if the Order has advanced since. Admission returns 201 with the durable modification record; `awaiting_business_decision` is admitted-but-not-committed.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../../schemas/shopping/order_modification.json#/$defs/create_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Attempt admitted (any per-operation outcome, including awaiting_business_decision) or original response replayed.",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              },
+              "Cache-Control": {
+                "description": "`no-store`. Modification and reconciliation responses are sensitive (order state, idempotency-scoped records) and MUST NOT be cached or prefetched by intermediaries.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../../schemas/shopping/order_modification.json#/$defs/create_response"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Business outcome before admission (stale_order_state, unknown_modification_unit, operation_not_supported_for_unit, modification_not_supported, invalid_modification_request, not_found, unauthorized). No modification record was created.",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              },
+              "Cache-Control": {
+                "description": "`no-store`. Modification and reconciliation responses are sensitive (order state, idempotency-scoped records) and MUST NOT be cached or prefetched by intermediaries.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../../schemas/common/types/error_response.json"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required or failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not permitted (for example missing `dev.ucp.shopping.order:manage`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`idempotency_conflict`: the Idempotency-Key was reused with different raw body bytes. Nothing was executed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable, including idempotency storage failure. Fail closed: nothing was executed. Include Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/modifications/{modification_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        },
+        {
+          "$ref": "#/components/parameters/modification_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "get_modification",
+        "summary": "Get Modification",
+        "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; see the extension specification. Proposed, not approved.] Read the authoritative, current record of an admitted attempt. Not an idempotent mutation: no Idempotency-Key. Scoped to the authenticated Platform and Order; a record outside that scope is reported as not_found.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Modification record or business outcome (not_found, unauthorized).",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              },
+              "Cache-Control": {
+                "description": "`no-store`. Modification and reconciliation responses are sensitive (order state, idempotency-scoped records) and MUST NOT be cached or prefetched by intermediaries.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "../../schemas/shopping/order_modification.json#/$defs/read_response"
+                    },
+                    {
+                      "$ref": "../../schemas/common/types/error_response.json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required or failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/modifications/lookup": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        }
+      ],
+      "get": {
+        "operationId": "lookup_modification",
+        "summary": "Lookup Modification by Original Key",
+        "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; proposed, not approved. A Business MUST reject the call with `modification_not_supported` when it was not negotiated.] STRICTLY READ-ONLY (safe, RFC 9110 section 9.2.1): never installs a tombstone, claims a key, or changes whether the original request can later commit, so retrying or prefetching it is harmless. Recover an attempt whose create response was lost. Scope is the authenticated Platform, the Order, the `operation` query parameter, and the original key in the `Original-Idempotency-Key` header. `status: found` returns the record; `status: unresolved` is provisional and the Platform MUST NOT create a replacement attempt with a new key on that answer alone. An authoritative negative requires the explicit `fence_modification` operation.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          },
+          {
+            "$ref": "#/components/parameters/operation_query"
+          },
+          {
+            "$ref": "#/components/parameters/original_idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lookup result or business outcome (unauthorized).",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              },
+              "Cache-Control": {
+                "description": "`no-store`. Modification and reconciliation responses are sensitive (order state, idempotency-scoped records) and MUST NOT be cached or prefetched by intermediaries.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "../../schemas/shopping/order_modification.json#/$defs/lookup_response"
+                    },
+                    {
+                      "$ref": "../../schemas/common/types/error_response.json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required or failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/modifications/fence": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/order_id_path"
+        }
+      ],
+      "post": {
+        "operationId": "fence_modification",
+        "summary": "Fence Modification Key",
+        "description": "[Requires the `dev.ucp.shopping.order_modification` extension to be negotiated; proposed, not approved. A Business MUST reject the call with `modification_not_supported` when it was not negotiated.] Explicit, state-changing, idempotent request that resolves an UNCLAIMED original key into an authoritative non-commit. Requires its own fresh signed Idempotency-Key and Content-Digest (distinct from the original key named in the body). The Business performs one atomic compare-and-set on the scoped key (authenticated Platform, Order, operation, original key): if a claim exists it returns `found` and installs nothing; if the record expired it returns `unresolved`; otherwise it installs a PERMANENT tombstone and returns `fenced`, after which the original request can never commit. A Business that cannot make the tombstone permanent rejects with `fence_not_supported`. The read-only lookup never does this.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/authorization"
+          },
+          {
+            "$ref": "#/components/parameters/x_api_key"
+          },
+          {
+            "$ref": "#/components/parameters/signature"
+          },
+          {
+            "$ref": "#/components/parameters/signature_input"
+          },
+          {
+            "$ref": "#/components/parameters/content_digest"
+          },
+          {
+            "$ref": "#/components/parameters/idempotency_key"
+          },
+          {
+            "$ref": "#/components/parameters/request_id"
+          },
+          {
+            "$ref": "#/components/parameters/user_agent"
+          },
+          {
+            "$ref": "#/components/parameters/ucp_agent"
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/accept_language"
+          },
+          {
+            "$ref": "#/components/parameters/accept_encoding"
+          },
+          {
+            "$ref": "#/components/parameters/content_type"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../../schemas/shopping/order_modification.json#/$defs/fence_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fence outcome (found, fenced, unresolved) or business outcome (fence_not_supported, modification_not_supported, unauthorized). Replays of the same fence request return the original response.",
+            "headers": {
+              "Signature": {
+                "$ref": "#/components/headers/signature"
+              },
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              },
+              "Cache-Control": {
+                "description": "`no-store`. Modification and reconciliation responses are sensitive (order state, idempotency-scoped records) and MUST NOT be cached or prefetched by intermediaries.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "../../schemas/shopping/order_modification.json#/$defs/fence_response"
+                    },
+                    {
+                      "$ref": "../../schemas/common/types/error_response.json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required or failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not permitted (for example missing `dev.ucp.shopping.order:manage`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`idempotency_conflict`: the Idempotency-Key was reused with different raw body bytes. Nothing was executed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable, including idempotency storage failure. Fail closed: nothing was executed. Include Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/protocol_error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/product": {
       "post": {
         "operationId": "get_product",
@@ -803,6 +1381,34 @@
         "description": "The unique identifier of the order.",
         "schema": {
           "type": "string"
+        }
+      },
+      "modification_id_path": {
+        "name": "modification_id",
+        "in": "path",
+        "required": true,
+        "description": "Business-assigned durable modification identifier. The literal `lookup` is reserved for the scoped-key lookup route and MUST NOT be issued as a modification_id.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "operation_query": {
+        "name": "operation",
+        "in": "query",
+        "required": true,
+        "description": "Operation type of the original attempt (for example `cancel`). Part of the lookup scope. The query string MUST be covered by the request signature (`@query`).",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "original_idempotency_key": {
+        "name": "Original-Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "The Idempotency-Key used on the original create request. Carried in a header (not the URL) so it is not recorded in access logs. MUST be covered by the request signature. This is a lookup argument, not an idempotency key for the lookup: the Business MUST NOT store a replay record for, or otherwise treat as state-changing, the lookup request.",
+        "schema": {
+          "type": "string",
+          "minLength": 22
         }
       },
       "authorization": {
@@ -968,6 +1574,28 @@
       }
     },
     "schemas": {
+      "protocol_error": {
+        "type": "object",
+        "description": "Protocol error body: machine-readable `code` and human-readable `content`.",
+        "required": [
+          "code",
+          "content"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "examples": [
+              "idempotency_conflict",
+              "unauthorized",
+              "insufficient_scope",
+              "service_unavailable"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
       "checkout": {
         "$ref": "../../schemas/shopping/checkout.json"
       },

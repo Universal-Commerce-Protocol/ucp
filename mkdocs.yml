@@ -92,6 +92,8 @@ nav:
           - Extensions:
               - Fulfillment: specification/shopping/extensions/fulfillment.md
               - Discounts: specification/shopping/extensions/discount.md
+              - Order Modification (Draft):
+                  specification/shopping/extensions/order-modification.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
           - Playground: specification/shopping/playground.md
@@ -575,6 +577,15 @@ plugins:
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
+          - specification/shopping/extensions/order-modification.md: >-
+              Draft Order Modification Extension (Enhancement Proposal #943,
+              proposed dev.ucp namespace, unapproved), a capability-negotiated,
+              cancellation-first contract for post-purchase order and unit
+              cancellation, defining the read-side modification declaration,
+              order version preconditions, atomic and per-unit outcomes,
+              merchant review, idempotent replay, scoped lost-response
+              lookup, and the separation of cancellation commitment from
+              refund adjustments.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data

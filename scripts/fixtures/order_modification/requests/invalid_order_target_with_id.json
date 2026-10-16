@@ -1,0 +1,12 @@
+{
+  "base_order_version": "v14",
+  "operations": [
+    {
+      "op": "cancel",
+      "target": {
+        "type": "order",
+        "id": "ord_9f2"
+      }
+    }
+  ]
+}
