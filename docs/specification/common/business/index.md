@@ -83,13 +83,13 @@ Businesses advertise `dev.ucp.common.business` in `ucp.capabilities` with a
               {
                 "type": "image",
                 "role": "logo",
-                "url": "https://cdn.pos-host.example/joes/logo.png",
+                "url": "https://cdn.joespizza.example/logo.png",
                 "alt_text": "Joe's Pizza logo"
               },
               {
                 "type": "image",
                 "role": "cover",
-                "url": "https://cdn.pos-host.example/joes/cover.jpg"
+                "url": "https://cdn.joespizza.example/cover.jpg"
               }
             ],
             "links": [
@@ -139,51 +139,23 @@ Because each version-specific profile referenced via `supported_versions` is a
 self-contained document, leaf profiles **SHOULD** include
 `dev.ucp.common.business` when present.
 
-### Storefront Binding (`website` Link)
+### Storefront and Policy Links
 
-When a business profile origin (`/.well-known/ucp`) differs from the business's
-buyer-facing storefront URL, the business **SHOULD** include a `website` entry
-in `config.links` pointing to its canonical customer-facing storefront:
-
-* **Platform-hosted SMB:** A profile hosted at
-  `https://joes-pizza.pos-host.example/.well-known/ucp` declares
-  `{"type": "website", "url": "https://joespizza.example"}` (or
-  `https://pos-host.example/joes-pizza`).
-* **Multi-region enterprise with path-based country storefronts:** An
-  enterprise serving regional storefronts at `https://global-apparel.example/us`
-  and `https://global-apparel.example/ca` publishes separate UCP profiles at
-  `https://us.ucp.global-apparel.example/.well-known/ucp` and
-  `https://ca.ucp.global-apparel.example/.well-known/ucp`, each setting
-  `config.name` (e.g., `"Global Apparel US"`) and `config.links`
-  (`{"type": "website", "url": "https://global-apparel.example/us"}`).
-* **Multi-brand enterprise:** Each brand origin declares that brand's own
-  `config.name`, `media`, `links`, `address`, `contacts`, and `categories`.
-
-`config.links` is for canonical storefront binding (`website`) and
+`config.links` carries the business's customer-facing `website` URL and
 business-wide legal or policy disclosures (`privacy_policy`,
-`terms_of_service`, `refund_policy`, `shipping_policy`, `faq`)—not a sitemap of
+`terms_of_service`, `refund_policy`, `shipping_policy`, `faq`), not a sitemap of
 site navigation pages.
 
-### Contact Points and Account Claiming
+### Corporate Address and Contacts
 
-`config.address` and `config.contacts` carry the business entity's corporate or
-registered legal address and business-wide contact channels (`general`,
-`customer_support`, `admin`, `legal`):
-
-* **Corporate and customer-support channels:** Online-only businesses and
-  multi-location brands publish their headquarters or registered legal address in
-  `config.address` and their support or inquiry channels in `config.contacts`.
-* **Origin-bound account claiming:** When a Platform ingests a UCP discovery
-  profile (such as a POS-hosted merchant profile) to create an unverified
-  merchant listing, it **MAY** send a verification challenge (such as a one-time
-  passcode) to an `email` or `phone_number` published in `config.contacts` on
-  that authoritative origin when the merchant claims the account.
-* **Public-profile privacy:** Because `/.well-known/ucp` is a public,
-  unauthenticated document, Businesses and hosting platforms **SHOULD** publish
-  public or business-routed contact channels (such as a main business phone
-  number, a domain email like `info@joespizza.example`, or a host-routed relay
-  address) rather than an individual owner's personal email address or personal
-  mobile number.
+`config.address` carries the business entity's corporate, headquarters, or
+registered legal address (distinct from physical retail branches in
+`dev.ucp.common.location.*`). `config.contacts` carries business-wide contact
+channels (`general`, `customer_support`, `admin`, `legal`). Because
+`/.well-known/ucp` is a public, unauthenticated document, Businesses **SHOULD**
+publish public or business-routed contact channels (such as a main business
+phone number or a domain email like `info@joespizza.example`) rather than an
+individual's personal email address or personal phone number.
 
 ## Schema
 
@@ -199,13 +171,13 @@ registered legal address and business-wide contact channels (`general`,
     {
       "type": "image",
       "role": "logo",
-      "url": "https://cdn.pos-host.example/joes/logo.png",
+      "url": "https://cdn.joespizza.example/logo.png",
       "alt_text": "Joe's Pizza logo"
     },
     {
       "type": "image",
       "role": "cover",
-      "url": "https://cdn.pos-host.example/joes/cover.jpg"
+      "url": "https://cdn.joespizza.example/cover.jpg"
     }
   ],
   "links": [

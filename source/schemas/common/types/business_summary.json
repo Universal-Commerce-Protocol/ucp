@@ -34,7 +34,7 @@
       "items": {
         "$ref": "contact.json"
       },
-      "description": "Business-wide contact points (e.g., `general`, `customer_support`, `admin`, `legal`) for buyer inquiries and origin-bound account claim flows."
+      "description": "Business-wide contact points (e.g., `general`, `customer_support`, `admin`, `legal`)."
     }
   }
 }

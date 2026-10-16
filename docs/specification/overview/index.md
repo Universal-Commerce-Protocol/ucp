@@ -679,8 +679,7 @@ for details.
 Businesses **MAY** declare the [Business Capability](../common/business/index.md)
 (`dev.ucp.common.business`) in `ucp.capabilities` to publish location-independent
 business and brand identity metadata (`name`, `media`, `links`, `address`,
-`contacts`, and `categories`), including a canonical `website` link when the
-profile origin differs from the customer-facing storefront URL.
+`contacts`, and `categories`).
 
 #### Platform Profile
 
