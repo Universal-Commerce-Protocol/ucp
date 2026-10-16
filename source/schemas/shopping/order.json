@@ -9,9 +9,7 @@
       "title": "Platform Order Schema",
       "description": "Platform's order capability configuration.",
       "type": "object",
-      "required": [
-        "webhook_url"
-      ],
+      "required": ["webhook_url"],
       "properties": {
         "webhook_url": {
           "type": "string",

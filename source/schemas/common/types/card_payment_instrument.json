@@ -12,11 +12,7 @@
         "brand": {
           "type": "string",
           "description": "Card scheme. Derived from the account number, not submitted.",
-          "examples": [
-            "visa",
-            "mastercard",
-            "cartebancaire"
-          ]
+          "examples": ["visa", "mastercard", "cartebancaire"]
         }
       }
     }
@@ -27,9 +23,7 @@
     },
     {
       "type": "object",
-      "required": [
-        "type"
-      ],
+      "required": ["type"],
       "properties": {
         "type": {
           "type": "string",

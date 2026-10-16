@@ -4,12 +4,7 @@
   "title": "Adjustment",
   "description": "Post-order event that exists independently of fulfillment. Typically represents money movements but can be any post-order change. Polymorphic type that can optionally reference line items.",
   "type": "object",
-  "required": [
-    "id",
-    "type",
-    "occurred_at",
-    "status"
-  ],
+  "required": ["id", "type", "occurred_at", "status"],
   "properties": {
     "id": {
       "type": "string",
@@ -26,11 +21,7 @@
     },
     "status": {
       "type": "string",
-      "enum": [
-        "pending",
-        "completed",
-        "failed"
-      ],
+      "enum": ["pending", "completed", "failed"],
       "description": "Adjustment status."
     },
     "line_items": {
