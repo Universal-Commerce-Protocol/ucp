@@ -4549,6 +4549,8 @@ the <code>attribution/</code> prefix.</p>
 <p>can resolve to:</p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">303</span> <span class="ne">See Other</span>
 </span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="na">Location</span><span class="o">:</span> <span class="l">https://merchant.example/collections/spring?utm_source=email&amp;utm_medium=sms&amp;color=black</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="na">Cache-Control</span><span class="o">:</span> <span class="l">no-store</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="na">Referrer-Policy</span><span class="o">:</span> <span class="l">no-referrer</span>
 </span></code></pre></div>
 <p>In this example:</p>
 <ul>
@@ -4600,6 +4602,8 @@ state.</p>
 <p>Possible resolution:</p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">303</span> <span class="ne">See Other</span>
 </span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="na">Location</span><span class="o">:</span> <span class="l">https://checkout.merchant.example/session/chk_123</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="na">Cache-Control</span><span class="o">:</span> <span class="l">no-store</span>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="na">Referrer-Policy</span><span class="o">:</span> <span class="l">no-referrer</span>
 </span></code></pre></div>
 <h3 id="campaign-link-with-discount-and-continuation">Campaign link with discount and continuation<a class="headerlink" href="#campaign-link-with-discount-and-continuation" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>https://merchant.example/buy/sku_123:1,sku_456:2?continue_to=/collections/spring&amp;discounts/codes/0=SPRING10&amp;attribution/utm_source=email
@@ -4631,6 +4635,8 @@ it as <code>utm_source</code> on the redirect destination for client-side analyt
 <p>Possible resolution:</p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">303</span> <span class="ne">See Other</span>
 </span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="na">Location</span><span class="o">:</span> <span class="l">https://merchant.example/collections/spring?utm_source=email</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="na">Cache-Control</span><span class="o">:</span> <span class="l">no-store</span>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="na">Referrer-Policy</span><span class="o">:</span> <span class="l">no-referrer</span>
 </span></code></pre></div>
 <h3 id="buyer-directed-purchase-link">Buyer-directed purchase link<a class="headerlink" href="#buyer-directed-purchase-link" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>https://merchant.example/buy/sku_kit:3,~Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC83MDg4MTQxMg:2?discounts/codes/0=VIP20&amp;discounts/codes/1=WELCOME&amp;buyer/email=alice%40foo.com&amp;buyer/phone_number=123-456-7890&amp;context/address_country=US&amp;context/postal_code=94105&amp;context/language=en-US&amp;attribution/ref=creator_42&amp;attribution/utm_source=social&amp;context/payment/0/handler=com.example.wallet
@@ -4675,6 +4681,8 @@ values.</p>
 <p>Possible resolution:</p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">303</span> <span class="ne">See Other</span>
 </span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="na">Location</span><span class="o">:</span> <span class="l">https://checkout.merchant.example/session/chk_123</span>
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="na">Cache-Control</span><span class="o">:</span> <span class="l">no-store</span>
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="na">Referrer-Policy</span><span class="o">:</span> <span class="l">no-referrer</span>
 </span></code></pre></div>
 <h3 id="pickup-with-a-pre-selected-destination">Pickup with a pre-selected destination<a class="headerlink" href="#pickup-with-a-pre-selected-destination" title="Permanent link">&para;</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>https://merchant.example/buy/sku_123:1?fulfillment/methods/0/type=pickup&amp;fulfillment/methods/0/selected_destination_id=loc_1375
@@ -4697,6 +4705,8 @@ server-generated IDs — does not exist until the Business resolves the link.</p
 <p>Possible resolution:</p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">303</span> <span class="ne">See Other</span>
 </span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="na">Location</span><span class="o">:</span> <span class="l">https://checkout.merchant.example/session/chk_123</span>
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="na">Cache-Control</span><span class="o">:</span> <span class="l">no-store</span>
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="na">Referrer-Policy</span><span class="o">:</span> <span class="l">no-referrer</span>
 </span></code></pre></div>
 <h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
 <p>A permalink endpoint is an unauthenticated browser GET. Every component of the
