@@ -10,13 +10,9 @@
       "description": "Return terms for a `dev.ucp.shopping.policy.return` policy.",
       "type": "object",
       "properties": {
-        "final_sale": {
-          "type": "boolean",
-          "description": "When `true`, the covered items cannot be returned and `window`, `supported_resolutions`, `methods`, and `restocking_fee` MUST be omitted. When `false` or omitted, the items are returnable subject to the other fields."
-        },
-        "window": {
-          "$ref": "#/$defs/return_window",
-          "description": "Guaranteed minimum return window, as a policy statement: a return started within it is accepted with any listed resolution through any listed method. Omit when no window can be stated as a guarantee; an omitted window means not stated, never unlimited."
+        "eligibility": {
+          "$ref": "#/$defs/return_eligibility",
+          "description": "Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When `type` is `not_accepted`, the covered items cannot be returned and `supported_resolutions`, `methods`, and `fees` MUST be omitted."
         },
         "supported_resolutions": {
           "type": "array",
@@ -29,160 +25,206 @@
         },
         "methods": {
           "type": "array",
-          "description": "Return channels guaranteed for every eligible return, each with its maximum logistics cost where stated; not an exhaustive list. Omit when channels are not stated structurally.",
+          "description": "Return channels guaranteed for every eligible return, as an unordered set; not an exhaustive list. Well-known values: `in_store`, `by_mail`, `kiosk`. Omit when channels are not stated structurally.",
           "minItems": 1,
+          "uniqueItems": true,
           "items": {
-            "$ref": "#/$defs/return_method"
+            "type": "string"
           }
         },
-        "restocking_fee": {
-          "$ref": "#/$defs/restocking_fee",
-          "description": "Maximum refund deduction, applied regardless of return channel. Omitted means the fee is not stated structurally, not that none is charged; set `percentage_bps` to `0` to state that no restocking fee is charged. Provide `percentage_bps`, `amount`, or both; when both are present, each is a cap computed over the same returned quantity and the deduction never exceeds either (e.g., 15% up to $50 per unit)."
+        "fees": {
+          "type": "array",
+          "description": "Estimated maximum charges on a return, each typed by what it is for and optionally scoped to channels; not an exhaustive list. Omitted means fees are not stated structurally, not that none are charged.",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fee"
+          }
         }
       },
       "if": {
         "properties": {
-          "final_sale": {
-            "const": true
+          "eligibility": {
+            "properties": {
+              "type": {
+                "const": "not_accepted"
+              }
+            },
+            "required": ["type"]
           }
         },
         "required": [
-          "final_sale"
+          "eligibility"
         ]
       },
       "then": {
         "properties": {
-          "window": false,
           "supported_resolutions": false,
           "methods": false,
-          "restocking_fee": false
+          "fees": false
         }
       }
     },
-    "return_window": {
-      "title": "Return Window",
-      "description": "A return window measured in whole days from an anchor event.",
+    "return_eligibility": {
+      "title": "Return Eligibility",
+      "description": "An open return eligibility statement. `window` states a guaranteed minimum period after an anchor event and, once resolved, the instant it ends; expiration does not signal non-returnability. `unlimited` states no time restriction, not unconditional eligibility. `not_accepted` states that the covered items cannot be returned. Unknown types establish no eligibility inference; consumers may use the base policy's `description`.",
       "type": "object",
-      "required": ["days", "anchor"],
+      "required": ["type"],
       "properties": {
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Length of the return window in whole days from `anchor`."
+        "type": {
+          "type": "string",
+          "description": "Eligibility kind. Well-known values: `window`, `unlimited`, `not_accepted`. Unknown values establish no eligibility inference."
+        },
+        "duration": {
+          "type": "string",
+          "format": "duration",
+          "pattern": "^P(?:[1-9]\\d*[YMWD])+(?:T(?:[1-9]\\d*[HMS])+)?$|^PT(?:[1-9]\\d*[HMS])+$",
+          "description": "Length of the return window after the `anchor` event, as an ISO 8601 duration with whole-number components greater than zero (e.g., `P30D` is 30 days, `PT30M` is 30 minutes, `P1M` is one month; `T` separates date units from time units, so `M` before it means months and after it minutes). It states the term for presentation; the Business resolves the deadline as `expires_at`."
         },
         "anchor": {
           "type": "string",
-          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`. Because the window is a guaranteed minimum, a business may name an event that never occurs after the one that starts its clock; `purchased` always qualifies."
-        }
-      }
-    },
-    "restocking_fee": {
-      "title": "Restocking Fee",
-      "description": "A deduction from the refund, stated as a percentage, a flat amount per unit, or both.",
-      "type": "object",
-      "anyOf": [
-        {
-          "required": ["percentage_bps"]
+          "description": "Event the window is measured from. Well-known values: `purchased`, `fulfilled`, `delivered`."
         },
-        {
-          "required": ["amount"]
-        }
-      ],
-      "properties": {
-        "percentage_bps": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 10000,
-          "description": "Restocking fee in basis points of the amount paid for the returned quantity, after item-level discounts and excluding tax, shipping, and other fees (e.g., `1500` = 15%). On catalog surfaces, where no amount has been paid, the basis is the covered product's price. `0` states that no restocking fee is charged."
-        },
-        "amount": {
-          "$ref": "../common/types/amount.json",
-          "minimum": 1,
-          "description": "Restocking fee as a flat charge per returned unit of quantity, in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces). At least 1; state no fee with `percentage_bps` of `0`."
-        },
-        "display_text": {
+        "expires_at": {
           "type": "string",
-          "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., '15% restocking fee on opened items')."
+          "format": "date-time",
+          "description": "RFC 3339 instant at which the window ends, resolved by the Business once the `anchor` event has occurred (e.g., on an order after delivery). When covered quantities reach the anchor at different times, it states the earliest of their deadlines. An otherwise eligible return requested no later than this instant is accepted."
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "window"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["duration", "anchor"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "unlimited"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "duration": false,
+              "anchor": false,
+              "expires_at": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "not_accepted"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "duration": false,
+              "anchor": false,
+              "expires_at": false
+            }
+          }
+        }
+      ]
     },
     "fee": {
-      "title": "Return Method Fee",
-      "description": "Logistics cost of using a return channel. Open vocabulary.",
+      "title": "Return Fee",
+      "description": "A charge on a return, typed by what it is for, as an estimated maximum. `amount` states a flat charge, where `0` means nothing is charged; `basis_points` states a percentage, optionally capped by `max_amount`; with neither, the fee is charged at its actual cost and no maximum is stated.",
       "type": "object",
       "required": ["type"],
       "additionalProperties": true,
       "properties": {
         "type": {
-          "type": "string",
-          "description": "Cost structure. Well-known values: `free`, `fixed_fee` (see `fixed_fee`), `customer_responsibility` (the buyer arranges and pays for return shipping; no maximum is stated). An unrecognized value states no cost."
+          "$ref": "../common/types/reverse_domain_name.json",
+          "description": "Fee kind, as a reverse-domain name. Well-known values: `dev.ucp.shopping.fee.restocking` (a deduction from the refund, charged per one whole `quantity_unit.unit` returned, for example per lb, or per `each` when `quantity_unit` is absent), `dev.ucp.shopping.fee.return_shipping` (the cost of shipping the return, charged per return shipment), `dev.ucp.shopping.fee.handling` (charged per return request). Vendor kinds use the vendor's own namespace (e.g., `com.example.fee.eco`) and are charged per return request. A vendor fee charged on another basis, such as per item, omits `amount` and states its terms in `display_text`. A fee with an unknown `type` MUST carry `display_text`."
         },
-        "display_text": {
-          "type": "string",
-          "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., 'Return shipping, free for defective items')."
-        }
-      }
-    },
-    "fixed_fee": {
-      "title": "Fixed Fee Return Method Fee",
-      "description": "Fixed logistics fee charged for a return channel.",
-      "type": "object",
-      "allOf": [
-        {
-          "$ref": "#/$defs/fee"
-        }
-      ],
-      "required": [
-        "type",
-        "amount"
-      ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "const": "fixed_fee"
+        "methods": {
+          "type": "array",
+          "description": "Return channels this fee applies to; omitted means every channel. A fee with `methods` overrides the fee of the same `type` without `methods` for those channels. A channel need not be listed in the policy's `methods`.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
         },
         "amount": {
           "$ref": "../common/types/amount.json",
-          "minimum": 1,
-          "description": "Maximum channel fee per return shipment, in ISO 4217 minor units, in the currency of the enclosing response (see the spec for catalog surfaces). Required when type is fixed_fee. At least 1; state a free channel with fee type `free`."
-        }
-      }
-    },
-    "return_method": {
-      "title": "Return Method",
-      "description": "A return channel and its logistics cost.",
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "Return channel. Well-known values: `in_store`, `by_mail`, `kiosk`."
+          "minimum": 0,
+          "description": "Estimated maximum flat charge, in ISO 4217 minor units of the currency the covered items are priced in, charged per the unit of the fee `type`. `0` states that nothing is charged. Mutually exclusive with `basis_points`."
         },
-        "fee": {
-          "type": "object",
-          "description": "Maximum logistics cost of using this channel. Omitted means the cost is not stated, not that the channel is free.",
-          "allOf": [
-            {
-              "$ref": "#/$defs/fee"
-            },
-            {
-              "if": {
-                "properties": {
-                  "type": {
-                    "const": "fixed_fee"
-                  }
-                },
-                "required": [
-                  "type"
-                ]
-              },
-              "then": {
-                "$ref": "#/$defs/fixed_fee"
-              }
-            }
-          ]
+        "basis_points": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Estimated maximum charge in basis points (hundredths of a percent; `1250` = 12.5%) of the amount paid for the returned quantity, after item-level discounts and excluding tax, shipping, and other fees. On catalog surfaces, where no amount has been paid, it applies to the covered product's price. Mutually exclusive with `amount`."
+        },
+        "max_amount": {
+          "$ref": "../common/types/amount.json",
+          "minimum": 1,
+          "description": "Cap on a `basis_points` charge: the charge is at most this amount, in ISO 4217 minor units of the currency the covered items are priced in, per the unit of the fee `type`. Requires `basis_points`."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable fee label, naming any condition under which the fee applies (e.g., '15% restocking fee on opened items'). Required when `type` is not a well-known fee kind, and when the fee has neither `amount` nor `basis_points`."
         }
-      }
+      },
+      "not": {
+        "required": ["amount", "basis_points"]
+      },
+      "dependentRequired": {
+        "max_amount": ["basis_points"]
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "dev.ucp.shopping.fee.restocking",
+                    "dev.ucp.shopping.fee.return_shipping",
+                    "dev.ucp.shopping.fee.handling"
+                  ]
+                }
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["display_text"]
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["amount"]
+                },
+                {
+                  "required": ["basis_points"]
+                }
+              ]
+            }
+          },
+          "then": {
+            "required": ["display_text"]
+          }
+        }
+      ]
     },
     "return_policy": {
       "title": "Return Policy",
