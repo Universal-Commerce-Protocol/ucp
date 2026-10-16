@@ -175,6 +175,14 @@ line delivered in two shipments, that is the earliest of their window ends, so a
 return requested by then is within the window for every covered quantity. A
 business scopes policies per line with `applies_to` for finer resolution.
 
+On an order, `policies` record the terms that applied at checkout (see
+[Order](../order/index.md#policies)). Stating `expires_at` resolves those terms;
+it does not change them. A business adds `expires_at` to the governing return
+policy and **MAY** split that policy into per-line copies with `applies_to` to
+state a deadline for each line, but every copy carries the terms of the checkout
+policy unchanged: its `eligibility` kind, `duration` and `anchor`,
+`supported_resolutions`, `methods`, and `fees`.
+
 For a 30-day window anchored on `delivered` and an item delivered on
 2026-03-02, the business states `"expires_at": "2026-04-01T18:00:00Z"`, and
 the platform shows "Return by Apr 1, 6:00 PM UTC" or its local equivalent (see
@@ -502,8 +510,9 @@ from the `description`:
 ### Order after delivery
 
 Once the first line of an order has been delivered, the business resolves its
-30-day window and states the deadline as `expires_at`, scoping the policy to
-that line with `applies_to` so a line delivered later carries its own deadline:
+30-day window and states the deadline as `expires_at`, copying the checkout
+policy's terms and scoping the copy to that line with `applies_to` so a line
+delivered later carries its own deadline:
 
 <!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.order -->
 ```json
