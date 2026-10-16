@@ -1,0 +1,851 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/order_consultation.json",
+  "name": "dev.ucp.shopping.order_consultation",
+  "title": "Order Consultation Extension (Working Draft)",
+  "description": "Optional Business-initiated post-order consultation for Orders. A Business issues an immutable, versioned proposal for a commercial change that exceeds already-accepted authority; an authorized buyer or delegated Platform records one terminal approve/decline decision against the exact revision; the Business returns a durable decision receipt and reports Order application separately. DRAFT PROPOSAL: `dev.ucp.shopping.order_consultation` is a proposed standardization target only. It is NOT approved by the UCP governing body or Technical Council and NOT published; vendor-first naming remains an open governance question.",
+  "$defs": {
+    "proposal_digest": {
+      "type": "string",
+      "pattern": "^sha-256:[0-9a-f]{64}$",
+      "description": "Canonical proposal digest: `sha-256:` followed by the lowercase-hex SHA-256 of the UTF-8 bytes of the RFC 8785 (JCS) serialization of the digest input object. The digest input object contains exactly the members of the revision named here that are present, plus the constant `digest_context`: `consultation_id`, `order_id`, `revision`, `change_type`, `scope`, `proposed_terms`, `baseline_reference`, `decision_deadline`, `effective_from`, `effective_time_rule`, `application_deadline`, and `digest_context` = `dev.ucp.shopping.order_consultation.proposal.v1`. Absent members are omitted, never null; values are the published JSON values verbatim (timestamps are the published strings, not re-normalized). Status, `reason`, `supersedes_revision`, `superseded_by_revision`, `follows_consultation_id`, and the revision's own digest are excluded. This is NOT the RFC 9530 `Content-Digest` of an HTTP body: it hashes a canonical JSON object, not raw wire bytes, and uses hex, not base64. A receipt carries it so the exact approved terms remain verifiable, and a revision read MUST reproduce the same value."
+    },
+    "baseline_reference": {
+      "type": "object",
+      "description": "Reference to the existing accepted commercial basis that this proposal would amend. Immutable once published on a revision.",
+      "required": ["order_version"],
+      "properties": {
+        "order_version": {
+          "type": "string",
+          "description": "Opaque Business-scoped version of the authoritative Order (or Order-linked domain terms) that was the accepted basis when the revision was issued. A decision is admitted only while the proposal remains applicable to this basis; the Business MUST reject with `proposal_stale` when applicability is lost."
+        },
+        "term_ref": {
+          "type": "string",
+          "description": "Optional opaque pointer to the specific accepted term (for example a rate schedule entry or line item) being amended."
+        }
+      }
+    },
+    "usage_tariff_change_scope": {
+      "type": "object",
+      "description": "Illustrative domain profile scope for `change_type: usage_tariff_change` (metered rental). Identifies the rental and the first usage instant the new tariff may cover. Not a universal pricing schema.",
+      "required": ["rental_id", "usage_from"],
+      "properties": {
+        "rental_id": {
+          "type": "string",
+          "description": "Identifier of the metered rental (Order-linked domain object) whose tariff is proposed to change."
+        },
+        "usage_from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 instant from which usage may be priced at the proposed tariff. Usage accrued before the actual effective boundary remains at the previously accepted tariff."
+        }
+      }
+    },
+    "usage_tariff_change_terms": {
+      "type": "object",
+      "description": "Illustrative domain profile terms for `change_type: usage_tariff_change`. Amounts are integer minor units; currency is that of the Order.",
+      "required": ["current_rate_amount", "proposed_rate_amount", "billing_unit"],
+      "properties": {
+        "current_rate_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Currently accepted rate per `billing_unit`, in ISO 4217 minor units."
+        },
+        "proposed_rate_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Proposed rate per `billing_unit`, in ISO 4217 minor units."
+        },
+        "billing_unit": {
+          "type": "string",
+          "description": "Unit of metered usage the rate is quoted against. Well-known: `hour`, `day`. Unknown values MUST be tolerated for display and MUST NOT be reinterpreted.",
+          "examples": ["hour", "day"]
+        }
+      }
+    },
+    "item_substitution_scope": {
+      "type": "object",
+      "description": "Illustrative domain profile scope for `change_type: item_substitution` (Shopping Order replacement not covered by an accepted contingency).",
+      "required": ["line_item_id", "quantity"],
+      "properties": {
+        "line_item_id": {
+          "type": "string",
+          "description": "Order line item that would be replaced."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Quantity of the line item the substitution covers, in the line item's own quantity steps. Partial approval of an indivisible proposal is not supported."
+        }
+      }
+    },
+    "item_substitution_terms": {
+      "type": "object",
+      "description": "Illustrative domain profile terms for `change_type: item_substitution`.",
+      "required": ["replacement_item", "price_delta_amount"],
+      "properties": {
+        "replacement_item": {
+          "$ref": "types/item.json",
+          "description": "The proposed replacement item, including unit price."
+        },
+        "price_delta_amount": {
+          "$ref": "../common/types/signed_amount.json",
+          "description": "Net change to the Order total if applied, in ISO 4217 minor units. Positive values are additional obligations; any charge still requires independent payment authority."
+        }
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "description": "One immutable proposal revision. `status` is the revision's current lifecycle state and is the only member that changes after publication; every other member is immutable and covered by `proposal_digest`. Approval-relevant changes require a new revision (or a new consultation), never an in-place edit.",
+      "required": [
+        "consultation_id",
+        "order_id",
+        "revision",
+        "status",
+        "change_type",
+        "scope",
+        "proposed_terms",
+        "baseline_reference",
+        "decision_deadline",
+        "proposal_digest"
+      ],
+      "properties": {
+        "consultation_id": {
+          "type": "string",
+          "description": "Durable Business-issued consultation identifier, unique within the Business."
+        },
+        "order_id": {
+          "type": "string",
+          "description": "Identifier of the authoritative Order this consultation belongs to."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Monotonically increasing revision number within the consultation. Each revision is independently addressable and immutable."
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle state of this revision. Well-known values: `open` (can receive a decision), `approved`, `declined`, `expired`, `withdrawn`, `superseded`. Platforms MUST treat any unrecognized value as NOT actionable (fail closed): they MUST NOT submit a decision against it.",
+          "examples": ["open", "approved", "declined", "expired", "withdrawn", "superseded"]
+        },
+        "change_type": {
+          "type": "string",
+          "description": "Domain-specific proposal type that selects the schema of `scope` and `proposed_terms`. Illustrative values defined by this draft: `usage_tariff_change`, `item_substitution`. Other domains use their own reverse-domain value. Platforms MUST NOT approve a `change_type` they do not understand and SHOULD surface it for buyer review instead.",
+          "examples": ["usage_tariff_change", "item_substitution"]
+        },
+        "scope": {
+          "type": "object",
+          "description": "Domain-defined, immutable description of the Order components or usage the proposal affects. The Business-authored scope is the only scope a decision can authorize."
+        },
+        "proposed_terms": {
+          "type": "object",
+          "description": "Domain-defined, immutable proposed commercial terms. The common envelope does not define a universal price or fulfillment object."
+        },
+        "baseline_reference": {
+          "$ref": "#/$defs/baseline_reference"
+        },
+        "decision_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last instant (inclusive) at which a NEW decision may be admitted. Evaluated by the Business at admission time against its authoritative clock, never at the time a request was generated or sent."
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Proposed effective time for time-based changes. By default (`effective_time_rule` absent or `not_before`) it is the earliest authorized start of the change, not permission to backdate: the actual effective boundary is the later of `effective_from` and the authoritative application-commit time."
+        },
+        "effective_time_rule": {
+          "type": "string",
+          "description": "How `effective_from` binds application. Well-known values: `not_before` (default) and `exact`. Under `exact`, buyer acceptance is conditioned on that exact instant; if it cannot be honored the Business MUST fail application or issue a new proposal. Unknown values MUST be treated as `exact` (the stricter reading) by Platforms and rejected by Businesses at issuance.",
+          "examples": ["not_before", "exact"]
+        },
+        "application_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional last instant by which an approved change may be applied. Distinct from `decision_deadline`: a decision validly recorded before `decision_deadline` stays authorized afterward, but late application MUST still satisfy `application_deadline` when present."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Optional human-readable explanation for buyer display. Not authorization-relevant and excluded from `proposal_digest`."
+        },
+        "proposal_digest": {
+          "$ref": "#/$defs/proposal_digest"
+        },
+        "supersedes_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Present when this revision superseded an earlier undecided revision."
+        },
+        "superseded_by_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Present on a revision whose `status` is `superseded`: the revision that replaced it."
+        },
+        "follows_consultation_id": {
+          "type": "string",
+          "description": "Present when this consultation was issued after a terminal decision on an earlier consultation, preserving history without reusing that consultation."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "change_type": { "const": "usage_tariff_change" } },
+            "required": ["change_type"]
+          },
+          "then": {
+            "properties": {
+              "scope": { "$ref": "#/$defs/usage_tariff_change_scope" },
+              "proposed_terms": { "$ref": "#/$defs/usage_tariff_change_terms" }
+            },
+            "required": ["effective_from"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "change_type": { "const": "item_substitution" } },
+            "required": ["change_type"]
+          },
+          "then": {
+            "properties": {
+              "scope": { "$ref": "#/$defs/item_substitution_scope" },
+              "proposed_terms": { "$ref": "#/$defs/item_substitution_terms" }
+            }
+          }
+        }
+      ]
+    },
+    "consultation_revision": {
+      "title": "Consultation Revision",
+      "description": "Response of the revision-specific read: the exact immutable terms of one revision plus its current lifecycle status.",
+      "allOf": [
+        { "$ref": "#/$defs/proposal" },
+        {
+          "type": "object",
+          "required": ["ucp"],
+          "properties": {
+            "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" }
+          }
+        }
+      ]
+    },
+    "revision_index_entry": {
+      "type": "object",
+      "description": "One entry of the consultation's revision history index.",
+      "required": ["revision", "status", "proposal_digest"],
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Revision number."
+        },
+        "status": {
+          "type": "string",
+          "description": "Current lifecycle state of that revision. Unknown values MUST be treated as not actionable."
+        },
+        "proposal_digest": {
+          "$ref": "#/$defs/proposal_digest",
+          "description": "Digest of that revision's immutable terms."
+        }
+      }
+    },
+    "application": {
+      "type": "object",
+      "description": "Order application facts for an APPROVED decision. Reported separately from the recorded decision and from any financial settlement.",
+      "properties": {
+        "applied_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Authoritative commit time of the Order amendment. Present only when the change was applied."
+        },
+        "actual_effective_from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Actual effective boundary of a time-based change. For `not_before` proposals it MUST equal the later of the proposal's `effective_from` and `applied_at`. For `exact` proposals it MUST equal `effective_from`, or application MUST have failed. Usage or activity before this instant stays at the previously accepted terms."
+        },
+        "resulting_order_version": {
+          "type": "string",
+          "description": "Opaque Order version produced by the amendment. Present only when applied."
+        },
+        "affected_components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "RFC 9535 JSONPath expressions (relative to the Order response root) or opaque domain identifiers of the Order components that changed."
+        },
+        "adjustment_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of related Order `adjustments[]` entries, where available. Financial facts live in the Order's adjustments, not in this receipt."
+        },
+        "applied_terms": {
+          "type": "object",
+          "description": "Domain-defined applied terms, or an authoritative link to them. For `usage_tariff_change` this is a `rate_schedule` showing the prior tariff through the boundary and the new tariff from it."
+        },
+        "failure": {
+          "type": "object",
+          "description": "Present when application failed: the approved change conclusively did not commit.",
+          "required": ["code"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Open failure code. Well-known: `order_changed`, `effective_time_unsatisfiable`, `application_deadline_passed`, `payment_authority_missing`, `scope_no_longer_applicable`.",
+              "examples": [
+                "order_changed",
+                "effective_time_unsatisfiable",
+                "application_deadline_passed",
+                "payment_authority_missing",
+                "scope_no_longer_applicable"
+              ]
+            },
+            "content": {
+              "type": "string",
+              "description": "Human-readable explanation."
+            },
+            "new_consultation_id": {
+              "type": "string",
+              "description": "Optional consultation the Business issued to request fresh authorization for different terms."
+            }
+          }
+        }
+      }
+    },
+    "decision_request": {
+      "title": "Consultation Decision Request",
+      "description": "Platform request that records one terminal decision against an exact revision. The request carries no scope or terms: the Business resolves them from its immutable revision. Sent with a high-entropy `Idempotency-Key`; the raw body bytes are the idempotency payload.",
+      "type": "object",
+      "required": ["proposal_revision", "decision"],
+      "properties": {
+        "proposal_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Exact revision being decided. A decision for revision N never authorizes any other revision."
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["approve", "decline"],
+          "description": "Terminal buyer decision. Silence never approves; partial approval is not supported."
+        },
+        "proposal_digest": {
+          "$ref": "#/$defs/proposal_digest",
+          "description": "Optional but RECOMMENDED echo of the digest the buyer was shown. When present the Business MUST reject a mismatch with `proposal_digest_mismatch` and record nothing."
+        }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["scope"] },
+          { "required": ["proposed_terms"] },
+          { "required": ["authorized_scope"] }
+        ]
+      }
+    },
+    "decision_receipt_body": {
+      "type": "object",
+      "description": "Durable record of one terminal decision. Decision members are immutable once recorded; only `application_status` and `application` evolve, and only for approvals. The approve/decline difference is mechanically enforced: a decline MUST omit `authorized_scope` and `application`, and MUST omit `application_status` or set it to `not_applicable`; an approval MUST carry `authorized_scope` and an `application_status` other than `not_applicable`.",
+      "required": [
+        "decision_id",
+        "consultation_id",
+        "order_id",
+        "proposal_revision",
+        "proposal_digest",
+        "decision",
+        "status",
+        "recorded_at"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "description": "Durable Business-assigned decision identifier."
+        },
+        "consultation_id": {
+          "type": "string",
+          "description": "Consultation the decision belongs to."
+        },
+        "order_id": {
+          "type": "string",
+          "description": "Order the consultation belongs to."
+        },
+        "proposal_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Exact revision the decision applies to."
+        },
+        "proposal_digest": {
+          "$ref": "#/$defs/proposal_digest",
+          "description": "Digest of the immutable revision terms the decision was admitted against. Binds the receipt to those terms even after later revisions."
+        },
+        "decision": {
+          "type": "string",
+          "description": "Recorded decision. Well-known: `approve`, `decline`. Platforms MUST treat any other value as granting no authority.",
+          "examples": ["approve", "decline"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Receipt status. `recorded` means the decision committed; it does NOT mean the Order was amended or any payment was authorized.",
+          "examples": ["recorded"]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Authoritative admission/commit time of the decision. Compared against `decision_deadline` at admission."
+        },
+        "decided_by": {
+          "type": "object",
+          "description": "Attribution of the deciding actor, as authenticated by the Business.",
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Open vocabulary. Well-known: `buyer`, `delegated_platform`.",
+              "examples": ["buyer", "delegated_platform"]
+            },
+            "id": {
+              "type": "string",
+              "description": "Opaque Business-scoped actor identifier."
+            }
+          }
+        },
+        "authorized_scope": {
+          "type": "object",
+          "description": "Exact Business-authored scope authorized by an APPROVED decision, copied from the immutable revision. MUST be omitted for a decline."
+        },
+        "application_status": {
+          "type": "string",
+          "description": "Order application state, reported independently of the decision. Well-known: `pending`, `applied`, `failed`, `indeterminate`, `not_applicable`. Approvals use the first four; declines omit the member or use `not_applicable`. Platforms MUST treat unknown values as `indeterminate`.",
+          "examples": ["pending", "applied", "failed", "indeterminate", "not_applicable"]
+        },
+        "application": {
+          "$ref": "#/$defs/application"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "decision": { "const": "approve" } },
+            "required": ["decision"]
+          },
+          "then": {
+            "required": ["authorized_scope", "application_status"],
+            "properties": {
+              "application_status": { "not": { "const": "not_applicable" } }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "decision": { "const": "decline" } },
+            "required": ["decision"]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["authorized_scope"] },
+                { "required": ["application"] }
+              ]
+            },
+            "properties": {
+              "application_status": { "const": "not_applicable" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "application_status": { "const": "applied" } },
+            "required": ["application_status"]
+          },
+          "then": {
+            "required": ["application"],
+            "properties": {
+              "application": {
+                "required": ["applied_at", "resulting_order_version"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "application_status": { "const": "failed" } },
+            "required": ["application_status"]
+          },
+          "then": {
+            "required": ["application"],
+            "properties": {
+              "application": { "required": ["failure"] }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "application_status": { "enum": ["pending", "indeterminate"] }
+            },
+            "required": ["application_status"]
+          },
+          "then": {
+            "properties": {
+              "application": {
+                "not": {
+                  "anyOf": [
+                    { "required": ["applied_at"] },
+                    { "required": ["actual_effective_from"] },
+                    { "required": ["resulting_order_version"] }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision_receipt": {
+      "title": "Consultation Decision Receipt",
+      "description": "Response of the decision POST and of the decision reads.",
+      "allOf": [
+        { "$ref": "#/$defs/decision_receipt_body" },
+        {
+          "type": "object",
+          "required": ["ucp"],
+          "properties": {
+            "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" }
+          }
+        }
+      ]
+    },
+    "consultation": {
+      "title": "Consultation",
+      "description": "Response of the consultation read: the current revision with its status, the revision history index, and, once a terminal decision is recorded, the authoritative receipt.",
+      "type": "object",
+      "required": [
+        "ucp",
+        "consultation_id",
+        "order_id",
+        "status",
+        "current_revision",
+        "proposal",
+        "revisions"
+      ],
+      "properties": {
+        "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" },
+        "consultation_id": {
+          "type": "string",
+          "description": "Consultation identifier."
+        },
+        "order_id": {
+          "type": "string",
+          "description": "Order the consultation belongs to."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the current revision. A new decision is possible only when this is `open`. Unknown values MUST be treated as not actionable."
+        },
+        "current_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of the authoritative current revision."
+        },
+        "proposal": {
+          "$ref": "#/$defs/proposal",
+          "description": "The current revision, with its immutable terms."
+        },
+        "revisions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revision_index_entry" },
+          "description": "Index of every revision ever issued, ascending. Each entry is retrievable through the revision-specific read."
+        },
+        "decision": {
+          "$ref": "#/$defs/decision_receipt_body",
+          "description": "The authoritative recorded decision for the current revision. Present exactly when `status` is `approved` or `declined`."
+        }
+      }
+    },
+    "consultation_summary": {
+      "type": "object",
+      "description": "Compact list entry for one consultation, sufficient to decide whether to read it in full.",
+      "required": [
+        "consultation_id",
+        "order_id",
+        "status",
+        "current_revision",
+        "change_type",
+        "decision_deadline",
+        "proposal_digest"
+      ],
+      "properties": {
+        "consultation_id": { "type": "string", "description": "Consultation identifier." },
+        "order_id": { "type": "string", "description": "Order identifier." },
+        "status": {
+          "type": "string",
+          "description": "Status of the current revision. Unknown values MUST be treated as not actionable."
+        },
+        "current_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Current revision number."
+        },
+        "change_type": { "type": "string", "description": "Domain-specific change type of the current revision." },
+        "decision_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Decision deadline of the current revision."
+        },
+        "proposal_digest": {
+          "$ref": "#/$defs/proposal_digest",
+          "description": "Digest of the current revision's immutable terms."
+        },
+        "decision_id": {
+          "type": "string",
+          "description": "Present when a terminal decision is recorded."
+        }
+      }
+    },
+    "consultation_list": {
+      "title": "Consultation List",
+      "description": "Response of the Order-scoped list operation: the authoritative discovery path. By default it lists every consultation of the Order whose current revision is `open`; the `status` filter selects other lifecycle states.",
+      "type": "object",
+      "required": ["ucp", "order_id", "consultations"],
+      "properties": {
+        "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" },
+        "order_id": { "type": "string", "description": "Order the list is scoped to." },
+        "consultations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/consultation_summary" },
+          "description": "Matching consultations. An empty array on a successful read is an authoritative statement that no matching consultation exists at read time."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/response",
+          "description": "Pagination information. Platforms MUST follow `cursor` until `has_next_page` is false before concluding that no actionable consultation exists."
+        }
+      }
+    },
+    "decision_lookup": {
+      "title": "Consultation Decision Lookup",
+      "description": "Response of the decision lookup by the original scoped idempotency key. It distinguishes a recorded decision, an in-flight admission, and an absent record, and only claims a final negative when the Business can guarantee no admission under that scoped key can still commit.",
+      "type": "object",
+      "required": ["ucp", "outcome", "checked_at"],
+      "properties": {
+        "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" },
+        "outcome": {
+          "type": "string",
+          "description": "Well-known values: `recorded` (receipt attached), `in_flight` (an admission under this scoped key is still being processed; NOT a failure), `not_recorded` (no record visible; see `final`). Unknown values MUST be treated as `not_recorded` with `final: false`.",
+          "examples": ["recorded", "in_flight", "not_recorded"]
+        },
+        "final": {
+          "type": "boolean",
+          "description": "Meaningful only for `not_recorded`. `true` only when the Business guarantees that no admission under this scoped key can ever commit. When absent or `false`, the absence is provisional and is NOT proof of non-commitment."
+        },
+        "final_reason": {
+          "type": "string",
+          "description": "Required when `final` is true. Well-known: `consultation_closed` (the consultation can no longer admit any decision and admission is serialized with that state change, so an uncommitted request can no longer commit). Businesses MAY define other reasons they can actually guarantee.",
+          "examples": ["consultation_closed"]
+        },
+        "decision": {
+          "$ref": "#/$defs/decision_receipt_body",
+          "description": "The receipt. Present exactly when `outcome` is `recorded`."
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Business time at which the lookup was evaluated."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "outcome": { "const": "recorded" } },
+            "required": ["outcome"]
+          },
+          "then": { "required": ["decision"] },
+          "else": {
+            "not": { "required": ["decision"] }
+          }
+        },
+        {
+          "if": {
+            "properties": { "final": { "const": true } },
+            "required": ["final"]
+          },
+          "then": { "required": ["final_reason"] }
+        },
+        {
+          "if": {
+            "properties": { "outcome": { "const": "in_flight" } },
+            "required": ["outcome"]
+          },
+          "then": {
+            "not": {
+              "properties": { "final": { "const": true } },
+              "required": ["final"]
+            }
+          }
+        }
+      ]
+    },
+    "consultation_message": {
+      "description": "UCP error message extended with machine-readable pointers for consultation conflicts.",
+      "allOf": [
+        { "$ref": "../common/types/message_error.json" },
+        {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "description": "Optional machine-readable detail. `current_revision` accompanies `proposal_superseded` and `proposal_stale`; `decision_id` accompanies `decision_conflict` and points an authorized reader to the authoritative receipt; `consultation_status` reports the blocking status.",
+              "properties": {
+                "current_revision": { "type": "integer", "minimum": 1 },
+                "decision_id": { "type": "string" },
+                "consultation_status": { "type": "string" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "consultation_error_response": {
+      "title": "Consultation Error Response",
+      "description": "UCP error response for consultation operations. Well-known codes and transport mapping: `proposal_expired` (409), `proposal_withdrawn` (409), `proposal_superseded` (409), `proposal_stale` (409), `decision_conflict` (409), `idempotency_key_conflict` (409), `decision_not_authorized` (403), `insufficient_scope` (403), `not_found` (404; also used for cross-buyer or cross-Order access so existence is not disclosed), `proposal_digest_mismatch` (422), `decision_scope_not_accepted` (422), `replay_store_unavailable` (503, fail closed).",
+      "type": "object",
+      "required": ["ucp", "messages"],
+      "properties": {
+        "ucp": { "$ref": "../ucp.json#/$defs/error" },
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/consultation_message" },
+          "description": "Messages describing why the operation failed."
+        }
+      }
+    },
+    "consultation_application": {
+      "type": "object",
+      "description": "Order-linked record that an approved consultation was applied. The Order is authoritative for the applied commercial change; this record links it to the baseline, the revision, and the decision receipt. It is created only when application commits and is never created for a decline.",
+      "required": [
+        "consultation_id",
+        "decision_id",
+        "proposal_revision",
+        "proposal_digest",
+        "change_type",
+        "baseline_reference",
+        "applied_at",
+        "resulting_order_version"
+      ],
+      "properties": {
+        "consultation_id": { "type": "string", "description": "Consultation applied." },
+        "decision_id": { "type": "string", "description": "Approval receipt that authorized the change." },
+        "proposal_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Exact approved revision."
+        },
+        "proposal_digest": {
+          "$ref": "#/$defs/proposal_digest",
+          "description": "Digest of the approved immutable terms."
+        },
+        "change_type": { "type": "string", "description": "Domain-specific change type that was applied." },
+        "baseline_reference": {
+          "$ref": "#/$defs/baseline_reference",
+          "description": "The accepted basis that was amended, preserved for audit."
+        },
+        "applied_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Authoritative commit time of the amendment."
+        },
+        "actual_effective_from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Actual effective boundary for time-based changes."
+        },
+        "resulting_order_version": {
+          "type": "string",
+          "description": "Order version produced by the amendment."
+        },
+        "adjustment_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Related Order adjustment IDs. Payment facts remain in `adjustments[]`."
+        },
+        "applied_terms": {
+          "type": "object",
+          "description": "Domain-defined applied terms. For `usage_tariff_change` a `rate_schedule` that preserves the prior tariff for usage before the boundary."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "change_type": { "const": "usage_tariff_change" } },
+            "required": ["change_type"]
+          },
+          "then": {
+            "required": ["actual_effective_from", "applied_terms"],
+            "properties": {
+              "applied_terms": { "$ref": "#/$defs/usage_tariff_applied_terms" }
+            }
+          }
+        }
+      ]
+    },
+    "usage_tariff_applied_terms": {
+      "type": "object",
+      "description": "Illustrative domain profile applied terms for `usage_tariff_change`: an ordered tariff timeline. Usage accrued before `actual_effective_from` is priced at the earlier entry, whether or not it has been billed.",
+      "required": ["rental_id", "rate_schedule"],
+      "properties": {
+        "rental_id": { "type": "string", "description": "Rental the schedule belongs to." },
+        "rate_schedule": {
+          "type": "array",
+          "minItems": 2,
+          "description": "Ordered, contiguous tariff entries. The entry that begins at the boundary names the decision that authorized it; earlier entries are never rewritten.",
+          "items": {
+            "type": "object",
+            "required": ["valid_from", "rate_amount", "billing_unit"],
+            "properties": {
+              "valid_from": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Start of the interval this rate prices (inclusive)."
+              },
+              "valid_until": {
+                "type": "string",
+                "format": "date-time",
+                "description": "End of the interval (exclusive). Absent on the open-ended current entry."
+              },
+              "rate_amount": {
+                "$ref": "../common/types/amount.json",
+                "description": "Rate per `billing_unit` in ISO 4217 minor units."
+              },
+              "billing_unit": { "type": "string", "description": "Metered usage unit." },
+              "decision_id": {
+                "type": "string",
+                "description": "Decision that authorized this entry. Absent for the original accepted tariff."
+              }
+            }
+          }
+        }
+      }
+    },
+    "business_config": {
+      "type": "object",
+      "description": "Business `config` for this capability declaration in its profile.",
+      "properties": {
+        "supported_change_types": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Change types this Business may propose. Platforms MUST NOT assume support beyond this list."
+        }
+      }
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Consultation Applications",
+      "description": "Order extended with a response-only record of approved consultations that were applied. Discovery of OPEN consultations is NOT carried here; it is provided by the mandatory Order-scoped list operation. Platforms that do not negotiate this extension see the unchanged base Order.",
+      "allOf": [
+        { "$ref": "order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "consultation_applications": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/consultation_application" },
+              "description": "Append-only record of approved consultations applied to this Order, each linked to its baseline, immutable revision digest, and decision receipt.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
