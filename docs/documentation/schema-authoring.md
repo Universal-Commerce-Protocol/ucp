@@ -558,6 +558,61 @@ object fields:
 - **`minProperties`** — Empty objects (`{}`) are well-formed and harmless.
   Implementers should accept and process them as a no-op.
 
+### Root Arrays (`"type": "array"`)
+
+Like a closed `enum`, `oneOf`, or `additionalProperties: false`, defining a
+schema with `"type": "array"` at its root is a one-way door for protocol
+evolution:
+
+- **No non-breaking sibling fields** — An array cannot accept collection-level
+  metadata, summary fields, or pagination cursors in future revisions without
+  changing the wire shape from `[...]` to `{"items": [...], ...}`, which is a
+  breaking change for every consumer.
+- **No `allOf` property composition** — Extensions compose onto target schemas
+  by adding `properties` via `allOf`, which only applies to `"type": "object"`
+  schemas.
+- **No ambient `ucp` member** — Only structured object scopes (`"type": "object"`)
+  can host the [reserved `ucp` member](#the-reserved-ucp-member) (such as
+  `request_constraints`).
+
+Consequently:
+
+- **Capability, extension, and operation payload schemas MUST NOT use
+  `"type": "array"` at the root.** Top-level request and response payloads must
+  be `"type": "object"`.
+- **Reusable type schemas (`types/*.json`) SHOULD define the singular item as
+  `"type": "object"`** (e.g., `line_item.json`, `policy.json`, `link.json`,
+  `message.json`) and declare `"type": "array"` on the parent property, or wrap
+  the collection in a `"type": "object"` container (e.g., `fulfillment.json`,
+  `discount.json`) when collection-level fields or extension points may be
+  needed. Reserve a standalone array type schema (such as
+  `common/types/totals.json`) strictly for cases where multiple parent objects
+  share identical array-level `contains` constraints over a singular item
+  schema.
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+// PREFER: singular item schema referenced by an array property, or an object
+// container when collection-level fields may be added later
+"fulfillment": {
+  "type": "object",
+  "properties": {
+    "methods": {
+      "type": "array",
+      "items": { "$ref": "types/fulfillment_method.json" }
+    }
+  }
+}
+
+// AVOID: standalone `"type": "array"` schema for a composite domain concept —
+// cannot accept sibling properties or extension fields without a breaking wire change
+{
+  "title": "Fulfillment",
+  "type": "array",
+  "items": { "$ref": "types/fulfillment_method.json" }
+}
+```
+
 ## The `request_constraints` Protocol Member
 
 Normative processing, scope, lifecycle, and invalid-member behavior are defined
