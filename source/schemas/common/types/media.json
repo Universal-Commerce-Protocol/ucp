@@ -18,6 +18,10 @@
       "format": "uri",
       "description": "URL of the media resource the Platform renders; interpretation is specialized per `type`."
     },
+    "role": {
+      "type": "string",
+      "description": "Semantic role of the media item within its container. Well-known values: `logo`, `cover`. Open vocabulary; a Platform MUST ignore unrecognized values."
+    },
     "name": {
       "type": "string",
       "description": "Human-readable title or label for the media, distinct from `alt_text` (accessibility text). Often present for `video` and `model_3d`."
