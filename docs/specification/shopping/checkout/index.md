@@ -1431,6 +1431,13 @@ when provided.
 
 {{ schema_fields('order_confirmation', 'shopping/checkout') }}
 
+When the checkout completed without a linked user identity, the business
+**SHOULD** include an `access` credential bound to the new order. It is the
+guest buyer's only programmatic route back to the order, since there is no
+account for the platform to authenticate against. See
+[Order Access](../order/index.md#order-access) for issuance, presentation,
+lifetime, and the handling requirements that apply to platforms holding one.
+
 ### Error Response <span id="error-response"></span>
 
 {{ schema_fields('types/error_response', 'shopping/checkout') }}
