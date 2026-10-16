@@ -100,10 +100,10 @@ The business advertises their tokenization endpoint and identity during discover
 The handler's specification (referenced via the `spec` field) documents the
 `/tokenize` endpoint URL.
 
-| Field         | Type   | Required | Description                                 |
-| :------------ | :----- | :------- | :------------------------------------------ |
-| `environment` | string | Yes      | API environment (`sandbox` or `production`) |
-| `business_id` | string | Yes      | Business identifier with the processor      |
+| Field         | Type   | Required | Description                                                                                        |
+| :------------ | :----- | :------- | :------------------------------------------------------------------------------------------------- |
+| `environment` | string | Yes      | API environment (`sandbox` or `production`)                                                        |
+| `business_id` | string | Yes      | Business identifier with the processor. Sent as `identity.access_token` on `/tokenize` in PSP Mode |
 
 #### Example Business Handler Declaration
 
@@ -228,8 +228,10 @@ that ensures the sensitive instrument details never touch the platform).
 
 Platform's payment credential provider calls the configured `endpoint`.
 
-**Note:** If the handler configuration includes an `identity` object, the
-credential provider **MUST** include it in the request alongside `binding`.
+**Note:** In PSP Mode the credential provider **MUST** send the business's
+participant identifier as `identity.access_token` alongside `binding`, using the
+value the business publishes in `config.business_id`. In Direct Mode the
+business is the authenticated caller and `identity` is omitted.
 
 Response:
 
@@ -297,9 +299,11 @@ Content-Type: application/json
 * **Role:** The PSP implements this specification.
 * **Requirements:**
     1. Provide the `endpoint` URL to merchants.
-    2. Issue `identity.access_token` (Merchant Secure Identifier) to merchants.
-    3. Validate that the `identity` matches the merchant requesting
-    the final payment charge.
+    2. Assign each merchant a participant identifier at onboarding. The merchant
+    publishes it as `config.business_id`, and the platform's credential provider
+    sends it as `identity.access_token` on `/tokenize`.
+    3. Validate that the participant identifier the token was issued to matches
+    the merchant requesting the final payment charge.
 * **Security:** PSP bears the compliance burden for credential storage
     (e.g., PCI DSS for cards).
 
@@ -313,3 +317,4 @@ Content-Type: application/json
 | **Compliance** | The entity hosting `config.endpoint` **MUST** be compliant with relevant data standards for the credential type (e.g., PCI DSS for cards, GDPR for PII, etc.). |
 | **Scope Isolation** | The Platform's main application **MUST NOT** see the raw credential; only the Platform's Secure credential provider and the Tokenizer Host may see it. |
 | **Binding Validation** | The Tokenizer/Processor **MUST** verify that the `binding` submitted during final payment matches the `binding` provided during tokenization. |
+| **Participant Identity** | `identity.access_token` is a participant identifier, not a credential. The Tokenizer/Processor authenticates the caller separately and **MUST NOT** accept `identity` as authentication. See [Binding](../tokenization.md#binding). |
