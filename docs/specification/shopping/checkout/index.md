@@ -377,10 +377,12 @@ platform receives messages indicating what's needed to progress.
           (session invalid/expired - can occur from any state)
 ```
 
-> **Note:** Two transitions are omitted from the diagram above for
-> readability: `complete_in_progress` can also resolve via Buyer handoff
-> (`continue_url`) when an outstanding Action's fallback is exhausted, or via
-> cancellation per the race scenario described in
+> **Note:** Three transitions are omitted from the diagram above for
+> readability: `ready_for_complete` can resolve directly to `completed` when
+> Complete Checkout finishes synchronously, without passing through
+> `complete_in_progress`. Separately, `complete_in_progress` can also resolve
+> via Buyer handoff (`continue_url`) when an outstanding Action's fallback is
+> exhausted, or via cancellation per the race scenario described in
 > [Accepted completion](#accepted-completion) below.
 
 ### Status Values
