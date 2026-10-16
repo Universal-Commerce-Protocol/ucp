@@ -16,7 +16,7 @@
         },
         "purpose": {
           "type": "string",
-          "description": "The retrieval purpose for the search request. Well-known values: `search` (general search or filter browse requiring `query`, `filters`, or an extension input; default when omitted), `recommendation` (complementary or related items anchored to `reference_ids` and/or `context`), `swap` (functional substitute items requiring `reference_ids`). Businesses MUST reject or return an empty `products` array with an error message for unsupported values rather than falling back to a general browse.",
+          "description": "The retrieval purpose for the search request. Well-known values: `search` (general search or filter browse requiring `query`, `filters`, or an extension input; default when omitted), `recommendation` (complementary or related items anchored to `reference_ids` and/or `context`), `swap` (functional substitute items requiring `reference_ids`). Businesses MUST reject unsupported values using the binding's invalid-request mechanism (error code `unsupported_purpose`) rather than falling back to a general browse.",
           "examples": ["search", "recommendation", "swap"]
         },
         "reference_ids": {
@@ -27,7 +27,7 @@
           },
           "minItems": 1,
           "uniqueItems": true,
-          "description": "Anchor product or variant identifiers for relational discovery. Requires `purpose` (e.g., `recommendation` or `swap`; MUST NOT be `search`). Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.). Referenced items MUST be excluded from the returned products."
+          "description": "Anchor product or variant identifiers for relational discovery. Requires `purpose` (e.g., `recommendation` or `swap`; MUST NOT be `search`). Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.). Referenced items MUST be excluded from the returned products. When a variant ID is supplied, its parent product MUST be excluded for `recommendation` and SHOULD be excluded for `swap` unless a distinct substitute variant of that product is returned."
         },
         "context": {
           "$ref": "../common/types/context.json"
@@ -45,9 +45,22 @@
           "$ref": "../common/types/pagination.json#/$defs/request"
         }
       },
-      "dependentRequired": {
-        "reference_ids": ["purpose"]
-      }
+      "allOf": [
+        {
+          "if": { "required": ["reference_ids"] },
+          "then": {
+            "required": ["purpose"],
+            "properties": { "purpose": { "not": { "const": "search" } } }
+          }
+        },
+        {
+          "if": {
+            "required": ["purpose"],
+            "properties": { "purpose": { "const": "swap" } }
+          },
+          "then": { "required": ["reference_ids"] }
+        }
+      ]
     },
     "search_response": {
       "type": "object",
