@@ -20,6 +20,13 @@
     "phone_number": {
       "type": "string",
       "description": "E.164 standard."
+    },
+    "dietary_restrictions": {
+      "type": "array",
+      "items": {
+        "$ref": "dietary_restriction.json"
+      },
+      "description": "Allergens the buyer has asked to avoid. A Business MAY use them to refuse a dish or add a message, and MUST NOT use them to clear one."
     }
   }
 }

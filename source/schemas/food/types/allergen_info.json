@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/allergen_info.json",
+  "title": "Allergen Information",
+  "description": "What the Business states about a dish's allergens, per allergen code. A code not listed is not recorded: it MUST NOT be read as absent.",
+  "type": "object",
+  "required": [
+    "code_list",
+    "items"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "code_list": {
+      "type": "string",
+      "description": "The list the allergen codes come from, so codes do not depend on string matching across jurisdictions.",
+      "examples": [
+        "eu_annex_ii",
+        "us_major_9"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "status"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Allergen code from `code_list` (e.g., `peanuts`, `milk`, `gluten`)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "contains",
+              "may_contain",
+              "free_of"
+            ],
+            "description": "'contains': an ingredient. 'may_contain': cross-contact is possible (e.g., shared equipment). 'free_of': the Business states the dish is free of it; a Platform MUST NOT infer this status."
+          },
+          "source": {
+            "type": "string",
+            "description": "Who states it: `business`, or a declaration the Business relies on (e.g., `supplier_declaration`).",
+            "examples": [
+              "business",
+              "supplier_declaration"
+            ]
+          }
+        }
+      },
+      "description": "One entry per allergen the Business states something about."
+    }
+  }
+}

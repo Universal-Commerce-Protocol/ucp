@@ -38,6 +38,11 @@
       "description": "Dish media assets (e.g., dish images, preparation videos). First item is the featured media for presentation in food ordering surfaces.",
       "ucp_request": "omit"
     },
+    "allergens": {
+      "$ref": "allergen_info.json",
+      "description": "What the Business states about this dish's allergens. A code not listed is not recorded, never absent.",
+      "ucp_request": "omit"
+    },
     "modifications": {
       "type": "array",
       "items": {

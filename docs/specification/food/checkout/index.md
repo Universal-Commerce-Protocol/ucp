@@ -602,6 +602,84 @@ longer than usual").
     ℹ High demand — delivery times are about 15 minutes longer than usual.
     ```
 
+### Allergens and Dietary Restrictions
+
+A Business MAY state, per allergen, what it knows about a dish in
+`dish.allergens` ([Allergen Information](#allergen-information)): the list the
+codes come from (`code_list`), and for each code a `status` of `contains`,
+`may_contain` or `free_of`, with the `source` of the statement. A Platform can
+then check a line against what the buyer asked to avoid instead of parsing the
+text of an `allergens` disclosure.
+
+* A code that is not listed is **not recorded**. A Platform **MUST NOT**
+  present a dish as free of an allergen unless it is listed with
+  `status: free_of`, and **MUST NOT** infer `free_of` itself.
+* An `allergens` disclosure **MAY** carry the same `allergens` object beside
+  its `content`. `content` stays the human-readable and legal text.
+* A buyer **MAY** list allergens to avoid in `buyer.dietary_restrictions`
+  ([Dietary Restriction](#dietary-restriction)). A Business **MAY** use them to
+  refuse a dish or to add a message, and **MUST NOT** use them to clear one.
+* When a line conflicts with a stated restriction — the dish `contains` or
+  `may_contain` that allergen, or has no entry for it — the Business returns an
+  `allergen_conflict` error with `severity: requires_buyer_review` on that line.
+  Its `content` **MUST** say what is actually known: "contains", "may contain",
+  or that no information is recorded. The checkout **MUST NOT** reach
+  `ready_for_complete` until the buyer has reviewed it.
+
+=== "Dish Allergen Information"
+
+    <!-- ucp:example schema=food/types/dish op=read -->
+    ```json
+    {
+      "id": "dish_pad_thai",
+      "title": "Pad Thai",
+      "price": 1500,
+      "allergens": {
+        "code_list": "eu_annex_ii",
+        "items": [
+          { "code": "peanuts", "status": "contains", "source": "business" },
+          { "code": "sesame", "status": "may_contain", "source": "business" },
+          { "code": "milk", "status": "free_of", "source": "supplier_declaration" }
+        ]
+      }
+    }
+    ```
+
+=== "Buyer Restriction"
+
+    <!-- ucp:example schema=food/types/buyer op=update direction=request -->
+    ```json
+    {
+      "email": "buyer@example.com",
+      "dietary_restrictions": [
+        { "code_list": "eu_annex_ii", "code": "peanuts" },
+        { "code_list": "eu_annex_ii", "code": "celery" }
+      ]
+    }
+    ```
+
+=== "Conflict Messages"
+
+    <!-- ucp:example schema=food/checkout target=$.messages op=read -->
+    ```json
+    [
+      {
+        "type": "error",
+        "code": "allergen_conflict",
+        "path": "$.line_items[0]",
+        "severity": "requires_buyer_review",
+        "content": "Contains peanuts, which the buyer listed."
+      },
+      {
+        "type": "error",
+        "code": "allergen_conflict",
+        "path": "$.line_items[0]",
+        "severity": "requires_buyer_review",
+        "content": "No allergen information about celery for this dish, which the buyer listed."
+      }
+    ]
+    ```
+
 ### Order Confirmation & Tracking
 
 On `completed`, the Business returns an [Order Confirmation](#order-confirmation)
@@ -770,6 +848,14 @@ Buyer location, localization, and eligibility claims (e.g., delivery-pass
 membership) used before completion.
 
 {{ schema_fields('types/context', 'food/checkout') }}
+
+### Allergen Information
+
+{{ schema_fields('food/types/allergen_info', 'food/checkout') }}
+
+### Dietary Restriction
+
+{{ schema_fields('food/types/dietary_restriction', 'food/checkout') }}
 
 ### Dish
 
