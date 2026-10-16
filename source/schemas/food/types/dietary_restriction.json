@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/dietary_restriction.json",
+  "title": "Dietary Restriction",
+  "description": "An allergen the buyer has asked to avoid. The Business MAY use it to refuse a dish or add a message, and MUST NOT use it to clear one.",
+  "type": "object",
+  "required": [
+    "code_list",
+    "code"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "code_list": {
+      "type": "string",
+      "description": "The list the code comes from (see Allergen Information `code_list`).",
+      "examples": [
+        "eu_annex_ii",
+        "us_major_9"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "description": "Allergen code from `code_list`."
+    }
+  }
+}
