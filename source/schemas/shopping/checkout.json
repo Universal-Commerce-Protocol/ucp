@@ -62,6 +62,16 @@
       "$ref": "types/attribution.json",
       "ucp_request": "optional"
     },
+    "platform_reference": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Opaque platform-supplied correlation reference. Set by the platform on Create Checkout and immutable thereafter. The business MUST persist the value, echo it verbatim on every checkout response, and carry it onto the resulting order. The business MUST treat the value as opaque and MUST NOT interpret or modify it. The platform MUST NOT place personally identifiable information or credentials in this field, and MUST NOT use it for authentication, authorization, or idempotency.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "omit",
+        "complete": "omit"
+      }
+    },
     "status": {
       "type": "string",
       "enum": [
