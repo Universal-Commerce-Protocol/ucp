@@ -23,12 +23,16 @@
 
 The Business capability lets a Business publish **location-independent**
 identity metadata about the business or brand as a whole (`name`, `media`,
-`links`, and `categories`) in its discovery profile (`/.well-known/ucp`).
+`links`, `address`, `contacts`, and `categories`) in its discovery profile
+(`/.well-known/ucp`).
 
 It is a declarative, profile-resident Common capability: it defines no runtime
 RPC operations of its own, and serves as the base capability that vertical
 specifications and third-party ecosystems extend via `extends` to attach
-vertical-specific business identity attributes.
+vertical-specific business identity attributes. Its shared summary type
+(`common/types/business_summary.json`) also provides the common identity shape
+reusable across other UCP surfaces, such as seller records in multi-seller
+catalogs.
 
 ### Separation from Location
 
@@ -38,21 +42,23 @@ adoptable:
 
 * **Business (`dev.ucp.common.business`) — who the business is (location-independent):**
   Describes the business or brand entity as a whole, independent of physical
-  geography or brick-and-mortar footprint: its display `name`, brand `media`
-  (`logo`, `cover`), canonical `website` and business-wide policy `links`, and
-  business `categories` (`mcc`, `naics`, `isic`, `merchant`). It is declared
-  statically in `ucp.capabilities` on `/.well-known/ucp`.
+  retail branches: its display `name`, brand `media` (`logo`, `cover`),
+  canonical `website` and business-wide policy `links`, corporate or legal
+  `address`, business-wide `contacts`, and business `categories` (`mcc`,
+  `naics`, `isic`, `merchant`). It is declared statically in `ucp.capabilities`
+  on `/.well-known/ucp`.
 * **Location (`dev.ucp.common.location.*`) — where physical branches operate:**
   Describes individual physical places (`Location` resources with `id`, branch
-  `name`, `address`, `geo` coordinates, `phone`, `hours`, `exception_hours`,
+  `name`, branch `address`, `geo` coordinates, `hours`, `exception_hours`,
   `timezone`, and physical `amenities`), queried dynamically at runtime via
   [Location Search](../location/search.md) and
   [Location Lookup](../location/lookup.md).
 
 An online-only merchant or digital brand advertises `dev.ucp.common.business`
-without `dev.ucp.common.location.*`. A brick-and-mortar or omnichannel business
-advertises `dev.ucp.common.business` for its brand-level identity alongside
-`dev.ucp.common.location.*` for its physical branches.
+(including its corporate `address` and customer-support `contacts`) without
+`dev.ucp.common.location.*`. A brick-and-mortar or omnichannel business
+advertises `dev.ucp.common.business` for its brand-level and corporate identity
+alongside `dev.ucp.common.location.*` for its physical retail branches.
 
 ## Discovery
 
@@ -90,6 +96,24 @@ Businesses advertise `dev.ucp.common.business` in `ucp.capabilities` with a
               {
                 "type": "website",
                 "url": "https://joespizza.example"
+              }
+            ],
+            "address": {
+              "street_address": "123 Carmine St",
+              "address_locality": "New York",
+              "address_region": "NY",
+              "postal_code": "10014",
+              "address_country": "US"
+            },
+            "contacts": [
+              {
+                "type": "general",
+                "phone_number": "+12125550100",
+                "email": "info@joespizza.example"
+              },
+              {
+                "type": "customer_support",
+                "email": "support@joespizza.example"
               }
             ],
             "categories": [
@@ -133,12 +157,33 @@ in `config.links` pointing to its canonical customer-facing storefront:
   `config.name` (e.g., `"Global Apparel US"`) and `config.links`
   (`{"type": "website", "url": "https://global-apparel.example/us"}`).
 * **Multi-brand enterprise:** Each brand origin declares that brand's own
-  `config.name`, `media`, `links`, and `categories`.
+  `config.name`, `media`, `links`, `address`, `contacts`, and `categories`.
 
 `config.links` is for canonical storefront binding (`website`) and
 business-wide legal or policy disclosures (`privacy_policy`,
 `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`)—not a sitemap of
 site navigation pages.
+
+### Contact Points and Account Claiming
+
+`config.address` and `config.contacts` carry the business entity's corporate or
+registered legal address and business-wide contact channels (`general`,
+`customer_support`, `admin`, `legal`):
+
+* **Corporate and customer-support channels:** Online-only businesses and
+  multi-location brands publish their headquarters or registered legal address in
+  `config.address` and their support or inquiry channels in `config.contacts`.
+* **Origin-bound account claiming:** When a Platform ingests a UCP discovery
+  profile (such as a POS-hosted merchant profile) to create an unverified
+  merchant listing, it **MAY** send a verification challenge (such as a one-time
+  passcode) to an `email` or `phone_number` published in `config.contacts` on
+  that authoritative origin when the merchant claims the account.
+* **Public-profile privacy:** Because `/.well-known/ucp` is a public,
+  unauthenticated document, Businesses and hosting platforms **SHOULD** publish
+  public or business-routed contact channels (such as a main business phone
+  number, a domain email like `info@joespizza.example`, or a host-routed relay
+  address) rather than an individual owner's personal email address or personal
+  mobile number.
 
 ## Schema
 
@@ -169,6 +214,24 @@ site navigation pages.
       "url": "https://joespizza.example"
     }
   ],
+  "address": {
+    "street_address": "123 Carmine St",
+    "address_locality": "New York",
+    "address_region": "NY",
+    "postal_code": "10014",
+    "address_country": "US"
+  },
+  "contacts": [
+    {
+      "type": "general",
+      "phone_number": "+12125550100",
+      "email": "info@joespizza.example"
+    },
+    {
+      "type": "customer_support",
+      "email": "support@joespizza.example"
+    }
+  ],
   "categories": [
     {
       "taxonomy": "mcc",
@@ -181,6 +244,14 @@ site navigation pages.
   ]
 }
 ```
+
+### Business Summary {: #business-summary }
+
+{{ schema_fields('types/business_summary', 'common/business') }}
+
+### Contact {: #contact }
+
+{{ schema_fields('types/contact', 'common/business') }}
 
 ### Business Category {: #business-category }
 

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/business_summary.json",
+  "title": "Business Summary",
+  "description": "Reusable location-independent identity metadata for a business, brand, or seller.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable display name of the business, brand, or seller (e.g., `'Joe\\'s Pizza'`)."
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "media.json"
+      },
+      "description": "Business-level media items, such as a brand `logo` (`role: 'logo'`) or `cover` image (`role: 'cover'`)."
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "link.json"
+      },
+      "description": "Business-level links, such as the canonical customer-facing `website` storefront URL and business-wide policy links (`privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`)."
+    },
+    "address": {
+      "$ref": "postal_address.json",
+      "description": "Corporate, headquarters, or registered legal address of the business. Physical retail branches live in `dev.ucp.common.location.*`."
+    },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "$ref": "contact.json"
+      },
+      "description": "Business-wide contact points (e.g., `general`, `customer_support`, `admin`, `legal`) for buyer inquiries and origin-bound account claim flows."
+    }
+  }
+}
