@@ -125,6 +125,13 @@ We welcome community contributions to enhance and evolve UCP.
   or other UCP repositories, please follow the developer instructions in the
   README of those repositories.
 
+> **Note:** This repository contains generic, cross-organization
+> specifications and schemas in the `dev.ucp.*` namespace. Organization or
+> vendor-specific capabilities, extensions, and payment handlers
+> (`com.{vendor}.*`, `org.{org}.*`) must be
+> [self-hosted on your own domain](https://ucp.dev/latest/documentation/core-concepts/#namespace-governance)
+> and should not be submitted as Pull Requests to this repository.
+
 ### Schema Development
 
 Schemas live in `source/` and are published with `ucp_*` annotations intact.
