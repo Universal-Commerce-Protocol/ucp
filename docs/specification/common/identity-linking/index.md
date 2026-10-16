@@ -276,20 +276,17 @@ vocabulary); runtime messages carry per-request advisories.
     authorization server protecting the resource without relying on
     domain conventions and prepares the deployment for future delegated
     domain conventions. The business **MUST** publish this metadata when
-    the authorization server does not live on the business domain. Every
-    entry in `authorization_servers` **MUST** be a canonical
-    [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){ target="_blank" }
-    issuer identifier whose discovered metadata `issuer` field matches
-    that entry byte-for-byte
+    the authorization server does not live on the business domain.
+* Every entry in `authorization_servers` **MUST** be an authorization
+    server issuer identifier
+    ([RFC 8414 §2](https://datatracker.ietf.org/doc/html/rfc8414#section-2){ target="_blank" })
+    whose discovered metadata `issuer` is identical to the entry
     ([RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
-    Businesses that serve OAuth endpoints (`authorization_endpoint`,
-    `token_endpoint`) on a custom domain while issuing tokens under a
-    different canonical issuer URI **MUST** advertise the canonical
-    issuer URI in `authorization_servers` (and point the endpoint fields
-    in that issuer's metadata to the custom domain), or configure the
-    custom domain's metadata to declare the custom domain itself as
-    `issuer`. Businesses **MUST NOT** list a custom endpoint domain in
-    `authorization_servers` whose metadata reports a different `issuer`.
+    A hostname that serves OAuth endpoints is not an issuer identifier
+    unless its metadata declares it as `issuer`. Branding is a property
+    of endpoint URLs (RFC 8414 places no host constraint on
+    `authorization_endpoint` or `token_endpoint`) or of redirects from
+    them, never of the issuer identifier.
 * **SHOULD** support
     [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
     to signal revocation and account state changes to platforms.
@@ -338,13 +335,14 @@ metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
 Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
 comparison.
 
-When `authorization_servers` contains multiple entries, platforms
-**MUST** evaluate entries in array order and select the first entry that
-successfully completes both Step 2 and Step 3. If an entry fails Step 2
-or Step 3 (for example, because an entry's metadata returns a mismatched
-`issuer`), the platform **MUST** discard that entry's metadata and try
-the next entry in `authorization_servers`. Discovery **MUST** abort if
-no entry in `authorization_servers` satisfies both Step 2 and Step 3.
+Platforms evaluate each candidate entry from Step 1 through Steps 2
+and 3. An entry that fails either step (for example, because its metadata
+reports a different `issuer`) **MUST** be discarded and **MUST NOT**
+by itself cause discovery to fail. Platforms **MAY** also exclude entries
+for authorization servers at which they hold no usable client identity
+(see [For Platforms](#for-platforms)). Among the remaining entries,
+platforms **SHOULD** prefer array order, which expresses the business's
+preference. Discovery fails only when no entry remains.
 
 ## Account Linking Flow
 
