@@ -195,7 +195,9 @@ of the payment.
 
 A term with more than one schedule **MUST** be funded by a single instrument.
 [Split Payments](split-payments.md) composes with a term that has exactly one
-schedule, and not otherwise.
+schedule. With a term that has more, any other submitted instrument
+contributes nothing to it, as when an extension requires an instrument to be
+retained for a later payment.
 
 ## Disclosures
 

@@ -142,6 +142,48 @@ Reading each combination:
 2. **Gift cards only**: 1 to 5 gift cards with no other instrument types.
 3. **Two cards**: Exactly 2 credit/debit cards.
 
+#### Per-checkout combinations
+
+The combinations a business accepts can depend on the checkout: a selected
+[payment term](terms.md) that defers payment excludes instruments that can only
+be charged immediately, and a checkout that includes a subscription requires an
+instrument able to pay for its
+[recurring orders](../../shopping/extensions/purchase-options.md#payment-eligibility).
+As a payment handler's response configuration is resolved for the checkout, a
+business MAY return the split payments capability in a checkout response's
+`ucp.capabilities` with a `config` whose `allowed_combinations` are resolved
+for that checkout. When present, they are authoritative for that checkout in
+place of the profile's, and admit only combinations the profile's also admits:
+the profile remains the upper bound, and a checkout can only narrow it. The
+platform MUST re-read them on every response.
+
+<!-- ucp:example schema=shopping/checkout extract=$.ucp target=$.ucp -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }],
+      "dev.ucp.common.payment.split_payments": [
+        {
+          "version": "{{ ucp_version }}",
+          "config": {
+            "allowed_combinations": [
+              [
+                { "types": ["gift_card"], "max": 2 },
+                { "types": ["card"], "min": 1, "max": 1 }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "payment_handlers": { ... }
+  }
+}
+```
+
 ## Using Split Payments
 
 ### Instrument Processing Model
@@ -221,17 +263,20 @@ Error conditions:
   instruments, the business MUST return an error.
 * If the sum of all specified `amount` values exceeds the
   checkout total, the business MUST return an error.
-* If the submitted instruments did not match any valid `allowed_combinations`, the business MUST return an error.
+* If the submitted instruments did not match any valid `allowed_combinations`
+  — those resolved for the checkout where the business returns them, the
+  profile's otherwise — the business MUST return an error.
 
 ### Response: Actual Charges
 
 On the checkout response, the business MUST set `amount` on every
 instrument that was authorized or charged, reflecting the actual
-contribution. For open-amount instruments (submitted without `amount`),
-the business MUST derive and report the actual contribution. The
-business MUST omit `amount` on all other instruments (e.g., a
-provisional authorization that was voided when a later instrument
-failed, or an instrument the business never attempted).
+contribution, and on every instrument it retains for a later payment, as an
+extension may require — `0` where it contributed nothing. For open-amount
+instruments (submitted without `amount`), the business MUST derive and report
+the actual contribution. The business MUST omit `amount` on all other
+instruments (e.g., a provisional authorization that was voided when a later
+instrument failed, or an instrument the business never attempted).
 
 Response `amount` is informational. It conveys what the business
 processed for buyer-facing UX and audit (e.g., "$10.00 charged to your
