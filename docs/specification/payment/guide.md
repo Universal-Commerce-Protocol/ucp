@@ -982,7 +982,7 @@ specifications:
 
 - **[Tokenization Guide](tokenization.md)** — Guide for building
   tokenization payment handlers
-- **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler){ target="_blank" }**
+- **[Google Pay Handler](https://developers.google.com/pay/api/universal-commerce-protocol/google-pay-payment-handler){ target="_blank" }**
   — Handler for Google Pay integration
-- **[Shop Pay Handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler){ target="_blank" }**
+- **[Shop Pay Handler](https://shopify.dev/docs/agents/carts-and-checkout/shop-pay-handler){ target="_blank" }**
   — Handler for Shop Pay integration
