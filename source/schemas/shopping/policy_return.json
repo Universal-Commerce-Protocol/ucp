@@ -61,7 +61,7 @@
     },
     "return_eligibility": {
       "title": "Return Eligibility",
-      "description": "An open return eligibility statement. `window` states a guaranteed minimum period for otherwise eligible returns; expiration does not signal non-returnability. `unlimited` states no time restriction, not unconditional eligibility. `not_accepted` states that the covered items cannot be returned. Unknown types establish no eligibility inference; consumers may use the base policy's `description`.",
+      "description": "An open return eligibility statement. `window` states a guaranteed minimum period after an anchor event and, once resolved, the instant it ends; expiration does not signal non-returnability. `unlimited` states no time restriction, not unconditional eligibility. `not_accepted` states that the covered items cannot be returned. Unknown types establish no eligibility inference; consumers may use the base policy's `description`.",
       "type": "object",
       "required": ["type"],
       "properties": {
@@ -69,14 +69,20 @@
           "type": "string",
           "description": "Eligibility kind. Well-known values: `window`, `unlimited`, `not_accepted`. Unknown values establish no eligibility inference."
         },
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Length of the return window in whole days from `anchor`."
+        "duration": {
+          "type": "string",
+          "format": "duration",
+          "pattern": "^P(?:[1-9]\\d*[YMWD])+(?:T(?:[1-9]\\d*[HMS])+)?$|^PT(?:[1-9]\\d*[HMS])+$",
+          "description": "Length of the return window after the `anchor` event, as an ISO 8601 duration with whole-number components greater than zero (e.g., `P30D` is 30 days, `PT30M` is 30 minutes, `P1M` is one month; `T` separates date units from time units, so `M` before it means months and after it minutes). It states the term for presentation; the Business resolves the deadline as `expires_at`."
         },
         "anchor": {
           "type": "string",
-          "description": "Event `days` is measured from. Well-known values: `delivered`, `purchased`, `shipped`, `fulfilled`."
+          "description": "Event the window is measured from. Well-known values: `purchased`, `fulfilled`, `delivered`."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 instant at which the window ends, resolved by the Business once the `anchor` event has occurred (e.g., on an order after delivery). When covered quantities reach the anchor at different times, it states the earliest of their deadlines. An otherwise eligible return requested no later than this instant is accepted."
         }
       },
       "allOf": [
@@ -90,7 +96,7 @@
             "required": ["type"]
           },
           "then": {
-            "required": ["days", "anchor"]
+            "required": ["duration", "anchor"]
           }
         },
         {
@@ -104,8 +110,9 @@
           },
           "then": {
             "properties": {
-              "days": false,
-              "anchor": false
+              "duration": false,
+              "anchor": false,
+              "expires_at": false
             }
           }
         },
@@ -120,8 +127,9 @@
           },
           "then": {
             "properties": {
-              "days": false,
-              "anchor": false
+              "duration": false,
+              "anchor": false,
+              "expires_at": false
             }
           }
         }

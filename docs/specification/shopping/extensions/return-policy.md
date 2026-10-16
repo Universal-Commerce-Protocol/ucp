@@ -85,7 +85,7 @@ any surface that carries `policies[]`:
 
 A business **MAY** advertise support on a subset of these surfaces. A platform
 that has negotiated this type validates the return body and **MAY** reason over
-its structured fields (for example, computing a return deadline) only when the
+its structured fields (for example, presenting a return deadline) only when the
 body passes schema validation. A platform that has not negotiated it still
 renders the policy from the base `type` and `description`, because the return
 body is purely additive.
@@ -133,21 +133,21 @@ kinds are:
 
 | `type` | States that |
 | :-- | :-- |
-| `window` | Otherwise eligible returns are accepted for at least `days` days from the event named by `anchor`; both are required (see [Window and anchor](#window-and-anchor)). |
+| `window` | Otherwise eligible returns are accepted for at least `duration` from the event named by `anchor`; both are required (see [Window and anchor](#window-and-anchor)). |
 | `unlimited` | Otherwise eligible returns are subject to no time restriction. |
 | `not_accepted` | The covered items cannot be returned (see [Non-returnable items](#non-returnable-items)). |
 
-`days` and `anchor` have meaning only on a `window`, so a business **MUST NOT**
-carry them on an `unlimited` or `not_accepted` eligibility; the schema rejects
-the combination.
+`duration`, `anchor`, and `expires_at` have meaning only on a `window`, so a
+business **MUST NOT** carry them on an `unlimited` or `not_accepted`
+eligibility; the schema rejects the combination.
 
 `not_accepted` is an explicit policy-level prohibition on returning the covered
 items. `window` and `unlimited` state a time bound, not a verdict on a
 particular return: `window` guarantees a period for returns that are otherwise
 eligible, and `unlimited` removes the time restriction and nothing else, so
 neither kind alone establishes that a particular attempted return meets every
-requirement. A business **MAY** describe eligibility requirements beyond time,
-such as tags attached or original packaging, in `description`.
+requirement. A business **MAY** describe eligibility requirements beyond the
+time bound, such as tags attached or original packaging, in `description`.
 
 An omitted `eligibility` means eligibility is not stated structurally; it
 states neither that returns are unrestricted nor that they are unavailable, and
@@ -161,24 +161,51 @@ limit or as not returnable; it **MAY** present the policy from its
 
 A `window` eligibility states the length of the return window as a **policy
 statement**, not a live countdown. It is a guaranteed minimum for otherwise
-eligible returns: a return started within the window is accepted with any
-listed resolution through any listed method. A platform computes that
-guaranteed deadline by adding `days` to the event named by `anchor`. The window
-is a floor, not a ceiling: its expiry does not establish that an item is
-non-returnable (see [Responsibilities](#responsibilities)).
+eligible returns: a return requested within the window is accepted with any
+listed resolution through any listed method. `duration` and `anchor` state the
+terms, for example "30 days from delivery"; once the anchor event has occurred,
+the business resolves the guaranteed deadline and states it as `expires_at`. A
+return requested no later than `expires_at` is within the window; later steps,
+such as sending the item back within a set period, are eligibility requirements
+a business **MAY** describe in `description`. The window is a floor, not a
+ceiling: its expiry does not establish that an item is non-returnable (see
+[Responsibilities](#responsibilities)).
 
-When the window varies with something known only at return time, such as the
-item's condition or the resolution the buyer picks, `days` states the period
-that holds in every case, and `description` states the longer ones. A policy
-with 30 days for a refund and 60 days for store credit sets `days` to `30`,
-lists both resolutions, and describes the store-credit extension (see
-[Different windows per resolution](#different-windows-per-resolution)).
+A platform **MAY** present `expires_at` in any time zone and **MUST NOT**
+present a later deadline, for example by showing only its date, which reads as
+the end of that date. Without `expires_at`, a platform presents the terms, for
+example "30 days from delivery", and **MUST NOT** present a date it computed
+from them as the deadline.
 
-Businesses differ on whether the clock starts at delivery, purchase, shipment,
-or fulfillment, so a business that states a `window` **MUST** provide both
-`days` and `anchor`, and the schema requires them. There is no default anchor,
-and a platform **MUST NOT** assume one. A business states no time restriction
-with an `unlimited` eligibility; when the window is not stated structurally, it
+A business **SHOULD** state `expires_at` once it can resolve the deadline,
+typically on an order after the anchor event. It **MUST NOT** state an
+`expires_at` earlier than the end of the window its `duration` and `anchor`
+describe.
+
+When covered quantities reach the anchor at different times, such as a line
+delivered in two shipments, `expires_at` states the earliest of their
+deadlines, so a return requested by then is within the window for every covered
+quantity. A business scopes policies per line with `applies_to` for finer
+resolution.
+
+For a 30-day window anchored on `delivered` and an item delivered on
+2026-03-02, the business states `"expires_at": "2026-04-01T18:00:00Z"`, and
+the platform shows "Return by Apr 1, 6:00 PM UTC" or its local equivalent (see
+[Order after delivery](#order-after-delivery)).
+
+When the window's length varies with something known only at return time, such
+as the item's condition or the resolution the buyer picks, `duration` states the
+shortest of those periods, since a guarantee field holds for every eligible
+return (see [Responsibilities](#responsibilities)), and `description` states the
+longer ones. A condition that makes an item not returnable at all, such as being
+worn, is an eligibility requirement, not a shorter window: the window applies
+only to otherwise eligible returns (see [Eligibility](#eligibility)).
+
+Businesses differ on whether the clock starts at purchase, fulfillment, or
+delivery, so a business that states a `window` **MUST** provide both `duration`
+and `anchor`, and the schema requires them. There is no default anchor, and a
+platform **MUST NOT** assume one. A business states no time restriction with
+an `unlimited` eligibility; when the window is not stated structurally, it
 omits `eligibility` and conveys the terms in `description`.
 
 `anchor` is an open vocabulary. The well-known values are:
@@ -186,17 +213,13 @@ omits `eligibility` and conveys the terms in `description`.
 | Anchor | The clock starts when |
 | :-- | :-- |
 | `purchased` | The order is placed. |
-| `shipped` | The items are handed to a carrier. |
-| `fulfilled` | The business completes its fulfillment step for the method: shipping the items, readying them for pickup, or making a digital item available. |
+| `fulfilled` | The business completes its fulfillment step for the method: handing the items to a carrier, readying them for pickup, or making a digital item available. |
 | `delivered` | The buyer receives the items, including collecting a pickup order or gaining access to a digital item. |
 
 `fulfilled` and `delivered` differ in whose action starts the clock: the
 business completing its step, or the buyer receiving the items. A platform that
-does not recognize an `anchor` value **MUST NOT** compute a deadline from it.
-
-Pre-purchase, the window is a duration plus an anchor. Resolving it to an
-absolute cutoff after the anchor event is future work (see
-[Order-time resolution](#order-time-resolution)).
+does not recognize an `anchor` value presents the window from `description`,
+and still presents `expires_at` when the business states it.
 
 ### Non-returnable items
 
@@ -330,8 +353,9 @@ It is the human-readable summary a platform renders, and the fallback for a
 platform that does not model the type. A platform **SHOULD** surface `url`
 alongside the structured terms so the buyer can review the full policy.
 
-A platform that models this type **MAY** compute a guaranteed return deadline
-and a worst-case net refund from these fields. It computes a worst-case net
+A platform that models this type **MAY** present a guaranteed return deadline
+from `expires_at` (see [Window and anchor](#window-and-anchor)) and **MAY**
+compute a worst-case net refund from these fields. It computes a worst-case net
 refund only when `restocking_fee` is present and every method the buyer may use
 states its cost (see [Two kinds of cost](#two-kinds-of-cost)). The worst-case
 net refund for a return of a given quantity in one shipment through a method is
@@ -344,18 +368,6 @@ shipments pays it for each one. It
 **MUST NOT** treat an elapsed window as making an item non-returnable, since
 the `description` may allow later returns; only a `not_accepted` eligibility
 states that.
-
-## Order-time resolution
-
-This section is informative and describes planned future work.
-
-Pre-purchase, the return window is a duration plus an anchor. The concrete
-deadline a buyer has can only be computed once the anchor event (for example,
-delivery) has occurred. A future revision is expected to let a business carry
-that resolved cutoff on the Order, so a platform can read it rather than track
-fulfillment events and recompute. Until that field is defined, Order `policies`
-remain the snapshot of the policies that applied at checkout, and a platform
-computes the deadline from a `window` eligibility as it does pre-purchase.
 
 ## Examples
 
@@ -377,7 +389,7 @@ to be shown. The default policy's 15% restocking fee is a maximum; its
     "description": {
       "plain": "30-day returns from delivery. Refund to original payment or exchange. Free in-store; $5 return shipping by mail. 15% restocking fee on opened items."
     },
-    "eligibility": { "type": "window", "days": 30, "anchor": "delivered" },
+    "eligibility": { "type": "window", "duration": "P30D", "anchor": "delivered" },
     "supported_resolutions": ["original_payment_method", "exchange"],
     "methods": [
       { "type": "in_store", "fee": { "type": "free", "display_text": "Free in-store return" } },
@@ -424,41 +436,11 @@ resolution the policy guarantees, and its `description` rules out any other:
     "type": "dev.ucp.shopping.policy.return",
     "description": { "plain": "Returns accepted within 30 days for store credit only." },
     "applies_to": ["$.products[0]"],
-    "eligibility": { "type": "window", "days": 30, "anchor": "purchased" },
+    "eligibility": { "type": "window", "duration": "P30D", "anchor": "purchased" },
     "supported_resolutions": ["store_credit"]
   }
 ]
 ```
-
-### Different windows per resolution
-
-A business offers refunds for 30 days after delivery and store credit for 60,
-with no restocking fee. Precedence lets only one return policy govern an item,
-so a single policy carries both: a `window` eligibility states the 30 days in
-which either resolution is guaranteed, the `description` states the longer
-store-credit window, and `percentage_bps` of `0` states that no restocking fee
-is charged:
-
-<!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
-```json
-[
-  {
-    "type": "dev.ucp.shopping.policy.return",
-    "description": {
-      "plain": "Return within 30 days of delivery for a refund to your original payment method, or within 60 days for store credit. No restocking fee."
-    },
-    "eligibility": { "type": "window", "days": 30, "anchor": "delivered" },
-    "supported_resolutions": ["original_payment_method", "store_credit"],
-    "restocking_fee": { "percentage_bps": 0 },
-    "url": "https://example.com/returns"
-  }
-]
-```
-
-A platform can tell the buyer that either resolution is guaranteed until 30
-days after delivery, with no restocking fee. After that, it relies on the
-`description`, which offers store credit until day 60, rather than reporting the
-item as non-returnable.
 
 ### Returns with no time limit
 
@@ -480,4 +462,47 @@ from the `description`:
     "supported_resolutions": ["store_credit"]
   }
 ]
+```
+
+### Order after delivery
+
+Once the first line of an order has been delivered, the business resolves its
+30-day window and states the deadline as `expires_at`, scoping the policy to
+that line with `applies_to` so a line delivered later carries its own deadline:
+
+<!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.order -->
+```json
+{
+  "ucp": {...},
+  "id": "order_abc123",
+  "checkout_id": "checkout_xyz789",
+  "permalink_url": "https://example.com/orders/abc123",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_jacket",
+      "item": { "id": "prod_jacket", "title": "Trail Jacket", "price": 12000 },
+      "quantity": { "original": 1, "total": 1, "fulfilled": 1 },
+      "totals": [...],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {...},
+  "totals": [...],
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.return",
+      "description": { "plain": "30-day returns from delivery. Refund to original payment method." },
+      "applies_to": ["$.line_items[0]"],
+      "eligibility": {
+        "type": "window",
+        "duration": "P30D",
+        "anchor": "delivered",
+        "expires_at": "2026-04-01T18:00:00Z"
+      },
+      "supported_resolutions": ["original_payment_method"],
+      "url": "https://example.com/returns"
+    }
+  ]
+}
 ```
