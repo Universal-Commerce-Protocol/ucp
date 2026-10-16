@@ -278,10 +278,10 @@ The examples below are abbreviated to focus on loyalty and discount extension fi
 complete cart and checkout responses also include base required fields such as `ucp`,
 `id`, `currency`, and `totals`.
 
-Building on the store loyalty card example from
+Building on the eligibility verification pattern from
 [Eligibility Verification at Completion](../../shopping/checkout/index.md#eligibility-verification-at-completion),
-assume the card offers one unconditional product discount and one conditional discount
-that the current checkout cart fails to satisfy. The platform can surface the first
+consider a store loyalty card that offers one unconditional product discount and one
+conditional discount that the current checkout cart fails to satisfy. The platform can surface the first
 provisional discount with disclaimers like "verified at purchase" and additionally show
 a warning message to disclose the inapplicability of the second discount.
 
@@ -313,11 +313,11 @@ a warning message to disclose the inapplicability of the second discount.
         "applied": [
           {
             "title": "Loyalty benefit 1",
-            "amount": 10,
+            "amount": 1000,
             "provisional": true,
             "eligibility": "com.example.loyalty.store_card",
             "allocations": [
-              {"path": "$.line_items[0]", "amount": 10}
+              {"path": "$.line_items[0]", "amount": 1000}
             ]
           }
         ]
@@ -382,11 +382,11 @@ non-provisional and `display_id` is returned.
         "applied": [
           {
             "title": "Loyalty benefit 1",
-            "amount": 10,
+            "amount": 1000,
             "provisional": false,
             "eligibility": "com.example.loyalty.store_card",
             "allocations": [
-              {"path": "$.line_items[0]", "amount": 10}
+              {"path": "$.line_items[0]", "amount": 1000}
             ]
           }
         ]
