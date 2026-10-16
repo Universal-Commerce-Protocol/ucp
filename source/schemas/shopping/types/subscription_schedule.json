@@ -11,7 +11,7 @@
   "properties": {
     "description": {
       "$ref": "../../common/types/description.json",
-      "description": "Complete buyer-facing statement of this run of recurring orders: what each order costs, how often one is placed, from when, and until when \u2014 until the next schedule takes effect, until a stated end, or until cancelled. Businesses MUST make this field sufficient on its own: a Platform that reads no other field MUST be able to present this schedule correctly. Platforms MAY use `totals` and `starts_at` for enhanced presentation, but MUST NOT present derived terms that contradict this field."
+      "description": "Complete buyer-facing statement of this run of recurring orders: what each order costs, how often one is placed, from when, and until when — until the next schedule takes effect, until a stated end, or until cancelled. Businesses MUST make this field sufficient on its own: a Platform that reads no other field MUST be able to present this schedule correctly. Platforms MAY use `totals` and `starts_at` for enhanced presentation, but MUST NOT present derived terms that contradict this field."
     },
     "totals": {
       "type": "array",
@@ -19,12 +19,29 @@
         "$ref": "../../common/types/total.json"
       },
       "minItems": 1,
-      "description": "Breakdown of each recurring order placed under this schedule, following the same contract as a line item's `totals`: entries are rendered in order and never aggregated by the Platform, and a `total` entry MUST be present. On a catalog variant the breakdown is for one unit; on a cart or checkout line, for the line at its quantity. `total` is the amount of the order before the taxes, fulfillment, and fees the Business computes when it places it, unless the Business can state those and includes their entries; an omitted entry is not stated, not zero. A `discount` entry makes a saving against the one-time price visible, and a saving that expires is a schedule that ends and another that begins. Amounts are in the response currency's minor units (ISO 4217); on a catalog surface, in the currency of the variant's `price`."
+      "description": "Breakdown of each recurring order placed under this schedule, following the same contract as a line item's `totals` — entries are rendered in order and never aggregated by the Platform — and additionally carrying exactly one `total` entry, because no other total states what each recurring order costs. On a catalog variant the breakdown is for one unit; on a cart or checkout line, for the line at its quantity. `total` is the amount of the order before the taxes, fulfillment, and fees the Business computes when it places it, unless the Business can state those and includes their entries; an omitted entry is not stated, not zero. A `discount` entry makes a saving against the one-time price visible, and a saving that expires is a schedule that ends and another that begins. Amounts are in the response currency's minor units (ISO 4217); on a catalog surface, in the currency of the variant's `price`.",
+      "contains": {
+        "properties": {
+          "type": {
+            "const": "total"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
     },
     "starts_at": {
       "type": "string",
       "format": "date-time",
       "description": "Absolute RFC 3339 date-time at which this schedule takes effect: for the first schedule, when the first recurring order after this purchase is placed; for a later schedule, when the first order on its terms is placed. Supplementary to `description`, never a replacement for it. Omitted where the Business cannot yet determine it, such as a catalog response or a cart lacking the context the schedule depends on; SHOULD be present once a checkout is `ready_for_complete`."
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Absolute RFC 3339 date-time after which no recurring order is placed under this schedule, for a schedule that ends on a date the Business can state. On the last schedule it marks a subscription that ends on its own; omitted there, the recurring orders continue until the buyer cancels. On an earlier schedule it is optional, because the next schedule's `starts_at` bounds it, and where present it is earlier than that `starts_at`. Supplementary to `description`, never a replacement for it."
     }
   }
 }

@@ -547,7 +547,7 @@ plugins:
               assist with privacy compliance (CCPA/GDPR).
           - specification/shopping/extensions/purchase-options.md: >-
               Purchase Options Extension, letting a business advertise the
-              ways a variant can be bought (once, subscription, pre-order) as
+              ways a variant can be bought (once, or as a subscription) as
               purchase_options[] on catalog variants and cart or checkout
               lines, a platform select one by
               selected_purchase_option_id, and the Order preserve the selected

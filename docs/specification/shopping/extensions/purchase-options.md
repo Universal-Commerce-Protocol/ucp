@@ -18,10 +18,10 @@
 
 ## Overview
 
-A product can be sold in several ways: once, as a subscription, on pre-order.
-The Purchase Options extension lets a Business advertise those ways on a
-variant, lets a Platform select one by opaque identifier, and preserves the
-selected option on the resulting Order.
+A product can be bought once or as a subscription. The Purchase Options
+extension lets a Business advertise those ways on a variant, lets a Platform
+select one by opaque identifier, and preserves the selected option on the
+resulting Order.
 
 Today a variant has one price and one way to buy it. A Business that also
 sells the same coffee on a monthly plan has no way to say so in its catalog, a
@@ -141,7 +141,9 @@ and exactly one of them is in effect. On a cart or checkout line,
 the **default**: the option the Business selects when a Platform adds the
 variant without choosing one, and the option whose `price` the variant's own
 `price` states. A Business orders `purchase_options` by its preference, default
-first.
+first. Where a one-time option is listed, the default **MUST** be an option
+without `schedules`: a buyer is never enrolled in recurring orders because a
+Platform did not choose.
 
 A one-time purchase is an option like any other. A variant that can be bought
 once or on a plan lists both; a variant whose list contains no one-time option
@@ -157,7 +159,7 @@ as a subscription is one such case: a single option with `schedules`.
 
 `purchase_options[].price` answers one question: what does one unit cost in
 this purchase under this option? It reflects any discount or fixed pricing the
-option defines and is stated before quantity, taxes, discounts, fees, and
+option defines and is stated before quantity, taxes, other discounts, fees, and
 fulfillment. Every option's `price` is directly comparable with every other's,
 and with the variant's `price`, because all of them answer the same question.
 
@@ -167,9 +169,11 @@ The same rule holds across arrangements:
   the $10 is collected is a [payment term](../../payment/extensions/terms.md).
 - A subscription whose first order costs $8.50 has a `price` of $8.50. The
   recurring orders are stated in its `schedules`.
-- A free trial has the first order's full `price`. Selecting it is what makes
-  the Business defer that order's payment to the end of the trial under a
-  payment term, and state the recurring orders in a subscription policy.
+- A free trial that is a free period has a `price` of `0`, and its recurring
+  orders begin when the trial ends. A free trial whose first order the buyer
+  owes at the end of the trial unless they cancel has that order's full
+  `price`, and selecting it is what makes the Business defer its payment under
+  a payment term. See [Payment terms](#payment-terms).
 - `0` means the current purchase is genuinely free. It never means a non-zero
   amount is merely collected later.
 
@@ -177,21 +181,26 @@ On a cart or checkout line, the selected option's price is the line's
 `item.price`, and the line's `totals` and the checkout `totals` follow from it.
 Unselected options are indicative, priced by the Business for this cart or
 checkout as best it can; only the selected option is reflected in the totals.
-The option is the pricing mechanism: a "subscribe & save" option's saving is
-its lower `price`. Where that price is a saving against a reference, the
-option carries `list_price` — for a subscribe-and-save option, the one-time
-price — mirroring `variant.list_price` for strikethrough display and a
-derivable saving. The
-catalog states a price and a reference price, never a breakdown; breakdowns
+The option is the pricing mechanism: a "subscribe & save" option's saving is its
+lower `price`. Where that price is a saving against a reference, the option
+carries `list_price` — for a subscribe-and-save option, the one-time price —
+mirroring `variant.list_price` for strikethrough display and a derivable saving.
+The catalog states a price and a reference price, never a breakdown; breakdowns
 begin at the line. Whether a Business then itemizes the saving as a discount
-entry in a line's `totals` is its choice, applied consistently to today's
-order and to the option's `schedules`.
+entry in a line's `totals` is its choice, applied consistently to today's order
+and to the option's `schedules`.
+
+A Business shapes `purchase_options`, and so `variant.price`, to the
+capabilities a Platform negotiated, so the same variant can state different
+prices to different Platforms. A response is specific to the Platform it was
+built for and **MUST NOT** be cached or shared across Platforms.
 
 ## Recurring orders
 
 An option that results in recurring orders carries `schedules`: one or more
 consecutive runs of recurring orders, each with its own complete
-`description`, the order's `totals`, and a `starts_at`. Most options have one
+`description`, the order's `totals`, a `starts_at`, and, where it ends on a
+date, an `ends_at`. Most options have one
 schedule. An option whose terms change — an introductory price that steps up,
 a weekly cadence that becomes monthly after a year — has one schedule per run,
 in the order they take effect. The presence of `schedules` is what makes an
@@ -215,24 +224,31 @@ placed, from when, and until when — so that a Platform can render it verbatim.
 There is no recurrence vocabulary on the wire — no interval, no cycle count,
 no anchor — for the same reason a payment schedule states its timing in text:
 the Business does the calendar arithmetic, and a Platform prints the result. A
-Platform **MAY** use `totals` and `starts_at` for a richer presentation — a
-budget check, a calendar reminder — but **MUST NOT** present derived terms that
-contradict a `description`, and **MUST NOT** derive further order dates from
-them.
+Platform **MAY** use `totals`, `starts_at`, and `ends_at` for a richer
+presentation — a budget check, a calendar reminder, telling a fixed term from
+an open-ended one — but **MUST NOT** present derived terms that contradict a
+`description`, and **MUST NOT** derive further order dates from them.
 
 Schedules are listed in the order they take effect. Each continues until the
-next one's `starts_at`; the last continues until the subscription ends — until
-cancelled, or until the end its `description` states.
+next one's `starts_at`; the last continues until the subscription ends. Where
+it ends on its own, the last schedule carries `ends_at`, after which no
+recurring order is placed; where it carries none, the recurring orders
+continue until the buyer cancels. On an earlier schedule `ends_at` is
+optional, because the next schedule bounds it.
 
 ### Totals
 
 A recurring order is an order, and a schedule states what it costs the way a
-line item does: `totals` follow the [line-item contract](../checkout/index.md#totals)
-— entries carry a `type` and a signed `amount`, a Platform renders them in the
-order provided and **MUST NOT** aggregate, filter, or reorder them, and a
-`total` entry **MUST** be present. On a catalog variant they are for one unit;
-on a cart or checkout line, for the line at its quantity. The option's own
-`price` is always per unit.
+line item does: `totals` follow the [line-item
+contract](../checkout/index.md#totals) — entries carry a `type` and a signed
+`amount`, a Platform renders them in the order provided and **MUST NOT**
+aggregate, filter, or reorder them. Unlike a line, whose amounts the checkout's
+own `totals` back, a schedule is the only statement of what each recurring order
+costs, so exactly one `total` entry **MUST** be present. On a catalog variant
+they are for one unit; on a cart or checkout line, for the line at its quantity.
+Because they follow the quantity, a change the Platform makes to the quantity
+changes them, and is not a change to the option. The option's own `price` is
+always per unit.
 
 `total` is the amount of the order **before** the taxes, fulfillment, and fees
 the Business computes when it places it, because the rates that apply on a
@@ -259,21 +275,24 @@ first order date depends on — and **SHOULD** be present once a checkout is
 This extension also defines the `dev.ucp.shopping.policy.subscription` type on
 the core [`policies[]`](../../overview/index.md#policies) primitive. The
 selected option's `schedules` state what each recurring order costs and when;
-the policy states the rest of the agreement — that the line results in
-recurring orders and until when, and how the buyer cancels and manages it — and
-carries the disclosure every jurisdiction requires before a buyer agrees to
-recurring orders. It adds no fields to the base policy. Negotiating this
-extension is how a Platform accepts the
-[Platform obligations](#platform-obligations) below.
+the policy states the rest of the agreement — that the line results in recurring
+orders and until when, and how the buyer cancels and manages it — and carries
+the disclosure buyers must see before agreeing to recurring orders. It adds no
+fields to the base policy. Negotiating this extension is how a Platform accepts
+the [Platform obligations](#platform-obligations) below.
 
 ### Where
 
 When a line's selected option carries `schedules`, the Business **MUST** emit a
-subscription policy whose `applies_to` names that line, on every cart,
+subscription policy whose `applies_to` names that line alone, on every cart,
 checkout, and order response that carries the line. Exactly one governs a
-line; a line whose selected option has no `schedules` has none. Items on
-different subscriptions are governed by separate policies, and two lines that
-recur together on one set of terms are one policy with two targets.
+line; a line whose selected option has no `schedules` has none.
+
+Each line that results in recurring orders is its own subscription, so the
+line identifies it: its `id` names the subscription at checkout, and with the
+Order's `id` on the Order. Two lines governed by the same terms are two
+policies. A Business that fulfills or bills several lines' recurring orders
+together may do so; the protocol records each line's agreement separately.
 
 On a catalog surface a Business **SHOULD** emit the policy targeting the
 product or variant whose options carry `schedules`, so that a buyer can read
@@ -298,23 +317,24 @@ The policy **MUST NOT** contradict the selected option's `schedules`, and
 
 ### The disclosure
 
-Alongside every governing policy on a cart or checkout, the Business **MUST**
-emit a `messages[]` warning with `presentation: "disclosure"`, `code` set to
-`dev.ucp.shopping.policy.subscription`, and `path` naming the line, as
+Alongside every governing policy on a cart, checkout, or order, the Business
+**MUST** emit a `messages[]` warning with `presentation: "disclosure"`, `code`
+set to `dev.ucp.shopping.policy.subscription`, and `path` naming the line, as
 [Presenting policies](../../overview/index.md#presenting-policies) defines. Its
 `content` **MUST** be sufficient on its own, because presenting a policy is
 optional for a Platform and the disclosure is not. It **MUST** state:
 
-- what the buyer pays today, where it differs from what each recurring order
-    costs;
+- what the current purchase costs and when it is paid, including any
+    condition on that payment, where either differs from a recurring order;
 - what each recurring order costs, and whether taxes and shipping are added;
-- how often recurring orders are placed, and when the first one is;
+- how often recurring orders are placed, and the date of the first one;
 - until when they continue; and
 - how to cancel.
 
-A disclosure **MUST** agree with the governing policy and with the selected
-option's `schedules`, and **MUST** be returned again whenever a change to the
-checkout changes any of the terms it states.
+A disclosure **MUST** agree with the governing policy, with the selected
+option's `schedules`, and with the selected payment term, and **MUST** be
+returned again whenever a change to the checkout changes any of the terms it
+states.
 
 ### Platform obligations
 
@@ -326,8 +346,8 @@ A Platform that negotiates this extension **MUST**:
 - present it before completing the checkout, and not complete a checkout that
   carries a subscription disclosure the buyer has not been shown, unless the
   buyer has authorized the disclosed terms by another means the Business
-  accepts, such as a signed [AP2 mandate](../../payment/extensions/ap2-mandates.md)
-  over the checkout;
+  accepts, such as a signed [AP2
+  mandate](../../payment/extensions/ap2-mandates.md) over the checkout;
 - escalate through `continue_url` when it cannot honor either of the above,
   rather than completing;
 - honor an error with `severity: "requires_buyer_review"`, which a Business
@@ -342,16 +362,43 @@ extension adds no authorization field of its own.
 
 ### Payment eligibility
 
-Recurring orders are paid with an instrument the Business can charge when the
+Recurring orders are paid with instruments the Business can charge when the
 buyer is not present. Checkout already requires a Business to filter the
-payment handlers and instruments it offers to the context of the cart, and
-names subscriptions as the example. A Business **MUST** offer only instruments
-able to pay for the recurring orders the selected options state, and **MUST**
-reject one that cannot. A Platform **MUST** treat the handlers in each response
-as authoritative, and re-read them after any change that adds or removes a
-subscription policy. How a handler stores an instrument, and how a payment for
-a recurring order is executed or recovers from a decline, are payment-handler
-and order-lifecycle behavior, outside this extension.
+payment handlers it offers to the context of the cart, and names subscriptions
+as the example; without [Split
+Payments](../../payment/extensions/split-payments.md), that filter is the whole
+rule.
+
+Where a subscription policy governs a line, the instruments submitted without
+an `amount` — and the single instrument, where Split Payments is not active —
+are **open-ended**. They pay toward today's order in allocation priority
+order, as Split Payments defines, and the Business retains them, in that
+order, as the buyer's preference for paying the recurring orders. An
+instrument submitted with an `amount` pays toward today's order only.
+
+Where Split Payments is active, the Business **MUST** return the
+[combinations it accepts for the
+checkout](../../payment/extensions/split-payments.md#per-checkout-combinations)
+in the split payments capability's response `config`, and the submission
+**MUST** match one. A combination that today's order alone would
+allow, such as gift cards covering the total, is one the Business leaves out
+where those instruments cannot pay for the recurring orders.
+
+A Business **MUST** reject a submission with no open-ended instrument able to
+pay for the recurring orders the selected options state, as a recoverable
+`payment_failed` error whose `path` names `$.payment.instruments`. It
+**MUST** process each open-ended instrument it retains, even where that
+instrument contributed nothing to today's order, and reports its `amount` as
+`0`. When it places a recurring order, it **MAY** skip a retained instrument
+that cannot pay for it, and **MAY** fall back through the remaining ones when
+a payment fails. It **MUST NOT** depart from the submitted order, or pay for a
+recurring order with an instrument submitted with an `amount`.
+
+A Platform **MUST** treat the handlers and `allowed_combinations` in each
+response as authoritative, and re-read them after any change that adds or
+removes a subscription policy. How a handler stores an instrument, and how a
+payment for a recurring order is executed or recovers from a decline, are
+payment-handler and order-lifecycle behavior, outside this extension.
 
 ## Selecting an option
 
@@ -375,17 +422,17 @@ is **authoritative for all derived state**: `purchase_options` as priced for
 this cart or checkout, the line's `item.price` and `totals`, the checkout
 `totals`, `policies[]`, `messages[]`, the payment terms offered — a selection
 can introduce a term, as a trial introduces a deferred one, or withdraw one —
-and the payment handlers and instruments offered. A Platform **MUST NOT** assume the prices it
-read in the catalog survive selection, and **MUST** re-render from the
-response.
+and the payment handlers and instruments offered. A Platform **MUST NOT**
+assume the prices it read in the catalog survive selection, and **MUST**
+re-render from the response.
 
 `selected_purchase_option_id` **MUST** match a `purchase_options[].id` from the
 catalog or from the latest cart or checkout response for that line. A Platform
 **SHOULD** always send an explicit selection. Where it sends none, the Business
-selects the default and echoes it; a Platform that negotiated this extension is
-expected to read the echoed selection and the policies and disclosures that
-come with it. A Platform **MUST** omit the field on complete, because the
-option is already agreed before a checkout can reach `ready_for_complete`.
+selects the default and echoes it, and the Platform **SHOULD** read the echoed
+selection and the policies and disclosures that come with it. A Platform
+**MUST** omit the field on complete, because the option is already agreed before
+a checkout can reach `ready_for_complete`.
 
 The Business **MUST** make `purchase_options[].id` unique within a line, so
 that a selection resolves to exactly one option.
@@ -394,14 +441,25 @@ that a selection resolves to exactly one option.
 
 An option can be withdrawn, repriced, or made ineligible between responses. A
 Business receiving a selection that does not resolve against the options it
-currently offers for that line **MUST NOT** silently substitute another. It
-selects the default, returns the authoritative state, and **MUST** report the
-change as a `purchase_option_changed` warning in `messages[]` with `path`
-naming the line. A Business **MUST** report the same warning when it changes
-the selected option in place — its price, or the terms a policy states for
-it — without
-naming a different one. A Platform can therefore detect a changed selection
-from the code alone, rather than by comparing responses.
+currently offers for that line **MUST NOT** silently substitute another, and
+**MUST** report the change as a `purchase_option_changed` warning in
+`messages[]` with `path` naming the line.
+
+Where the selection that no longer resolves carried no `schedules`, the
+Business selects the default. Where it carried `schedules`, the Business
+**MUST NOT** replace it with a different option that carries `schedules`: a
+buyer never moves from one subscription to another without choosing it. It
+selects a one-time option where one is listed. Where none is, it selects the
+default, returns the checkout `incomplete`, and emits a recoverable
+`purchase_option_unavailable` error at the line's
+`selected_purchase_option_id`; the checkout cannot reach `ready_for_complete`
+until the Platform selects an option.
+
+A Business **MUST** also report `purchase_option_changed` when it changes the
+selected option in place — its price or its `schedules` — without naming a
+different one. A change that follows from the Platform's own request, such as
+a new quantity, is not a change to the option and is not reported. A Platform
+can therefore detect a Business-initiated change from the code alone.
 
 Changing the selected option can invalidate a selection accepted elsewhere in
 the checkout: a deposit term a Business offers on one-time purchases but not
@@ -417,11 +475,43 @@ answers what the current purchase is. They do not overlap. A try-before-you-buy
 option is a one-time purchase at full `price` whose payment is deferred, so it
 is expressed as an option plus a deferred payment term. A subscription's first
 order is simply in the checkout `totals`, paid at completion like anything
-else; the recurring orders are not owed yet and are not payment schedules. A
-free trial composes the two: the option is the first order at full `price`
-and its `schedules` state the recurring orders; its selection makes the
-Business return a deferred payment term for that first order, and nothing is
-paid at completion. In a catalog, when an option's purchase is paid is stated in its
+else; the recurring orders are not owed yet and are not payment schedules.
+
+A free trial takes one of two shapes, by whether today's order is owed:
+
+- A free period, after which paid recurring orders begin, has a `price` of
+  `0`, and its first schedule's `starts_at` is the end of the trial. Nothing
+  is owed for today's order, and no payment term is involved.
+- A first order the buyer owes at the end of the trial unless they cancel has
+  its full `price`, and its `schedules` state the recurring orders that
+  follow. Its selection makes the Business return a deferred payment term for
+  that first order, and nothing is paid at completion.
+
+An option whose current purchase depends on a payment term — a trial, a
+try-before-you-buy — **MUST NOT** be offered unless
+`dev.ucp.common.payment.terms` is active for the checkout. Without it, the
+checkout `total` is due at completion and the option cannot be honored; the
+Business treats it as an option the Platform cannot buy through. A deferred
+schedule that is due unless the buyer cancels first states that condition in
+its `description`. The buyer cancels through the Business, as for any
+subscription; payment terms defines no cancellation through UCP, and this
+extension adds none.
+
+A payment term and the recurring orders are paid from the same instruments,
+under different rules. A term's schedules are paid as Payment Terms defines,
+by the instrument that funds the term; the fallback in [Payment
+eligibility](#payment-eligibility) applies to recurring orders only. A term
+with more than one schedule is funded by a single instrument, and any other
+instrument contributes nothing to it. An installment term can therefore be
+paid by one instrument while another pays for the recurring orders: the
+Platform submits both open-ended, the instrument funding the term first; that
+instrument takes today's total, the other contributes nothing today and is
+retained, and the Business skips the first for any recurring order it cannot
+pay. A deferred term already excludes instruments that can only be charged
+immediately, so the instruments that remain pay for both the deferred first
+order and the recurring orders.
+
+In a catalog, when an option's purchase is paid is stated in its
 `description`; a structured preview of payment timing there would be an
 additive composition of payment terms onto catalog, title and description like
 fulfillment's previews, not a field on the option.
@@ -430,19 +520,21 @@ fulfillment's previews, not a field on the option.
 
 A purchase option is selected on the line it belongs to. Where a Business
 composes a line from components — nested lines that reference it through
-`parent_id` — the option is selected on the **parent**, and a selection sent
-on a component line is not honored. The components' prices are a breakdown of
-the parent's as that composition defines. Where components recur on their own
-terms, the Business states them as the selected option of each component line
-— response-only, set by the Business — each with a subscription policy
-targeting that line. Purchase Options does not define composition and does not
-infer it: an option never causes lines to be added or removed.
+`parent_id` — the option is selected on the **parent**. A selection sent on a
+component line is ignored, as the bundle's own update rules ignore submitted
+component lines; the Business returns its own. The components' prices are a
+breakdown of the parent's as that composition defines. Where components recur on
+their own terms, the Business states them as the selected option of each
+component line — set by the Business, not by the Platform — each with a
+subscription policy targeting that line. Purchase Options does not define
+composition and does not infer it: an option never causes lines to be added or
+removed.
 
 ### Platforms that have not negotiated this extension
 
-A Platform that has not negotiated this extension must not receive a variant
-that looks ordinary but cannot be bought as one. For such a Platform a
-Business:
+A Business **MUST NOT** return a variant that looks ordinary but cannot be
+bought as one to a Platform that has not negotiated this extension. For such a
+Platform a Business:
 
 - returns a variant that has a one-time option with that option's price as the
   variant's `price` and no extension fields, so it can be bought once as it
@@ -470,9 +562,9 @@ recurring orders agreed to; the Order line's `item.price` and `totals` record
 what the current purchase cost. Available options are checkout state and are
 not projected.
 
-The Order also carries the subscription policies that governed its lines at
-checkout as part of its `policies[]` snapshot, with `applies_to` re-targeted
-to the Order's lines, together with the disclosure that paired with each, its
+The Business **MUST** carry the subscription policy that governed each line at
+checkout onto the Order's `policies[]` snapshot, with `applies_to` re-targeted
+to the Order line, and **MUST** carry the disclosure that paired with it, its
 `path` naming the Order line. With the lines' `purchase_option` they are the
 authoritative record of what was disclosed and agreed; a dispute is resolved
 against them. They state what was agreed, not what has happened since: price
@@ -498,6 +590,10 @@ originate from this Order, so a buyer who can reach it can reach them.
 - **Future deliveries.** A recurring option's delivery schedule is
   described in `description` until a capability for scheduled fulfillment
   exists. Billing cadence does not imply delivery cadence.
+- **Structured cadence.** How often recurring orders are placed is stated in
+  `description`; options are compared on `totals`, `starts_at`, and `ends_at`,
+  and on cadence through text. A structured interval is an additive
+  follow-up.
 - **Platform-assembled options.** A Platform selects one id. It never composes
   a cadence, price, and commitment into an option the Business did not
   advertise.
@@ -508,7 +604,8 @@ Businesses **MUST**:
 
 - List every way a variant can be bought, including a one-time purchase where
   one is offered, default first, with the variant's `price` stating the
-  default option's price.
+  default option's price, and a default without `schedules` where a one-time
+  option is listed.
 - Name one offered option in `selected_purchase_option_id` on every cart or
   checkout line that carries `purchase_options`, selecting the default where
   the Platform made no choice.
@@ -521,14 +618,19 @@ Businesses **MUST**:
   option carries `schedules`, stating what [the policy](#what-it-says) and
   [the disclosure](#the-disclosure) require.
 - Report a `purchase_option_changed` warning whenever a response changes the
-  option in effect, by naming a different option or by rewriting the selected
-  one in place.
+  option in effect on the Business's initiative, by naming a different option
+  or by rewriting the selected one in place, and never replace a selection
+  that carries `schedules` with a different one that does.
 - Honor a selection only on the line it is sent for; never add, remove, or
   change other lines as a consequence of a selection.
 - Shape responses to Platforms that have not negotiated this extension so that
   no variant appears ordinarily purchasable when it is not.
 - Carry the selected option onto the Order line as `purchase_option`, with its
-  `schedules` as agreed.
+  `schedules` as agreed, and the line's subscription policy and disclosure onto
+  the Order.
+- Where Split Payments is active, return the `allowed_combinations` resolved
+  for the checkout, retain the open-ended instruments in the submitted
+  order, and pay for recurring orders only from them.
 
 Platforms **MUST**:
 
@@ -543,6 +645,9 @@ Platforms **MUST**:
 - Meet the [Platform obligations](#platform-obligations) for every
   subscription disclosure.
 - Omit `selected_purchase_option_id` on complete.
+- Submit the instruments meant to pay for the recurring orders without an
+  `amount`, in the order the buyer prefers them, matching the
+  `allowed_combinations` resolved for the checkout.
 
 Platforms **SHOULD**:
 
@@ -735,10 +840,12 @@ option is echoed for comparison.
 
 ### Checkout: a free trial selected
 
-A trial option is the first order at its full price, with `schedules` for the
-recurring orders that follow. Selecting it makes the Business return a
-deferred payment term for that first order — due at the end of the trial
-unless the buyer cancels first. Nothing is paid at completion. The unselected
+Here the first order is owed at the end of the trial unless the buyer cancels,
+so the option carries its full price, with `schedules` for the recurring
+orders that follow. Selecting it makes the Business return a deferred payment
+term for that first order. Nothing is paid at completion. A trial that is a
+free period instead has a `price` of `0` and a first schedule that starts when
+it ends, with no payment term. The unselected
 "Start today" option's schedules remain indicative, for comparison.
 
 <!-- ucp:example schema=shopping/purchase_options def=dev.ucp.shopping.checkout op=read -->
@@ -832,7 +939,7 @@ unless the buyer cancels first. Nothing is paid at completion. The unselected
       "code": "dev.ucp.shopping.policy.subscription",
       "path": "$.line_items[0]",
       "presentation": "disclosure",
-      "content": "Free for 14 days. $12.00 on October 16, 2026 unless you cancel before then, and $12.00 every month after. Cancel anytime at example.com/account."
+      "content": "Free for 14 days. $12.00 on October 16, 2026 unless you cancel before then, then $12.00 every month from November 16, 2026, until you cancel. Cancel anytime at example.com/account."
     }
   ],
   "links": [ ... ]
@@ -841,9 +948,10 @@ unless the buyer cancels first. Nothing is paid at completion. The unselected
 
 ### Checkout: an introductory price
 
-Today's order is the first of three months at an introductory rate. Two
-schedules follow: the remaining two introductory months, then the standing
-rate until cancelled. The first ends where the second begins; the Business
+Today's order is the first of three months at an introductory $5.00 a bag.
+Two schedules follow: the remaining two introductory months, then the
+standing subscribe-and-save rate of $8.50 a bag — not the $10.00 one-time
+price — until cancelled. The first ends where the second begins; the Business
 computed both dates.
 
 <!-- ucp:example schema=shopping/purchase_options def=dev.ucp.shopping.checkout op=read -->
@@ -871,7 +979,7 @@ computed both dates.
         },
         {
           "id": "po_intro",
-          "title": "Subscribe — half price for 3 months",
+          "title": "Subscribe — $5.00 a bag for 3 months, then $8.50",
           "price": { "amount": 500, "currency": "USD" },
           "list_price": { "amount": 1000, "currency": "USD" },
           "schedules": [
@@ -919,7 +1027,7 @@ computed both dates.
       "code": "dev.ucp.shopping.policy.subscription",
       "path": "$.line_items[0]",
       "presentation": "disclosure",
-      "content": "$10.80 today, then $10.00 plus tax and shipping on November 2 and December 2, then $17.00 plus tax and shipping every month from January 2, 2027, until you cancel. Cancel anytime at example.com/account."
+      "content": "$10.80 today, then $10.00 plus tax and shipping on November 2 and December 2, 2026, then $17.00 plus tax and shipping every month from January 2, 2027, until you cancel. Cancel anytime at example.com/account."
     }
   ],
   "links": [ ... ]
@@ -929,7 +1037,9 @@ computed both dates.
 ### Checkout: a cadence that changes
 
 Weekly for the first year, then monthly. The amount happens not to change; the
-cadence does, so the two runs are two schedules.
+cadence does, so the two runs are two schedules. The first carries an
+optional `ends_at`; the second carries none, so it continues until the buyer
+cancels.
 
 <!-- ucp:example schema=shopping/purchase_options def=dev.ucp.shopping.checkout op=read -->
 ```json
@@ -967,7 +1077,8 @@ cadence does, so the two runs are two schedules.
                 { "type": "subtotal", "amount": 1500 },
                 { "type": "total", "amount": 1500 }
               ],
-              "starts_at": "2026-10-09T00:00:00Z"
+              "starts_at": "2026-10-09T00:00:00Z",
+              "ends_at": "2027-10-01T00:00:00Z"
             },
             {
               "description": {
@@ -1014,8 +1125,8 @@ cadence does, so the two runs are two schedules.
 
 ### Checkout: a subscription that ends
 
-A filter pack every two weeks for one year. One schedule whose `description`
-states the end.
+A filter pack every two weeks for one year. One schedule, whose `ends_at`
+marks a subscription that ends on its own and whose `description` states it.
 
 <!-- ucp:example schema=shopping/purchase_options def=dev.ucp.shopping.checkout op=read -->
 ```json
@@ -1053,7 +1164,8 @@ states the end.
                 { "type": "subtotal", "amount": 600 },
                 { "type": "total", "amount": 600 }
               ],
-              "starts_at": "2026-10-16T00:00:00Z"
+              "starts_at": "2026-10-16T00:00:00Z",
+              "ends_at": "2027-10-01T00:00:00Z"
             }
           ]
         }
@@ -1085,6 +1197,97 @@ states the end.
     }
   ],
   "links": [ ... ]
+}
+```
+
+### Checkout: a gift card and a card
+
+A one-time mug and a coffee subscription, $30.00 today. Because the checkout
+includes a subscription, the Business narrows the combinations it resolves for
+the checkout: gift cards alone would cover today's order, but cannot pay for
+the recurring orders, so every combination it returns requires a card.
+
+<!-- ucp:example schema=shopping/checkout extract=$.ucp target=$.ucp -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }],
+      "dev.ucp.shopping.purchase_options": [{ "version": "{{ ucp_version }}" }],
+      "dev.ucp.common.payment.split_payments": [
+        {
+          "version": "{{ ucp_version }}",
+          "config": {
+            "allowed_combinations": [
+              [
+                { "types": ["gift_card"], "max": 2 },
+                { "types": ["card"], "min": 1, "max": 1 }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "payment_handlers": { ... }
+  }
+}
+```
+
+The buyer pays today with a gift card, submitted with an `amount` so that it
+pays toward today's order only, and a card submitted open-ended to pay for the
+recurring orders.
+
+<!-- ucp:example schema=common/payment_split_payments def=dev.ucp.shopping.checkout op=complete direction=request extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gc_1",
+        "handler_id": "example_handler_1",
+        "type": "gift_card",
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
+        "amount": 3000
+      },
+      {
+        "id": "pi_card_1",
+        "handler_id": "example_handler_1",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
+      }
+    ]
+  }
+}
+```
+
+The gift card covers today's order. The card contributes nothing today; the
+Business verifies and retains it for the recurring orders, and reports it at
+`0`. Had the gift card been submitted open-ended, it would be retained too,
+and any balance left on it would pay toward a recurring order before the card.
+
+<!-- ucp:example schema=common/payment_split_payments def=dev.ucp.shopping.checkout extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gc_1",
+        "handler_id": "example_handler_1",
+        "type": "gift_card",
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
+        "amount": 3000
+      },
+      {
+        "id": "pi_card_1",
+        "handler_id": "example_handler_1",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "amount": 0
+      }
+    ]
+  }
 }
 ```
 
@@ -1126,11 +1329,35 @@ default, reprices, and says so:
 ]
 ```
 
+Where no one-time option is listed, the Business never moves the buyer to a
+different subscription. It selects the default but holds the checkout
+`incomplete` until the Platform chooses:
+
+<!-- ucp:example schema=shopping/checkout target=$.messages -->
+```json
+[
+  {
+    "type": "warning",
+    "code": "purchase_option_changed",
+    "path": "$.line_items[0]",
+    "content": "The monthly plan is no longer available. Choose another plan to continue."
+  },
+  {
+    "type": "error",
+    "code": "purchase_option_unavailable",
+    "path": "$.line_items[0].selected_purchase_option_id",
+    "severity": "recoverable",
+    "content": "Choose a plan for Coffee Club."
+  }
+]
+```
+
 ### Order
 
 The Order line records the option it was bought through and the schedules
-agreed to. The Order's subscription policy and its disclosure travel with it,
-as that extension shows.
+agreed to. The line's subscription policy and its disclosure are carried onto
+the Order, re-targeted to the Order line; `permalink_url` is where the buyer
+manages the subscription.
 
 <!-- ucp:example schema=shopping/purchase_options def=dev.ucp.shopping.order op=read -->
 ```json
@@ -1165,6 +1392,22 @@ as that extension shows.
   ],
   "totals": [ ... ],
   "fulfillment": { ... },
-  "policies": [ ... ]
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Renews monthly until you cancel. Cancel anytime from your account at example.com/account; no minimum commitment." },
+      "applies_to": ["$.line_items[0]"],
+      "url": "https://example.com/subscription-terms"
+    }
+  ],
+  "messages": [
+    {
+      "type": "warning",
+      "code": "dev.ucp.shopping.policy.subscription",
+      "path": "$.line_items[0]",
+      "presentation": "disclosure",
+      "content": "$17.00 plus tax and shipping every month from November 2, 2026, until you cancel. Cancel anytime at example.com/account."
+    }
+  ]
 }
 ```

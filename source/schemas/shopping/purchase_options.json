@@ -19,7 +19,7 @@
             "$ref": "#/$defs/purchase_option"
           },
           "minItems": 1,
-          "description": "The ways this variant can be bought, in the Business's order of preference. The first entry is the default: the option the Business selects when a Platform adds the variant without choosing one, and whose `price` the variant's own `price` states. Where a variant can also be bought once, the one-time purchase is listed as an option; a list with no one-time option means the variant is sold only through the options listed. Absent when the variant is bought the ordinary way at its `price`.",
+          "description": "The ways this variant can be bought, in the Business's order of preference. The first entry is the default, and where a one-time option is listed the default carries no `schedules`: the option the Business selects when a Platform adds the variant without choosing one, and whose `price` the variant's own `price` states. Where a variant can also be bought once, the one-time purchase is listed as an option; a list with no one-time option means the variant is sold only through the options listed. Absent when the variant is bought the ordinary way at its `price`.",
           "ucp_request": "omit"
         }
       }
@@ -193,7 +193,7 @@
             },
             "selected_purchase_option_id": {
               "type": "string",
-              "description": "ID of the selected purchase option. MUST match one `purchase_options[].id` from the catalog or the latest cart or checkout response. Present in a response whenever `purchase_options` is, and absent when it is not. Where the Platform has made no choice, the Business selects the default. A selection that no longer resolves is replaced by the default and reported with a `purchase_option_changed` warning; the Business never substitutes silently. Omitted on complete because the option is already agreed by then.",
+              "description": "ID of the selected purchase option. MUST match one `purchase_options[].id` from the catalog or the latest cart or checkout response. Present in a response whenever `purchase_options` is, and absent when it is not. Where the Platform has made no choice, the Business selects the default. A selection that no longer resolves is replaced and reported with a `purchase_option_changed` warning, and is never replaced by a different option that carries `schedules`; the Business never substitutes silently. Omitted on complete because the option is already agreed by then.",
               "ucp_request": {
                 "create": "optional",
                 "update": "optional",
@@ -258,7 +258,7 @@
     },
     "subscription_policy": {
       "title": "Subscription Policy",
-      "description": "A policy statement with type `dev.ucp.shopping.policy.subscription`, governing a line whose selected purchase option carries `schedules`. Its `description` states the terms of the subscription \u2014 that the line results in recurring orders and until when, how the buyer cancels, and where the buyer manages it; what each recurring order costs and when is stated by the option's `schedules`. One policy governs a line. Adds no fields to the base policy.",
+      "description": "A policy statement with type `dev.ucp.shopping.policy.subscription`, governing a line whose selected purchase option carries `schedules`. Its `description` states the terms of the subscription — that the line results in recurring orders and until when, how the buyer cancels, and where the buyer manages it; what each recurring order costs and when is stated by the option's `schedules`. Each line that results in recurring orders is its own subscription, governed by exactly one policy whose `applies_to` names that line alone. Adds no fields to the base policy.",
       "allOf": [
         {
           "$ref": "../common/types/policy.json"
