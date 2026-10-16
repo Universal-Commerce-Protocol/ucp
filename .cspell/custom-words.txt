@@ -112,6 +112,7 @@ linenums
 linkignore
 llms
 llmstxt
+mainnet
 mastercard
 meunier
 midsole
