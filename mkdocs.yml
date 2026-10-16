@@ -578,7 +578,7 @@ plugins:
               primitive with machine-readable return terms: an explicit
               eligibility statement (a return window with anchor, no time
               limit, or returns not accepted), supported resolutions, return
-              channels and logistics fees, and a policy-level restocking fee
+              channels, and typed return fees optionally scoped to channels,
               across catalog, cart, checkout, and order.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-

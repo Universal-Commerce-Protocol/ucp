@@ -37,9 +37,9 @@ platform reads for an item are the ones that apply to it.
 - A return eligibility statement (`eligibility`): a minimum return window with
   an explicit anchor, no time limit, or returns not accepted
 - What the buyer receives on an accepted return (`supported_resolutions`)
-- Permitted return channels and their logistics cost (`methods`)
-- A restocking fee that deducts from the refund independent of channel
-  (`restocking_fee`)
+- Return channels (`methods`)
+- Return fees, each typed by what it is for and optionally scoped to channels
+  (`fees`)
 
 **Dependencies:**
 
@@ -107,21 +107,11 @@ from its `description`.
 
 {{ extension_schema_fields('policy_return.json#/$defs/return_eligibility', 'shopping/extensions/return-policy') }}
 
-### Restocking Fee
+### Return Fee
 
-{{ extension_schema_fields('policy_return.json#/$defs/restocking_fee', 'shopping/extensions/return-policy') }}
-
-### Return Method
-
-{{ extension_schema_fields('policy_return.json#/$defs/return_method', 'shopping/extensions/return-policy') }}
-
-### Return Method Fee
+Each entry in `fees` uses this shape.
 
 {{ extension_schema_fields('policy_return.json#/$defs/fee', 'shopping/extensions/return-policy') }}
-
-### Fixed Fee
-
-{{ extension_schema_fields('policy_return.json#/$defs/fixed_fee', 'shopping/extensions/return-policy') }}
 
 ## Return terms
 
@@ -226,9 +216,9 @@ and still presents `expires_at` when the business states it.
 To state that the covered items cannot be returned, such as a final-sale item,
 a business **MUST** set `eligibility.type` to `not_accepted`. Because return
 terms do not apply, a business **MUST NOT** carry `supported_resolutions`,
-`methods`, or `restocking_fee` on a `not_accepted` policy; the schema rejects
-the combination, so no precedence between fields of one policy is ever needed.
-A business **MUST NOT** use an empty `supported_resolutions` or `methods` array
+`methods`, or `fees` on a `not_accepted` policy; the schema rejects the
+combination, so no precedence between fields of one policy is ever needed. A
+business **MUST NOT** use an empty `supported_resolutions` or `methods` array
 to signal non-returnability, and the schema requires at least one entry in
 each; omit a field that is not stated structurally. A `not_accepted`
 eligibility is the single, unambiguous signal a platform acts on.
@@ -239,66 +229,119 @@ to `dev.ucp.shopping.policy.return`, targeting the item. The disclosure pairs
 with the governing return policy at that node, as defined in
 [Presenting policies](../../overview/index.md#presenting-policies).
 
-### Two kinds of cost
+### Return fees
 
-Returns carry two independent costs, modeled separately:
+`fees` lists the charges a return can incur, each as a
+[Return Fee](#return-fee): `type` states what the charge is for, `methods` the
+channels it applies to, and `amount`, `basis_points`, and `max_amount` how
+much. A restocking fee deducts from the refund however the item comes back, so
+it is an entry that applies to every channel; a channel's cost, such as return
+shipping by mail, is an entry scoped to that channel. This lets a business
+state, for example, "free return shipping with a 15% restocking fee".
 
-- **Logistics cost** is the price of using a channel (return shipping or
-  handling). It lives on each `methods[].fee` because it varies by channel: an
-  in-store drop-off may be `free` while a mailed return is a `fixed_fee`.
-- **Restocking fee** is a deduction from the refund charged regardless of how
-  the item comes back. It lives once at the policy level as `restocking_fee`.
+`methods` is an open vocabulary of return channels. The well-known values are
+`in_store`, `by_mail`, and `kiosk`; a business **MAY** use others, and a
+platform that does not recognize one presents it from `description`.
 
-Keeping them separate lets a business express, for example, "free returns by
-mail with a 15% restocking fee" - which a single per-method fee cannot
-represent. A percentage restocking fee uses `restocking_fee.percentage_bps`; a
-flat or precomputed amount uses `restocking_fee.amount`. A `restocking_fee`
-**MUST** carry at least one of them.
+`type` is a reverse-domain fee kind, and `amount` and `max_amount` are charged
+per the kind's unit. The well-known kinds are:
 
-Each amount has a defined basis, so every platform computes the same maximum:
+| `type` | Charged per |
+| :-- | :-- |
+| `dev.ucp.shopping.fee.restocking` | One whole `quantity_unit.unit` returned, or one `each` when `quantity_unit` is absent, as `price` is (see [Quantities and units](../../overview/index.md#quantities-and-units)). |
+| `dev.ucp.shopping.fee.return_shipping` | Return shipment, so units returned together incur it once and a return split across shipments incurs it for each one. |
+| `dev.ucp.shopping.fee.handling` | Return request. |
 
-- `restocking_fee.percentage_bps` applies to the amount paid for the returned
-  quantity, after item-level discounts and excluding tax, shipping, and other
-  fees. On catalog surfaces, where nothing has been paid, the basis is the
-  covered product's price.
-- `restocking_fee.amount` is charged per returned unit of quantity.
-- `methods[].fee.amount` (a `fixed_fee`) is charged per return shipment.
+A vendor kind, such as `com.example.fee.eco`, is charged per return request and
+carries `display_text`, which the schema requires for any kind other than the
+three above. A vendor fee charged on another basis, such as per item, omits
+`amount` and states its terms in `display_text` (for example, "Eco fee, $1 per
+item"); such an entry states no maximum, so a platform presents its text and
+never an understated cap.
 
-When both `percentage_bps` and `amount` are present, each is a cap computed
-over the same returned quantity, and the deduction never exceeds either:
-`percentage_bps` of `1500` with an `amount` of `5000` means 15% of the amount
-paid, up to $50.00 per unit in a USD checkout. For 3 units bought at $200.00
-each, the deduction is at most 3 × min($30.00, $50.00) = $90.00.
+How much a fee charges is stated by the pricing fields it carries:
 
-Both costs are maximums: `restocking_fee` and each method's `fee` state the
-most the buyer is charged. A business whose actual charge is lower, or is
-computed on a different basis, remains conformant as long as it never charges
-more. A fee that applies only in some cases, such as a restocking fee on opened
-items, states its full value, and its `display_text` names the condition.
+| Fields | States |
+| :-- | :-- |
+| `amount` of 1 or more | Up to that flat charge. |
+| `amount: 0` | Nothing is charged. |
+| `basis_points`, optionally with `max_amount` | Up to that percentage, and at most `max_amount` when present. |
+| Neither `amount` nor `basis_points` | The fee is charged at its actual cost, and no maximum is stated; the schema requires `display_text`. |
 
-An omitted `restocking_fee` means the fee is not stated structurally, not that
-none is charged; a platform **MUST NOT** present it as "no restocking fee". To
-state that no restocking fee is charged, a business sets `percentage_bps` to `0`
-and omits `amount`. To state that a channel is free, it sets `fee.type` to
-`free`. Every `amount` is at least 1, so these are the only zero-cost signals.
+`basis_points` applies to the amount paid for the returned quantity, after
+item-level discounts and excluding tax, shipping, and other fees; on catalog
+surfaces, where nothing has been paid, it applies to the covered product's
+price. An entry carries `amount` or `basis_points` but not both, and
+`max_amount` only with `basis_points`; the schema rejects either combination.
 
-A method's logistics cost is likewise stated only by its `fee`. A method with no
-`fee`, or with a `fee.type` the platform does not recognize, states no cost, and
-`customer_responsibility` means the buyer arranges and pays for the return
-shipping, with no maximum stated. A platform **MUST NOT** present any of these
-as free.
+An entry's `methods` scopes it to channels. An entry without `methods` applies
+to every channel, and an entry with `methods` overrides the same-type entry
+without `methods` for those channels. A scoped entry may name a channel the
+policy's `methods` does not list: the scope names a channel, it does not
+guarantee one. A business **MUST NOT** carry two same-type entries without
+`methods`, or two same-type entries whose `methods` overlap. The schema does
+not reject such a conflict, and a platform treats the conflicting fee type as
+not stated for the affected channels.
 
-When a return method's `fee.type` is `fixed_fee`, `amount` **MUST** be present,
-so the charge is never left uninterpretable.
+`max_amount` caps a percentage. For items priced in USD,
+`{ "type": "dev.ucp.shopping.fee.restocking", "basis_points": 1500, "max_amount": 5000 }`
+means 15% of the amount paid, at most $50.00 per unit. For 3 units bought at
+$200.00 each, the estimated maximum deduction is 3 × min($30.00, $50.00) =
+$90.00.
 
-Amounts (`methods[].fee.amount` and `restocking_fee.amount`) carry no currency
-of their own. They are in the `currency` of the enclosing cart, checkout, or
-order, or, on catalog surfaces, in the currency of the covered product's price.
-Because a catalog response can price products in more than one currency, a
-catalog policy that carries an amount **MUST** cover only products priced in a
-single currency; a business scopes it with `applies_to` to achieve this. A
-platform **MUST NOT** interpret an amount on a policy whose covered products are
-priced in different currencies.
+Fees are estimated maximums. A business **SHOULD** state the most its policy
+charges, including a fee that applies only in some cases, such as a restocking
+fee on opened items, at its full value with `display_text` naming the
+condition. The business sets the charge for a particular return when it
+processes the return, and that charge can differ from an amount derived from
+these fields, for example with the item's condition, return shipping rates,
+taxes, or how the order's discounts are refunded. A platform **MUST NOT**
+present a fee, or an amount derived from it, as the final charge for a
+particular return.
+
+For example, a policy that charges a capped restocking fee, waives it in store
+and at kiosks, and charges return shipping and an eco fee by mail states:
+
+<!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
+```json
+[
+  {
+    "type": "dev.ucp.shopping.policy.return",
+    "description": {...},
+    "methods": ["in_store", "kiosk", "by_mail"],
+    "fees": [
+      { "type": "dev.ucp.shopping.fee.restocking", "basis_points": 1500, "max_amount": 5000, "display_text": "15% restocking fee on opened items" },
+      { "type": "dev.ucp.shopping.fee.restocking", "methods": ["in_store", "kiosk"], "amount": 0 },
+      { "type": "dev.ucp.shopping.fee.return_shipping", "methods": ["by_mail"], "amount": 500 },
+      { "type": "com.example.fee.eco", "methods": ["by_mail"], "amount": 100, "display_text": "Eco packaging fee" }
+    ]
+  }
+]
+```
+
+Per channel, its entries resolve to the following; a fee type with no entry for
+a channel is not stated:
+
+| Channel | Resulting fees |
+| :-- | :-- |
+| `in_store`, `kiosk` | Restocking: nothing is charged (`amount: 0`). Return shipping: not stated. |
+| `by_mail` | Restocking: up to 15% of the amount paid, at most 5000 minor units per unit returned. Return shipping: up to 500 minor units per return shipment. `com.example.fee.eco`: up to 100 minor units per return request. |
+
+Only `amount: 0` states that nothing is charged. A platform **MUST NOT** treat
+any other state as zero cost, including an omitted `fees` or a fee type with
+no entry for a channel, whether it presents the terms, for example as "free"
+or "no restocking fee", or estimates a return's charges (see
+[Responsibilities](#responsibilities)). A platform **MAY** present a channel as
+free when every well-known fee type resolves to `amount: 0` for it and no
+other resolved entry charges anything there.
+
+Amounts (`amount` and `max_amount` on a fee) carry no currency of their own.
+They are in the currency the covered items are priced in, which in a cart,
+checkout, or order is its `currency`. A business **MUST** limit a policy that
+carries an amount to items priced in a single currency. A catalog response can
+price products in more than one currency, so a business scopes such a policy
+with `applies_to`. A platform **MUST NOT** interpret an amount on a policy whose
+covered items are priced in different currencies.
 
 ## Targeting and precedence
 
@@ -314,8 +357,8 @@ once, then adds targeted overrides only for the exceptions (a final-sale item, a
 category with a different window), rather than repeating a policy on every line.
 An override replaces the default for the items it governs and inherits none of
 its terms, so a business **MUST** restate in the override every term that still
-applies. A term the override omits, including `restocking_fee`, is not stated
-for the items it governs.
+applies. A term the override omits, including `fees`, is not stated for the
+items it governs.
 
 ## Responsibilities
 
@@ -326,24 +369,27 @@ no buyer-asserted claims and no PII, so they cross no new trust boundary beyond
 the base response.
 
 The return-term fields (`eligibility`, `supported_resolutions`, `methods`, and
-`restocking_fee`) are guarantees that hold for every eligible return in the
-policy's scope, not an exhaustive statement of its terms. Within a `window`
-eligibility, any listed resolution is available through any listed method (see
-[Window and anchor](#window-and-anchor)), and each fee is a maximum (see
-[Two kinds of cost](#two-kinds-of-cost)). A business **MAY** describe
-eligibility requirements, such as tags attached or original packaging, in
-`description` (see [Eligibility](#eligibility)). A condition under which an
-item stays returnable on different terms, such as opened or unopened, is not an
-eligibility requirement, so the fields state the terms that hold in every case.
+`fees`) are not an exhaustive statement of the policy's terms. `eligibility`,
+`supported_resolutions`, and `methods` are guarantees that hold for every
+eligible return in the policy's scope: within a `window` eligibility, any
+listed resolution is available through any listed method (see
+[Window and anchor](#window-and-anchor)). `fees` is a return term but not a
+guarantee: it states estimated maximums (see [Return fees](#return-fees)). A
+business **MAY** describe eligibility requirements, such as tags attached or
+original packaging, in `description` (see [Eligibility](#eligibility)). A
+condition under which an item stays returnable on different terms, such as
+opened or unopened, is not an eligibility requirement, so the guarantee fields
+state the terms that hold in every case.
 
 A business **SHOULD** populate the fields it can state as guarantees and
-**MUST NOT** populate a field with a value that does not hold for every eligible
-return. It omits a field when it cannot state the term as a guarantee, and
-conveys the term in `description` or links to it through `url`. Where a term
-depends on something known when the response is built, such as the seller, the
-purchase date, an authenticated buyer's membership, or a selected payment
-instrument, a business **SHOULD** resolve it, scoping policies with `applies_to`
-where it differs per item.
+**MUST NOT** populate a guarantee field with a value that does not hold for
+every eligible return. It omits such a field when it cannot state the term as a
+guarantee, and conveys the term in `description` or links to it through `url`.
+`fees` follows [Return fees](#return-fees) instead. Where a term depends on
+something known when the response is built, such as the seller, the purchase
+date, an authenticated buyer's membership, or a selected payment instrument, a
+business **SHOULD** resolve it, scoping policies with `applies_to` where it
+differs per item.
 
 A policy's `description` and its structured fields are two representations of
 the same policy. The `description` **MAY** state better terms than a field (a
@@ -355,16 +401,7 @@ alongside the structured terms so the buyer can review the full policy.
 
 A platform that models this type **MAY** present a guaranteed return deadline
 from `expires_at` (see [Window and anchor](#window-and-anchor)) and **MAY**
-compute a worst-case net refund from these fields. It computes a worst-case net
-refund only when `restocking_fee` is present and every method the buyer may use
-states its cost (see [Two kinds of cost](#two-kinds-of-cost)). The worst-case
-net refund for a return of a given quantity in one shipment through a method is
-the amount paid for that quantity, less the maximum restocking fee for that
-quantity, less the method's logistics cost (zero for `free`). When the buyer has
-not chosen a method, the worst case is the lowest result across the listed
-methods. A `fixed_fee` is charged per shipment, not per unit, so returning
-several units together incurs it once; a buyer who splits a return across
-shipments pays it for each one. It
+estimate a return's charges from `fees` (see [Return fees](#return-fees)). It
 **MUST NOT** treat an elapsed window as making an item non-returnable, since
 the `description` may allow later returns; only a `not_accepted` eligibility
 states that.
@@ -378,8 +415,8 @@ A response-wide return policy states the standard terms once. An item-scoped
 names that line with a singular query (`$.line_items[2]`), it governs it under
 same-type precedence, outranking any Set match at the same depth, while every
 other line keeps the default. A paired disclosure compels the final-sale notice
-to be shown. The default policy's 15% restocking fee is a maximum; its
-`display_text` names the condition (opened items) under which it applies.
+to be shown. The default policy's 15% restocking fee is an estimated maximum;
+its `display_text` names the condition (opened items) under which it applies.
 
 <!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
 ```json
@@ -391,11 +428,12 @@ to be shown. The default policy's 15% restocking fee is a maximum; its
     },
     "eligibility": { "type": "window", "duration": "P30D", "anchor": "delivered" },
     "supported_resolutions": ["original_payment_method", "exchange"],
-    "methods": [
-      { "type": "in_store", "fee": { "type": "free", "display_text": "Free in-store return" } },
-      { "type": "by_mail", "fee": { "type": "fixed_fee", "amount": 500, "display_text": "Return shipping" } }
+    "methods": ["in_store", "by_mail"],
+    "fees": [
+      { "type": "dev.ucp.shopping.fee.restocking", "basis_points": 1500, "display_text": "15% restocking fee on opened items" },
+      { "type": "dev.ucp.shopping.fee.return_shipping", "methods": ["in_store"], "amount": 0 },
+      { "type": "dev.ucp.shopping.fee.return_shipping", "methods": ["by_mail"], "amount": 500, "display_text": "Return shipping" }
     ],
-    "restocking_fee": { "percentage_bps": 1500, "display_text": "15% restocking fee on opened items" },
     "url": "https://example.com/returns"
   },
   {
