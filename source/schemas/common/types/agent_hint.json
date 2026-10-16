@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/agent_hint.json",
+  "title": "Agent Hint",
+  "description": "An advisory hint from a business to a consuming agent, carried inside commerce event payloads. Hints are non-normative suggestions — agents decide whether and how to act on them.",
+
+  "type": "object",
+  "required": ["action"],
+  "additionalProperties": false,
+
+  "properties": {
+    "action": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short verb identifying the suggested action (e.g. notify_user, reorder, escalate, summarize)."
+    },
+
+    "condition": {
+      "type": "string",
+      "description": "Human-readable condition under which this hint applies. Informational only — not a machine-executable expression.",
+      "examples": [
+        "status == 'delayed'",
+        "user.auto_reorder == true"
+      ]
+    },
+
+    "priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high"],
+      "default": "normal",
+      "description": "Advisory priority. Does not override agent judgment."
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "Additional free-form context the business wants to pass with this hint.",
+      "additionalProperties": true
+    }
+  }
+}
