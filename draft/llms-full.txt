@@ -1165,7 +1165,7 @@ A request MAY carry multiple signatures per [RFC 9421 §4.3](https://www.rfc-edi
 1. **Fetch the document** per [§Fetching](#fetching). If the fetch fails (DNS error, network failure, non-2xx response, parse failure), **skip** this signature.
 1. **Locate the key list.** The profile's top-level `keys[]` (RFC 7517 JWK Set) when resolved via `UCP-Agent` or via `Signature-Agent` `type=jwks_uri`; for `type=cimd`, dereference the document's `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the resolved origin.
 1. **Match the signature's `keyid`** to a `kid` in the resolved key list. When resolving, **skip keys not usable for signature verification**: any key marked `use:"enc"`, or whose `key_ops` is present but does not include `"verify"` ([RFC 7517](https://www.rfc-editor.org/rfc/rfc7517) §4.2, §4.3). Keys that set `use:"sig"` or omit both members remain eligible. **Skip** this signature if no eligible key matches. For WBA-shape signatures (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid` equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256 thumbprint of the matched JWK — the WBA architecture draft §4.2 requires this, binding the advertised key identity to its bytes. If it fails, skip this signature.
-1. **Enforce covered-component requirements, in every regime.** Independent of `tag` and transport, the signature **MUST** cover the request target (`@method`, `@authority`, `@path`; `@query` when a query string is present), the body when present (`content-digest`, `content-type`), and each of these request headers when present: `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a header added to UCP later is gate-required only if its defining section says so). If any such component is absent from the signature's covered set, **skip** this signature — a target, body, or header the signature does not cover is treated as unsigned. This prevents a signature satisfying only Web Bot Auth's minimal covered set (`@authority`, `signature-agent`) from authenticating a UCP request whose body, method, or path is unbound. (Whether a request must carry `Idempotency-Key` at all is a binding-level rule, separate from this coverage check.)
+1. **Enforce covered-component requirements, in every regime.** Independent of `tag` and transport, the signature **MUST** cover the request target (`@method`, `@authority`, `@path`; `@query` when a query string is present), the body when present (`content-digest`, `content-type`), and each of these request headers when present: `ucp-agent`, `signature-agent`, `idempotency-key`, `webhook-id`, `webhook-timestamp` (a closed set — a header added to UCP later is gate-required only if its defining section says so). If any such component is absent from the signature's covered set, **skip** this signature — a target, body, or header the signature does not cover is treated as unsigned. This prevents a signature satisfying only Web Bot Auth's minimal covered set (`@authority`, `signature-agent`) from authenticating a UCP request whose body, method, or path is unbound. (Whether a request must carry `Idempotency-Key` at all is a binding-level rule, separate from this coverage check.)
 1. **Verify the signature** using the matched key. The signing algorithm is derived from the JWK's `kty`/`crv`. If the verifier does not support the matched key's `kty`, `crv`, or `alg`, **skip** this signature; it yields `algorithm_unsupported` if no other signature authenticates the request.
 
 The request **MUST** be rejected (`key_not_found`, `algorithm_unsupported`, or related error) only when every signature has been skipped or fails verification.
@@ -7367,28 +7367,32 @@ For HTTP REST transport, UCP uses [RFC 9421 (HTTP Message Signatures)](https://w
 
 **Signed Components:**
 
-| Component         | Required     | Description                                                  |
-| ----------------- | ------------ | ------------------------------------------------------------ |
-| `@method`         | Yes          | HTTP method (GET, POST, etc.)                                |
-| `@authority`      | Yes          | Target host (prevents cross-host relay)                      |
-| `@path`           | Yes          | Request path                                                 |
-| `@query`          | Cond. `*`    | Query string (if present)                                    |
-| `ucp-agent`       | Cond. `**`   | Profile URL (binds identity)                                 |
-| `signature-agent` | Cond. `***`  | WBA key source (when [WBA Interop](#wba-interop) opted into) |
-| `idempotency-key` | Cond. `****` | Idempotency header (state-changing)                          |
-| `content-digest`  | Cond. `†`    | Body digest (if body present)                                |
-| `content-type`    | Cond. `†`    | Content-Type (if body present)                               |
+| Component           | Required     | Description                                                  |
+| ------------------- | ------------ | ------------------------------------------------------------ |
+| `@method`           | Yes          | HTTP method (GET, POST, etc.)                                |
+| `@authority`        | Yes          | Target host (prevents cross-host relay)                      |
+| `@path`             | Yes          | Request path                                                 |
+| `@query`            | Cond. `*`    | Query string (if present)                                    |
+| `ucp-agent`         | Cond. `**`   | Profile URL (binds identity)                                 |
+| `signature-agent`   | Cond. `***`  | WBA key source (when [WBA Interop](#wba-interop) opted into) |
+| `idempotency-key`   | Cond. `****` | Idempotency header (state-changing)                          |
+| `webhook-id`        | Cond. `‡`    | Event identifier (webhooks)                                  |
+| `webhook-timestamp` | Cond. `‡`    | Event occurrence time (webhooks)                             |
+| `content-digest`    | Cond. `†`    | Body digest (if body present)                                |
+| `content-type`      | Cond. `†`    | Content-Type (if body present)                               |
 
 - `*` Required if request has query parameters
 - `**` Required if `UCP-Agent` header is present
 - `***` Required if `Signature-Agent` header is present (i.e., WBA-shape signature)
-- `****` Required for POST, PUT, DELETE, PATCH
+- `****` Required if the header is present. Whether a request must carry `Idempotency-Key` at all is a binding-level rule, separate from this coverage check
+- `‡` Required if the header is present. Webhook deliveries carry no `Idempotency-Key`, so these two headers are the only per-event replay signal; a signature omitting them leaves a signed delivery open to replay with an altered event identity or event time.
 - `†` Required if request has a body
 
 **Signature Generation:**
 
 ```text
-sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
+sign_rest_request(method, path, query, body_bytes, idempotency_key, webhook_id,
+                  webhook_timestamp, private_key, kid):
     // 1. Compute body digest (if body present)
     if body_bytes:
         digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
@@ -7399,6 +7403,8 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
     if query: components.append("@query")
     if ucp_agent: components.append("ucp-agent")
     if idempotency_key: components.append("idempotency-key")
+    if webhook_id: components.append("webhook-id")
+    if webhook_timestamp: components.append("webhook-timestamp")
     if body: components.extend(["content-digest", "content-type"])
 
     // 3. Build signature base (RFC 9421)
@@ -7409,6 +7415,8 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
         query=query,
         headers={
             "idempotency-key": idempotency_key,
+            "webhook-id": webhook_id,
+            "webhook-timestamp": webhook_timestamp,
             "content-digest": digest_header,
             "content-type": "application/json"
         },
@@ -7616,6 +7624,8 @@ verify_rest_request(request):
     if request.has_body:                     required += ["content-digest", "content-type"]
     if "Idempotency-Key" in request.headers: required += ["idempotency-key"]
     if "UCP-Agent" in request.headers:       required += ["ucp-agent"]
+    if "Webhook-Id" in request.headers:      required += ["webhook-id"]
+    if "Webhook-Timestamp" in request.headers: required += ["webhook-timestamp"]
     if "Signature-Agent" in request.headers: required += ["signature-agent"]
     for component in required:
         if component not in components:
@@ -19361,10 +19371,10 @@ Headers follow **[Standard Webhooks](https://www.standardwebhooks.com/)**; excep
 
 **Required Headers:**
 
-| Header              | Description                       |
-| ------------------- | --------------------------------- |
-| `Webhook-Timestamp` | Event occurrence timestamp (unix) |
-| `Webhook-Id`        | Unique event identifier           |
+| Header              | Description                             |
+| ------------------- | --------------------------------------- |
+| `Webhook-Timestamp` | Event occurrence timestamp (unix)       |
+| `Webhook-Id`        | Event identifier; stable across retries |
 
 **Inputs**
 
@@ -19427,6 +19437,12 @@ Webhook payloads **MUST** be signed by the business and verified by the platform
 | `Signature`       | Contains the signature value               |
 | `Content-Digest`  | Body digest (RFC 9530)                     |
 
+`Webhook-Id` and `Webhook-Timestamp` are required headers on this delivery, so the covered-component rule in [REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) requires the signature to cover them, and [REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) requires platforms to reject a delivery whose signature omits either. Webhooks carry no `Idempotency-Key`, so these two headers are the only per-event replay signal.
+
+An order webhook carries the full current state of the order rather than a delta, so a platform that applies deliveries in `Webhook-Timestamp` order, or reconciles through `GET /orders/{id}`, converges on the current state without keeping per-delivery state. Platforms **SHOULD** deduplicate on `Webhook-Id`, which short-circuits retries and separates events that share a `Webhook-Timestamp`, whose resolution is one second.
+
+Businesses **MUST** send retries with the original `Webhook-Id` and `Webhook-Timestamp`: a retry redelivers the same event, and the deduplication and ordering above rely on both values staying constant.
+
 **Example Webhook Request:**
 
 ```http
@@ -19434,17 +19450,19 @@ POST /webhooks/ucp/orders HTTP/1.1
 Host: platform.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Webhook-Timestamp: 1737000000
+Webhook-Id: 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d
 Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type");keyid="merchant-2026"
-Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="merchant-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
-{"id":"order_abc123","event_id":"evt_123","created_time":"2026-01-15T12:00:00Z",...}
+{"id":"order_abc123",...}
 ```
 
 #### Signing (Business)
 
 1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
-1. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421)
+1. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), covering every component [REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) requires
 1. Sign using a key from `keys` in the business's UCP profile
 1. Set `Signature-Input` and `Signature` headers
 
@@ -19459,6 +19477,7 @@ See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specificati
 1. Locate key in `keys` with matching `kid`
 1. Verify `Content-Digest` matches SHA-256 of raw body
 1. Reconstruct signature base and verify signature
+1. Confirm every component [REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) requires is among the signed components, and reject the delivery otherwise
 
 See [Message Signatures - REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
 
@@ -19489,6 +19508,7 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries
+- **MUST** send retries with the original `Webhook-Id` and `Webhook-Timestamp`; a retry redelivers the same event, and platforms deduplicate on `Webhook-Id` and order deliveries by `Webhook-Timestamp`
 
 ## Entities
 

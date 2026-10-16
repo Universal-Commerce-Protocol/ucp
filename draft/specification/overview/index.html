@@ -8799,9 +8799,9 @@ below processes a single signature.</p>
    request target (<code>@method</code>, <code>@authority</code>, <code>@path</code>; <code>@query</code> when a
    query string is present), the body when present (<code>content-digest</code>,
    <code>content-type</code>), and each of these request headers when present:
-   <code>ucp-agent</code>, <code>signature-agent</code>, <code>idempotency-key</code> (a closed set — a
-   header added to UCP later is gate-required only if its defining
-   section says so). If any
+   <code>ucp-agent</code>, <code>signature-agent</code>, <code>idempotency-key</code>, <code>webhook-id</code>,
+   <code>webhook-timestamp</code> (a closed set — a header added to UCP later is
+   gate-required only if its defining section says so). If any
    such component is absent from the signature's covered set, <strong>skip</strong>
    this signature — a target, body, or header the signature does not
    cover is treated as unsigned. This prevents a signature satisfying only

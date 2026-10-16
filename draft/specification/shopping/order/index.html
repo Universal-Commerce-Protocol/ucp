@@ -5524,7 +5524,7 @@ See <a href="../../signatures/">Message Signatures</a> for more details.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>Webhook-Id</code></td>
-<td style="text-align: left;">Unique event identifier</td>
+<td style="text-align: left;">Event identifier; stable across retries</td>
 </tr>
 </tbody>
 </table>
@@ -5690,21 +5690,41 @@ to ensure authenticity and integrity. Signatures follow the
 </tr>
 </tbody>
 </table>
+<p><code>Webhook-Id</code> and <code>Webhook-Timestamp</code> are required headers on this delivery, so
+the covered-component rule in
+<a href="../../signatures/#rest-request-signing">REST Request Signing</a> requires the
+signature to cover them, and
+<a href="../../signatures/#rest-request-verification">REST Request Verification</a> requires
+platforms to reject a delivery whose signature omits either. Webhooks carry no
+<code>Idempotency-Key</code>, so these two headers are the only per-event replay signal.</p>
+<p>An order webhook carries the full current state of the order rather than a delta, so
+a platform that applies deliveries in <code>Webhook-Timestamp</code> order, or reconciles
+through <code>GET /orders/{id}</code>, converges on the current state without keeping
+per-delivery state. Platforms <strong>SHOULD</strong> deduplicate on <code>Webhook-Id</code>, which
+short-circuits retries and separates events that share a <code>Webhook-Timestamp</code>, whose
+resolution is one second.</p>
+<p>Businesses <strong>MUST</strong> send retries with the original <code>Webhook-Id</code> and
+<code>Webhook-Timestamp</code>: a retry redelivers the same event, and the deduplication
+and ordering above rely on both values staying constant.</p>
 <p><strong>Example Webhook Request:</strong></p>
 <div class="language-http highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nf">POST</span> <span class="nn">/webhooks/ucp/orders</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="na">Host</span><span class="o">:</span> <span class="l">platform.example.com</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="na">UCP-Agent</span><span class="o">:</span> <span class="l">profile=&quot;https://merchant.example/.well-known/ucp&quot;</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="na">Content-Digest</span><span class="o">:</span> <span class="l">sha-256=:X48E9q...:</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="na">Signature-Input</span><span class="o">:</span> <span class="l">sig1=(&quot;@method&quot; &quot;@authority&quot; &quot;@path&quot; &quot;content-digest&quot; &quot;content-type&quot;);keyid=&quot;merchant-2026&quot;</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="na">Signature</span><span class="o">:</span> <span class="l">sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;order_abc123&quot;</span><span class="p">,</span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="s2">&quot;evt_123&quot;</span><span class="p">,</span><span class="nt">&quot;created_time&quot;</span><span class="p">:</span><span class="s2">&quot;2026-01-15T12:00:00Z&quot;</span><span class="p">,</span><span class="err">...</span><span class="p">}</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="na">Webhook-Timestamp</span><span class="o">:</span> <span class="l">1737000000</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="na">Webhook-Id</span><span class="o">:</span> <span class="l">018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="na">Content-Digest</span><span class="o">:</span> <span class="l">sha-256=:X48E9q...:</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="na">Signature-Input</span><span class="o">:</span> <span class="l">sig1=(&quot;@method&quot; &quot;@authority&quot; &quot;@path&quot; &quot;ucp-agent&quot; &quot;content-digest&quot; &quot;content-type&quot; &quot;webhook-id&quot; &quot;webhook-timestamp&quot;);keyid=&quot;merchant-2026&quot;</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="na">Signature</span><span class="o">:</span> <span class="l">sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;order_abc123&quot;</span><span class="p">,</span><span class="err">...</span><span class="p">}</span>
 </span></code></pre></div>
 <h4 id="signing-business">Signing (Business)<a class="headerlink" href="#signing-business" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Compute SHA-256 digest of the raw request body and set <code>Content-Digest</code> header</li>
-<li>Build signature base per <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a></li>
+<li>Build signature base per <a href="https://www.rfc-editor.org/rfc/rfc9421">RFC 9421</a>,
+   covering every component
+   <a href="../../signatures/#rest-request-signing">REST Request Signing</a> requires</li>
 <li>Sign using a key from <code>keys</code> in the business's UCP profile</li>
 <li>Set <code>Signature-Input</code> and <code>Signature</code> headers</li>
 </ol>
@@ -5718,6 +5738,9 @@ for complete algorithm.</p>
 <li>Locate key in <code>keys</code> with matching <code>kid</code></li>
 <li>Verify <code>Content-Digest</code> matches SHA-256 of raw body</li>
 <li>Reconstruct signature base and verify signature</li>
+<li>Confirm every component
+   <a href="../../signatures/#rest-request-verification">REST Request Verification</a>
+   requires is among the signed components, and reject the delivery otherwise</li>
 </ol>
 <p>See <a href="../../signatures/#rest-request-verification">Message Signatures - REST Request Verification</a>
 for complete algorithm.</p>
@@ -5749,6 +5772,9 @@ zero-downtime key rotation procedures.</p>
 <li><strong>MUST</strong> send "Order created" event with fully populated order entity</li>
 <li><strong>MUST</strong> send full order entity on updates (not incremental deltas)</li>
 <li><strong>MUST</strong> retry failed webhook deliveries</li>
+<li><strong>MUST</strong> send retries with the original <code>Webhook-Id</code> and <code>Webhook-Timestamp</code>;
+  a retry redelivers the same event, and platforms deduplicate on <code>Webhook-Id</code>
+  and order deliveries by <code>Webhook-Timestamp</code></li>
 </ul>
 <h2 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h2>
 <h3 id="item">Item<a class="headerlink" href="#item" title="Permanent link">&para;</a></h3>
