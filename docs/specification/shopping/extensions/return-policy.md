@@ -170,13 +170,10 @@ from them as the deadline.
 A business **SHOULD** state `expires_at` once it can resolve the deadline,
 typically on an order after the anchor event. It **MUST NOT** state an
 `expires_at` earlier than the end of the window its `duration` and `anchor`
-describe.
-
-When covered quantities reach the anchor at different times, such as a line
-delivered in two shipments, `expires_at` states the earliest of their
-deadlines, so a return requested by then is within the window for every covered
-quantity. A business scopes policies per line with `applies_to` for finer
-resolution.
+describe; when covered quantities reach the anchor at different times, such as a
+line delivered in two shipments, that is the earliest of their window ends, so a
+return requested by then is within the window for every covered quantity. A
+business scopes policies per line with `applies_to` for finer resolution.
 
 For a 30-day window anchored on `delivered` and an item delivered on
 2026-03-02, the business states `"expires_at": "2026-04-01T18:00:00Z"`, and
