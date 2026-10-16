@@ -8613,7 +8613,9 @@ must be reliably hosted. An unreliable or misconfigured endpoint may prevent
 the other party from processing requests.</p>
 <ol>
 <li>Published artifacts <strong>MUST</strong> be served over HTTPS.</li>
-<li>Profile endpoints <strong>MUST NOT</strong> use redirects (3xx).</li>
+<li>Profile endpoints <strong>MUST NOT</strong> redirect to another URL (<code>301</code>, <code>302</code>,
+   <code>303</code>, <code>307</code>, <code>308</code>). Answering a conditional request with
+   <code>304 Not Modified</code> is not a redirect and is allowed.</li>
 <li>Published artifacts <strong>MUST</strong> include a <code>Cache-Control</code> header with
    <code>public</code> and <code>max-age</code> of at least 60 seconds, and <strong>MUST NOT</strong> be
    served with <code>private</code>, <code>no-store</code>, or <code>no-cache</code> directives.</li>
@@ -8657,7 +8659,10 @@ request access. Strategies include:</p>
 the profile, and any <code>jwks_uri</code> or CIMD document a verifier follows:</p>
 <ol>
 <li>Implementations <strong>MUST</strong> reject URLs not served over HTTPS.</li>
-<li>Implementations <strong>MUST NOT</strong> follow redirects (3xx).</li>
+<li>Implementations <strong>MUST NOT</strong> follow redirects to another URL (<code>301</code>,
+   <code>302</code>, <code>303</code>, <code>307</code>, <code>308</code>). A <code>304 Not Modified</code> received in response
+   to a conditional request is not a redirect; implementations should
+   keep using their cached copy.</li>
 <li>Implementations <strong>SHOULD</strong> enforce connect and response timeouts.</li>
 <li>Implementations <strong>SHOULD</strong> cache profiles with a minimum TTL floor
    of 60 seconds, regardless of the origin's <code>Cache-Control</code> headers.</li>
