@@ -35,6 +35,7 @@ from pathlib import Path
 # Import the validator module under test
 sys.path.insert(0, str(Path(__file__).parent))
 import validate_examples as v  # noqa: E402
+import test_seller_logo  # noqa: E402
 
 # -----------------------------------------------------------
 # Test harness (minimal, no deps)
@@ -798,6 +799,10 @@ def main() -> int:
   test_resolve_schema_cache_key()
   test_process_block_integration()
   test_extension_validation()
+  if _has_ucp_schema():
+    _check("seller logo schema tests", test_seller_logo.main() == 0)
+  else:
+    print("  SKIP  seller logo schema tests (ucp-schema missing)")
   return _report()
 
 
