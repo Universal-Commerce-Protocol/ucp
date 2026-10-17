@@ -537,10 +537,14 @@ This initial IdP connection is a prerequisite for the Accelerated IdP Flow.
 Without it, platforms **MUST** fall back to direct OAuth on the business domain
 (see [Identity Providers](#identity-providers)).
 
-**Minimum token requirements.** The subject token **MUST** have been issued to
-the authenticated user whose identity is being chained. Platforms **MUST NOT**
-present subject tokens issued to a different user and **MUST NOT** reuse a
-subject token across users.
+**Which token.** The subject token is per-user platform state. The IdP issues
+it to a specific user, mints the authorization grant for that user, and the
+business resolves or provisions the account from the `(iss, sub)` the grant
+carries (see [Business Token Issuance](#business-token-issuance)). Platforms
+**SHOULD** select the subject token held for the user they are acting on
+behalf of, and **SHOULD NOT** present a subject token issued to a different
+user or reuse one subject token across users — the business would link an
+identity that does not belong to the user in session.
 
 The IdP defines which scopes a token must carry to be accepted in a token
 exchange request. At minimum, the token **SHOULD** have been issued with
@@ -1353,7 +1357,7 @@ GET https://accounts.example-login.app/oauth2/authorize
 
 The user authenticated and consented at the IdP. The platform exchanged the
 authorization code for a subject token scoped to `openid email` and stores it
-for subsequent token exchange requests.
+for that user, for subsequent token exchange requests.
 
 **Step 1 — Discover providers.** Platform reads the business's `config.providers`,
 finds `app.example.login` with `required_claims: ["email"]`. The platform holds a
@@ -1361,7 +1365,8 @@ subject token with `email` scope — the entry is a match.
 
 **Step 2 — Token exchange at the IdP.** Platform calls the IdP's token endpoint
 using the token exchange grant type
-([RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693){ target="_blank" }):
+([RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693){ target="_blank" }),
+presenting the subject token it holds for this user:
 
 ```http
 POST https://accounts.example-login.app/oauth2/token
