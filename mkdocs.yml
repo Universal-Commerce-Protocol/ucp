@@ -61,6 +61,7 @@ nav:
                   - MCP: specification/common/ask/mcp.md
           - Extensions:
               - Loyalty: specification/common/extensions/loyalty.md
+              - Quote: specification/common/extensions/quote.md
       - Shopping:
           - Checkout Capability:
               - Overview: specification/shopping/checkout/index.md
@@ -430,6 +431,11 @@ plugins:
               for memberships, tiers, benefits, and reward earning forecasts
               while managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/common/extensions/quote.md: >-
+              Quote Extension (Working Draft), letting a Buyer propose a price
+              or ask for one and a Business issue a time-bound quotation that
+              the Buyer accepts by id, reflected in authoritative totals and
+              projected onto the Order.
         Location Capability:
           - specification/common/location/index.md: >-
               Core Location Capability, detailing physical Location discovery,
