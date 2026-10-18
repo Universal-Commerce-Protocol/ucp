@@ -537,24 +537,24 @@ This initial IdP connection is a prerequisite for the Accelerated IdP Flow.
 Without it, platforms **MUST** fall back to direct OAuth on the business domain
 (see [Identity Providers](#identity-providers)).
 
-**Which token.** The subject token is per-user platform state. The IdP issues
-it to a specific user, mints the authorization grant for that user, and the
-business resolves or provisions the account from the `(iss, sub)` the grant
-carries (see [Business Token Issuance](#business-token-issuance)). Platforms
-**SHOULD** select the subject token held for the user they are acting on
-behalf of, and **SHOULD NOT** present a subject token issued to a different
-user or reuse one subject token across users — the business would link an
-identity that does not belong to the user in session.
+**Which token.** The subject token represents the user whose identity is being
+chained. The IdP issues the JWT authorization grant for the subject represented
+by that token, and the business resolves or provisions the account from the
+`(iss, sub)` carried in the grant (see [Business Token Issuance](#business-token-issuance)).
+
+The platform's selection of a subject token therefore determines which user's
+identity is linked at the business. Selecting a token associated with a different
+user can result in linking the wrong account.
 
 The IdP defines which scopes a token must carry to be accepted in a token
-exchange request. At minimum, the token **SHOULD** have been issued with
-`openid` scope so that the IdP can resolve the user's `sub` and populate
-standard OIDC claims in the resulting JWT authorization grant. Platforms
-**SHOULD** also request scopes covering any claims listed in the target
-business's `required_claims` (see
-[Provider Configuration](#provider-configuration)) during the initial IdP
-connection — for example, including `email` scope so that `email` and
-`email_verified` are available in grants when businesses require them.
+exchange request. For OIDC-based IdPs, the `openid` scope can be requested
+during the initial authorization flow. Depending on the IdP's scope policy,
+additional scopes may be needed to make claims available in the resulting
+JWT authorization grant.
+
+For example, an IdP may require the `email` scope to include `email` and
+`email_verified` claims when these are listed in the target business's
+`required_claims` (see [Provider Configuration](#provider-configuration)).
 
 ### Flow
 
@@ -729,18 +729,20 @@ IdP **MUST**:
 user has authorized identity sharing with a given business. Two common
 approaches are:
 
-* **Platform-level consent:** Authorization to share identity is captured when
-    the user connects their account to the platform at the IdP (for example,
-    via `openid` or an IdP-specific scope during the initial
-    [Subject Token](#subject-token) acquisition). The IdP then issues grants
-    for any relying party in its ecosystem without per-business interaction.
+* **Platform-level consent:** Authorization to share identity with relying
+    parties in the IdP's ecosystem is captured when the user connects their
+    account to the platform. The scope of authorized sharing depends on the
+    consent obtained and the IdP's policy. Subsequent grants can be issued
+    without additional per-business interaction when the target business is
+    covered by that authorization.
 * **Per-business consent:** The IdP prompts the user interactively the first
     time a grant is requested for a new business, records the authorization, and
     issues subsequent grants silently.
 
-IdPs **SHOULD** document which model they implement. Platforms **SHOULD**
-communicate the applicable consent model to users before initiating identity
-chaining (see [General Guidelines for Platforms](#for-platforms)).
+The consent model implemented by an IdP affects when and how users authorize
+identity sharing. Documentation of the model can help platforms explain the
+authorization process to users before initiating identity chaining
+(see [General Guidelines for Platforms](#for-platforms)).
 
 IdPs **SHOULD** populate OIDC Core §5.1 standard claims in JWT
 authorization grants when the user has consented to share them — at
@@ -1355,13 +1357,15 @@ GET https://accounts.example-login.app/oauth2/authorize
   &state=<random>
 ```
 
-The user authenticated and consented at the IdP. The platform exchanged the
-authorization code for a subject token scoped to `openid email` and stores it
-for that user, for subsequent token exchange requests.
+The user authenticated and consented at the IdP. In this example, the platform
+requested the `openid` and `email` scopes based on the IdP's scope policy.
+The platform exchanged the authorization code for an access token and stores
+it for that user for subsequent token exchange requests.
 
-**Step 1 — Discover providers.** Platform reads the business's `config.providers`,
-finds `app.example.login` with `required_claims: ["email"]`. The platform holds a
-subject token with `email` scope — the entry is a match.
+**Step 1 — Discover providers.** Platform reads the business's `config.providers`
+and finds `app.example.login` with `required_claims: ["email"]`. The platform
+holds an IdP access token obtained with the `email` scope, which may enable
+the IdP to include the required claim in the JWT authorization grant.
 
 **Step 2 — Token exchange at the IdP.** Platform calls the IdP's token endpoint
 using the token exchange grant type
