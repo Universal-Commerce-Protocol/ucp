@@ -295,18 +295,18 @@ vocabulary); runtime messages carry per-request advisories.
 
 UCP discovery is a three-step pipeline.
 
-**Step 1 — Resolve the AS issuer.** Platforms fetch the business's
-protected-resource metadata per
-[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" }
-and use the selected entry from `authorization_servers` as the AS
-issuer. The AS issuer **MAY** be hosted on a different origin than the
-business domain. If the business publishes no protected-resource
-metadata, the AS issuer defaults to the business domain (single-host
-deployments).
+**Step 1 — Resolve candidate AS issuers.** Platforms fetch the
+business's protected-resource metadata per
+[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" };
+each entry in `authorization_servers` is a candidate AS issuer (see
+[Selection](#selection)). A candidate issuer **MAY** be hosted on a
+different origin than the business domain. If the business publishes no
+protected-resource metadata, the business domain is the sole candidate
+issuer (single-host deployments).
 
-**Step 2 — Fetch AS metadata.** Using the issuer from Step 1, platforms
-resolve authorization-server metadata via a strict two-tier hierarchy.
-Well-known URLs are constructed per
+**Step 2 — Fetch AS metadata.** Using a candidate issuer from Step 1,
+platforms resolve authorization-server metadata via a strict two-tier
+hierarchy. Well-known URLs are constructed per
 [RFC 8414 §3.1](https://datatracker.ietf.org/doc/html/rfc8414#section-3.1){ target="_blank" }
 (the well-known segment is inserted between the host and any issuer
 path, not appended).
@@ -329,20 +329,23 @@ Platforms **MUST NOT** silently fall through to OIDC Discovery on any
 error other than `404` in item 1.
 
 **Step 3 — Validate the issuer.** The `issuer` value in the discovered
-metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
-(per
+metadata **MUST** byte-for-byte match the candidate issuer being
+evaluated (per
 [RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
 Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
 comparison.
+
+### Selection
 
 Platforms evaluate each candidate entry from Step 1 through Steps 2
 and 3. An entry that fails either step (for example, because its metadata
 reports a different `issuer`) **MUST** be discarded and **MUST NOT**
 by itself cause discovery to fail. Platforms **MAY** also exclude entries
-for authorization servers at which they hold no usable client identity
-(see [For Platforms](#for-platforms)). Among the remaining entries,
-platforms **SHOULD** prefer array order, which expresses the business's
-preference. Discovery fails only when no entry remains.
+for authorization servers at which they cannot act as a client (for
+example, because they hold no client registration there). Among the
+remaining entries, platforms **SHOULD** prefer array order, which
+expresses the business's preference. Discovery fails only when no entry
+remains.
 
 ## Account Linking Flow
 
@@ -1026,6 +1029,13 @@ field conveys the business's value prompt to the platform (e.g.,
   (byte-for-byte). Platforms **MUST NOT** normalize before comparison.
   Normalization (e.g., stripping trailing slashes) is a known source of
   `iss` validation bypass.
+* **Multiple authorization servers.** Array order in
+  `authorization_servers` is a preference, not a security boundary;
+  businesses **MUST** list only authorization servers they accept being
+  used for the protected resource. Platforms **SHOULD** log or surface
+  entries discarded during [Selection](#selection) so that a
+  misconfigured entry is visible to the business rather than silently
+  skipped.
 * **Transport security.** All communication between platform and business
   **MUST** use HTTPS with a minimum of TLS 1.2
   ([RFC 6749 §1.6](https://datatracker.ietf.org/doc/html/rfc6749#section-1.6){ target="_blank" }).
