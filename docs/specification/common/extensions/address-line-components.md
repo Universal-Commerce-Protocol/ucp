@@ -44,9 +44,17 @@ into a flat line — `Avenida Paulista, 1578` in Brazil, `15 Rue de Rivoli` in
 France — is a convention of the destination country. The business composes;
 the platform never does.
 
-**Which components a country uses is a country fact.** The schema accepts every
-component everywhere; a sender includes the components the destination country
-writes and omits the rest. Per-country applicability is published separately.
+**Country shape is separate from transport.** Country-level metadata describes
+field applicability, labels, layout, baseline requirements and limits. This
+extension defines how those fields are exchanged; it does not duplicate country
+tables or expose merchant configuration, rollout state or request-specific
+rules. Country metadata provides a baseline; business validation remains
+authoritative.
+
+Shopify is consolidating its country address shape data in the public
+[Worldwide](https://github.com/Shopify/worldwide) project. Publication of a
+language-neutral country address shape artifact is separate work; this
+extension does not prescribe its schema or distribution mechanism.
 
 **`address_code` is not a line component.** It identifies the delivery point on
 its own and is never composed into a flat line.
@@ -123,8 +131,12 @@ advertise either or both, and platforms SHOULD check which are extended.
 | Checkout | `payment.instruments[].billing_address` | Request and response |
 | Order | `fulfillment.expectations[].destination` | Response |
 
-A `business_location` destination never carries the properties. Cart has no
-address-bearing member at this revision and is not extended.
+On Checkout, this extension applies to shipping-address destinations and
+payment-instrument billing addresses. Only shipping destinations require the
+Fulfillment extension; billing addresses do not. Other destination variants,
+including `business_location`, MUST NOT carry these properties. The extension
+does not extend the Location capability. Cart has no address-bearing member at
+this revision and is not extended.
 
 ## Schema
 
@@ -164,15 +176,26 @@ The business applies these rules to each component group independently;
    knows only the flat shape keeps writing it exactly as before, and the
    resulting address has no components for that group.
 3. **Clearing is by omission.** A field is cleared by leaving it out of the
-   request. `null` is not a valid value: every `PostalAddress` field is a
-   non-nullable string, and an extension can only add constraints, never relax
-   them.
-4. **The business never infers components.** A response contains only the
-   components a request supplied; the business does not split a flat line.
+   request, including a previously stored `address_code`. Component and code
+   values MUST be strings; neither they nor the `address_line_components`
+   object accept `null`. An empty object supplies no components and has the
+   same effect as omitting the object in a replacement request.
+4. **The business never infers components.** The business MUST NOT split flat
+   lines to manufacture structured components.
 
-The business MUST reject a component the destination country does not use, an
-empty required component or a value beyond the country's limits with a
-recoverable `message` of `type: "error"` whose `path` names the field.
+When a component group is supplied structurally, the business validates its
+components against the applicable country shape and request-specific
+requirements. A group supplied only as a flat line remains subject to
+flat-address validation; negotiating this extension does not, by itself,
+require that group to be supplied as components.
+
+When components or `address_code` are supplied, the business MUST resolve a
+recognized destination country. An unresolved or invalid country, unsupported
+components, missing or empty required components within a structured group,
+and invalid component or code values MUST produce a recoverable `message` of
+`type: "error"` whose `path` identifies the relevant field. Components and code
+remain subject to applicable length limits; invalid structured input does not
+fall back to a flat line supplied alongside it.
 
 ### Reading an address
 
@@ -180,6 +203,15 @@ A response carries the composed flat lines alongside the components the
 business holds, and `address_code` when one is held. A reader that does not
 implement this extension reads the flat lines and ignores the rest; one that
 does SHOULD prefer the components when present.
+
+Returned components and `address_code` belong to the address represented by
+the resource, regardless of the channel through which they were captured.
+They may originate from an address book, a saved payment instrument, an
+earlier checkout or another authorized API. Businesses MUST NOT substitute
+values from a different address or replace a resource's address snapshot with
+the current address-book entry. Historical flat-only addresses remain
+flat-only. Components and code inherit the address's authorization, masking
+and retention requirements.
 
 ### Absence
 
@@ -189,10 +221,12 @@ them. The flat address behaves exactly as it does without the extension.
 
 ## Use Cases and Examples
 
-### Shipping to a structured address
+### Structured shipping with flat-only billing
 
 A platform collects a Brazilian delivery address as components and sends them
-on a checkout update together with the flat lines it would have sent anyway.
+on a checkout update together with a flat-only billing address. Negotiating
+the extension does not require both addresses to use components. The response
+excerpt shows the shipping destination; the billing address remains flat-only.
 
 === "Request"
 
@@ -230,6 +264,23 @@ on a checkout update together with the flat lines it would have sent anyway.
                 }
               }
             ]
+          }
+        ]
+      },
+      "payment": {
+        "instruments": [
+          {
+            "id": "card_1",
+            "handler_id": "handler_1",
+            "type": "card",
+            "billing_address": {
+              "street_address": "Rua Augusta, 1200",
+              "extended_address": "Apto 31",
+              "address_locality": "São Paulo",
+              "address_region": "SP",
+              "postal_code": "01304-001",
+              "address_country": "BR"
+            }
           }
         ]
       }
@@ -363,6 +414,122 @@ and is never part of a flat line.
 }
 ```
 
+### Clearing an address code on replacement
+
+Suppose the preceding billing address held `address_code: "2929"`. The
+platform resubmits the complete intended address without that property. The
+components remain, but the previous code is cleared rather than restored
+from stored state. These are address excerpts from the checkout update and
+response, not standalone operations.
+
+This example assumes the business accepts the address without a code. If a
+code is required for the request, its omission instead produces a recoverable
+validation error.
+
+=== "Request"
+
+    <!-- ucp:example schema=common/address_line_components def=postal_address op=update direction=request -->
+    ```json
+    {
+      "first_name": "Noura",
+      "last_name": "Al-Qahtani",
+      "street_address": "Olaya Street 7248",
+      "extended_address": "Apt 501",
+      "address_locality": "Riyadh",
+      "postal_code": "12271",
+      "address_country": "SA",
+      "address_line_components": {
+        "street_name": "Olaya Street",
+        "street_number": "7248",
+        "additional_information": "Apt 501"
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/address_line_components def=postal_address op=read direction=response -->
+    ```json
+    {
+      "first_name": "Noura",
+      "last_name": "Al-Qahtani",
+      "street_address": "Olaya Street 7248",
+      "extended_address": "Apt 501",
+      "address_locality": "Riyadh",
+      "postal_code": "12271",
+      "address_country": "SA",
+      "address_line_components": {
+        "street_name": "Olaya Street",
+        "street_number": "7248",
+        "additional_information": "Apt 501"
+      }
+    }
+    ```
+
+### Reading an address captured through another API
+
+An address book captured these components through another authorized API.
+The business copied that address onto an order. This Order fulfillment
+excerpt returns the order's address snapshot, not the customer's current
+address-book entry. The components need not have appeared in a UCP request.
+
+<!-- ucp:example schema=shopping/order op=read direction=response target=$.fulfillment -->
+```json
+{
+  "expectations": [
+    {
+      "id": "expectation_1",
+      "line_items": [{ "id": "li_1", "quantity": 1 }],
+      "method_type": "shipping",
+      "destination": {
+        "street_address": "Avenida Paulista, 1578",
+        "extended_address": "Conjunto 42, Bela Vista",
+        "address_locality": "São Paulo",
+        "address_region": "SP",
+        "postal_code": "01310-200",
+        "address_country": "BR",
+        "address_line_components": {
+          "street_name": "Avenida Paulista",
+          "street_number": "1578",
+          "additional_information": "Conjunto 42",
+          "district": "Bela Vista"
+        }
+      }
+    }
+  ]
+}
+```
+
+### Validation error on a billing address
+
+A business rejects an invalid billing address code with a recoverable error.
+The path uses the public UCP input location, not an internal address model.
+The error code below is illustrative; the base message contract permits
+business-defined codes.
+
+<!-- ucp:example schema=common/types/message_error op=read direction=response -->
+```json
+{
+  "type": "error",
+  "code": "address_code_invalid",
+  "content": "The address code is not valid for the destination country.",
+  "severity": "recoverable",
+  "path": "$.payment.instruments[0].billing_address.address_code"
+}
+```
+
+### Destination type constraints
+
+These schema constraints are separate from country and request validation:
+
+| Location | New properties | Schema result |
+| -------- | -------------- | ------------- |
+| `shipping_address` destination | Components and/or code | Valid |
+| Shipping request destination with its optional `type` omitted | Components and/or code | Valid |
+| `business_location` destination | Neither property | Valid |
+| `business_location` destination | Either property, including an empty object or `null` | Invalid |
+| Payment-instrument billing address | Components and/or code | Valid |
+
 ## Mapping from other address models
 
 The components carry the same names as the structured address fields of
@@ -382,8 +549,11 @@ differs.
 
 ## Implementation guidelines
 
-* Businesses MUST NOT put invisible or non-printing separators in a composed
-  flat line.
+* Flat lines returned under this extension MUST NOT contain invisible or
+  non-printing separators, including when the source address is stored in a
+  legacy format. Businesses must use an explicit, compatible output
+  projection for such formats; this requirement does not authorize inferring
+  components or rewriting stored address snapshots.
 * Platforms that render an editable address form SHOULD edit the components
   when the response carries them, and SHOULD NOT pre-fill components from a
   flat line without the buyer's confirmation.

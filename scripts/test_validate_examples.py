@@ -745,6 +745,133 @@ def test_extension_validation() -> None:
   )
 
 
+def test_address_line_components_destination_scope() -> None:
+  """Checkout components apply to shipping, not business locations."""
+  if not _has_ucp_schema():
+    _check(
+      "address_line_components_destination_scope", False, "Missing ucp-schema"
+    )
+    return
+
+  components = {"street_name": "Olaya Street", "street_number": "7248"}
+  shipping = {
+    "id": "dest_1",
+    "type": "shipping_address",
+    "street_address": "Olaya Street 7248",
+    "address_country": "SA",
+    "address_line_components": components,
+    "address_code": "2929",
+  }
+  pickup = {"id": "location_1", "type": "business_location", "name": "Pickup"}
+  cases = [
+    ("shipping", "shipping", shipping, "response", "read", "ok"),
+    (
+      "shipping_without_destination_type",
+      "shipping",
+      {key: value for key, value in shipping.items() if key != "type"},
+      "request",
+      "update",
+      "ok",
+    ),
+    ("pickup_without_components", "pickup", pickup, "response", "read", "ok"),
+  ]
+  for field, value in (
+    ("address_line_components", components),
+    ("address_line_components", {}),
+    ("address_line_components", None),
+    ("address_code", "2929"),
+    ("address_code", None),
+  ):
+    cases.append(
+      (
+        f"pickup_rejects_{field}_{value}",
+        "pickup",
+        pickup | {field: value},
+        "response",
+        "read",
+        "fail",
+      )
+    )
+
+  for name, method_type, destination, direction, op, expected in cases:
+    payload = {
+      "methods": [
+        {
+          "id": "method_1",
+          "type": method_type,
+          "line_item_ids": ["li_1"],
+          "destinations": [destination],
+        }
+      ]
+    }
+    md = (
+      "<!-- ucp:example schema=shopping/checkout "
+      f"op={op} direction={direction} target=$.fulfillment -->\n"
+      f"```json\n{json.dumps(payload)}\n```\n"
+    )
+    result = _process(md)
+    _check(
+      f"address_line_components_{name}",
+      result.status == expected,
+      f"got {result.status}: {result.message}",
+    )
+
+
+def test_address_line_components_billing_scope() -> None:
+  """Instrument billing accepts components and code, but not null values."""
+  if not _has_ucp_schema():
+    _check("address_line_components_billing_scope", False, "Missing ucp-schema")
+    return
+
+  address = {
+    "street_address": "Olaya Street 7248",
+    "address_country": "SA",
+    "address_line_components": {
+      "street_name": "Olaya Street",
+      "street_number": "7248",
+    },
+    "address_code": "2929",
+  }
+  for direction, op in (("request", "update"), ("response", "read")):
+    for name, billing, expected in (
+      ("structured", address, "ok"),
+      ("empty_wrapper", address | {"address_line_components": {}}, "ok"),
+      ("null_code", address | {"address_code": None}, "fail"),
+      ("null_wrapper", address | {"address_line_components": None}, "fail"),
+      (
+        "null_component",
+        address | {"address_line_components": {"street_name": None}},
+        "fail",
+      ),
+    ):
+      payload = v.load_scaffold(
+        "shopping/checkout", direction, op, _SCAFFOLDS_DIR
+      )
+      assert payload is not None
+      payload["payment"] = {
+        "instruments": [
+          {
+            "id": "card_1",
+            "handler_id": "handler_1",
+            "type": "card",
+            "billing_address": billing,
+          }
+        ]
+      }
+      md = (
+        "<!-- ucp:example schema=common/address_line_components "
+        "def=dev.ucp.shopping.checkout "
+        f"op={op} direction={direction} -->\n"
+        f"```json\n{json.dumps(payload)}\n```\n"
+      )
+      result = _process(md)
+      _check(
+        f"address_line_components_billing_{direction}_{name}",
+        result.status == expected,
+        f"got {result.status}: {result.message}",
+      )
+
+
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
   original_run = v.subprocess.run
@@ -798,6 +925,8 @@ def main() -> int:
   test_resolve_schema_cache_key()
   test_process_block_integration()
   test_extension_validation()
+  test_address_line_components_destination_scope()
+  test_address_line_components_billing_scope()
   return _report()
 
 

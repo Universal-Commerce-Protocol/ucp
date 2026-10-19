@@ -44,7 +44,7 @@
     },
     "postal_address_properties": {
       "type": "object",
-      "description": "The properties this extension adds to a postal address. Composed onto every address-bearing location of an extended capability.",
+      "description": "The properties this extension adds at the supported postal-address locations of an extended capability.",
       "properties": {
         "address_line_components": {
           "$ref": "#/$defs/address_line_components"
@@ -64,7 +64,7 @@
     },
     "shipping_destination": {
       "title": "Shipping Destination with Address Line Components",
-      "description": "A `shipping_address` fulfillment destination carrying structured street-line components. The Checkout composition below adds the same properties to every destination; this named composition is the shape a `shipping_address` destination takes.",
+      "description": "A `shipping_address` fulfillment destination carrying structured street-line components. Other fulfillment destination variants do not carry these properties.",
       "allOf": [
         { "$ref": "../shopping/types/shipping_destination.json" },
         { "$ref": "#/$defs/postal_address_properties" }
@@ -89,8 +89,24 @@
                       "destinations": {
                         "type": "array",
                         "items": {
-                          "$ref": "#/$defs/postal_address_properties",
-                          "description": "A `shipping_address` destination may carry `address_line_components` and `address_code`; a `business_location` destination never does."
+                          "type": "object",
+                          "description": "Only shipping-address destinations may carry these properties. Shipping requests may omit their destination type under the Fulfillment contract; other destination variants, including business_location, must not carry either property.",
+                          "if": {
+                            "properties": {
+                              "type": { "const": "shipping_address" }
+                            }
+                          },
+                          "then": {
+                            "$ref": "#/$defs/postal_address_properties"
+                          },
+                          "else": {
+                            "not": {
+                              "anyOf": [
+                                { "required": ["address_line_components"] },
+                                { "required": ["address_code"] }
+                              ]
+                            }
+                          }
                         }
                       }
                     }
