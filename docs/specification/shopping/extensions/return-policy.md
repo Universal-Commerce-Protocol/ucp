@@ -298,15 +298,16 @@ means 15% of the amount paid, at most $50.00 per unit. For 3 units bought at
 $200.00 each, the estimated maximum deduction is 3 × min($30.00, $50.00) =
 $90.00.
 
-Fees are estimated maximums. A business **SHOULD** state the most its policy
-charges, including a fee that applies only in some cases, such as a restocking
-fee on opened items, at its full value with `display_text` naming the
-condition. The business sets the charge for a particular return when it
-processes the return, and that charge can differ from an amount derived from
-these fields, for example with the item's condition, return shipping rates,
-taxes, or how the order's discounts are refunded. A platform **MUST NOT**
-present a fee, or an amount derived from it, as the final charge for a
-particular return.
+Fees are estimated maximums. A business **MUST NOT** state an `amount`,
+`basis_points`, or `max_amount` lower than its policy charges for that fee,
+including a fee that applies only in some cases, such as a restocking fee on
+opened items, which it states at its full value with `display_text` naming the
+condition; a fee it cannot bound omits them. The business sets the charge for a
+particular return when it processes the return, and that charge can differ from
+an amount derived from these fields, for example with the item's condition,
+return shipping rates, taxes, or how the order's discounts are refunded. A
+platform **MUST NOT** present a fee, or an amount derived from it, as the final
+charge for a particular return.
 
 For example, a policy that charges a capped restocking fee, waives it in store
 and at kiosks, and charges return shipping and an eco fee by mail states:
