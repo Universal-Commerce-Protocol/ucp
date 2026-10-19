@@ -125,15 +125,15 @@ kinds are:
 | :-- | :-- |
 | `window` | Otherwise eligible returns are accepted for at least `duration` from the event named by `anchor`; both are required (see [Window and anchor](#window-and-anchor)). |
 | `unlimited` | Otherwise eligible returns are subject to no time restriction. |
-| `not_accepted` | The covered items cannot be returned (see [Non-returnable items](#non-returnable-items)). |
+| `not_accepted` | The business's return policy does not accept returns of the covered items (see [Non-returnable items](#non-returnable-items)). |
 
 `duration`, `anchor`, and `expires_at` have meaning only on a `window`, so a
 business **MUST NOT** carry them on an `unlimited` or `not_accepted`
 eligibility; the schema rejects the combination.
 
-`not_accepted` is an explicit policy-level prohibition on returning the covered
-items. `window` and `unlimited` state a time bound, not a verdict on a
-particular return: `window` guarantees a period for returns that are otherwise
+`not_accepted` states that the business's return policy accepts no returns of
+the covered items. `window` and `unlimited` state a time bound, not a verdict on
+a particular return: `window` guarantees a period for returns that are otherwise
 eligible, and `unlimited` removes the time restriction and nothing else, so
 neither kind alone establishes that a particular attempted return meets every
 requirement. A business **MAY** describe eligibility requirements beyond the
@@ -218,15 +218,17 @@ and still presents `expires_at` when the business states it.
 
 ### Non-returnable items
 
-To state that the covered items cannot be returned, such as a final-sale item,
-a business **MUST** set `eligibility.type` to `not_accepted`. Because return
-terms do not apply, a business **MUST NOT** carry `supported_resolutions`,
-`methods`, or `fees` on a `not_accepted` policy; the schema rejects the
-combination, so no precedence between fields of one policy is ever needed. A
-business **MUST NOT** use an empty `supported_resolutions` or `methods` array
-to signal non-returnability, and the schema requires at least one entry in
-each; omit a field that is not stated structurally. A `not_accepted`
-eligibility is the single, unambiguous signal a platform acts on.
+To state that its return policy does not accept returns of the covered items,
+such as a final-sale item, a business **MUST** set `eligibility.type` to
+`not_accepted`. Because return terms do not apply, a business **MUST NOT** carry
+`supported_resolutions`, `methods`, or `fees` on a `not_accepted` policy; the
+schema rejects the combination, so no precedence between fields of one policy is
+ever needed. A business **MUST NOT** use an empty `supported_resolutions` or
+`methods` array to signal non-returnability, and the schema requires at least
+one entry in each; omit a field that is not stated structurally. A
+`not_accepted` eligibility is the single, unambiguous signal a platform acts on.
+A `not_accepted` eligibility describes the business's return policy only (see
+[Responsibilities](#responsibilities)).
 
 When a business requires the buyer to be shown that an item is final sale, it
 emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal
@@ -373,6 +375,12 @@ submits; there is no buyer selection and no request-side machinery. They carry
 no buyer-asserted claims and no PII, so they cross no new trust boundary beyond
 the base response.
 
+A return policy states the business's own terms. A business **SHOULD** localize
+them to the buyer where it can, using what the request provides, such as the
+buyer's `context` or a shipping address, so the terms are those that apply to
+that buyer. The policy does not describe remedies the buyer may have under
+applicable law or a third-party guarantee; those are outside this specification.
+
 The return-term fields (`eligibility`, `supported_resolutions`, `methods`, and
 `fees`) are not an exhaustive statement of the policy's terms. `eligibility`,
 `supported_resolutions`, and `methods` are guarantees that hold for every
@@ -407,9 +415,9 @@ alongside the structured terms so the buyer can review the full policy.
 A platform that models this type **MAY** present a guaranteed return deadline
 from `expires_at` (see [Window and anchor](#window-and-anchor)) and **MAY**
 estimate a return's charges from `fees` (see [Return fees](#return-fees)). It
-**MUST NOT** treat an elapsed window as making an item non-returnable, since
-the `description` may allow later returns; only a `not_accepted` eligibility
-states that.
+**MUST NOT** treat an elapsed window as making an item non-returnable, since the
+`description` may allow later returns; only a `not_accepted` eligibility states
+that its return policy accepts no returns.
 
 ## Examples
 

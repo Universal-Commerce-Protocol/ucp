@@ -66,7 +66,7 @@
     },
     "return_eligibility": {
       "title": "Return Eligibility",
-      "description": "An open return eligibility statement. `window` states a guaranteed minimum period after an anchor event and, once resolved, the instant it ends; expiration does not signal non-returnability. `unlimited` states no time restriction, not unconditional eligibility. `not_accepted` states that the covered items cannot be returned. Unknown types establish no eligibility inference; consumers may use the base policy's `description`.",
+      "description": "An open return eligibility statement. `window` states a guaranteed minimum period after an anchor event and, once resolved, the instant it ends; expiration does not signal non-returnability. `unlimited` states no time restriction, not unconditional eligibility. `not_accepted` states that the business's return policy does not accept returns of the covered items; it does not describe remedies under applicable law or third-party guarantees. Unknown types establish no eligibility inference; consumers may use the base policy's `description`.",
       "type": "object",
       "required": ["type"],
       "properties": {
