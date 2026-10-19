@@ -91,6 +91,7 @@ nav:
                   - MCP: specification/shopping/order/mcp.md
           - Extensions:
               - Fulfillment: specification/shopping/extensions/fulfillment.md
+              - Similarity: specification/shopping/extensions/similarity.md
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
@@ -566,6 +567,11 @@ plugins:
           - specification/shopping/extensions/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
+          - specification/shopping/extensions/similarity.md: >-
+              Catalog Similarity extension, adding `like` similarity anchors
+              (product, variant, or inline image) to Catalog Search and an
+              `include` list for substitutes and recommendations to Catalog
+              Lookup, with the Business configuration that opts into them.
           - specification/shopping/extensions/discount.md: >-
               Discount Extension, covering discount code discovery, applied
               discounts, allocation method stacking orders, rejected code

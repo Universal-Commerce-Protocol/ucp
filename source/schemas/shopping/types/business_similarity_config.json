@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/business_similarity_config.json",
+  "title": "Business Similarity Config",
+  "description": "Business's similarity configuration.",
+  "type": "object",
+  "properties": {
+    "like": {
+      "type": "object",
+      "description": "Limits for `like` anchors on Catalog Search.",
+      "properties": {
+        "max_items": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Maximum anchors per request. When a request carries more, the Business processes the first `max_items` in request order and includes an informational `batch_limit_applied` message."
+        },
+        "images": {
+          "type": "object",
+          "description": "Inline image anchor support. Absent is equivalent to `max_items: 0`.",
+          "if": {
+            "required": ["max_items"],
+            "properties": { "max_items": { "minimum": 1 } }
+          },
+          "then": { "required": ["types", "max_bytes"] },
+          "properties": {
+            "max_items": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "description": "Maximum image anchors per request. Default 0: the Business accepts no image anchors until it advertises 1 or more, together with `types` and `max_bytes`. Image anchors count toward `like.max_items`."
+            },
+            "types": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Accepted MIME types, e.g. `image/jpeg`, `image/webp`."
+            },
+            "max_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum length in bytes of one image anchor's base64 `data` string. Image bytes travel inside the JSON payload, so the limit applies to the encoded string."
+            }
+          }
+        }
+      }
+    }
+  }
+}
