@@ -484,8 +484,8 @@ The loyalty extension can provide buyer status information that helps the platfo
     {"type": "subtotal", "display_text": "Subtotal", "amount": 1000},
     {"type": "items_discount", "display_text": "Club member benefit", "amount": -150},
     {"type": "discount", "display_text": "Free shipping for Retail Card holder", "amount": -199},
-    {"type": "fulfillment", "display_text": "Shipping", "amount": 0},
-    {"type": "total", "display_text": "Estimated Total", "amount": 651}
+    {"type": "fulfillment", "display_text": "Shipping", "amount": 199},
+    {"type": "total", "display_text": "Estimated Total", "amount": 850}
   ]
 }
 ```
