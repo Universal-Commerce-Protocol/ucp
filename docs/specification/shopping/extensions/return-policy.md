@@ -212,9 +212,11 @@ omits `eligibility` and conveys the terms in `description`.
 | `delivered` | The buyer receives the items, including collecting a pickup order or gaining access to a digital item. |
 
 `fulfilled` and `delivered` differ in whose action starts the clock: the
-business completing its step, or the buyer receiving the items. A platform that
-does not recognize an `anchor` value presents the window from `description`,
-and still presents `expires_at` when the business states it.
+business completing its step, or the buyer receiving the items. If its clock
+starts at an event no well-known anchor names, a business **MAY** use its own
+anchor value or an earlier well-known one, such as `purchased`. A platform that
+does not recognize an `anchor` value presents the window from `description`, and
+still presents `expires_at` when the business states it.
 
 ### Non-returnable items
 
