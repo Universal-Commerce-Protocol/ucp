@@ -81,6 +81,8 @@ Selecting a term can invalidate a selection previously accepted elsewhere in the
 
 This extension does not change how instruments are supplied. The Buyer's instruments fund the checkout under the selected term.
 
+Where the selected payment term is fully deferred and requires no upfront payment capture or instrument guarantee (e.g., cash payment upon arrival, or deferred invoicing where no tokens or instruments are submitted at checkout), no payment instruments need to be supplied. In this case, because `checkout.payment` is required on completion but `selected_term_id` is omitted on complete requests, the Platform **MUST** provide an empty payment object (`"payment": {}`) in the complete request.
+
 Checkout-specific handler and instrument eligibility is a **runtime result**. Profiles advertise broad support; the Business resolves that support against the Checkout context and any instruments already supplied, then returns the authoritative `ucp.payment_handlers` in the response. This covers cases a discovery-time predicate cannot express — a gift card whose balance is below the deposit, an issuer that will not support a delayed capture for this Business, a credential that expires before the balance comes due.
 
 A Platform therefore cannot pre-compute the effect of a choice, and **MUST** treat the set in each response as authoritative for that response alone. A handler that must be initialized with the amount and timing it will charge cannot be prepared before the term is agreed, and **MAY** cease to be offered once it is.
@@ -346,6 +348,14 @@ The deposit terms live in a policy that targets the term they apply to:
     }
   }
 ]
+```
+
+**Complete request — completing under fully deferred payment terms:**
+
+When completing a checkout with a selected payment term that requires no upfront payment capture or payment instruments, `selected_term_id` is omitted and the Platform sends an empty `payment` object:
+
+```json
+{}
 ```
 
 On completion, the accepted term travels to the Order, so the Buyer can still see that $900 is due at check-in. The other terms do not travel, and the deposit disclosure moves with the term it governs:
