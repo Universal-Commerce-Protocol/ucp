@@ -171,6 +171,39 @@ Content-Type: application/json
 }
 ```
 
+## HTTP Headers
+
+The following headers are defined for the HTTP binding and apply to all operations unless otherwise noted.
+
+**Request Headers**
+
+| Header            | Required | Description                                                                                                                           |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `Authorization`   | No       | Contains an OAuth token representing Platform or Buyer credentials.                                                                   |
+| `X-API-Key`       | No       | Reusable API key allocated to the Platform by the Business.                                                                           |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature. Format: `sig1=:<base64-signature>:`.                                                                 |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header. Format: `sig1=("@method" "@path" ...);created=<timestamp>;keyid="<key-id>"`.                         |
+| `Content-Digest`  | No       | Body digest per RFC 9530. Format: `sha-256=:<base64-digest>:`.                                                                        |
+| `Request-Id`      | **Yes**  | Unique UUID for tracing requests across components.                                                                                   |
+| `User-Agent`      | No       | Identifies the user agent string making the call.                                                                                     |
+| `UCP-Agent`       | **Yes**  | Identifies the UCP agent making the call, containing the signer's profile URI. Format: profile="https://example.com/.well-known/ucp". |
+| `Content-Type`    | No       | Representation Metadata describing the body content.                                                                                  |
+| `Accept`          | No       | Content Negotiation, indicating accepted formats.                                                                                     |
+| `Accept-Language` | No       | Preferred natural languages for localization.                                                                                         |
+| `Accept-Encoding` | No       | Supported content-codings (compression).                                                                                              |
+
+**Response Headers**
+
+| Header            | Required | Description                                   |
+| ----------------- | -------- | --------------------------------------------- |
+| `Signature`       | No       | RFC 9421 HTTP Message Signature for response. |
+| `Signature-Input` | No       | RFC 9421 Signature-Input header for response. |
+| `Content-Digest`  | No       | Body digest per RFC 9530 for response.        |
+
+### Specific Header Requirements
+
+- **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header containing the platform profile URI using Dictionary Structured Field syntax ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)). Format: `profile="https://platform.example/profile"`.
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport-level errors from business outcomes.

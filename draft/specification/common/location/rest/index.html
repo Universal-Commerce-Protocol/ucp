@@ -994,6 +994,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#http-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Headers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Headers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specific-header-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specific Header Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3919,6 +3947,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#http-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Headers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Headers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specific-header-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specific Header Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4446,6 +4502,115 @@ Location capabilities through their UCP profile at <code>/.well-known/ucp</code>
 </div>
 </div>
 </div>
+<h2 id="http-headers">HTTP Headers<a class="headerlink" href="#http-headers" title="Permanent link">&para;</a></h2>
+<p>The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.</p>
+<p><strong>Request Headers</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Authorization</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Contains an OAuth token representing Platform or Buyer credentials.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>X-API-Key</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Reusable API key allocated to the Platform by the Business.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 HTTP Message Signature. Format: <code>sig1=:&lt;base64-signature&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 Signature-Input header. Format: <code>sig1=("@method" "@path" ...);created=&lt;timestamp&gt;;keyid="&lt;key-id&gt;"</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Body digest per RFC 9530. Format: <code>sha-256=:&lt;base64-digest&gt;:</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Request-Id</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Unique UUID for tracing requests across components.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>User-Agent</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Identifies the user agent string making the call.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>UCP-Agent</code></td>
+<td style="text-align: left;"><strong>Yes</strong></td>
+<td style="text-align: left;">Identifies the UCP agent making the call, containing the signer's profile URI. Format: profile="https://example.com/.well-known/ucp".</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Type</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Representation Metadata describing the body content.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Content Negotiation, indicating accepted formats.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept-Language</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Preferred natural languages for localization.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Accept-Encoding</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Supported content-codings (compression).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response Headers</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Header</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Signature</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 HTTP Message Signature for response.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Signature-Input</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">RFC 9421 Signature-Input header for response.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Content-Digest</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Body digest per RFC 9530 for response.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="specific-header-requirements">Specific Header Requirements<a class="headerlink" href="#specific-header-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>UCP-Agent</strong>: All requests <strong>MUST</strong> include the <code>UCP-Agent</code> header
+    containing the platform profile URI using Dictionary Structured
+    Field syntax (<a href="https://datatracker.ietf.org/doc/html/rfc8941" target="_blank">RFC 8941</a>).
+    Format: <code>profile="https://platform.example/profile"</code>.</li>
+</ul>
 <h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
 <p>UCP uses a two-layer error model separating transport-level errors from business outcomes.</p>
 <h3 id="transport-errors">Transport Errors<a class="headerlink" href="#transport-errors" title="Permanent link">&para;</a></h3>
