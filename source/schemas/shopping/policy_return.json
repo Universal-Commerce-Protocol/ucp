@@ -144,16 +144,15 @@
       "title": "Return Fee",
       "description": "A charge on a return, typed by what it is for, as an estimated maximum. `amount` states a flat charge, where `0` means nothing is charged; `basis_points` states a percentage, optionally capped by `max_amount`; with neither, the fee is charged at its actual cost and no maximum is stated.",
       "type": "object",
-      "required": ["type"],
       "additionalProperties": true,
       "properties": {
         "type": {
           "$ref": "../common/types/reverse_domain_name.json",
-          "description": "Fee kind, as a reverse-domain name. Well-known values: `dev.ucp.shopping.fee.restocking` (a deduction from the refund, charged per one whole `quantity_unit.unit` returned, for example per lb, or per `each` when `quantity_unit` is absent), `dev.ucp.shopping.fee.return_shipping` (the cost of shipping the return, charged per return shipment), `dev.ucp.shopping.fee.handling` (charged per return request). Vendor kinds use the vendor's own namespace (e.g., `com.example.fee.eco`) and are charged per return request. A vendor fee charged on another basis, such as per item, omits `amount` and states its terms in `display_text`. A fee with an unknown `type` MUST carry `display_text`."
+          "description": "Fee kind, as a reverse-domain name. Well-known values: `dev.ucp.shopping.fee.restocking` (a deduction from the refund, charged per one whole `quantity_unit.unit` returned, for example per lb, or per `each` when `quantity_unit` is absent), `dev.ucp.shopping.fee.return_shipping` (the cost of shipping the return, charged per return shipment), `dev.ucp.shopping.fee.handling` (charged per return request). Vendor kinds use the vendor's own namespace (e.g., `com.example.fee.eco`) and are charged per return request. A vendor fee charged on another basis, such as per item, omits `amount` and states its terms in `display_text`. A fee with an unknown `type` MUST carry `display_text`. Omitted only on an entry with `amount: 0`, which states that the business charges no fee of any kind in its scope, including vendor kinds and kinds defined later."
         },
         "methods": {
           "type": "array",
-          "description": "Return channels this fee applies to; omitted means every channel. A fee with `methods` overrides the fee of the same `type` without `methods` for those channels. A channel need not be listed in the policy's `methods`.",
+          "description": "Return channels this fee applies to; omitted means every channel. A fee with `methods` overrides the fee of the same `type` without `methods` for those channels. A channel need not be listed in the policy's `methods`. When more than one entry applies to a fee on a channel, an entry that lists the channel takes precedence over one that does not, and an entry with a `type` takes precedence over one without.",
           "minItems": 1,
           "uniqueItems": true,
           "items": {
@@ -222,6 +221,23 @@
           },
           "then": {
             "required": ["display_text"]
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "required": ["type"]
+            }
+          },
+          "then": {
+            "required": ["amount"],
+            "properties": {
+              "amount": {
+                "const": 0
+              },
+              "basis_points": false,
+              "max_amount": false
+            }
           }
         }
       ]

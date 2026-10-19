@@ -277,20 +277,27 @@ How much a fee charges is stated by the pricing fields it carries:
 | `basis_points`, optionally with `max_amount` | Up to that percentage, and at most `max_amount` when present. |
 | Neither `amount` nor `basis_points` | The fee is charged at its actual cost, and no maximum is stated; the schema requires `display_text`. |
 
+An entry may omit `type` only with `amount: 0`; such an entry states that the
+business charges no fee of any kind in its scope, including vendor kinds and
+kinds defined later.
+
 `basis_points` applies to the amount paid for the returned quantity, after
 item-level discounts and excluding tax, shipping, and other fees; on catalog
 surfaces, where nothing has been paid, it applies to the covered product's
 price. An entry carries `amount` or `basis_points` but not both, and
 `max_amount` only with `basis_points`; the schema rejects either combination.
 
-An entry's `methods` scopes it to channels. An entry without `methods` applies
-to every channel, and an entry with `methods` overrides the same-type entry
-without `methods` for those channels. A scoped entry may name a channel the
-policy's `methods` does not list: the scope names a channel, it does not
-guarantee one. A business **MUST NOT** carry two same-type entries without
-`methods`, or two same-type entries whose `methods` overlap. The schema does
-not reject such a conflict, and a platform treats the conflicting fee type as
-not stated for the affected channels.
+An entry that lists `methods` applies only to those channels; an entry without
+`methods` applies to every channel. When more than one entry applies to a fee on
+a channel, an entry that lists the channel takes precedence over one that does
+not, and an entry with a `type` takes precedence over one without. For example,
+`{ "methods": ["in_store"], "amount": 0 }` makes in-store returns free even when
+another entry charges a restocking fee on every channel. An entry may list a
+channel the policy's `methods` does not.
+
+A business **MUST NOT** carry two entries of the same `type`, or two entries
+without `type`, that apply to the same channel. If it does, a platform treats
+those fees as not stated for that channel.
 
 `max_amount` caps a percentage. For items priced in USD,
 `{ "type": "dev.ucp.shopping.fee.restocking", "basis_points": 1500, "max_amount": 5000 }`
@@ -309,8 +316,9 @@ return shipping rates, taxes, or how the order's discounts are refunded. A
 platform **MUST NOT** present a fee, or an amount derived from it, as the final
 charge for a particular return.
 
-For example, a policy that charges a capped restocking fee, waives it in store
-and at kiosks, and charges return shipping and an eco fee by mail states:
+For example, a policy that charges a capped restocking fee, offers free returns
+in store and at kiosks, and charges return shipping and an eco fee by mail
+states:
 
 <!-- ucp:example schema=shopping/policy_return def=dev.ucp.shopping.checkout target=$.policies -->
 ```json
@@ -321,7 +329,7 @@ and at kiosks, and charges return shipping and an eco fee by mail states:
     "methods": ["in_store", "kiosk", "by_mail"],
     "fees": [
       { "type": "dev.ucp.shopping.fee.restocking", "basis_points": 1500, "max_amount": 5000, "display_text": "15% restocking fee on opened items" },
-      { "type": "dev.ucp.shopping.fee.restocking", "methods": ["in_store", "kiosk"], "amount": 0 },
+      { "methods": ["in_store", "kiosk"], "amount": 0 },
       { "type": "dev.ucp.shopping.fee.return_shipping", "methods": ["by_mail"], "amount": 500 },
       { "type": "com.example.fee.eco", "methods": ["by_mail"], "amount": 100, "display_text": "Eco packaging fee" }
     ]
@@ -334,16 +342,16 @@ a channel is not stated:
 
 | Channel | Resulting fees |
 | :-- | :-- |
-| `in_store`, `kiosk` | Restocking: nothing is charged (`amount: 0`). Return shipping: not stated. |
+| `in_store`, `kiosk` | Free, since no fee of any kind is charged (the `amount: 0` entry without `type`). |
 | `by_mail` | Restocking: up to 15% of the amount paid, at most 5000 minor units per unit returned. Return shipping: up to 500 minor units per return shipment. `com.example.fee.eco`: up to 100 minor units per return request. |
 
 Only `amount: 0` states that nothing is charged. A platform **MUST NOT** treat
-any other state as zero cost, including an omitted `fees` or a fee type with
-no entry for a channel, whether it presents the terms, for example as "free"
-or "no restocking fee", or estimates a return's charges (see
+any other state as zero cost, including an omitted `fees` or a fee type with no
+entry for a channel, whether it presents the terms, for example as "free" or "no
+restocking fee", or estimates a return's charges (see
 [Responsibilities](#responsibilities)). A platform **MAY** present a channel as
-free when every well-known fee type resolves to `amount: 0` for it and no
-other resolved entry charges anything there.
+free only when an entry without `type` covers it and no entry with `type`
+resolves to a charge there.
 
 Amounts (`amount` and `max_amount` on a fee) carry no currency of their own.
 They are in the currency the covered items are priced in, which in a cart,
