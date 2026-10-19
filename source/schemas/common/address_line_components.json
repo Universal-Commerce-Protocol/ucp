@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/address_line_components.json",
+  "name": "dev.shopify.common.address_line_components",
+  "title": "Address Line Components Extension",
+  "description": "Extends postal addresses on the Checkout and Order capabilities with structured street-line components (`address_line_components`) and an independent `address_code`, for countries whose addresses are written that way. The flat `street_address` and `extended_address` keep their meaning; the components are an additive, structured view of the same two lines.",
+  "requires": {
+    "protocol": { "min": "2026-08-25" },
+    "capabilities": {
+      "dev.ucp.shopping.checkout": { "min": "2026-08-25" },
+      "dev.ucp.shopping.order": { "min": "2026-08-25" }
+    }
+  },
+  "$defs": {
+    "address_line_components": {
+      "type": "object",
+      "description": "Structured components of the two street lines. `street_name` and `street_number` are the components of `street_address`; `additional_information`, `district` and `subdistrict` are the components of `extended_address`. Which components a country uses is a property of the country, not of this schema; a sender includes the components the destination country writes and omits the rest.",
+      "properties": {
+        "street_name": {
+          "type": "string",
+          "description": "Road or street name. Component of `street_address`."
+        },
+        "street_number": {
+          "type": "string",
+          "description": "Building or house number. Component of `street_address`."
+        },
+        "additional_information": {
+          "type": "string",
+          "description": "Apartment, suite, unit, building, landmark or other detail that fits no other component. Component of `extended_address`."
+        },
+        "district": {
+          "type": "string",
+          "description": "First sub- or super-city division where the country has one, for example a Brazilian bairro, a Mexican colonia or an Indonesian kecamatan. Component of `extended_address`."
+        },
+        "subdistrict": {
+          "type": "string",
+          "description": "Second, finer division where the country has one, for example an Indonesian kelurahan. Used together with `district`. Component of `extended_address`."
+        }
+      }
+    },
+    "address_code": {
+      "type": "string",
+      "description": "Country-specific code that identifies the delivery point independently of the street lines, for example the Saudi Additional Number or the UAE Makani number. It is never composed into `street_address` or `extended_address`."
+    },
+    "postal_address_properties": {
+      "type": "object",
+      "description": "The properties this extension adds to a postal address. Composed onto every address-bearing location of an extended capability.",
+      "properties": {
+        "address_line_components": {
+          "$ref": "#/$defs/address_line_components"
+        },
+        "address_code": {
+          "$ref": "#/$defs/address_code"
+        }
+      }
+    },
+    "postal_address": {
+      "title": "Postal Address with Address Line Components",
+      "description": "A postal address carrying structured street-line components. When a request carries a component of a street line together with the flat line itself, the components win and the business composes the flat line from them; a request that carries only the flat line for a street line carries no components for that line.",
+      "allOf": [
+        { "$ref": "types/postal_address.json" },
+        { "$ref": "#/$defs/postal_address_properties" }
+      ]
+    },
+    "shipping_destination": {
+      "title": "Shipping Destination with Address Line Components",
+      "description": "A `shipping_address` fulfillment destination carrying structured street-line components. The Checkout composition below adds the same properties to every destination; this named composition is the shape a `shipping_address` destination takes.",
+      "allOf": [
+        { "$ref": "../shopping/types/shipping_destination.json" },
+        { "$ref": "#/$defs/postal_address_properties" }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Address Line Components",
+      "description": "Checkout extended with address line components on shipping destinations (negotiated through the Fulfillment extension) and on payment-instrument billing addresses.",
+      "allOf": [
+        { "$ref": "../shopping/checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "type": "object",
+              "properties": {
+                "methods": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "destinations": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/postal_address_properties",
+                          "description": "A `shipping_address` destination may carry `address_line_components` and `address_code`; a `business_location` destination never does."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "payment": {
+              "type": "object",
+              "properties": {
+                "instruments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "billing_address": {
+                        "$ref": "#/$defs/postal_address_properties"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Address Line Components",
+      "description": "Order extended with address line components on fulfillment expectation destinations.",
+      "allOf": [
+        { "$ref": "../shopping/order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "type": "object",
+              "properties": {
+                "expectations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "destination": {
+                        "$ref": "#/$defs/postal_address_properties"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

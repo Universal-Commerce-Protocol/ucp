@@ -205,3 +205,17 @@ mpegurl
 usdz
 vnd
 webm
+Avenida
+Conjunto
+Makani
+Paulista
+Rivoli
+Souza
+bairro
+colonia
+kecamatan
+kelurahan
+Apto
+Noura
+Olaya
+Qahtani

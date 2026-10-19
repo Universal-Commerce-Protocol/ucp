@@ -61,6 +61,8 @@ nav:
                   - MCP: specification/common/ask/mcp.md
           - Extensions:
               - Loyalty: specification/common/extensions/loyalty.md
+              - Address Line Components:
+                  specification/common/extensions/address-line-components.md
       - Shopping:
           - Checkout Capability:
               - Overview: specification/shopping/checkout/index.md
@@ -430,6 +432,12 @@ plugins:
               for memberships, tiers, benefits, and reward earning forecasts
               while managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+          - specification/common/extensions/address-line-components.md: >-
+              Address Line Components Extension, adding a structured view of
+              the two postal street lines (`address_line_components`) and an
+              independent `address_code` to Checkout shipping destinations and
+              billing addresses and to Order destinations, with precedence
+              rules between components and flat lines.
         Location Capability:
           - specification/common/location/index.md: >-
               Core Location Capability, detailing physical Location discovery,
