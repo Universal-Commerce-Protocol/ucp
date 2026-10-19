@@ -205,4 +205,3 @@ mpegurl
 usdz
 vnd
 webm
-YMWD

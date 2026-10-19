@@ -77,7 +77,7 @@
         "duration": {
           "type": "string",
           "format": "duration",
-          "pattern": "^P(?:[1-9]\\d*[YMWD])+(?:T(?:[1-9]\\d*[HMS])+)?$|^PT(?:[1-9]\\d*[HMS])+$",
+          "pattern": "^P(?:[1-9]\\d*W|(?:[1-9]\\d*Y(?:[1-9]\\d*M)?(?:[1-9]\\d*D)?|[1-9]\\d*M(?:[1-9]\\d*D)?|[1-9]\\d*D)(?:T(?:[1-9]\\d*H(?:[1-9]\\d*M)?(?:[1-9]\\d*S)?|[1-9]\\d*M(?:[1-9]\\d*S)?|[1-9]\\d*S))?|T(?:[1-9]\\d*H(?:[1-9]\\d*M)?(?:[1-9]\\d*S)?|[1-9]\\d*M(?:[1-9]\\d*S)?|[1-9]\\d*S))$",
           "description": "Length of the return window after the `anchor` event, as an ISO 8601 duration with whole-number components greater than zero (e.g., `P30D` is 30 days, `PT30M` is 30 minutes, `P1M` is one month; `T` separates date units from time units, so `M` before it means months and after it minutes). It states the term for presentation; the Business resolves the deadline as `expires_at`."
         },
         "anchor": {
