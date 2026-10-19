@@ -214,7 +214,9 @@ does not exist, has expired, or was canceled.
 
 Performs a full replacement of the cart session. The platform **MUST** send
 the entire cart resource. The provided resource replaces the existing cart
-state on the business side.
+state on the business side. Platforms send parent line items only; businesses
+MUST ignore, and MUST NOT reject, line items carrying `parent_id` (see
+[Nested Line Items](../checkout/index.md#nested-line-items)).
 
 * [REST Binding](rest.md#update-cart)
 * [MCP Binding](mcp.md#update_cart)
@@ -237,6 +239,9 @@ consistent data structures when converting a cart to a checkout session.
 {{ extension_schema_fields('ucp.json#/$defs/response_cart_schema', 'shopping/cart') }}
 
 ### Line Item
+
+The same nesting contract applies to cart and checkout. See
+[Nested Line Items](../checkout/index.md#nested-line-items) for bundle semantics.
 
 #### Line Item Create Request
 
