@@ -447,13 +447,17 @@ Business SHOULD route the buyer to a valid `continue_to` destination when
 present; otherwise it SHOULD route the buyer to a safe fallback, such as the
 storefront root, cart, or a buyer-facing remediation page.
 
-A Business decides how to construct that state: it MAY merge the permalink
-items into an existing cart, create a new cart, or stage a separate checkout,
-and MAY either offer the buyer a choice or apply an automated policy.
-The permalink expresses buyer intent; the response conveys the resulting state.
-A Business MAY also require additional steps — such as verification, eligibility
-or age gating, or authentication — before it constructs purchasable state, and
-routes the buyer accordingly.
+A Business decides how to construct that state: it MAY create a new cart, stage
+a separate checkout, or merge the permalink items into an existing cart, and MAY
+either offer the buyer a choice or apply an automated policy — except that the
+Business MUST require an explicit buyer action on rendered permalink state
+before merging that state into an authenticated buyer's existing cart, and an
+automatic merge performed on page load, on redirect, or through a pre-filled
+submission does not satisfy this requirement. The permalink expresses buyer
+intent; the response conveys the resulting state. A Business MAY also require
+additional steps — such as verification, eligibility or age gating, or
+authentication — before it constructs purchasable state, and routes the buyer
+accordingly.
 
 A Business SHOULD apply query parameters it understands. Applied parameters may
 affect server-side state or destination selection, and are not required to
@@ -480,6 +484,8 @@ can resolve to:
 ```http
 HTTP/1.1 303 See Other
 Location: https://merchant.example/collections/spring?utm_source=email&utm_medium=sms&color=black
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 In this example:
@@ -547,6 +553,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ### Campaign link with discount and continuation
@@ -588,6 +596,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://merchant.example/collections/spring?utm_source=email
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ### Buyer-directed purchase link
@@ -642,6 +652,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ### Pickup with a pre-selected destination
@@ -674,6 +686,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ## Security Considerations

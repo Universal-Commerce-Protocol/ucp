@@ -161,7 +161,23 @@ def check_links():
 
       parsed = urlparse(link)
       if parsed.scheme in ("http", "https"):
-        if not link.startswith(SITE_URL):
+        parsed_site = urlparse(SITE_URL)
+        if parsed.hostname == parsed_site.hostname:
+          path = parsed.path if parsed.path else "/"
+          site_path = parsed_site.path
+          site_path_no_slash = site_path.rstrip("/")
+          if (path == site_path_no_slash) or path.startswith(site_path):
+            if path.startswith(site_path):
+              rel_link_path = "/" + path[len(site_path) :]
+            else:
+              rel_link_path = "/"
+            query_part = f"?{parsed.query}" if parsed.query else ""
+            fragment_part = f"#{parsed.fragment}" if parsed.fragment else ""
+            link = rel_link_path + query_part + fragment_part
+            parsed = urlparse(link)
+          else:
+            continue  # External link
+        else:
           continue  # External link
       elif parsed.netloc or parsed.scheme:
         # Anything else carrying a host (protocol-relative //host/path) or a
@@ -200,6 +216,7 @@ def check_links():
         path_part = "/" + path_part[len(SITE_BASE_PATH) :]
 
       target_file = None
+      is_missing_version = False
 
       # Resolve Target File
       if not path_part:
@@ -221,7 +238,14 @@ def check_links():
           )
           and not (ROOT_DIR / parts[0]).exists()
         ):
-          rel_path = parts[1]
+          is_missing_version = True
+          stripped_path = parts[1]
+          if (
+            (ROOT_DIR / stripped_path).exists()
+            or (ROOT_DIR / (stripped_path + ".html")).exists()
+            or (ROOT_DIR / stripped_path / "index.html").exists()
+          ):
+            rel_path = stripped_path
 
         target_file = ROOT_DIR / rel_path
       else:
@@ -242,11 +266,15 @@ def check_links():
           if candidate.exists():
             target_file = candidate
           else:
+            if is_missing_version:
+              continue
             errors_by_version[version][str(file_path)].append(
               f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
             )
             continue
         else:
+          if is_missing_version:
+            continue
           errors_by_version[version][str(file_path)].append(
             f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
           )
