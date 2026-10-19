@@ -13,7 +13,30 @@
       ]
     },
     "capabilities": {},
-    "payment_handlers": {}
+    "payment_handlers": {
+      "com.google.pay": [
+        {
+          "id": "gpay",
+          "version": "2026-01-01",
+          "spec": "https://payments.google.com/gpay/specification",
+          "schema": "https://payments.google.com/gpay/schema.json"
+        }
+      ],
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay",
+          "version": "2026-01-01",
+          "spec": "https://shopify.dev/ucp/shop-pay",
+          "schema": "https://shopify.dev/ucp/shop-pay.json"
+        }
+      ]
+    },
+    "map_order": {
+      "payment_handlers": [
+        "dev.shopify.shop_pay",
+        "com.google.pay"
+      ]
+    }
   },
   "keys": [
     {

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location_serves.json",
+  "title": "Location Serves",
+  "description": "A one-entry map whose key names the authoritative service-target representation. The Platform MUST supply exactly one target form. A Business that cannot evaluate a well-formed target, or receives an extension form that was not negotiated, MUST reject the request rather than ignore it, fall back, or broaden results. This dictionary-like representation map cannot host an ambient `ucp` member.",
+  "type": "object",
+  "minProperties": 1,
+  "maxProperties": 1,
+  "propertyNames": {
+    "anyOf": [
+      { "const": "point" },
+      { "const": "address" },
+      { "$ref": "reverse_domain_name.json" }
+    ]
+  },
+  "properties": {
+    "point": {
+      "$ref": "geo.json",
+      "description": "WGS 84 coordinates of the service target.",
+      "ucp_request": "optional"
+    },
+    "address": {
+      "allOf": [
+        { "$ref": "locality.json" },
+        {
+          "type": "object",
+          "anyOf": [
+            {
+              "required": ["address_country"],
+              "properties": {
+                "address_country": {
+                  "type": "string",
+                  "minLength": 1,
+                  "ucp_request": "required"
+                }
+              }
+            },
+            {
+              "required": ["address_region"],
+              "properties": {
+                "address_region": {
+                  "type": "string",
+                  "minLength": 1,
+                  "ucp_request": "required"
+                }
+              }
+            },
+            {
+              "required": ["postal_code"],
+              "properties": {
+                "postal_code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "ucp_request": "required"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Coarse locality of the service target.",
+      "ucp_request": "optional"
+    }
+  },
+  "additionalProperties": true
+}

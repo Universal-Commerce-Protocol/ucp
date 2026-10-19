@@ -560,7 +560,7 @@
           "instruments": {
             "type": "array",
             "items": {
-              "$ref": "../../schemas/shopping/types/payment_instrument.json#/$defs/selected_payment_instrument"
+              "$ref": "../../schemas/common/types/payment_instrument.json#/$defs/selected_payment_instrument"
             },
             "description": "Available payment instruments."
           }

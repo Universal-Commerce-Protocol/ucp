@@ -123,15 +123,18 @@ def _rewrite_version_urls(data, url_version):
 
 
 def _set_schema_version(data, version):
-  """Set version field for named entities (capabilities, services, handlers).
+  """Set versions for versioned entities and transport artifacts.
 
-  Named entities (schemas with top-level 'name' field) require version per
-  ucp.json#/$defs/entity. Build injects version so source files don't need it.
+  UCP-authored capability and extension schemas require version per
+  ucp.json#/$defs/entity. Build injects the release version only for dev.ucp.*
+  schemas published in the core release. Third-party extensions and payment
+  handlers retain their author-controlled versions; the UCP payment-handler
+  meta-schema has no name and defines only the shared declaration structure.
 
-  Additionally, for OpenAPI and OpenRPC transport specifications, set the
-  required info.version field.
+  For OpenAPI and OpenRPC transport specifications, set the required
+  info.version field as release artifact metadata.
   """
-  if "name" in data:
+  if str(data.get("name", "")).startswith("dev.ucp."):
     data["version"] = version
 
   if ("openapi" in data or "openrpc" in data) and isinstance(
@@ -285,11 +288,13 @@ def on_page_markdown(markdown, page, config, files):
     target_base = f"{base_path}latest/specification/"
 
     def replace_link(match):
-      path = match.group(1)
+      path, separator, fragment = match.group(1).partition("#")
       if path.endswith("index.md"):
         path = path[:-8]
       elif path.endswith(".md"):
         path = path[:-3] + "/"
+      if separator:
+        path = f"{path}#{fragment}"
       return f"({target_base}{path})"
 
     # Pattern matches: (  prefix  specification/  path  )
@@ -346,17 +351,35 @@ def on_post_build(config):
     doc_folder = docs_dir / "documentation"
     if doc_folder.exists():
       for md_file in doc_folder.rglob("*.md"):
+        if md_file.name == "index.md":
+          rel_dir = md_file.relative_to(docs_dir).parent
+          target = f"{base_path}{rel_dir.as_posix()}/"
+        else:
+          rel_dir = md_file.relative_to(docs_dir).with_suffix("")
+          target = f"{base_path}{rel_dir.as_posix()}/"
+
+        # Directory URL redirect (e.g. /documentation/foo/index.html)
+        dest_index = site_dir / rel_dir / "index.html"
+        dest_index.parent.mkdir(parents=True, exist_ok=True)
+        with Path.open(dest_index, "w") as f:
+          f.write(
+            "<!doctype html>"
+            f'<link rel="canonical" href="{target}">'
+            "<script>var a=location.hash.substr(1);"
+            f'location.href="{target}"+(a?"#"+a:"")</script>'
+            f'<meta http-equiv="refresh" content="0; url={target}">'
+          )
+
+        # Flat HTML redirect (e.g. /documentation/foo.html)
         rel_path = md_file.relative_to(docs_dir).with_suffix(".html")
         dest_file = site_dir / rel_path
-
-        # Target URL: base_path + relative_path
-        # (e.g. /ucp/documentation/foo.html)
-        target = f"{base_path}{rel_path.as_posix()}"
-
         dest_file.parent.mkdir(parents=True, exist_ok=True)
         with Path.open(dest_file, "w") as f:
           f.write(
             "<!doctype html>"
+            f'<link rel="canonical" href="{target}">'
+            "<script>var a=location.hash.substr(1);"
+            f'location.href="{target}"+(a?"#"+a:"")</script>'
             f'<meta http-equiv="refresh" content="0; url={target}">'
           )
 
@@ -367,6 +390,9 @@ def on_post_build(config):
     with Path.open(index_file, "w") as f:
       f.write(
         "<!doctype html>"
+        f'<link rel="canonical" href="{index_target}">'
+        "<script>var a=location.hash.substr(1);"
+        f'location.href="{index_target}"+(a?"#"+a:"")</script>'
         f'<meta http-equiv="refresh" content="0; url={index_target}">'
       )
 
@@ -430,7 +456,7 @@ def on_post_build(config):
       # Step 1: Resolve relative $ref to absolute URLs
       _process_refs(data, src_file.parent)
 
-      # Step 2: Inject version field for named entities
+      # Step 2: Inject versions for versioned entities and transport artifacts
       if schema_version:
         _set_schema_version(data, schema_version)
 

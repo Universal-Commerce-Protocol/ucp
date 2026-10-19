@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# cspell:ignore shema directon
+# cspell:ignore shema directon skiped
 """Contract conformance tests for validate_examples.py.
 
 Each test asserts one claim from the contract documented in
@@ -10,8 +10,8 @@ broke.
 
 Two layers of testing exist for the validator:
 
-  - **The doc corpus is the integration test.** All 268 ```json blocks
-    across 39 spec docs are validated on every CI run. This proves
+  - **The doc corpus is the integration test.** All annotated ```json
+    blocks across the spec docs are validated on every CI run. This proves
     real-world examples conform to the contract.
 
   - **This file is the unit test layer.** It proves the contract is
@@ -209,6 +209,29 @@ def test_string_ellipsis_in_array() -> None:
   )
 
 
+def test_array_ellipsis_paths_use_stripped_indices() -> None:
+  """Elision paths inside arrays reflect post-strip positions.
+
+  Removing a `"..."` sentinel shifts later items left. Recorded paths
+  must match the stripped payload the validator sees \u2014 recording the
+  source index would fail to suppress the acknowledged elision (and
+  could suppress a real error on the sibling that shifts into that
+  index).
+  """
+  tree = {"items": ["...", {"price": "..."}]}
+  cleaned, paths = v.strip_ellipsis(tree)
+  _check(
+    "array_sentinel_removed_items_shift",
+    cleaned == {"items": [{}]},
+    f"got {cleaned!r}",
+  )
+  _check(
+    "array_ellipsis_paths_use_stripped_indices",
+    "/items/0/price" in paths and "/items/1/price" not in paths,
+    f"got {paths!r}",
+  )
+
+
 # -----------------------------------------------------------
 # Annotation parsing
 # -----------------------------------------------------------
@@ -238,6 +261,29 @@ def test_annotation_parsing() -> None:
   )
 
   # Unknown attribute key rejected via reserved _error
+  # skip must be a whole word. Each typo below carries a valid reason=, so
+  # only a whole-word check can reject them — a reason-only guard cannot.
+  for typo in (
+    'skiped reason="oops"',
+    'skip_the_check reason="oops"',
+    'skipping validation reason="oops"',
+  ):
+    ann = v.parse_annotation(typo)
+    _check(
+      f"annotation_skip_typo_with_reason_not_skipped[{typo}]",
+      ann.get("skip") is None,
+      f"got {ann!r}",
+    )
+
+  # A bare or empty reason= is not auditable and must not skip.
+  for bad in ("skip", 'skip reason=""'):
+    ann = v.parse_annotation(bad)
+    _check(
+      f"annotation_skip_missing_reason_rejected[{bad}]",
+      ann.get("_error") is not None and ann.get("skip") is None,
+      f"got {ann!r}",
+    )
+
   ann = v.parse_annotation("shema=foo")  # typo
   _check(
     "annotation_unknown_key_rejected",
@@ -354,6 +400,49 @@ def test_extract_blocks() -> None:
   )
 
 
+def test_reads_are_utf8() -> None:
+  """Docs are UTF-8 whatever the locale of the machine reading them."""
+  with tempfile.TemporaryDirectory() as td:
+    path = Path(td) / "doc.md"
+    # Written as bytes on purpose: this is what is in the repository, and it
+    # must be read the same way on a machine whose locale is not UTF-8.
+    path.write_bytes(
+      (
+        "<!-- ucp:example schema=foo -->\n```json\n"
+        '{"note": "an em dash \u2014 and a quote \u201cx\u201d"}\n'
+        "```\n"
+      ).encode()
+    )
+    try:
+      blocks = v.extract_blocks(path)
+      ok = len(blocks) == 1 and "\u2014" in blocks[0]["content"]
+      detail = f"got {blocks!r}"
+    except UnicodeDecodeError as error:
+      ok, detail = False, f"read with the locale encoding: {error}"
+  _check("extract_blocks_reads_utf8", ok, detail)
+
+
+def test_missing_binary_says_how_to_install() -> None:
+  """A missing ucp-schema is an install instruction, not a traceback."""
+  original = v.subprocess.run
+
+  def absent(*args, **kwargs):
+    raise FileNotFoundError(2, "No such file or directory")
+
+  v.subprocess.run = absent
+  try:
+    v.run_ucp_schema(["resolve", "x"], capture_output=True, text=True)
+    ok, detail = False, "no error raised"
+  except RuntimeError as error:
+    ok = "cargo install ucp-schema" in str(error)
+    detail = f"got {error!r}"
+  except FileNotFoundError as error:
+    ok, detail = False, f"raw FileNotFoundError reached the caller: {error}"
+  finally:
+    v.subprocess.run = original
+  _check("missing_ucp_schema_explains_itself", ok, detail)
+
+
 # -----------------------------------------------------------
 # process_block: integration tests requiring ucp-schema
 # -----------------------------------------------------------
@@ -370,6 +459,73 @@ def _process(md: str) -> v.Result:
   blocks = v.extract_blocks(path)
   assert len(blocks) == 1, f"expected 1 block, got {len(blocks)}"
   return v.process_block(blocks[0], _SCHEMA_BASE, _SCAFFOLDS_DIR)
+
+
+def test_scaffold_resolution() -> None:
+  """Scaffold lookup prefers op-specific fixtures over direction fallbacks.
+
+  get_product shares catalog_lookup.json with the lookup op but has a
+  different payload shape (id/product vs ids/products). Without
+  op-specific fixtures, the direction-only fallback merges lookup
+  boilerplate into every get_product example, so validation runs
+  against a payload carrying both shapes at once.
+  """
+  # Unit: the op-specific file wins over the direction-only file.
+  with tempfile.TemporaryDirectory() as td:
+    d = Path(td)
+    (d / "x_request.json").write_text('{"fallback": true}')
+    (d / "x_request_special.json").write_text('{"specific": true}')
+    _check(
+      "scaffold_prefers_op_specific",
+      v.load_scaffold("x", "request", "special", d) == {"specific": True},
+    )
+    _check(
+      "scaffold_direction_fallback",
+      v.load_scaffold("x", "request", "other", d) == {"fallback": True},
+    )
+
+  # Repo fixtures: get_product must not inherit lookup's payload shape.
+  req = v.load_scaffold(
+    "shopping/catalog_lookup", "request", "get_product", _SCAFFOLDS_DIR
+  )
+  _check(
+    "get_product_request_scaffold_shape",
+    req is not None and "id" in req and "ids" not in req,
+    f"got {req}",
+  )
+  res = v.load_scaffold(
+    "shopping/catalog_lookup", "response", "get_product", _SCAFFOLDS_DIR
+  )
+  _check(
+    "get_product_response_scaffold_shape",
+    res is not None and "product" in res and "products" not in res,
+    f"got {res}",
+  )
+
+  # E2E: a fully-elided get_product response validates via the scaffold
+  # alone, proving the fixture itself is a valid payload seed.
+  if not _has_ucp_schema():
+    _check(
+      "get_product_scaffold_seed_valid",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+  md = (
+    "<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->\n"
+    "```json\n"
+    "{\n"
+    '  "ucp": { "version": "{{ ucp_version }}", "...": "..." },\n'
+    '  "product": { "...": "..." }\n'
+    "}\n"
+    "```\n"
+  )
+  result = _process(md)
+  _check(
+    "get_product_scaffold_seed_valid",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
 
 
 def test_process_block_integration() -> None:
@@ -504,6 +660,123 @@ def test_process_block_integration() -> None:
   )
 
 
+def test_extension_validation() -> None:
+  """Fields an extension adds are validated against that extension.
+
+  Capability schemas are open, so a checkout example carrying
+  `fulfillment` passes the checkout schema whatever `fulfillment`
+  contains. The validator must also check it against the fulfillment
+  extension's composition of checkout.
+  """
+  capabilities, extensions = v.load_extensions(_SCHEMA_BASE)
+  checkout_exts = dict(extensions.get("dev.ucp.shopping.checkout", []))
+  _check(
+    "extensions_index_capability_path",
+    capabilities.get("dev.ucp.shopping.checkout") == "shopping/checkout",
+    f"got {capabilities.get('dev.ucp.shopping.checkout')!r}",
+  )
+  _check(
+    "extensions_index_fulfillment_fields",
+    "fulfillment" in checkout_exts.get("shopping/fulfillment", ()),
+    f"got {sorted(checkout_exts)}",
+  )
+  _check(
+    "extensions_index_excludes_capability_itself",
+    "shopping/checkout" not in checkout_exts,
+  )
+
+  if not _has_ucp_schema():
+    _check(
+      "extension_validation_integration",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  def option(description: str) -> str:
+    return (
+      "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+      "```json\n"
+      '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], '  # noqa: E501
+      '"groups": [ { "id": "g1", "line_item_ids": ["li_1"], "options": [ '
+      f'{{ "id": "o1", "title": "Standard", "description": {description}, '
+      '"totals": [ { "type": "total", "amount": 500 } ] } ] } ] } ] }\n'
+      "```\n"
+    )
+
+  result = _process(option('"Arrives soon"'))
+  _check(
+    "extension_field_type_error_fails",
+    result.status == "fail"
+    and "extension shopping/fulfillment:" in result.message
+    and "/description" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  result = _process(option('{ "plain": "Arrives soon" }'))
+  _check(
+    "extension_field_valid_ok",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    '```json\n{ "methods": [ { "id": "m1", "type": "shipping" } ] }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "extension_missing_required_fails",
+    result.status == "fail" and '"line_item_ids"' in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    "```json\n"
+    '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], "groups": [ ... ] } ] }\n'  # noqa: E501
+    "```\n"
+  )
+  result = _process(md)
+  _check(
+    "extension_elided_paths_suppressed",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+
+def test_resolve_schema_cache_key() -> None:
+  """Resolved schemas are cached per schema root as well as schema identity."""
+  original_run = v.subprocess.run
+  calls: list[Path] = []
+
+  def fake_run(*args: object, **kwargs: object) -> object:
+    cwd = Path(str(kwargs["cwd"]))
+    calls.append(cwd)
+    return v.subprocess.CompletedProcess(
+      args[0], 0, stdout=json.dumps({"schema_root": cwd.name}), stderr=""
+    )
+
+  v._schema_cache.clear()
+  v.subprocess.run = fake_run
+  try:
+    with tempfile.TemporaryDirectory() as tmp:
+      base_a = Path(tmp, "a", "schemas")
+      base_b = Path(tmp, "b", "schemas")
+      base_a.mkdir(parents=True)
+      base_b.mkdir(parents=True)
+
+      first = v.resolve_schema("shopping/checkout", "response", "read", base_a)
+      cached = v.resolve_schema("shopping/checkout", "response", "read", base_a)
+      second = v.resolve_schema("shopping/checkout", "response", "read", base_b)
+
+    _check("schema_cache_same_base_hits", first == cached and len(calls) == 2)
+    _check("schema_cache_separates_bases", first != second, f"got {second!r}")
+  finally:
+    v.subprocess.run = original_run
+    v._schema_cache.clear()
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -516,9 +789,15 @@ def main() -> int:
   test_parse_example_keeps_sentinels()
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()
+  test_array_ellipsis_paths_use_stripped_indices()
   test_annotation_parsing()
   test_extract_blocks()
+  test_reads_are_utf8()
+  test_missing_binary_says_how_to_install()
+  test_scaffold_resolution()
+  test_resolve_schema_cache_key()
   test_process_block_integration()
+  test_extension_validation()
   return _report()
 
 

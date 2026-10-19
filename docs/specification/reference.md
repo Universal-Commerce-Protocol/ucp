@@ -21,13 +21,19 @@ within the UCP.
 
 ## Capability Schemas
 
+{{ auto_generate_schema_reference('.', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
+
+{{ auto_generate_schema_reference('.', 'reference', include_extensions=False, base_dir='source/schemas/lodging') }}
 
 ## Type Schemas
 
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False, base_dir='source/schemas/common') }}
 
 {{ auto_generate_schema_reference('types', 'reference', include_extensions=False) }}
+
+{{ auto_generate_schema_reference('types', 'reference', include_extensions=False, base_dir='source/schemas/lodging') }}
 
 ### Selected Payment Instrument {: #payment-instrument-selected-payment-instrument }
 
@@ -55,7 +61,11 @@ within the UCP.
 
 ## Extension Schemas
 
+{{ auto_generate_schema_reference('.', 'reference', include_capability=False, base_dir='source/schemas/common') }}
+
 {{ auto_generate_schema_reference('.', 'reference', include_capability=False) }}
+
+{{ auto_generate_schema_reference('.', 'reference', include_capability=False, base_dir='source/schemas/lodging') }}
 
 ## UCP Metadata <span id="services"></span> <span id="ap2-checkout-response"></span> <span id="ap2-complete-request"></span>
 
@@ -97,6 +107,18 @@ The `ucp` object included in catalog responses.
 The `ucp` object included in order responses or events.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'reference') }}
+
+### Location Response Metadata {: #ucp-response-location-schema }
+
+The `ucp` object included in location responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_location_schema', 'reference') }}
+
+### Booking Response Metadata {: #ucp-response-booking-schema }
+
+The `ucp` object included in booking responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_booking_schema', 'reference') }}
 
 ### Capability
 
