@@ -287,7 +287,7 @@
     {
       "name": "search_catalog",
       "summary": "Search for products in the catalog",
-      "description": "Search for products by query text or similarity, with filters and pagination.",
+      "description": "Search for products using query text, filters, and pagination.",
       "params": [
         {
           "name": "meta",

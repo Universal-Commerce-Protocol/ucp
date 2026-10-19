@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_similarity.json",
+  "name": "dev.ucp.shopping.catalog.similarity",
+  "title": "Catalog Similarity",
+  "description": "Similarity anchors on Catalog Search and included substitutes and recommendations on Catalog Lookup. Extends dev.ucp.shopping.catalog.search and dev.ucp.shopping.catalog.lookup.",
+  "$defs": {
+    "like_item": {
+      "title": "Like Item",
+      "description": "A similarity anchor. Carries exactly one anchor key: `id` for a product or variant, or `image` for an inline image when the Business advertises a non-zero `config.like.images.max_items`. Other extensions add anchor kinds by adding keys and SHOULD name them with reverse-domain keys (for example `com.example.color`) so independently authored kinds cannot collide. A Business MUST ignore items carrying no anchor key it recognizes.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Product or variant identifier in the Business's namespace. Resolution follows Catalog Lookup's Supported Identifiers: product ID and variant ID MUST be supported; secondary identifiers MAY be."
+        },
+        "image": {
+          "type": "object",
+          "description": "Inline image anchor. A Platform MUST NOT send image anchors unless the Business advertises a non-zero `config.like.images.max_items`.",
+          "required": ["content_type", "data"],
+          "properties": {
+            "content_type": {
+              "type": "string",
+              "description": "MIME type of the encoded image, one of the types the Business advertises in `config.like.images.types`."
+            },
+            "data": {
+              "type": "string",
+              "contentEncoding": "base64",
+              "description": "Base64-encoded image bytes; the string is at most `config.like.images.max_bytes` bytes long. Validators do not enforce the encoding; a Business drops an image anchor it cannot decode and reports it with an informational `image_invalid` message."
+            }
+          }
+        }
+      }
+    },
+    "includes": {
+      "title": "Includes",
+      "description": "Optional data returned with a product when `include` names it.",
+      "type": "object",
+      "properties": {
+        "substitutes": {
+          "type": "array",
+          "items": { "$ref": "types/product.json" },
+          "ucp_request": "omit",
+          "description": "Functionally similar items a Buyer could purchase in place of the requested variant — the featured variant (`variants[0]`) in `get_product`, or the variants the request identifiers resolved to in `lookup_catalog` — as the Business determines, most suitable first. Each entry's `variants[]` is narrowed to the qualifying variant(s); another variant of this product MAY appear. Present only when `include` names `substitutes`; absent when unsupported; empty when none qualify."
+        },
+        "recommendations": {
+          "type": "array",
+          "items": { "$ref": "types/product.json" },
+          "ucp_request": "omit",
+          "description": "Related items the Business selects for this product, most relevant first — typically complementary. Present only when `include` names `recommendations`; absent when unsupported; empty when none qualify."
+        }
+      }
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": ["substitutes", "recommendations"]
+      },
+      "uniqueItems": true,
+      "description": "Optional data to include with each returned product. Well-known values: `substitutes` (functionally similar items purchasable in place of a variant), `recommendations` (related items the Business selects for a product). A Business MUST omit values it does not recognize or support and MUST return an empty array for a supported value with no results; presence means the Business understood the request."
+    },
+    "similarity_lookup_product": {
+      "description": "A lookup product with included data. Used by lookup.",
+      "allOf": [
+        { "$ref": "types/product.json" },
+        { "$ref": "#/$defs/includes" }
+      ]
+    },
+    "similarity_detail_product": {
+      "description": "A get_product detail product (carrying selected/options availability signals) with included data. Used by get_product.",
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/detail_product" },
+        { "$ref": "#/$defs/includes" }
+      ]
+    },
+    "similarity_search_request": {
+      "allOf": [
+        { "$ref": "catalog_search.json#/$defs/search_request" },
+        {
+          "type": "object",
+          "properties": {
+            "like": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/like_item" },
+              "description": "Similarity anchors. Results are ranked by resemblance to the request's inputs (`query` and every anchor) as the Business determines it; this specification does not define the resemblance function. A product anchor excludes that product from results; a variant anchor excludes that variant only — its product MAY appear with other variants. An anchor that does not resolve contributes nothing (the Business SHOULD include an informational message: `not_found` for an identifier that does not resolve; `image_type_unsupported`, `image_too_large`, or `image_invalid` for an image anchor it cannot accept); if no anchor resolves, the result is empty. When a request carries more anchors than `config.like.max_items`, the Business processes the first `max_items` in request order and includes an informational `batch_limit_applied` message."
+            }
+          }
+        }
+      ]
+    },
+    "similarity_lookup_request": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/lookup_request" },
+        { "type": "object", "properties": { "include": { "$ref": "#/$defs/include" } } }
+      ]
+    },
+    "similarity_lookup_response": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/lookup_response" },
+        { "type": "object", "properties": { "products": { "type": "array", "items": { "$ref": "#/$defs/similarity_lookup_product" } } } }
+      ]
+    },
+    "similarity_get_product_request": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/get_product_request" },
+        { "type": "object", "properties": { "include": { "$ref": "#/$defs/include" } } }
+      ]
+    },
+    "similarity_get_product_response": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/get_product_response" },
+        { "type": "object", "properties": { "product": { "$ref": "#/$defs/similarity_detail_product" } } }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with similarity anchors (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_request": { "$ref": "#/$defs/similarity_search_request" }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with included data (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_request": { "$ref": "#/$defs/similarity_lookup_request" },
+        "lookup_response": { "$ref": "#/$defs/similarity_lookup_response" },
+        "get_product_request": { "$ref": "#/$defs/similarity_get_product_request" },
+        "get_product_response": { "$ref": "#/$defs/similarity_get_product_response" }
+      }
+    },
+    "dev.ucp.shopping.catalog.similarity": {
+      "business_schema": {
+        "title": "Catalog Similarity Capability (Business)",
+        "description": "Business-level similarity capability configuration",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "types/business_similarity_config.json",
+                "description": "Business similarity configuration"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

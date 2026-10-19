@@ -23,17 +23,15 @@ This enables product discovery before checkout, supporting use cases like:
 
 * Free-text product search
 * Category and filter-based browsing
-* Similar-product search
 * Batch product/variant retrieval by identifier
-* Substitutes and recommendations for a known product
 * Price comparison across variants
 
 ## Capabilities
 
 | Capability | Description |
 | :--- | :--- |
-| [`dev.ucp.shopping.catalog.search`](search.md) | Search for products by query text or similarity, with filters. |
-| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier, optionally including substitutes or recommendations. |
+| [`dev.ucp.shopping.catalog.search`](search.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](lookup.md) | Retrieve products or variants by identifier. |
 
 ## Key Concepts
 
