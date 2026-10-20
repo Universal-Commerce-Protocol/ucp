@@ -188,13 +188,13 @@ For a 30-day window anchored on `delivered` and an item delivered on
 the platform shows "Return by Apr 1, 6:00 PM UTC" or its local equivalent (see
 [Order after delivery](#order-after-delivery)).
 
-When the window's length varies with something known only at return time, such
-as the item's condition or the resolution the buyer picks, `duration` states the
-shortest of those periods, since a guarantee field holds for every eligible
-return (see [Responsibilities](#responsibilities)), and `description` states the
-longer ones. A condition that makes an item not returnable at all, such as being
-worn, is an eligibility requirement, not a shorter window: the window applies
-only to otherwise eligible returns (see [Eligibility](#eligibility)).
+When the window's length varies with a choice the buyer makes at return time,
+such as the resolution, `duration` states the shortest of those periods, since a
+guarantee field holds for every eligible return (see
+[Responsibilities](#responsibilities)), and `description` states the longer
+ones. A condition the business requires, such as the item being unworn or
+unopened, is an eligibility requirement, not a shorter window: the window
+applies only to otherwise eligible returns (see [Eligibility](#eligibility)).
 
 Businesses differ on whether the clock starts at purchase, fulfillment, or
 delivery, so a business that states a `window` **MUST** provide both `duration`
@@ -395,15 +395,18 @@ applicable law or a third-party guarantee; those are outside this specification.
 The return-term fields (`eligibility`, `supported_resolutions`, `methods`, and
 `fees`) are not an exhaustive statement of the policy's terms. `eligibility`,
 `supported_resolutions`, and `methods` are guarantees that hold for every
-eligible return in the policy's scope: within a `window` eligibility, any
-listed resolution is available through any listed method (see
-[Window and anchor](#window-and-anchor)). `fees` is a return term but not a
-guarantee: it states estimated maximums (see [Return fees](#return-fees)). A
-business **MAY** describe eligibility requirements, such as tags attached or
-original packaging, in `description` (see [Eligibility](#eligibility)). A
-condition under which an item stays returnable on different terms, such as
-opened or unopened, is not an eligibility requirement, so the guarantee fields
-state the terms that hold in every case.
+eligible return in the policy's scope: within a `window` eligibility, any listed
+resolution is available through any listed method (see [Window and
+anchor](#window-and-anchor)). `fees` is a return term but not a guarantee: it
+states estimated maximums (see [Return fees](#return-fees)). A business **MAY**
+describe eligibility requirements, such as tags attached or original packaging,
+in `description` (see [Eligibility](#eligibility)). A condition the business
+requires of the item or return, such as unopened, tags attached, or proof of
+purchase, is an eligibility requirement: the guarantee fields state the terms
+for returns that meet it, and `description` states the requirement and any terms
+for returns that don't. A choice the buyer makes at return time, such as the
+resolution, is not a requirement; the guarantee fields state what holds for
+every such choice.
 
 A business **SHOULD** populate the fields it can state as guarantees and
 **MUST NOT** populate a guarantee field with a value that does not hold for
@@ -418,10 +421,11 @@ differs per item.
 A policy's `description` and its structured fields are two representations of
 the same policy. The `description` **MAY** state better terms than a field (a
 longer window for one resolution) or the conditions under which a fee applies,
-but a business **MUST NOT** let it state terms worse for the buyer than a field.
-It is the human-readable summary a platform renders, and the fallback for a
-platform that does not model the type. A platform **SHOULD** surface `url`
-alongside the structured terms so the buyer can review the full policy.
+but a business **MUST NOT** let it state terms worse for the buyer than a field
+for the returns that field covers. It is the human-readable summary a platform
+renders, and the fallback for a platform that does not model the type. A
+platform **SHOULD** surface `url` alongside the structured terms so the buyer
+can review the full policy.
 
 A platform that models this type **MAY** present a guaranteed return deadline
 from `expires_at` (see [Window and anchor](#window-and-anchor)) and **MAY**
