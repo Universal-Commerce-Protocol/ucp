@@ -785,6 +785,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4155,6 +4172,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4875,23 +4909,33 @@ that is compatible with the platform's deployment model.</p>
     domain conventions and prepares the deployment for future delegated
     domain conventions. The business <strong>MUST</strong> publish this metadata when
     the authorization server does not live on the business domain.</li>
+<li>Every entry in <code>authorization_servers</code> <strong>MUST</strong> be an authorization
+    server issuer identifier
+    (<a href="https://datatracker.ietf.org/doc/html/rfc8414#section-2" target="_blank">RFC 8414 §2</a>)
+    whose discovered metadata <code>issuer</code> is identical to the entry
+    (<a href="https://datatracker.ietf.org/doc/html/rfc8414#section-3.3" target="_blank">RFC 8414 §3.3</a>).
+    A hostname that serves OAuth endpoints is not an issuer identifier
+    unless its metadata declares it as <code>issuer</code>. Branding is a property
+    of endpoint URLs (RFC 8414 places no host constraint on
+    <code>authorization_endpoint</code> or <code>token_endpoint</code>) or of redirects from
+    them, never of the issuer identifier.</li>
 <li><strong>SHOULD</strong> support
     <a href="https://openid.net/specs/openid-risc-1_0-final.html" target="_blank">OpenID RISC Profile 1.0</a>
     to signal revocation and account state changes to platforms.</li>
 </ul>
 <h2 id="discovery">Discovery<a class="headerlink" href="#discovery" title="Permanent link">&para;</a></h2>
 <p>UCP discovery is a three-step pipeline.</p>
-<p><strong>Step 1 — Resolve the AS issuer.</strong> Platforms fetch the business's
-protected-resource metadata per
-<a href="https://datatracker.ietf.org/doc/html/rfc9728" target="_blank">RFC 9728</a>
-and use the selected entry from <code>authorization_servers</code> as the AS
-issuer. The AS issuer <strong>MAY</strong> be hosted on a different origin than the
-business domain. If the business publishes no protected-resource
-metadata, the AS issuer defaults to the business domain (single-host
-deployments).</p>
-<p><strong>Step 2 — Fetch AS metadata.</strong> Using the issuer from Step 1, platforms
-resolve authorization-server metadata via a strict two-tier hierarchy.
-Well-known URLs are constructed per
+<p><strong>Step 1 — Resolve candidate AS issuers.</strong> Platforms fetch the
+business's protected-resource metadata per
+<a href="https://datatracker.ietf.org/doc/html/rfc9728" target="_blank">RFC 9728</a>;
+each entry in <code>authorization_servers</code> is a candidate AS issuer (see
+<a href="#selection">Selection</a>). A candidate issuer <strong>MAY</strong> be hosted on a
+different origin than the business domain. If the business publishes no
+protected-resource metadata, the business domain is the sole candidate
+issuer (single-host deployments).</p>
+<p><strong>Step 2 — Fetch AS metadata.</strong> Using a candidate issuer from Step 1,
+platforms resolve authorization-server metadata via a strict two-tier
+hierarchy. Well-known URLs are constructed per
 <a href="https://datatracker.ietf.org/doc/html/rfc8414#section-3.1" target="_blank">RFC 8414 §3.1</a>
 (the well-known segment is inserted between the host and any issuer
 path, not appended).</p>
@@ -4900,29 +4944,41 @@ path, not appended).</p>
 <p><strong>RFC 8414 (Primary):</strong> Fetch
    <code>https://{host}/.well-known/oauth-authorization-server{path}</code>.</p>
 <ul>
-<li><code>2xx</code> response: use this metadata. Discovery complete.</li>
-<li><code>404 Not Found</code>: proceed to step 2.</li>
+<li><code>2xx</code> response: use this metadata. Proceed to Step 3.</li>
+<li><code>404 Not Found</code>: proceed to OIDC Discovery (item 2).</li>
 <li>Any other non-2xx response, network error, or timeout: <strong>MUST</strong>
-  abort. <strong>MUST NOT</strong> proceed to step 2.</li>
+  abort metadata resolution for this issuer. <strong>MUST NOT</strong> proceed to
+  item 2.</li>
 </ul>
 </li>
 <li>
 <p><strong>OIDC Discovery (Fallback):</strong> Fetch
    <code>{issuer}/.well-known/openid-configuration</code>.</p>
 <ul>
-<li><code>2xx</code> response: use this metadata. Discovery complete.</li>
-<li>Any non-2xx response, network error, or timeout: <strong>MUST</strong> abort.</li>
+<li><code>2xx</code> response: use this metadata. Proceed to Step 3.</li>
+<li>Any non-2xx response, network error, or timeout: <strong>MUST</strong> abort
+  metadata resolution for this issuer.</li>
 </ul>
 </li>
 </ol>
-<p>Platforms <strong>MUST NOT</strong> silently fall through on any error other than
-<code>404</code> in step 1.</p>
+<p>Platforms <strong>MUST NOT</strong> silently fall through to OIDC Discovery on any
+error other than <code>404</code> in item 1.</p>
 <p><strong>Step 3 — Validate the issuer.</strong> The <code>issuer</code> value in the discovered
-metadata <strong>MUST</strong> byte-for-byte match the AS issuer selected in Step 1
-(per
+metadata <strong>MUST</strong> byte-for-byte match the candidate issuer being
+evaluated (per
 <a href="https://datatracker.ietf.org/doc/html/rfc8414#section-3.3" target="_blank">RFC 8414 §3.3</a>).
 Platforms <strong>MUST NOT</strong> normalize (e.g., strip trailing slashes) before
 comparison.</p>
+<h3 id="selection">Selection<a class="headerlink" href="#selection" title="Permanent link">&para;</a></h3>
+<p>Platforms evaluate each candidate entry from Step 1 through Steps 2
+and 3. An entry that fails either step (for example, because its metadata
+reports a different <code>issuer</code>) <strong>MUST</strong> be discarded and <strong>MUST NOT</strong>
+by itself cause discovery to fail. Platforms <strong>MAY</strong> also exclude entries
+for authorization servers at which they cannot act as a client (for
+example, because they hold no client registration there). Among the
+remaining entries, platforms <strong>SHOULD</strong> prefer array order, which
+expresses the business's preference. Discovery fails only when no entry
+remains.</p>
 <h2 id="account-linking-flow">Account Linking Flow<a class="headerlink" href="#account-linking-flow" title="Permanent link">&para;</a></h2>
 <p>Identity linking uses the OAuth 2.0 Authorization Code flow with PKCE.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Platform                              Business AS
@@ -5551,6 +5607,13 @@ field conveys the business's value prompt to the platform (e.g.,
   (byte-for-byte). Platforms <strong>MUST NOT</strong> normalize before comparison.
   Normalization (e.g., stripping trailing slashes) is a known source of
   <code>iss</code> validation bypass.</li>
+<li><strong>Multiple authorization servers.</strong> Array order in
+  <code>authorization_servers</code> is a preference, not a security boundary;
+  businesses <strong>MUST</strong> list only authorization servers they accept being
+  used for the protected resource. Platforms <strong>SHOULD</strong> log or surface
+  entries discarded during <a href="#selection">Selection</a> so that a
+  misconfigured entry is visible to the business rather than silently
+  skipped.</li>
 <li><strong>Transport security.</strong> All communication between platform and business
   <strong>MUST</strong> use HTTPS with a minimum of TLS 1.2
   (<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-1.6" target="_blank">RFC 6749 §1.6</a>).</li>
