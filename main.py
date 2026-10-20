@@ -295,41 +295,125 @@ def _resolve_schema_bundled(
   return _resolve_schema(schema_path, direction, operation, bundle=True)
 
 
-def _restore_fragment_refs(
-  bundled_def: dict[str, Any], raw_def: dict[str, Any] | None
-) -> dict[str, Any]:
-  """Restore cross-file `$defs` fragment refs that bundling left unlinked.
+def _resolve_raw_ref(
+  ref: str,
+  schema_path: Path | None,
+  raw_root: dict[str, Any] | None,
+) -> tuple[dict[str, Any] | None, Path | None, dict[str, Any] | None]:
+  """Resolve a `$ref` against its unbundled source schema document."""
+  if not isinstance(ref, str) or not ref:
+    return None, schema_path, raw_root
+  if ref == "#":
+    return raw_root, schema_path, raw_root
+  if ref.startswith("#/"):
+    if isinstance(raw_root, dict):
+      target = _resolve_json_pointer(ref, raw_root)
+      return (
+        target if isinstance(target, dict) else None,
+        schema_path,
+        raw_root,
+      )
+    return None, schema_path, raw_root
+  if schema_path is None:
+    return None, None, None
+  if "#" in ref:
+    rel_file, frag = ref.split("#", 1)
+    frag = "#" + frag
+  else:
+    rel_file, frag = ref, None
+  target_path = (schema_path.parent / rel_file).resolve()
+  if not target_path.exists():
+    return None, schema_path, raw_root
+  target_root = _resolve_schema(target_path)
+  if not isinstance(target_root, dict):
+    return None, target_path, None
+  target_node = (
+    _resolve_json_pointer(frag, target_root) if frag else target_root
+  )
+  return (
+    target_node if isinstance(target_node, dict) else None,
+    target_path,
+    target_root,
+  )
 
-  Bundling inlines every `$ref`. A ref to a whole schema file keeps that
-  file's `$id`, which the table renderer turns back into a type link, but a
-  ref into another file's `$defs` fragment (e.g.
-  `types/pagination.json#/$defs/request`) is inlined without one, so its Type
-  cell falls back to `object`. Copy such refs from the unbundled definition
-  onto the matching bundled properties (and their array `items`). Same-file
-  refs (`#/$defs/...`) are left alone: only some of the pages that render
-  them define a matching anchor, and `create_link` cannot tell which.
-  `ucp.json` fragments are skipped too: the renderer inlines those itself.
+
+def _restore_fragment_refs(
+  bundled_def: dict[str, Any],
+  raw_def: dict[str, Any] | None,
+  schema_path: Path | None = None,
+  raw_root: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+  """Restore cross-file `$ref`s that bundling inlined without `$id`.
+
+  Bundling (`ucp-schema resolve --bundle`) inlines every `$ref` and (starting
+  in `ucp-schema` 2.0.0) strips non-root `$id`s from inlined schemas, which
+  leaves the table renderer with no link target and degrades Type cells to
+  `object` or `Array[object]`. Walk the bundled definition alongside the
+  unbundled definition (following top-level and `allOf` `$ref`s into their
+  source schemas) and copy cross-file `$ref`s back onto matching properties,
+  array `items`, and `items.allOf` branches. Same-file `#/$defs/...` refs are
+  left alone unless they are pure aliases to a cross-file `$ref`, and
+  `ucp.json` fragments are skipped because the renderer inlines those itself.
 
   Args:
     bundled_def: The bundled definition to be rendered.
     raw_def: The same definition resolved without bundling.
+    schema_path: Path to the schema file `raw_def` was loaded from.
+    raw_root: Full unbundled schema document containing `raw_def`.
 
   Returns:
-    bundled_def, with fragment refs restored where they were lost.
+    bundled_def, with cross-file refs restored where they were lost.
 
   """
-  props = bundled_def.get("properties")
-  if not isinstance(raw_def, dict) or not isinstance(props, dict):
+  if not isinstance(bundled_def, dict) or not isinstance(raw_def, dict):
     return bundled_def
-  raw_props = raw_def.get("properties") or {}
 
-  def _lost_fragment_ref(bundled, raw):
+  # Follow top-level $ref on raw_def when bundling inlined its target.
+  seen_refs: set[str] = set()
+  while (
+    isinstance(raw_def, dict)
+    and "$ref" in raw_def
+    and "$ref" not in bundled_def
+    and raw_def["$ref"] not in seen_refs
+  ):
+    ref_str = raw_def["$ref"]
+    seen_refs.add(ref_str)
+    resolved_node, next_path, next_root = _resolve_raw_ref(
+      ref_str, schema_path, raw_root
+    )
+    if not isinstance(resolved_node, dict):
+      break
+    merged_raw = dict(resolved_node)
+    for k, v in raw_def.items():
+      if k != "$ref":
+        merged_raw[k] = v
+    raw_def = merged_raw
+    schema_path = next_path
+    raw_root = next_root
+
+  def _lost_ref(bundled, raw, whole_file_only=False):
     if not isinstance(bundled, dict) or not isinstance(raw, dict):
       return None
     ref = raw.get("$ref", "")
+    # Follow same-file #/$defs/... aliases that point to a cross-file $ref
+    # (e.g. fulfillment.json#/$defs/fulfillment -> types/fulfillment.json).
+    seen_local: set[str] = set()
+    while (
+      isinstance(ref, str)
+      and ref.startswith("#/")
+      and ref not in seen_local
+      and isinstance(raw_root, dict)
+    ):
+      seen_local.add(ref)
+      target = _resolve_json_pointer(ref, raw_root)
+      if isinstance(target, dict) and isinstance(target.get("$ref"), str):
+        ref = target["$ref"]
+      else:
+        break
     if (
-      "#/$defs/" in ref
+      ref
       and not ref.startswith("#")
+      and (not whole_file_only or "#" not in ref)
       and "ucp.json" not in ref
       and "$ref" not in bundled
       and "$id" not in bundled
@@ -337,18 +421,79 @@ def _restore_fragment_refs(
       return ref
     return None
 
-  restored = {}
-  for name, details in props.items():
-    raw = raw_props.get(name)
-    ref = _lost_fragment_ref(details, raw)
-    if ref:
-      details = {**details, "$ref": ref}
-    elif isinstance(details, dict) and isinstance(raw, dict):
-      items_ref = _lost_fragment_ref(details.get("items"), raw.get("items"))
-      if items_ref:
-        details = {**details, "items": {**details["items"], "$ref": items_ref}}
-    restored[name] = details
-  return {**bundled_def, "properties": restored}
+  def _restore_allof_branch_refs(bundled_branches, raw_branches):
+    if (
+      not isinstance(bundled_branches, list)
+      or not isinstance(raw_branches, list)
+      or len(bundled_branches) != len(raw_branches)
+    ):
+      return bundled_branches
+    out = []
+    for b_branch, r_branch in zip(bundled_branches, raw_branches, strict=True):
+      ref = _lost_ref(b_branch, r_branch, whole_file_only=True)
+      if ref:
+        out.append({**b_branch, "$ref": ref})
+      else:
+        out.append(b_branch)
+    return out
+
+  result = dict(bundled_def)
+
+  # Recurse into table-level allOf branches
+  if isinstance(result.get("allOf"), list) and isinstance(
+    raw_def.get("allOf"), list
+  ):
+    b_allof = result["allOf"]
+    r_allof = raw_def["allOf"]
+    if len(b_allof) == len(r_allof):
+      result["allOf"] = [
+        _restore_fragment_refs(b_item, r_item, schema_path, raw_root)
+        for b_item, r_item in zip(b_allof, r_allof, strict=True)
+      ]
+
+  props = result.get("properties")
+  raw_props = raw_def.get("properties") if isinstance(raw_def, dict) else None
+  if isinstance(props, dict) and isinstance(raw_props, dict):
+    restored = {}
+    for name, details in props.items():
+      raw = raw_props.get(name)
+      ref = _lost_ref(details, raw)
+      if ref:
+        details = {**details, "$ref": ref}
+      elif isinstance(details, dict) and isinstance(raw, dict):
+        b_items = details.get("items")
+        r_items = raw.get("items")
+        items_ref = _lost_ref(b_items, r_items)
+        if items_ref:
+          details = {**details, "items": {**b_items, "$ref": items_ref}}
+        elif isinstance(b_items, dict) and isinstance(r_items, dict):
+          r_items_resolved = r_items
+          if (
+            "$ref" in r_items
+            and r_items["$ref"].startswith("#")
+            and "$ref" not in b_items
+          ):
+            target_items, _, _ = _resolve_raw_ref(
+              r_items["$ref"], schema_path, raw_root
+            )
+            if isinstance(target_items, dict):
+              r_items_resolved = target_items
+          if isinstance(b_items.get("allOf"), list) and isinstance(
+            r_items_resolved.get("allOf"), list
+          ):
+            details = {
+              **details,
+              "items": {
+                **b_items,
+                "allOf": _restore_allof_branch_refs(
+                  b_items["allOf"], r_items_resolved["allOf"]
+                ),
+              },
+            }
+      restored[name] = details
+    result["properties"] = restored
+
+  return result
 
 
 def define_env(env):
@@ -1364,10 +1509,15 @@ def define_env(env):
             embedded_schema_data = embedded_schema_data.copy()
             embedded_schema_data["allOf"] = new_all_of
 
-          # Bundling drops cross-file $defs refs; restore them for links.
-          raw_def = _resolve_json_pointer(def_path, _resolve_schema(full_path))
+          # Bundling drops cross-file $refs and $ids; restore them for links.
+          raw_root = _resolve_schema(full_path)
+          raw_def = (
+            _resolve_json_pointer(def_path, raw_root)
+            if isinstance(raw_root, dict)
+            else None
+          )
           embedded_schema_data = _restore_fragment_refs(
-            embedded_schema_data, raw_def
+            embedded_schema_data, raw_def, full_path, raw_root
           )
 
           table = _render_table_from_schema(

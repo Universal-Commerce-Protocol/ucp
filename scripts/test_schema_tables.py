@@ -160,6 +160,127 @@ def test_bundled_composed_field_uses_shared_type(macros: dict) -> None:
   )
 
 
+def test_bundled_whole_file_and_inherited_refs_link_reference_section(
+  macros: dict,
+) -> None:
+  """Bundled $defs preserve links for whole-file, inherited, and alias refs."""
+  lookup_req = macros["extension_schema_fields"](
+    "location_lookup.json#/$defs/lookup_request", "common/location"
+  )
+  lookup_resp = macros["extension_schema_fields"](
+    "location_lookup.json#/$defs/lookup_response", "common/location"
+  )
+  lookup_loc = macros["extension_schema_fields"](
+    "location_lookup.json#/$defs/lookup_location", "common/location"
+  )
+  fulfillment_search = macros["extension_schema_fields"](
+    "fulfillment.json#/$defs/fulfillment_search_request",
+    "shopping/extensions/fulfillment",
+  )
+  payment_with_terms = macros["extension_schema_fields"](
+    "payment_terms.json#/$defs/payment", "payment/extensions/terms"
+  )
+  cases = [
+    (
+      "lookup_request.distance",
+      _type_cell(lookup_req, "distance"),
+      "site:specification/reference/#location-distance",
+    ),
+    (
+      "lookup_response.locations",
+      _type_cell(lookup_resp, "locations"),
+      "site:specification/reference/#location",
+    ),
+    (
+      "lookup_response.messages",
+      _type_cell(lookup_resp, "messages"),
+      "site:specification/reference/#message",
+    ),
+    (
+      "lookup_location.address",
+      _type_cell(lookup_loc, "address"),
+      "site:specification/reference/#postal-address",
+    ),
+    (
+      "lookup_location.hours",
+      _type_cell(lookup_loc, "hours"),
+      "site:specification/reference/#daily-hour",
+    ),
+    (
+      "fulfillment_search_request.pagination",
+      _type_cell(fulfillment_search, "pagination"),
+      "site:specification/reference/#pagination-request",
+    ),
+    (
+      "payment_terms.terms",
+      _type_cell(payment_with_terms, "terms"),
+      "site:specification/reference/#payment-term",
+    ),
+  ]
+  missing = [
+    f"{name}={got!r}" for name, got, want in cases if not got or want not in got
+  ]
+  _check(
+    "bundled_whole_file_and_inherited_refs_link_reference_section",
+    not missing,
+    f"missing links: {missing}",
+  )
+
+
+def test_restore_fragment_refs_without_nested_ids() -> None:
+  """_restore_fragment_refs recovers refs when ucp-schema 2.0.0 strips $id."""
+  main = sys.modules["main"]
+  schema_path = REPO_ROOT / "source/schemas/common/location_lookup.json"
+  raw_root = main._resolve_schema(schema_path)
+  raw_def = main._resolve_json_pointer("#/$defs/lookup_location", raw_root)
+  bundled = {
+    "description": "Location with required correlation metadata.",
+    "allOf": [
+      {
+        "title": "Location",
+        "allOf": [
+          {
+            "title": "Location Summary",
+            "type": "object",
+            "properties": {
+              "id": {"type": "string"},
+              "address": {"title": "Postal Address", "type": "object"},
+            },
+          },
+          {
+            "type": "object",
+            "properties": {
+              "geo": {"title": "Geo", "type": "object"},
+              "hours": {
+                "type": "array",
+                "items": {"title": "Daily Hour", "type": "object"},
+              },
+            },
+          },
+        ],
+      },
+      {
+        "type": "object",
+        "properties": {
+          "inputs": {"type": "array", "items": {"type": "object"}}
+        },
+      },
+    ],
+  }
+  restored = main._restore_fragment_refs(
+    bundled, raw_def, schema_path, raw_root
+  )
+  summary_props = restored["allOf"][0]["allOf"][0]["properties"]
+  loc_props = restored["allOf"][0]["allOf"][1]["properties"]
+  _check(
+    "restore_fragment_refs_without_nested_ids",
+    summary_props["address"].get("$ref") == "postal_address.json"
+    and loc_props["geo"].get("$ref") == "geo.json"
+    and loc_props["hours"]["items"].get("$ref") == "daily_hour.json",
+    f"got summary={summary_props!r} loc={loc_props!r}",
+  )
+
+
 def test_method_tables_name_ucp_field(macros: dict) -> None:
   """Operation tables built from OpenAPI name the `ucp` field too."""
   table = macros["method_fields"](
@@ -355,6 +476,8 @@ def main() -> int:
   test_ucp_def_without_anchor_is_named(macros)
   test_composed_field_links_referenced_type(macros)
   test_bundled_composed_field_uses_shared_type(macros)
+  test_bundled_whole_file_and_inherited_refs_link_reference_section(macros)
+  test_restore_fragment_refs_without_nested_ids()
   test_method_tables_name_ucp_field(macros)
   test_header_tables_list_each_header_once(macros)
   test_security_header_rows_follow_requirements()
