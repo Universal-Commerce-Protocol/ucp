@@ -151,15 +151,15 @@ limit or as not returnable; it **MAY** present the policy from its
 
 A `window` eligibility states the length of the return window as a **policy
 statement**, not a live countdown. It is a guaranteed minimum for otherwise
-eligible returns: a return requested within the window is accepted with any
-listed resolution through any listed method. `duration` and `anchor` state the
-terms, for example "30 days from delivery"; once the anchor event has occurred,
-the business resolves the guaranteed deadline and states it as `expires_at`. A
-return requested no later than `expires_at` is within the window; later steps,
-such as sending the item back within a set period, are eligibility requirements
-a business **MAY** describe in `description`. The window is a floor, not a
-ceiling: its expiry does not establish that an item is non-returnable (see
-[Responsibilities](#responsibilities)).
+eligible returns: a return requested within the window is accepted through a
+listed method, with a listed resolution that method accepts. `duration` and
+`anchor` state the terms, for example "30 days from delivery"; once the anchor
+event has occurred, the business resolves the guaranteed deadline and states it
+as `expires_at`. A return requested no later than `expires_at` is within the
+window; later steps, such as sending the item back within a set period, are
+eligibility requirements a business **MAY** describe in `description`. The
+window is a floor, not a ceiling: its expiry does not establish that an item is
+non-returnable (see [Responsibilities](#responsibilities)).
 
 A platform **MAY** present `expires_at` in any time zone and **MUST NOT**
 present a later deadline, for example by showing only its date, which reads as
@@ -395,10 +395,14 @@ applicable law or a third-party guarantee; those are outside this specification.
 The return-term fields (`eligibility`, `supported_resolutions`, `methods`, and
 `fees`) are not an exhaustive statement of the policy's terms. `eligibility`,
 `supported_resolutions`, and `methods` are guarantees that hold for every
-eligible return in the policy's scope: within a `window` eligibility, any listed
-resolution is available through any listed method (see [Window and
-anchor](#window-and-anchor)). `fees` is a return term but not a guarantee: it
-states estimated maximums (see [Return fees](#return-fees)). A business **MAY**
+eligible return in the policy's scope: within a `window` eligibility, each
+listed resolution is available through at least one listed method, and each
+listed method accepts at least one listed resolution (see [Window and
+anchor](#window-and-anchor)). The lists do not state which resolutions each
+method accepts; a platform **MUST NOT** present a specific resolution as
+available through a specific method unless a single method or a single
+resolution is listed. `fees` is a return term but not a guarantee: it states
+estimated maximums (see [Return fees](#return-fees)). A business **MAY**
 describe eligibility requirements, such as tags attached or original packaging,
 in `description` (see [Eligibility](#eligibility)). A condition the business
 requires of the item or return, such as unopened, tags attached, or proof of
