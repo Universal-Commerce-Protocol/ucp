@@ -272,12 +272,78 @@ def test_restore_fragment_refs_without_nested_ids() -> None:
   )
   summary_props = restored["allOf"][0]["allOf"][0]["properties"]
   loc_props = restored["allOf"][0]["allOf"][1]["properties"]
+
+  # Verify items -> #/$defs/... -> allOf restoration (lookup_response.locations)
+  raw_resp = main._resolve_json_pointer("#/$defs/lookup_response", raw_root)
+  bundled_resp = {
+    "type": "object",
+    "properties": {
+      "locations": {
+        "type": "array",
+        "items": {
+          "allOf": [
+            {"title": "Location", "type": "object"},
+            {"type": "object", "properties": {"inputs": {"type": "array"}}},
+          ]
+        },
+      }
+    },
+  }
+  restored_resp = main._restore_fragment_refs(
+    bundled_resp, raw_resp, schema_path, raw_root
+  )
+  locations_branch = restored_resp["properties"]["locations"]["items"]["allOf"][
+    0
+  ]
+
+  # Verify same-file #/$defs/... alias to cross-file $ref (payment_terms.terms)
+  terms_path = REPO_ROOT / "source/schemas/common/payment_terms.json"
+  terms_root = main._resolve_schema(terms_path)
+  raw_payment = main._resolve_json_pointer("#/$defs/payment", terms_root)
+  bundled_payment = {
+    "type": "object",
+    "properties": {
+      "terms": {
+        "type": "array",
+        "items": {"title": "Payment Term", "type": "object"},
+      }
+    },
+  }
+  restored_payment = main._restore_fragment_refs(
+    bundled_payment, raw_payment, terms_path, terms_root
+  )
+  terms_items = restored_payment["properties"]["terms"]["items"]
+
+  # Verify property-level allOf branch restoration (serves.address)
+  serves_path = REPO_ROOT / "source/schemas/common/types/location_serves.json"
+  raw_serves = main._resolve_schema(serves_path)
+  bundled_serves = {
+    "type": "object",
+    "properties": {
+      "address": {
+        "allOf": [
+          {"title": "Locality", "type": "object"},
+          {"required": ["postal_code"]},
+        ]
+      }
+    },
+  }
+  restored_serves = main._restore_fragment_refs(
+    bundled_serves, raw_serves, serves_path, raw_serves
+  )
+  address_branch = restored_serves["properties"]["address"]["allOf"][0]
+
   _check(
     "restore_fragment_refs_without_nested_ids",
     summary_props["address"].get("$ref") == "postal_address.json"
     and loc_props["geo"].get("$ref") == "geo.json"
-    and loc_props["hours"]["items"].get("$ref") == "daily_hour.json",
-    f"got summary={summary_props!r} loc={loc_props!r}",
+    and loc_props["hours"]["items"].get("$ref") == "daily_hour.json"
+    and locations_branch.get("$ref") == "types/location.json"
+    and terms_items.get("$ref") == "types/payment_term.json"
+    and address_branch.get("$ref") == "locality.json",
+    f"got summary={summary_props!r} loc={loc_props!r} "
+    f"locations={locations_branch!r} terms={terms_items!r} "
+    f"address={address_branch!r}",
   )
 
 

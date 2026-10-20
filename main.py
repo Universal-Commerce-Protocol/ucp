@@ -255,7 +255,8 @@ def _resolve_schema(
 
   """
   bundle_suffix = ":bundled" if bundle else ""
-  cache_key = f"{schema_path}:{direction}:{operation}{bundle_suffix}"
+  resolved_path = Path(schema_path).resolve()
+  cache_key = f"{resolved_path}:{direction}:{operation}{bundle_suffix}"
   if cache_key in _resolved_schema_cache:
     return _resolved_schema_cache[cache_key]
 
@@ -369,15 +370,15 @@ def _restore_fragment_refs(
     return bundled_def
 
   # Follow top-level $ref on raw_def when bundling inlined its target.
-  seen_refs: set[str] = set()
+  seen_refs: set[tuple[Path | None, str]] = set()
   while (
     isinstance(raw_def, dict)
     and "$ref" in raw_def
     and "$ref" not in bundled_def
-    and raw_def["$ref"] not in seen_refs
+    and (schema_path, raw_def["$ref"]) not in seen_refs
   ):
     ref_str = raw_def["$ref"]
-    seen_refs.add(ref_str)
+    seen_refs.add((schema_path, ref_str))
     resolved_node, next_path, next_root = _resolve_raw_ref(
       ref_str, schema_path, raw_root
     )
@@ -489,6 +490,25 @@ def _restore_fragment_refs(
                   b_items["allOf"], r_items_resolved["allOf"]
                 ),
               },
+            }
+        elif isinstance(details.get("allOf"), list):
+          r_prop_resolved = raw
+          if (
+            "$ref" in raw
+            and raw["$ref"].startswith("#")
+            and "$ref" not in details
+          ):
+            target_prop, _, _ = _resolve_raw_ref(
+              raw["$ref"], schema_path, raw_root
+            )
+            if isinstance(target_prop, dict):
+              r_prop_resolved = target_prop
+          if isinstance(r_prop_resolved.get("allOf"), list):
+            details = {
+              **details,
+              "allOf": _restore_allof_branch_refs(
+                details["allOf"], r_prop_resolved["allOf"]
+              ),
             }
       restored[name] = details
     result["properties"] = restored
