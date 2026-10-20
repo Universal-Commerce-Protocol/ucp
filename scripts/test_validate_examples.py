@@ -444,6 +444,98 @@ def test_missing_binary_says_how_to_install() -> None:
 
 
 # -----------------------------------------------------------
+# Coverage walker
+# -----------------------------------------------------------
+
+
+def test_required_anyof_coverage() -> None:
+  """Authored keys satisfy one required-key alternative per anyOf layer."""
+  source_alternatives = {
+    "type": "object",
+    "anyOf": [
+      {"required": ["line_items"]},
+      {"required": ["cart_id"]},
+    ],
+  }
+  for name, example, expected in (
+    ("inline", {"line_items": []}, True),
+    ("cart", {"cart_id": "cart_123"}, True),
+    ("neither", {"buyer": {}}, False),
+    ("both", {"line_items": [], "cart_id": "cart_123"}, True),
+    ("elided_inline", {"line_items": "..."}, True),
+  ):
+    errors = v.check_coverage(example, source_alternatives)
+    _check(
+      f"coverage_required_anyof[{name}]",
+      bool(errors) is not expected,
+      f"got {errors!r}",
+    )
+
+  neutral = {
+    "type": "object",
+    "anyOf": [{}, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_neutral_branch",
+    not v.check_coverage({}, neutral),
+  )
+  true_neutral = {
+    "type": "object",
+    "anyOf": [True, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_true_branch_is_neutral",
+    not v.check_coverage({}, true_neutral),
+  )
+  false_alternative = {
+    "type": "object",
+    "anyOf": [False, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_false_branch_rejects_neither",
+    bool(v.check_coverage({}, false_alternative)),
+  )
+  _check(
+    "coverage_required_anyof_false_branch_accepts_inline",
+    not v.check_coverage({"line_items": []}, false_alternative),
+  )
+
+  pure_alternatives = {
+    "anyOf": [
+      {"required": ["line_items"]},
+      {"required": ["cart_id"]},
+    ],
+  }
+  _check(
+    "coverage_required_pure_anyof_rejects_neither",
+    bool(v.check_coverage({}, pure_alternatives)),
+  )
+  _check(
+    "coverage_required_pure_anyof_accepts_either",
+    not v.check_coverage({"cart_id": "cart_123"}, pure_alternatives),
+  )
+
+  layered = {
+    "allOf": [
+      {
+        "anyOf": [
+          {"required": ["line_items"]},
+          {"required": ["cart_id"]},
+        ]
+      }
+    ],
+  }
+  _check(
+    "coverage_required_anyof_in_allof_layer",
+    bool(v.check_coverage({"buyer": {}}, layered)),
+  )
+  _check(
+    "coverage_required_anyof_in_allof_layer_satisfied",
+    not v.check_coverage({"cart_id": "cart_123"}, layered),
+  )
+
+
+# -----------------------------------------------------------
 # process_block: integration tests requiring ucp-schema
 # -----------------------------------------------------------
 
@@ -647,17 +739,53 @@ def test_process_block_integration() -> None:
     f"got {result.status}: {result.message}",
   )
 
-  # Empty body trivially valid
+  # Only no-body read/cancel requests retain the empty-body shortcut.
+  for op in ("read", "cancel"):
+    md = (
+      "<!-- ucp:example schema=shopping/checkout "
+      f"op={op} direction=request -->\n"
+      "```json\n{}\n```\n"
+    )
+    result = _process(md)
+    _check(
+      f"process_empty_no_body_request_ok[{op}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+  # Responses are authored payloads, even when empty, and must not bypass
+  # coverage merely because a scaffold could fill the missing fields.
   md = (
-    "<!-- ucp:example schema=shopping/checkout op=cancel direction=request -->\n"  # noqa: E501
+    "<!-- ucp:example schema=shopping/checkout op=read direction=response -->\n"
     "```json\n{}\n```\n"
   )
   result = _process(md)
   _check(
-    "process_empty_body_ok",
-    result.status == "ok",
+    "process_empty_response_not_blindly_accepted",
+    result.status == "fail" and "coverage:" in result.message,
     f"got {result.status}: {result.message}",
   )
+
+  # Explicit def=/target= validation is never hidden by the request shortcut.
+  scoped_examples = (
+    (
+      "def",
+      "schema=shopping/cart def=checkout op=read direction=request",
+    ),
+    (
+      "target",
+      "schema=shopping/checkout target=$.line_items op=read direction=request",
+    ),
+  )
+  for scope, annotation in scoped_examples:
+    result = _process(
+      f"<!-- ucp:example {annotation} -->\n```json\n{{}}\n```\n"
+    )
+    _check(
+      f"process_empty_explicit_{scope}_not_shortcut",
+      result.status != "ok",
+      f"got {result.status}: {result.message}",
+    )
 
 
 def test_extension_validation() -> None:
@@ -743,6 +871,44 @@ def test_extension_validation() -> None:
     result.status == "ok",
     f"got {result.status}: {result.message}",
   )
+
+
+def test_checkout_item_source_process_block() -> None:
+  """Authored checkout create examples provide an item source before merge."""
+  if not _has_ucp_schema():
+    _check(
+      "checkout_item_source_process_block",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  annotations = (
+    "schema=shopping/checkout op=create direction=request",
+    "schema=shopping/cart def=checkout op=create direction=request",
+  )
+  examples = (
+    ("buyer_only", '{"buyer": {"email": "buyer@example.com"}}', False),
+    ("empty", "{}", False),
+    ("cart_only", '{"cart_id": "cart_abc123"}', True),
+    ("inline", '{"line_items": []}', True),
+    (
+      "both",
+      '{"cart_id": "cart_abc123", "line_items": []}',
+      True,
+    ),
+    ("elided_source", '{"line_items": "..."}', True),
+  )
+  for annotation in annotations:
+    schema_name = "cart_def" if "def=" in annotation else "base"
+    for example_name, payload, expected in examples:
+      md = f"<!-- ucp:example {annotation} -->\n```json\n{payload}\n```\n"
+      result = _process(md)
+      _check(
+        f"process_checkout_create_source[{schema_name}/{example_name}]",
+        (result.status == "ok") == expected,
+        f"got {result.status}: {result.message}",
+      )
 
 
 def test_checkout_item_source() -> None:
@@ -974,10 +1140,12 @@ def main() -> int:
   test_extract_blocks()
   test_reads_are_utf8()
   test_missing_binary_says_how_to_install()
+  test_required_anyof_coverage()
   test_scaffold_resolution()
   test_resolve_schema_cache_key()
   test_process_block_integration()
   test_extension_validation()
+  test_checkout_item_source_process_block()
   test_checkout_item_source()
   return _report()
 
