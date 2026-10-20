@@ -23,8 +23,7 @@
             "create": "required",
             "update": "omit",
             "complete": "omit",
-            "read": "omit",
-            "cancel": "omit"
+            "read": "omit"
           },
           "ucp_response": "omit"
         }
@@ -37,8 +36,7 @@
             "create": "required",
             "update": "omit",
             "complete": "omit",
-            "read": "omit",
-            "cancel": "omit"
+            "read": "omit"
           },
           "ucp_response": "omit"
         }
@@ -74,8 +72,7 @@
         "create": "optional",
         "update": "omit",
         "complete": "omit",
-        "read": "omit",
-        "cancel": "omit"
+        "read": "omit"
       },
       "ucp_response": "omit"
     },

@@ -21,7 +21,8 @@
               "ucp_request": {
                 "create": "optional",
                 "update": "omit",
-                "complete": "omit"
+                "complete": "omit",
+                "read": "omit"
               },
               "ucp_response": "omit"
             }

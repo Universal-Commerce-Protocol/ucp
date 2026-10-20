@@ -814,7 +814,7 @@ def test_checkout_item_source() -> None:
     "shopping/checkout", "request", "complete", _SCAFFOLDS_DIR
   )
   assert complete is not None and set(complete) == {"payment"}
-  for op in ("create", "update", "complete", "read", "cancel"):
+  for op in ("create", "update", "complete", "read"):
     base = v.resolve_schema("shopping/checkout", "request", op, _SCHEMA_BASE)
     cart = v.resolve_schema("shopping/cart", "request", op, _SCHEMA_BASE)
     for name, schema in (
@@ -828,17 +828,14 @@ def test_checkout_item_source() -> None:
       _check(
         f"checkout_{op}_line_items_projection[{name}]",
         ("line_items" in properties) == (op != "complete")
-        and ("line_items" in required) == (op in ("update", "read", "cancel")),
+        and ("line_items" in required) == (op in ("update", "read")),
         f"properties={list(properties)}, required={required}",
       )
       _check(
         f"checkout_{op}_cart_id_projection[{name}]",
         ("cart_id" in properties) == (op == "create")
         and any("cart_id" in b.get("properties", {}) for b in bodies)
-        == (
-          op == "create"
-          or (name == "cart_composed" and op in ("read", "cancel"))
-        ),
+        == (op == "create"),
       )
       if op != "create":
         _check(
@@ -848,13 +845,9 @@ def test_checkout_item_source() -> None:
             for b in body.get("anyOf", [])
           ),
         )
-        # Read/cancel retain the shared schema's existing item requirement
+        # Read retains the shared schema's existing item requirement
         # and line IDs; the new source branches must not add constraints.
-        op_items = (
-          [{"id": "line_123", **items[0]}]
-          if op in ("read", "cancel")
-          else items
-        )
+        op_items = [{"id": "line_123", **items[0]}] if op == "read" else items
         for label, payload, expected in (
           ("seed", complete if op == "complete" else {}, op == "complete"),
           ("items", {"line_items": op_items}, op != "complete"),
