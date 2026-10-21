@@ -1085,7 +1085,7 @@ Signature: sig1=:7JjH0q1zfOB0WiXpb3FI3lxHqxfioJNQ2d4C6IK9NegIKkORb41Dn/kZL3rhiYi
 
 Vector `rest-get-es256`, key `test-key-ecc-p256`, algorithm `ES256`.
 
-Mirrors the [GET Request Example](#rest-request-signing). No body, so no `Content-Digest`, `content-digest` or `content-type` component; no `Idempotency-Key`, so no `idempotency-key` component.
+Follows the [GET Request Example](#rest-request-signing), with one addition: the request carries `UCP-Agent` and covers `ucp-agent`, since a default UCP verifier resolves the signer's key from that header (see [Identity Resolution Algorithm](overview/index.md#identity-resolution-algorithm)). No body, so no `Content-Digest`, `content-digest` or `content-type` component; no `Idempotency-Key`, so no `idempotency-key` component.
 
 **Signed message:**
 
