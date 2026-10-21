@@ -1,0 +1,237 @@
+{
+  "title": "UCP HTTP Message Signature Test Vectors",
+  "description": "Non-normative test vectors for the UCP profile of RFC 9421 HTTP Message Signatures, as specified in the Message Signatures specification. Keys are the RFC 9421 Appendix B.1.3 and B.1.4 test keys and MUST NOT be used outside of testing. Bodies are signed as the exact bytes of the body field (UTF-8, no trailing newline). ECDSA signatures use RFC 6979 deterministic nonces and raw r||s encoding; a randomized ES256 signer verifies them rather than reproducing them.",
+  "keys": [
+    {
+      "kid": "test-key-ecc-p256",
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
+      "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
+      "d": "UpuF81l-kOxbjf7T4mNSv0r5tN67Gim7rnf6EFpcYDs",
+      "use": "sig",
+      "alg": "ES256"
+    },
+    {
+      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+      "d": "n4Ni-HpISpVObnQMW0wOhCKROaIKqKtW_2ZYb2p9KcU",
+      "use": "sig",
+      "alg": "EdDSA"
+    }
+  ],
+  "vectors": [
+    {
+      "id": "rest-request-es256",
+      "description": "Default UCP signature on a REST request with a body: the Complete Request Example from REST Request Signing.",
+      "kid": "test-key-ecc-p256",
+      "algorithm": "ES256",
+      "request": {
+        "method": "POST",
+        "authority": "merchant.example.com",
+        "path": "/checkout-sessions"
+      },
+      "headers": {
+        "Host": "merchant.example.com",
+        "Content-Type": "application/json",
+        "UCP-Agent": "profile=\"https://platform.example/.well-known/ucp\"",
+        "Idempotency-Key": "550e8400-e29b-41d4-a716-446655440000",
+        "Content-Digest": "sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:"
+      },
+      "body": "{\"line_items\":[{\"item\":{\"id\":\"item_123\"},\"quantity\":2}]}",
+      "label": "sig1",
+      "covered_components": [
+        "\"@method\"",
+        "\"@authority\"",
+        "\"@path\"",
+        "\"ucp-agent\"",
+        "\"idempotency-key\"",
+        "\"content-digest\"",
+        "\"content-type\""
+      ],
+      "signature_params": {
+        "keyid": "test-key-ecc-p256"
+      },
+      "signature_base": "\"@method\": POST\n\"@authority\": merchant.example.com\n\"@path\": /checkout-sessions\n\"ucp-agent\": profile=\"https://platform.example/.well-known/ucp\"\n\"idempotency-key\": 550e8400-e29b-41d4-a716-446655440000\n\"content-digest\": sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:\n\"content-type\": application/json\n\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\");keyid=\"test-key-ecc-p256\"",
+      "signature_input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\");keyid=\"test-key-ecc-p256\"",
+      "signature": "sig1=:7JjH0q1zfOB0WiXpb3FI3lxHqxfioJNQ2d4C6IK9NegIKkORb41Dn/kZL3rhiYih62E42Zj6SacQbr/MFTgZjQ==:",
+      "message": "POST /checkout-sessions HTTP/1.1\nHost: merchant.example.com\nContent-Type: application/json\nUCP-Agent: profile=\"https://platform.example/.well-known/ucp\"\nIdempotency-Key: 550e8400-e29b-41d4-a716-446655440000\nContent-Digest: sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:\nSignature-Input: sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\");keyid=\"test-key-ecc-p256\"\nSignature: sig1=:7JjH0q1zfOB0WiXpb3FI3lxHqxfioJNQ2d4C6IK9NegIKkORb41Dn/kZL3rhiYih62E42Zj6SacQbr/MFTgZjQ==:\n\n{\"line_items\":[{\"item\":{\"id\":\"item_123\"},\"quantity\":2}]}\n"
+    },
+    {
+      "id": "rest-get-es256",
+      "description": "Default UCP signature on a REST request with no body and no idempotency key: the GET Request Example.",
+      "kid": "test-key-ecc-p256",
+      "algorithm": "ES256",
+      "request": {
+        "method": "GET",
+        "authority": "merchant.example.com",
+        "path": "/checkout-sessions/chk_123"
+      },
+      "headers": {
+        "Host": "merchant.example.com",
+        "UCP-Agent": "profile=\"https://platform.example/.well-known/ucp\""
+      },
+      "body": "",
+      "label": "sig1",
+      "covered_components": [
+        "\"@method\"",
+        "\"@authority\"",
+        "\"@path\"",
+        "\"ucp-agent\""
+      ],
+      "signature_params": {
+        "keyid": "test-key-ecc-p256"
+      },
+      "signature_base": "\"@method\": GET\n\"@authority\": merchant.example.com\n\"@path\": /checkout-sessions/chk_123\n\"ucp-agent\": profile=\"https://platform.example/.well-known/ucp\"\n\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"ucp-agent\");keyid=\"test-key-ecc-p256\"",
+      "signature_input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\");keyid=\"test-key-ecc-p256\"",
+      "signature": "sig1=:NdtVgJzyEA93uOdae8mW5Wx6UHbcChssG7di8XQkN0Gn84o4LyGcEsMimteJ6TkVgFrH/cFREMYRvTSLnxvyQQ==:",
+      "message": "GET /checkout-sessions/chk_123 HTTP/1.1\nHost: merchant.example.com\nUCP-Agent: profile=\"https://platform.example/.well-known/ucp\"\nSignature-Input: sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\");keyid=\"test-key-ecc-p256\"\nSignature: sig1=:NdtVgJzyEA93uOdae8mW5Wx6UHbcChssG7di8XQkN0Gn84o4LyGcEsMimteJ6TkVgFrH/cFREMYRvTSLnxvyQQ==:\n"
+    },
+    {
+      "id": "rest-response-es256",
+      "description": "Default UCP signature on a REST response: the Complete Response Example from REST Response Signing, with the OPTIONAL created parameter.",
+      "kid": "test-key-ecc-p256",
+      "algorithm": "ES256",
+      "response": {
+        "status": 201
+      },
+      "headers": {
+        "Content-Type": "application/json",
+        "Content-Digest": "sha-256=:IqZyCS4UkeOqoDosER1evBitFIxXpSlu8ekHlucCpVA=:"
+      },
+      "body": "{\"id\":\"chk_123\",\"status\":\"ready_for_complete\",\"currency\":\"USD\",\"line_items\":[{\"id\":\"li_1\",\"item\":{\"id\":\"item_123\"},\"quantity\":2}]}",
+      "label": "sig1",
+      "covered_components": [
+        "\"@status\"",
+        "\"content-digest\"",
+        "\"content-type\""
+      ],
+      "signature_params": {
+        "created": 1738617600,
+        "keyid": "test-key-ecc-p256"
+      },
+      "signature_base": "\"@status\": 201\n\"content-digest\": sha-256=:IqZyCS4UkeOqoDosER1evBitFIxXpSlu8ekHlucCpVA=:\n\"content-type\": application/json\n\"@signature-params\": (\"@status\" \"content-digest\" \"content-type\");created=1738617600;keyid=\"test-key-ecc-p256\"",
+      "signature_input": "sig1=(\"@status\" \"content-digest\" \"content-type\");created=1738617600;keyid=\"test-key-ecc-p256\"",
+      "signature": "sig1=:ptCCqbd2WWrDaB8NdInmByqq+dd4VH0bxAdYUp0Fn/jhY7RW7nkhD5NIUSrecDDnAwKM/HlQKe3F0HOkmcWlXA==:",
+      "message": "HTTP/1.1 201 Created\nContent-Type: application/json\nContent-Digest: sha-256=:IqZyCS4UkeOqoDosER1evBitFIxXpSlu8ekHlucCpVA=:\nSignature-Input: sig1=(\"@status\" \"content-digest\" \"content-type\");created=1738617600;keyid=\"test-key-ecc-p256\"\nSignature: sig1=:ptCCqbd2WWrDaB8NdInmByqq+dd4VH0bxAdYUp0Fn/jhY7RW7nkhD5NIUSrecDDnAwKM/HlQKe3F0HOkmcWlXA==:\n\n{\"id\":\"chk_123\",\"status\":\"ready_for_complete\",\"currency\":\"USD\",\"line_items\":[{\"id\":\"li_1\",\"item\":{\"id\":\"item_123\"},\"quantity\":2}]}\n"
+    },
+    {
+      "id": "wba-request-ed25519",
+      "description": "Dual-audience (Web Bot Auth-shaped) signature on a REST request: Signature-Agent alongside UCP-Agent, the signature-agent component selected by ;key, keyid set to the RFC 7638 thumbprint, and created, expires, nonce and tag parameters.",
+      "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+      "algorithm": "EdDSA",
+      "request": {
+        "method": "POST",
+        "authority": "merchant.example.com",
+        "path": "/checkout-sessions"
+      },
+      "headers": {
+        "Host": "merchant.example.com",
+        "Content-Type": "application/json",
+        "UCP-Agent": "profile=\"https://platform.example/.well-known/ucp\"",
+        "Signature-Agent": "sig1=\"https://platform.example/.well-known/ucp\";type=jwks_uri",
+        "Idempotency-Key": "550e8400-e29b-41d4-a716-446655440000",
+        "Content-Digest": "sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:"
+      },
+      "body": "{\"line_items\":[{\"item\":{\"id\":\"item_123\"},\"quantity\":2}]}",
+      "label": "sig1",
+      "covered_components": [
+        "\"@method\"",
+        "\"@authority\"",
+        "\"@path\"",
+        "\"signature-agent\";key=\"sig1\"",
+        "\"ucp-agent\"",
+        "\"idempotency-key\"",
+        "\"content-digest\"",
+        "\"content-type\""
+      ],
+      "signature_params": {
+        "keyid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+        "created": 1738617600,
+        "expires": 1738621200,
+        "nonce": "p9XobbyV3_aRwb6CmcKmG3ZQejLZxwuWYimRsKPxQQ3H8tBWd4nf3h3pbg-C33JX8COWg6lbPvqeiUmUBoD-sQ",
+        "tag": "web-bot-auth"
+      },
+      "signature_base": "\"@method\": POST\n\"@authority\": merchant.example.com\n\"@path\": /checkout-sessions\n\"signature-agent\";key=\"sig1\": \"https://platform.example/.well-known/ucp\";type=jwks_uri\n\"ucp-agent\": profile=\"https://platform.example/.well-known/ucp\"\n\"idempotency-key\": 550e8400-e29b-41d4-a716-446655440000\n\"content-digest\": sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:\n\"content-type\": application/json\n\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"signature-agent\";key=\"sig1\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\");keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";created=1738617600;expires=1738621200;nonce=\"p9XobbyV3_aRwb6CmcKmG3ZQejLZxwuWYimRsKPxQQ3H8tBWd4nf3h3pbg-C33JX8COWg6lbPvqeiUmUBoD-sQ\";tag=\"web-bot-auth\"",
+      "signature_input": "sig1=(\"@method\" \"@authority\" \"@path\" \"signature-agent\";key=\"sig1\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\");keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";created=1738617600;expires=1738621200;nonce=\"p9XobbyV3_aRwb6CmcKmG3ZQejLZxwuWYimRsKPxQQ3H8tBWd4nf3h3pbg-C33JX8COWg6lbPvqeiUmUBoD-sQ\";tag=\"web-bot-auth\"",
+      "signature": "sig1=:bX1xKcdFCWatmnLAx27EtY4I6YJnOlR82MLuvJ9Jdnj4Rz8PfpLNPjYAsJK5lICZi0MOgNujBaHokdFXS2WCAQ==:",
+      "message": "POST /checkout-sessions HTTP/1.1\nHost: merchant.example.com\nContent-Type: application/json\nUCP-Agent: profile=\"https://platform.example/.well-known/ucp\"\nSignature-Agent: sig1=\"https://platform.example/.well-known/ucp\";type=jwks_uri\nIdempotency-Key: 550e8400-e29b-41d4-a716-446655440000\nContent-Digest: sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:\nSignature-Input: sig1=(\"@method\" \"@authority\" \"@path\" \"signature-agent\";key=\"sig1\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\");keyid=\"poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U\";created=1738617600;expires=1738621200;nonce=\"p9XobbyV3_aRwb6CmcKmG3ZQejLZxwuWYimRsKPxQQ3H8tBWd4nf3h3pbg-C33JX8COWg6lbPvqeiUmUBoD-sQ\";tag=\"web-bot-auth\"\nSignature: sig1=:bX1xKcdFCWatmnLAx27EtY4I6YJnOlR82MLuvJ9Jdnj4Rz8PfpLNPjYAsJK5lICZi0MOgNujBaHokdFXS2WCAQ==:\n\n{\"line_items\":[{\"item\":{\"id\":\"item_123\"},\"quantity\":2}]}\n"
+    },
+    {
+      "id": "webhook-request-es256",
+      "description": "Business-signed order webhook delivery: Webhook-Id and Webhook-Timestamp covered, no Idempotency-Key, UCP-Agent naming the business profile.",
+      "kid": "test-key-ecc-p256",
+      "algorithm": "ES256",
+      "request": {
+        "method": "POST",
+        "authority": "platform.example.com",
+        "path": "/webhooks/ucp/orders"
+      },
+      "headers": {
+        "Host": "platform.example.com",
+        "Content-Type": "application/json",
+        "UCP-Agent": "profile=\"https://merchant.example/.well-known/ucp\"",
+        "Webhook-Timestamp": "1737000000",
+        "Webhook-Id": "018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d",
+        "Content-Digest": "sha-256=:bJRRL30yFYUOhoU6EyZmE2Nvndq8sT8MoKoA1yZfjoE=:"
+      },
+      "body": "{\"id\":\"ord_456\",\"checkout_id\":\"chk_123\",\"status\":\"confirmed\"}",
+      "label": "sig1",
+      "covered_components": [
+        "\"@method\"",
+        "\"@authority\"",
+        "\"@path\"",
+        "\"ucp-agent\"",
+        "\"content-digest\"",
+        "\"content-type\"",
+        "\"webhook-id\"",
+        "\"webhook-timestamp\""
+      ],
+      "signature_params": {
+        "keyid": "test-key-ecc-p256"
+      },
+      "signature_base": "\"@method\": POST\n\"@authority\": platform.example.com\n\"@path\": /webhooks/ucp/orders\n\"ucp-agent\": profile=\"https://merchant.example/.well-known/ucp\"\n\"content-digest\": sha-256=:bJRRL30yFYUOhoU6EyZmE2Nvndq8sT8MoKoA1yZfjoE=:\n\"content-type\": application/json\n\"webhook-id\": 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d\n\"webhook-timestamp\": 1737000000\n\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"content-digest\" \"content-type\" \"webhook-id\" \"webhook-timestamp\");keyid=\"test-key-ecc-p256\"",
+      "signature_input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"content-digest\" \"content-type\" \"webhook-id\" \"webhook-timestamp\");keyid=\"test-key-ecc-p256\"",
+      "signature": "sig1=:QdAsgybMumYi0xegyxNMR/dkNwZKqHXyoHbL1iQb86qcMReFjx4Y5xaBLyxw9my4y3sPEH7rgGbohfWU/5uYug==:",
+      "message": "POST /webhooks/ucp/orders HTTP/1.1\nHost: platform.example.com\nContent-Type: application/json\nUCP-Agent: profile=\"https://merchant.example/.well-known/ucp\"\nWebhook-Timestamp: 1737000000\nWebhook-Id: 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d\nContent-Digest: sha-256=:bJRRL30yFYUOhoU6EyZmE2Nvndq8sT8MoKoA1yZfjoE=:\nSignature-Input: sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"content-digest\" \"content-type\" \"webhook-id\" \"webhook-timestamp\");keyid=\"test-key-ecc-p256\"\nSignature: sig1=:QdAsgybMumYi0xegyxNMR/dkNwZKqHXyoHbL1iQb86qcMReFjx4Y5xaBLyxw9my4y3sPEH7rgGbohfWU/5uYug==:\n\n{\"id\":\"ord_456\",\"checkout_id\":\"chk_123\",\"status\":\"confirmed\"}\n"
+    },
+    {
+      "id": "mcp-request-es256",
+      "description": "Default UCP signature on an MCP tools/call request over streamable HTTP: the JSON-RPC body is bound through Content-Digest exactly as a REST body is.",
+      "kid": "test-key-ecc-p256",
+      "algorithm": "ES256",
+      "request": {
+        "method": "POST",
+        "authority": "business.example.com",
+        "path": "/mcp"
+      },
+      "headers": {
+        "Host": "business.example.com",
+        "Content-Type": "application/json",
+        "UCP-Agent": "profile=\"https://platform.example/.well-known/ucp\"",
+        "Idempotency-Key": "550e8400-e29b-41d4-a716-446655440000",
+        "Content-Digest": "sha-256=:UNTS0erweQak6csrVzrLFS7odTRMBeuB1nTUEvJiB8g=:"
+      },
+      "body": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"complete_checkout\",\"arguments\":{\"meta\":{\"ucp-agent\":{\"profile\":\"https://platform.example/.well-known/ucp\"},\"idempotency-key\":\"550e8400-e29b-41d4-a716-446655440000\"},\"id\":\"chk_123\",\"checkout\":{\"payment\":{\"instruments\":[{\"id\":\"pi_1\",\"type\":\"card\",\"handler_id\":\"tokenizer_1\"}]}}}}}",
+      "label": "sig1",
+      "covered_components": [
+        "\"@method\"",
+        "\"@authority\"",
+        "\"@path\"",
+        "\"content-digest\"",
+        "\"content-type\"",
+        "\"ucp-agent\"",
+        "\"idempotency-key\""
+      ],
+      "signature_params": {
+        "keyid": "test-key-ecc-p256"
+      },
+      "signature_base": "\"@method\": POST\n\"@authority\": business.example.com\n\"@path\": /mcp\n\"content-digest\": sha-256=:UNTS0erweQak6csrVzrLFS7odTRMBeuB1nTUEvJiB8g=:\n\"content-type\": application/json\n\"ucp-agent\": profile=\"https://platform.example/.well-known/ucp\"\n\"idempotency-key\": 550e8400-e29b-41d4-a716-446655440000\n\"@signature-params\": (\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"ucp-agent\" \"idempotency-key\");keyid=\"test-key-ecc-p256\"",
+      "signature_input": "sig1=(\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"ucp-agent\" \"idempotency-key\");keyid=\"test-key-ecc-p256\"",
+      "signature": "sig1=:uDn9pQyObd0kn5JTYlaU3ctx40Sja19s5TM5B0N6PRTLk7VKk+O4+Vx2R1wUQTpLP3we2P8qRyR0zE8k6UNgfg==:",
+      "message": "POST /mcp HTTP/1.1\nHost: business.example.com\nContent-Type: application/json\nUCP-Agent: profile=\"https://platform.example/.well-known/ucp\"\nIdempotency-Key: 550e8400-e29b-41d4-a716-446655440000\nContent-Digest: sha-256=:UNTS0erweQak6csrVzrLFS7odTRMBeuB1nTUEvJiB8g=:\nSignature-Input: sig1=(\"@method\" \"@authority\" \"@path\" \"content-digest\" \"content-type\" \"ucp-agent\" \"idempotency-key\");keyid=\"test-key-ecc-p256\"\nSignature: sig1=:uDn9pQyObd0kn5JTYlaU3ctx40Sja19s5TM5B0N6PRTLk7VKk+O4+Vx2R1wUQTpLP3we2P8qRyR0zE8k6UNgfg==:\n\n{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"complete_checkout\",\"arguments\":{\"meta\":{\"ucp-agent\":{\"profile\":\"https://platform.example/.well-known/ucp\"},\"idempotency-key\":\"550e8400-e29b-41d4-a716-446655440000\"},\"id\":\"chk_123\",\"checkout\":{\"payment\":{\"instruments\":[{\"id\":\"pi_1\",\"type\":\"card\",\"handler_id\":\"tokenizer_1\"}]}}}}}\n"
+    }
+  ]
+}

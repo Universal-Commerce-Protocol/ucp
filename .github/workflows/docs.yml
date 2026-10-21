@@ -86,6 +86,12 @@ jobs:
       - name: Run schema table macro tests
         run: uv run python scripts/test_schema_tables.py
 
+      # The Message Signatures spec publishes RFC 9421 test vectors. Prove the
+      # corpus still verifies, matches its generator, and is quoted verbatim
+      # by the spec page.
+      - name: Run signature test vector checks
+        run: uv run python scripts/test_signature_vectors.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest

@@ -58,6 +58,13 @@ repos:
         pass_filenames: false
         files: ^scripts/(check_links|test_check_links)\.py$
         stages: [pre-commit, pre-push]
+      - id: signature-vectors-tests
+        name: Signature test vector checks
+        entry: uv run --frozen python scripts/test_signature_vectors.py
+        language: system
+        pass_filenames: false
+        files: ^(scripts/(signature_vectors|test_signature_vectors)\.py|docs/specification/signatures\.md|docs/specification/signatures/test-vectors\.json)$
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:

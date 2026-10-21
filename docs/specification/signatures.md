@@ -983,6 +983,263 @@ Content-Type: application/json
 }
 ```
 
+## Test Vectors
+
+This section is non-normative. It provides worked signatures for each
+signing shape the specification defines, so an implementer can check a signer
+or verifier against known-good values before testing against a counterparty.
+The same vectors are published in machine-readable form at
+[`signatures/test-vectors.json`](signatures/test-vectors.json).
+
+**Keys.** The vectors sign with the RFC 9421 Appendix B.1.3 (`test-key-ecc-p256`)
+and B.1.4 (`test-key-ed25519`) test keys, reproduced below with their private
+member `d`. A suite that already carries those keys needs nothing new. The
+Ed25519 key's `kid` is its RFC 7638 thumbprint, which is what a WBA-shape
+signature requires. These keys are public knowledge and **MUST NOT** be used
+outside of testing.
+
+**Bodies.** Each body is signed as the exact bytes shown, UTF-8, with no
+trailing newline. `Content-Digest` is the SHA-256 of those bytes; re-serializing
+the JSON changes the digest and invalidates the signature.
+
+**Determinism.** Ed25519 signatures are deterministic: a correct signer
+reproduces the `Signature` value byte for byte. The ECDSA vectors were
+produced with RFC 6979 deterministic nonces, so a deterministic ES256 signer
+also reproduces them; a randomized ES256 signer produces a different, equally
+valid value and verifies these instead (RFC 9421 §7.3.5). ECDSA values are
+raw `r||s` (64 bytes), never DER.
+
+**Timestamps.** `created` and `expires` are fixed in the past. A verifier that
+enforces freshness must disable or widen that check to accept these vectors;
+default UCP verification does not enforce it (see
+[Replay Protection](#replay-protection)).
+
+### Test Keys
+
+**ES256 (P-256), `test-key-ecc-p256`:**
+
+<!-- ucp:example skip reason="private JWK test key, not a UCP payload" -->
+```json
+{
+  "kid": "test-key-ecc-p256",
+  "kty": "EC",
+  "crv": "P-256",
+  "x": "qIVYZVLCrPZHGHjP17CTW0_-D9Lfw0EkjqF7xB4FivA",
+  "y": "Mc4nN9LTDOBhfoUeg8Ye9WedFRhnZXZJA12Qp0zZ6F0",
+  "d": "UpuF81l-kOxbjf7T4mNSv0r5tN67Gim7rnf6EFpcYDs",
+  "use": "sig",
+  "alg": "ES256"
+}
+```
+
+**EdDSA (Ed25519), `poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U`:**
+
+<!-- ucp:example skip reason="private JWK test key, not a UCP payload" -->
+```json
+{
+  "kid": "poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U",
+  "kty": "OKP",
+  "crv": "Ed25519",
+  "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+  "d": "n4Ni-HpISpVObnQMW0wOhCKROaIKqKtW_2ZYb2p9KcU",
+  "use": "sig",
+  "alg": "EdDSA"
+}
+```
+
+### REST request with a body (ES256)
+
+Vector `rest-request-es256`, key `test-key-ecc-p256`, algorithm `ES256`.
+
+Mirrors the [Complete Request Example](#rest-request-signing). The body is the 56-byte string shown, with no trailing newline.
+
+**Signed message:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:7JjH0q1zfOB0WiXpb3FI3lxHqxfioJNQ2d4C6IK9NegIKkORb41Dn/kZL3rhiYih62E42Zj6SacQbr/MFTgZjQ==:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+**Signature base:**
+
+```text
+"@method": POST
+"@authority": merchant.example.com
+"@path": /checkout-sessions
+"ucp-agent": profile="https://platform.example/.well-known/ucp"
+"idempotency-key": 550e8400-e29b-41d4-a716-446655440000
+"content-digest": sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:
+"content-type": application/json
+"@signature-params": ("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="test-key-ecc-p256"
+```
+
+### REST request without a body (ES256)
+
+Vector `rest-get-es256`, key `test-key-ecc-p256`, algorithm `ES256`.
+
+Mirrors the [GET Request Example](#rest-request-signing). No body, so no `Content-Digest`, `content-digest` or `content-type` component; no `Idempotency-Key`, so no `idempotency-key` component.
+
+**Signed message:**
+
+```http
+GET /checkout-sessions/chk_123 HTTP/1.1
+Host: merchant.example.com
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent");keyid="test-key-ecc-p256"
+Signature: sig1=:NdtVgJzyEA93uOdae8mW5Wx6UHbcChssG7di8XQkN0Gn84o4LyGcEsMimteJ6TkVgFrH/cFREMYRvTSLnxvyQQ==:
+```
+
+**Signature base:**
+
+```text
+"@method": GET
+"@authority": merchant.example.com
+"@path": /checkout-sessions/chk_123
+"ucp-agent": profile="https://platform.example/.well-known/ucp"
+"@signature-params": ("@method" "@authority" "@path" "ucp-agent");keyid="test-key-ecc-p256"
+```
+
+### REST response (ES256)
+
+Vector `rest-response-es256`, key `test-key-ecc-p256`, algorithm `ES256`.
+
+Mirrors the [Complete Response Example](#rest-response-signing): `@status` replaces `@method`, and the OPTIONAL `created` parameter is present.
+
+**Signed message:**
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Digest: sha-256=:IqZyCS4UkeOqoDosER1evBitFIxXpSlu8ekHlucCpVA=:
+Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617600;keyid="test-key-ecc-p256"
+Signature: sig1=:ptCCqbd2WWrDaB8NdInmByqq+dd4VH0bxAdYUp0Fn/jhY7RW7nkhD5NIUSrecDDnAwKM/HlQKe3F0HOkmcWlXA==:
+
+{"id":"chk_123","status":"ready_for_complete","currency":"USD","line_items":[{"id":"li_1","item":{"id":"item_123"},"quantity":2}]}
+```
+
+**Signature base:**
+
+```text
+"@status": 201
+"content-digest": sha-256=:IqZyCS4UkeOqoDosER1evBitFIxXpSlu8ekHlucCpVA=:
+"content-type": application/json
+"@signature-params": ("@status" "content-digest" "content-type");created=1738617600;keyid="test-key-ecc-p256"
+```
+
+### Web Bot Auth-shaped request (Ed25519)
+
+Vector `wba-request-ed25519`, key `poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U`, algorithm `EdDSA`.
+
+Mirrors the dual-audience example in [WBA Interop](#wba-interop). `Signature-Agent` is covered through Dictionary-member selection (`;key="sig1"`, RFC 9421 §2.1.2), so its component value is the serialized member including its `type` parameter. `keyid` is the key's RFC 7638 thumbprint, and `created`, `expires`, `nonce` and `tag` are present. The body and every default UCP component are identical to `rest-request-es256`.
+
+**Signed message:**
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:
+Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U";created=1738617600;expires=1738621200;nonce="p9XobbyV3_aRwb6CmcKmG3ZQejLZxwuWYimRsKPxQQ3H8tBWd4nf3h3pbg-C33JX8COWg6lbPvqeiUmUBoD-sQ";tag="web-bot-auth"
+Signature: sig1=:bX1xKcdFCWatmnLAx27EtY4I6YJnOlR82MLuvJ9Jdnj4Rz8PfpLNPjYAsJK5lICZi0MOgNujBaHokdFXS2WCAQ==:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+**Signature base:**
+
+```text
+"@method": POST
+"@authority": merchant.example.com
+"@path": /checkout-sessions
+"signature-agent";key="sig1": "https://platform.example/.well-known/ucp";type=jwks_uri
+"ucp-agent": profile="https://platform.example/.well-known/ucp"
+"idempotency-key": 550e8400-e29b-41d4-a716-446655440000
+"content-digest": sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:
+"content-type": application/json
+"@signature-params": ("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U";created=1738617600;expires=1738621200;nonce="p9XobbyV3_aRwb6CmcKmG3ZQejLZxwuWYimRsKPxQQ3H8tBWd4nf3h3pbg-C33JX8COWg6lbPvqeiUmUBoD-sQ";tag="web-bot-auth"
+```
+
+### Order webhook delivery (ES256)
+
+Vector `webhook-request-es256`, key `test-key-ecc-p256`, algorithm `ES256`.
+
+Mirrors the [Order webhook example](shopping/order/index.md#signing-business): the business signs with its own key, `UCP-Agent` names the business profile, and `webhook-id` and `webhook-timestamp` are covered in place of an idempotency key.
+
+**Signed message:**
+
+```http
+POST /webhooks/ucp/orders HTTP/1.1
+Host: platform.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://merchant.example/.well-known/ucp"
+Webhook-Timestamp: 1737000000
+Webhook-Id: 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d
+Content-Digest: sha-256=:bJRRL30yFYUOhoU6EyZmE2Nvndq8sT8MoKoA1yZfjoE=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="test-key-ecc-p256"
+Signature: sig1=:QdAsgybMumYi0xegyxNMR/dkNwZKqHXyoHbL1iQb86qcMReFjx4Y5xaBLyxw9my4y3sPEH7rgGbohfWU/5uYug==:
+
+{"id":"ord_456","checkout_id":"chk_123","status":"confirmed"}
+```
+
+**Signature base:**
+
+```text
+"@method": POST
+"@authority": platform.example.com
+"@path": /webhooks/ucp/orders
+"ucp-agent": profile="https://merchant.example/.well-known/ucp"
+"content-digest": sha-256=:bJRRL30yFYUOhoU6EyZmE2Nvndq8sT8MoKoA1yZfjoE=:
+"content-type": application/json
+"webhook-id": 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d
+"webhook-timestamp": 1737000000
+"@signature-params": ("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="test-key-ecc-p256"
+```
+
+### MCP request over streamable HTTP (ES256)
+
+Vector `mcp-request-es256`, key `test-key-ecc-p256`, algorithm `ES256`.
+
+Mirrors the [MCP Transport example](#mcp-transport). The JSON-RPC envelope is the HTTP body and is bound through `Content-Digest` exactly as a REST body is.
+
+**Signed message:**
+
+```http
+POST /mcp HTTP/1.1
+Host: business.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:UNTS0erweQak6csrVzrLFS7odTRMBeuB1nTUEvJiB8g=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="test-key-ecc-p256"
+Signature: sig1=:uDn9pQyObd0kn5JTYlaU3ctx40Sja19s5TM5B0N6PRTLk7VKk+O4+Vx2R1wUQTpLP3we2P8qRyR0zE8k6UNgfg==:
+
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"meta":{"ucp-agent":{"profile":"https://platform.example/.well-known/ucp"},"idempotency-key":"550e8400-e29b-41d4-a716-446655440000"},"id":"chk_123","checkout":{"payment":{"instruments":[{"id":"pi_1","type":"card","handler_id":"tokenizer_1"}]}}}}}
+```
+
+**Signature base:**
+
+```text
+"@method": POST
+"@authority": business.example.com
+"@path": /mcp
+"content-digest": sha-256=:UNTS0erweQak6csrVzrLFS7odTRMBeuB1nTUEvJiB8g=:
+"content-type": application/json
+"ucp-agent": profile="https://platform.example/.well-known/ucp"
+"idempotency-key": 550e8400-e29b-41d4-a716-446655440000
+"@signature-params": ("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="test-key-ecc-p256"
+```
+
 ## References
 
 * [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517) — JSON Web Key (JWK)
