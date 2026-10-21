@@ -112,7 +112,10 @@ Receipts use the existing UCP/AP2 Message Signatures cryptographic profile:
 
 - ES256 **REQUIRED**; ES384 and ES512 OPTIONAL.
 - JCS (RFC 8785) canonicalization.
-- JWK key discovery through `signing_keys[]`.
+- JWK key discovery as defined by the AP2 Mandates extension
+  ([Cryptographic Requirements](ap2-mandates.md#cryptographic-requirements)):
+  `keys[]` in `/.well-known/ucp`, resolved per
+  [Key Discovery](overview.md#key-discovery).
 
 This applies an existing cryptographic profile; it introduces no new algorithm or key-discovery mechanism, and is distinct from RFC 9421 HTTP Message Signatures (transport-layer).
 
@@ -172,6 +175,7 @@ The following examples illustrate §5. With placement resolved (§5.1), they use
 
 ### A.1 Valid at admission, completed successfully
 
+<!-- ucp:example skip reason="illustrative AP2 receipt; placement/signing profile not yet schema-bound (see §7)" -->
 ```json
 {
   "status": "Success",
@@ -194,6 +198,7 @@ The following examples illustrate §5. With placement resolved (§5.1), they use
 
 ### A.2 Expired at admission
 
+<!-- ucp:example skip reason="illustrative AP2 receipt; placement/signing profile not yet schema-bound (see §7)" -->
 ```json
 {
   "status": "Error",
