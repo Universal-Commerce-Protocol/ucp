@@ -1,0 +1,51 @@
+{
+  "id": "V11-atomic-pending-no-partial-commit",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Atomic request with review pending commits nothing",
+  "spec_refs": [
+    "Atomicity"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a",
+    "atomicity": "atomic"
+  },
+  "steps": [
+    {
+      "name": "submit two units; one requires merchant review",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_two_units.json"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/atomic_pending_nothing_committed.json"
+      }
+    },
+    {
+      "name": "Order read while review pending",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "orders/history_before_cancel.json",
+        "note": "no line quantity changed"
+      }
+    }
+  ],
+  "assertions": [
+    "Neither unit commits, including the immediate-eligible unit.",
+    "A pending decision is not a partial atomic commitment."
+  ]
+}

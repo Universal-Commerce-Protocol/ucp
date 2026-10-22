@@ -1,0 +1,4 @@
+{
+  "operation": "cancel",
+  "original_idempotency_key": "abc"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "V17-cross-buyer-lookup-denied",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Another Platform cannot retrieve an attempt by knowing the key",
+  "spec_refs": [
+    "Authorization and scope"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "platform-b looks up platform-a's key on the same Order id",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2/modifications/lookup?operation=cancel",
+        "authenticated_platform": "platform-b",
+        "headers": {
+          "Original-Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"@query\" \"ucp-agent\" \"original-idempotency-key\")"
+        }
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "errors/unauthorized.json"
+      }
+    }
+  ],
+  "assertions": [
+    "Order-level authorization failure returns unauthorized; no attempt data is disclosed.",
+    "If platform-b were authorized for the Order, the lookup is still scoped to platform-b and cannot match platform-a's association."
+  ]
+}

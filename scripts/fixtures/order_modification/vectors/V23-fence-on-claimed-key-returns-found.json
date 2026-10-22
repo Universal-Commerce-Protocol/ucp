@@ -1,0 +1,79 @@
+{
+  "id": "V23-fence-on-claimed-key-returns-found",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Fence on a claimed key installs nothing",
+  "spec_refs": [
+    "Fence operation"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "original admitted (claim exists); its response was lost",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/pending.json"
+      },
+      "client_receives_response": false
+    },
+    {
+      "name": "POST fence for the claimed key",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications/fence",
+        "authenticated_platform": "platform-a",
+        "headers": {
+          "Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/fence_cancel_key.json",
+        "body_note": "body names original_idempotency_key=f5d9d412-537c-4f4c-a9da-42a87e766f34"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "fences/found_claimed.json"
+      }
+    },
+    {
+      "name": "retry of the same fence POST (same key, identical bytes) replays",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications/fence",
+        "authenticated_platform": "platform-a",
+        "headers": {
+          "Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/fence_cancel_key.json",
+        "body_note": "body names original_idempotency_key=f5d9d412-537c-4f4c-a9da-42a87e766f34"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "fences/found_claimed.json"
+      }
+    }
+  ],
+  "assertions": [
+    "The compare-and-set sees the claim: no tombstone is written and the attempt is unaffected.",
+    "The Platform follows the returned attempt.",
+    "The fence POST is idempotent: retrying it returns the original response."
+  ]
+}

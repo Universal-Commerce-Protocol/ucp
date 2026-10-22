@@ -1,0 +1,61 @@
+{
+  "id": "V16-committed-refund-pending",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Cancellation committed is not refund completed",
+  "spec_refs": [
+    "Financial separation"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "cancellation committed",
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "f5d9d412-537c-4f4c-a9da-42a87e766f34",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 201,
+        "body_ref": "responses/committed_refund_pending.json"
+      }
+    },
+    {
+      "name": "Order read shows cancellation committed, refund pending",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "orders/history_after_cancel_refund_pending.json"
+      }
+    },
+    {
+      "name": "later Order read shows refund completed at a different amount than the estimate",
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "orders/history_after_refund_completed.json"
+      }
+    }
+  ],
+  "assertions": [
+    "A Platform may report 'cancellation committed; refund pending' and MUST NOT report 'refund completed' until the adjustment status is completed.",
+    "adjustments[] is authoritative; affected_amount and estimated_refund_amount are not."
+  ]
+}

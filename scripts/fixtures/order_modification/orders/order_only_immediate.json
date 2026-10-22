@@ -1,0 +1,142 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "2026-10-13"
+        }
+      ],
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  },
+  "id": "ord_9f2",
+  "checkout_id": "chk_7c1",
+  "permalink_url": "https://business.example.com/orders/ord_9f2",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": {
+        "id": "prod_li_1",
+        "title": "Trail Running Shoes",
+        "price": 1750
+      },
+      "quantity": {
+        "original": 2,
+        "total": 2,
+        "fulfilled": 0
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 3500
+        },
+        {
+          "type": "total",
+          "amount": 3500
+        }
+      ],
+      "status": "processing"
+    },
+    {
+      "id": "li_2",
+      "item": {
+        "id": "prod_li_2",
+        "title": "Merino Hiking Socks",
+        "price": 2000
+      },
+      "quantity": {
+        "original": 1,
+        "total": 1,
+        "fulfilled": 0
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 2000
+        },
+        {
+          "type": "total",
+          "amount": 2000
+        }
+      ],
+      "status": "processing"
+    }
+  ],
+  "fulfillment": {
+    "expectations": [
+      {
+        "id": "exp_1",
+        "line_items": [
+          {
+            "id": "li_1",
+            "quantity": 2
+          }
+        ],
+        "method_type": "shipping",
+        "destination": {
+          "street_address": "123 Main St",
+          "address_locality": "Austin",
+          "address_region": "TX",
+          "address_country": "US",
+          "postal_code": "78701"
+        },
+        "description": "Ships to 123 Main St"
+      },
+      {
+        "id": "exp_2",
+        "line_items": [
+          {
+            "id": "li_2",
+            "quantity": 1
+          }
+        ],
+        "method_type": "shipping",
+        "destination": {
+          "street_address": "123 Main St",
+          "address_locality": "Austin",
+          "address_region": "TX",
+          "address_country": "US",
+          "postal_code": "78701"
+        },
+        "description": "Ships to 123 Main St"
+      }
+    ],
+    "events": []
+  },
+  "adjustments": [],
+  "totals": [
+    {
+      "type": "subtotal",
+      "amount": 5500
+    },
+    {
+      "type": "fulfillment",
+      "amount": 600
+    },
+    {
+      "type": "total",
+      "amount": 6100
+    }
+  ],
+  "order_version": "v14",
+  "modification": {
+    "granularity": "order_only",
+    "atomicity": "atomic",
+    "operations": [
+      "cancel"
+    ],
+    "order_cancellation": {
+      "available": true,
+      "processing_mode": "immediate",
+      "reversible_amount": 5500,
+      "estimated_refund_amount": 5500
+    }
+  }
+}

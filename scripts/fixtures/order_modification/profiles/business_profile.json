@@ -1,0 +1,43 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "2026-10-13",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/draft/services/shopping/rest.openapi.json",
+          "endpoint": "https://business.example.com/ucp/v1"
+        },
+        {
+          "version": "2026-10-13",
+          "spec": "https://ucp.dev/draft/specification/overview",
+          "transport": "mcp",
+          "schema": "https://ucp.dev/draft/services/shopping/mcp.openrpc.json",
+          "endpoint": "https://business.example.com/ucp/mcp"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "2026-10-13",
+          "spec": "https://ucp.dev/draft/specification/shopping/order",
+          "schema": "https://ucp.dev/draft/schemas/shopping/order.json"
+        }
+      ],
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13",
+          "extends": [
+            "dev.ucp.shopping.order"
+          ],
+          "spec": "https://ucp.dev/draft/specification/shopping/extensions/order-modification",
+          "schema": "https://ucp.dev/draft/schemas/shopping/order_modification.json"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  }
+}

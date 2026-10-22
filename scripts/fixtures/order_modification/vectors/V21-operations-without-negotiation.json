@@ -1,0 +1,57 @@
+{
+  "id": "V21-operations-without-negotiation",
+  "kind": "runtime_conformance_vector",
+  "executed_against_runtime": false,
+  "title": "Operations are unavailable unless the extension was negotiated",
+  "spec_refs": [
+    "Negotiation"
+  ],
+  "setup": {
+    "order": "orders/order_by_unit_merchant_review.json",
+    "authenticated_platform": "platform-a"
+  },
+  "steps": [
+    {
+      "name": "platform profile does not declare the extension; request invokes create_modification",
+      "negotiated": false,
+      "request": {
+        "transport": "rest",
+        "method": "POST",
+        "path": "/orders/ord_9f2/modifications",
+        "headers": {
+          "Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Content-Type": "application/json",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"ucp-agent\" \"idempotency-key\" \"content-digest\" \"content-type\")"
+        },
+        "body_ref": "requests/cancel_unit.json"
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "errors/modification_not_supported.json"
+      }
+    },
+    {
+      "name": "same, via lookup",
+      "negotiated": false,
+      "request": {
+        "transport": "rest",
+        "method": "GET",
+        "path": "/orders/ord_9f2/modifications/lookup?operation=cancel",
+        "authenticated_platform": "platform-a",
+        "headers": {
+          "Original-Idempotency-Key": "3b1e8a54-6c0d-4e0a-9f7a-1d2c5b8e4a77",
+          "Signature-Input": "sig1=(\"@method\" \"@authority\" \"@path\" \"@query\" \"ucp-agent\" \"original-idempotency-key\")"
+        }
+      },
+      "response": {
+        "http_status": 200,
+        "body_ref": "errors/modification_not_supported.json"
+      }
+    }
+  ],
+  "assertions": [
+    "The shared dev.ucp.shopping descriptor lists the operations but listing is not availability.",
+    "The Business creates no record, claims no key, and writes no fence.",
+    "A conforming Platform never sends these requests when negotiation did not succeed."
+  ]
+}

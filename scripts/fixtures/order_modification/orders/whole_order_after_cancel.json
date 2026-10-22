@@ -1,0 +1,195 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.order": [
+        {
+          "version": "2026-10-13"
+        }
+      ],
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  },
+  "id": "ord_9f2",
+  "checkout_id": "chk_7c1",
+  "permalink_url": "https://business.example.com/orders/ord_9f2",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_1",
+      "item": {
+        "id": "prod_li_1",
+        "title": "Trail Running Shoes",
+        "price": 1750
+      },
+      "quantity": {
+        "original": 2,
+        "total": 0,
+        "fulfilled": 0
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 0
+        },
+        {
+          "type": "total",
+          "amount": 0
+        }
+      ],
+      "status": "removed"
+    },
+    {
+      "id": "li_2",
+      "item": {
+        "id": "prod_li_2",
+        "title": "Merino Hiking Socks",
+        "price": 2000
+      },
+      "quantity": {
+        "original": 1,
+        "total": 0,
+        "fulfilled": 0
+      },
+      "totals": [
+        {
+          "type": "subtotal",
+          "amount": 0
+        },
+        {
+          "type": "total",
+          "amount": 0
+        }
+      ],
+      "status": "removed"
+    }
+  ],
+  "fulfillment": {
+    "expectations": [
+      {
+        "id": "exp_1",
+        "line_items": [
+          {
+            "id": "li_1",
+            "quantity": 2
+          }
+        ],
+        "method_type": "shipping",
+        "destination": {
+          "street_address": "123 Main St",
+          "address_locality": "Austin",
+          "address_region": "TX",
+          "address_country": "US",
+          "postal_code": "78701"
+        },
+        "description": "Ships to 123 Main St"
+      },
+      {
+        "id": "exp_2",
+        "line_items": [
+          {
+            "id": "li_2",
+            "quantity": 1
+          }
+        ],
+        "method_type": "shipping",
+        "destination": {
+          "street_address": "123 Main St",
+          "address_locality": "Austin",
+          "address_region": "TX",
+          "address_country": "US",
+          "postal_code": "78701"
+        },
+        "description": "Ships to 123 Main St"
+      }
+    ],
+    "events": []
+  },
+  "adjustments": [
+    {
+      "id": "adj_cancel_9",
+      "type": "cancellation",
+      "occurred_at": "2026-10-13T10:00:00Z",
+      "status": "completed",
+      "line_items": [
+        {
+          "id": "li_1",
+          "quantity": -2
+        },
+        {
+          "id": "li_2",
+          "quantity": -1
+        }
+      ],
+      "description": "Whole-order cancellation committed."
+    },
+    {
+      "id": "adj_refund_9",
+      "type": "refund",
+      "occurred_at": "2026-10-13T10:00:00Z",
+      "status": "pending",
+      "totals": [
+        {
+          "type": "total",
+          "amount": -6100
+        }
+      ],
+      "description": "Refund for cancelled order."
+    }
+  ],
+  "totals": [
+    {
+      "type": "subtotal",
+      "amount": 0
+    },
+    {
+      "type": "fulfillment",
+      "amount": 0
+    },
+    {
+      "type": "total",
+      "amount": 0
+    }
+  ],
+  "order_version": "v21",
+  "modification": {
+    "granularity": "by_unit",
+    "atomicity": "per_unit",
+    "operations": [],
+    "order_cancellation": {
+      "available": false,
+      "reason_code": "already_canceled"
+    },
+    "units": [
+      {
+        "id": "unit_goods_1",
+        "targets": [
+          {
+            "type": "line_item",
+            "id": "li_1",
+            "quantity": 2
+          }
+        ],
+        "operations": [],
+        "reason_code": "already_canceled"
+      },
+      {
+        "id": "unit_goods_2",
+        "targets": [
+          {
+            "type": "line_item",
+            "id": "li_2",
+            "quantity": 1
+          }
+        ],
+        "operations": [],
+        "reason_code": "already_canceled"
+      }
+    ]
+  }
+}

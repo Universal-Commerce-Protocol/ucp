@@ -1,0 +1,11 @@
+{
+  "operations": [
+    {
+      "op": "cancel",
+      "target": {
+        "type": "unit",
+        "id": "unit_goods_2"
+      }
+    }
+  ]
+}

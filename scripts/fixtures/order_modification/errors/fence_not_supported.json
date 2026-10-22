@@ -1,0 +1,21 @@
+{
+  "ucp": {
+    "version": "2026-10-13",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.order_modification": [
+        {
+          "version": "2026-10-13"
+        }
+      ]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "fence_not_supported",
+      "severity": "unrecoverable",
+      "content": "This Business cannot guarantee a permanent key tombstone."
+    }
+  ]
+}
