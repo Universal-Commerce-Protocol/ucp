@@ -52,23 +52,24 @@ Carts support:
 
 ## Cart-to-Checkout Conversion
 
-When the cart capability is negotiated, platforms can convert a cart to checkout
-by providing `cart_id` in the Create Checkout request. The cart contents
-(`line_items`, `context`, `buyer`) initialize the checkout session.
+When the Cart capability is negotiated, the Platform converts a cart to a
+checkout by providing `cart_id` in the Create Checkout request. The cart
+contents (`line_items`, `context`, `buyer`) initialize the checkout session.
 
 <!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
 ```json
 {
-  "cart_id": "cart_abc123",
-  "line_items": []
+  "cart_id": "cart_abc123"
 }
 ```
 
-Because the cart checkout extension composes onto the base Checkout schema,
-`line_items` remains a required request field; the platform MUST include line_items and SHOULD set it to an empty array (`"line_items": []`).
-array (`"line_items": []`). The business MUST use the cart contents and MUST
-ignore overlapping fields in the checkout payload. The `cart_id` parameter is
-only available when the cart capability is advertised in the business profile.
+The Platform **MAY** omit `line_items`, or send an empty array
+(`"line_items": []`), when it provides `cart_id`. The Business **MUST** use the
+cart contents and **MUST** ignore overlapping fields in the checkout payload.
+All other input and negotiation requirements of
+[Create Checkout](../checkout/index.md#create-checkout) apply to the request.
+`cart_id` is a checkout initialization input only; the Business does not return
+it in checkout responses.
 
 **Idempotent conversion:**
 
