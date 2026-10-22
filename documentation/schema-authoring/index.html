@@ -3063,6 +3063,11 @@ prioritize what to validate next.</p>
 payload for the named operation.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>&lt;!-- ucp:example schema=shopping/cart op=create direction=request --&gt;
 </span></code></pre></div>
+<p>The coverage check runs on the authored example before any scaffold merge:
+every required field must be present or elided (an elided field counts as
+acknowledged), and where the schema offers required-key <code>anyOf</code> alternatives,
+at least one alternative must be satisfied by the example's own keys. Scaffold
+data cannot satisfy missing required-key coverage.</p>
 <p><strong>Sub-tree with surrounding context.</strong> Use <code>target=</code> when the example focuses
 on one field. The example is spliced into a known-valid scaffold at that
 target path; the rest uses the scaffold's defaults.</p>
@@ -3084,8 +3089,11 @@ a profile's <code>business_schema</code>, or a named sub-type — select it expl
 <code>def=</code>:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>&lt;!-- ucp:example schema=transports/jsonrpc def=error_response op=read --&gt;
 </span></code></pre></div>
-<p><strong>Empty body.</strong> A <code>{}</code> payload (e.g. cancel, GET) validates trivially against
-the matching op + direction. No special syntax needed.</p>
+<p><strong>Empty body.</strong> A <code>{}</code> example annotated with <code>op=read</code> or <code>op=cancel</code> and
+<code>direction=request</code>, with no <code>def=</code> or <code>target=</code>, passes without body
+validation: those operations have no request body. Every other <code>{}</code> payload
+(a response, any other operation, or an explicit <code>def=</code> or <code>target=</code>
+selection) is validated normally against its schema. No special syntax needed.</p>
 <p><strong>Extension fields.</strong> Capability schemas are open, so a field that only an
 extension defines (e.g. <code>fulfillment</code> or <code>discounts</code> on checkout) would pass
 validation against the capability unchecked. When an example carries such a
