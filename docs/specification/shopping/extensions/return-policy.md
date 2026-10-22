@@ -290,10 +290,11 @@ price. An entry carries `amount` or `basis_points` but not both, and
 An entry that lists `methods` applies only to those channels; an entry without
 `methods` applies to every channel. When more than one entry applies to a fee on
 a channel, an entry that lists the channel takes precedence over one that does
-not, and an entry with a `type` takes precedence over one without. For example,
-`{ "methods": ["in_store"], "amount": 0 }` makes in-store returns free even when
-another entry charges a restocking fee on every channel. An entry may list a
-channel the policy's `methods` does not.
+not; among entries that both list the channel or both do not, an entry with a
+`type` takes precedence over one without. For example, `{ "methods":
+["in_store"], "amount": 0 }` makes in-store returns free even when another entry
+charges a restocking fee on every channel. An entry may list a channel the
+policy's `methods` does not.
 
 A business **MUST NOT** carry two entries of the same `type`, or two entries
 without `type`, that apply to the same channel. If it does, a platform treats
@@ -456,14 +457,14 @@ its `display_text` names the condition (opened items) under which it applies.
   {
     "type": "dev.ucp.shopping.policy.return",
     "description": {
-      "plain": "30-day returns from delivery. Refund to original payment or exchange. Free in-store; $5 return shipping by mail. 15% restocking fee on opened items."
+      "plain": "30-day returns from delivery. Refund to original payment or exchange. No return shipping cost in store; $5 by mail. 15% restocking fee on opened items."
     },
     "eligibility": { "type": "window", "duration": "P30D", "anchor": "delivered" },
     "supported_resolutions": ["original_payment_method", "exchange"],
     "methods": ["in_store", "by_mail"],
     "fees": [
       { "type": "dev.ucp.shopping.fee.restocking", "basis_points": 1500, "display_text": "15% restocking fee on opened items" },
-      { "type": "dev.ucp.shopping.fee.return_shipping", "methods": ["in_store"], "amount": 0 },
+      { "amount": 0 },
       { "type": "dev.ucp.shopping.fee.return_shipping", "methods": ["by_mail"], "amount": 500, "display_text": "Return shipping" }
     ],
     "url": "https://example.com/returns"

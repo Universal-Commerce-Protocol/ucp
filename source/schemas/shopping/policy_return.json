@@ -12,7 +12,7 @@
       "properties": {
         "eligibility": {
           "$ref": "#/$defs/return_eligibility",
-          "description": "Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When `type` is `not_accepted`, the covered items cannot be returned and `supported_resolutions`, `methods`, and `fees` MUST be omitted."
+          "description": "Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When `type` is `not_accepted`, the business's return policy does not accept returns of the covered items, and `supported_resolutions`, `methods`, and `fees` MUST be omitted."
         },
         "supported_resolutions": {
           "type": "array",
@@ -150,7 +150,7 @@
         },
         "methods": {
           "type": "array",
-          "description": "Return channels this fee applies to; omitted means every channel. A fee with `methods` overrides the fee of the same `type` without `methods` for those channels. A channel need not be listed in the policy's `methods`. When more than one entry applies to a fee on a channel, an entry that lists the channel takes precedence over one that does not, and an entry with a `type` takes precedence over one without.",
+          "description": "Return channels this fee applies to; omitted means every channel. A channel need not be listed in the policy's `methods`. When more than one entry applies to a fee on a channel, an entry that lists the channel takes precedence over one that does not; among entries that both list the channel or both do not, an entry with a `type` takes precedence over one without.",
           "minItems": 1,
           "uniqueItems": true,
           "items": {
