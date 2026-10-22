@@ -4431,20 +4431,21 @@ collection before purchase intent is established.</p>
 </tbody>
 </table>
 <h2 id="cart-to-checkout-conversion">Cart-to-Checkout Conversion<a class="headerlink" href="#cart-to-checkout-conversion" title="Permanent link">&para;</a></h2>
-<p>When the cart capability is negotiated, platforms can convert a cart to checkout
-by providing <code>cart_id</code> in the Create Checkout request. The cart contents
-(<code>line_items</code>, <code>context</code>, <code>buyer</code>) initialize the checkout session.</p>
+<p>When the Cart capability is negotiated, the Platform converts a cart to a
+checkout by providing <code>cart_id</code> in the Create Checkout request. The cart
+contents (<code>line_items</code>, <code>context</code>, <code>buyer</code>) initialize the checkout session.</p>
 <!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;cart_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cart_abc123&quot;</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;line_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;cart_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cart_abc123&quot;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Because the cart checkout extension composes onto the base Checkout schema,
-<code>line_items</code> remains a required request field; the platform MUST include line_items and SHOULD set it to an empty array (<code>"line_items": []</code>).
-array (<code>"line_items": []</code>). The business MUST use the cart contents and MUST
-ignore overlapping fields in the checkout payload. The <code>cart_id</code> parameter is
-only available when the cart capability is advertised in the business profile.</p>
+<p>The Platform <strong>MAY</strong> omit <code>line_items</code>, or send an empty array
+(<code>"line_items": []</code>), when it provides <code>cart_id</code>. The Business <strong>MUST</strong> use the
+cart contents and <strong>MUST</strong> ignore overlapping fields in the checkout payload.
+All other input and negotiation requirements of
+<a href="../checkout/#create-checkout">Create Checkout</a> apply to the request.
+<code>cart_id</code> is a checkout initialization input only; the Business does not return
+it in checkout responses.</p>
 <p><strong>Idempotent conversion:</strong></p>
 <p>If an incomplete checkout already exists for the given <code>cart_id</code>, the business
 MUST return the existing checkout session rather than creating a new one. This

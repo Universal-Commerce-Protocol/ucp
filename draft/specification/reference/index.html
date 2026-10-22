@@ -8515,8 +8515,14 @@ within the UCP.</p>
 <tr>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
-<td style="text-align: left;"><strong>Required</strong>; omitted on complete</td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;"><strong>Required</strong>; optional on create, omitted on complete</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
+</tr>
+<tr>
+<td style="text-align: left;">cart_id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Optional; omitted on update &amp; complete</td>
+<td style="text-align: left;">Cart ID for checkout initialization. The Business MUST reject requests using it without negotiated Cart support. Cart contents take precedence over overlapping checkout fields; line_items may be omitted or empty.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -13171,7 +13177,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -13347,7 +13353,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -13638,7 +13644,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -13983,7 +13989,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -14325,7 +14331,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -14913,7 +14919,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -15267,7 +15273,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
@@ -16563,7 +16569,7 @@ within the UCP.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>

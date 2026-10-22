@@ -7020,7 +7020,7 @@ line items, totals, and buyer information.</p>
 <td style="text-align: left;">line_items</td>
 <td style="text-align: left;">Array[<a href="/draft/specification/reference/#line-item">Line Item Response</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
-<td style="text-align: left;">List of line items being checked out.</td>
+<td style="text-align: left;">List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.</td>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
