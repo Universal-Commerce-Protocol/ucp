@@ -198,37 +198,30 @@ For example, a Business sells bananas by the pound with `quantity_unit` `{ "unit
 
 The checkout `status` field indicates the current phase of the session and determines what processing is required next. The business sets the status; the platform receives messages indicating what's needed to progress.
 
-```text
-       +------------+                         +---------------------+
-       | incomplete |<----------------------->| requires_escalation |
-       +-----+------+                         |   (buyer handoff    |
-             |                                |  via continue_url)  |
-             | all info collected             +----------+----------+
-             v                                           |
-    +------------------+                                 |
-    |ready_for_complete|                                 |
-    |                  |                                 |
-    | (platform can    |                                 | continue_url
-    | call Complete    |                                 |
-    |   Checkout)      |                                 |
-    +--------+---------+                                 |
-             |                                           |
-             | Complete Checkout                         |
-             v                                           |
-   +--------------------+                                |
-   |complete_in_progress|                                |
-   +---------+----------+                                |
-             |                                           |
-             +-----------------------+-------------------+
-                                     v
-                               +-------------+
-                               |  completed  |
-                               +-------------+
+```
+stateDiagram-v2
+    [*] --> incomplete
 
-                               +-------------+
-                               |  canceled   |
-                               +-------------+
-          (session invalid/expired - can occur from any state)
+    incomplete --> requires_escalation: buyer handoff
+    requires_escalation --> incomplete: recoverable update
+
+    incomplete --> ready_for_complete: all info collected
+    ready_for_complete --> incomplete: Update / Complete (recoverable)
+
+    ready_for_complete --> requires_escalation: Complete Checkout (escalation)
+    ready_for_complete --> complete_in_progress: Complete Checkout (async)
+    ready_for_complete --> completed: Complete Checkout (sync)
+
+    complete_in_progress --> requires_escalation: continue_url
+    complete_in_progress --> completed
+
+    requires_escalation --> completed: continue_url
+
+    canceled
+    note right of canceled
+        Session invalid/expired
+        (from any active state)
+    end note
 ```
 
 ### Status Values
