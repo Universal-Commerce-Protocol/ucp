@@ -386,6 +386,15 @@ def _is_ellipsis(value) -> bool:
   )
 
 
+def escape_pointer_token(token: str) -> str:
+  """Escape one JSON Pointer reference token (RFC 6901, section 3).
+
+  `~` becomes `~0` and `/` becomes `~1`, in that order. ucp-schema reports
+  validation error paths in this form, so elision paths must match it.
+  """
+  return token.replace("~", "~0").replace("/", "~1")
+
+
 def strip_ellipsis(obj, _path="", _paths=None):
   """Replace ellipsis markers with empty defaults.
 
@@ -399,7 +408,7 @@ def strip_ellipsis(obj, _path="", _paths=None):
   if isinstance(obj, dict):
     result = {}
     for k, v in obj.items():
-      child_path = f"{_path}/{k}"
+      child_path = f"{_path}/{escape_pointer_token(k)}"
       if v == "...":
         _paths.add(child_path)
         continue
@@ -440,7 +449,7 @@ def split_path(path: str) -> list[tuple[str, str | None]]:
 
   Bare names are dot-separated (`$.a.b`) and may carry a single array
   index (`$.a[0]`). Names that are not bare-legal are written in
-  bracket-quoted form (`$.a['x.y'][0]`) — required for the
+  bracket-quoted form (`$.a['x.y'][0]`), required for the
   reverse-domain identifiers and scope tokens UCP uses as object keys,
   such as `dev.ucp.common.identity_linking` and
   `dev.ucp.shopping.order:read`, whose dots and colons would otherwise
@@ -483,7 +492,7 @@ def jsonpath_to_pointer(path: str) -> str:
     return ""
   pointer_parts: list[str] = []
   for name, idx in segments:
-    pointer_parts.append(name)
+    pointer_parts.append(escape_pointer_token(name))
     if idx is not None:
       pointer_parts.append(idx)
   return "".join(f"/{part}" for part in pointer_parts)

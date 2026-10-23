@@ -721,6 +721,50 @@ def test_jsonpath_quoted_keys() -> None:
     _check("jsonpath_unquoted_dotted_key_raises", True)
 
 
+def test_pointer_escaping() -> None:
+  """Quoted keys may hold `/` or `~`; pointers escape them per RFC 6901.
+
+  ucp-schema reports error paths with `~` as `~0` and `/` as `~1`
+  (`{"a/b": {"n": "x"}}` failing on `n` is reported at `/a~1b/n`), so
+  elision paths built from target= and from elided keys must use the same
+  form, or a suppressed error would be reported and vice versa.
+  """
+  _check(
+    "pointer_escapes_slash",
+    v.jsonpath_to_pointer("$.x['a/b'][0]") == "/x/a~1b/0",
+  )
+  _check(
+    "pointer_escapes_tilde",
+    v.jsonpath_to_pointer("$.x['c~d']") == "/x/c~0d",
+  )
+  # `~` first, so a literal `~1` in a key is not read back as `/`.
+  _check(
+    "pointer_escapes_tilde_before_slash",
+    v.jsonpath_to_pointer("$['~1']") == "/~01",
+  )
+  _check(
+    "pointer_leaves_dots_and_colons",
+    v.jsonpath_to_pointer("$['dev.ucp.shopping.order:read']")
+    == "/dev.ucp.shopping.order:read",
+  )
+
+  _, paths = v.strip_ellipsis({"a/b": "...", "c~d": {"n": "..."}})
+  _check(
+    "strip_ellipsis_escapes_keys",
+    paths == {"/a~1b", "/c~0d/n"},
+    f"got {sorted(paths)}",
+  )
+
+  # The two halves joined, as process_block does for target=, give the
+  # path ucp-schema itself reports.
+  target_pointer = v.jsonpath_to_pointer("$['a/b']")
+  _, rel = v.strip_ellipsis({"n": "..."})
+  _check(
+    "pointer_joined_matches_validator_form",
+    {f"{target_pointer}{r}" for r in rel} == {"/a~1b/n"},
+  )
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -738,6 +782,7 @@ def main() -> int:
   test_extract_blocks()
   test_scaffold_resolution()
   test_jsonpath_quoted_keys()
+  test_pointer_escaping()
   test_resolve_schema_cache_key()
   test_process_block_integration()
   return _report()
