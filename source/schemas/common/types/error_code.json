@@ -12,6 +12,7 @@
     "payment_failed",
     "eligibility_invalid",
     "identity_required",
-    "insufficient_scope"
+    "insufficient_scope",
+    "purchase_option_unavailable"
   ]
 }

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription_schedule.json",
+  "title": "Subscription Schedule",
+  "description": "One run of recurring orders on one set of terms: a buyer-facing `description`, each order's `totals`, and when the run starts and ends. There is no recurrence vocabulary on the wire.",
+  "type": "object",
+  "required": [
+    "description"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "description": {
+      "$ref": "../../common/types/description.json",
+      "description": "Complete buyer-facing statement of this run: what each order costs, how often, from when, and until when. Sufficient on its own; a Platform can render it verbatim."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/total.json"
+      },
+      "minItems": 1,
+      "description": "Breakdown of each recurring order, as a line item's `totals`, with exactly one `total` entry. Per unit on a catalog variant; for the line at its quantity on a cart or checkout. Before taxes, fulfillment, and fees unless the Business can state them.",
+      "contains": {
+        "properties": {
+          "type": {
+            "const": "total"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "starts_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 date-time when the first order under this schedule is placed. Supplementary to `description`; omitted where the Business cannot yet determine it."
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 date-time after which no order is placed under this schedule, before the next schedule's `starts_at`. On the last schedule it marks a subscription that ends on its own; omitted there, the orders continue until the buyer cancels."
+    }
+  }
+}
