@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/common/types/duration.json",
+  "title": "Duration",
+  "description": "A length of time as an ISO 8601 duration (RFC 3339 Appendix A grammar) with whole-number components greater than zero: weeks alone, or years, months, and days in that order, optionally followed by `T` and hours, minutes, and seconds in that order, each at most once (e.g., `P30D` is 30 days, `PT30M` is 30 minutes, `P1M` is one month; `T` separates date units from time units, so `M` before it means months and after it minutes). It states a length, not an instant; resolving it to a calendar time is up to the schema that uses it.",
+  "type": "string",
+  "format": "duration",
+  "pattern": "^P(?:[1-9]\\d*W|(?:[1-9]\\d*Y(?:[1-9]\\d*M)?(?:[1-9]\\d*D)?|[1-9]\\d*M(?:[1-9]\\d*D)?|[1-9]\\d*D)(?:T(?:[1-9]\\d*H(?:[1-9]\\d*M)?(?:[1-9]\\d*S)?|[1-9]\\d*M(?:[1-9]\\d*S)?|[1-9]\\d*S))?|T(?:[1-9]\\d*H(?:[1-9]\\d*M)?(?:[1-9]\\d*S)?|[1-9]\\d*M(?:[1-9]\\d*S)?|[1-9]\\d*S))$"
+}

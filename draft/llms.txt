@@ -100,6 +100,7 @@ specifications:
 - [Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md): Fulfillment extension for checkouts, defining delivery methods, pickup destinations, and method-agnostic UI rendering contracts.
 - [Discounts](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md): Discount Extension, covering discount code discovery, applied discounts, allocation method stacking orders, rejected code message handling, and automatic or provisional eligibility promotions.
 - [Buyer Consent](http://ucp.dev/draft/specification/shopping/extensions/buyer-consent/index.md): Buyer Consent Extension, defining data schemas for transmitting buyer privacy choices (analytics, marketing, personalization) to assist with privacy compliance (CCPA/GDPR).
+- [Return Policy](http://ucp.dev/draft/specification/shopping/extensions/return-policy/index.md): Return Policy Extension, defining the dev.ucp.shopping.policy.return type on the core policies primitive with machine-readable return terms: an explicit eligibility statement (a return window with anchor, no time limit, or returns not accepted), supported resolutions, return channels, and typed return fees optionally scoped to channels, across catalog, cart, checkout, and order.
 
 ## Lodging Booking Capability
 
