@@ -297,6 +297,38 @@ def test_docs_mode_spec_ignores_documentation_links() -> None:
 # -----------------------------------------------------------
 
 
+def test_site_base_path_is_stripped_once() -> None:
+  """A nested directory matching the mount path must remain in the target."""
+  with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp, "site")
+    _build_site(
+      root,
+      {
+        "nested_absolute": "https://ucp.dev/ucp/ucp/target/#nested",
+        "nested_missing": "https://ucp.dev/ucp/ucp/target/#real",
+        "mounted_root": "/ucp/target/#real",
+        "relative_nested": "ucp/target/#nested",
+      },
+    )
+    nested = root / "ucp/target"
+    nested.mkdir(parents=True)
+    (nested / "index.html").write_text(
+      '<h2 id="nested">Nested</h2>', encoding="utf-8"
+    )
+    out = _run(root, Path(tmp), {"SITE_URL": "https://ucp.dev/ucp/"})
+    for case in ("nested_absolute", "mounted_root", "relative_nested"):
+      _check(
+        f"mounted_site_resolves[{case}]",
+        not _flagged(out, case),
+        f"valid target reported: {out}",
+      )
+    _check(
+      "mounted_site_reports_nested_missing_anchor",
+      _flagged(out, "nested_missing"),
+      "validated an anchor on the root target instead of the nested target",
+    )
+
+
 def main() -> int:
   """Run all contract tests and report. Exit 0 on pass, 1 on failure."""
   print("Running check_links contract tests...\n")
@@ -307,6 +339,7 @@ def main() -> int:
   test_exit_code_signals_failure()
   test_linkignore_suppresses_but_not_raw_markdown()
   test_docs_mode_spec_ignores_documentation_links()
+  test_site_base_path_is_stripped_once()
   return _report()
 
 
