@@ -55,8 +55,8 @@ Capabilities operate at three access levels:
 | Level | Authentication | Example |
 | :---- | :------------- | :------ |
 | **Public** | None | Browse a public catalog |
-| **Agent-authenticated** | Platform credentials (`client_id` / `client_secret`) | Guest checkout, create a cart |
-| **User-authenticated** | Platform credentials + user identity token | Saved addresses, full order history, personalized pricing |
+| **Agent-authenticated** | Platform client credentials | Guest checkout, create a cart |
+| **User-authenticated** | Platform client credentials + user identity token | Saved addresses, full order history, personalized pricing |
 
 Identity linking bridges agent-authenticated to user-authenticated access: the
 platform obtains a user identity token by completing the OAuth flow described
@@ -341,11 +341,24 @@ Platforms evaluate each candidate entry from Step 1 through Steps 2
 and 3. An entry that fails either step (for example, because its metadata
 reports a different `issuer`) **MUST** be discarded and **MUST NOT**
 by itself cause discovery to fail. Platforms **MAY** also exclude entries
-for authorization servers at which they cannot act as a client (for
-example, because they hold no client registration there). Among the
-remaining entries, platforms **SHOULD** prefer array order, which
-expresses the business's preference. Discovery fails only when no entry
-remains.
+for authorization servers at which they cannot act as a client (see
+[Client Identity](#client-identity)). Among the remaining entries,
+platforms **SHOULD** prefer array order, which expresses the business's
+preference. Discovery fails only when no entry remains.
+
+### Client Identity
+
+This specification does not define client registration. A platform
+acts as an OAuth client of the business's authorization server using a
+client identity it has either registered out of band with that server
+or established through a client identification method the server
+advertises in its metadata — for example, Client ID Metadata Documents
+([draft-ietf-oauth-client-id-metadata-document](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document){ target="_blank" }),
+where `client_id` is an HTTPS URL at which the platform publishes its
+redirect URIs and public keys. Either way, the platform authenticates
+at the token endpoint with a method the server lists in
+`token_endpoint_auth_methods_supported` (see
+[For Platforms](#for-platforms)).
 
 ## Account Linking Flow
 
@@ -1269,18 +1282,26 @@ https://agent.example.com/callback
 
 Platform validates `state` matches and `iss` equals the discovered `issuer`.
 
-**Step 5 — Token exchange.** Platform calls token endpoint:
+**Step 5 — Token exchange.** Platform calls the token endpoint,
+authenticating with `private_key_jwt`
+([RFC 7523 §2.2](https://datatracker.ietf.org/doc/html/rfc7523#section-2.2){ target="_blank" }):
 
 ```http
 POST https://merchant.example.com/oauth2/token
-Authorization: Basic <base64(client_id:client_secret)>
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=authorization_code
 &code=<auth-code>
 &redirect_uri=https://agent.example.com/callback
 &code_verifier=<verifier>
+&client_id=platform-client-id
+&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+&client_assertion=<signed-jwt>
 ```
+
+A public client would instead identify itself with `client_id` alone
+(no client assertion) and rely on PKCE as proof of possession of the
+authorization code (see [For Platforms](#for-platforms)).
 
 Business validates `code_verifier` against stored `code_challenge`, returns:
 
