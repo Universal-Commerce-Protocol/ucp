@@ -80,6 +80,11 @@ jobs:
       - name: Validate documentation examples
         run: uv run python scripts/validate_examples.py --schema-base source/schemas/
 
+      # Draft EP #944 conformance vectors (reference model, not a production
+      # Business). Needs the ucp-schema binary installed by setup-build-env.
+      - name: Run order consultation conformance vectors
+        run: uv run python scripts/test_order_consultation.py
+
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
