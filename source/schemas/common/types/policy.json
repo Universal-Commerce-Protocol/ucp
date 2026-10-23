@@ -20,10 +20,11 @@
     },
     "applies_to": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "string"
       },
-      "description": "RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. When omitted, the policy applies to the entire response. When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves."
+      "description": "RFC 9535 JSONPath expressions identifying the nodes this policy applies to, relative to the embedding response root (e.g., `$.line_items[0]` in cart/checkout, `$.products[2]` in catalog). Each target covers the node it names and everything nested under it, so a target on a product also covers its variants. A singular query (RFC 9535 Section 2.3.5.1; name and index selectors only) names a single node; filters, wildcards, and slices match a set. Omit `applies_to` to apply the policy to the entire response; when present it MUST list at least one target (an empty array is not a valid way to express response-wide scope). When policies of the same `type` contest a node, the narrowest target wins and overrides the rest. See the Policies section for how specificity resolves."
     },
     "url": {
       "type": "string",
