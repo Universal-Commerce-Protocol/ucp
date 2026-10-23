@@ -25,6 +25,10 @@
       "minimum": 1,
       "default": 1,
       "description": "Maximum number of instruments allowed from this group. Defaults to 1. MUST be greater than or equal to `min`."
+    },
+    "schedule_type": {
+      "type": "string",
+      "description": "Timing class of the payment schedules this group's instruments may fund, in the vocabulary of a payment schedule's `type`. `immediate` is the only value with defined meaning: the group funds what is due at completion, and an instrument assigned to it is never charged after completion, for any purpose. Absent, the group funds any schedule."
     }
   }
 }
