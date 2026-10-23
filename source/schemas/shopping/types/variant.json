@@ -13,7 +13,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Global ID (GID) uniquely identifying this variant. Used as item.id in checkout."
+      "description": "Global ID (GID) uniquely identifying this variant. When `offers` is absent, this is also the item ID used as `item.id` in checkout. When `offers` is present, the item ID at checkout is the selected `offers[].item_id` instead, and this ID serves only to identify the variant."
     },
     "sku": {
       "type": "string",
@@ -112,7 +112,7 @@
     },
     "seller": {
       "type": "object",
-      "description": "Optional seller context for this variant.",
+      "description": "Optional display-only seller context for the variant as a whole. This does not assign a Merchant of Record. When a variant is sold by more than one seller, per-offer attribution and the Merchant of Record are carried by `offers[].seller`.",
       "properties": {
         "name": {
           "type": "string",
@@ -126,6 +126,14 @@
           "description": "Seller policy and information links."
         }
       }
+    },
+    "offers": {
+      "type": "array",
+      "items": {
+        "$ref": "offer.json"
+      },
+      "minItems": 1,
+      "description": "Offers for this variant from more than one seller. Optional and additive. When present, each entry attributes the offer to a specific seller — `offers[].seller.domain` is the Merchant of Record — and carries that seller's own item ID (`item_id`) and authoritative `price`. A Platform MUST resolve checkout from the selected offer's `item_id` and MUST NOT use `variant.id`, and MUST treat `offers[].price` as authoritative over the display-only `variant.price`. When absent, the Business serving the catalog is the single seller and Merchant of Record, `variant.price` is authoritative, and `variant.id` is the item ID used at checkout."
     }
   }
 }
