@@ -3,11 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/types/message_warning.json",
   "title": "Message Warning",
   "type": "object",
-  "required": [
-    "type",
-    "code",
-    "content"
-  ],
+  "required": ["type", "code", "content"],
   "properties": {
     "type": {
       "type": "string",
@@ -27,10 +23,7 @@
     },
     "content_type": {
       "type": "string",
-      "enum": [
-        "plain",
-        "markdown"
-      ],
+      "enum": ["plain", "markdown"],
       "default": "plain",
       "description": "Content format, default = plain."
     },

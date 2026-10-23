@@ -5,9 +5,7 @@
   "description": "Profile of an individual guest staying at the accommodation.",
   "type": "object",
   "additionalProperties": true,
-  "required": [
-    "id"
-  ],
+  "required": ["id"],
   "properties": {
     "id": {
       "type": "string",

@@ -68,10 +68,7 @@
     }
   ],
   "if": {
-    "anyOf": [
-      { "required": ["hours"] },
-      { "required": ["exception_hours"] }
-    ]
+    "anyOf": [{ "required": ["hours"] }, { "required": ["exception_hours"] }]
   },
   "then": {
     "required": ["timezone"]

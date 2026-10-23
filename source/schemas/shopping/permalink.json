@@ -26,9 +26,7 @@
       "platform_schema": {
         "title": "Permalink Capability (Platform)",
         "description": "Platform-level permalink capability declaration. Platforms advertise support for shopping permalinks; the permalink endpoint is business-specific, so no platform config is required.",
-        "allOf": [
-          { "$ref": "../capability.json#/$defs/platform_schema" }
-        ]
+        "allOf": [{ "$ref": "../capability.json#/$defs/platform_schema" }]
       },
       "business_schema": {
         "title": "Permalink Capability (Business)",

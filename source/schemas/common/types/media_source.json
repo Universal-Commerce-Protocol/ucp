@@ -4,9 +4,7 @@
   "title": "Media Source",
   "description": "One encoded rendition of the parent media item: a format or resolution of an image or video, a streaming manifest, or a file format of a 3D model. The Platform selects a source by `mime_type` and dimensions.",
   "type": "object",
-  "required": [
-    "url"
-  ],
+  "required": ["url"],
   "properties": {
     "url": {
       "type": "string",

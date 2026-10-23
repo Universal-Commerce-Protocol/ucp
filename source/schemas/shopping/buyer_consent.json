@@ -34,7 +34,9 @@
         "segments": {
           "type": "object",
           "description": "Optional refinements scoping this purpose to specific channels, vendors, or programs. Keys are reverse-DNS identifiers. UCP currently defines two well-known segment identifiers under `dev.ucp.consent.marketing`: `dev.ucp.consent.marketing.email`, `dev.ucp.consent.marketing.sms`. Other segments follow vendor or merchant reverse-DNS conventions.",
-          "propertyNames": { "$ref": "../common/types/reverse_domain_name.json" },
+          "propertyNames": {
+            "$ref": "../common/types/reverse_domain_name.json"
+          },
           "additionalProperties": { "$ref": "#/$defs/consent_segment" }
         }
       }

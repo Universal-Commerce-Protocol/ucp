@@ -11,11 +11,7 @@
   "$defs": {
     "id": {
       "description": "JSON-RPC request identifier. Notifications omit id; responses echo the request id, or use null when the request id could not be determined.",
-      "oneOf": [
-        { "type": "string" },
-        { "type": "number" },
-        { "type": "null" }
-      ]
+      "oneOf": [{ "type": "string" }, { "type": "number" }, { "type": "null" }]
     },
     "error": {
       "type": "object",
@@ -54,10 +50,7 @@
         },
         "params": {
           "description": "Method parameters. Binding-specific schemas define the object shape.",
-          "oneOf": [
-            { "type": "object" },
-            { "type": "array" }
-          ]
+          "oneOf": [{ "type": "object" }, { "type": "array" }]
         }
       },
       "additionalProperties": false

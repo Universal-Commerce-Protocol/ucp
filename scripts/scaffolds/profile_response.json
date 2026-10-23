@@ -32,10 +32,7 @@
       ]
     },
     "map_order": {
-      "payment_handlers": [
-        "dev.shopify.shop_pay",
-        "com.google.pay"
-      ]
+      "payment_handlers": ["dev.shopify.shop_pay", "com.google.pay"]
     }
   },
   "keys": [
