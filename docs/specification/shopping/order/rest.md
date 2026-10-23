@@ -88,6 +88,11 @@ Returns the current-state snapshot of an order.
 #### Input Schema
 
 * `id` (String, required): The order ID (path parameter).
+* `access_token` (String, optional): Order credential issued at checkout
+    completion (query parameter — see [Order Access](index.md#order-access)).
+    Omit when the request is authorized by platform credentials or a user
+    identity token. Responses to a request carrying this parameter **MUST**
+    set `Cache-Control: no-store`.
 
 #### Output Schema
 
