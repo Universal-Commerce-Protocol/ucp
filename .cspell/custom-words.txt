@@ -205,3 +205,6 @@ mpegurl
 usdz
 vnd
 webm
+isic
+naics
+omnichannel

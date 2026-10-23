@@ -676,6 +676,11 @@ Businesses that support older protocol versions **SHOULD** include a
 version-specific profile URI. See [Protocol Version](#protocol-version)
 for details.
 
+Businesses **MAY** declare the [Business Capability](../common/business/index.md)
+(`dev.ucp.common.business`) in `ucp.capabilities` to publish location-independent
+business and brand identity metadata (`name`, `media`, `links`, `address`,
+`contacts`, and `categories`).
+
 #### Platform Profile
 
 Platform profiles are similar and include signing keys for capabilities
