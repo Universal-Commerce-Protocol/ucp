@@ -194,16 +194,19 @@ handler that must be initialized with the amount and timing it will charge
 cannot be prepared before the term is agreed, and **MAY** cease to be offered
 once it is.
 
-The instrument funding a term is charged once for each of that term's
-schedules, and **MUST** be capable of every one of them. A Business **MUST NOT**
-advertise an instrument that cannot fund every schedule of the selected term,
-and **MUST** reject one that is submitted. An instrument that can only be
-charged immediately therefore cannot be offered on a term that defers any part
-of the payment.
+An instrument is charged its part of a schedule when that schedule is due.
+Without [Split Payments](split-payments.md), the single instrument funds every
+schedule and **MUST** be capable of every one of them; a Business **MUST NOT**
+advertise, and **MUST** reject, one that is not. An instrument that can only
+be charged at completion therefore cannot be offered on a term that defers any
+part of the payment.
 
-A term with more than one schedule **MUST** be funded by a single instrument.
-[Split Payments](split-payments.md) composes with a term that has exactly one
-schedule, and not otherwise.
+With Split Payments, a stated `amount` applies to the term's first payment
+only, and the schedules after the first are later charges, paid by the
+instruments submitted without an `amount` in array order, as [Later
+charges](split-payments.md#later-charges) defines. How a Business collects a
+schedule whose charge fails after completion is not defined by this
+extension.
 
 ## Disclosures
 
