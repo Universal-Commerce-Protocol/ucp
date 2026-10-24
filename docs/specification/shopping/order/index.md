@@ -704,8 +704,12 @@ order identifier and permalink the platform already receives (see
 trip is involved, and no separate issuance endpoint exists.
 
 Businesses **SHOULD** issue a credential when a checkout completes without a
-linked user identity. Businesses **MAY** issue one for authenticated checkouts
-as well; doing so does not weaken the user's own access path.
+linked user identity, and **MUST NOT** issue one when the checkout completed
+with a linked identity. That order belongs to an identified user from the moment
+it exists and is reachable through Identity Linking, so a standing bearer
+credential would be surplus authority — the same reason a credential is revoked
+when a guest order is later claimed into an account (see
+[Lifetime and revocation](#lifetime-and-revocation)).
 
 <!-- ucp:example schema=shopping/checkout op=read extract=$.order target=$.order -->
 ```json
@@ -724,20 +728,34 @@ as well; doing so does not weaken the user's own access path.
 
 ### Presentation
 
-The credential is an input to the operation, not a field of the order. It is
-defined in the operation signature so every transport carries it the same way,
-rather than in a transport-specific header:
+The credential is request metadata, not a field of the order or an operation
+argument. Like `UCP-Agent` and `Idempotency-Key`, each binding carries it
+natively:
 
 | Transport | Carried as |
 | :-------- | :--------- |
-| MCP | the optional `access_token` argument on `get_order` |
-| REST | the optional `access_token` query parameter on `GET /orders/{id}` |
+| REST | the `UCP-Order-Token` request header |
+| MCP | the `ucp-order-token` entry in `meta` |
+
+```http
+GET /orders/order_abc123 HTTP/1.1
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+UCP-Order-Token: oat_3f9a1c7e5b2d48a6
+```
+
+The credential uses a dedicated header rather than `Authorization`, which
+already carries platform credentials or a user identity token, so a request can
+present both (see below).
+
+When a REST request carrying `UCP-Order-Token` is signed, the signature
+**MUST** cover the `ucp-order-token` component, in addition to the components
+required by [Message Signatures](../../signatures.md); a verifier **MUST**
+treat a signature that does not cover it as not covering the request.
 
 Platforms **MUST** send the credential only to the business that issued it, and
-**MUST NOT** place it in a browser-addressable URL — a
-[permalink](../../permalink.md#privacy) **MUST NOT** carry it. Businesses
-**MUST** respond with `Cache-Control: no-store` to any request that presented
-one, and **SHOULD** redact it from access logs.
+**MUST NOT** place it in any URL — a [permalink](../../permalink.md#privacy)
+**MUST NOT** carry it. Businesses **MUST** respond with
+`Cache-Control: no-store` to any request that presented one.
 
 A request that presents both an order credential and platform or user
 credentials is authorized on the union of what each grants; the business
@@ -767,17 +785,25 @@ the bound order is claimed into a user account — at that point the order is
 reachable through Identity Linking, and the standing guest credential is
 surplus authority over data that now belongs to an identified user.
 
-Platforms **SHOULD** discard the credential once the buyer's post-purchase
-journey is complete, consistent with treating order data as ephemeral.
+When `access` is present on the checkout completion response, the platform
+**SHOULD** retain it for the buyer's post-purchase journey: no operation
+issues a replacement on request, so a platform that drops it leaves the guest
+buyer with no programmatic route back to the order. Platforms **MUST** store a retained
+credential with the protections they apply to other secret credentials, and
+**SHOULD** discard it once the post-purchase journey is complete, consistent
+with treating order data as ephemeral.
 
 ### Errors
 
-A request presenting an absent, expired, revoked, or unrecognized credential
-returns the existing `unauthorized` error (see
-[Error Responses](#error-responses)). Businesses **MUST** return the same
-response for a credential that does not match the order as for an order that
-does not exist, so the endpoint cannot be used to probe which order
-identifiers are real.
+Errors reuse the existing codes (see [Error Responses](#error-responses)):
+
+* A request presenting an expired or revoked credential for the order it is
+  bound to returns `unauthorized`. The holder already knows that order exists,
+  so nothing is disclosed.
+* A request presenting an unrecognized credential, or a credential bound to a
+  different order, returns `not_found` — the same response as for an order
+  that does not exist — so the endpoint cannot be used to probe which order
+  identifiers are real.
 
 ### Security Considerations
 
@@ -791,12 +817,6 @@ identifiers are real.
 * **Unguessable values.** Businesses **MUST NOT** derive the credential from order
   attributes a third party could reconstruct — order number, buyer email,
   totals, or timestamps.
-* **Query-string exposure.** The REST binding carries the credential in the
-  request URI, which is more exposed than a header (proxy logs, server access
-  logs, browser history if a URL ever escapes to a browser). This is the cost
-  of keeping the credential in the transport-independent operation signature.
-  The `Cache-Control: no-store`, log-redaction, short-lifetime, and
-  single-order-binding requirements above are what keep that cost bounded.
 * **Scope creep.** Post-purchase operations beyond retrieval are not defined by
   this version of the capability. A business **MUST NOT** honor a scope in
   `scopes` that names an operation it has not implemented.

@@ -24,7 +24,7 @@
     },
     "access": {
       "$ref": "order_access.json",
-      "description": "Credential granting the platform authorized access to this order. Businesses SHOULD issue it when the checkout completed without a linked user identity, so post-purchase order operations remain reachable without an account."
+      "description": "Credential granting the platform authorized access to this order. Businesses SHOULD issue it when the checkout completed without a linked user identity, so post-purchase order operations remain reachable without an account, and MUST NOT issue it when the checkout completed with one."
     }
   }
 }

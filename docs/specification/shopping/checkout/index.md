@@ -1457,7 +1457,8 @@ when provided.
 When the checkout completed without a linked user identity, the business
 **SHOULD** include an `access` credential bound to the new order. It is the
 guest buyer's only programmatic route back to the order, since there is no
-account for the platform to authenticate against. See
+account for the platform to authenticate against. When the checkout completed
+with a linked identity, the business **MUST NOT** include one. See
 [Order Access](../order/index.md#order-access) for issuance, presentation,
 lifetime, and the handling requirements that apply to platforms holding one.
 
