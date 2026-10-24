@@ -163,7 +163,17 @@ A `get_product` response for bananas sold by the pound. The variant advertises
         "description": { "plain": "Fresh bananas sold by the pound." },
         "price": { "amount": 79, "currency": "USD" },
         "quantity_unit": { "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 },
-        "availability": { "available": true }
+        "availability": { "available": true },
+        "seller": {
+          "name": "Example Grocery",
+          "logo": {
+            "type": "image",
+            "url": "https://cdn.example.com/grocery-logo.png",
+            "alt_text": "Example Grocery logo",
+            "width": 128,
+            "height": 128
+          }
+        }
       }
     ]
   }
@@ -238,6 +248,15 @@ was `exact` or `featured` (server-selected). See
 `media` is an ordered array. Businesses **SHOULD** return the featured variant
 media item as the first element. Platforms **SHOULD** treat the first media
 item they present as featured.
+
+`seller.logo` is optional seller or shop display media, distinct from product
+and variant `media`. It identifies the seller shown for this variant, not the
+product's manufacturer. It does not establish a binding between that seller
+and a business discovery profile.
+Businesses **SHOULD** use `type: "image"` and provide `alt_text` for accessibility.
+Platforms **MUST** tolerate an absent `seller` or `seller.logo` and can display
+`seller.name` without a logo. The logo uses the shared [Media](#media) type,
+including its open `type` vocabulary and URL rendering rules.
 
 {{ schema_fields('types/variant', 'shopping/catalog') }}
 
