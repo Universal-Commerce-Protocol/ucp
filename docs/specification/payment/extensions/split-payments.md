@@ -54,7 +54,7 @@ like loyalty points MUST convert each instrument's contribution to the
 checkout currency.
 
 Instruments are submitted in **allocation priority order** — the first
-instrument gets first claim on the checkout total, the second gets next
+instrument gets first claim on the [first charge](#later-charges), the second gets next
 claim, and so on. The business MAY process payment authorizations in
 any order for operational reasons (e.g., gift cards before open-loop
 cards to minimize reversal costs); array order governs amount
@@ -214,7 +214,7 @@ toward today's deposit, and exactly one card":
      `amount`, toward the first charge (see [Later charges](#later-charges)).
    * **Open-amount**: the business determines the
      contribution — typically the instrument's full available balance,
-     up to the remaining checkout total after all prior contributions.
+     up to the remaining first charge after all prior contributions.
      A zero available balance is a valid $0 contribution, not a failure.
 3. Where an extension defines charges after the first, the business
    funds them as [Later charges](#later-charges) defines.
@@ -299,7 +299,7 @@ Error conditions:
 * If any instrument cannot be processed (invalid credentials, fraud flag,
   hard decline, expired, insufficient funds), the business MUST return an error. For
   open-amount instruments, a zero available balance is not a failure.
-* If the checkout total cannot be reached after applying all submitted
+* If the first charge cannot be reached after applying all submitted
   instruments, the business MUST return an error.
 * If the sum of all specified `amount` values exceeds the first charge —
   the checkout total, or the selected payment term's first payment — the
@@ -315,7 +315,8 @@ Error conditions:
 
 On the checkout response, the business MUST set `amount` on every
 instrument that was authorized or charged, reflecting the actual
-contribution. For open-amount instruments (submitted without `amount`),
+contribution to the [first charge](#later-charges). For open-amount
+instruments (submitted without `amount`),
 the business MUST derive and report the actual contribution. The
 business MUST omit `amount` on all other instruments (e.g., a
 provisional authorization that was voided when a later instrument
