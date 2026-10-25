@@ -440,8 +440,56 @@ Upon receiving the `complete` request, the business **MUST**:
     verify(encoded_signature, signing_input, my_key, header.alg)
     ```
 
-2. **Verify Terms Match:** Confirm the embedded checkout terms match the
-    current session state (id, totals, line items).
+2. **Verify Authorized Terms:** Confirm that the terms authorized in the
+    mandate-embedded checkout remain consistent with the current Checkout
+    state the business will use to perform completion. This comparison
+    **MUST** include `id`, `totals`, and `line_items`, but those fields
+    are **not** an exhaustive set. It **MUST** also include any
+    authorization-relevant terms defined by negotiated extensions,
+    including the effective selected fulfillment destination and option
+    when Fulfillment is active. Equality of the core three fields alone
+    **MUST NOT** be treated as sufficient when material authorized terms
+    outside those fields differ.
+
+    If an authorization-relevant term differs, the business **MUST NOT**
+    complete against the stale Checkout Mandate. It can return a
+    recoverable Checkout state for the platform to obtain authorization
+    for the revised terms, following the Checkout completion lifecycle.
+
+    The comparison concerns the transaction effects being authorized;
+    changes to non-authorizing lifecycle or presentation fields alone
+    do not require new payment authorization. A Buyer Consent update
+    submitted in the Complete request retains the confirmation semantics
+    of the Buyer Consent extension rather than being treated as an
+    automatic mismatch against the earlier signed response.
+
+    **Separate AP2 binding:** Semantic Checkout-term equivalence does not
+    replace AP2's required `checkout_hash` verification against the
+    latest issued Checkout JWT. Two valid ES256 signatures over identical
+    Checkout content can produce different JWTs and hashes, so these
+    are distinct checks. The UCP serialization of `checkout_jwt` is
+    addressed separately in
+    [#905](https://github.com/Universal-Commerce-Protocol/ucp/issues/905).
+
+    **Privacy boundary:** The live-state comparison is performed by the
+    business using the Checkout state it already holds and the
+    mandate-embedded Checkout. It does not require passing fulfillment,
+    Buyer Consent, or additional Checkout state to a payment handler
+    or PSP.
+
+    **Conformance examples:**
+    - Same `id`, `totals`, and `line_items` but a different effective
+      selected delivery destination: do not complete using the old
+      mandate if that change is material to the authorized transaction.
+    - Same core fields but a materially different selected fulfillment
+      option: do not complete using the old mandate.
+    - Updated Checkout with a newly issued signed artifact and an old
+      mandate: enforce the AP2 latest-JWT/hash rule independently.
+    - New valid ES256 signature over identical Checkout terms: semantic
+      equality alone does not settle the latest-JWT/hash check.
+    - Non-authorizing metadata changes or Buyer Consent confirmation in
+      the Complete request: handle under their respective lifecycle or
+      extension rules, not blanket signed-object equality.
 
 ### PSP Verification
 
