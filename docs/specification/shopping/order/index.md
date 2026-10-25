@@ -753,9 +753,11 @@ required by [Message Signatures](../../signatures.md); a verifier **MUST**
 treat a signature that does not cover it as not covering the request.
 
 Platforms **MUST** send the credential only to the business that issued it, and
-**MUST NOT** place it in any URL — a [permalink](../../permalink.md#privacy)
-**MUST NOT** carry it. Businesses **MUST** respond with
-`Cache-Control: no-store` to any request that presented one.
+**MUST NOT** place it in any URL. Businesses **MUST NOT** embed the credential's
+value in `permalink_url`; browser access via `permalink_url` remains
+authenticated by the business's own means and is unaffected by this section.
+Businesses **MUST** respond with `Cache-Control: no-store` to any request that
+presented one.
 
 A request that presents both an order credential and platform or user
 credentials is authorized on the union of what each grants; the business

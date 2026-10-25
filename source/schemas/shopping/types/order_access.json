@@ -10,7 +10,7 @@
   "properties": {
     "token": {
       "type": "string",
-      "description": "Opaque, unguessable credential scoped to a single order. Platforms MUST treat it as a secret and MUST NOT place it in a URL. Businesses MUST bind it to one order, MUST reject it for any other resource, and MUST NOT derive it from guessable order attributes."
+      "description": "Opaque, unguessable credential scoped to a single order. Platforms MUST treat it as a secret and MUST NOT place it in a URL. Businesses MUST bind it to one order, MUST reject it for any other resource, MUST NOT embed it in permalink_url, and MUST NOT derive it from guessable order attributes."
     },
     "expires_at": {
       "type": "string",
