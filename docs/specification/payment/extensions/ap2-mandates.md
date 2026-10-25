@@ -376,9 +376,14 @@ The payment mandate is not submitted to the business. It is presented to the
 instrument the user selected — which verifies it and issues a payment token in
 exchange. The business receives that token in Step 4.
 
-Verification happens here, before a token exists, because a token issued
-against an invalid mandate is indistinguishable from a valid one by the time it
-reaches the business.
+Mandate validity is established here, before a token exists, because a token
+issued against an invalid mandate is indistinguishable from a valid one by the
+time it reaches the business.
+
+The checkout itself is not presented here, and neither is the Checkout JWT. The
+Credential Provider receives a **transaction digest** — the value the mandate is
+bound to — and nothing in its verification consumes the checkout terms. See
+**Correlation across the two steps** below for where the binding is proved.
 
 **Presentation.** The platform presents the payment mandate to the instrument's
 payment handler as a **source credential**, using the handler's existing
@@ -395,7 +400,7 @@ Content-Type: application/json
   "credential": {
     "type": "ap2_payment_mandate",
     "payment_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9...~...",
-    "checkout_jwt": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ.<payload>.<signature>"
+    "checkout_hash": "0k_3Jq8tXh2mB7vN1pLZcQd5rYwS6eU4aG9fHiKjOxM"
   },
   "binding": {
     "type": "dev.ucp.shopping.checkout",
@@ -407,28 +412,48 @@ Content-Type: application/json
 }
 ```
 
-The `checkout_jwt` is the Checkout JWT for the checkout the mandate authorizes.
-It is what makes the correlation check below possible: a Credential Provider
-holds neither the checkout response nor `ap2.merchant_authorization`, and cannot
-reconstruct the value the mandate was bound to from the token request alone.
+The `checkout_hash` is the transaction digest for the checkout the mandate
+authorizes: the hash of the Checkout JWT, computed as the AP2 Protocol
+Specification defines. It is an opaque value to the Credential Provider — it
+identifies a transaction without disclosing its terms, and is reconciled to a
+checkout only in a dispute, by a party that already holds that checkout.
 
 **Verification.** Before issuing a token, the Credential Provider **MUST**:
 
 1. **Verify the mandate** — decode and verify the SD-JWT signature, key
     binding, and expiration per the
     [AP2 Protocol Specification](https://ap2-protocol.org/specification).
-2. **Verify the merchant signature** — verify `checkout_jwt` as a Compact JWS
-    against the business's published key, resolved from the `kid` in its
-    protected header.
-3. **Correlate the mandate to the checkout** — recompute the checkout hash from
-    `checkout_jwt` and confirm it equals the mandate's transaction identifier.
-    A mandate that does not correlate authorizes a different purchase.
-4. **Confirm the binding** — the binding rules of
+2. **Match the digest** — confirm that the mandate's transaction identifier
+    equals the `checkout_hash` in the request. A mandate that does not match
+    authorizes a different purchase.
+3. **Confirm the binding** — the binding rules of
     [Tokenization](../tokenization.md) apply unchanged, tying the resulting
     token to this checkout.
 
 A Credential Provider **MUST NOT** issue a token when any of these fail, and
-**MUST NOT** issue a token for a mandate it has not verified.
+**MUST NOT** issue a token for a mandate it has not verified. On success it
+**MUST** record the matched digest against the token it issues, so the
+comparison in [PSP Verification](#psp-verification) has something to compare
+against.
+
+The digest is carried in the request rather than read out of the mandate so a
+handler does not have to parse AP2 claim structure to know what it bound. A
+handler that reads the claim instead arrives at the same value; requiring the
+member keeps both at the same place.
+
+**Correlation across the two steps.** At issuance the digest match is a
+*commitment*, not a proof: the platform supplies both the mandate and the
+digest, so a platform acting in bad faith can make them agree. The proof is at
+processing, where the business derives the digest independently from the
+checkout it signed and the Credential Provider or PSP compares the two
+(see [PSP Verification](#psp-verification)). Two independently computed values
+must agree, and the party this binding exists to constrain controls only one of
+them.
+
+This split is deliberate. Mandate validity — expiration, key binding, signature
+— is caught at issuance, before a token exists. Correlation is caught at
+processing, the first point at which a second, independent computation of the
+digest exists. Both occur before the business creates the order.
 
 **Issuance.** On success the handler returns a token in its normal form. The
 token is an ordinary payment token: opaque to the platform and the business,
@@ -538,17 +563,31 @@ Upon receiving the `complete` request, the business **MUST**:
 
 ### PSP Verification
 
-Payment mandate verification happens at issuance
+Payment mandate *validity* is established at issuance
 ([Step 3](#step-3-payment-mandate-verification-and-token-issuance)), not at
 processing. By the time the business passes the `token` to their Payment
 Handler / PSP, the mandate behind it has already been verified against the
 [AP2 Protocol Specification](https://ap2-protocol.org/specification) —
-signature, key binding, expiration, and correlation with the checkout.
+signature, key binding, and expiration.
 
-At processing time the PSP resolves the token to the mandate it was issued
-against and processes the payment on that authorization. A token that cannot
-be resolved to a verified mandate **MUST NOT** be processed under this
-extension.
+What remains at processing is the *correlation*. The business derives the
+Checkout JWT from its own checkout and `ap2.merchant_authorization`, computes
+the transaction digest from it, and presents that digest alongside the token.
+The Payment Handler / PSP **MUST** confirm it equals the digest recorded when
+the token was issued, and **MUST NOT** process a token whose digest does not
+match or that cannot be resolved to a verified mandate.
+
+This is the point at which the binding holds. The business's digest and the
+platform's are computed independently from the same rule, so a platform that
+presented a mandate for a different purchase produces a value the business's
+checkout cannot reproduce.
+
+Neither the checkout nor the Checkout JWT is sent on this path. The digest is
+opaque to the Payment Handler and the PSP; reconciling it to checkout terms is
+a dispute-time operation, performed by a party that already holds the checkout.
+How the digest accompanies the token is handler-defined, as handler error
+surfaces already are: this specification states what must be compared, not the
+wire format of a call it does not define.
 
 ## Schema
 
@@ -580,11 +619,11 @@ The source credential a platform presents to a payment handler in
 `source/schemas/common/types/ap2_payment_mandate_credential.json`; it is a
 tokenization input, not a member of any UCP request or response.
 
-| Field             | Type   | Required | Description                                                                 |
-| :---------------- | :----- | :------- | :-------------------------------------------------------------------------- |
-| `type`            | string | Yes      | Constant `ap2_payment_mandate`                                              |
-| `payment_mandate` | string | Yes      | The SD-JWT+kb payment mandate                                               |
-| `checkout_jwt`    | string | Yes      | The Checkout JWT for the checkout the mandate authorizes, used to correlate |
+| Field             | Type   | Required | Description                                                              |
+| :---------------- | :----- | :------- | :----------------------------------------------------------------------- |
+| `type`            | string | Yes      | Constant `ap2_payment_mandate`                                           |
+| `payment_mandate` | string | Yes      | The SD-JWT+kb payment mandate                                            |
+| `checkout_hash`   | string | Yes      | Transaction digest the mandate is bound to, opaque to the handler        |
 
 ### AP2 Complete Request
 
