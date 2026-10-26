@@ -110,6 +110,7 @@ nav:
                   - MCP: specification/food/checkout/mcp.md
           - Extensions:
               - Fulfillment: specification/food/extensions/fulfillment.md
+              - Discounts: specification/food/extensions/discount.md
       - Payment:
           - Extensions:
               - AP2 Mandates Extension: specification/payment/extensions/ap2-mandates.md
@@ -616,6 +617,11 @@ plugins:
               Food Fulfillment Extension, defining delivery and pickup fulfillment
               methods, delivery addresses, and food establishment pickup locations
               for online food orders.
+          - specification/food/extensions/discount.md: >-
+              Food Discount Extension, covering discount code discovery, applied
+              discounts, allocation method stacking orders, rejected code
+              message handling, and automatic or provisional eligibility
+              promotions.
         Payment:
           - specification/payment/extensions/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound
