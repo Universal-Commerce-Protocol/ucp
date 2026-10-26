@@ -4759,7 +4759,7 @@ verification.</p>
 <p><strong>Signature Encoding:</strong></p>
 <ul>
 <li><strong>ECDSA</strong> signatures <strong>MUST</strong> use fixed-width raw <code>r||s</code> encoding per
-  RFC 9421 §3.3.1, <strong>not</strong> ASN.1/DER. The signature value is the
+  RFC 9421 §3.3.4 (P-256) and §3.3.5 (P-384), <strong>not</strong> ASN.1/DER. The signature value is the
   concatenation of <code>r</code> and <code>s</code> as fixed-length unsigned big-endian
   integers: 64 bytes for P-256 (32 + 32), 96 bytes for P-384 (48 + 48).
   Many crypto libraries (OpenSSL, Java, .NET) default to DER encoding and
