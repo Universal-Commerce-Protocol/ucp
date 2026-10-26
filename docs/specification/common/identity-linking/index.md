@@ -642,8 +642,28 @@ providers, IdPs **SHOULD** include relevant
 grant when available and the user has consented. Businesses
 **SHOULD NOT** auto-link accounts across IdPs by matching email or any
 other claim, and **SHOULD** require user-mediated linking (the user
-authenticating to the existing account) before merging identities. See
+authenticating to the existing account) before merging identities,
+except as permitted below. See
 [Security Considerations](#security-considerations).
+
+Businesses **MAY** resolve a grant to an existing account by matching
+`email` when all of the following hold: the business has independently
+established that the grant's issuer is the mailbox authority for the
+email's domain (for example, a consumer mailbox provider's own domain,
+where every account is a hosted mailbox); the grant asserts
+`email_verified` as the JSON boolean `true`; the existing account's
+address was verified by the business itself, not imported from an IdP
+claim; and neither the grant's `(iss, sub)` nor the account is already
+linked to a conflicting counterpart. Once linked, the business **MUST**
+resolve that account by `(iss, sub)` and **MUST NOT** re-target the link
+on a later change to `email`. Businesses **SHOULD** notify the account
+holder when a link is created this way. The cross-IdP risks in
+[Security Considerations](#security-considerations) remain the
+business's to assess per domain, including the provider's
+address-recycling policy. DNS delegation per
+[draft-hardt-email-verification §3](https://www.ietf.org/archive/id/draft-hardt-email-verification-02.html#section-3){ target="_blank" }
+is one signal a business **MAY** consult when establishing authority;
+this specification does not define its evaluation.
 
 ### Chaining Errors at the Token Endpoint
 
@@ -1066,6 +1086,12 @@ field conveys the business's value prompt to the platform (e.g.,
   Businesses **SHOULD** require user-mediated linking — the user
   demonstrating control of the existing account via current-session
   authentication or equivalent — before merging accounts across IdPs.
+  The one exception is email matching as permitted in
+  [Business Token Issuance](#business-token-issuance), where the business
+  has independently established that the grant's issuer is the mailbox
+  authority for the email's domain. That exception narrows these risks
+  but does not remove them: address recycling or reassignment by the
+  mailbox provider remains the business's to assess per domain.
 
 ## Future Extensibility
 
