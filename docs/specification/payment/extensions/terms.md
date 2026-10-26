@@ -180,6 +180,18 @@ no payment instruments need to be supplied. In this case, because
 complete requests, the Platform **MUST** provide an empty payment object
 (`"payment": {}`) in the complete request.
 
+**Compatibility with AP2 Mandates.** If
+`dev.ucp.common.payment.ap2_mandate` is active, the Business **MUST NOT** offer
+or select a fully deferred term whose completion requires `"payment": {}`
+without an instrument to carry AP2's required Payment Mandate. It **MUST NOT**
+return `ready_for_complete` with such a term selected. If a previously selected
+term becomes incompatible, the Business **MUST NOT** silently substitute a
+replacement and **MUST** apply the `payment_term_changed` warning rules when
+it changes the selection. If no compatible term can be offered, the Business
+**MUST** keep the Checkout out of `ready_for_complete` and provide an
+appropriate error or handoff. The empty-payment completion form above remains
+available when AP2 is not active; it does not waive AP2 mandate requirements.
+
 Checkout-specific handler and instrument eligibility is a **runtime result**.
 Profiles advertise broad support; the Business resolves that support against the
 Checkout context and any instruments already supplied, then returns the
