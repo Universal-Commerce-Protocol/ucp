@@ -81,8 +81,18 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
     fixture per schema/op/direction). Example fields win; scaffold
     fills required gaps.
   - Coverage walk: for each object in the example, verify every
-    schema-required field is either present or elision-acknowledged.
+    schema-required field is either present or elision-acknowledged;
+    required-key anyOf alternatives must have at least one branch
+    represented by authored keys before scaffold merge.
+  - Empty objects only bypass body validation for unscoped read/cancel
+    requests, whose operations have no request body.
   - The merged payload is validated by `ucp-schema validate`.
+  - Extension fields: if the payload carries a top-level field that
+    the annotated capability does not declare but an extension
+    composes onto it (under the extension's $defs/<capability name>,
+    e.g. checkout `fulfillment`), the payload is also validated
+    against that extension's composed schema. Capability schemas are
+    open, so without this such fields would go unchecked.
   - Validation errors whose path is an elided path (or descendant)
     are suppressed.
 
@@ -111,6 +121,7 @@ Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -201,7 +212,7 @@ def extract_blocks(filepath: Path) -> list[dict]:
   fence with no intervening fence — and emits an error block for the
   second one. Per contract, at most one annotation per block.
   """
-  lines = filepath.read_text().splitlines()
+  lines = filepath.read_text(encoding="utf-8").splitlines()
   blocks: list[dict] = []
   i = 0
   pending_annotation = None
@@ -542,6 +553,22 @@ def _collect_required(schema: dict) -> set[str]:
   return required
 
 
+def _collect_required_alternatives(schema: dict) -> list[list[set[str]]]:
+  """Collect required-key anyOf alternatives from an object and its allOf."""
+  alternatives = []
+  for layer in (schema, *schema.get("allOf", [])):
+    if not isinstance(layer, dict) or "anyOf" not in layer:
+      continue
+    alternatives.append(
+      [
+        _collect_required(branch) if isinstance(branch, dict) else set()
+        for branch in layer["anyOf"]
+        if branch is not False
+      ]
+    )
+  return alternatives
+
+
 def _collect_properties(schema: dict) -> dict:
   """Collect properties, merging allOf branches."""
   props = dict(schema.get("properties", {}))
@@ -584,12 +611,13 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
   # Object coverage
   if isinstance(example, dict):
     obj_type = schema.get("type")
-    # Schemas without explicit "type" but with
-    # "properties" or "allOf" are still objects.
+    # Schemas without explicit "type" but with properties or required-key
+    # alternatives are still objects for authored-key coverage.
     has_object_shape = (
       obj_type == "object"
       or "properties" in schema
       or any("properties" in b for b in schema.get("allOf", []))
+      or bool(_collect_required_alternatives(schema))
     )
     if has_object_shape:
       required = _collect_required(schema)
@@ -597,6 +625,19 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
       missing = required - present
       for field in sorted(missing):
         errors.append(f'{path}: missing required field "{field}"')
+
+      for alternatives in _collect_required_alternatives(schema):
+        # A branch without required keys imposes no authored-key coverage
+        # constraint (as in non-create operation projections).
+        if any(not required_keys for required_keys in alternatives):
+          continue
+        if not any(required_keys <= present for required_keys in alternatives):
+          choices = " or ".join(
+            "+".join(sorted(required_keys)) for required_keys in alternatives
+          )
+          errors.append(
+            f"{path}: missing required field alternative ({choices})"
+          )
 
       # Recurse into non-ellipsis fields
       for key, value in example.items():
@@ -644,6 +685,30 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
 
 _schema_cache: dict[tuple, dict] = {}
 
+UCP_SCHEMA_MISSING = (
+  "ucp-schema not found on PATH. Install it with"
+  " `cargo install ucp-schema` (see AGENTS.md)."
+)
+
+
+def run_ucp_schema(args: list[str], **kwargs) -> subprocess.CompletedProcess:
+  """Run the ucp-schema binary, or explain how to get it.
+
+  Without this, a contributor who has not installed the binary sees a
+  FileNotFoundError traceback rather than the install line that AGENTS.md
+  already documents.
+
+  ucp-schema always writes UTF-8, so decode it as UTF-8 rather than by the
+  locale: schemas under source/schemas/ carry em dashes and section signs,
+  and a cp1252 machine would otherwise fail on the bytes that carry them.
+  """
+  if kwargs.get("text"):
+    kwargs.setdefault("encoding", "utf-8")
+  try:
+    return subprocess.run(["ucp-schema", *args], **kwargs)
+  except FileNotFoundError:
+    raise RuntimeError(UCP_SCHEMA_MISSING) from None
+
 
 def resolve_schema(
   schema_path: str,
@@ -657,9 +722,8 @@ def resolve_schema(
     return _schema_cache[key]
 
   full_path = schema_base / f"{schema_path}.json"
-  result = subprocess.run(
+  result = run_ucp_schema(
     [
-      "ucp-schema",
       "resolve",
       str(full_path),
       f"--{direction}",
@@ -702,9 +766,8 @@ def validate_payload(
     tmp_path = f.name
 
   try:
-    result = subprocess.run(
+    result = run_ucp_schema(
       [
-        "ucp-schema",
         "validate",
         tmp_path,
         "--schema",
@@ -758,9 +821,8 @@ def validate_payload_with_schema(
     ) as f:
       json.dump(payload, f)
       tmp_payload = f.name
-    result = subprocess.run(
+    result = run_ucp_schema(
       [
-        "ucp-schema",
         "validate",
         tmp_payload,
         "--schema",
@@ -791,6 +853,105 @@ def validate_payload_with_schema(
 
 
 # -----------------------------------------------------------
+# Extension validation
+# -----------------------------------------------------------
+
+_extension_cache: dict[Path, tuple[dict, dict]] = {}
+
+
+def load_extensions(schema_base: Path) -> tuple[dict, dict]:
+  """Index capabilities and the extensions that compose onto them.
+
+  Returns (capabilities, extensions). capabilities maps a capability
+  name (e.g. dev.ucp.shopping.checkout) to its schema path. extensions
+  maps a capability name to (schema path, added fields) for every other
+  schema that composes onto it under $defs/<capability name>, where
+  added fields are the properties the extension's own allOf branches
+  declare.
+  """
+  key = schema_base.resolve()
+  if key in _extension_cache:
+    return _extension_cache[key]
+
+  schemas = {}
+  for path in sorted(schema_base.rglob("*.json")):
+    rel = path.relative_to(schema_base).with_suffix("").as_posix()
+    schemas[rel] = json.loads(path.read_text(encoding="utf-8"))
+
+  capabilities = {
+    schema["name"]: rel
+    for rel, schema in schemas.items()
+    if str(schema.get("name", "")).startswith("dev.ucp.")
+  }
+  extensions: dict[str, list[tuple[str, frozenset[str]]]] = {}
+  for rel, schema in schemas.items():
+    for name, composed in schema.get("$defs", {}).items():
+      if name not in capabilities or capabilities[name] == rel:
+        continue
+      added = set(composed.get("properties", {}))
+      for branch in composed.get("allOf", []):
+        if "$ref" not in branch:
+          added.update(branch.get("properties", {}))
+      if added:
+        extensions.setdefault(name, []).append((rel, frozenset(added)))
+
+  _extension_cache[key] = (capabilities, extensions)
+  return capabilities, extensions
+
+
+def validate_extensions(
+  payload: dict,
+  schema_path: str,
+  schema_def: str | None,
+  resolved: dict,
+  direction: str,
+  op: str,
+  schema_base: Path,
+) -> list[tuple[str, list[dict]]]:
+  """Validate a payload against each extension whose fields it carries.
+
+  Capability schemas are open, so a field that only an extension
+  declares (e.g. checkout `fulfillment`) passes validation against the
+  capability unchecked. When the payload carries such a field, it is
+  also validated against that extension's composed schema. Fields the
+  capability itself declares (e.g. `payment`, `buyer`) do not trigger
+  this, since the capability already validates them.
+
+  Returns (extension schema path, errors) for each failing extension.
+  """
+  if not isinstance(payload, dict):
+    return []
+  capabilities, extensions = load_extensions(schema_base)
+  if schema_def:
+    capability = schema_def if schema_def in capabilities else None
+  else:
+    capability = resolved.get("name")
+  if capability not in extensions:
+    return []
+
+  base = resolve_schema(capabilities[capability], direction, op, schema_base)
+  declared = set(base.get("properties", {}))
+
+  failures = []
+  for ext_path, added in extensions[capability]:
+    if ext_path == schema_path and schema_def == capability:
+      continue
+    if not (added - declared) & payload.keys():
+      continue
+    composed = resolve_schema(ext_path, direction, op, schema_base)
+    valid, errors = validate_payload_with_schema(
+      payload,
+      composed["$defs"][capability],
+      direction,
+      op,
+      schema_base,
+    )
+    if not valid:
+      failures.append((ext_path, errors))
+  return failures
+
+
+# -----------------------------------------------------------
 # Scaffold loading
 # -----------------------------------------------------------
 
@@ -806,17 +967,17 @@ def load_scaffold(
   name = schema_path.replace("/", "_")
   specific = scaffolds_dir / f"{name}_{direction}_{op}.json"
   if specific.exists():
-    return json.loads(specific.read_text())
+    return json.loads(specific.read_text(encoding="utf-8"))
 
   # Try direction-only: checkout_response.json
   dir_only = scaffolds_dir / f"{name}_{direction}.json"
   if dir_only.exists():
-    return json.loads(dir_only.read_text())
+    return json.loads(dir_only.read_text(encoding="utf-8"))
 
   # Try generic: checkout.json
   generic = scaffolds_dir / f"{name}.json"
   if generic.exists():
-    return json.loads(generic.read_text())
+    return json.loads(generic.read_text(encoding="utf-8"))
 
   return None
 
@@ -958,8 +1119,15 @@ def process_block(
       annotation,
     )
 
-  # Empty body — trivially valid (e.g. GET, cancel)
-  if example == {}:
+  # Read and cancel requests have no body. Keep their authored empty-object
+  # notation lightweight, but never bypass an explicitly selected shape.
+  if (
+    example == {}
+    and direction == "request"
+    and op in ("read", "cancel")
+    and schema_def is None
+    and target_path is None
+  ):
     return Result(file, line, "ok", annotation=annotation)
 
   # Layer 3: resolve schema
@@ -1044,17 +1212,33 @@ def process_block(
     merged = deep_merge(scaffold, stripped)
 
   # 9. Validate — use extracted $def schema if specified
-  if schema_def:
-    valid, val_errors = validate_payload_with_schema(
-      merged, validation_schema, direction, op, schema_base
+  try:
+    if schema_def:
+      valid, val_errors = validate_payload_with_schema(
+        merged, validation_schema, direction, op, schema_base
+      )
+    else:
+      valid, val_errors = validate_payload(
+        merged,
+        schema_path,
+        direction,
+        op,
+        schema_base,
+      )
+  except RuntimeError as e:
+    return Result(file, line, "error", str(e), annotation)
+
+  # 10. Validate fields contributed by extensions
+  try:
+    extension_errors = validate_extensions(
+      merged, schema_path, schema_def, resolved, direction, op, schema_base
     )
-  else:
-    valid, val_errors = validate_payload(
-      merged,
-      schema_path,
-      direction,
-      op,
-      schema_base,
+  except RuntimeError as e:
+    return Result(file, line, "error", str(e), annotation)
+
+  def elided(err_path: str) -> bool:
+    return any(
+      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
     )
 
   # Collect all failures
@@ -1064,11 +1248,17 @@ def process_block(
   for ve in val_errors:
     # Suppress errors at ellipsis-acknowledged paths
     err_path = ve.get("path", "")
-    if any(
-      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
-    ):
+    if elided(err_path):
       continue
     messages.append(f"validation: {err_path} \u2014 {ve.get('message', '')}")
+  for ext_path, errors in extension_errors:
+    for ve in errors:
+      err_path = ve.get("path", "")
+      if elided(err_path):
+        continue
+      messages.append(
+        f"extension {ext_path}: {err_path} \u2014 {ve.get('message', '')}"
+      )
 
   if messages:
     return Result(
@@ -1135,6 +1325,13 @@ def main() -> int:
 
   scaffolds_dir = args.scaffolds or script_dir / "scaffolds"
   docs_dir = args.docs or repo_root / "docs"
+
+  # Every block needs the binary, so a missing one is a single message
+  # before any work rather than the same error repeated per block. --audit
+  # only counts blocks and needs no binary.
+  if not args.audit and shutil.which("ucp-schema") is None:
+    print(UCP_SCHEMA_MISSING, file=sys.stderr)
+    return 1
 
   # Collect markdown files
   md_files = args.file if args.file else sorted(docs_dir.rglob("*.md"))
