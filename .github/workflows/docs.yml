@@ -86,11 +86,6 @@ jobs:
       - name: Run schema table macro tests
         run: uv run python scripts/test_schema_tables.py
 
-      # Draft EP #943 fixtures, reference checks, and discovery/gating tests.
-      # Needs the ucp-schema binary installed by setup-build-env.
-      - name: Run order modification fixture tests
-        run: uv run python scripts/test_order_modification.py
-
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest

@@ -69,11 +69,11 @@ Submitting a request never authorizes cancellation by itself.
 
 | Layer | Where | Status |
 | :---- | :---- | :---- |
-| **Implemented schema** | `source/schemas/shopping/order_modification.json` | Machine-checked: every example on this page and every fixture is validated |
+| **Implemented schema** | `source/schemas/shopping/order_modification.json` | Inline examples can be checked against this schema using the existing documentation validator |
 | **Normative behavior** | This page | Proposed `MUST`/`SHOULD` rules; **not** machine-checkable by schema alone |
 | **Binding proposals** | Additive operations in `source/services/shopping/rest.openapi.json` and `mcp.openrpc.json` | The only discovery path existing registry semantics provide; see [Discovery](#discovery) |
 | **Illustrative Business processing** | Worked example and sequence tables | Not a merchant server; no endpoint here executes anything |
-| **Runtime conformance vectors** | `scripts/fixtures/order_modification/vectors/` | Inputs for a future runtime suite; **none has been executed against an implementation** |
+| **Reference fixtures and conformance vectors** | [Companion testing branch](https://github.com/arjun2075/ucp/tree/feat/ep943-order-cancellation-conformance/scripts/fixtures/order_modification) | Separated from this normative PR for review; vectors have **not** been run against a merchant implementation |
 
 ## Discovery
 
@@ -3045,13 +3045,14 @@ commit.
 
 ### Tests
 
-| What | How | Executed here |
+| What | Where | Status in this PR |
 | :---- | :---- | :---- |
-| Schema, examples, positive and negative fixtures, composition under the proposed name | `uv run python scripts/validate_examples.py --schema-base source/schemas/` and `uv run python scripts/test_order_modification.py` | **Yes** (schema-validator level) |
-| Capability gating (client exposure and Business rejection) and profile-to-operation discovery for REST and MCP | `uv run python scripts/test_order_modification.py` | **Yes** (resolves from the example profile) |
-| Order invariants (history, quantities, derived status, whole-Order metadata, atomic pending, commit vs refund) | `uv run python scripts/test_order_modification.py` | **Yes**, reference checks on fixtures |
-| GET safety, and reconciliation rules (claim, fence, replay, retention) | `uv run python scripts/test_order_modification.py` | **Yes**, against a tiny executable *specification model*, not a merchant implementation |
-| 24 runtime vectors (`scripts/fixtures/order_modification/vectors/V01..V24`) | Future runtime conformance suite | **No.** Structure and embedded payloads are checked; no implementation was run |
+| Inline JSON examples and composition | `uv run python scripts/validate_examples.py --schema-base source/schemas/` | Documented; run with repository documentation checks |
+| Positive and negative fixtures, profile-to-operation discovery, capability gating, and reconciliation reference model | [Companion testing branch](https://github.com/arjun2075/ucp/tree/feat/ep943-order-cancellation-conformance) — `uv run python scripts/test_order_modification.py` | Separated from this normative PR to keep the protocol contract reviewable |
+| Twenty-four structural runtime conformance vectors | Companion `scripts/fixtures/order_modification/vectors/` | Not executed against a merchant implementation |
+
+The companion suite is independently reviewable but does **not** establish production
+interoperability or Technical Council approval.
 
 ## Open Decisions
 
