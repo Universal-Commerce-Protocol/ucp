@@ -93,8 +93,8 @@ The `method` field indicates how the discount was calculated:
 
 | Method   | Meaning                                 | Example                                          |
 | -------- | --------------------------------------- | ------------------------------------------------ |
-| `each`   | Applied independently per eligible item | "10% off each item" → 10% × item price           |
-| `across` | Split proportionally by value           | "$10 off order" → $6 to $60 item, $4 to $40 item |
+| `each`   | Applied independently per eligible dish | "10% off each dish" → 10% × dish price           |
+| `across` | Split proportionally by value           | "$10 off order" → $6 to $60 dish, $4 to $40 dish |
 
 ### Stacking Order
 
@@ -251,7 +251,7 @@ stacking and allocation details:
       "line_items": [
         {
           "dish": {
-            "id": "sku_pizza_pep_lg"
+            "id": "dish_pizza_pep_lg"
           },
           "quantity": 2
         }
@@ -340,7 +340,7 @@ proceeding to checkout.
       "line_items": [
         {
           "dish": {
-            "id": "sku_pizza_pep_lg"
+            "id": "dish_pizza_pep_lg"
           },
           "quantity": 2
         }
@@ -363,7 +363,7 @@ proceeding to checkout.
         {
           "id": "li_pizza_001",
           "dish": {
-            "id": "sku_pizza_pep_lg",
+            "id": "dish_pizza_pep_lg",
             "title": "Large Pepperoni Pizza",
             "price": 2000
           },
@@ -441,9 +441,9 @@ to the order as a whole and uses `type: "discount"` in totals.
     }
     ```
 
-### Mixed discounts (item + order level)
+### Mixed discounts (dish + order level)
 
-This example shows both discount types: a per-item discount (Buy One Get One
+This example shows both discount types: a per-dish discount (Buy One Get One
 Free) allocated to line items, and an automatic delivery discount at the order
 level.
 
@@ -471,7 +471,7 @@ level.
         {
           "id": "li_pizza_001",
           "dish": {
-            "id": "sku_pizza_pep_lg",
+            "id": "dish_pizza_pep_lg",
             "title": "Large Pepperoni Pizza",
             "price": 2000
           },
@@ -580,7 +580,7 @@ Multiple discounts applied with full allocation breakdown:
         {
           "id": "li_pizza_001",
           "dish": {
-            "id": "sku_pizza_pep_lg",
+            "id": "dish_pizza_pep_lg",
             "title": "Large Pepperoni Pizza",
             "price": 6000
           },
@@ -594,7 +594,7 @@ Multiple discounts applied with full allocation breakdown:
         {
           "id": "li_wings_002",
           "dish": {
-            "id": "sku_wings_bbq_10",
+            "id": "dish_wings_bbq_10",
             "title": "Honey BBQ Wings (10 pcs)",
             "price": 4000
           },
@@ -644,4 +644,4 @@ Multiple discounts applied with full allocation breakdown:
 With this data, an agent can explain:
 > "Your Large Pepperoni Pizza ($60) got $12 off from the 20% summer sale, plus
 > $3 from your loyalty reward (split proportionally). Total savings on this
-> item: $15."
+> dish: $15."
