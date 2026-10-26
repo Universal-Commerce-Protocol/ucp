@@ -28,9 +28,11 @@ checkout session into a cryptographically bound agreement:
 
 * **Businesses** **MUST** embed a cryptographic signature in checkout
     responses, proving the terms (price, line items) are authentic.
-* **Platforms** **MUST** provide cryptographically signed proofs (Mandates)
-    during the `complete` operation, proving the user explicitly authorized the
-    specific checkout state and funds transfer.
+* **Platforms** **MUST** provide a cryptographically signed Checkout Mandate
+    during the `complete` operation, proving authorization of the specific
+    checkout state. When a payment instrument is required to authorize a funds
+    transfer or guarantee, the platform **MUST** also provide the required
+    Payment Mandate. The narrowly scoped no-instrument case is defined below.
 
 **Security Binding:** Once this extension is negotiated in the capability
 intersection, the session is **Security Locked**. Neither party may revert to
@@ -220,12 +222,36 @@ sign_checkout(checkout, private_key, kid, alg="ES256"):
 ### Mandate Structure
 
 Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform
-**MUST** produce two distinct mandate artifacts:
+**MUST** produce a Checkout Mandate in every AP2-active checkout session, and
+**MUST** also produce a distinct Payment Mandate for each payment instrument
+that authorizes a transfer or guarantee at completion:
 
 | Mandate              | UCP Placement                             | Purpose                                              |
 | :------------------- | :---------------------------------------- | :--------------------------------------------------- |
 | **checkout_mandate** | `ap2.checkout_mandate`                    | Proof bound to checkout terms, protects business     |
 | **payment_mandate**  | `payment.instruments[*].credential.token` | Proof bound to payment authorization, protects funds |
+
+#### Fully deferred checkouts without payment instruments
+
+If the authoritative selected [Payment Terms](terms.md) requires **neither**
+upfront payment capture **nor** an instrument guarantee at completion, and its
+complete request consequently uses `"payment": {}` with no instruments, the
+platform **MUST** still provide `ap2.checkout_mandate` and **MUST NOT** invent
+an instrument or a Payment Mandate solely to meet the normal two-artifact rule.
+For this narrowly defined completion, the Checkout Mandate is the only AP2
+mandate required, because no payment is authorized at that time.
+
+The business **MUST** verify the Checkout Mandate and the selected Payment
+Terms before applying this exception. It **MUST NOT** apply this exception if
+any transfer, deposit, capture, or instrument guarantee is required at
+completion. An AP2 Checkout Mandate by itself **MUST NOT** be interpreted as
+an authorization to collect funds later. A subsequent collection requires
+its own applicable payment authorization; this extension does not define an
+out-of-session collection or retroactively waive Payment Mandate requirements.
+
+The exception does not disable AP2 negotiation, merchant signing, Checkout
+Mandate verification, or session locking. All other AP2 payment flows retain
+the ordinary requirement for both mandates.
 
 The checkout mandate **MUST** contain the full checkout response including the
 `ap2.merchant_authorization` field. This creates a nested cryptographic binding
@@ -270,7 +296,10 @@ are automatically handled.
 Once the `dev.ucp.common.payment.ap2_mandate` capability is negotiated, the session
 is locked into the following flow. Both parties **MUST** follow these steps to
 ensure cryptographic integrity; any attempt to bypass these steps or submit
-a completion request without mandates **MUST** result in a session failure.
+a completion request without its required Checkout Mandate (or without a
+required Payment Mandate for a payment-bearing completion) **MUST** result in a
+session failure. The fully deferred no-instrument exception above is the only
+checkout-only completion case defined here.
 
 ### Step 1: Checkout Creation & Signing
 
@@ -338,7 +367,9 @@ verify_merchant_authorization(checkout, merchant_profile):
 ### Step 2: User Consent & Mandate Generation
 
 When the user confirms the purchase, the platform **MUST** facilitate the
-generation of cryptographically verifiable mandates.
+generation of cryptographically verifiable mandates. For a fully deferred,
+no-instrument completion as defined above, the platform generates and submits
+only the Checkout Mandate; it does not fabricate a Payment Mandate.
 
 #### Option 1: Trusted Platform Provider
 
@@ -364,8 +395,10 @@ Binding (+kb) signature.
 
 ### Step 3: Submission (`complete_checkout`)
 
-Once the mandates are generated, the platform submits them in the completion
-request:
+Once the applicable mandates are generated, the platform submits them in the
+completion request. The instrument-bearing example below is unchanged; the
+fully deferred no-instrument case instead submits `"payment": {}` and a valid
+`ap2.checkout_mandate` as defined above:
 
 {{ extension_schema_fields('payment_ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'payment/extensions/ap2-mandates') }}
 
@@ -404,7 +437,9 @@ request:
 
 * `ap2.checkout_mandate`: The SD-JWT+kb checkout mandate containing the
     full checkout (with `ap2.merchant_authorization`)
-* `payment.instruments[*].credential.token`: Contains the payment mandate (composite token)
+* `payment.instruments[*].credential.token`: Contains the payment mandate
+    (composite token) where a payment instrument is required. It is absent in
+    the narrowly defined fully deferred no-instrument case.
 
 ## Verification & Processing
 
@@ -414,6 +449,13 @@ Upon receiving the `complete` request, the business **MUST**:
 
 1. **Enforce Negotiation:** If AP2 was negotiated, reject the request with
     `mandate_required` error code if `ap2.checkout_mandate` is missing.
+2. **Enforce Payment-Mandate Applicability:** When the request has no payment
+    instruments, permit Checkout-Mandate-only completion **only** if the
+    authoritative selected Payment Terms requires no transfer, deposit,
+    capture, or instrument guarantee at completion. Otherwise reject the
+    request; an omitted payment instrument does not waive authorization.
+    Where payment authorization is required, enforce the ordinary AP2 Payment
+    Mandate verification requirements.
 
 **Mandate Verification (per AP2 spec):**
 
@@ -445,11 +487,24 @@ Upon receiving the `complete` request, the business **MUST**:
 
 ### PSP Verification
 
-The business passes the `token` (composite object) to their Payment
-Handler / PSP. The PSP verifies the `payment_mandate` per the
+When a payment instrument is present, the business passes the `token`
+(composite object) to its Payment Handler / PSP. The PSP verifies the
+`payment_mandate` per the
 [AP2 Protocol Specification](https://ap2-protocol.org/specification),
 including signature validation, expiration, and correlation with the
-checkout.
+checkout. No token is presented for the fully deferred no-instrument
+completion; the absence of a token must not authorize any later collection.
+
+### Conformance cases: Payment Terms composition
+
+| Case | AP2 negotiated | Authoritative Payment Terms at completion | Mandates and instruments | Required outcome |
+| :--- | :--- | :--- | :--- | :--- |
+| Immediate charge | Yes | Payment required now | Checkout Mandate and valid Payment Mandate for instrument | Apply normal AP2 checks; valid completion may proceed |
+| Fully deferred invoice | Yes | No capture or instrument guarantee at completion | Checkout Mandate; `"payment": {}` | Permit after normal Checkout Mandate and Terms checks; no payment authorization is inferred |
+| Pay upon arrival | Yes | No capture or instrument guarantee at completion | Checkout Mandate; `"payment": {}` | Same narrow exception; future payment needs separate authorization |
+| Deposit or guarantee required | Yes | Any transfer, deposit or guarantee required now | Checkout Mandate only; `"payment": {}` | Reject; no-instrument exception is inapplicable |
+| Missing Checkout Mandate | Yes | Fully deferred, no upfront requirement | `"payment": {}` without `ap2.checkout_mandate` | Reject with `mandate_required` |
+| Later collection attempt | Yes | Earlier completion used the no-instrument exception | Earlier Checkout Mandate alone | Cannot treat the earlier completion as AP2 authorization to transfer funds |
 
 ## Schema
 
