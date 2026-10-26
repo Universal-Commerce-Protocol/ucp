@@ -34,15 +34,15 @@ fi
 echo "Syncing dependencies with uv..."
 uv sync
 
-# Check UCP-Schema CLI version vs current Crates.io version and prompt
+# Check UCP-Schema CLI version vs pinned UCP_SCHEMA_VERSION (or Crates.io) and prompt
 PURPLE='\033[1;35m'
 NC='\033[0m' # No Color
 echo "Using ucp-schema CLI: $(which ucp-schema)"
 UCP_CLI_VERSION=$(ucp-schema --version | sed 's/ucp-schema //')
-echo "Local ucp-schema version:  '$UCP_CLI_VERSION'"
-UCP_CRATES_VERSION=$(cargo info ucp-schema | sed -n 's/^version: //p')
-echo "Crates ucp-schema version: '$UCP_CRATES_VERSION'"
-if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
+echo "Local ucp-schema version:    '$UCP_CLI_VERSION'"
+EXPECTED_UCP_VERSION="${UCP_SCHEMA_VERSION:-$(cargo info ucp-schema | sed -n 's/^version: //p')}"
+echo "Expected ucp-schema version: '$EXPECTED_UCP_VERSION'"
+if [[ $UCP_CLI_VERSION != "$EXPECTED_UCP_VERSION" ]]; then
 	if [[ "$CI" = "true" ]]; then
 		echo -e "${PURPLE}*ucp-schema version mismatch in CI*${NC}"
 		exit 1

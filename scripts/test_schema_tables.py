@@ -20,6 +20,7 @@ Run: python3 scripts/test_schema_tables.py
 Exit: 0 on all pass, 1 on any failure.
 """
 
+import ast
 import json
 import os
 from pathlib import Path
@@ -360,6 +361,752 @@ def test_method_tables_name_ucp_field(macros: dict) -> None:
   )
 
 
+def _strip_non_root_ids(node: object, *, is_root: bool = True) -> object:
+  """Simulate ucp-schema 2.0.0 --bundle stripping non-root `$id`s."""
+  if isinstance(node, dict):
+    return {
+      k: _strip_non_root_ids(v, is_root=False)
+      for k, v in node.items()
+      if is_root or k != "$id"
+    }
+  if isinstance(node, list):
+    return [_strip_non_root_ids(item, is_root=False) for item in node]
+  return node
+
+
+def _render_synthetic_schema(
+  macros: dict, schema: dict, spec_file: str = "reference"
+) -> str:
+  """Render an arbitrary JSON Schema dict via `method_fields`."""
+  main = sys.modules["main"]
+  spec = {
+    "openapi": "3.1.0",
+    "info": {"title": "synthetic", "version": "1"},
+    "paths": {
+      "/x": {
+        "post": {
+          "operationId": "op",
+          "requestBody": {"content": {"application/json": {"schema": schema}}},
+          "responses": {"200": {"description": "ok"}},
+        }
+      }
+    },
+  }
+  original = main.OPENAPI_DIR
+  with tempfile.TemporaryDirectory() as tmp:
+    Path(tmp, "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+    main.OPENAPI_DIR = Path(tmp)
+    try:
+      return macros["method_fields"]("op", "spec.json", spec_file, "request")
+    finally:
+      main.OPENAPI_DIR = original
+
+
+def test_loyalty_catalog_lookup_one_of_all_of_renders_prose(
+  macros: dict,
+) -> None:
+  """Top-level oneOf without branch `type` renders prose, not an empty table."""
+  loyalty = macros["extension_schema_fields"](
+    "loyalty.json#/$defs/dev.ucp.shopping.catalog.lookup", "reference"
+  )
+  union_prose = _render_synthetic_schema(
+    macros,
+    {
+      "oneOf": [
+        {"$ref": "types/message.json"},
+        {"title": "JSON-RPC Message", "oneOf": [{"type": "object"}]},
+      ]
+    },
+  )
+  _check(
+    "loyalty_catalog_lookup_one_of_all_of_renders_prose",
+    "This object MUST be one of the following types: `object`, `object`."
+    in loyalty
+    and "| Name | Type |" not in loyalty
+    and (
+      "This object MUST be one of the following types: "
+      "[Message](site:specification/reference/#message), JSON-RPC Message."
+    )
+    in union_prose,
+    f"loyalty={loyalty!r} union={union_prose!r}",
+  )
+
+
+def test_recursive_schema_and_all_of_constraint_branch(macros: dict) -> None:
+  """Recursive `#` refs and constraint-only allOf branches preserve types."""
+  main = sys.modules["main"]
+  direct = macros["schema_fields"]("types/constraint_expression", "reference")
+
+  ce_path = REPO_ROOT / "source/schemas/common/types/constraint_expression.json"
+  raw_ce = main._resolve_schema(ce_path)
+  bundled_ce = _strip_non_root_ids(main._resolve_schema_bundled(ce_path))
+  restored_ce = main._restore_fragment_refs(bundled_ce, raw_ce, ce_path, raw_ce)
+  rendered_bundled_ce = _render_synthetic_schema(macros, restored_ce)
+
+  composed_table = _render_synthetic_schema(
+    macros,
+    {
+      "$id": "https://ucp.dev/schemas/common/types/constraint_expression.json",
+      "type": "object",
+      "properties": {
+        "by_id": {
+          "allOf": [
+            {
+              "$id": "https://ucp.dev/schemas/common/types/locality.json",
+              "type": "object",
+            },
+            {"required": ["postal_code"]},
+          ]
+        },
+        "self_composed": {
+          "allOf": [
+            {"$ref": "#"},
+            {"required": ["id"]},
+          ]
+        },
+        "untitled_constrained": {
+          "allOf": [
+            {"type": "object", "properties": {"x": {"type": "string"}}},
+            {"required": ["x"]},
+          ]
+        },
+      },
+    },
+  )
+
+  want_props = (
+    "Map[string, OneOf["
+    "[Constraint Expression]"
+    "(site:specification/reference/#constraint-expression), `object`]]"
+  )
+  want_array = (
+    "Array[[Constraint Expression]"
+    "(site:specification/reference/#constraint-expression)]"
+  )
+  _check(
+    "recursive_schema_and_all_of_constraint_branch",
+    _type_cell(direct, "properties") == want_props
+    and _type_cell(direct, "anyOf") == want_array
+    and _type_cell(rendered_bundled_ce, "properties") == want_props
+    and _type_cell(rendered_bundled_ce, "anyOf") == want_array
+    and _type_cell(composed_table, "by_id")
+    == "[Locality](site:specification/reference/#locality)"
+    and _type_cell(composed_table, "self_composed")
+    == (
+      "[Constraint Expression]"
+      "(site:specification/reference/#constraint-expression)"
+    )
+    and _type_cell(composed_table, "untitled_constrained") == "object",
+    f"direct_props={_type_cell(direct, 'properties')!r} "
+    f"bundled_props={_type_cell(rendered_bundled_ce, 'properties')!r} "
+    f"composed={composed_table!r}",
+  )
+
+
+def test_fragment_ref_real_anchor_vs_title_fallback(macros: dict) -> None:
+  """Fragment refs link real anchors and fall back to title/type otherwise."""
+  main = sys.modules["main"]
+  lookup_loc = macros["extension_schema_fields"](
+    "location_lookup.json#/$defs/lookup_location", "common/location"
+  )
+  loc_rest = macros["schema_fields"]("types/location", "common/location/rest")
+  get_prod = macros["extension_schema_fields"](
+    "catalog_lookup.json#/$defs/get_product_response", "shopping/catalog"
+  )
+
+  # Cross-file fragment inside allOf: pagination.json#/$defs/request has a real
+  # anchor on reference.md (#pagination-request), whereas capability.json's
+  # platform_schema has no anchor on shopping/checkout and falls back to title.
+  fulfillment_path = REPO_ROOT / "source/schemas/shopping/fulfillment.json"
+  raw_synthetic = {
+    "type": "object",
+    "properties": {
+      "anchored_frag": {
+        "allOf": [
+          {"$ref": "../common/types/pagination.json#/$defs/request"},
+          {"required": ["limit"]},
+        ]
+      },
+      "unanchored_frag": {"$ref": "../capability.json#/$defs/platform_schema"},
+    },
+  }
+  bundled_synthetic = {
+    "type": "object",
+    "properties": {
+      "anchored_frag": {
+        "allOf": [
+          {"type": "object", "properties": {"limit": {"type": "integer"}}},
+          {"required": ["limit"]},
+        ]
+      },
+      "unanchored_frag": {"type": "object", "properties": {}},
+    },
+  }
+  restored = main._restore_fragment_refs(
+    bundled_synthetic,
+    raw_synthetic,
+    fulfillment_path,
+    raw_synthetic,
+    anchor_checker=lambda ref: "pagination.json#/$defs/request" in ref,
+  )
+  rendered_synthetic = _render_synthetic_schema(
+    macros, restored, "shopping/checkout"
+  )
+
+  _check(
+    "fragment_ref_real_anchor_vs_title_fallback",
+    _type_cell(lookup_loc, "amenities") == "Map[string, Amenity]"
+    and _type_cell(loc_rest, "amenities")
+    == (
+      "Map[string, [Amenity](site:specification/common/location/rest/#amenity)]"
+    )
+    and _type_cell(get_prod, "product")
+    == "[Product](site:specification/reference/#product)"
+    and restored["properties"]["anchored_frag"]["allOf"][0].get("$ref")
+    == "../common/types/pagination.json#/$defs/request"
+    and "$ref" not in restored["properties"]["unanchored_frag"]
+    and _type_cell(rendered_synthetic, "anchored_frag")
+    == "[Pagination Request](site:specification/reference/#pagination-request)"
+    and _type_cell(rendered_synthetic, "unanchored_frag")
+    == "Capability (Platform Schema)",
+    f"amenities_loc={_type_cell(lookup_loc, 'amenities')!r} "
+    f"amenities_rest={_type_cell(loc_rest, 'amenities')!r} "
+    f"product={_type_cell(get_prod, 'product')!r} "
+    f"synthetic={rendered_synthetic!r}",
+  )
+
+
+def test_union_any_of_and_map_restoration_and_rendering(macros: dict) -> None:
+  """oneOf, anyOf, and Map[string, ...] restore stripped refs and render."""
+  main = sys.modules["main"]
+  cap_resp = macros["extension_schema_fields"](
+    "capability.json#/$defs/response_schema", "reference"
+  )
+  ucp_plat = macros["extension_schema_fields"](
+    "ucp.json#/$defs/platform_schema", "reference"
+  )
+
+  types_path = REPO_ROOT / "source/schemas/common/types/location.json"
+  raw_schema = {
+    "type": "object",
+    "properties": {
+      "union_obj": {
+        "oneOf": [
+          {"$ref": "postal_address.json"},
+          {"$ref": "locality.json"},
+        ]
+      },
+      "union_items": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {"$ref": "postal_address.json"},
+            {"$ref": "locality.json"},
+          ]
+        },
+      },
+      "union_no_top_type": {
+        "oneOf": [
+          {"$ref": "message.json"},
+          {"$ref": "postal_address.json"},
+        ]
+      },
+      "any_of_union": {
+        "anyOf": [
+          {"$ref": "postal_address.json"},
+          {"type": "string"},
+        ]
+      },
+      "constraint_any_of": {
+        "type": "object",
+        "properties": {"a": {"type": "string"}, "b": {"type": "string"}},
+        "anyOf": [{"required": ["a"]}, {"required": ["b"]}],
+      },
+      "typed_map": {
+        "type": "object",
+        "additionalProperties": {"$ref": "daily_hour.json"},
+      },
+    },
+  }
+  bundled_schema = {
+    "type": "object",
+    "properties": {
+      "union_obj": {
+        "oneOf": [
+          {"title": "Postal Address", "type": "object"},
+          {"title": "Locality", "type": "object"},
+        ]
+      },
+      "union_items": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {"title": "Postal Address", "type": "object"},
+            {"title": "Locality", "type": "object"},
+          ]
+        },
+      },
+      "union_no_top_type": {
+        "oneOf": [
+          {"title": "Message", "oneOf": [{"type": "object"}]},
+          {"title": "Postal Address", "type": "object"},
+        ]
+      },
+      "any_of_union": {
+        "anyOf": [
+          {"title": "Postal Address", "type": "object"},
+          {"type": "string"},
+        ]
+      },
+      "constraint_any_of": {
+        "type": "object",
+        "properties": {"a": {"type": "string"}, "b": {"type": "string"}},
+        "anyOf": [{"required": ["a"]}, {"required": ["b"]}],
+      },
+      "typed_map": {
+        "type": "object",
+        "additionalProperties": {"title": "Daily Hour", "type": "object"},
+      },
+    },
+  }
+  restored = main._restore_fragment_refs(
+    bundled_schema, raw_schema, types_path, raw_schema
+  )
+  rendered = _render_synthetic_schema(macros, restored)
+
+  addr_link = "[Postal Address](site:specification/reference/#postal-address)"
+  loc_link = "[Locality](site:specification/reference/#locality)"
+  msg_link = "[Message](site:specification/reference/#message)"
+  hour_link = "[Daily Hour](site:specification/reference/#daily-hour)"
+  rdn_link = (
+    "[Reverse Domain Name](site:specification/reference/#reverse-domain-name)"
+  )
+  _check(
+    "union_any_of_and_map_restoration_and_rendering",
+    _type_cell(cap_resp, "extends") == f"OneOf[{rdn_link}, Array[{rdn_link}]]"
+    and _type_cell(ucp_plat, "map_order") == "Map[string, Array[string]]"
+    and _type_cell(ucp_plat, "services")
+    == "Map[string, Array[Service (Platform Schema)]]"
+    and _type_cell(rendered, "union_obj") == f"OneOf[{addr_link}, {loc_link}]"
+    and _type_cell(rendered, "union_items")
+    == f"Array[OneOf[{addr_link}, {loc_link}]]"
+    and _type_cell(rendered, "union_no_top_type")
+    == f"OneOf[{msg_link}, {addr_link}]"
+    and _type_cell(rendered, "any_of_union") == f"AnyOf[{addr_link}, `string`]"
+    and _type_cell(rendered, "constraint_any_of") == "object"
+    and _type_cell(rendered, "typed_map") == f"Map[string, {hour_link}]",
+    f"cap_extends={_type_cell(cap_resp, 'extends')!r} "
+    f"ucp_plat={ucp_plat!r} rendered={rendered!r}",
+  )
+
+
+def _find_schema_file(entity_name: str) -> Path | None:
+  main = sys.modules["main"]
+  for d in main.SCHEMAS_DIRS:
+    candidate = Path(d) / f"{entity_name}.json"
+    if candidate.exists():
+      return candidate.resolve()
+  return None
+
+
+def _collect_node_cross_refs(
+  node: object,
+  cur_path: Path,
+  cur_root: dict,
+  orig_root_path: Path,
+  seen: set | None = None,
+) -> list[str]:
+  """Collect cross-file `$ref` targets backing a property schema node."""
+  main = sys.modules["main"]
+  if seen is None:
+    seen = set()
+  if not isinstance(node, dict):
+    return []
+  refs: list[str] = []
+  raw_ref = node.get("$ref")
+  if isinstance(raw_ref, str) and raw_ref:
+    ref = raw_ref
+    seen_local: set[str] = set()
+    while ref.startswith("#/") and ref not in seen_local:
+      seen_local.add(ref)
+      target = main._resolve_json_pointer(ref, cur_root)
+      if isinstance(target, dict) and isinstance(target.get("$ref"), str):
+        ref = target["$ref"]
+      else:
+        break
+    if cur_path.resolve() != orig_root_path.resolve():
+      rel = Path(
+        os.path.relpath(cur_path.resolve(), orig_root_path.resolve().parent)
+      ).as_posix()
+      if ref == "#":
+        ref = rel
+      elif ref.startswith("#/"):
+        ref = f"{rel}{ref}"
+    if not ref.startswith("#"):
+      refs.append(ref)
+    elif ref.startswith("#/") and (cur_path, ref) not in seen:
+      seen.add((cur_path, ref))
+      target = main._resolve_json_pointer(ref, cur_root)
+      if isinstance(target, dict):
+        refs.extend(
+          _collect_node_cross_refs(
+            target, cur_path, cur_root, orig_root_path, seen
+          )
+        )
+
+  for sub_key in ("items", "additionalProperties"):
+    sub = node.get(sub_key)
+    if isinstance(sub, dict):
+      refs.extend(
+        _collect_node_cross_refs(sub, cur_path, cur_root, orig_root_path, seen)
+      )
+  for comp_key in ("allOf", "oneOf", "anyOf"):
+    comp = node.get(comp_key)
+    if isinstance(comp, list):
+      for branch in comp:
+        refs.extend(
+          _collect_node_cross_refs(
+            branch, cur_path, cur_root, orig_root_path, seen
+          )
+        )
+  return refs
+
+
+def _collect_table_cross_refs(
+  schema_node: object,
+  cur_path: Path,
+  cur_root: dict,
+  orig_root_path: Path,
+  seen: set | None = None,
+) -> dict[str, list[str]]:
+  """Collect `{field_name: [cross_file_refs]}` across table properties/allOf."""
+  main = sys.modules["main"]
+  if seen is None:
+    seen = set()
+  if not isinstance(schema_node, dict):
+    return {}
+  out: dict[str, list[str]] = {}
+
+  if isinstance(schema_node.get("$ref"), str):
+    ref_str = schema_node["$ref"]
+    key = (cur_path, ref_str)
+    if key not in seen:
+      seen.add(key)
+      target, next_path, next_root = main._resolve_raw_ref(
+        ref_str, cur_path, cur_root
+      )
+      if isinstance(target, dict) and next_path and isinstance(next_root, dict):
+        for fname, field_refs in _collect_table_cross_refs(
+          target, next_path, next_root, orig_root_path, seen
+        ).items():
+          out.setdefault(fname, []).extend(field_refs)
+
+  if isinstance(schema_node.get("allOf"), list):
+    for branch in schema_node["allOf"]:
+      for fname, field_refs in _collect_table_cross_refs(
+        branch, cur_path, cur_root, orig_root_path, seen
+      ).items():
+        out.setdefault(fname, []).extend(field_refs)
+
+  props = schema_node.get("properties")
+  if isinstance(props, dict):
+    if isinstance(props.get("allOf"), list):
+      for branch in props["allOf"]:
+        for fname, field_refs in _collect_table_cross_refs(
+          branch, cur_path, cur_root, orig_root_path, seen
+        ).items():
+          out.setdefault(fname, []).extend(field_refs)
+    else:
+      for fname, details in props.items():
+        if fname == "$ref" and isinstance(details, str):
+          target, next_path, next_root = main._resolve_raw_ref(
+            details, cur_path, cur_root
+          )
+          if (
+            isinstance(target, dict)
+            and next_path
+            and isinstance(next_root, dict)
+          ):
+            for sub_f, sub_refs in _collect_table_cross_refs(
+              target, next_path, next_root, orig_root_path, seen
+            ).items():
+              out.setdefault(sub_f, []).extend(sub_refs)
+          continue
+        field_refs = _collect_node_cross_refs(
+          details, cur_path, cur_root, orig_root_path
+        )
+        if field_refs:
+          out.setdefault(fname, []).extend(field_refs)
+  return out
+
+
+def _is_degraded_type_cell(cell: str) -> bool:
+  """Return True when a cross-file `$ref` cell degraded to a generic type."""
+  if cell in (
+    "any",
+    "object",
+    "Array[object]",
+    "Array[any]",
+    "Map[string, object]",
+    "Map[string, Array[object]]",
+  ):
+    return True
+  return any(
+    prefix in cell and "](" not in cell for prefix in ("OneOf[", "AnyOf[")
+  )
+
+
+def _parse_table_type_cells(md_text: str) -> dict[str, str]:
+  """Map `field_name -> Type cell` across Markdown table rows."""
+  rows: dict[str, str] = {}
+  for line in md_text.splitlines():
+    stripped = line.strip()
+    if (
+      stripped.startswith("|")
+      and stripped.endswith("|")
+      and not stripped.endswith(r"\|")
+    ):
+      parts = [p.strip() for p in re.split(r"(?<!\\)\|", stripped)]
+      if len(parts) >= 5 and parts[1] not in ("Name", ":---"):
+        rows[parts[1]] = parts[2]
+  return rows
+
+
+def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
+  """Every cross-file `$ref` field rendered in `docs/` is linked or named."""
+  main = sys.modules["main"]
+  # Untitled, unanchored base `$defs` in service.json and payment_handler.json
+  # intentionally carry no standalone anchor or title in the specification.
+  allowlisted_refs = {
+    "service.json#/$defs/base",
+    "payment_handler.json#/$defs/base",
+  }
+  macro_re = re.compile(
+    r"\{\{\s*(schema_fields|extension_schema_fields|extension_fields|"
+    r"method_fields|auto_generate_schema_reference)\(([^)]*)\)\s*\}\}"
+  )
+  checked_fields = 0
+  unexpected: list[str] = []
+
+  def check_table(
+    label: str, field_map: dict[str, list[str]], rendered_text: str
+  ) -> None:
+    nonlocal checked_fields
+    trows = _parse_table_type_cells(rendered_text)
+    for fname, field_refs in field_map.items():
+      if fname not in trows:
+        continue
+      checked_fields += 1
+      cell = trows[fname]
+      if (
+        _is_degraded_type_cell(cell) and not set(field_refs) <= allowlisted_refs
+      ):
+        unexpected.append(f"{label}.{fname}={cell!r} (refs={field_refs})")
+
+  for md_path in sorted((REPO_ROOT / "docs").rglob("*.md")):
+    rel_md = md_path.relative_to(REPO_ROOT).as_posix()
+    for match in macro_re.finditer(md_path.read_text(encoding="utf-8")):
+      name, arg_str = match.group(1), match.group(2)
+      call = ast.parse(f"f({arg_str})", mode="eval").body
+      pos = [ast.literal_eval(a) for a in call.args]
+      kw = {k.arg: ast.literal_eval(k.value) for k in call.keywords if k.arg}
+      rendered = macros[name](*pos, **kw)
+
+      if name == "schema_fields":
+        entity_name = pos[0]
+        render_inline = kw.get(
+          "render_inline", pos[2] if len(pos) > 2 else True
+        )
+        if not render_inline and "See [" in rendered:
+          continue
+        base_name, direction, op = entity_name, "response", "read"
+        if entity_name.endswith("_resp"):
+          base_name = entity_name[:-5]
+        elif entity_name.endswith("_req"):
+          parts = entity_name[:-4].rsplit("_", 1)
+          if len(parts) == 2 and parts[1] in (
+            "create",
+            "update",
+            "complete",
+            "read",
+          ):
+            base_name, op = parts
+          else:
+            base_name = entity_name[:-4]
+          direction = "request"
+        schema_path = _find_schema_file(base_name)
+        if not schema_path:
+          continue
+        raw = main._resolve_schema(schema_path, direction, op, bundle=False)
+        check_table(
+          f"{rel_md}:{name}({arg_str})",
+          _collect_table_cross_refs(raw, schema_path, raw, schema_path),
+          rendered,
+        )
+
+      elif name == "extension_schema_fields":
+        entity_name = pos[0]
+        render_inline = kw.get(
+          "render_inline", pos[2] if len(pos) > 2 else True
+        )
+        if not render_inline and "|" not in rendered:
+          continue
+        core_entity, def_part = entity_name.split(".json#", 1)
+        schema_path = _find_schema_file(core_entity)
+        if not schema_path:
+          continue
+        raw_root = main._resolve_schema(schema_path)
+        raw_def = main._resolve_json_pointer("#" + def_part, raw_root)
+        check_table(
+          f"{rel_md}:{name}({arg_str})",
+          _collect_table_cross_refs(
+            raw_def, schema_path, raw_root, schema_path
+          ),
+          rendered,
+        )
+
+      elif name == "extension_fields":
+        entity_name = pos[0]
+        target_name = kw.get("target", pos[2] if len(pos) > 2 else "checkout")
+        schema_path = (
+          main.SHOPPING_SCHEMAS_DIR / f"{entity_name}.json"
+        ).resolve()
+        raw_root = json.loads(schema_path.read_text(encoding="utf-8"))
+        target_def = next(
+          (
+            schema_def
+            for k, schema_def in raw_root.get("$defs", {}).items()
+            if (k == target_name or k.endswith("." + target_name))
+            and isinstance(schema_def, dict)
+            and "allOf" in schema_def
+          ),
+          None,
+        )
+        if target_def:
+          item = next((i for i in target_def["allOf"] if "properties" in i), {})
+          check_table(
+            f"{rel_md}:{name}({arg_str})",
+            _collect_table_cross_refs(item, schema_path, raw_root, schema_path),
+            rendered,
+          )
+
+      elif name == "auto_generate_schema_reference":
+        sub_dir = pos[0] if len(pos) > 0 else kw.get("sub_dir", ".")
+        spec_file = (
+          pos[1] if len(pos) > 1 else kw.get("spec_file_name", "reference")
+        )
+        inc_ext = pos[2] if len(pos) > 2 else kw.get("include_extensions", True)
+        inc_cap = pos[3] if len(pos) > 3 else kw.get("include_capability", True)
+        base_dir = pos[4] if len(pos) > 4 else kw.get("base_dir")
+        base_p = Path(base_dir) if base_dir else main.SHOPPING_SCHEMAS_DIR
+        scan_p = base_p / sub_dir if sub_dir != "." else base_p
+        for schema_file in sorted(
+          f for f in scan_p.iterdir() if f.suffix == ".json"
+        ):
+          sdata = json.loads(schema_file.read_text(encoding="utf-8"))
+          is_ext = "Extension" in sdata.get("title", "")
+          if (is_ext and not inc_ext) or (not is_ext and not inc_cap):
+            continue
+          ent = (
+            schema_file.stem
+            if sub_dir == "."
+            else f"{Path(sub_dir).as_posix()}/{schema_file.stem}"
+          )
+          resolved_file = schema_file.resolve()
+          raw_root = main._resolve_schema(resolved_file)
+          if is_ext and sdata.get("$defs"):
+            for def_name in sdata["$defs"]:
+              sub_render = macros["extension_schema_fields"](
+                f"{ent}.json#/$defs/{def_name}", spec_file
+              )
+              raw_def = main._resolve_json_pointer(
+                f"#/$defs/{def_name}", raw_root
+              )
+              check_table(
+                f"{rel_md}:{ent}.json#/$defs/{def_name}",
+                _collect_table_cross_refs(
+                  raw_def, resolved_file, raw_root, resolved_file
+                ),
+                sub_render,
+              )
+          else:
+            sub_render = macros["schema_fields"](ent, spec_file)
+            check_table(
+              f"{rel_md}:{ent}.json",
+              _collect_table_cross_refs(
+                raw_root, resolved_file, raw_root, resolved_file
+              ),
+              sub_render,
+            )
+
+      elif name == "method_fields":
+        op_id, file_name = pos[0], pos[1]
+        io_type = pos[3] if len(pos) > 3 else kw.get("io_type")
+        oa_path = (main.OPENAPI_DIR / file_name).resolve()
+        oa_data = json.loads(oa_path.read_text(encoding="utf-8"))
+        op_obj = next(
+          (
+            v
+            for path_item in (
+              *oa_data.get("paths", {}).values(),
+              *oa_data.get("webhooks", {}).values(),
+            )
+            for v in path_item.values()
+            if isinstance(v, dict) and v.get("operationId") == op_id
+          ),
+          None,
+        )
+        if not op_obj:
+          continue
+        if io_type in (None, "request"):
+          req_s = (
+            op_obj.get("requestBody", {})
+            .get("content", {})
+            .get("application/json", {})
+            .get("schema", {})
+          )
+          req_txt = (
+            rendered.split("**Output**")[0]
+            if "**Output**" in rendered
+            else rendered
+          )
+          if req_s:
+            check_table(
+              f"{rel_md}:{name}({op_id},request)",
+              _collect_table_cross_refs(req_s, oa_path, oa_data, oa_path),
+              req_txt,
+            )
+        if io_type in (None, "response"):
+          res_s = next(
+            (
+              op_obj["responses"][code]
+              .get("content", {})
+              .get("application/json", {})
+              .get("schema", {})
+              for code in ("200", "201")
+              if code in op_obj.get("responses", {})
+            ),
+            {},
+          )
+          res_txt = (
+            rendered.split("**Output**")[1]
+            if "**Output**" in rendered
+            else rendered
+          )
+          if res_s:
+            check_table(
+              f"{rel_md}:{name}({op_id},response)",
+              _collect_table_cross_refs(res_s, oa_path, oa_data, oa_path),
+              res_txt,
+            )
+
+  _check(
+    "corpus_cross_file_refs_are_linked_or_named",
+    checked_fields >= 1000 and not unexpected,
+    f"checked={checked_fields} unexpected={unexpected}",
+  )
+
+
 # -----------------------------------------------------------
 # Header tables
 # -----------------------------------------------------------
@@ -545,6 +1292,11 @@ def main() -> int:
   test_bundled_whole_file_and_inherited_refs_link_reference_section(macros)
   test_restore_fragment_refs_without_nested_ids()
   test_method_tables_name_ucp_field(macros)
+  test_loyalty_catalog_lookup_one_of_all_of_renders_prose(macros)
+  test_recursive_schema_and_all_of_constraint_branch(macros)
+  test_fragment_ref_real_anchor_vs_title_fallback(macros)
+  test_union_any_of_and_map_restoration_and_rendering(macros)
+  test_corpus_cross_file_refs_are_linked_or_named(macros)
   test_header_tables_list_each_header_once(macros)
   test_security_header_rows_follow_requirements()
   test_content_header_rows_follow_media_types()
