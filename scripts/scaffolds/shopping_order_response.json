@@ -10,7 +10,11 @@
   "line_items": [
     {
       "id": "li_scaffold",
-      "item": { "id": "item_scaffold", "title": "Scaffold Item", "price": 1000 },
+      "item": {
+        "id": "item_scaffold",
+        "title": "Scaffold Item",
+        "price": 1000
+      },
       "quantity": { "original": 1, "total": 1, "fulfilled": 0 },
       "totals": [
         { "type": "subtotal", "amount": 1000 },

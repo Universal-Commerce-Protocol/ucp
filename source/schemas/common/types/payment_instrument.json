@@ -4,11 +4,7 @@
   "title": "Payment Instrument",
   "description": "The base definition for any payment instrument. It links the instrument to a specific payment handler.",
   "type": "object",
-  "required": [
-    "id",
-    "handler_id",
-    "type"
-  ],
+  "required": ["id", "handler_id", "type"],
   "properties": {
     "id": {
       "type": "string",

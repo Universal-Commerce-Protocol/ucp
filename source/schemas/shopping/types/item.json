@@ -3,11 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/types/item.json",
   "title": "Item",
   "type": "object",
-  "required": [
-    "id",
-    "title",
-    "price"
-  ],
+  "required": ["id", "title", "price"],
   "properties": {
     "id": {
       "type": "string",

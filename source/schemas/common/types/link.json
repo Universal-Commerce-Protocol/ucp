@@ -3,10 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/types/link.json",
   "title": "Link",
   "type": "object",
-  "required": [
-    "type",
-    "url"
-  ],
+  "required": ["type", "url"],
   "properties": {
     "type": {
       "type": "string",

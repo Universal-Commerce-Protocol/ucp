@@ -4,13 +4,7 @@
   "title": "Product",
   "description": "A product in the catalog with variants and options.",
   "type": "object",
-  "required": [
-    "id",
-    "title",
-    "description",
-    "price_range",
-    "variants"
-  ],
+  "required": ["id", "title", "description", "price_range", "variants"],
   "properties": {
     "id": {
       "type": "string",

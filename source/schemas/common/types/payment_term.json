@@ -4,11 +4,7 @@
   "title": "Payment Term",
   "description": "A way of paying for the checkout: one or more payment schedules that together cover its total.",
   "type": "object",
-  "required": [
-    "id",
-    "title",
-    "schedules"
-  ],
+  "required": ["id", "title", "schedules"],
   "additionalProperties": true,
   "properties": {
     "id": {

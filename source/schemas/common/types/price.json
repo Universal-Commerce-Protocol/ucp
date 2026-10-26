@@ -4,10 +4,7 @@
   "title": "Price",
   "description": "Price with explicit currency.",
   "type": "object",
-  "required": [
-    "amount",
-    "currency"
-  ],
+  "required": ["amount", "currency"],
   "properties": {
     "amount": {
       "$ref": "amount.json",

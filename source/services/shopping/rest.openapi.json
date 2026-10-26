@@ -428,8 +428,12 @@
             "description": "Cart created",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
@@ -441,9 +445,7 @@
       }
     },
     "/carts/{id}": {
-      "parameters": [
-        { "$ref": "#/components/parameters/cart_id_path" }
-      ],
+      "parameters": [{ "$ref": "#/components/parameters/cart_id_path" }],
       "get": {
         "operationId": "get_cart",
         "summary": "Get Cart",
@@ -466,8 +468,12 @@
             "description": "Cart retrieved",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
@@ -509,8 +515,12 @@
             "description": "Cart updated",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
@@ -522,9 +532,7 @@
       }
     },
     "/carts/{id}/cancel": {
-      "parameters": [
-        { "$ref": "#/components/parameters/cart_id_path" }
-      ],
+      "parameters": [{ "$ref": "#/components/parameters/cart_id_path" }],
       "post": {
         "operationId": "cancel_cart",
         "summary": "Cancel Cart",
@@ -549,8 +557,12 @@
             "description": "Cart cancelled",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
@@ -584,7 +596,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/catalog_search_request" }
+              "schema": {
+                "$ref": "#/components/schemas/catalog_search_request"
+              }
             }
           }
         },
@@ -593,12 +607,18 @@
             "description": "Search results",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/catalog_search_response" }
+                "schema": {
+                  "$ref": "#/components/schemas/catalog_search_response"
+                }
               }
             }
           }
@@ -628,7 +648,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/catalog_lookup_request" }
+              "schema": {
+                "$ref": "#/components/schemas/catalog_lookup_request"
+              }
             }
           }
         },
@@ -637,12 +659,18 @@
             "description": "Lookup result",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/catalog_lookup_response" }
+                "schema": {
+                  "$ref": "#/components/schemas/catalog_lookup_response"
+                }
               }
             }
           }
@@ -650,9 +678,7 @@
       }
     },
     "/orders/{id}": {
-      "parameters": [
-        { "$ref": "#/components/parameters/order_id_path" }
-      ],
+      "parameters": [{ "$ref": "#/components/parameters/order_id_path" }],
       "get": {
         "operationId": "get_order",
         "summary": "Get Order",
@@ -675,8 +701,12 @@
             "description": "Order retrieved or business outcome message",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
@@ -710,7 +740,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/catalog_get_product_request" }
+              "schema": {
+                "$ref": "#/components/schemas/catalog_get_product_request"
+              }
             }
           }
         },
@@ -719,12 +751,18 @@
             "description": "Product detail",
             "headers": {
               "Signature": { "$ref": "#/components/headers/signature" },
-              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
-              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+              "Signature-Input": {
+                "$ref": "#/components/headers/signature_input"
+              },
+              "Content-Digest": {
+                "$ref": "#/components/headers/content_digest"
+              }
             },
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/catalog_get_product_response" }
+                "schema": {
+                  "$ref": "#/components/schemas/catalog_get_product_response"
+                }
               }
             }
           }
@@ -1018,7 +1056,9 @@
       },
       "catalog_get_product_response": {
         "oneOf": [
-          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
+          {
+            "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response"
+          },
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       }

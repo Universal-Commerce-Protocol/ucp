@@ -3,12 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/types/message_error.json",
   "title": "Message Error",
   "type": "object",
-  "required": [
-    "type",
-    "code",
-    "content",
-    "severity"
-  ],
+  "required": ["type", "code", "content", "severity"],
   "properties": {
     "type": {
       "type": "string",
@@ -24,10 +19,7 @@
     },
     "content_type": {
       "type": "string",
-      "enum": [
-        "plain",
-        "markdown"
-      ],
+      "enum": ["plain", "markdown"],
       "default": "plain",
       "description": "Content format, default = plain."
     },

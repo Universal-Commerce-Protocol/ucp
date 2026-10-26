@@ -4,12 +4,7 @@
   "title": "Payment Schedule",
   "description": "A single payment that settles part or all of the checkout under a payment term. Timing is stated in buyer-facing text; `type` and `due_at` are supplementary machine-readable signals derived from it.",
   "type": "object",
-  "required": [
-    "id",
-    "type",
-    "description",
-    "amount"
-  ],
+  "required": ["id", "type", "description", "amount"],
   "additionalProperties": true,
   "properties": {
     "id": {

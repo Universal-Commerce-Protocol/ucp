@@ -4,12 +4,7 @@
   "title": "Expectation",
   "description": "Buyer-facing fulfillment expectation representing logical groupings of items (e.g., 'package'). Can be split, merged, or adjusted post-order to set buyer expectations for when/how items arrive.",
   "type": "object",
-  "required": [
-    "id",
-    "line_items",
-    "method_type",
-    "destination"
-  ],
+  "required": ["id", "line_items", "method_type", "destination"],
   "properties": {
     "id": {
       "type": "string",
