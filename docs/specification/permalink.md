@@ -480,6 +480,8 @@ can resolve to:
 ```http
 HTTP/1.1 303 See Other
 Location: https://merchant.example/collections/spring?utm_source=email&utm_medium=sms&color=black
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 In this example:
@@ -547,6 +549,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ### Campaign link with discount and continuation
@@ -588,6 +592,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://merchant.example/collections/spring?utm_source=email
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ### Buyer-directed purchase link
@@ -642,6 +648,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ### Pickup with a pre-selected destination
@@ -674,6 +682,8 @@ Possible resolution:
 ```http
 HTTP/1.1 303 See Other
 Location: https://checkout.merchant.example/session/chk_123
+Cache-Control: no-store
+Referrer-Policy: no-referrer
 ```
 
 ## Security Considerations
