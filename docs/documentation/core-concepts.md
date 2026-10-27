@@ -155,6 +155,7 @@ up-to-date list.
 | `dev.ucp.shopping.order` | Order lifecycle events |
 | `dev.ucp.shopping.permalink` | Shareable links to pre-populated carts and products |
 | `dev.ucp.common.identity_linking` | OAuth-based account linking |
+| `dev.ucp.common.identity` | Authenticated buyer identity profile and account state |
 | `dev.ucp.common.location.search` | Search for physical stores and pickup locations |
 | `dev.ucp.common.location.lookup` | Retrieve location details, operating hours, and amenities |
 | `dev.ucp.common.ask` | Natural-language questions about a business's resources, policies, and services |
@@ -199,7 +200,7 @@ up-to-date list.
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
 | `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
-| `dev.ucp.common.loyalty` | checkout, cart, catalog | Member benefits, rewards, and points earning |
+| `dev.ucp.common.loyalty` | identity, checkout, cart, catalog | Member benefits, reward balances, tier progress, credits, and points earning |
 | `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
 | `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.common.payment.split_payments` | checkout | Multi-instrument allocation and split settlements |

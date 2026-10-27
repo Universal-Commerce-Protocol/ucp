@@ -72,9 +72,25 @@
         }
       }
     },
+    "reward_balance": {
+      "type": "object",
+      "description": "Current redeemable balance and optional expiration date for a reward currency.",
+      "required": ["amount"],
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/reward_amount",
+          "description": "Total current redeemable balance denominated in the minor unit of the associated reward currency."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional RFC 3339 timestamp when the balance expires."
+        }
+      }
+    },
     "membership_reward": {
       "type": "object",
-      "description": "Quantifiable reward type and optional earning forecast for the current transaction.",
+      "description": "Quantifiable reward type, optional current balance, and optional earning forecast for the current transaction.",
       "required": ["currency"],
       "properties": {
         "currency": {
@@ -82,10 +98,141 @@
           "$ref": "#/$defs/reward_currency",
           "description": "A unit of value that customers can accumulate through various commercial activities."
         },
+        "balance": {
+          "type": "object",
+          "$ref": "#/$defs/reward_balance",
+          "description": "Current redeemable balance and optional expiration date for this reward currency."
+        },
         "earning_forecast": {
           "type": "object",
           "$ref": "#/$defs/earning_forecast",
           "description": "Preview of rewards to be earned from the current transaction."
+        }
+      }
+    },
+    "available_credit": {
+      "type": "object",
+      "description": "Non-point loyalty credit or award certificate held by the member.",
+      "required": ["id", "name", "type", "remaining_amount"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the credit or award certificate."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the credit or award certificate (e.g. '$300 Annual Travel Credit', 'Free Night Award')."
+        },
+        "type": {
+          "type": "string",
+          "description": "Category of the available credit. Well-known values: `monetary_credit` (fiat travel, statement, or flight credit denominated in minor units of `currency`), `certificate` (non-point award voucher or certificate such as a Free Night Award). Clients MUST tolerate and ignore unknown values.",
+          "examples": [
+            "monetary_credit",
+            "certificate"
+          ]
+        },
+        "remaining_amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Remaining usable value. For `monetary_credit`, denominated in minor units of ISO 4217 `currency`. For `certificate`, remaining count of certificates."
+        },
+        "total_amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Original issued value in minor units of `currency` (for `monetary_credit`) or initial certificate count (for `certificate`)."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 3-letter currency code (e.g. 'USD'). Applicable when `type` is `monetary_credit`."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this credit or certificate expires."
+        },
+        "description": {
+          "type": "string",
+          "description": "Display-ready explanation of eligibility, property category caps, or redemption terms."
+        }
+      }
+    },
+    "tier_progress_metric": {
+      "type": "object",
+      "description": "Single qualification metric tracking progress toward a target loyalty tier.",
+      "required": ["metric_type", "current_amount", "target_amount"],
+      "properties": {
+        "metric_type": {
+          "type": "string",
+          "description": "Qualification metric category. Well-known values: `nights`, `stays`, `spend`, `qualifying_points`, `qualifying_miles`, `segments`, `transactions`. Clients MUST tolerate and ignore unknown values.",
+          "examples": [
+            "nights",
+            "stays",
+            "spend",
+            "qualifying_points",
+            "qualifying_miles",
+            "segments",
+            "transactions"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit code or label for the metric (e.g. 'NIGHTS', 'STAYS', 'USD', 'PQP', 'LP'). When `metric_type` is `spend` and `unit` is an ISO 4217 currency code, amounts are denominated in minor units of that currency."
+        },
+        "current_amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Member's current accumulated progress toward `target_amount` in the active qualification period."
+        },
+        "target_amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total threshold required on this metric to achieve the target tier."
+        },
+        "remaining_amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Remaining progress needed to reach `target_amount`."
+        },
+        "description": {
+          "type": "string",
+          "description": "Display-ready summary of progress on this metric (e.g. '12 nights needed for Globalist')."
+        }
+      }
+    },
+    "tier_progress": {
+      "type": "object",
+      "description": "Progress tracking toward a higher loyalty membership tier.",
+      "required": ["target_tier_id", "target_tier_name", "metrics"],
+      "properties": {
+        "target_tier_id": {
+          "type": "string",
+          "description": "Identifier of the next tier being tracked."
+        },
+        "target_tier_name": {
+          "type": "string",
+          "description": "Human-readable name of the target tier (e.g. 'Globalist', 'Platinum Pro')."
+        },
+        "qualification_operator": {
+          "type": "string",
+          "description": "How multiple `metrics` combine to satisfy tier qualification. Well-known values: `any` (qualify by meeting any single metric, such as nights OR points), `all` (qualify by meeting all listed metrics, such as nights AND spend). Defaults to `any` when omitted. Clients MUST tolerate and ignore unknown values.",
+          "examples": [
+            "any",
+            "all"
+          ]
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tier_progress_metric"
+          },
+          "minItems": 1,
+          "description": "Qualification metrics tracking progress toward `target_tier_id`."
+        },
+        "qualification_period_ends_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when the current qualification tracking period ends."
         }
       }
     },
@@ -150,12 +297,26 @@
           },
           "description": "Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved."
         },
+        "tier_progress": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tier_progress"
+          },
+          "description": "Progress tracking toward one or more higher membership tiers."
+        },
         "rewards": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/membership_reward"
           },
-          "description": "Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward."
+          "description": "Reward types, current balances, and earning forecasts associated with this membership. Each object encapsulates one type of reward."
+        },
+        "credits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/available_credit"
+          },
+          "description": "Non-point loyalty credits and award certificates available on this membership."
         },
         "provisional": {
           "type": "boolean",
@@ -175,6 +336,24 @@
         "description": "Payload that describes the membership information corresponding to the claim.",
         "ucp_request": "omit"
       }
+    },
+    "dev.ucp.common.identity": {
+      "title": "Identity with Loyalty",
+      "description": "Identity response extended with Loyalty capability.",
+      "allOf": [
+        {
+          "$ref": "identity.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
     },
     "dev.ucp.shopping.catalog.search": {
       "title": "Catalog Search with Loyalty",

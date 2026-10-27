@@ -215,3 +215,7 @@ mpegurl
 usdz
 vnd
 webm
+Explorist
+explorist
+Globalist
+PQP

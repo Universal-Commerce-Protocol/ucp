@@ -69,6 +69,7 @@ All capability and service names **MUST** use the format:
 | `dev.ucp.shopping.fulfillment`      | ucp.dev     | shopping | fulfillment      |
 | `dev.ucp.lodging.booking`           | ucp.dev     | lodging  | booking          |
 | `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
+| `dev.ucp.common.identity`           | ucp.dev     | common   | identity         |
 | `com.example.payments.installments` | example.com | payments | installments     |
 
 #### Authority Binding

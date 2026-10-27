@@ -47,6 +47,11 @@ nav:
       - Glossary: specification/glossary.md
       - Common:
           - Identity Linking: specification/common/identity-linking/index.md
+          - Identity Capability:
+              - Overview: specification/common/identity/index.md
+              - Transports:
+                  - REST: specification/common/identity/rest.md
+                  - MCP: specification/common/identity/mcp.md
           - Location Capability:
               - Overview: specification/common/location/index.md
               - Search: specification/common/location/search.md
@@ -440,10 +445,24 @@ plugins:
               RFC 9207) to unlock personalized commerce data.
           - specification/common/extensions/loyalty.md: >-
               Loyalty Extension, enabling high-fidelity member benefit
-              recognition during catalog, cart, and checkout by defining schemas
-              for memberships, tiers, benefits, and reward earning forecasts
+              recognition across identity, catalog, cart, and checkout by
+              defining schemas for memberships, tiers, tier progress, benefits,
+              reward balances, available credits, and reward earning forecasts
               while managing provisional eligibility claims and enforcing
               data-minimization privacy rules.
+        Identity Capability:
+          - specification/common/identity/index.md: >-
+              Core Identity Capability (`dev.ucp.common.identity`), defining the
+              authenticated buyer identity resource and extension composition
+              for upper-funnel profile and loyalty retrieval.
+          - specification/common/identity/rest.md: >-
+              HTTP REST transport binding for the Identity Capability on the
+              Common service, detailing the `GET /identity` endpoint, headers,
+              and response payloads.
+          - specification/common/identity/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the Identity
+              Capability on the Common service, mapping the `get_identity` tool
+              to JSON-RPC with metadata validation rules.
         Location Capability:
           - specification/common/location/index.md: >-
               Core Location Capability, detailing physical Location discovery,

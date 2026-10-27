@@ -149,6 +149,40 @@
           }
         }
       }
+    },
+    "/identity": {
+      "get": {
+        "operationId": "get_identity",
+        "summary": "Get Identity",
+        "description": "Get the authenticated buyer's identity profile and negotiated identity extensions (such as loyalty memberships).",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Identity profile retrieved",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/identity_response" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -314,6 +348,9 @@
       },
       "ask_response": {
         "$ref": "../../schemas/common/ask.json#/$defs/ask_response"
+      },
+      "identity_response": {
+        "$ref": "../../schemas/common/identity.json"
       }
     }
   }

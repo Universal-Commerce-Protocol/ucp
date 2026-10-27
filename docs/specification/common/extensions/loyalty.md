@@ -19,15 +19,20 @@
 ## Overview
 
 The loyalty extension is designed to facilitate high-fidelity loyalty experiences:
-ensuring existing loyalty members can seamlessly access their benefits during agentic
-Catalog, Cart, and Checkout experiences. By enabling buyers to see their specific tier,
-eligible rewards, and immediately applicable benefits before finalizing a purchase, it
-addresses a foundational expectation for program members and removes friction from the
-checkout funnel.
+ensuring existing loyalty members can seamlessly access their membership status,
+balances, and benefits across upper-funnel Identity and Catalog discovery as well as
+lower-funnel Cart and Checkout experiences. By enabling buyers to see their specific
+tier, progress toward next-tier milestones, redeemable reward balances, available
+credits, and applicable benefits before finalizing a purchase, it addresses a
+foundational expectation for program members across retail and travel verticals.
 
 Specifically the following core use cases of benefit recognition for known members are
 addressed:
 
+* Upper-Funnel Profile & Balance Visibility: Retrieval of verified loyalty memberships,
+  active tiers, tier benefits, reward balances (including expiration dates), non-point
+  credits or certificates, and tier progress metrics via the
+  [Identity Capability](../identity/index.md).
 * Price-Impacting Benefits: Real-time application of member-only discounts and free
   shipping offers with clear attribution of benefit sources.
 * Non-Price Benefits: Transparent display of rewards earned or rewards applicable to
@@ -37,7 +42,7 @@ addressed:
 
 ## Key Concepts
 
-Loyalty has four main components:
+Loyalty is organized around the following core components:
 
 **Memberships**: Distinct enrollment pathways or program categories that a user can join
 
@@ -46,12 +51,15 @@ Loyalty has four main components:
   programmatically represented as separate sibling top-level keys in the loyalty extension
   map, namespaced by reverse-domain naming.
 
-**Tiers**: Specific achievement ranks or status milestones within a membership that
-unlock escalating value as a member progresses through activity or spend
+**Tiers and Tier Progress**: Specific achievement ranks or status milestones within a
+membership that unlock escalating value as a member progresses through activity or spend
 
 * A member typically holds a single active tier per membership. For programs with parallel
   status dimensions (e.g., holding both "Gold" and "Lifetime Platinum"), multiple tiers
   can be active concurrently.
+* `tier_progress` tracks how close the member is to achieving a higher tier across one or
+  more qualification metrics (such as `nights`, `stays`, `spend`, or `qualifying_points`),
+  combined via `qualification_operator` (`any` or `all`).
 
 **Benefits**: Ongoing perks and privileges granted to a customer based on their current
 tier or membership status
@@ -59,12 +67,20 @@ tier or membership status
 * Contains both delayed (e.g. “Members have access to dedicated customer service”) and
   immediate-value (e.g. “Members get 5% off”) benefits.
 
-**Rewards**: Quantifiable loyalty value that may be earned from the current transaction.
-Note: Redeemable balances and stored value are modeled by the negotiated payment
-instrument or a future redemption capability, not by this loyalty extension.
+**Rewards**: Quantifiable loyalty value accumulated or earned by the member
 
 * One membership can offer multiple types of accumulable/collectable rewards, each having
   its own usage and redemption rules.
+* Each `membership_reward` entry pairs a `currency` definition with an optional current
+  redeemable `balance` (including optional `expires_at`) and an optional transactional
+  `earning_forecast`. Executing points redemption at payment time is modeled by the
+  negotiated payment instrument or a dedicated redemption capability.
+
+**Credits**: Non-point entitlements held by the member
+
+* `credits` represents non-point monetary credits (e.g., an annual travel credit) and award
+  certificates (e.g., a Free Night Award voucher) with remaining value and expiration
+  metadata.
 
 <!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
 ```json
@@ -72,19 +88,27 @@ instrument or a future redemption capability, not by this loyalty extension.
   "loyalty": {
     "com.example.loyalty": {
       "id": "membership_1",
+      "display_id": "****5678",
       "name": "Example Rewards",
       "tiers": [
         {
           "id": "gold",
           "name": "Gold",
           "benefits": [
-            { "id": "BEN_001", "description": "Early access to sales" }
+            {
+              "id": "BEN_001",
+              "description": "Complimentary standard shipping on all orders"
+            }
           ]
         }
       ],
       "rewards": [
         {
-          "currency": { "name": "LoyaltyStars", "code": "LST" }
+          "currency": { "name": "LoyaltyStars", "code": "LST" },
+          "balance": {
+            "amount": 4500,
+            "expires_at": "2027-12-31T23:59:59Z"
+          }
         }
       ],
       "provisional": false
@@ -96,7 +120,7 @@ instrument or a future redemption capability, not by this loyalty extension.
 ## Discovery
 
 Businesses can follow the standard advertising mechanism to advertise loyalty support in
-the Business profile. Currently the loyalty extension can decorate catalog search,
+the Business profile. Currently the loyalty extension can decorate identity, catalog search,
 catalog lookup, cart, and checkout capabilities. Businesses MAY advertise loyalty
 support for any subset of these capabilities. Platforms SHOULD check which resources are
 extended.
@@ -107,6 +131,13 @@ extended.
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
+      "dev.ucp.common.identity": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/identity",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/identity.json"
+        }
+      ],
       "dev.ucp.shopping.catalog.search": [
         {
           "version": "{{ ucp_version }}",
@@ -139,6 +170,7 @@ extended.
         {
           "version": "{{ ucp_version }}",
           "extends": [
+            "dev.ucp.common.identity",
             "dev.ucp.shopping.catalog.search",
             "dev.ucp.shopping.catalog.lookup",
             "dev.ucp.shopping.cart",
@@ -155,6 +187,7 @@ extended.
 
 **Dependencies:**
 
+* Identity Capability
 * Catalog Search Capability
 * Catalog Lookup Capability
 * Cart Capability
@@ -180,9 +213,21 @@ extended.
 
 {{ extension_schema_fields('loyalty.json#/$defs/membership_tier_benefit', 'common/extensions/loyalty') }}
 
+#### Tier Progress
+
+{{ extension_schema_fields('loyalty.json#/$defs/tier_progress', 'common/extensions/loyalty') }}
+
+#### Tier Progress Metric
+
+{{ extension_schema_fields('loyalty.json#/$defs/tier_progress_metric', 'common/extensions/loyalty') }}
+
 #### Membership Reward
 
 {{ extension_schema_fields('loyalty.json#/$defs/membership_reward', 'common/extensions/loyalty') }}
+
+#### Reward Balance
+
+{{ extension_schema_fields('loyalty.json#/$defs/reward_balance', 'common/extensions/loyalty') }}
 
 #### Reward Amount
 
@@ -200,6 +245,10 @@ extended.
 
 {{ extension_schema_fields('loyalty.json#/$defs/earning_breakdown', 'common/extensions/loyalty') }}
 
+#### Available Credit
+
+{{ extension_schema_fields('loyalty.json#/$defs/available_credit', 'common/extensions/loyalty') }}
+
 ## Loyalty behavior
 
 The loyalty extension holds a key-value map whose keys are reverse-domain identifiers —
@@ -212,13 +261,15 @@ Programs that can be joined independently MUST be modeled as separate sibling en
 under the loyalty map, distinguished by their reverse-domain naming.
 
 Platforms MAY send buyer loyalty membership claims via `context.eligibility` in the
-request to activate the loyalty extension and claim loyalty benefits. Alternatively,
-when the buyer is authenticated and the business can determine loyalty membership from
-the authenticated identity, businesses MAY populate the loyalty extension without an
-explicit eligibility claim. In this case, the map key MUST be the same reverse-domain
-identifier the business would accept as a claim value. This is a specific instance of
-the general pattern where identity linking lets a business return its own user state on a
-response; see
+request to activate the loyalty extension and claim loyalty benefits on capabilities that
+accept `context` (catalog search, catalog lookup, cart, and checkout). Alternatively,
+when the buyer is authenticated — including on `GET /identity` via
+[`dev.ucp.common.identity`](../identity/index.md) — and the business can determine
+loyalty membership from the authenticated identity, businesses MAY populate the loyalty
+extension without an explicit eligibility claim. In this case, the map key MUST be the
+same reverse-domain identifier the business would accept as a claim value. This is a
+specific instance of the general pattern where identity linking lets a business return
+its own user state on a response; see
 [Business-Populated Response Values](../identity-linking/index.md#business-populated-response-values).
 
 * When a business verifies a membership claim or determines membership from
@@ -226,11 +277,14 @@ response; see
   active tier(s) the buyer holds within the `tiers` array **when the program has
   tier structure** — for programs with no tier concept (flat-rate cashback,
   single-status memberships), businesses MAY omit `tiers`. It also SHOULD set
-  `display_id` as a masked unique identifier for the buyer.
+  `display_id` as a masked unique identifier for the buyer, and MAY populate
+  authenticated account state such as `rewards[].balance`, `tier_progress`, and
+  `credits`.
 * When a membership claim in the request is recognized and accepted but not verified by
   the business, the business MUST return `provisional: true`. It MAY return display-safe
   tier context for the state accepted during the session, and MUST NOT return
-  `display_id` until the membership is verified.
+  `display_id`, `rewards[].balance`, `tier_progress`, or `credits` until the
+  membership is verified.
 * When a membership claim in the request is accepted but cannot be verified, the business
   MUST communicate the failure via a recoverable `message` with `type: "error"` and
   `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim
@@ -452,9 +506,141 @@ If the claim cannot be verified, the business MUST return a recoverable error vi
 
 ## Use Cases and Examples
 
-With the help of the loyalty extension, the catalog, cart, and checkout capabilities can
-be further decorated to provide full visibility into buyers’ member-exclusive perks and
-allow the platform to render the extra information to facilitate the transaction.
+With the help of the loyalty extension, the identity, catalog, cart, and checkout
+capabilities can be decorated to provide full visibility into buyers’ loyalty status,
+redeemable balances, tier progress, available credits, and member-exclusive perks across
+the commerce journey.
+
+### Upper-Funnel Loyalty Profile Retrieval
+
+When a buyer has linked their account with a business via
+[Identity Linking](../identity-linking/index.md), the platform can invoke
+[`GET /identity`](../identity/rest.md) (or the MCP [`get_identity`](../identity/mcp.md)
+tool) to retrieve the buyer's verified loyalty memberships before initiating a cart,
+checkout, or booking session. This allows the platform to surface loyalty status,
+redeemable balances with expiration dates, available non-point credits or award
+certificates, and progress toward higher tiers during upper-funnel search and
+discovery.
+
+=== "Request"
+
+    ```http
+    GET /identity HTTP/1.1
+    Host: business.example.com
+    Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+    UCP-Agent: profile="https://platform.example/.well-known/ucp"
+    Request-Id: 8a7b6c5d-4e3f-4210-89ab-cdef01234567
+    Accept: application/json
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/identity op=read -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.identity": [
+            { "version": "{{ ucp_version }}" }
+          ],
+          "dev.ucp.common.loyalty": [
+            {
+              "version": "{{ ucp_version }}",
+              "extends": "dev.ucp.common.identity"
+            }
+          ]
+        }
+      },
+      "id": "usr_9f8e7d6c",
+      "loyalty": {
+        "com.example.hospitality.rewards": {
+          "id": "mem_774411",
+          "display_id": "****4411",
+          "name": "Example Hospitality Rewards",
+          "provisional": false,
+          "tiers": [
+            {
+              "id": "explorist",
+              "name": "Explorist",
+              "benefits": [
+                {
+                  "id": "BEN_UPGRADE",
+                  "description": "Upgrade to best available room (excluding suites) at check-in"
+                },
+                {
+                  "id": "BEN_LATE_OUT",
+                  "description": "2:00 PM late checkout upon request"
+                }
+              ]
+            }
+          ],
+          "tier_progress": [
+            {
+              "target_tier_id": "globalist",
+              "target_tier_name": "Globalist",
+              "qualification_operator": "any",
+              "qualification_period_ends_at": "2026-12-31T23:59:59Z",
+              "metrics": [
+                {
+                  "metric_type": "nights",
+                  "unit": "NIGHTS",
+                  "current_amount": 48,
+                  "target_amount": 60,
+                  "remaining_amount": 12,
+                  "description": "12 qualifying nights needed for Globalist"
+                },
+                {
+                  "metric_type": "qualifying_points",
+                  "unit": "BASE_PTS",
+                  "current_amount": 75000,
+                  "target_amount": 100000,
+                  "remaining_amount": 25000,
+                  "description": "25,000 base points needed for Globalist"
+                }
+              ]
+            }
+          ],
+          "rewards": [
+            {
+              "currency": {
+                "name": "Hospitality Points",
+                "code": "EHP"
+              },
+              "balance": {
+                "amount": 85000,
+                "expires_at": "2027-12-31T23:59:59Z"
+              }
+            }
+          ],
+          "credits": [
+            {
+              "id": "cred_fna_cat4",
+              "name": "Category 1-4 Free Night Award",
+              "type": "certificate",
+              "remaining_amount": 1,
+              "total_amount": 1,
+              "expires_at": "2026-11-15T23:59:59Z",
+              "description": "Redeemable for one standard night at any Category 1-4 property."
+            },
+            {
+              "id": "cred_dining_2026",
+              "name": "$100 Property Dining Credit",
+              "type": "monetary_credit",
+              "remaining_amount": 6500,
+              "total_amount": 10000,
+              "currency": "USD",
+              "expires_at": "2026-12-31T23:59:59Z",
+              "description": "Remaining balance of annual on-property dining credit."
+            }
+          ]
+        }
+      }
+    }
+    ```
 
 ### Price-Impacting Benefits
 

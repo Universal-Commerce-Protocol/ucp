@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/identity.json",
+  "name": "dev.ucp.common.identity",
+  "title": "Identity",
+  "description": "Authenticated buyer identity resource.",
+  "type": "object",
+  "required": [
+    "ucp",
+    "id"
+  ],
+  "properties": {
+    "ucp": {
+      "$ref": "../ucp.json#/$defs/response_identity_schema",
+      "ucp_request": "omit"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique business-scoped identifier for the authenticated user identity.",
+      "ucp_request": "omit"
+    },
+    "email": {
+      "type": "string",
+      "description": "Primary email address associated with the user identity.",
+      "ucp_request": "omit"
+    },
+    "email_verified": {
+      "type": "boolean",
+      "description": "Whether the primary email address has been verified by the business.",
+      "ucp_request": "omit"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Primary phone number in E.164 format.",
+      "ucp_request": "omit"
+    },
+    "phone_verified": {
+      "type": "boolean",
+      "description": "Whether the primary phone number has been verified by the business.",
+      "ucp_request": "omit"
+    },
+    "first_name": {
+      "type": "string",
+      "description": "Given or first name of the user.",
+      "ucp_request": "omit"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Family or last name of the user.",
+      "ucp_request": "omit"
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "$ref": "types/postal_address.json"
+      },
+      "description": "Saved postal addresses associated with the user identity.",
+      "ucp_request": "omit"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "types/message.json"
+      },
+      "description": "Business outcome messages (errors, warnings, informational).",
+      "ucp_request": "omit"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "types/link.json"
+      },
+      "description": "Optional business links related to the user account or privacy policy.",
+      "ucp_request": "omit"
+    }
+  }
+}

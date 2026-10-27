@@ -126,6 +126,12 @@ The `ucp` object included in booking responses.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_booking_schema', 'reference') }}
 
+### Identity Response Metadata {: #ucp-response-identity-schema }
+
+The `ucp` object included in identity responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_identity_schema', 'reference') }}
+
 ### Capability
 
 This object describes a single capability or extension. It appears in the

@@ -109,6 +109,22 @@
         "name": "response",
         "schema": {"$ref": "../../schemas/common/ask.json#/$defs/ask_response"}
       }
+    },
+    {
+      "name": "get_identity",
+      "summary": "Get the authenticated buyer's identity profile",
+      "description": "Get the authenticated buyer's identity profile and negotiated identity extensions (such as loyalty memberships).",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        }
+      ],
+      "result": {
+        "name": "identity",
+        "schema": {"$ref": "../../schemas/common/identity.json"}
+      }
     }
   ]
 }
