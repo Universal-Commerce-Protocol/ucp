@@ -94,6 +94,8 @@ nav:
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
+              - Return Policy:
+                  specification/shopping/extensions/return-policy.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -575,6 +577,14 @@ plugins:
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
+          - specification/shopping/extensions/return-policy.md: >-
+              Return Policy Extension, defining the
+              dev.ucp.shopping.policy.return type on the core policies
+              primitive with machine-readable return terms: an explicit
+              eligibility statement (a return window with anchor, no time
+              limit, or returns not accepted), supported resolutions, return
+              channels, and typed return fees optionally scoped to channels,
+              across catalog, cart, checkout, and order.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data

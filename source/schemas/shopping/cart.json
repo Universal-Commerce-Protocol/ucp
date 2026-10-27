@@ -7,7 +7,7 @@
   "$defs": {
     "checkout": {
       "title": "Checkout with Cart",
-      "description": "Checkout extended with cart capability. Adds cart_id to create_checkout for cart-to-checkout conversion.",
+      "description": "Checkout with Cart capability support, including cart-to-checkout conversion.",
       "allOf": [
         {
           "$ref": "checkout.json"
@@ -17,12 +17,14 @@
           "properties": {
             "cart_id": {
               "type": "string",
-              "description": "Cart ID to convert to checkout. Because line_items remains required by the base checkout schema, the platform SHOULD pass an empty array (\"line_items\": []). The business MUST use cart contents (line_items, context, buyer) and MUST ignore overlapping fields in the checkout payload.",
+              "description": "Cart ID for checkout initialization. The Business MUST reject requests using it without negotiated Cart support. Cart contents take precedence over overlapping checkout fields; line_items may be omitted or empty.",
               "ucp_request": {
                 "create": "optional",
                 "update": "omit",
-                "complete": "omit"
-              }
+                "complete": "omit",
+                "read": "omit"
+              },
+              "ucp_response": "omit"
             }
           }
         }

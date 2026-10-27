@@ -29,6 +29,7 @@ on:
       - main
       - "release/**"
     paths:
+      - ".github/actions/**"
       - ".github/workflows/docs.yml"
       - "pyproject.toml"
       - "uv.lock"
@@ -155,7 +156,10 @@ jobs:
     concurrency:
       group: gh-pages-deploy
       cancel-in-progress: false
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && github.ref == 'refs/heads/main'
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      github.ref == 'refs/heads/main'
     permissions:
       contents: write
       pages: read
@@ -212,7 +216,10 @@ jobs:
     concurrency:
       group: gh-pages-deploy
       cancel-in-progress: false
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
       pages: read
@@ -249,7 +256,10 @@ jobs:
     needs: deploy_release
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
     steps:
