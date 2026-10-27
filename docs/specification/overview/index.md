@@ -3546,6 +3546,218 @@ Platforms **MAY** run separate negotiations with the same Business at different
 supported versions, and **SHOULD NOT** combine or intersect capabilities across
 profiles within the same negotiation.
 
+##### Business Profile Delegation
+
+A Business **MAY** declare `delegates` in its profile to authorize an external
+HTTPS resource to manage part or all of its profile configuration. Delegation
+changes who is authoritative for profile *configuration*; it does not delegate
+Business identity, protocol-version authority, cryptographic trust, or runtime
+execution — all of which remain exclusively with the Business.
+
+Delegation resolves after protocol version selection, as part of constructing
+the effective profile used for capability negotiation:
+
+1. [Protocol Version](#protocol-version) selection chooses one self-contained
+    Business profile, exactly as described above.
+2. The Platform resolves that profile's `delegates`, fetching each `profile`
+    URI the same way it fetches a `supported_versions` profile URI.
+3. Each fetched document **MUST** validate as
+    `profile.json#/$defs/delegate_contribution_schema` and **MUST** stay
+    within the scope its delegate was granted.
+4. Valid contributions are composed with the Business's own `services`,
+    `capabilities`, and `payment_handlers` registries into the effective
+    profile.
+5. Capability negotiation proceeds against the effective profile using the
+    existing [Intersection Algorithm](#intersection-algorithm).
+
+A Platform **MUST NOT** restart version negotiation when resolving a
+delegate, and delegation relationships are **not** inherited or composed
+across different protocol-version profiles: a `supported_versions` leaf
+profile declares its own `delegates`, if any, independent of the current
+profile's.
+
+###### Representation
+
+`delegates` is an array of delegate declarations, each identifying an
+authorized resource and, optionally, the registry it may manage:
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
+    "payment_handlers": {},
+    "delegates": [
+      { "profile": "https://provider.example/ucp/business/123" }
+    ]
+  }
+}
+```
+
+- `profile` is an HTTPS URI identifying the resource the Business authorizes.
+    Non-HTTPS URIs **MUST** be rejected.
+- `scope` is an array naming the registries (`services`, `capabilities`,
+    `payment_handlers`) the delegate may manage. v1 scope is registry-level
+    only — it does not name individual registry entries. Omitting `scope`
+    means **complete-profile delegation**.
+
+The fetched resource at `profile` is not a full Business or Platform
+profile: it carries only delegated registry configuration and **MUST NOT**
+publish `keys`, `version`, `supported_versions`, or `delegates` of its own.
+A contribution that delegates onward, replaces root-owned metadata, or
+publishes signing keys is invalid and **MUST** be rejected — Business
+identity and trust never move with a delegate.
+
+The document fetched at a `payment_handlers`-scoped delegate's `profile` URI:
+
+<!-- ucp:example skip reason="illustrative fragment" -->
+```json
+{
+  "ucp": {
+    "payment_handlers": {
+      "com.example.processor_tokenizer": [
+        {
+          "id": "processor_tokenizer",
+          "version": "{{ ucp_version }}",
+          "available_instruments": [{ "type": "card" }]
+        }
+      ]
+    }
+  }
+}
+```
+
+###### Complete-Profile Delegation
+
+Complete-profile delegation is exclusive in v1: a delegate without `scope`
+**MUST** be the Business's only delegate, and the Business's own `services`,
+`capabilities`, and `payment_handlers` registries **MUST** be empty. There is
+exactly one source of delegated configuration and no implicit merge
+precedence between a complete delegate and anything else.
+
+<!-- ucp:example skip reason="intentionally invalid delegation example" -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {
+      "dev.ucp.shopping": [ ... ]
+    },
+    "payment_handlers": {},
+    "delegates": [
+      { "profile": "https://provider.example/ucp/business/123" }
+    ]
+  }
+}
+```
+
+This profile is invalid: it combines a complete-profile delegate with a
+local `services` entry. A Platform resolving a complete-profile delegate
+that is unavailable or fails `delegate_contribution_schema` validation
+**MUST** fail Business Profile resolution entirely — a failed complete
+delegate has no fallback.
+
+###### Scoped Delegation
+
+Scoped delegation is additive: a Business retains local configuration and
+delegates management of specific registries. Multiple delegates **MAY**
+target the same registry.
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {
+      "dev.ucp.shopping": [ ... ]
+    },
+    "payment_handlers": {},
+    "delegates": [
+      {
+        "profile": "https://psp-a.example/ucp/business/123",
+        "scope": [{ "registry": "payment_handlers" }]
+      },
+      {
+        "profile": "https://psp-b.example/ucp/business/123",
+        "scope": [{ "registry": "payment_handlers" }]
+      },
+      {
+        "profile": "https://loyalty.example/ucp/business/123",
+        "scope": [{ "registry": "capabilities" }]
+      }
+    ]
+  }
+}
+```
+
+A delegate **MUST NOT** contribute outside its declared scope, provide or
+replace `version`, `supported_versions`, or `keys`, or delegate onward.
+Out-of-scope or root-owned content in a contribution is invalid and **MUST
+NOT** be silently dropped into "the Business did not advertise this" — the
+contribution is rejected.
+
+###### Composition and Collisions
+
+Scoped contributions compose with Business-owned configuration under
+existing UCP registry semantics — the same registry map that already
+supports multiple array entries per key. Composition **MUST** be
+deterministic and independent of delegate declaration order, retrieval
+order, or network completion order:
+
+- Producers **MUST NOT** introduce last-writer-wins, implicit merge
+    precedence, or delegate-order precedence when composing contributions.
+- If two contributions (Business-owned or delegated) redefine the same
+    registry entry in a way existing registry semantics do not define how to
+    reconcile, the conflicting contribution is invalid and **MUST** be
+    rejected rather than merged.
+- A scoped delegate that is unavailable or fails validation **MAY** leave
+    unrelated, independently valid configuration usable, but only when the
+    resulting effective profile remains valid and no required dependency
+    relies on the failed contribution.
+
+###### Delegated `map_order`
+
+A delegate **MAY** supply [`map_order`](#map_order) for registry entries it
+itself contributes. It **MUST NOT** order or suppress Business-owned entries
+or another delegate's entries; a delegated `map_order` entry that references
+a key the delegate did not itself contribute is invalid and **MUST** be
+rejected. Cross-provider ordering — declaring preference between entries
+contributed by *different* delegates — is intentionally unsolved in v1:
+delegate declaration order, retrieval order, and network completion order
+**MUST NOT** imply cross-provider preference.
+
+###### Runtime Semantics
+
+Delegation affects Business Profile *configuration* authority only. After
+the effective profile is constructed, existing UCP semantics apply
+unchanged: `services` determine routing and endpoints, `capabilities`
+advertise behavior through applicable services, and capability-specific
+rules determine runtime behavior. For `payment_handlers` specifically,
+delegation controls which handlers the Business *advertises* at discovery;
+existing Checkout semantics remain solely responsible for determining the
+runtime `checkout.ucp.payment_handlers` in a given session.
+
+###### Failure Model
+
+| Contribution                      | Outcome                                                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Valid, in scope                    | Composed into the effective profile.                                                                |
+| Invalid (schema, scope, root-owned metadata, nesting, `map_order` ownership, or collision) | Rejected; never silently treated as "not advertised."                             |
+| Unavailable (fetch or parse failure) | Treated as invalid for resolution purposes.                                                       |
+| Complete-profile delegate, invalid or unavailable | Business Profile resolution fails entirely.                                          |
+| Scoped delegate, invalid or unavailable | Unrelated valid configuration **MAY** remain usable only if the effective profile stays valid and nothing required depends on the failed contribution. |
+
+###### Backward Compatibility
+
+Delegation reuses existing [Protocol Version](#protocol-version) negotiation
+unchanged. A Platform that does not support the delegation-capable protocol
+version selects an older, self-contained profile through `supported_versions`
+if one exists; otherwise existing `version_unsupported` behavior applies (see
+[Error Handling](#error-handling)). A Platform that claims support for the
+delegation-capable version **MUST** implement delegation resolution —
+ignoring `delegates` is not conformant for that version.
+
 ##### Request-Time Validation
 
 Businesses **MUST** validate the platform's protocol version on
