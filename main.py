@@ -464,6 +464,18 @@ def _restore_fragment_refs(
         not table_level and "title" in resolved_node and "title" not in bundled
       ):
         bundled = {**bundled, "title": resolved_node["title"]}
+      elif (
+        not table_level
+        and "title" not in bundled
+        and "#/$defs/" in ref_str
+        and "ucp.json" not in ref_str
+      ):
+        bundled = {
+          **bundled,
+          "x-ucp-def-name": (
+            ref_str.rsplit("/", 1)[-1].replace("_", " ").title()
+          ),
+        }
       merged_raw = dict(resolved_node)
       for k, v in raw.items():
         if k != "$ref":
@@ -1542,12 +1554,20 @@ def define_env(env):
               all_of_fallback_titles.append(formatted)
           elif branch.get("title"):
             all_of_fallback_titles.append(branch["title"])
+          elif branch_mode and branch.get("x-ucp-def-name"):
+            all_of_fallback_titles.append(branch["x-ucp-def-name"])
         if len(links) == 1:
           return links[0]
         if links:
           return f"AllOf[{', '.join(links)}]"
 
       if raw_type in ("object", None) and node.get("title"):
+        untitled = {k: v for k, v in node.items() if k != "title"}
+        structural = _format_schema_type(
+          untitled, branch_mode=branch_mode, _seen=_seen
+        )
+        if "](" in structural:
+          return structural
         return node["title"]
 
       if isinstance(node.get("oneOf"), list) and node["oneOf"]:

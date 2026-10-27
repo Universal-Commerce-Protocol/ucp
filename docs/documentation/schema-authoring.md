@@ -997,7 +997,7 @@ binary for schema resolution and payload validation. First-time setup:
 
 ```bash
 uv sync                                   # Python deps
-cargo install ucp-schema                  # validator backend
+cargo install ucp-schema --version "$(cat .ucp-schema-version)"  # validator backend
 uv tool install pre-commit                # if not already installed
 pre-commit install --hook-type pre-commit --hook-type pre-push
 ```

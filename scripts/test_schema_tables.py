@@ -420,7 +420,10 @@ def test_loyalty_catalog_lookup_one_of_all_of_renders_prose(
   )
   _check(
     "loyalty_catalog_lookup_one_of_all_of_renders_prose",
-    "This object MUST be one of the following types: `object`, `object`."
+    (
+      "This object MUST be one of the following types: "
+      "Lookup Response, Get Product Response."
+    )
     in loyalty
     and "| Name | Type |" not in loyalty
     and (
@@ -626,6 +629,18 @@ def test_union_any_of_and_map_restoration_and_rendering(macros: dict) -> None:
         "type": "object",
         "additionalProperties": {"$ref": "daily_hour.json"},
       },
+      "titled_union": {
+        "title": "Destination",
+        "oneOf": [
+          {"$ref": "postal_address.json"},
+          {"$ref": "locality.json"},
+        ],
+      },
+      "titled_map": {
+        "title": "Daily Schedule",
+        "type": "object",
+        "additionalProperties": {"$ref": "daily_hour.json"},
+      },
     },
   }
   bundled_schema = {
@@ -667,6 +682,18 @@ def test_union_any_of_and_map_restoration_and_rendering(macros: dict) -> None:
         "type": "object",
         "additionalProperties": {"title": "Daily Hour", "type": "object"},
       },
+      "titled_union": {
+        "title": "Destination",
+        "oneOf": [
+          {"title": "Postal Address", "type": "object"},
+          {"title": "Locality", "type": "object"},
+        ],
+      },
+      "titled_map": {
+        "title": "Daily Schedule",
+        "type": "object",
+        "additionalProperties": {"title": "Daily Hour", "type": "object"},
+      },
     },
   }
   restored = main._restore_fragment_refs(
@@ -694,7 +721,10 @@ def test_union_any_of_and_map_restoration_and_rendering(macros: dict) -> None:
     == f"OneOf[{msg_link}, {addr_link}]"
     and _type_cell(rendered, "any_of_union") == f"AnyOf[{addr_link}, `string`]"
     and _type_cell(rendered, "constraint_any_of") == "object"
-    and _type_cell(rendered, "typed_map") == f"Map[string, {hour_link}]",
+    and _type_cell(rendered, "typed_map") == f"Map[string, {hour_link}]"
+    and _type_cell(rendered, "titled_union")
+    == f"OneOf[{addr_link}, {loc_link}]"
+    and _type_cell(rendered, "titled_map") == f"Map[string, {hour_link}]",
     f"cap_extends={_type_cell(cap_resp, 'extends')!r} "
     f"ucp_plat={ucp_plat!r} rendered={rendered!r}",
   )
@@ -888,6 +918,64 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
   checked_fields = 0
   unexpected: list[str] = []
 
+  def split_union_items(items_str: str) -> list[str]:
+    parts: list[str] = []
+    depth = 0
+    current: list[str] = []
+    for ch in items_str:
+      if ch in "[(":
+        depth += 1
+      elif ch in "])":
+        depth = max(0, depth - 1)
+      if ch == "," and depth == 0:
+        parts.append("".join(current).strip())
+        current = []
+      else:
+        current.append(ch)
+    if current:
+      parts.append("".join(current).strip())
+    return parts
+
+  def check_union_prose(
+    label: str,
+    schema_node: object,
+    cur_path: Path,
+    cur_root: dict,
+    rendered_text: str,
+  ) -> None:
+    nonlocal checked_fields
+    if (
+      not isinstance(schema_node, dict)
+      or not isinstance(schema_node.get("oneOf"), list)
+      or schema_node.get("properties")
+      or schema_node.get("allOf")
+      or schema_node.get("$ref")
+    ):
+      return
+    branch_refs = [
+      _collect_node_cross_refs(branch, cur_path, cur_root, cur_path)
+      for branch in schema_node["oneOf"]
+    ]
+    if not any(branch_refs):
+      return
+    prose_match = re.search(
+      r"This object MUST be one of the following types: (.+)\.", rendered_text
+    )
+    if not prose_match:
+      checked_fields += 1
+      unexpected.append(f"{label}[oneOf]=missing_prose")
+      return
+    items = split_union_items(prose_match.group(1))
+    for idx, field_refs in enumerate(branch_refs):
+      if not field_refs:
+        continue
+      checked_fields += 1
+      item = items[idx] if idx < len(items) else "<missing>"
+      if item in ("`object`", "object", "any", "<missing>") and not (
+        set(field_refs) <= allowlisted_refs
+      ):
+        unexpected.append(f"{label}.oneOf[{idx}]={item!r} (refs={field_refs})")
+
   def check_table(
     label: str, field_map: dict[str, list[str]], rendered_text: str
   ) -> None:
@@ -938,11 +1026,13 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
         if not schema_path:
           continue
         raw = main._resolve_schema(schema_path, direction, op, bundle=False)
+        label = f"{rel_md}:{name}({arg_str})"
         check_table(
-          f"{rel_md}:{name}({arg_str})",
+          label,
           _collect_table_cross_refs(raw, schema_path, raw, schema_path),
           rendered,
         )
+        check_union_prose(label, raw, schema_path, raw, rendered)
 
       elif name == "extension_schema_fields":
         entity_name = pos[0]
@@ -957,13 +1047,15 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
           continue
         raw_root = main._resolve_schema(schema_path)
         raw_def = main._resolve_json_pointer("#" + def_part, raw_root)
+        label = f"{rel_md}:{name}({arg_str})"
         check_table(
-          f"{rel_md}:{name}({arg_str})",
+          label,
           _collect_table_cross_refs(
             raw_def, schema_path, raw_root, schema_path
           ),
           rendered,
         )
+        check_union_prose(label, raw_def, schema_path, raw_root, rendered)
 
       elif name == "extension_fields":
         entity_name = pos[0]
@@ -1022,21 +1114,29 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
               raw_def = main._resolve_json_pointer(
                 f"#/$defs/{def_name}", raw_root
               )
+              label = f"{rel_md}:{ent}.json#/$defs/{def_name}"
               check_table(
-                f"{rel_md}:{ent}.json#/$defs/{def_name}",
+                label,
                 _collect_table_cross_refs(
                   raw_def, resolved_file, raw_root, resolved_file
                 ),
                 sub_render,
               )
+              check_union_prose(
+                label, raw_def, resolved_file, raw_root, sub_render
+              )
           else:
             sub_render = macros["schema_fields"](ent, spec_file)
+            label = f"{rel_md}:{ent}.json"
             check_table(
-              f"{rel_md}:{ent}.json",
+              label,
               _collect_table_cross_refs(
                 raw_root, resolved_file, raw_root, resolved_file
               ),
               sub_render,
+            )
+            check_union_prose(
+              label, raw_root, resolved_file, raw_root, sub_render
             )
 
       elif name == "method_fields":

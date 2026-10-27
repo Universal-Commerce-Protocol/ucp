@@ -43,7 +43,7 @@ Validate your changes locally using these commands before considering a task com
 
 **Installing ucp-schema:** If `ucp-schema` is not available in your environment, install it using Cargo:
 
-* From crates.io: `cargo install ucp-schema`
+* From crates.io (pinned in `.ucp-schema-version`): `cargo install ucp-schema --version "$(cat .ucp-schema-version)"`
 * From git: `cargo install --git https://github.com/universal-commerce-protocol/ucp-schema`
 
 Then validate your changes with:

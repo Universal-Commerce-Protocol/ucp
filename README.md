@@ -139,7 +139,7 @@ to the current action and direction (request vs. response).
 1. Ensure `ucp-schema` is installed:
 
    ```bash
-   cargo install ucp-schema                 # from crates.io
+   cargo install ucp-schema --version "$(cat .ucp-schema-version)"  # from crates.io
    cargo install --git https://github.com/universal-commerce-protocol/ucp-schema  # from git
    ```
 
