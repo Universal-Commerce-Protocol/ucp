@@ -134,20 +134,20 @@ prices them and asks for a fulfillment method.
         {
           "quantity": 2,
           "dish": {
-            "id": "dish_margherita_12",
-            "modifications": [
-              {"id": "mod_extra_mozzarella"},
-              {"id": "mod_fresh_basil"}
-            ],
-            "note": "Well done crust, please"
-          }
+            "id": "dish_margherita_12"
+          },
+          "modifications": [
+            {"id": "mod_extra_mozzarella"},
+            {"id": "mod_fresh_basil"}
+          ],
+          "note": "Well done crust, please"
         },
         {
           "quantity": 1,
           "dish": {
-            "id": "dish_caesar",
-            "note": "Dressing on the side"
-          }
+            "id": "dish_caesar"
+          },
+          "note": "Dressing on the side"
         }
       ],
       "buyer": {
@@ -216,13 +216,13 @@ prices them and asks for a fulfillment method.
             "price": 1600,
             "media": [
               {"type": "image", "url": "https://food.example.com/img/margherita.jpg"}
-            ],
-            "modifications": [
-              {"id": "mod_extra_mozzarella", "title": "Extra Mozzarella", "price": 200},
-              {"id": "mod_fresh_basil", "title": "Fresh Basil", "price": 150}
-            ],
-            "note": "Well done crust, please"
+            ]
           },
+          "modifications": [
+            {"id": "mod_extra_mozzarella", "title": "Extra Mozzarella", "price": 200},
+            {"id": "mod_fresh_basil", "title": "Fresh Basil", "price": 150}
+          ],
+          "note": "Well done crust, please",
           "totals": [
             {"type": "subtotal", "amount": 3900},
             {"type": "total", "amount": 3900}
@@ -234,9 +234,9 @@ prices them and asks for a fulfillment method.
           "dish": {
             "id": "dish_caesar",
             "title": "Caesar Salad",
-            "price": 1100,
-            "note": "Dressing on the side"
+            "price": 1100
           },
+          "note": "Dressing on the side",
           "totals": [
             {"type": "subtotal", "amount": 1100},
             {"type": "total", "amount": 1100}
@@ -303,21 +303,21 @@ resolved tip.
           "id": "li_1",
           "quantity": 2,
           "dish": {
-            "id": "dish_margherita_12",
-            "modifications": [
-              {"id": "mod_extra_mozzarella"},
-              {"id": "mod_fresh_basil"}
-            ],
-            "note": "Well done crust, please"
-          }
+            "id": "dish_margherita_12"
+          },
+          "modifications": [
+            {"id": "mod_extra_mozzarella"},
+            {"id": "mod_fresh_basil"}
+          ],
+          "note": "Well done crust, please"
         },
         {
           "id": "li_2",
           "quantity": 1,
           "dish": {
-            "id": "dish_caesar",
-            "note": "Dressing on the side"
-          }
+            "id": "dish_caesar"
+          },
+          "note": "Dressing on the side"
         }
       ],
       "buyer": {
@@ -400,13 +400,13 @@ resolved tip.
                 "address_region": "CA",
                 "postal_code": "94305",
                 "address_country": "US"
-              },
-              "preference_options": [
-                {"id": "pref_leave_at_door", "label": "Leave at my door"},
-                {"id": "pref_hand_to_me", "label": "Hand it to me"}
-              ],
-              "selected_preference_option_ids": ["pref_leave_at_door"]
+              }
             },
+            "preference_options": [
+              {"id": "pref_leave_at_door", "label": "Leave at my door"},
+              {"id": "pref_hand_to_me", "label": "Hand it to me"}
+            ],
+            "selected_preference_option_id": "pref_leave_at_door",
             "notes": "Gate code #4210, second floor",
             "selected_option_id": "opt_standard",
             "options": [
@@ -541,7 +541,9 @@ and returns the order confirmation.
       "order": {
         "id": "ord_food_9876543210",
         "label": "#42",
-        "tracking_url": "https://food.example.com/orders/ord_food_9876543210"
+        "tracking_url": "https://food.example.com/orders/ord_food_9876543210",
+        "earliest_fulfillment_time": "2026-04-10T18:35:00-07:00",
+        "latest_fulfillment_time": "2026-04-10T18:50:00-07:00"
       },
       "links": [...]
     }

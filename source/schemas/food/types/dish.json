@@ -13,7 +13,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "The dish identifier, required to resolve the associated dish details. Should be recognized by both the Platform and the Business."
+      "description": "The dish identifier, required to resolve the associated dish details. SHOULD be recognized by both the Platform and the Business."
     },
     "title": {
       "type": "string",
@@ -37,17 +37,6 @@
       },
       "description": "Dish media assets (e.g., dish images, preparation videos). First item is the featured media for presentation in food ordering surfaces.",
       "ucp_request": "omit"
-    },
-    "modifications": {
-      "type": "array",
-      "items": {
-        "$ref": "modification.json"
-      },
-      "description": "List of modifications associated with the dish."
-    },
-    "note": {
-      "type": "string",
-      "description": "Buyer-specified freeform note associated with the dish."
     }
   }
 }

@@ -13,7 +13,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "The modification identifier. Should be recognized by both the Platform and the Business."
+      "description": "The modification identifier. SHOULD be recognized by both the Platform and the Business."
     },
     "title": {
       "type": "string",

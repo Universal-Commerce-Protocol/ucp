@@ -9,13 +9,18 @@
   "properties": {
     "type": {
       "type": "string",
-      "enum": ["delivery", "pickup"],
-      "description": "Fulfillment method type this availability applies to.",
+      "description": "Fulfillment method type this availability applies to. Well-known values: `delivery`, `pickup`. Businesses MAY use additional values.",
+      "ucp_request": "omit"
+    },
+    "scheduling": {
+      "type": "string",
+      "description": "Scheduling capability supported for this fulfillment method type. Well-known values: `asap_only` (immediate ordering only), `scheduled_only` (advance scheduled time slots only), `asap_and_scheduled` (both). Businesses MAY use additional values; a Platform MUST NOT reject the containing object for an unrecognized value and SHOULD treat it as if `scheduling` were absent.",
+      "examples": ["asap_only", "scheduled_only", "asap_and_scheduled"],
       "ucp_request": "omit"
     },
     "fulfillable_on": {
       "type": "string",
-      "description": "'now' for immediate availability, or ISO 8601 date for future (e.g., dinner-time only pickup offering).",
+      "description": "'now' for immediate availability, or an RFC 3339 timestamp from which the method becomes available (e.g., delivery starting at dinner service).",
       "ucp_request": "omit"
     },
     "description": {

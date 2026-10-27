@@ -27,11 +27,11 @@
       "ucp_request": "omit"
     },
     "food_establishment": {
-      "$ref": "types/food_establishment.json",
+      "$ref": "../common/types/location_summary.json",
       "description": "Food establishment location the checkout is associated with.",
       "ucp_request": {
         "create": "optional",
-        "update": "optional",
+        "update": "required",
         "complete": "omit"
       }
     },
@@ -91,6 +91,11 @@
       "description": "Different checkout totals.",
       "ucp_request": "omit"
     },
+    "actions": {
+      "$ref": "../common/types/actions.json",
+      "description": "Outstanding extension-defined Actions for this checkout.",
+      "ucp_request": "omit"
+    },
     "messages": {
       "type": "array",
       "items": {
@@ -105,6 +110,14 @@
         "$ref": "../common/types/link.json"
       },
       "description": "Links to be displayed by the platform (Privacy Policy, TOS). Mandatory for legal compliance.",
+      "ucp_request": "omit"
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/types/policy.json"
+      },
+      "description": "Policies (e.g., cancellation/refund terms) that apply to the items in this checkout. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"
     },
     "expires_at": {

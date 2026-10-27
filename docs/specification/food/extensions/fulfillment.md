@@ -29,25 +29,26 @@ at the establishment.
 - Type-discriminated destinations: a buyer `delivery_address` or the
   establishment's `business_location`
 - ASAP or scheduled ordering via `requested_fulfillment_time`
-- Structured drop-off preferences (e.g., "Leave at my door") plus free-form
-  courier `notes`
+- Structured handoff preferences (e.g., "Leave at my door", "Curbside Pickup")
+  plus free-form courier or pickup `notes`
 - Time-window options (`earliest_fulfillment_time` / `latest_fulfillment_time`)
   priced through `totals`
 
 `fulfillment` contains:
 
-- `methods[]` — the fulfillment method for the order (`delivery` or `pickup`)
+- `methods[]` — the fulfillment method for the order (`delivery`, `pickup`, or another business-supported method)
     - `destination` — where the order goes (buyer address or establishment)
     - `requested_fulfillment_time` — omitted for ASAP; a timestamp for scheduled orders
     - `options[]` — Business-generated time windows, each with `totals`
+    - `preference_options[]` / `selected_preference_option_id` — structured handoff mode (e.g., contactless drop-off, curbside pickup)
     - `notes` — courier or pickup instructions
-- `available_methods[]` — whether delivery and pickup are offered, and when
+- `available_methods[]` — whether delivery and pickup are offered, when, and with what scheduling support
 
 **Mental model:**
 
 - `methods[0]` 🛵 Delivery
     - `destination` 🏠 `delivery_address` 450 Serra Mall, Apt 3B
-        - `selected_preference_option_ids` 🔘✅ Leave at my door · 🔘 Hand it to me
+    - `selected_preference_option_id` 🔘✅ Leave at my door · 🔘 Hand it to me
     - `requested_fulfillment_time` ⏱️ *(omitted → ASAP)*
     - `notes` 📝 "Gate code #4210, second floor"
     - `selected_option_id` = `options[1].id`
@@ -68,7 +69,7 @@ together from a single kitchen:
 | **Hierarchy** | `methods[]` → `groups[]` → `options[]` | `methods[]` → `options[]` | No packaging layer; speed and time tiers attach to the method. |
 | **Destination** | `destinations[]` + `selected_destination_id` | One `destination`, discriminated by `type` | An order goes to one address or is collected at one counter. |
 | **Timing** | Chosen only from Business options | Platform may request a time (`requested_fulfillment_time`) | Buyers order "now" or for a specific dinner time. |
-| **Handoff** | — | `preference_options[]` + `selected_preference_option_ids[]` + `notes` | Contactless drop-off and building access are core to delivery. |
+| **Handoff** | — | `preference_options[]` + `selected_preference_option_id` + `notes` | Contactless drop-off, curbside pickup, and building access are core to food handoff. |
 
 ## Discovery
 
@@ -113,9 +114,9 @@ Businesses advertise food fulfillment support in their profile:
 
 {{ schema_fields('food/types/delivery_destination_resp', 'food/extensions/fulfillment') }}
 
-#### Physical Address
+#### Postal Address
 
-{{ schema_fields('types/physical_address', 'food/extensions/fulfillment') }}
+{{ schema_fields('types/postal_address', 'food/extensions/fulfillment') }}
 
 #### Geo
 
@@ -146,13 +147,13 @@ requests; the method `type` determines which destination contract applies:
 
 | Method `type` | Destination `type` | Authored by | Contents |
 | :--- | :--- | :--- | :--- |
-| `delivery` | `delivery_address` | Platform (address, coordinates, selections) + Business (`preference_options[]`) | [Physical Address](#physical-address) (`address` and/or `geo`), drop-off preferences |
+| `delivery` | `delivery_address` | Platform (address, coordinates) | [Postal Address](#postal-address) (`address`) and/or [Geo](#geo) (`geo`) |
 | `pickup` | `business_location` | Business only (response-only) | [Location Summary](../../reference.md#location-summary) of the establishment |
 
 ### Delivery Address
 
-The Platform writes the buyer's address; the Business adds the drop-off
-choices it supports.
+The Platform writes the buyer's address; the Business returns the available
+delivery windows and handoff preferences on the method.
 
 #### Platform Request
 
@@ -194,14 +195,14 @@ choices it supports.
       "address_region": "CA",
       "postal_code": "94305",
       "address_country": "US"
-    },
-    "preference_options": [
-      { "id": "pref_leave_at_door", "label": "Leave at my door" },
-      { "id": "pref_hand_to_me", "label": "Hand it to me" },
-      { "id": "pref_meet_outside", "label": "Meet outside" }
-    ],
-    "selected_preference_option_ids": ["pref_leave_at_door"]
+    }
   },
+  "preference_options": [
+    { "id": "pref_leave_at_door", "label": "Leave at my door" },
+    { "id": "pref_hand_to_me", "label": "Hand it to me" },
+    { "id": "pref_meet_outside", "label": "Meet outside" }
+  ],
+  "selected_preference_option_id": "pref_leave_at_door",
   "notes": "Gate code #4210, second floor",
   "selected_option_id": "opt_standard",
   "options": [
@@ -260,8 +261,8 @@ or in addition to, a postal address. At least one of `address` or `geo` **MUST**
 ### Business Location
 
 For pickup, the destination is the establishment itself. It is Business-authored
-and response-only: the Platform sends just the method `type`, and the Business
-fills in the location.
+and response-only: the Platform sends just the method `type` (and optional
+handoff preference or `notes`), and the Business fills in the location.
 
 #### Platform Request
 
@@ -291,11 +292,16 @@ fills in the location.
       "address_country": "US"
     }
   },
+  "preference_options": [
+    { "id": "pref_counter", "label": "Counter Pickup" },
+    { "id": "pref_curbside", "label": "Curbside Pickup" }
+  ],
+  "selected_preference_option_id": "pref_counter",
   "selected_option_id": "opt_pickup_asap",
   "options": [
     {
       "id": "opt_pickup_asap",
-      "title": "Counter Pickup",
+      "title": "Ready in 15–25 min",
       "description": "Ask for your order number at the pickup shelf",
       "earliest_fulfillment_time": "2026-04-10T18:15:00-07:00",
       "latest_fulfillment_time": "2026-04-10T18:25:00-07:00",
@@ -305,18 +311,21 @@ fills in the location.
 }
 ```
 
-### Drop-Off Preferences & Notes
+### Handoff Preferences & Notes
 
-Delivery handoff is split into two channels so couriers get both a structured
-instruction and the details only the buyer knows:
+Order handoff is split into two channels on `methods[]` so couriers and counter
+staff get both a structured handoff mode and the details only the buyer knows:
 
-- **Preferences (`preference_options[]` → `selected_preference_option_ids[]`)**:
-  The Business lists the handoff modes it supports, each with an `id` and a
-  display `label`. The Platform selects by `id`. The Business **MAY** pre-select
-  a default (commonly contactless).
-- **Notes (`methods[].notes`)**: Free-form courier instructions — gate codes,
-  building entrances, "call on arrival". Kitchen requests belong in
-  `line_items[].dish.note`, not here.
+- **Preferences (`preference_options[]` → `selected_preference_option_id`)**:
+  The Business lists the mutually exclusive handoff modes it supports for the
+  active method — such as `"Leave at my door"` vs. `"Hand it to me"` for
+  delivery, or `"Counter Pickup"` vs. `"Curbside Pickup"` for pickup — each
+  with an `id` and a display `label`. The Platform selects one by `id`. The
+  Business **MAY** pre-select a default (commonly contactless for delivery or
+  counter for pickup).
+- **Notes (`methods[].notes`)**: Free-form handoff instructions — gate codes,
+  building entrances, "call on arrival", or vehicle description for curbside
+  pickup. Kitchen requests belong in `line_items[].note`, not here.
 
 ```text
 Drop-off
@@ -331,7 +340,11 @@ Instructions for courier
 
 Food establishments sell both "as soon as possible" and "for a specific time". The
 method's `requested_fulfillment_time` expresses which one the buyer wants, and
-the Business answers with concrete windows in `options[]`:
+the Business answers with concrete windows in `options[]`.
+`requested_fulfillment_time` serves as the slot-discovery query input; once
+`selected_option_id` is set, the selected option's window
+(`earliest_fulfillment_time` / `latest_fulfillment_time`) takes precedence as
+the authoritative fulfillment window:
 
 | `requested_fulfillment_time` | Meaning | Business response |
 | :--- | :--- | :--- |
@@ -354,7 +367,9 @@ When `requested_fulfillment_time` is provided, the business validates the time a
   `earliest_fulfillment_time` / `latest_fulfillment_time` windows that contain the requested time
   (i.e., `earliest_fulfillment_time` <= `requested_fulfillment_time` <= `latest_fulfillment_time`).
   Session proceeds normally.
-- **Unavailable:** Business returns a `recoverable` error. The fulfillment options array **SHOULD** contain the
+- **Unavailable:** Business returns a `recoverable` error (`fulfillment_time_unavailable` when
+  the establishment is open or accepting pre-orders for other windows, or `location_closed` when
+  closed). The fulfillment options array **SHOULD** contain the
   nearest available alternatives so the platform can propose an adjusted time to the buyer.
 
 ### Scheduled Fulfillment Examples
@@ -393,9 +408,9 @@ and offers alternatives instead of failing.
     [
       {
         "type": "error",
-        "code": "location_closed",
+        "code": "fulfillment_time_unavailable",
         "path": "$.fulfillment.methods[0].requested_fulfillment_time",
-        "content": "Luigi's closes at 10:00 PM. Choose one of the latest available delivery times.",
+        "content": "10:30 PM is past the last delivery window (kitchen closes at 10:00 PM). Choose one of the latest available delivery times.",
         "severity": "recoverable"
       }
     ]
@@ -467,6 +482,12 @@ offered for this establishment right now, later, or not at all, following
 - An RFC 3339 timestamp — available from that time (e.g., delivery starts at
   5:00 PM for dinner service).
 - Absent from the array — not offered (e.g., a pickup-only bakery).
+- `scheduling` (optional) — whether the method supports immediate ordering only
+  (`asap_only`), advance scheduled time slots only (`scheduled_only`), or both
+  (`asap_and_scheduled`). These are well-known values of an open string;
+  Businesses **MAY** use additional values, and Platforms **MUST NOT** reject
+  the response for an unrecognized value and **SHOULD** treat it as if
+  `scheduling` were absent.
 
 <!-- ucp:example schema=food/types/fulfillment op=read -->
 ```json
@@ -474,11 +495,13 @@ offered for this establishment right now, later, or not at all, following
   "available_methods": [
     {
       "type": "pickup",
-      "fulfillable_on": "now"
+      "fulfillable_on": "now",
+      "scheduling": "asap_and_scheduled"
     },
     {
       "type": "delivery",
       "fulfillable_on": "2026-04-10T17:00:00-07:00",
+      "scheduling": "scheduled_only",
       "description": "Delivery starts at 5:00 PM when dinner service opens"
     }
   ]
@@ -497,10 +520,12 @@ The `description` lets Platforms surface the alternative in conversation:
 - **MUST** omit `requested_fulfillment_time` for ASAP orders and send an RFC 3339
   timestamp with a UTC offset for scheduled orders.
 - **MUST** select only `id` values present in `preference_options[]`.
-- **MUST** put courier instructions in `methods[].notes`, not in
-  `line_items[].dish.note`.
+- **MUST** put courier or pickup instructions in `methods[].notes`, not in
+  `line_items[].note`.
 - **SHOULD** offer every method in `available_methods[]`, and render each
   option's window and price.
+- **SHOULD** send `requested_fulfillment_time` when the available method's `scheduling`
+  (when provided) is `scheduled_only`, and **SHOULD NOT** send it when it is `asap_only`.
 
 ### Business
 
@@ -515,9 +540,12 @@ The `description` lets Platforms surface the alternative in conversation:
 - **MUST** reflect the selected option's price in checkout `totals[]` as
   `type: "fulfillment"` and recompute tax, fees, and percentage tips when the
   method or option changes.
-- **SHOULD** pre-select a default `selected_option_id` and default drop-off
-  preference so the session can reach `ready_for_complete` without extra round
-  trips.
+- **SHOULD** pre-select a default `selected_option_id` and default handoff
+  preference (`selected_preference_option_id`) so the session can reach
+  `ready_for_complete` without extra round trips.
+- **MUST** answer a request that conflicts with the advertised scheduling with
+  a recoverable `fulfillment_time_unavailable` error, and **SHOULD** return the
+  valid windows in `options[]`.
 
 ## Examples
 

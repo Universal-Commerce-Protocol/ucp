@@ -917,6 +917,55 @@ def define_env(env):
         return def_name
     return None
 
+  def _variant_base(schema_path: Path) -> dict[str, Any] | None:
+    """Return the schema that composes `schema_path` as an if/then variant.
+
+    A per-type variant (e.g. media_video.json) is selected by its base via
+    `allOf: [{"if": {...}, "then": {"$ref": "media_video.json"}}]`. The variant
+    carries no back-pointer, so the relationship is read from the siblings
+    that declare it rather than from a macro parameter a caller could omit.
+    """
+    for sibling in sorted(schema_path.parent.glob("*.json")):
+      if sibling == schema_path:
+        continue
+      data = _load_json(sibling)
+      if not data:
+        continue
+      for branch in data.get("allOf", []):
+        then = branch.get("then") if isinstance(branch, dict) else None
+        if isinstance(then, dict) and then.get("$ref") == schema_path.name:
+          return data
+    return None
+
+  def _inherit_base_fields(
+    schema_data: dict[str, Any], base_schema: dict[str, Any]
+  ) -> tuple[dict[str, Any], list[str]]:
+    """Complete a variant's description-only properties from its base.
+
+    A variant property that carries only a `description` refines a field the
+    base defines; its type, format, and requirement live on the base. Rendered
+    standalone, such a row shows `any` / `Optional` directly under a base table
+    that says `string` / `Required`. Copy the base definition and keep the
+    variant's description so the row renders what actually validates.
+
+    Returns the completed schema and the base's `required` list, to be passed
+    as `parent_required_list`.
+    """
+    base_props = base_schema.get("properties", {})
+    props = dict(schema_data.get("properties", {}))
+    for name, details in props.items():
+      if (
+        isinstance(details, dict)
+        and set(details) == {"description"}
+        and name in base_props
+      ):
+        merged = dict(base_props[name])
+        merged["description"] = details["description"]
+        props[name] = merged
+    completed = dict(schema_data)
+    completed["properties"] = props
+    return completed, base_schema.get("required", [])
+
   # --- Page context ---
   def get_error_context():
     try:
@@ -1374,18 +1423,22 @@ def define_env(env):
         )
 
       # --- Logic to determine Display Type ---
+      one_of_parts = []
       if "oneOf" in details:
         # Render each branch: a $ref becomes a type link, an inline
         # branch shows its JSON type (matching the prose oneOf renderer
         # above). Without the inline case, a oneOf of scalars such as
         # capability `extends` (string | array) rendered as "OneOf[]".
-        parts = []
+        # When `oneOf` only holds validation constraints (e.g. `required`/`not`
+        # rules on `tip.json`), `one_of_parts` is empty and we fall through to
+        # the `$ref` link below.
         for one_of_type in details.get("oneOf", []):
           if "$ref" in one_of_type:
-            parts.append(link(_deref_self(one_of_type["$ref"])))
+            one_of_parts.append(link(_deref_self(one_of_type["$ref"])))
           elif one_of_type.get("type"):
-            parts.append(f"`{one_of_type['type']}`")
-        f_type = f"OneOf[{', '.join(parts)}]"
+            one_of_parts.append(f"`{one_of_type['type']}`")
+      if one_of_parts:
+        f_type = f"OneOf[{', '.join(one_of_parts)}]"
       elif ref and version_data:
         f_type = version_data.get("type", "any")
       elif ref:
@@ -1530,6 +1583,9 @@ def define_env(env):
     embedded_schema_data = _resolve_internal_all_of(
       embedded_schema_data, bundled
     )
+    # Bundling drops cross-file $defs refs; restore them for links.
+    raw_def = _resolve_json_pointer(pointer, _resolve_schema(full_path))
+    embedded_schema_data = _restore_fragment_refs(embedded_schema_data, raw_def)
 
     table = _render_table_from_schema(
       embedded_schema_data,
@@ -1673,8 +1729,17 @@ def define_env(env):
 
     # Resolve WITHOUT bundling to preserve $refs for hyperlinks.
     resolved_schema = _resolve_schema(full_path, direction, operation)
+    parent_required = None
+    base_schema = _variant_base(full_path)
+    if resolved_schema and base_schema is not None:
+      resolved_schema, parent_required = _inherit_base_fields(
+        resolved_schema, base_schema
+      )
     return _render_table_from_schema(
-      resolved_schema, spec_file_name, ctx=ctx.at(full_path)
+      resolved_schema,
+      spec_file_name,
+      parent_required_list=parent_required,
+      ctx=ctx.at(full_path),
     )
 
   @env.macro
@@ -1741,7 +1806,18 @@ def define_env(env):
     ):
       return []
 
-    table = _render_table_from_schema(schema_data, spec_file_name, ctx=ctx)
+    parent_required = None
+    base_schema = _variant_base(schema_file)
+    if base_schema is not None:
+      schema_data, parent_required = _inherit_base_fields(
+        schema_data, base_schema
+      )
+    table = _render_table_from_schema(
+      schema_data,
+      spec_file_name,
+      parent_required_list=parent_required,
+      ctx=ctx,
+    )
     if table == "_No properties defined._":
       return []
     return [heading, table, "\n---\n"]

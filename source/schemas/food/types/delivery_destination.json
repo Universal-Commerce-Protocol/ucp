@@ -2,44 +2,42 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/food/types/delivery_destination.json",
   "title": "Delivery Destination",
-  "description": "Delivery destination.",
+  "description": "Delivery destination with a postal address and/or geographic coordinates.",
   "type": "object",
-  "allOf": [
+  "required": [
+    "id",
+    "type"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "ID specific to this delivery destination.",
+      "ucp_request": "optional"
+    },
+    "type": {
+      "type": "string",
+      "const": "delivery_address",
+      "description": "Destination type discriminator.",
+      "ucp_request": "optional"
+    },
+    "address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "Human-readable postal address of the delivery destination."
+    },
+    "geo": {
+      "$ref": "../../common/types/geo.json",
+      "description": "Geographic coordinates (WGS 84) of the delivery destination."
+    }
+  },
+  "anyOf": [
     {
-      "$ref": "../../common/types/physical_address.json"
+      "required": [
+        "address"
+      ]
     },
     {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "ID specific to this delivery destination.",
-          "ucp_request": "optional"
-        },
-        "type": {
-          "type": "string",
-          "const": "delivery_address",
-          "description": "Destination type discriminator.",
-          "ucp_request": "optional"
-        },
-        "preference_options": {
-          "type": "array",
-          "items": {
-            "$ref": "preference_option.json"
-          },
-          "ucp_request": "omit"
-        },
-        "selected_preference_option_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of identifiers for the selected preference options."
-        }
-      },
       "required": [
-        "id",
-        "type"
+        "geo"
       ]
     }
   ]

@@ -89,11 +89,11 @@ Checkout follows a progressive session lifecycle:
 * `food_establishment` 🏪 Luigi's Artisan Pizzeria — every dish below comes from this one kitchen
 * `line_items[0]` 🍕 × 2
     * `dish` Margherita Pizza (12") — $16.00
-    * `dish.modifications[]` 🧀 Extra Mozzarella +$2.00 · 🌿 Fresh Basil +$1.50
-    * `dish.note` 📝 "Well done crust, please"
+    * `modifications[]` 🧀 Extra Mozzarella +$2.00 · 🌿 Fresh Basil +$1.50
+    * `note` 📝 "Well done crust, please"
 * `line_items[1]` 🥗 × 1
     * `dish` Caesar Salad — $11.00
-    * `dish.note` 📝 "Dressing on the side"
+    * `note` 📝 "Dressing on the side"
 * `fulfillment.methods[0]` 🛵 delivery → 450 Serra Mall, Apt 3B *(via the [Fulfillment Extension](../extensions/fulfillment.md))*
     * `selected_option_id` 🔘✅ Standard Delivery, 6:35–6:50 PM, $2.99
 * `tip` 💵 `selected_option_id` 🔘✅ 18%
@@ -125,12 +125,13 @@ Checkout follows a progressive session lifecycle:
 
 Food ordering relies on rich item-level customization — choosing a protein,
 picking a spice level, upgrading a side, or adding toppings — alongside
-free-form kitchen requests. The [Dish](#dish) entity separates the two:
+free-form kitchen requests. The [Line Item](#line-item) entity separates the
+menu [Dish](#dish) from buyer-selected customization:
 
 | Mechanism | Field | Priced? | Contract |
 | :--- | :--- | :--- | :--- |
-| **Structured modifications** | `dish.modifications[]` ([Modification](#modification)) | Yes | Platform sends menu-backed modification `id`s. Business validates modifier-group rules (required choices, min/max selections, mutually exclusive options), echoes `title` and `price`, and includes the charges in `line_items[].totals`. |
-| **Special instructions** | `dish.note` | No | Free-form buyer text for the kitchen (e.g., "sauce on the side", "cut in half", "no onions"). **MUST NOT** trigger paid add-ons. |
+| **Structured modifications** | `line_items[].modifications[]` ([Modification](#modification)) | Yes | Platform sends menu-backed modification `id`s. Business validates modifier-group rules (required choices, min/max selections, mutually exclusive options), echoes `title` and `price`, and includes the charges in `line_items[].totals`. |
+| **Special instructions** | `line_items[].note` | No | Free-form buyer text for the kitchen (e.g., "sauce on the side", "cut in half", "well done crust"). **MUST NOT** alter price or structured modifications. |
 
 * **Modification quantity applies per unit of the dish.** `modification.quantity`
   specifies how many units of that modification apply to **each** unit of the dish
@@ -142,39 +143,46 @@ free-form kitchen requests. The [Dish](#dish) entity separates the two:
 * **A configured dish is a line item.** Two units of the same dish with
   different modifications or different notes are separate `line_items[]`
   entries; Platforms **MUST NOT** merge them.
-* **Line item arithmetic.** A line's `subtotal` is
+* **Line item arithmetic.** A `line_item`'s `subtotal` is
   `(dish.price + sum(modifications[].price × modifications[].quantity)) × line_items[].quantity`
   (where omitted `modifications[].quantity` defaults to 1).
+* **Free-form kitchen `note` rules:**
+    1. `line_items[].note` is passed to the kitchen verbatim and **MUST NOT**
+       alter price or structured `modifications[]`.
+    2. A Business **SHOULD** return `note_contains_modification` warning when a note
+       asks for a menu-modeled modifier at any price (including `$0` removal or
+       substitution modifiers such as "no onions"), and **MAY** return
+       `note_not_supported` error when a request cannot be honored by the kitchen
+       (e.g., "pepperoni on half").
+    3. A Platform **MUST NOT** present a free-form `note` to the buyer as an
+       applied or verified modification.
 
 === "Request"
 
-    The Platform sends identifiers and buyer input only:
+    The Platform sends identifiers and buyer inputs only:
 
-    <!-- ucp:example schema=food/checkout op=create direction=request -->
+    <!-- ucp:example schema=food/checkout target=$.line_items op=create direction=request -->
     ```json
-    {
-      "food_establishment": { "id": "est_luigis_01" },
-      "line_items": [
-        {
-          "quantity": 2,
-          "dish": {
-            "id": "dish_margherita_12",
-            "modifications": [
-              { "id": "mod_extra_mozzarella" },
-              { "id": "mod_fresh_basil" }
-            ],
-            "note": "Well done crust, please"
-          }
+    [
+      {
+        "quantity": 2,
+        "dish": {
+          "id": "dish_margherita_12"
         },
-        {
-          "quantity": 1,
-          "dish": {
-            "id": "dish_caesar",
-            "note": "Dressing on the side"
-          }
-        }
-      ]
-    }
+        "modifications": [
+          { "id": "mod_extra_mozzarella" },
+          { "id": "mod_fresh_basil" }
+        ],
+        "note": "Well done crust, please"
+      },
+      {
+        "quantity": 1,
+        "dish": {
+          "id": "dish_caesar"
+        },
+        "note": "Dressing on the side"
+      }
+    ]
     ```
 
 === "Response"
@@ -193,13 +201,13 @@ free-form kitchen requests. The [Dish](#dish) entity separates the two:
           "price": 1600,
           "media": [
             { "type": "image", "url": "https://food.example.com/img/margherita.jpg" }
-          ],
-          "modifications": [
-            { "id": "mod_extra_mozzarella", "title": "Extra Mozzarella", "price": 200 },
-            { "id": "mod_fresh_basil", "title": "Fresh Basil", "price": 150 }
-          ],
-          "note": "Well done crust, please"
+          ]
         },
+        "modifications": [
+          { "id": "mod_extra_mozzarella", "title": "Extra Mozzarella", "price": 200 },
+          { "id": "mod_fresh_basil", "title": "Fresh Basil", "price": 150 }
+        ],
+        "note": "Well done crust, please",
         "totals": [
           { "type": "subtotal", "amount": 3900 },
           { "type": "total", "amount": 3900 }
@@ -211,9 +219,9 @@ free-form kitchen requests. The [Dish](#dish) entity separates the two:
         "dish": {
           "id": "dish_caesar",
           "title": "Caesar Salad",
-          "price": 1100,
-          "note": "Dressing on the side"
+          "price": 1100
         },
+        "note": "Dressing on the side",
         "totals": [
           { "type": "subtotal", "amount": 1100 },
           { "type": "total", "amount": 1100 }
@@ -224,8 +232,9 @@ free-form kitchen requests. The [Dish](#dish) entity separates the two:
 
 === "Error Response: Note Carries Add-Ons"
 
-    When a `dish.note` asks for something the menu sells as a modification, the
-    Business **SHOULD** return a warning pointing back to the note:
+    When a `line_items[].note` asks for something the menu models as a
+    modification, the Business **SHOULD** return a warning pointing back to the
+    note:
 
     <!-- ucp:example schema=food/checkout target=$.messages op=read -->
     ```json
@@ -233,7 +242,7 @@ free-form kitchen requests. The [Dish](#dish) entity separates the two:
       {
         "type": "warning",
         "code": "note_contains_modification",
-        "path": "$.line_items[0].dish.note",
+        "path": "$.line_items[0].note",
         "content": "\"Add avocado\" is a paid add-on (+$2.50). Select the Avocado modification to add it; notes are passed to the kitchen as-is and cannot add charges."
       }
     ]
@@ -253,7 +262,7 @@ non-total entries sum to the single `total` entry.
 * **Delivery (`fulfillment`)**: The price of the selected
   [fulfillment option](../extensions/fulfillment.md#fulfillment-option). Pickup
   options are typically `0`.
-* **Fees (`fee`)**: Some common examples include - marketplace service fees,
+* **Fees (`fee`)**: Some common examples include: marketplace service fees,
   small-order fees (basket below a threshold), bag or packaging fees, and municipal
   surcharges (e.g., courier minimum-pay regulatory fees). Use repeating `fee` entries
   or one `fee` entry with itemized `lines[]`.
@@ -321,8 +330,8 @@ The following snippets illustrate canonical food pricing patterns:
       { "type": "fulfillment", "display_text": "Delivery (Free with Pass)", "amount": 0 },
       { "type": "fee", "display_text": "Service Fee", "amount": 350 },
       { "type": "tax", "display_text": "Tax (8.75%)", "amount": 346 },
-      { "type": "tip", "display_text": "Courier Tip (18%)", "amount": 450 },
-      { "type": "total", "display_text": "Total", "amount": 5106 }
+      { "type": "tip", "display_text": "Courier Tip (18%)", "amount": 900 },
+      { "type": "total", "display_text": "Total", "amount": 5556 }
     ]
     ```
 
@@ -353,20 +362,27 @@ Business suggests from what the buyer chooses:
   $5.00). Tip options carry no label: the Platform renders one from `unit` and
   `amount` (e.g., "18%", "$5").
 * **Choice (`tip.selected_option_id` or `tip.custom_amount`, Platform-authored)**:
-  The schema's `oneOf` admits exactly three states:
+  `selected_option_id` is omitted on Create Checkout (`create: omit`) and
+  available on Update Checkout (`update: optional`) once the Business has
+  returned `tip.options[]`; `custom_amount` **MAY** be sent on either create or
+  update. The schema's `oneOf` admits exactly three states:
 
 | State | `selected_option_id` | `custom_amount` | Meaning |
 | :--- | :--- | :--- | :--- |
-| Preset | ✅ | — | Buyer picked a suggested option. |
+| Preset | ✅ | — | Buyer picked a suggested option (on update). |
 | Custom | — | ✅ | Buyer entered an amount in minor units (`0` = no tip). |
 | Unset | — | — | No choice yet; the Business **MAY** apply a default. |
 | ❌ Invalid | ✅ | ✅ | Rejected by schema validation. |
 
 * **Resolution (`totals[]`, Business-authored)**: The Business resolves the
-  choice into money — computing percentages against its stated basis
-  (typically the pre-tax `subtotal`) — and **MUST** report any non-zero tip as a
-  `type: "tip"` entry in `totals[]`. `tip` holds the choice; `totals[]` holds the
-  amount.
+  choice into money — percentage `tip.options[]` are computed against the
+  pre-discount `subtotal` entry in `totals[]` unless otherwise stated in
+  `display_text` — and **MUST** report any non-zero tip as a `type: "tip"`
+  entry in `totals[]`. `tip` holds the choice; `totals[]` holds the amount.
+  When a fulfillment switch (e.g., `delivery` → `pickup`) replaces
+  `tip.options[]` and invalidates a prior `selected_option_id`, the Business
+  **MUST** clear (or re-default) `selected_option_id` and **SHOULD** surface
+  a `notice` warning.
 
 A Platform renders the suggestions as quick-select chips:
 
@@ -391,19 +407,39 @@ Add a tip for your courier
 
 === "Platform Selects a Preset"
 
-    <!-- ucp:example schema=food/types/tip op=update direction=request -->
+    <!-- ucp:example schema=food/checkout op=update direction=request -->
     ```json
     {
-      "selected_option_id": "tip_18"
+      "food_establishment": { "id": "est_luigis_01" },
+      "line_items": [
+        {
+          "id": "li_1",
+          "quantity": 2,
+          "dish": { "id": "dish_margherita_12" }
+        }
+      ],
+      "tip": {
+        "selected_option_id": "tip_18"
+      }
     }
     ```
 
 === "Platform Sends a Custom Amount"
 
-    <!-- ucp:example schema=food/types/tip op=update direction=request -->
+    <!-- ucp:example schema=food/checkout op=update direction=request -->
     ```json
     {
-      "custom_amount": 700
+      "food_establishment": { "id": "est_luigis_01" },
+      "line_items": [
+        {
+          "id": "li_1",
+          "quantity": 2,
+          "dish": { "id": "dish_margherita_12" }
+        }
+      ],
+      "tip": {
+        "custom_amount": 700
+      }
     }
     ```
 
@@ -432,7 +468,7 @@ ignores overlapping fields in the request. Checkout-only fields — `tip`,
 {
   "cart_id": "cart_food_8912",
   "line_items": [],
-  "tip": { "selected_option_id": "tip_18" }
+  "tip": { "custom_amount": 500 }
 }
 ```
 
@@ -442,7 +478,7 @@ The `status` field indicates the current phase of the session. Statuses follow
 [Checkout — Status Values](../../shopping/checkout/index.md#status-values); in
 food ordering they typically mean:
 
-| Status | Typical food ordering situation | Platform action |
+| Status | Typical food ordering situation | Recommended Platform action |
 | :--- | :--- | :--- |
 | `incomplete` | No fulfillment method yet, a dish was 86'd, or the basket is under the delivery minimum. | Resolve `messages[]` via Update Checkout. |
 | `requires_escalation` | Alcohol in the basket requires ID verification, or a catering order needs business review. | Hand off via `continue_url`. |
@@ -465,16 +501,18 @@ Businesses **SHOULD** use these codes so Platforms can offer targeted recovery:
 
 | Code | Typical `path` | Food ordering meaning | Suggested recovery |
 | :--- | :--- | :--- | :--- |
-| `out_of_stock` | `$.line_items[1].dish` or `...modifications[0]` | Dish or ingredient 86'd for this service. | Offer a substitute or remove. |
+| `out_of_stock` | `$.line_items[1].dish` or `$.line_items[1].modifications[0]` | Dish or ingredient 86'd for this service. | Offer a substitute or remove. |
 | `item_unavailable` | `$.line_items[1].dish` | Dish not on the current menu (e.g., breakfast-only). | Remove or schedule for a later time. |
+| `modification_required` | `$.line_items[0]` | Required modifier group (e.g., protein or size) is missing a selection. | Prompt the buyer to choose a required modification. |
+| `modification_invalid` | `$.line_items[0].modifications[1]` | Modification is not valid for the dish or violates group min/max rules. | Adjust or remove the invalid modification. |
 | `location_closed` | `$.food_establishment` | Establishment closed or paused for intake. | Offer scheduled ordering or another location. |
+| `fulfillment_time_unavailable` | `$.fulfillment.methods[0].requested_fulfillment_time` | Requested scheduled time is outside operating hours or slot capacity. | Propose one of the alternative windows in `options[]`. |
 | `address_undeliverable` | `$.fulfillment.methods[0].destination` | Address outside the delivery zone. | Offer pickup or a different address. |
 | `minimum_order_unmet` | `$.totals` | Basket below the delivery minimum. | Prompt to add items. |
 | `payment_failed` | `$.payment` | Authorization or capture failed. | Prompt for another payment method. |
 | `eligibility_invalid` | `$.context.eligibility` | Delivery pass or membership could not be verified. | Show recomputed totals for review. |
 
-`location_closed` and `minimum_order_unmet` are food-specific; the remaining
-codes are the shared standard errors.
+Sample definitions based on the error examples above:
 
 === "Sold-Out Dish & Delivery Minimum"
 
@@ -550,7 +588,10 @@ referenced item and **MUST NOT** auto-dismiss:
 * **Nutrition** (`nutritional_info`): Calorie or sodium statements required by
   menu-labeling laws.
 * **Price changes** (`totals_changed`): A menu or fee change re-priced the
-  order after the buyer reviewed it.
+  order after the buyer reviewed it. The Business **MUST** return the
+  recomputed `totals[]` along with a `totals_changed` disclosure warning at
+  `$.totals`, and **MUST NOT** complete a checkout at a modified price without
+  first returning the updated totals for buyer review.
 
 Use `notice` for operational context (e.g., "High demand — delivery times are
 longer than usual").
@@ -614,13 +655,19 @@ in `order`. Its design reflects how food orders are handed off:
 * **`order.tracking_url`** (required): A live page showing preparation status,
   ready or arrival time, and courier location. Unlike retail, where a receipt
   link suffices, food orders are tracked minute by minute until handoff.
+* **`order.earliest_fulfillment_time` / `order.latest_fulfillment_time`**
+  (optional, Business-only): The committed post-placement ready or arrival
+  window (RFC 3339), allowing the Platform to render an immediate ETA on the
+  confirmation screen without scraping `tracking_url`.
 
 <!-- ucp:example schema=food/checkout target=$.order op=read -->
 ```json
 {
   "id": "ord_food_9876543210",
   "label": "#42",
-  "tracking_url": "https://food.example.com/orders/ord_food_9876543210"
+  "tracking_url": "https://food.example.com/orders/ord_food_9876543210",
+  "earliest_fulfillment_time": "2026-04-10T18:35:00-07:00",
+  "latest_fulfillment_time": "2026-04-10T18:50:00-07:00"
 }
 ```
 
@@ -640,8 +687,12 @@ custom scopes are defined in [Identity Linking — Scopes](../../common/identity
 
 The `continue_url` field enables checkout handoff from the Platform to the
 Business UI — for example, for ID verification or catering approval. URL
-construction (server-side state vs. permalink) follows
-[Checkout — Continue URL](../../shopping/checkout/index.md#continue-url).
+construction (server-side state vs. permalink) and security/recovery
+considerations follow
+[Checkout — Continue URL](../../shopping/checkout/index.md#continue-url). When
+a Platform hands off before a tip has been selected, it **SHOULD** label the
+displayed total as pre-tip so the buyer expects gratuity selection on the
+Business UI.
 
 ### Availability
 
@@ -660,10 +711,10 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   converting a cart via `cart_id`.
 * **MUST** present each `line_items[]` entry as a unit — `dish.title`, every
   modification `title`, `quantity` (when greater than 1), and `price`,
-  `dish.note`, and the line's `totals` — and **MUST NOT** merge entries that
-  differ in modifications or notes.
-* **MUST** keep kitchen instructions in `dish.note` and courier instructions in
-  `fulfillment.methods[].notes`.
+  `line_items[].note`, and the line's `totals` — and **MUST NOT** merge entries
+  that differ in modifications or notes.
+* **MUST** keep kitchen instructions in `line_items[].note` and courier
+  instructions in `fulfillment.methods[].notes`.
 * **MUST NOT** send both `tip.selected_option_id` and `tip.custom_amount`, and
   **MUST** render the tip from the `type: "tip"` entry in `totals[]`.
 * **SHOULD** collect `buyer.phone_number` (E.164) for delivery orders so the
@@ -683,9 +734,9 @@ Businesses **MUST** provide `continue_url` when returning `status` =
 * **MUST** echo authoritative `title` and `price` for every dish and modification,
   and compute `line_items[].totals` and `totals[]` deterministically.
 * **MUST NOT** infer a quantity from a repeated modification `id` within a
-  single dish, and **SHOULD** reject duplicate modification IDs as invalid.
-* **MUST NOT** add charges based on `dish.note`; **SHOULD** return a warning message
-  when a note requests for a paid add-on.
+  single line item, and **SHOULD** reject duplicate modification IDs as invalid.
+* **MUST NOT** add charges based on `line_items[].note`; **SHOULD** return a
+  warning message when a note requests a menu-modeled modification.
 * **MUST** include `display_text` on `type: "tip"` totals and report any non-zero
   tip in `totals[]`.
 * **SHOULD** use the food error codes in [Error Handling](#error-handling) with a
@@ -730,8 +781,11 @@ Retrieves the latest state of the checkout session.
 ### Update Checkout
 
 Performs a full replacement of the checkout session. The Platform is
-**REQUIRED** to send the complete writable state, including `line_items`, along
-with any changes (e.g., fulfillment, buyer, tip).
+**REQUIRED** to send the complete writable state, including `food_establishment`
+and `line_items`, along with any changes (e.g., fulfillment, buyer, tip). To
+preserve existing line item handles across updates, the Platform **SHOULD**
+include each item's `line_items[].id` from the prior response; omitting `id`
+indicates a newly added line item.
 
 {{ method_fields('update_checkout', 'food/rest.openapi.json', 'food/checkout') }}
 
@@ -757,6 +811,13 @@ The abstract operations above are bound to specific transport protocols:
 
 ## Entities
 
+### Actions
+
+Executable recovery actions that an agent or Platform can invoke to resolve a
+checkout issue.
+
+{{ schema_fields('types/actions', 'food/checkout') }}
+
 ### Buyer
 
 The person placing the order. `phone_number` uses E.164 format and lets the
@@ -773,20 +834,14 @@ membership) used before completion.
 
 ### Dish
 
-A menu item being ordered, with its base `price`, structured `modifications[]`,
-and free-form kitchen `note`.
+A menu item being ordered, with its base `price` and descriptive metadata.
 
 {{ schema_fields('food/types/dish', 'food/checkout') }}
 
-### Food Establishment
-
-The restaurant, cafe, or kitchen that prepares the order.
-
-{{ schema_fields('food/types/food_establishment', 'food/checkout') }}
-
 ### Line Item
 
-A configured dish and its `quantity`, with Business-computed `totals`.
+A configured dish and its `quantity`, structured `modifications[]`, free-form
+kitchen `note`, and Business-computed `totals`.
 
 {{ schema_fields('food/types/line_item', 'food/checkout') }}
 
@@ -796,6 +851,13 @@ Legal and policy links (e.g., Privacy Policy, Terms of Service, allergen
 information).
 
 {{ schema_fields('types/link', 'food/checkout') }}
+
+### Location Summary
+
+The food establishment (restaurant, cafe, or kitchen) that prepares the order,
+referenced by `food_establishment`.
+
+{{ schema_fields('location_summary', 'food/checkout') }}
 
 ### Message Error
 
@@ -811,8 +873,8 @@ information).
 
 ### Modification
 
-A priced customization applied to a [Dish](#dish) (e.g., "Extra Mozzarella",
-"Gluten-Free Crust").
+A priced customization applied to a [Line Item](#line-item) (e.g., "Extra
+Mozzarella", "Gluten-Free Crust").
 
 A modification with `quantity` omitted **MUST** be treated as `quantity: 1`.
 `price` remains the price of a single unit regardless of `quantity`, and
@@ -821,15 +883,16 @@ businesses **MUST** reflect `quantity` in the line item `totals` breakdown.
 Platforms **MUST** express repeated units of the same modification as a single
 entry whose `quantity` is greater than 1, and **MUST NOT** repeat an entry to
 convey quantity. Businesses **MUST NOT** infer a quantity from a repeated
-modification `id` within a single dish, and **SHOULD** reject such a request as
-invalid.
+modification `id` within a single line item, and **SHOULD** reject such a
+request as invalid.
 
 {{ schema_fields('food/types/modification', 'food/checkout') }}
 
 ### Order Confirmation
 
 Order details returned on `completed`: the order `id`, an optional
-human-readable `label`, and a live `tracking_url`.
+human-readable `label`, a live `tracking_url`, and an optional committed
+fulfillment window (`earliest_fulfillment_time` / `latest_fulfillment_time`).
 
 {{ schema_fields('food/types/order_confirmation', 'food/checkout') }}
 
@@ -838,6 +901,12 @@ human-readable `label`, and a live `tracking_url`.
 Payment details and collected payment instruments.
 
 {{ schema_fields('payment', 'food/checkout') }}
+
+### Policy
+
+Business-specific policies applicable to the checkout session.
+
+{{ schema_fields('types/policy', 'food/checkout') }}
 
 ### Signals
 

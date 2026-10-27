@@ -21,6 +21,16 @@
       "type": "string",
       "format": "uri",
       "description": "A URL to access or track the order on the business site."
+    },
+    "earliest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Earliest committed fulfillment time (RFC 3339) after kitchen acceptance."
+    },
+    "latest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Latest committed fulfillment time (RFC 3339) after kitchen acceptance."
     }
   }
 }

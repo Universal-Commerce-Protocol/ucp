@@ -14,18 +14,18 @@
     },
     "type": {
       "type": "string",
-      "enum": ["delivery", "pickup"],
-      "description": "Fulfillment method type.",
+      "description": "Fulfillment method type. Well-known values: `delivery`, `pickup`. Businesses MAY use additional values via negotiated extensions; Businesses MUST reject unrecognized request values with a recoverable error.",
       "ucp_request": {"create": "required", "update": "optional"}
     },
     "destination": {
       "$ref": "fulfillment_destination.json",
-      "description": "The destination for fulfillment. For delivery: customer address. For pickup: food establishment location."
+      "description": "The destination for fulfillment. For delivery: customer address. For pickup: food establishment location.",
+      "ucp_request": "omit"
     },
     "requested_fulfillment_time": {
       "type": "string",
       "format": "date-time",
-      "description": "Platform-requested fulfillment time as an RFC 3339 timestamp. When omitted, the business MUST interpret the request as ASAP fulfillment. When present, the business SHOULD return the nearest available fulfillment option matching the requested time. If the requested time is unavailable, the business SHOULD return a recoverable error with available alternatives in the fulfillment options array."
+      "description": "Platform-requested target fulfillment time as an RFC 3339 timestamp used as a slot-discovery query input. When omitted, the business MUST interpret the request as ASAP fulfillment. When present, the business SHOULD return available fulfillment options matching the requested time, and `selected_option_id` takes precedence once an option is chosen. If the requested time is unavailable, the business SHOULD return a recoverable `fulfillment_time_unavailable` error with available alternatives in the fulfillment options array."
     },
     "options": {
       "type": "array",
@@ -37,9 +37,21 @@
       "type": "string",
       "description": "Identifier of the selected fulfillment option."
     },
+    "preference_options": {
+      "type": "array",
+      "items": {
+        "$ref": "preference_option.json"
+      },
+      "description": "Available handoff preferences for this fulfillment method (e.g., drop-off preferences for delivery, or counter vs. curbside handoff for pickup).",
+      "ucp_request": "omit"
+    },
+    "selected_preference_option_id": {
+      "type": "string",
+      "description": "Identifier of the selected handoff preference option from `preference_options`."
+    },
     "notes": {
       "type": "string",
-      "description": "Optional input from the buyer for the fulfillment method. Common examples include delivery instructions."
+      "description": "Optional input from the buyer for the fulfillment method. Common examples include delivery/pickup instructions."
     }
   },
   "allOf": [
