@@ -160,20 +160,39 @@ def check_links():
         continue
 
       parsed = urlparse(link)
-      if parsed.scheme and parsed.scheme in ("http", "https"):
-        if not link.startswith(SITE_URL):
+      if parsed.scheme in ("http", "https"):
+        parsed_site = urlparse(SITE_URL)
+        if parsed.hostname == parsed_site.hostname:
+          path = parsed.path if parsed.path else "/"
+          site_path = parsed_site.path
+          site_path_no_slash = site_path.rstrip("/")
+          if (path == site_path_no_slash) or path.startswith(site_path):
+            if path.startswith(site_path):
+              rel_link_path = "/" + path[len(site_path) :]
+            else:
+              rel_link_path = "/"
+            query_part = f"?{parsed.query}" if parsed.query else ""
+            fragment_part = f"#{parsed.fragment}" if parsed.fragment else ""
+            link = rel_link_path + query_part + fragment_part
+            parsed = urlparse(link)
+          else:
+            continue  # External link
+        else:
           continue  # External link
-        # Internal absolute URL (e.g. https://ucp.dev/foo) -> /foo
-        link = link[len(SITE_URL) - 1 :]  # Keep the leading slash
+      elif parsed.netloc or parsed.scheme:
+        # Anything else carrying a host (protocol-relative //host/path) or a
+        # scheme we do not resolve (ftp:, ws:, vscode:, ...) points off-site.
+        # Falling through would read its path as a site-absolute path and
+        # report a spurious "Not Found" against the local build.
+        continue
 
-      path_part = parsed.path
-      anchor_part = parsed.fragment
-      path_part = unquote(path_part)
+      path_part = unquote(parsed.path)
+      anchor_part = unquote(parsed.fragment)
 
       # Built documentation should link to rendered pages, never copied source
       # markdown. A raw .md target can exist and fool the ordinary existence
       # check while sending readers to source text instead of the HTML page.
-      if path_part.endswith(".md"):
+      if path_part.lower().endswith(".md"):
         errors_by_version[version][str(file_path)].append(
           f"  Link: {original_link}\n"
           "  Target is raw Markdown; link to the rendered page instead"
@@ -197,6 +216,7 @@ def check_links():
         path_part = "/" + path_part[len(SITE_BASE_PATH) :]
 
       target_file = None
+      is_missing_version = False
 
       # Resolve Target File
       if not path_part:
@@ -218,7 +238,14 @@ def check_links():
           )
           and not (ROOT_DIR / parts[0]).exists()
         ):
-          rel_path = parts[1]
+          is_missing_version = True
+          stripped_path = parts[1]
+          if (
+            (ROOT_DIR / stripped_path).exists()
+            or (ROOT_DIR / (stripped_path + ".html")).exists()
+            or (ROOT_DIR / stripped_path / "index.html").exists()
+          ):
+            rel_path = stripped_path
 
         target_file = ROOT_DIR / rel_path
       else:
@@ -239,11 +266,15 @@ def check_links():
           if candidate.exists():
             target_file = candidate
           else:
+            if is_missing_version:
+              continue
             errors_by_version[version][str(file_path)].append(
               f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
             )
             continue
         else:
+          if is_missing_version:
+            continue
           errors_by_version[version][str(file_path)].append(
             f"  Link: {original_link}\n  Target: {target_file} (Not Found)"
           )
