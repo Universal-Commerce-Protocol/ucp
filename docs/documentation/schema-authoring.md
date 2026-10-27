@@ -358,6 +358,44 @@ fundamental protocol change (e.g., `checkout.status: open | completed | expired`
 If the set might grow as new use cases emerge, use an open string with well-known
 values documented in the `description`.
 
+### Per-Value Field Semantics
+
+An open `type` vocabulary can change what an existing field *means* without
+changing what validates. The media `type` above is the case in point: `url` is
+a displayable image for `image`, a playable file or streaming manifest for
+`video`, and a third-party player to embed for `external_video` — the same
+required URL in every case. Keep one schema and one field set on the
+base, and express the per-value meaning as description-only overrides in a
+sibling schema file that the base selects with an `allOf` `if`/`then` branch on
+`type`:
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+// media.json — every field is defined here; a branch selects a sibling by `type`
+"allOf": [{
+  "if": { "properties": { "type": { "const": "video" } }, "required": ["type"] },
+  "then": { "$ref": "media_video.json" }
+}]
+
+// media_video.json — description-only overrides: no types, no constraints
+"properties": {
+  "url": { "description": "A playable rendition of the video: a progressive file or an adaptive-streaming manifest." },
+  "sources": { "description": "Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH)." }
+}
+```
+
+The branch carries no constraints. Every field lives on the base — including
+one that applies to only some values, such as `duration` for time-based media
+— with a description that names its scope. JSON Schema code generators do not
+project `if`/`then`, so a field defined only inside a branch is missing from
+the generated type, while a field on the base is present for every value. The
+`schema_fields` macro renders each sibling as a per-value table, completing
+type and requirement from the base that references it, so an override row
+reads `url | string | Required | <per-value description>`.
+
+If a value ever needs a real constraint — a field only it requires, a format
+only it accepts — the branch is already where it goes.
+
 ## Versioning Strategy
 
 ### UCP Services (`dev.ucp.*`)
@@ -868,6 +906,12 @@ payload for the named operation.
 <!-- ucp:example schema=shopping/cart op=create direction=request -->
 ```
 
+The coverage check runs on the authored example before any scaffold merge:
+every required field must be present or elided (an elided field counts as
+acknowledged), and where the schema offers required-key `anyOf` alternatives,
+at least one alternative must be satisfied by the example's own keys. Scaffold
+data cannot satisfy missing required-key coverage.
+
 **Sub-tree with surrounding context.** Use `target=` when the example focuses
 on one field. The example is spliced into a known-valid scaffold at that
 target path; the rest uses the scaffold's defaults.
@@ -901,8 +945,20 @@ a profile's `business_schema`, or a named sub-type — select it explicitly with
 <!-- ucp:example schema=transports/jsonrpc def=error_response op=read -->
 ```
 
-**Empty body.** A `{}` payload (e.g. cancel, GET) validates trivially against
-the matching op + direction. No special syntax needed.
+**Empty body.** A `{}` example annotated with `op=read` or `op=cancel` and
+`direction=request`, with no `def=` or `target=`, passes without body
+validation: those operations have no request body. Every other `{}` payload
+(a response, any other operation, or an explicit `def=` or `target=`
+selection) is validated normally against its schema. No special syntax needed.
+
+**Extension fields.** Capability schemas are open, so a field that only an
+extension defines (e.g. `fulfillment` or `discounts` on checkout) would pass
+validation against the capability unchecked. When an example carries such a
+field, the validator also validates it against that extension's composition of
+the capability (`$defs/dev.ucp.shopping.checkout` in `shopping/fulfillment.json`,
+for instance). No annotation is needed: keep annotating the capability, and the
+extension fields are checked too. Fields the capability itself declares, such as
+`payment` or `buyer`, are validated by the capability and don't trigger this.
 
 ### Keep validator wiring invisible
 

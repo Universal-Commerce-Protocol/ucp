@@ -21,8 +21,9 @@ bodies.
 """
 
 import json
-import subprocess
 from pathlib import Path
+import re
+import subprocess
 from typing import Any
 
 # --- CONFIGURATION ---
@@ -33,6 +34,7 @@ HANDLERS_GOOGLE_PAY_DIR = Path("source/handlers/google_pay")
 COMMON_SCHEMAS_DIR = SCHEMAS_DIR / "common"
 COMMON_TYPES_DIR = COMMON_SCHEMAS_DIR / "types"
 UCP_SCHEMA_PATH = SCHEMAS_DIR / "ucp.json"
+REFERENCE_DOC_PATH = Path("docs/specification/reference.md")
 
 
 # common/ is the protocol namespace; every other immediate subdir of
@@ -150,6 +152,89 @@ def _resolve_json_pointer(pointer: str, data: Any) -> Any | None:
   return current
 
 
+def _security_header_rows(data: dict, operation: dict) -> list[dict]:
+  """Header rows for the authentication schemes an operation accepts.
+
+  OpenAPI 3.1 ignores a header parameter named Authorization, so auth belongs
+  in security/securitySchemes; a header table built only from parameters
+  silently stops listing authentication once a spec declares it correctly.
+  """
+  requirements = operation.get("security", data.get("security", []))
+  schemes = data.get("components", {}).get("securitySchemes", {})
+  scheme_names: dict[str, list[str]] = {}
+  descriptions: dict[str, list[str]] = {}
+  for name in dict.fromkeys(n for r in requirements for n in r):
+    scheme = schemes.get(name, {})
+    kind = scheme.get("type")
+    if kind == "http":
+      header = "Authorization"
+      auth = scheme.get("scheme", "")
+      prefix = f"`{auth.capitalize()}` credentials. " if auth else ""
+    elif kind in ("oauth2", "openIdConnect"):
+      header = "Authorization"
+      prefix = "`Bearer` access token. "
+    elif kind == "apiKey" and scheme.get("in") == "header":
+      header = scheme.get("name", "")
+      prefix = ""
+    else:
+      continue
+    if not header:
+      continue
+    scheme_names.setdefault(header, []).append(name)
+    descriptions.setdefault(header, []).append(
+      prefix + scheme.get("description", "")
+    )
+  return [
+    {
+      "name": header,
+      # Required only when every alternative needs one of these schemes.
+      "required": all(any(n in r for n in names) for r in requirements),
+      "description": " ".join(descriptions[header]).strip(),
+    }
+    for header, names in scheme_names.items()
+  ]
+
+
+def _content_header_rows(data: dict, operation: dict) -> list[dict]:
+  """Content-Type/Accept rows derived from the operation's media types.
+
+  OpenAPI 3.1 ignores Content-Type and Accept header parameters; the request
+  body and response content maps are where those are actually declared.
+  """
+
+  def resolved(node: Any) -> dict:
+    if isinstance(node, dict) and "$ref" in node:
+      return _resolve_json_pointer(node["$ref"], data) or {}
+    return node if isinstance(node, dict) else {}
+
+  rows = []
+  body = resolved(operation.get("requestBody")).get("content", {})
+  if body:
+    types = ", ".join(f"`{t}`" for t in body)
+    rows.append(
+      {
+        "name": "Content-Type",
+        "required": False,
+        "description": f"Media type of the request body: {types}.",
+      }
+    )
+  for code, response in sorted(operation.get("responses", {}).items()):
+    if not str(code).startswith("2"):
+      continue
+    content = resolved(response).get("content")
+    if content:
+      types = ", ".join(f"`{t}`" for t in content)
+      rows.append(
+        {
+          "name": "Accept",
+          "required": False,
+          "description": f"Response media types the client accepts: {types}.",
+        }
+      )
+      break
+  return rows
+
+
 def _resolve_schema(
   schema_path: str | Path,
   direction: str = "response",
@@ -210,6 +295,62 @@ def _resolve_schema_bundled(
   return _resolve_schema(schema_path, direction, operation, bundle=True)
 
 
+def _restore_fragment_refs(
+  bundled_def: dict[str, Any], raw_def: dict[str, Any] | None
+) -> dict[str, Any]:
+  """Restore cross-file `$defs` fragment refs that bundling left unlinked.
+
+  Bundling inlines every `$ref`. A ref to a whole schema file keeps that
+  file's `$id`, which the table renderer turns back into a type link, but a
+  ref into another file's `$defs` fragment (e.g.
+  `types/pagination.json#/$defs/request`) is inlined without one, so its Type
+  cell falls back to `object`. Copy such refs from the unbundled definition
+  onto the matching bundled properties (and their array `items`). Same-file
+  refs (`#/$defs/...`) are left alone: only some of the pages that render
+  them define a matching anchor, and `create_link` cannot tell which.
+  `ucp.json` fragments are skipped too: the renderer inlines those itself.
+
+  Args:
+    bundled_def: The bundled definition to be rendered.
+    raw_def: The same definition resolved without bundling.
+
+  Returns:
+    bundled_def, with fragment refs restored where they were lost.
+
+  """
+  props = bundled_def.get("properties")
+  if not isinstance(raw_def, dict) or not isinstance(props, dict):
+    return bundled_def
+  raw_props = raw_def.get("properties") or {}
+
+  def _lost_fragment_ref(bundled, raw):
+    if not isinstance(bundled, dict) or not isinstance(raw, dict):
+      return None
+    ref = raw.get("$ref", "")
+    if (
+      "#/$defs/" in ref
+      and not ref.startswith("#")
+      and "ucp.json" not in ref
+      and "$ref" not in bundled
+      and "$id" not in bundled
+    ):
+      return ref
+    return None
+
+  restored = {}
+  for name, details in props.items():
+    raw = raw_props.get(name)
+    ref = _lost_fragment_ref(details, raw)
+    if ref:
+      details = {**details, "$ref": ref}
+    elif isinstance(details, dict) and isinstance(raw, dict):
+      items_ref = _lost_fragment_ref(details.get("items"), raw.get("items"))
+      if items_ref:
+        details = {**details, "items": {**details["items"], "$ref": items_ref}}
+    restored[name] = details
+  return {**bundled_def, "properties": restored}
+
+
 def define_env(env):
   """Injects custom macros into the MkDocs environment.
 
@@ -245,6 +386,99 @@ def define_env(env):
       except FileNotFoundError:
         continue
     return None
+
+  ucp_type_index = {}
+
+  def _ucp_type_index():
+    """Load ucp.json $defs and the anchors reference.md defines for them."""
+    if not ucp_type_index:
+      try:
+        with UCP_SCHEMA_PATH.open(encoding="utf-8") as f:
+          ucp_type_index["defs"] = json.load(f).get("$defs", {})
+      except (json.JSONDecodeError, OSError):
+        ucp_type_index["defs"] = {}
+      try:
+        reference_md = REFERENCE_DOC_PATH.read_text(encoding="utf-8")
+      except OSError:
+        reference_md = ""
+      ucp_type_index["anchors"] = set(
+        re.findall(r"\{: #(ucp-[a-z0-9-]+) \}", reference_md)
+      )
+    return ucp_type_index
+
+  def _ucp_def_type(def_name):
+    """Type cell for a field typed by a ucp.json $def.
+
+    Links to the reference section anchored for the def (e.g.
+    `{: #ucp-response-checkout-schema }`) when one exists, otherwise names
+    the def by its title, so the cell never falls back to "any".
+    """
+    index = _ucp_type_index()
+    resolved_def = index["defs"].get(def_name, {})
+    title = resolved_def.get("title") or (
+      "UCP " + def_name.replace("_", " ").title()
+    )
+    anchor = "ucp-" + def_name.replace("_", "-")
+    if anchor in index["anchors"]:
+      return f"[{title}](site:specification/reference/#{anchor})"
+    return title
+
+  def _ucp_def_name_for_title(title):
+    """Find the ucp.json $def a bundled (already inlined) schema came from."""
+    if not title:
+      return None
+    for def_name, def_schema in _ucp_type_index()["defs"].items():
+      if isinstance(def_schema, dict) and def_schema.get("title") == title:
+        return def_name
+    return None
+
+  def _variant_base(schema_path):
+    """Return the schema that composes `schema_path` as an if/then variant.
+
+    A per-type variant (e.g. media_video.json) is selected by its base via
+    `allOf: [{"if": {...}, "then": {"$ref": "media_video.json"}}]`. The variant
+    carries no back-pointer, so the relationship is read from the siblings
+    that declare it rather than from a macro parameter a caller could omit.
+    """
+    for sibling in sorted(schema_path.parent.glob("*.json")):
+      if sibling == schema_path:
+        continue
+      try:
+        data = json.loads(sibling.read_text(encoding="utf-8"))
+      except (json.JSONDecodeError, OSError):
+        continue
+      for branch in data.get("allOf", []):
+        then = branch.get("then") if isinstance(branch, dict) else None
+        if isinstance(then, dict) and then.get("$ref") == schema_path.name:
+          return data
+    return None
+
+  def _inherit_base_fields(schema_data, base_schema):
+    """Complete a variant's description-only properties from its base.
+
+    A variant property that carries only a `description` refines a field the
+    base defines; its type, format, and requirement live on the base. Rendered
+    standalone, such a row shows `any` / `Optional` directly under a base table
+    that says `string` / `Required`. Copy the base definition and keep the
+    variant's description so the row renders what actually validates.
+
+    Returns the completed schema and the base's `required` list, to be passed
+    as `parent_required_list`.
+    """
+    base_props = base_schema.get("properties", {})
+    props = dict(schema_data.get("properties", {}))
+    for name, details in props.items():
+      if (
+        isinstance(details, dict)
+        and set(details) == {"description"}
+        and name in base_props
+      ):
+        merged = dict(base_props[name])
+        merged["description"] = details["description"]
+        props[name] = merged
+    completed = dict(schema_data)
+    completed["properties"] = props
+    return completed, base_schema.get("required", [])
 
   def _load_schema_variant(entity_name, context):
     """Load and resolve a schema for a specific operation.
@@ -377,17 +611,20 @@ def define_env(env):
     if ref_string.startswith("types/"):
       spec_file_name = "reference"
 
-    # Redirect refs to common/types/ or shopping/types/ schemas to reference.
+    # Redirect refs to common/types/ or <vertical>/types/ schemas to reference.
     # Uses ref_path (fragment stripped) so refs like
     # "../common/types/pagination.json#/$defs/request" are handled correctly.
     elif ref_path.endswith(".json"):
       filename_only = Path(ref_path).name
       common_type_path = COMMON_TYPES_DIR / filename_only
-      shopping_type_path = SHOPPING_TYPES_DIR / filename_only
-      shopping_path = SHOPPING_SCHEMAS_DIR / filename_only
-      if common_type_path.exists() or (
-        shopping_type_path.exists() and not shopping_path.exists()
-      ):
+      vertical_type_paths = []
+      for vertical_dir in VERTICAL_DIRS:
+        vertical_path = vertical_dir / filename_only
+        vertical_type_path = vertical_dir / "types" / filename_only
+        if vertical_type_path.exists() and not vertical_path.exists():
+          vertical_type_paths.append(vertical_type_path)
+
+      if common_type_path.exists() or len(vertical_type_paths) > 0:
         spec_file_name = "reference"
 
     filename = Path(ref_path).name
@@ -410,7 +647,7 @@ def define_env(env):
       fragment_text = (
         fragment.replace("_", " ").replace(".", " ").replace("-", " ").title()
       )
-      link_text = f"{base_text} {fragment_text}"
+      link_text = f"{base_text} {fragment_text}".strip()
     else:
       link_text = (
         raw_name.replace("_", " ").replace(".", " ").replace("-", " ").title()
@@ -606,7 +843,78 @@ def define_env(env):
         )
       )
 
-    return "\n".join(md)
+    # When allOf composition overrides a property from an earlier branch, prefer
+    # the outer (later) definition per cell, falling back to the base branch for
+    # cells the specialization leaves empty. Render each field only once.
+    deduped_rows = {}
+    other_lines = []
+    for block in md:
+      for line in block.splitlines():
+        stripped = line.strip()
+        if not stripped:
+          continue
+        if (
+          stripped.startswith("|")
+          and stripped.endswith("|")
+          and not stripped.endswith(r"\|")
+        ):
+          parts = [p.strip() for p in re.split(r"(?<!\\)\|", stripped)]
+          # Exclude header and separator rows if any were embedded
+          if len(parts) >= 5 and parts[1] not in ("Name", ":---"):
+            field_name = parts[1]
+            prior = deduped_rows.get(field_name)
+            if prior is None:
+              deduped_rows[field_name] = parts
+            else:
+              # Merge cell-by-cell:
+              # - Type (col 2): "any" is the renderer's placeholder for a branch
+              #   that adds no `type`, which defers to the base branch. Also,
+              #   generic "string" in a specialization should not overwrite a
+              #   more specific referenced type from the base branch.
+              # - Description (col 4): merge specialization description with
+              #   base description so protocol rules from base are not lost.
+              merged_parts = list(parts)
+              for i in range(len(parts)):
+                new_val = parts[i]
+                old_val = prior[i] if i < len(prior) else ""
+                if i == 2:  # Type column
+                  if new_val and new_val != "any":
+                    if (
+                      new_val == "string"
+                      and old_val
+                      and old_val not in ("any", "string")
+                    ):
+                      merged_parts[i] = old_val
+                    else:
+                      merged_parts[i] = new_val
+                  else:
+                    merged_parts[i] = old_val or new_val
+                elif i == 4:  # Description column
+                  if new_val and old_val and new_val != old_val:
+                    if old_val in new_val:
+                      merged_parts[i] = new_val
+                    elif new_val in old_val:
+                      merged_parts[i] = old_val
+                    else:
+                      sep = " " if new_val.endswith((".", "!", "?")) else ". "
+                      merged_parts[i] = f"{new_val}{sep}{old_val}"
+                  else:
+                    merged_parts[i] = new_val or old_val
+                else:
+                  merged_parts[i] = (
+                    new_val
+                    if new_val and new_val != "any"
+                    else (old_val or new_val)
+                  )
+              deduped_rows[field_name] = merged_parts
+            continue
+        other_lines.append(line)
+
+    result = ["| " + " | ".join(p[1:-1]) + " |" for p in deduped_rows.values()]
+    if other_lines:
+      result.extend(other_lines)
+
+    return "\n".join(result)
 
   def _field_requirement(field_name, ucp_request, required_list):
     """Render the Requirement cell for a schema field.
@@ -725,6 +1033,17 @@ def define_env(env):
         return self_ref_name
       return ref_value
 
+    def _branch_ref(branch):
+      # The type an allOf branch names: its $ref, or the $id that bundling
+      # preserved when it inlined a whole schema file.
+      if not isinstance(branch, dict):
+        return None
+      if branch.get("$ref"):
+        return _deref_self(branch["$ref"])
+      if branch.get("$id") and branch.get("$id") != self_id:
+        return branch["$id"]
+      return None
+
     # If schema is ONLY a oneOf, render as prose instead of table
     if (
       "oneOf" in schema_data
@@ -794,10 +1113,18 @@ def define_env(env):
           context,
         )
       )
-    elif "allOf" in schema_data and not properties:
+    elif "allOf" in schema_data:
+      all_of_list = list(schema_data.get("allOf", []))
+      if properties:
+        all_of_list.append(
+          {
+            "properties": properties,
+            "required": schema_data.get("required", []),
+          }
+        )
       md.append(
         _render_embedded_table(
-          schema_data.get("allOf", []),
+          all_of_list,
           required_list,
           spec_file_name,
           context,
@@ -827,6 +1154,8 @@ def define_env(env):
 
         f_type = details.get("type", "any")
         ref = _deref_self(details.get("$ref"))
+        if not ref and details.get("$id") and details.get("$id") != self_id:
+          ref = details.get("$id")
 
         # Resolve UCP $defs references inline so properties render as
         # expanded tables (with anchors) instead of opaque links.
@@ -846,13 +1175,18 @@ def define_env(env):
                 if embedder_desc:
                   details["description"] = embedder_desc
                 ref = None
-                f_type = details.get("type", "any")
+                # The resolved def is usually an allOf with no top-level
+                # type; name it (and link its reference section) rather
+                # than falling back to "any".
+                f_type = details.get("type") or _ucp_def_type(def_name)
           except (json.JSONDecodeError, OSError):
             pass
 
         # Check for Array specific logic
         items = details.get("items", {})
         items_ref = _deref_self(items.get("$ref"))
+        if not items_ref and items.get("$id") and items.get("$id") != self_id:
+          items_ref = items.get("$id")
 
         # Special handling for UCP version
         version_data = None
@@ -907,16 +1241,43 @@ def define_env(env):
             for branch in branches:
               if not isinstance(branch, dict):
                 continue
-              if branch.get("$ref"):
-                inner_type = create_link(
-                  _deref_self(branch["$ref"]), spec_file_name, context
-                )
+              branch_ref = _branch_ref(branch)
+              if branch_ref:
+                inner_type = create_link(branch_ref, spec_file_name, context)
                 break
               if branch.get("title"):
                 inner_type = branch["title"]
                 break
             inner_type = inner_type or "object"
           f_type = f"Array[{inner_type}]"
+        elif f_type == "any" and _ucp_def_name_for_title(details.get("title")):
+          # A ucp.json $def already inlined by bundled resolution: the $ref
+          # is gone, but its title still identifies it.
+          f_type = _ucp_def_type(_ucp_def_name_for_title(details["title"]))
+        elif f_type == "any" and isinstance(details.get("allOf"), list):
+          # Composed type (e.g. a $ref plus extra constraints). Show the
+          # referenced type(s) instead of "any".
+          links = [
+            create_link(_deref_self(branch["$ref"]), spec_file_name, context)
+            for branch in details["allOf"]
+            if isinstance(branch, dict) and branch.get("$ref")
+          ]
+          if len(links) == 1:
+            f_type = links[0]
+          elif links:
+            f_type = f"AllOf[{', '.join(links)}]"
+          elif details.get("title"):
+            f_type = details["title"]
+          else:
+            # Bundled resolution inlines the branches; if they agree on a
+            # JSON type, that is still more precise than "any".
+            branch_types = {
+              branch.get("type")
+              for branch in details["allOf"]
+              if isinstance(branch, dict)
+            }
+            if len(branch_types) == 1 and None not in branch_types:
+              f_type = branch_types.pop()
 
         # --- Handle Description ---
         desc = ""
@@ -934,7 +1295,7 @@ def define_env(env):
         elif ref and not ref.startswith("#"):
           # No embedder description - inherit from ref'd type
           ref_clean = ref.split("#")[0]
-          ref_entity = ref_clean.replace(".json", "")
+          ref_entity = Path(ref_clean).stem
           ref_schema = _load_json_file(ref_entity)
           if ref_schema:
             desc += ref_schema.get("description", "")
@@ -1002,6 +1363,12 @@ def define_env(env):
                 new_all_of.append(item)
             embedded_schema_data = embedded_schema_data.copy()
             embedded_schema_data["allOf"] = new_all_of
+
+          # Bundling drops cross-file $defs refs; restore them for links.
+          raw_def = _resolve_json_pointer(def_path, _resolve_schema(full_path))
+          embedded_schema_data = _restore_fragment_refs(
+            embedded_schema_data, raw_def
+          )
 
           table = _render_table_from_schema(
             embedded_schema_data,
@@ -1174,8 +1541,17 @@ def define_env(env):
         full_path, direction, operation, bundle=False
       )
       if resolved_schema:
+        parent_required = None
+        base_schema = _variant_base(full_path)
+        if base_schema is not None:
+          resolved_schema, parent_required = _inherit_base_fields(
+            resolved_schema, base_schema
+          )
         return _render_table_from_schema(
-          resolved_schema, spec_file_name, context=context
+          resolved_schema,
+          spec_file_name,
+          parent_required_list=parent_required,
+          context=context,
         )
       # ucp-schema failed - fail loudly, don't silently use raw JSON
       raise RuntimeError(
@@ -1322,8 +1698,14 @@ def define_env(env):
             output.pop()  # remove title
             continue
         else:
+          parent_required = None
+          base_schema = _variant_base(schema_file)
+          if base_schema is not None:
+            schema_data, parent_required = _inherit_base_fields(
+              schema_data, base_schema
+            )
           rendered_table = _render_table_from_schema(
-            schema_data, spec_file_name
+            schema_data, spec_file_name, parent_required_list=parent_required
           )
           if rendered_table == "_No properties defined._":
             continue
@@ -1590,6 +1972,39 @@ def define_env(env):
         f"Error processing OpenAPI: {e}{get_error_context()}"
       ) from e
 
+  # --- Shared "Specific Header Requirements" prose ---
+  header_requirements_map = {
+    "ucp_agent": (
+      "* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header\n"
+      "    containing the platform profile URI using Dictionary Structured\n"
+      "    Field syntax ([RFC 8941]"
+      '(https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).\n'
+      '    Format: `profile="https://platform.example/profile"`.'
+    ),
+    "idempotency_key": (
+      "* **Idempotency-Key**: Operations that modify state **SHOULD** support\n"
+      "    idempotency. When provided, the server **MUST**:\n"
+      "    1. Store the key with the operation result for at least 24 hours.\n"
+      "    2. Return the cached result for duplicate keys whose request body"
+      " matches the original.\n"
+      "    3. Return `409 Conflict` if the key is reused with a mismatched"
+      " body.\n"
+      "    See [Message Signatures — Idempotency Key Requirements]"
+      "(../../signatures.md#replay-protection)\n"
+      "    for the full payload-matching contract."
+    ),
+  }
+
+  @env.macro
+  def header_requirements(*keys):
+    """Render shared 'Specific Header Requirements' bullets by key."""
+    try:
+      return "\n".join(header_requirements_map[k] for k in keys)
+    except KeyError as exc:
+      raise ValueError(
+        f"Unknown header requirement {exc}{get_error_context()}."
+      ) from exc
+
   # --- MACRO 4: For HTTP Headers ---
   @env.macro
   def header_fields(operation_id, file_name):
@@ -1645,6 +2060,23 @@ def define_env(env):
 
         if param.get("in") == "header":
           req_headers.append(param)
+
+      # A header still declared as a parameter keeps its own row, so a spec
+      # that has not moved to securitySchemes never lists a header twice.
+      declared = {h.get("name", "").lower() for h in req_headers}
+      req_headers = (
+        [
+          r
+          for r in _security_header_rows(data, operation)
+          if r["name"].lower() not in declared
+        ]
+        + req_headers
+        + [
+          r
+          for r in _content_header_rows(data, operation)
+          if r["name"].lower() not in declared
+        ]
+      )
 
       # 3. Extract Response Headers (Assumes 200 OK)
       res_headers_defs = (
