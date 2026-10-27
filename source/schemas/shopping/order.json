@@ -118,8 +118,9 @@
     },
     "platform_reference": {
       "type": "string",
+      "minLength": 1,
       "maxLength": 512,
-      "description": "Opaque platform-supplied correlation reference carried over from the originating checkout. Present when the originating checkout carried one. Echoed verbatim by the business and immutable for the lifetime of the order, including every order event webhook. Read-only on the order.",
+      "description": "Opaque platform-supplied correlation reference carried over verbatim from the originating checkout. When the originating checkout carried one, present on every order event webhook and on Get Order responses to the originating platform; absent otherwise, and never synthesized by the business. Immutable for the lifetime of the order. Read-only on the order.",
       "ucp_request": "omit"
     }
   }

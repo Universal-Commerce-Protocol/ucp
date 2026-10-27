@@ -700,9 +700,9 @@ See [Message Signatures](../../signatures.md) for more details.
 
 When the originating checkout carried a
 [`platform_reference`](../checkout/index.md#platform-reference), the business
-includes it verbatim on every event for that order, which lets the platform
-correlate the event without consulting a stored mapping of business-assigned
-identifiers.
+**MUST** include it verbatim on every event for that order and on Get Order
+responses to the originating platform. This lets the platform correlate the
+event without consulting a stored mapping of business-assigned identifiers.
 
 **Example Event Body:**
 

@@ -64,8 +64,9 @@
     },
     "platform_reference": {
       "type": "string",
+      "minLength": 1,
       "maxLength": 512,
-      "description": "Opaque platform-supplied correlation reference. Set by the platform on Create Checkout and immutable thereafter. The business MUST persist the value, echo it verbatim on every checkout response, and carry it onto the resulting order. The business MUST treat the value as opaque and MUST NOT interpret or modify it. The platform MUST NOT place personally identifiable information or credentials in this field, and MUST NOT use it for authentication, authorization, or idempotency.",
+      "description": "Opaque platform-supplied correlation reference. Set by the platform on Create Checkout and immutable thereafter. The business MUST persist the value, echo it verbatim on every checkout response, and carry it onto every order created from the checkout. The business MUST treat the value as opaque, MUST NOT interpret or modify it, and MUST NOT use it for authentication, authorization, or idempotency. The platform MUST NOT place personally identifiable information, directly identifying values, or credentials in this field, and MUST NOT use it for authentication, authorization, or idempotency.",
       "ucp_request": {
         "create": "optional",
         "update": "omit",
