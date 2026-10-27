@@ -25,32 +25,24 @@ if ! command -v cargo >/dev/null 2>&1; then
 	exit 1
 fi
 
-PINNED_UCP_VERSION_FILE="$PROJECT_ROOT/.ucp-schema-version"
-if [[ -n "${UCP_SCHEMA_VERSION:-}" ]]; then
-	EXPECTED_UCP_VERSION="$UCP_SCHEMA_VERSION"
-elif [[ -f "$PINNED_UCP_VERSION_FILE" ]]; then
-	EXPECTED_UCP_VERSION=$(tr -d '[:space:]' <"$PINNED_UCP_VERSION_FILE")
-else
-	EXPECTED_UCP_VERSION=$(cargo info ucp-schema | sed -n 's/^version: //p')
-fi
-
 if ! command -v ucp-schema >/dev/null 2>&1; then
 	echo "Error: ucp-schema executable not found in PATH." >&2
-	echo "Install it with 'cargo install ucp-schema --version $EXPECTED_UCP_VERSION' or build the sibling ucp-schema repository." >&2
+	echo "Install it with 'cargo install ucp-schema' or build the sibling ucp-schema repository." >&2
 	exit 1
 fi
 
 echo "Syncing dependencies with uv..."
 uv sync
 
-# Check UCP-Schema CLI version vs pinned .ucp-schema-version (or UCP_SCHEMA_VERSION) and prompt
+# Check UCP-Schema CLI version vs current Crates.io version and prompt
 PURPLE='\033[1;35m'
 NC='\033[0m' # No Color
 echo "Using ucp-schema CLI: $(which ucp-schema)"
 UCP_CLI_VERSION=$(ucp-schema --version | sed 's/ucp-schema //')
-echo "Local ucp-schema version:    '$UCP_CLI_VERSION'"
-echo "Expected ucp-schema version: '$EXPECTED_UCP_VERSION'"
-if [[ $UCP_CLI_VERSION != "$EXPECTED_UCP_VERSION" ]]; then
+echo "Local ucp-schema version:  '$UCP_CLI_VERSION'"
+UCP_CRATES_VERSION=$(cargo info ucp-schema | sed -n 's/^version: //p')
+echo "Crates ucp-schema version: '$UCP_CRATES_VERSION'"
+if [[ $UCP_CLI_VERSION != "$UCP_CRATES_VERSION" ]]; then
 	if [[ "$CI" = "true" ]]; then
 		echo -e "${PURPLE}*ucp-schema version mismatch in CI*${NC}"
 		exit 1
