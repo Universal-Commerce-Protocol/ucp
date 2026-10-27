@@ -18,9 +18,9 @@ You are an AI agent tasked with implementing the Universal Commerce Protocol (UC
 *When to fetch:* Only fetch external resource links (like `llms.txt` or spec pages) when you need to understand specific schema details, integration patterns, or protocol rules. Avoid fetching for simple coding tasks.
 
 * **Latest Stable Specification Index:** [`https://ucp.dev/latest/llms.txt`](https://ucp.dev/latest/llms.txt)
-  *Use when:* You are developing new integrations, updating to the latest version, or when no specific version is requested (defaults to latest). This index contains links to LLM-optimized markdown specifications for all UCP capabilities (Discovery, Checkout, Identity, Order).
-* **UCP Specification Index (All Versions):** [`https://ucp.dev/llms.txt`](https://ucp.dev/llms.txt)
-  *Use when:* You need to find specifications for a specific historical version (e.g., matching a release branch like `release/2026-04-08` being used by the target node).
+  *Use when:* You are developing new integrations, updating to the latest version, or when no specific version is requested (defaults to latest). This index links to LLM-optimized markdown specifications across UCP capabilities, extensions, and transport bindings (e.g., Catalog, Cart, Checkout, Order, Lodging Booking, Location, Ask, Identity Linking, AP2 Mandates).
+* **Root Documentation & Version Directory:** [`https://ucp.dev/llms.txt`](https://ucp.dev/llms.txt)
+  *Use when:* You need foundational cross-version guides (Core Concepts, UCP and AP2, Schema Authoring, Versioning) or need to locate the specification index for a specific historical release (e.g., `https://ucp.dev/2026-04-08/llms.txt`).
 * **Conformance Testing:** Use the [UCP Conformance Test Suite](https://github.com/Universal-Commerce-Protocol/conformance) to validate endpoint compliance.
 * **All Sample Implementations:** [GitHub Repo](https://github.com/Universal-Commerce-Protocol/samples)
 
