@@ -447,9 +447,9 @@ plugins:
               Loyalty Extension, enabling high-fidelity member benefit
               recognition across identity, catalog, cart, and checkout by
               defining schemas for memberships, tiers, tier progress, benefits,
-              reward balances, available credits, and reward earning forecasts
-              while managing provisional eligibility claims and enforcing
-              data-minimization privacy rules.
+              reward balances, available credits, linked programs, and reward
+              earning forecasts while managing provisional eligibility claims
+              and enforcing data-minimization privacy rules.
         Identity Capability:
           - specification/common/identity/index.md: >-
               Core Identity Capability (`dev.ucp.common.identity`), defining the

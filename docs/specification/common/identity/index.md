@@ -36,9 +36,9 @@ Business exposes, including retail shopping and lodging.
 Typical upper-funnel use cases include:
 
 * Retrieving the authenticated Buyer's loyalty memberships, active tiers,
-  benefits, reward balances, available credits, and tier progress via the
-  [Loyalty Extension](../extensions/loyalty.md) to personalize discovery,
-  search results, and property or product cards.
+  benefits, reward balances, available credits, tier progress, and linked
+  partner programs via the [Loyalty Extension](../extensions/loyalty.md) to
+  personalize discovery, search results, and property or product cards.
 * Confirming which account or contact profile is linked with the Business.
 * Retrieving saved postal addresses associated with the Buyer's account.
 
@@ -130,10 +130,12 @@ response with the authenticated Buyer's verified loyalty memberships (see
           "benefits": [
             {
               "id": "BEN_BREAKFAST",
+              "type": "free_breakfast",
               "description": "Complimentary daily continental breakfast"
             },
             {
               "id": "BEN_CHECKOUT",
+              "type": "late_checkout",
               "description": "Guaranteed 4:00 PM late checkout"
             }
           ]
@@ -177,6 +179,13 @@ response with the authenticated Buyer's verified loyalty memberships (see
           "total_amount": 1,
           "expires_at": "2026-12-31T23:59:59Z",
           "description": "Valid for one standard room night at Category 1-7 properties."
+        }
+      ],
+      "linked_programs": [
+        {
+          "program_key": "com.example.air.miles",
+          "name": "Example SkyMiles",
+          "display_id": "****4410"
         }
       ]
     }

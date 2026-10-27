@@ -72,9 +72,25 @@
         }
       }
     },
+    "expiring_balance_tranche": {
+      "type": "object",
+      "description": "Portion of a reward balance expiring on a specific timestamp.",
+      "required": ["amount", "expires_at"],
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/reward_amount",
+          "description": "Amount of the reward balance expiring at `expires_at`, denominated in the minor unit of the associated reward currency."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this balance tranche expires."
+        }
+      }
+    },
     "reward_balance": {
       "type": "object",
-      "description": "Current redeemable balance and optional expiration date for a reward currency.",
+      "description": "Current redeemable balance and optional expiration schedule for a reward currency.",
       "required": ["amount"],
       "properties": {
         "amount": {
@@ -84,7 +100,14 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "Optional RFC 3339 timestamp when the balance expires."
+          "description": "Optional RFC 3339 timestamp when the entire balance expires, if all units share a single expiration date."
+        },
+        "expiring_tranches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/expiring_balance_tranche"
+          },
+          "description": "Optional breakdown when subsets of the redeemable balance expire on different dates."
         }
       }
     },
@@ -101,7 +124,7 @@
         "balance": {
           "type": "object",
           "$ref": "#/$defs/reward_balance",
-          "description": "Current redeemable balance and optional expiration date for this reward currency."
+          "description": "Current redeemable balance and optional expiration schedule for this reward currency."
         },
         "earning_forecast": {
           "type": "object",
@@ -236,6 +259,25 @@
         }
       }
     },
+    "linked_program": {
+      "type": "object",
+      "description": "Partner or transfer loyalty program linked to this membership.",
+      "required": ["program_key", "name"],
+      "properties": {
+        "program_key": {
+          "$ref": "types/reverse_domain_name.json",
+          "description": "Reverse-domain identifier of the linked partner or transfer loyalty program (e.g. 'com.example.airlines.rewards')."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the linked loyalty program (e.g. 'Example Airlines Rewards')."
+        },
+        "display_id": {
+          "type": "string",
+          "description": "Masked or partial member identifier in the linked program (e.g. '****9012')."
+        }
+      }
+    },
     "membership_tier_benefit": {
       "type": "object",
       "description": "Benefits associated with a membership tier.",
@@ -244,6 +286,21 @@
         "id": {
           "type": "string",
           "description": "Unique identifier for the tier benefit."
+        },
+        "type": {
+          "type": "string",
+          "description": "Optional machine-readable benefit category for UI badges and filtering. Well-known values: `room_discount`, `free_breakfast`, `late_checkout`, `room_upgrade`, `free_wifi`, `free_checked_bag`, `priority_boarding`, `lounge_access`, `free_shipping`. Clients MUST tolerate and ignore unknown values.",
+          "examples": [
+            "room_discount",
+            "free_breakfast",
+            "late_checkout",
+            "room_upgrade",
+            "free_wifi",
+            "free_checked_bag",
+            "priority_boarding",
+            "lounge_access",
+            "free_shipping"
+          ]
         },
         "description": {
           "type": "string",
@@ -317,6 +374,13 @@
             "$ref": "#/$defs/available_credit"
           },
           "description": "Non-point loyalty credits and award certificates available on this membership."
+        },
+        "linked_programs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/linked_program"
+          },
+          "description": "Partner or transfer loyalty programs linked to this membership."
         },
         "provisional": {
           "type": "boolean",

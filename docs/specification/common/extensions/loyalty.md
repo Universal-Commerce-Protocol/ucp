@@ -30,9 +30,9 @@ Specifically the following core use cases of benefit recognition for known membe
 addressed:
 
 * Upper-Funnel Profile & Balance Visibility: Retrieval of verified loyalty memberships,
-  active tiers, tier benefits, reward balances (including expiration dates), non-point
-  credits or certificates, and tier progress metrics via the
-  [Identity Capability](../identity/index.md).
+  active tiers, structured tier benefit categories, reward balances (including
+  expiration schedules), non-point credits or certificates, tier progress metrics, and
+  linked partner programs via the [Identity Capability](../identity/index.md).
 * Price-Impacting Benefits: Real-time application of member-only discounts and free
   shipping offers with clear attribution of benefit sources.
 * Non-Price Benefits: Transparent display of rewards earned or rewards applicable to
@@ -66,21 +66,27 @@ tier or membership status
 
 * Contains both delayed (e.g. “Members have access to dedicated customer service”) and
   immediate-value (e.g. “Members get 5% off”) benefits.
+* Benefits can optionally declare a machine-readable `type` (such as `free_breakfast`,
+  `late_checkout`, `room_upgrade`, or `free_shipping`) so platforms can render standardized
+  UI badges and filter results.
 
 **Rewards**: Quantifiable loyalty value accumulated or earned by the member
 
 * One membership can offer multiple types of accumulable/collectable rewards, each having
   its own usage and redemption rules.
 * Each `membership_reward` entry pairs a `currency` definition with an optional current
-  redeemable `balance` (including optional `expires_at`) and an optional transactional
-  `earning_forecast`. Executing points redemption at payment time is modeled by the
-  negotiated payment instrument or a dedicated redemption capability.
+  redeemable `balance` (including optional single-date `expires_at` or multi-date
+  `expiring_tranches`) and an optional transactional `earning_forecast`. Executing points
+  redemption at payment time is modeled by the negotiated payment instrument or a dedicated
+  redemption capability.
 
-**Credits**: Non-point entitlements held by the member
+**Credits and Linked Programs**: Non-point entitlements and cross-program links
 
 * `credits` represents non-point monetary credits (e.g., an annual travel credit) and award
   certificates (e.g., a Free Night Award voucher) with remaining value and expiration
   metadata.
+* `linked_programs` represents partner or transfer loyalty programs linked to the
+  membership.
 
 <!-- ucp:example schema=common/loyalty def=loyalty extract=$.loyalty -->
 ```json
@@ -97,6 +103,7 @@ tier or membership status
           "benefits": [
             {
               "id": "BEN_001",
+              "type": "free_shipping",
               "description": "Complimentary standard shipping on all orders"
             }
           ]
@@ -229,6 +236,10 @@ extended.
 
 {{ extension_schema_fields('loyalty.json#/$defs/reward_balance', 'common/extensions/loyalty') }}
 
+#### Expiring Balance Tranche
+
+{{ extension_schema_fields('loyalty.json#/$defs/expiring_balance_tranche', 'common/extensions/loyalty') }}
+
 #### Reward Amount
 
 {{ extension_schema_fields('loyalty.json#/$defs/reward_amount', 'common/extensions/loyalty') }}
@@ -248,6 +259,10 @@ extended.
 #### Available Credit
 
 {{ extension_schema_fields('loyalty.json#/$defs/available_credit', 'common/extensions/loyalty') }}
+
+#### Linked Program
+
+{{ extension_schema_fields('loyalty.json#/$defs/linked_program', 'common/extensions/loyalty') }}
 
 ## Loyalty behavior
 
@@ -278,13 +293,13 @@ its own user state on a response; see
   tier structure** — for programs with no tier concept (flat-rate cashback,
   single-status memberships), businesses MAY omit `tiers`. It also SHOULD set
   `display_id` as a masked unique identifier for the buyer, and MAY populate
-  authenticated account state such as `rewards[].balance`, `tier_progress`, and
-  `credits`.
+  authenticated account state such as `rewards[].balance`, `tier_progress`, `credits`,
+  and `linked_programs`.
 * When a membership claim in the request is recognized and accepted but not verified by
   the business, the business MUST return `provisional: true`. It MAY return display-safe
   tier context for the state accepted during the session, and MUST NOT return
-  `display_id`, `rewards[].balance`, `tier_progress`, or `credits` until the
-  membership is verified.
+  `display_id`, `rewards[].balance`, `tier_progress`, `credits`, or `linked_programs`
+  until the membership is verified.
 * When a membership claim in the request is accepted but cannot be verified, the business
   MUST communicate the failure via a recoverable `message` with `type: "error"` and
   `code: "eligibility_invalid"`. Platforms MAY then choose to remove the membership claim
@@ -518,9 +533,9 @@ When a buyer has linked their account with a business via
 [`GET /identity`](../identity/rest.md) (or the MCP [`get_identity`](../identity/mcp.md)
 tool) to retrieve the buyer's verified loyalty memberships before initiating a cart,
 checkout, or booking session. This allows the platform to surface loyalty status,
-redeemable balances with expiration dates, available non-point credits or award
-certificates, and progress toward higher tiers during upper-funnel search and
-discovery.
+redeemable balances with expiration schedules, available non-point credits or award
+certificates, progress toward higher tiers, and linked partner programs during
+upper-funnel search and discovery.
 
 === "Request"
 
@@ -569,10 +584,12 @@ discovery.
               "benefits": [
                 {
                   "id": "BEN_UPGRADE",
+                  "type": "room_upgrade",
                   "description": "Upgrade to best available room (excluding suites) at check-in"
                 },
                 {
                   "id": "BEN_LATE_OUT",
+                  "type": "late_checkout",
                   "description": "2:00 PM late checkout upon request"
                 }
               ]
@@ -612,7 +629,16 @@ discovery.
               },
               "balance": {
                 "amount": 85000,
-                "expires_at": "2027-12-31T23:59:59Z"
+                "expiring_tranches": [
+                  {
+                    "amount": 15000,
+                    "expires_at": "2026-09-30T23:59:59Z"
+                  },
+                  {
+                    "amount": 70000,
+                    "expires_at": "2027-12-31T23:59:59Z"
+                  }
+                ]
               }
             }
           ],
@@ -635,6 +661,13 @@ discovery.
               "currency": "USD",
               "expires_at": "2026-12-31T23:59:59Z",
               "description": "Remaining balance of annual on-property dining credit."
+            }
+          ],
+          "linked_programs": [
+            {
+              "program_key": "com.example.airlines.advantage",
+              "name": "Example Airlines Advantage",
+              "display_id": "****9012"
             }
           ]
         }

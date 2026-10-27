@@ -219,3 +219,5 @@ Explorist
 explorist
 Globalist
 PQP
+tranche
+tranches
