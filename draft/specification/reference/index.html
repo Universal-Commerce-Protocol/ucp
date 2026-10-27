@@ -9262,7 +9262,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">allowed_combinations</td>
-<td style="text-align: left;">Array[array]</td>
+<td style="text-align: left;">Array[Array[<a href="/draft/specification/reference/#instrument-group">Instrument Group</a>]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Array of valid instrument combinations. Each combination is an array of instrument groups. A payment is valid if it matches any combination.</td>
 </tr>
@@ -9412,7 +9412,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">properties</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, OneOf[<a href="/draft/specification/reference/#constraint-expression">Constraint Expression</a>, <code>object</code>]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.</td>
 </tr>
@@ -9834,7 +9834,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amenities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Amenity]</td>
 <td style="text-align: left;">Optional; omitted in requests</td>
 <td style="text-align: left;">Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.</td>
 </tr>
@@ -10972,7 +10972,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">properties</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, OneOf[<a href="/draft/specification/reference/#constraint-expression">Constraint Expression</a>, <code>object</code>]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Constraints keyed by property name. Must be non-empty: an empty object applies no constraint.</td>
 </tr>
@@ -11244,7 +11244,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">method_combinations</td>
-<td style="text-align: left;">Array[array]</td>
+<td style="text-align: left;">Array[Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Method-type combinations the business permits within one cart. Each inner array is a permitted set of method <code>type</code> values (e.g. shipping + pickup).</td>
 </tr>
@@ -11454,7 +11454,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillable_on</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional; omitted in requests</td>
 <td style="text-align: left;">'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).</td>
 </tr>
@@ -11624,7 +11624,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected_option_id</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected fulfillment option for this group.</td>
 </tr>
@@ -11668,7 +11668,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected_destination_id</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in <code>destinations</code>.</td>
 </tr>
@@ -13081,7 +13081,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reward-amount">Reward Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Rewards earned from this rule.</td>
 </tr>
@@ -13113,13 +13113,13 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reward-amount">Reward Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Total rewards to be earned if the transaction completes.</td>
 </tr>
 <tr>
 <td style="text-align: left;">breakdown</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#earning-breakdown">Earning Breakdown</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of breakdown of earning contributing to the total.</td>
 </tr>
@@ -13171,13 +13171,13 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">currency</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reward-currency">Reward Currency</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A unit of value that customers can accumulate through various commercial activities.</td>
 </tr>
 <tr>
 <td style="text-align: left;">earning_forecast</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#earning-forecast">Earning Forecast</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preview of rewards to be earned from the current transaction.</td>
 </tr>
@@ -13235,7 +13235,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">benefits</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#membership-tier-benefit">Membership Tier Benefit</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of benefits associated with this tier.</td>
 </tr>
@@ -13273,13 +13273,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">tiers</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#membership-tier">Membership Tier</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rewards</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#membership-reward">Membership Reward</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward.</td>
 </tr>
@@ -13319,7 +13319,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">pagination</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#pagination-response">Pagination Response</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Pagination information in responses.</td>
 </tr>
@@ -13343,7 +13343,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">loyalty</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#loyalty">Loyalty</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
@@ -13351,24 +13351,7 @@ within the UCP.</p>
 </table>
 <h4 id="catalog-lookup-with-loyalty">Catalog Lookup with Loyalty<a class="headerlink" href="#catalog-lookup-with-loyalty" title="Permanent link">&para;</a></h4>
 <p>Catalog Lookup response extended with Loyalty capability.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Name</th>
-<th style="text-align: left;">Type</th>
-<th style="text-align: left;">Requirement</th>
-<th style="text-align: left;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
+<p>This object MUST be one of the following types: Lookup Response, Get Product Response.</p>
 <h4 id="cart-with-loyalty">Cart with Loyalty<a class="headerlink" href="#cart-with-loyalty" title="Permanent link">&para;</a></h4>
 <p>Cart extended with Loyalty capability.</p>
 <table>
@@ -13473,7 +13456,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">loyalty</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#loyalty">Loyalty</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
@@ -13601,7 +13584,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">loyalty</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#loyalty">Loyalty</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Key-value map whose keys represent buyer/platform asserted eligibility claims and whose values represent associated membership information. All loyalty keys MUST use reverse-domain naming to ensure provenance and prevent collisions when multiple extensions contribute to the shared namespace.</td>
 </tr>
@@ -13629,7 +13612,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">merchant_authorization</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#merchant-authorization">Merchant Authorization</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Merchant's signature proving checkout terms are authentic.</td>
 </tr>
@@ -13649,7 +13632,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">checkout_mandate</td>
-<td style="text-align: left;">string</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#checkout-mandate">Checkout Mandate</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">SD-JWT+kb proving user authorized this checkout.</td>
 </tr>
@@ -13777,7 +13760,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">ap2</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">AllOf[<a href="/draft/specification/reference/#ap2-with-merchant-authorization">Ap2 With Merchant Authorization</a>, <a href="/draft/specification/reference/#ap2-with-checkout-mandate">Ap2 With Checkout Mandate</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
@@ -13917,7 +13900,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">ap2</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">AllOf[<a href="/draft/specification/reference/#ap2-with-merchant-authorization">Ap2 With Merchant Authorization</a>, <a href="/draft/specification/reference/#ap2-with-checkout-mandate">Ap2 With Checkout Mandate</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;"></td>
 </tr>
@@ -14020,7 +14003,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this checkout.</td>
 </tr>
@@ -14153,7 +14136,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">actions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#actions">Actions</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Outstanding extension-defined Actions for this booking.</td>
 </tr>
@@ -14401,7 +14384,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
@@ -14535,7 +14518,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment configuration containing handlers.</td>
 </tr>
@@ -14743,7 +14726,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment details with available and selected payment terms. Payment configuration containing handlers.</td>
 </tr>
@@ -14847,7 +14830,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Order Payment with Accepted Term</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment details for the Order, including the accepted payment term.</td>
 </tr>
@@ -14975,7 +14958,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#payment">Payment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment details with available and selected payment terms. Payment configuration containing handlers.</td>
 </tr>
@@ -15027,7 +15010,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">segments</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, <a href="/draft/specification/reference/#consent-segment">Consent Segment</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Optional refinements scoping this purpose to specific channels, vendors, or programs. Keys are reverse-DNS identifiers. UCP currently defines two well-known segment identifiers under <code>dev.ucp.consent.marketing</code>: <code>dev.ucp.consent.marketing.email</code>, <code>dev.ucp.consent.marketing.sms</code>. Other segments follow vendor or merchant reverse-DNS conventions.</td>
 </tr>
@@ -15111,7 +15094,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">consent</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#consent">Consent</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Per-purpose consent decisions and business-advertised consent options.</td>
 </tr>
@@ -15167,7 +15150,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">Buyer with Consent</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer with consent tracking. Optional buyer information for personalized estimates.</td>
 </tr>
@@ -15253,7 +15236,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">buyer</td>
-<td style="text-align: left;">Buyer with Consent</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#buyer">Buyer</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer with consent tracking. Representation of the buyer.</td>
 </tr>
@@ -15433,7 +15416,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">allocations</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#allocation">Allocation</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.</td>
 </tr>
@@ -15459,7 +15442,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">applied</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#applied-discount">Applied Discount</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Discounts successfully applied (code-based and automatic).</td>
 </tr>
@@ -15569,7 +15552,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">discounts</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#discounts-object">Discounts Object</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Discount codes input and applied discounts output.</td>
 </tr>
@@ -15697,7 +15680,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">discounts</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#discounts-object">Discounts Object</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Discount codes input and applied discounts output.</td>
 </tr>
@@ -15793,7 +15776,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected_option_id</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected fulfillment option for this group.</td>
 </tr>
@@ -15837,7 +15820,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected_destination_id</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in <code>destinations</code>.</td>
 </tr>
@@ -15875,7 +15858,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillable_on</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).</td>
 </tr>
@@ -15971,7 +15954,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">methods</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#catalog-fulfillment-method">Catalog Fulfillment Method</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment methods for this variant.</td>
 </tr>
@@ -16105,7 +16088,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#catalog-fulfillment">Catalog Fulfillment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">How a catalog variant can be fulfilled. Mirrors checkout <code>fulfillment</code>.</td>
 </tr>
@@ -16185,7 +16168,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#variant">Variant</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-variant">Fulfillment Variant</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
@@ -16343,7 +16326,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillment</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#catalog-fulfillment">Catalog Fulfillment</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">How a catalog variant can be fulfilled. Mirrors checkout <code>fulfillment</code>.</td>
 </tr>
@@ -16423,7 +16406,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-lookup-variant">Fulfillment Lookup Variant</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
@@ -16515,13 +16498,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#product-option">Product Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product options with availability signals relative to the effective selections. Product options (Size, Color, etc.).</td>
 </tr>
 <tr>
 <td style="text-align: left;">variants</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#variant">Variant</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-variant">Fulfillment Variant</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Purchasable variants of this product. First item is the featured variant for listings.</td>
 </tr>
@@ -16626,13 +16609,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#fulfillment-search-filters">Fulfillment Search Filters</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Catalog filters extended with a fulfillment destination filter and a method-type filter. Filter criteria to narrow search results. All specified filters combine with AND logic.</td>
 </tr>
 <tr>
 <td style="text-align: left;">pagination</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#pagination-request">Pagination Request</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Pagination parameters for requests.</td>
 </tr>
@@ -16657,13 +16640,13 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#product">Product</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-product">Fulfillment Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the search criteria.</td>
 </tr>
 <tr>
 <td style="text-align: left;">pagination</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#pagination-response">Pagination Response</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Pagination information in responses.</td>
 </tr>
@@ -16706,7 +16689,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#fulfillment-search-filters">Fulfillment Search Filters</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Catalog filters extended with a fulfillment destination filter and a method-type filter. Filter criteria to narrow returned products and variants. All specified filters combine with AND logic.</td>
 </tr>
@@ -16749,7 +16732,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">products</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#product">Product</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#fulfillment-lookup-product">Fulfillment Lookup Product</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products.</td>
 </tr>
@@ -16804,7 +16787,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">filters</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#fulfillment-search-filters">Fulfillment Search Filters</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Catalog filters extended with a fulfillment destination filter and a method-type filter. Filter criteria to narrow returned variants. All specified filters combine with AND logic.</td>
 </tr>
@@ -16847,7 +16830,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">product</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#fulfillment-detail-product">Fulfillment Detail Product</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A get_product detail product (carrying selected/options availability signals) whose variants are fulfillment-enriched. Used by get_product. The requested product with full detail. Singular — this is a single-resource operation.</td>
 </tr>
@@ -17015,7 +16998,7 @@ within the UCP.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">eligibility</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#return-eligibility">Return Eligibility</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When <code>type</code> is <code>not_accepted</code>, the business's return policy does not accept returns of the covered items, and <code>supported_resolutions</code>, <code>methods</code>, and <code>fees</code> MUST be omitted.</td>
 </tr>
@@ -17033,7 +17016,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fees</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[Return Fee]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Estimated maximum charges on a return, each typed by what it is for and optionally scoped to channels; not an exhaustive list. Omitted means fees are not stated structurally, not that none are charged.</td>
 </tr>
@@ -17165,7 +17148,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">eligibility</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#return-eligibility">Return Eligibility</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When <code>type</code> is <code>not_accepted</code>, the business's return policy does not accept returns of the covered items, and <code>supported_resolutions</code>, <code>methods</code>, and <code>fees</code> MUST be omitted.</td>
 </tr>
@@ -17183,7 +17166,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fees</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[Return Fee]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Estimated maximum charges on a return, each typed by what it is for and optionally scoped to channels; not an exhaustive list. Omitted means fees are not stated structurally, not that none are charged.</td>
 </tr>
@@ -17252,7 +17235,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">pagination</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#pagination-response">Pagination Response</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Pagination information in responses.</td>
 </tr>
@@ -17270,7 +17253,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policies-item">Policies Item</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in these search results. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -17313,7 +17296,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policies-item">Policies Item</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the products in this response. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -17338,7 +17321,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">product</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#product">Product</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The requested product with full detail. Singular — this is a single-resource operation.</td>
 </tr>
@@ -17356,7 +17339,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policies-item">Policies Item</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to this product. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -17448,7 +17431,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policies-item">Policies Item</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this cart. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -17558,7 +17541,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policies-item">Policies Item</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., return/refund terms) that apply to the items in this checkout. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -17662,7 +17645,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policies-item">Policies Item</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. <code>applies_to</code> targets are relative to the response root.</td>
 </tr>
@@ -17829,7 +17812,7 @@ within the UCP.</p>
 </tr>
 <tr>
 <td style="text-align: left;">policies</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#policy">Policy</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Policies (e.g., cancellation terms) that apply to the booking session. <code>applies_to</code> targets are relative to the response root; when absent or empty, refer to the URLs in <code>links[]</code>.</td>
 </tr>
@@ -17884,7 +17867,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -17896,19 +17879,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Service (Platform Schema)]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Platform Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Payment Handler (Platform Schema)]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -17935,7 +17918,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -17947,25 +17930,25 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Service (Business Schema)]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Business Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Payment Handler (Business Schema)]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">supported_versions</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, string]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Previous protocol versions this business supports, mapped to profile URIs. Businesses that support older protocol versions SHOULD advertise each version and link to its profile. Each URI points to a complete, self-contained profile for that version. When omitted, only <code>version</code> is supported.</td>
 </tr>
@@ -17992,7 +17975,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -18004,19 +17987,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Service (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Payment Handler (Response Schema)]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -18043,7 +18026,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -18055,19 +18038,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -18094,7 +18077,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -18106,19 +18089,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -18145,7 +18128,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -18157,19 +18140,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -18196,7 +18179,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -18208,19 +18191,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -18247,7 +18230,7 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -18259,19 +18242,19 @@ and responses.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Service (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Payment Handler (Response Schema)]]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -18326,7 +18309,7 @@ different required fields in each context.</p>
 </tr>
 <tr>
 <td style="text-align: left;">extends</td>
-<td style="text-align: left;">OneOf[<code>string</code>, <code>array</code>]</td>
+<td style="text-align: left;">OneOf[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>, Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.</td>
 </tr>
@@ -18377,7 +18360,7 @@ different required fields in each context.</p>
 </tr>
 <tr>
 <td style="text-align: left;">extends</td>
-<td style="text-align: left;">OneOf[<code>string</code>, <code>array</code>]</td>
+<td style="text-align: left;">OneOf[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>, Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.</td>
 </tr>

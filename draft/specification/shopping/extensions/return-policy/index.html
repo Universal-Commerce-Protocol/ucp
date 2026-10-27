@@ -4131,7 +4131,7 @@ from its <code>description</code>.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">eligibility</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/shopping/extensions/return-policy/#return-eligibility">Return Eligibility</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Structured return eligibility statement. Omitted means eligibility is not stated structurally, not that returns are unlimited or not accepted. When <code>type</code> is <code>not_accepted</code>, the business's return policy does not accept returns of the covered items, and <code>supported_resolutions</code>, <code>methods</code>, and <code>fees</code> MUST be omitted.</td>
 </tr>
@@ -4149,7 +4149,7 @@ from its <code>description</code>.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fees</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[Return Fee]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Estimated maximum charges on a return, each typed by what it is for and optionally scoped to channels; not an exhaustive list. Omitted means fees are not stated structurally, not that none are charged.</td>
 </tr>

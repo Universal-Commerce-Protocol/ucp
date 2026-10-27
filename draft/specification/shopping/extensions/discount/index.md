@@ -47,26 +47,26 @@ When this capability is active, cart and/or checkout are extended with a `discou
 
 Discount codes input and applied discounts output.
 
-| Name    | Type          | Requirement | Description                                                                                                |
-| ------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
-| codes   | Array[string] | Optional    | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
-| applied | Array[object] | Optional    | Discounts successfully applied (code-based and automatic).                                                 |
+| Name    | Type                                                                                             | Requirement | Description                                                                                                |
+| ------- | ------------------------------------------------------------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| codes   | Array[string]                                                                                    | Optional    | Discount codes to apply. Case-insensitive. Replaces previously submitted codes. Send empty array to clear. |
+| applied | Array\[[Applied Discount](/draft/specification/shopping/extensions/discount/#applied-discount)\] | Optional    | Discounts successfully applied (code-based and automatic).                                                 |
 
 ### Applied Discount
 
 A discount that was successfully applied.
 
-| Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                        |
-| ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| code        | string                                                                     | Optional     | The discount code. Omitted for automatic discounts.                                                                                                                                |
-| title       | string                                                                     | **Required** | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
-| amount      | [Amount](/draft/specification/reference/#amount)                           | **Required** | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
-| automatic   | boolean                                                                    | Optional     | True if applied automatically by merchant rules (no code required).                                                                                                                |
-| method      | string                                                                     | Optional     | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
-| priority    | integer                                                                    | Optional     | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
-| provisional | boolean                                                                    | Optional     | True if this discount requires additional verification.                                                                                                                            |
-| eligibility | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | Optional     | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
-| allocations | Array[object]                                                              | Optional     | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
+| Name        | Type                                                                                 | Requirement  | Description                                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| code        | string                                                                               | Optional     | The discount code. Omitted for automatic discounts.                                                                                                                                |
+| title       | string                                                                               | **Required** | Human-readable discount name (e.g., 'Summer Sale 20% Off').                                                                                                                        |
+| amount      | [Amount](/draft/specification/reference/#amount)                                     | **Required** | Total discount amount in ISO 4217 minor units.                                                                                                                                     |
+| automatic   | boolean                                                                              | Optional     | True if applied automatically by merchant rules (no code required).                                                                                                                |
+| method      | string                                                                               | Optional     | Allocation method. 'each' = applied independently per item. 'across' = split proportionally by value. **Enum:** `each`, `across`                                                   |
+| priority    | integer                                                                              | Optional     | Stacking order for discount calculation. Lower numbers applied first (1 = first).                                                                                                  |
+| provisional | boolean                                                                              | Optional     | True if this discount requires additional verification.                                                                                                                            |
+| eligibility | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)           | Optional     | The eligibility claim accepted by the Business for this discount. Corresponds to a value from context.eligibility. Omitted for code-based and non-eligibility automatic discounts. |
+| allocations | Array\[[Allocation](/draft/specification/shopping/extensions/discount/#allocation)\] | Optional     | Breakdown of where this discount was allocated. Sum of allocation amounts equals total amount.                                                                                     |
 
 ### Allocation
 

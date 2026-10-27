@@ -43,9 +43,9 @@ Businesses declare split payments configuration in their profile.
 
 ### Business Profile
 
-| Name                 | Type         | Requirement  | Description                                                                                                                                  |
-| -------------------- | ------------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| allowed_combinations | Array[array] | **Required** | Array of valid instrument combinations. Each combination is an array of instrument groups. A payment is valid if it matches any combination. |
+| Name                 | Type                                                                                   | Requirement  | Description                                                                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| allowed_combinations | Array\[Array\[[Instrument Group](/draft/specification/reference/#instrument-group)\]\] | **Required** | Array of valid instrument combinations. Each combination is an array of instrument groups. A payment is valid if it matches any combination. |
 
 #### `allowed_combinations`
 

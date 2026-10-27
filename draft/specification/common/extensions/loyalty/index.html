@@ -4271,13 +4271,13 @@ extended.</p>
 </tr>
 <tr>
 <td style="text-align: left;">tiers</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/common/extensions/loyalty/#membership-tier">Membership Tier</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved.</td>
 </tr>
 <tr>
 <td style="text-align: left;">rewards</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/common/extensions/loyalty/#membership-reward">Membership Reward</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward.</td>
 </tr>
@@ -4315,7 +4315,7 @@ extended.</p>
 </tr>
 <tr>
 <td style="text-align: left;">benefits</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/common/extensions/loyalty/#membership-tier-benefit">Membership Tier Benefit</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of benefits associated with this tier.</td>
 </tr>
@@ -4361,13 +4361,13 @@ extended.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">currency</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/common/extensions/loyalty/#reward-currency">Reward Currency</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">A unit of value that customers can accumulate through various commercial activities.</td>
 </tr>
 <tr>
 <td style="text-align: left;">earning_forecast</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/common/extensions/loyalty/#earning-forecast">Earning Forecast</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preview of rewards to be earned from the current transaction.</td>
 </tr>
@@ -4421,13 +4421,13 @@ extended.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/draft/specification/common/extensions/loyalty/#reward-amount">Reward Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Total rewards to be earned if the transaction completes.</td>
 </tr>
 <tr>
 <td style="text-align: left;">breakdown</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/common/extensions/loyalty/#earning-breakdown">Earning Breakdown</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">List of breakdown of earning contributing to the total.</td>
 </tr>
@@ -4453,7 +4453,7 @@ extended.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amount</td>
-<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><a href="/draft/specification/common/extensions/loyalty/#reward-amount">Reward Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Rewards earned from this rule.</td>
 </tr>

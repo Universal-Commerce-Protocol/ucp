@@ -292,9 +292,9 @@ Once the mandates are generated, the platform submits them in the completion req
 
 AP2 extension data including checkout mandate.
 
-| Name             | Type   | Requirement | Description                                      |
-| ---------------- | ------ | ----------- | ------------------------------------------------ |
-| checkout_mandate | string | Optional    | SD-JWT+kb proving user authorized this checkout. |
+| Name             | Type                                                                                       | Requirement | Description                                      |
+| ---------------- | ------------------------------------------------------------------------------------------ | ----------- | ------------------------------------------------ |
+| checkout_mandate | [Checkout Mandate](/draft/specification/payment/extensions/ap2-mandates/#checkout-mandate) | Optional    | SD-JWT+kb proving user authorized this checkout. |
 
 ```json
 {
@@ -380,9 +380,9 @@ The `ap2` object included in checkout responses.
 
 AP2 extension data including merchant authorization.
 
-| Name                   | Type   | Requirement | Description                                                |
-| ---------------------- | ------ | ----------- | ---------------------------------------------------------- |
-| merchant_authorization | string | Optional    | Merchant's signature proving checkout terms are authentic. |
+| Name                   | Type                                                                                                   | Requirement | Description                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ----------- | ---------------------------------------------------------- |
+| merchant_authorization | [Merchant Authorization](/draft/specification/payment/extensions/ap2-mandates/#merchant-authorization) | Optional    | Merchant's signature proving checkout terms are authentic. |
 
 ### Checkout Mandate
 
@@ -396,9 +396,9 @@ The `ap2` object included in COMPLETE checkout requests.
 
 AP2 extension data including checkout mandate.
 
-| Name             | Type   | Requirement | Description                                      |
-| ---------------- | ------ | ----------- | ------------------------------------------------ |
-| checkout_mandate | string | Optional    | SD-JWT+kb proving user authorized this checkout. |
+| Name             | Type                                                                                       | Requirement | Description                                      |
+| ---------------- | ------------------------------------------------------------------------------------------ | ----------- | ------------------------------------------------ |
+| checkout_mandate | [Checkout Mandate](/draft/specification/payment/extensions/ap2-mandates/#checkout-mandate) | Optional    | SD-JWT+kb proving user authorized this checkout. |
 
 ### Error Codes
 

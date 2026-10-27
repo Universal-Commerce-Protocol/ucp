@@ -1018,14 +1018,14 @@ A payment instrument with selection state.
 
 Capability reference in responses. Only name/version required to confirm active capabilities.
 
-| Name    | Type                       | Requirement  | Description                                                                                                                     |
-| ------- | -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string                     | **Required** | Entity version in YYYY-MM-DD format.                                                                                            |
-| spec    | string                     | Optional     | URL to human-readable specification document.                                                                                   |
-| schema  | string                     | Optional     | URL to JSON Schema defining this entity's structure and payloads.                                                               |
-| id      | string                     | Optional     | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
-| config  | object                     | Optional     | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
-| extends | OneOf\[`string`, `array`\] | Optional     | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
+| Name    | Type                                                                                                                                                                     | Requirement  | Description                                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| version | string                                                                                                                                                                   | **Required** | Entity version in YYYY-MM-DD format.                                                                                            |
+| spec    | string                                                                                                                                                                   | Optional     | URL to human-readable specification document.                                                                                   |
+| schema  | string                                                                                                                                                                   | Optional     | URL to JSON Schema defining this entity's structure and payloads.                                                               |
+| id      | string                                                                                                                                                                   | Optional     | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
+| config  | object                                                                                                                                                                   | Optional     | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
+| extends | OneOf\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name), Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\]\] | Optional     | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
 
 ### Total
 
@@ -1161,14 +1161,14 @@ The business controls what MUST be rendered (top-level entries) versus what MAY 
 
 UCP metadata for checkout responses.
 
-| Name             | Type   | Requirement  | Description                                                                                                                                    |
-| ---------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| version          | string | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
-| map_order        | object | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
-| status           | string | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
-| services         | object | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
-| capabilities     | object | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
-| payment_handlers | object | **Required** | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| Name             | Type                                                    | Requirement  | Description                                                                                                                                    |
+| ---------------- | ------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| version          | string                                                  | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
+| map_order        | Map\[string, Array[string]\]                            | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
+| status           | string                                                  | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
+| services         | Map\[string, Array[Service (Response Schema)]\]         | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| capabilities     | Map\[string, Array[Capability (Response Schema)]\]      | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
+| payment_handlers | Map\[string, Array[Payment Handler (Response Schema)]\] | **Required** | Payment handler registry keyed by reverse-domain name.                                                                                         |
 
 ### Order Confirmation
 

@@ -5965,7 +5965,7 @@ zero-downtime key rotation procedures.</p>
 </tr>
 <tr>
 <td style="text-align: left;">extends</td>
-<td style="text-align: left;">OneOf[<code>string</code>, <code>array</code>]</td>
+<td style="text-align: left;">OneOf[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>, Array[<a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a>]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions.</td>
 </tr>
@@ -6022,7 +6022,7 @@ zero-downtime key rotation procedures.</p>
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -6034,19 +6034,19 @@ zero-downtime key rotation procedures.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>

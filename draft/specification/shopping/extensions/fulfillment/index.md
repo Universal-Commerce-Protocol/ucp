@@ -80,7 +80,7 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 | type                    | string                                                                                      | **Required** | Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.                                                                      |
 | line_item_ids           | Array[string]                                                                               | **Required** | Line item IDs fulfilled via this method.                                                                                                                                     |
 | destinations            | Array\[[Fulfillment Destination](/draft/specification/reference/#fulfillment-destination)\] | Optional     | Available destinations for this method. In Business responses, each destination carries a `type` and `id`.                                                                   |
-| selected_destination_id | ['string', 'null']                                                                          | Optional     | ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`. |
+| selected_destination_id | OneOf\[`string`, `null`\]                                                                   | Optional     | ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`. |
 | groups                  | Array\[[Fulfillment Group](/draft/specification/reference/#fulfillment-group)\]             | Optional     | Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.                                                                 |
 
 #### Fulfillment Destination
@@ -130,7 +130,7 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 | id                 | string                                                                            | **Required** | Group identifier for referencing merchant-generated groups in updates. |
 | line_item_ids      | Array[string]                                                                     | **Required** | Line item IDs included in this group/package.                          |
 | options            | Array\[[Fulfillment Option](/draft/specification/reference/#fulfillment-option)\] | Optional     | Available fulfillment options for this group.                          |
-| selected_option_id | ['string', 'null']                                                                | Optional     | ID of the selected fulfillment option for this group.                  |
+| selected_option_id | OneOf\[`string`, `null`\]                                                         | Optional     | ID of the selected fulfillment option for this group.                  |
 
 #### Fulfillment Option
 
@@ -146,12 +146,12 @@ Fulfillment applies only to items requiring physical delivery. Items not requiri
 
 #### Fulfillment Available Method
 
-| Name           | Type               | Requirement  | Description                                                                                                                          |
-| -------------- | ------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| type           | string             | **Required** | Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values. |
-| line_item_ids  | Array[string]      | **Required** | Line items available for this fulfillment method.                                                                                    |
-| fulfillable_on | ['string', 'null'] | Optional     | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).                                                |
-| description    | string             | Optional     | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').                                             |
+| Name           | Type                      | Requirement  | Description                                                                                                                          |
+| -------------- | ------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| type           | string                    | **Required** | Fulfillment method type this availability applies to. Well-known values: `shipping`, `pickup`; businesses MAY use additional values. |
+| line_item_ids  | Array[string]             | **Required** | Line items available for this fulfillment method.                                                                                    |
+| fulfillable_on | OneOf\[`string`, `null`\] | Optional     | 'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).                                                |
+| description    | string                    | Optional     | Human-readable availability info (e.g., 'Available for pickup at Downtown Store today').                                             |
 
 #### Total
 
@@ -479,9 +479,9 @@ A discovered option `id` lets a Buyer's choice carry forward: a Business **SHOUL
 
 How a catalog variant can be fulfilled. Mirrors checkout `fulfillment`.
 
-| Name    | Type          | Requirement | Description                           |
-| ------- | ------------- | ----------- | ------------------------------------- |
-| methods | Array[object] | Optional    | Fulfillment methods for this variant. |
+| Name    | Type                                                                                                                    | Requirement | Description                           |
+| ------- | ----------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------- |
+| methods | Array\[[Catalog Fulfillment Method](/draft/specification/shopping/extensions/fulfillment/#catalog-fulfillment-method)\] | Optional    | Fulfillment methods for this variant. |
 
 #### Catalog Fulfillment Method
 
@@ -647,10 +647,10 @@ Opt-in declaration (business MAY return multiple groups per method):
 
 Businesses declare what fulfillment configurations they support using `business_config`:
 
-| Name                | Type          | Requirement | Description                                                                                                                                                                                                 |
-| ------------------- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| multi_destination   | Array[object] | Optional    | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
-| method_combinations | Array[array]  | Optional    | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
+| Name                | Type                   | Requirement | Description                                                                                                                                                                                                 |
+| ------------------- | ---------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| multi_destination   | Array[object]          | Optional    | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
+| method_combinations | Array\[Array[string]\] | Optional    | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
 
 ```json
 {

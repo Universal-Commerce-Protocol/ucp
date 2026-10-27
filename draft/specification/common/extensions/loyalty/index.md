@@ -130,24 +130,24 @@ Key-value map whose keys represent buyer/platform asserted eligibility claims an
 
 Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').
 
-| Name        | Type          | Requirement  | Description                                                                                                                                                                                                                                                     |
-| ----------- | ------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string        | **Required** | Unique loyalty membership identifier.                                                                                                                                                                                                                           |
-| name        | string        | **Required** | Business specific name of the loyalty membership/program.                                                                                                                                                                                                       |
-| display_id  | string        | Optional     | A masked or partial version of the membership id for user recognition (e.g., '\*\*\*\*5678'). MUST NOT be set if the membership has not been verified.                                                                                                          |
-| tiers       | Array[object] | Optional     | Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved. |
-| rewards     | Array[object] | Optional     | Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward.                                                                                                                                                |
-| provisional | boolean       | **Required** | True if this membership requires additional verification.                                                                                                                                                                                                       |
+| Name        | Type                                                                                            | Requirement  | Description                                                                                                                                                                                                                                                     |
+| ----------- | ----------------------------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                                                                          | **Required** | Unique loyalty membership identifier.                                                                                                                                                                                                                           |
+| name        | string                                                                                          | **Required** | Business specific name of the loyalty membership/program.                                                                                                                                                                                                       |
+| display_id  | string                                                                                          | Optional     | A masked or partial version of the membership id for user recognition (e.g., '\*\*\*\*5678'). MUST NOT be set if the membership has not been verified.                                                                                                          |
+| tiers       | Array\[[Membership Tier](/draft/specification/common/extensions/loyalty/#membership-tier)\]     | Optional     | Active or display-safe tier context for this membership. Most programs are single-status (one entry); programs with parallel status dimensions (e.g., current and lifetime) populate one entry per active tier. Omitted when no tier context has been resolved. |
+| rewards     | Array\[[Membership Reward](/draft/specification/common/extensions/loyalty/#membership-reward)\] | Optional     | Reward types and earning forecasts associated with this membership. Each object encapsulates one type of reward.                                                                                                                                                |
+| provisional | boolean                                                                                         | **Required** | True if this membership requires additional verification.                                                                                                                                                                                                       |
 
 #### Membership Tier
 
 Specific achievement rank or status milestone that unlocks escalating value as a member progresses through activity or spend.
 
-| Name     | Type          | Requirement  | Description                                             |
-| -------- | ------------- | ------------ | ------------------------------------------------------- |
-| id       | string        | **Required** | Unique identifier for the membership tier.              |
-| name     | string        | **Required** | The human-readable name of the tier (e.g., 'Platinum'). |
-| benefits | Array[object] | Optional     | List of benefits associated with this tier.             |
+| Name     | Type                                                                                                        | Requirement  | Description                                             |
+| -------- | ----------------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------- |
+| id       | string                                                                                                      | **Required** | Unique identifier for the membership tier.              |
+| name     | string                                                                                                      | **Required** | The human-readable name of the tier (e.g., 'Platinum'). |
+| benefits | Array\[[Membership Tier Benefit](/draft/specification/common/extensions/loyalty/#membership-tier-benefit)\] | Optional     | List of benefits associated with this tier.             |
 
 #### Membership Tier Benefit
 
@@ -162,10 +162,10 @@ Benefits associated with a membership tier.
 
 Quantifiable reward type and optional earning forecast for the current transaction.
 
-| Name             | Type   | Requirement  | Description                                                                          |
-| ---------------- | ------ | ------------ | ------------------------------------------------------------------------------------ |
-| currency         | object | **Required** | A unit of value that customers can accumulate through various commercial activities. |
-| earning_forecast | object | Optional     | Preview of rewards to be earned from the current transaction.                        |
+| Name             | Type                                                                                 | Requirement  | Description                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------------------------------------ |
+| currency         | [Reward Currency](/draft/specification/common/extensions/loyalty/#reward-currency)   | **Required** | A unit of value that customers can accumulate through various commercial activities. |
+| earning_forecast | [Earning Forecast](/draft/specification/common/extensions/loyalty/#earning-forecast) | Optional     | Preview of rewards to be earned from the current transaction.                        |
 
 #### Reward Amount
 
@@ -185,21 +185,21 @@ The currency of the loyalty reward.
 
 Preview of rewards to be earned from the current transaction.
 
-| Name      | Type          | Requirement  | Description                                              |
-| --------- | ------------- | ------------ | -------------------------------------------------------- |
-| amount    | integer       | **Required** | Total rewards to be earned if the transaction completes. |
-| breakdown | Array[object] | Optional     | List of breakdown of earning contributing to the total.  |
+| Name      | Type                                                                                            | Requirement  | Description                                              |
+| --------- | ----------------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------- |
+| amount    | [Reward Amount](/draft/specification/common/extensions/loyalty/#reward-amount)                  | **Required** | Total rewards to be earned if the transaction completes. |
+| breakdown | Array\[[Earning Breakdown](/draft/specification/common/extensions/loyalty/#earning-breakdown)\] | Optional     | List of breakdown of earning contributing to the total.  |
 
 #### Earning Breakdown
 
 Breakdown rule of the reward earnings
 
-| Name        | Type    | Requirement  | Description                                                                                                                                                            |
-| ----------- | ------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id          | string  | **Required** | Unique rewards breakdown rule identifier.                                                                                                                              |
-| amount      | integer | **Required** | Rewards earned from this rule.                                                                                                                                         |
-| description | string  | **Required** | A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear).                                                                              |
-| benefit_id  | string  | Optional     | Optional `id` of the membership_tier_benefit that produced this rewards rule. Resolves against `membership_tier_benefit.id` within the same parent loyalty membership. |
+| Name        | Type                                                                           | Requirement  | Description                                                                                                                                                            |
+| ----------- | ------------------------------------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id          | string                                                                         | **Required** | Unique rewards breakdown rule identifier.                                                                                                                              |
+| amount      | [Reward Amount](/draft/specification/common/extensions/loyalty/#reward-amount) | **Required** | Rewards earned from this rule.                                                                                                                                         |
+| description | string                                                                         | **Required** | A display-ready, human-readable rationale for the specific rewards (e.g. 2x on footwear).                                                                              |
+| benefit_id  | string                                                                         | Optional     | Optional `id` of the membership_tier_benefit that produced this rewards rule. Resolves against `membership_tier_benefit.id` within the same parent loyalty membership. |
 
 ## Loyalty behavior
 

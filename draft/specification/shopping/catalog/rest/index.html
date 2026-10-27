@@ -5235,7 +5235,7 @@ MAY include informational messages indicating which identifiers were not found.<
 </tr>
 <tr>
 <td style="text-align: left;">map_order</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Preferred key-traversal order for sibling registry fields inside the root <code>ucp</code> envelope (<code>services</code>, <code>capabilities</code>, and <code>payment_handlers</code>).</td>
 </tr>
@@ -5247,19 +5247,19 @@ MAY include informational messages indicating which identifiers were not found.<
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">capabilities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[Capability (Response Schema)]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Capability registry keyed by reverse-domain name.</td>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Array[object]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -5333,7 +5333,7 @@ MAY include informational messages indicating which identifiers were not found.<
 </tr>
 <tr>
 <td style="text-align: left;">options</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/reference/#product-option">Product Option</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Product options with availability signals relative to the effective selections. Product options (Size, Color, etc.).</td>
 </tr>
@@ -5388,7 +5388,7 @@ MAY include informational messages indicating which identifiers were not found.<
 </tr>
 <tr>
 <td style="text-align: left;">product</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="/draft/specification/shopping/catalog/rest/#detail-product">Detail Product</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">The requested product with full detail. Singular — this is a single-resource operation.</td>
 </tr>

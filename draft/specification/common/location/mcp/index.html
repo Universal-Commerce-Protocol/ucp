@@ -4521,7 +4521,7 @@ request in <code>location</code>.</p>
 </tr>
 <tr>
 <td style="text-align: left;">locations</td>
-<td style="text-align: left;">Array[<a href="/draft/specification/reference/#location">Location</a>]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/common/location/mcp/#lookup-location">Lookup Location</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Locations matching the requested identifiers and refinements. May contain fewer Locations if some identifiers do not resolve or their resolved Locations are filtered out, or more if one identifier resolves to multiple Locations. When multiple identifiers resolve to the same Location, one returned Location carries all corresponding <code>inputs</code> entries.</td>
 </tr>
@@ -4674,7 +4674,7 @@ request in <code>location</code>.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amenities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, Amenity]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.</td>
 </tr>
@@ -4741,7 +4741,7 @@ request in <code>location</code>.</p>
 </tr>
 <tr>
 <td style="text-align: left;">amenities</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;">Map[string, <a href="/draft/specification/common/location/mcp/#amenity">Amenity</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Static features, services, or capabilities of the Location, keyed by reverse-domain amenity identifier. Each value provides a buyer-facing description; the key alone defines amenity identity and filter matching.</td>
 </tr>

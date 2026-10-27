@@ -164,14 +164,14 @@ A **capability** is a feature within a service. It declares what functionality i
 
 Full capability declaration for platform-level discovery. Includes spec/schema URLs for agent fetching.
 
-| Name    | Type                       | Requirement  | Description                                                                                                                     |
-| ------- | -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| version | string                     | **Required** | Entity version in YYYY-MM-DD format.                                                                                            |
-| spec    | string                     | **Required** | URL to human-readable specification document.                                                                                   |
-| schema  | string                     | **Required** | URL to JSON Schema defining this entity's structure and payloads.                                                               |
-| id      | string                     | Optional     | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
-| config  | object                     | Optional     | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
-| extends | OneOf\[`string`, `array`\] | Optional     | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
+| Name    | Type                                                                                                                                                                     | Requirement  | Description                                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| version | string                                                                                                                                                                   | **Required** | Entity version in YYYY-MM-DD format.                                                                                            |
+| spec    | string                                                                                                                                                                   | **Required** | URL to human-readable specification document.                                                                                   |
+| schema  | string                                                                                                                                                                   | **Required** | URL to JSON Schema defining this entity's structure and payloads.                                                               |
+| id      | string                                                                                                                                                                   | Optional     | Unique identifier for this entity instance. Used to disambiguate when multiple instances exist.                                 |
+| config  | object                                                                                                                                                                   | Optional     | Entity-specific configuration. Structure defined by each entity's schema.                                                       |
+| extends | OneOf\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name), Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\]\] | Optional     | Parent capability(s) this extends. Present for extensions, absent for root capabilities. Use array for multi-parent extensions. |
 
 #### Extensions
 

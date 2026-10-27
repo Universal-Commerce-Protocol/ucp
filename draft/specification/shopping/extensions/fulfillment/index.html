@@ -5019,7 +5019,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected_destination_id</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in <code>destinations</code>.</td>
 </tr>
@@ -5234,7 +5234,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">selected_option_id</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">ID of the selected fulfillment option for this group.</td>
 </tr>
@@ -5320,7 +5320,7 @@ method.</p>
 </tr>
 <tr>
 <td style="text-align: left;">fulfillable_on</td>
-<td style="text-align: left;">['string', 'null']</td>
+<td style="text-align: left;">OneOf[<code>string</code>, <code>null</code>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">'now' for immediate availability, or ISO 8601 date for future (preorders, transfers).</td>
 </tr>
@@ -5871,7 +5871,7 @@ quantities, and combined fulfillment modify the options.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">methods</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="/draft/specification/shopping/extensions/fulfillment/#catalog-fulfillment-method">Catalog Fulfillment Method</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Fulfillment methods for this variant.</td>
 </tr>
@@ -6188,7 +6188,7 @@ checkout and on catalog discovery):</p>
 </tr>
 <tr>
 <td style="text-align: left;">method_combinations</td>
-<td style="text-align: left;">Array[array]</td>
+<td style="text-align: left;">Array[Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Method-type combinations the business permits within one cart. Each inner array is a permitted set of method <code>type</code> values (e.g. shipping + pickup).</td>
 </tr>
