@@ -40,7 +40,7 @@ at the establishment.
     - `destination` — where the order goes (buyer address or establishment)
     - `requested_fulfillment_time` — omitted for ASAP; a timestamp for scheduled orders
     - `options[]` — Business-generated time windows, each with `totals`
-    - `preference_options[]` / `selected_preference_option_id` — structured handoff mode (e.g., contactless drop-off, curbside pickup)
+    - `preference_options[]` / `selected_preference_option_ids[]` — structured handoff preferences, multi-select (e.g., contactless drop-off plus ring the doorbell, curbside pickup)
     - `notes` — courier or pickup instructions
 - `available_methods[]` — whether delivery and pickup are offered, when, and with what scheduling support
 
@@ -48,7 +48,7 @@ at the establishment.
 
 - `methods[0]` 🛵 Delivery
     - `destination` 🏠 `delivery_address` 450 Serra Mall, Apt 3B
-    - `selected_preference_option_id` 🔘✅ Leave at my door · 🔘 Hand it to me
+    - `selected_preference_option_ids[]` 🔘✅ Leave at my door · 🔘 Hand it to me · ☑️ Ring the doorbell
     - `requested_fulfillment_time` ⏱️ *(omitted → ASAP)*
     - `notes` 📝 "Gate code #4210, second floor"
     - `selected_option_id` = `options[1].id`
@@ -69,7 +69,7 @@ together from a single kitchen:
 | **Hierarchy** | `methods[]` → `groups[]` → `options[]` | `methods[]` → `options[]` | No packaging layer; speed and time tiers attach to the method. |
 | **Destination** | `destinations[]` + `selected_destination_id` | One `destination`, discriminated by `type` | An order goes to one address or is collected at one counter. |
 | **Timing** | Chosen only from Business options | Platform may request a time (`requested_fulfillment_time`) | Buyers order "now" or for a specific dinner time. |
-| **Handoff** | — | `preference_options[]` + `selected_preference_option_id` + `notes` | Contactless drop-off, curbside pickup, and building access are core to food handoff. |
+| **Handoff** | — | `preference_options[]` + `selected_preference_option_ids[]` + `notes` | Contactless drop-off, curbside pickup, and building access are core to food handoff. |
 
 ## Discovery
 
@@ -200,9 +200,10 @@ delivery windows and handoff preferences on the method.
   "preference_options": [
     { "id": "pref_leave_at_door", "label": "Leave at my door" },
     { "id": "pref_hand_to_me", "label": "Hand it to me" },
-    { "id": "pref_meet_outside", "label": "Meet outside" }
+    { "id": "pref_meet_outside", "label": "Meet outside" },
+    { "id": "pref_ring_bell", "label": "Ring the doorbell" }
   ],
-  "selected_preference_option_id": "pref_leave_at_door",
+  "selected_preference_option_ids": ["pref_leave_at_door", "pref_ring_bell"],
   "notes": "Gate code #4210, second floor",
   "selected_option_id": "opt_standard",
   "options": [
@@ -296,7 +297,7 @@ handoff preference or `notes`), and the Business fills in the location.
     { "id": "pref_counter", "label": "Counter Pickup" },
     { "id": "pref_curbside", "label": "Curbside Pickup" }
   ],
-  "selected_preference_option_id": "pref_counter",
+  "selected_preference_option_ids": ["pref_counter"],
   "selected_option_id": "opt_pickup_asap",
   "options": [
     {
@@ -314,27 +315,128 @@ handoff preference or `notes`), and the Business fills in the location.
 ### Handoff Preferences & Notes
 
 Order handoff is split into two channels on `methods[]` so couriers and counter
-staff get both a structured handoff mode and the details only the buyer knows:
+staff get both structured handoff preferences and the details only the buyer knows:
 
-- **Preferences (`preference_options[]` → `selected_preference_option_id`)**:
-  The Business lists the mutually exclusive handoff modes it supports for the
-  active method — such as `"Leave at my door"` vs. `"Hand it to me"` for
-  delivery, or `"Counter Pickup"` vs. `"Curbside Pickup"` for pickup — each
-  with an `id` and a display `label`. The Platform selects one by `id`. The
-  Business **MAY** pre-select a default (commonly contactless for delivery or
-  counter for pickup).
+- **Preferences (`preference_options[]` → `selected_preference_option_ids[]`)**:
+  The Business lists the handoff preferences it supports for the active
+  method — such as `"Leave at my door"`, `"Hand it to me"`, or
+  `"Ring the doorbell"` for delivery, or `"Counter Pickup"` vs.
+  `"Curbside Pickup"` for pickup — each with an `id` and a display `label`.
+  The Platform selects one or more of them by `id`. The Business **MAY**
+  pre-select defaults (commonly contactless for delivery or counter for
+  pickup).
 - **Notes (`methods[].notes`)**: Free-form handoff instructions — gate codes,
   building entrances, "call on arrival", or vehicle description for curbside
   pickup. Kitchen requests belong in `line_items[].note`, not here.
 
 ```text
-Drop-off
- (•) Leave at my door    ( ) Hand it to me    ( ) Meet outside
+Drop-off preferences
+ [x] Leave at my door    [ ] Hand it to me    [ ] Meet outside
+ [x] Ring the doorbell
 Instructions for courier
  ┌──────────────────────────────────────────────────────────────┐
  │ Gate code #4210, second floor                                │
  └──────────────────────────────────────────────────────────────┘
 ```
+
+#### Operations
+
+Handoff preferences follow the same operational and warning patterns as discount
+codes in the
+[Discount Extension](../../shopping/extensions/discount.md#operations):
+
+**Request behavior:**
+
+- **Replacement semantics**: Submitting `selected_preference_option_ids[]`
+  replaces any previously submitted selections for that method.
+- **Clear preferences**: Send an empty array `"selected_preference_option_ids": []`
+  to clear optional selections. When `selected_preference_option_ids[]` is
+  omitted (e.g., on initial method selection), the Business **MAY** apply its
+  defaults.
+
+**Response behavior:**
+
+- **Authoritative selection**: `selected_preference_option_ids[]` contains only
+  the active preferences the Business will honor. Unlike `discounts`, which
+  splits input (`discounts.codes`) and output (`discounts.applied`) into two
+  fields, `selected_preference_option_ids[]` is a single field that serves as
+  the authoritative applied set in responses; rejected selections are omitted.
+- **Rejected preferences**: Communicated via `messages[]` warnings (see below).
+
+#### Rejected Preferences
+
+When a submitted preference option cannot be applied (e.g., curbside pickup is
+paused during a rush, contactless drop-off is disallowed for alcohol delivery,
+or two selected options such as `"Leave at my door"` and `"Hand it to me"`
+cannot be combined), the Business drops the unhonored option from
+`selected_preference_option_ids[]` and communicates the rejection via the
+`messages[]` array instead of failing the request:
+
+> **Implementation guidance:** Operations that change how the buyer expects the
+> order to be fulfilled **SHOULD** use `type: "warning"` with
+> `path: "$.fulfillment.methods[0].selected_preference_option_ids"` so they are
+> surfaced to the buyer rather than silently ignored by the Platform. These
+> warnings do not block `ready_for_complete`. When two submitted preferences
+> conflict with each other, the Business **SHOULD** keep the earlier entry in
+> the array and drop the conflicting one with a warning.
+
+=== "Request (`fulfillment.methods[0]`)"
+
+    <!-- ucp:example schema=food/types/fulfillment_method op=update direction=request -->
+    ```json
+    {
+      "id": "method_delivery",
+      "type": "delivery",
+      "selected_preference_option_ids": [
+        "pref_hand_to_me",
+        "pref_leave_at_door",
+        "pref_ring_bell"
+      ]
+    }
+    ```
+
+=== "Response (`fulfillment.methods[0]`)"
+
+    <!-- ucp:example schema=food/types/fulfillment_method op=read -->
+    ```json
+    {
+      "id": "method_delivery",
+      "type": "delivery",
+      "preference_options": [
+        { "id": "pref_leave_at_door", "label": "Leave at my door" },
+        { "id": "pref_hand_to_me", "label": "Hand it to me" },
+        { "id": "pref_meet_outside", "label": "Meet outside" },
+        { "id": "pref_ring_bell", "label": "Ring the doorbell" }
+      ],
+      "selected_preference_option_ids": ["pref_hand_to_me", "pref_ring_bell"]
+    }
+    ```
+
+=== "Response (`messages`)"
+
+    <!-- ucp:example schema=food/checkout target=$.messages op=read -->
+    ```json
+    [
+      {
+        "type": "warning",
+        "code": "preference_option_combination_disallowed",
+        "path": "$.fulfillment.methods[0].selected_preference_option_ids",
+        "content": "\"Leave at my door\" cannot be combined with \"Hand it to me\". Your courier will hand the order to you."
+      }
+    ]
+    ```
+
+**Warning codes for rejected preferences:**
+
+| Code | Description |
+| :--- | :--- |
+| `preference_option_invalid` | Option `id` is not found in the method's `preference_options[]` |
+| `preference_option_unavailable` | Option is offered but not eligible for this order (e.g., curbside paused, contactless not allowed for alcohol delivery) |
+| `preference_option_combination_disallowed` | Cannot combine with another active preference option |
+
+When the Platform switches the method (e.g., `delivery` → `pickup`), selections
+that the new method doesn't offer are dropped as part of that change. The
+Business **MAY** omit warnings for them, because the buyer initiated the switch.
 
 ## Fulfillment Timing
 
@@ -519,7 +621,12 @@ The `description` lets Platforms surface the alternative in conversation:
 
 - **MUST** omit `requested_fulfillment_time` for ASAP orders and send an RFC 3339
   timestamp with a UTC offset for scheduled orders.
-- **MUST** select only `id` values present in `preference_options[]`.
+- **MUST** select only `id` values present in `preference_options[]` without
+  duplicates.
+- **MUST** render the buyer's handoff preferences from the response's
+  `selected_preference_option_ids[]`, **MUST NOT** present a dropped selection
+  as applied, and **MUST** surface rejected-preference warnings to the buyer
+  before completion.
 - **MUST** put courier or pickup instructions in `methods[].notes`, not in
   `line_items[].note`.
 - **SHOULD** offer every method in `available_methods[]`, and render each
@@ -541,8 +648,17 @@ The `description` lets Platforms surface the alternative in conversation:
   `type: "fulfillment"` and recompute tax, fees, and percentage tips when the
   method or option changes.
 - **SHOULD** pre-select a default `selected_option_id` and default handoff
-  preference (`selected_preference_option_id`) so the session can reach
+  preferences (`selected_preference_option_ids[]`) so the session can reach
   `ready_for_complete` without extra round trips.
+- **MUST** return in `selected_preference_option_ids[]` only the preferences
+  it will honor, and **MUST NOT** add an option the Platform did not select,
+  except to apply a default when `selected_preference_option_ids[]` was omitted
+  or when a selection is required and none remains.
+- **MUST NOT** fail the request, or withhold `ready_for_complete`, only because
+  of preferences it cannot honor. It **SHOULD** drop each rejected option and
+  return a `preference_option_*` warning (see
+  [Rejected Preferences](#rejected-preferences)), keeping the earlier entry when
+  two selections conflict.
 - **MUST** answer a request that conflicts with the advertised scheduling with
   a recoverable `fulfillment_time_unavailable` error, and **SHOULD** return the
   valid windows in `options[]`.

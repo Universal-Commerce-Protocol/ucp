@@ -406,7 +406,7 @@ resolved tip.
               {"id": "pref_leave_at_door", "label": "Leave at my door"},
               {"id": "pref_hand_to_me", "label": "Hand it to me"}
             ],
-            "selected_preference_option_id": "pref_leave_at_door",
+            "selected_preference_option_ids": ["pref_leave_at_door"],
             "notes": "Gate code #4210, second floor",
             "selected_option_id": "opt_standard",
             "options": [

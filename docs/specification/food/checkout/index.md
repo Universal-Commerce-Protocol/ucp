@@ -574,8 +574,7 @@ Platforms turn these messages into recovery prompts, for example:
 
 ### Warning Presentation
 
-Checkout follows the `notice` vs. `disclosure` presentation contract and
-the `totals_changed` rule in
+Checkout follows the `notice` vs. `disclosure` presentation contract in
 [Checkout — Warning Presentation](../../shopping/checkout/index.md#warning-presentation).
 In food ordering, `disclosure` is the right tier for **statutory food-safety
 and labeling notices**, which Platforms **MUST** show prominently near the

@@ -45,9 +45,13 @@
       "description": "Available handoff preferences for this fulfillment method (e.g., drop-off preferences for delivery, or counter vs. curbside handoff for pickup).",
       "ucp_request": "omit"
     },
-    "selected_preference_option_id": {
-      "type": "string",
-      "description": "Identifier of the selected handoff preference option from `preference_options`."
+    "selected_preference_option_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      },
+      "description": "Identifiers of the selected handoff preference options from `preference_options`. Replaces previously submitted selections; send an empty array to clear. In responses, lists only the preferences the Business will honor; rejected selections are omitted and communicated via `messages[]` warnings."
     },
     "notes": {
       "type": "string",
