@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/feed.json",
   "name": "dev.ucp.common.feed",
   "title": "Feed",
-  "description": "Feed capability. A feed is a materialized publication of records, as files described by a manifest, that a Platform can index offline. The feed is point-in-time; the capability that defines the records remains authoritative at serving time. The Business declares a feed endpoint in the capability `config`; a Platform fetches the feed list document from it, then fetches each feed's manifest and files. The shape of the records is declared by the manifest's `ucp.capabilities`, not by this capability.",
+  "description": "A feed is a point-in-time publication of records—each representing one logical data item—delivered in bulk as files. Records normally use a UCP-defined shape from a service or capability, so a Platform can discover them in bulk, then call corresponding live operations for authoritative serving-time values. A Business MAY publish feeds using a custom record shape through a record-type extension negotiated with the Platform, and MAY publish feeds without corresponding live operations. Common Feed adds one endpoint declaration, a feed list, and a manifest; it defines no record model. The manifest's ucp.capabilities declares the record type, defined by an extension of Common Feed. The Business declares a feed endpoint in the capability `config`; a Platform fetches the feed list document from it, then fetches each feed's manifest and files. For every record type, including custom record types, the Business MUST use stable entity identifiers that it can resolve in related operations. The record-type specification defines which identifiers corresponding operations accept and what they identify. Where those operations are advertised, the Business MUST resolve those identifiers to the same entities. Publishing a feed does not require advertising those operations.",
   "type": "object",
   "$defs": {
     "endpoint": {
@@ -116,11 +116,11 @@
           "ucp_request": "omit"
         },
         "format": {
-          "type": "string",
-          "description": "Wire encoding of every file in the feed's current snapshot. Equals the current manifest's `format`, which is authoritative. Lets a Platform select feeds it can read, and skip ones it cannot, without fetching manifests. Registered values are those listed for the manifest's `format`.",
+          "$ref": "types/reverse_domain_name.json",
+          "description": "Specification-defined namespaced format identifier for every file in the feed's current snapshot. The Business MUST set the feed list entry's `format` and the `format` in the manifest referenced by that entry's `manifest` URL to the same value. The manifest is authoritative. A Platform that fetches the manifest and finds that these values differ MUST NOT consume the snapshot. Lets a Platform select feeds it can read, and skip ones it cannot, without fetching manifests. A Platform MUST use the full identifier when determining format support, MUST NOT infer a decoder from its suffix, and MUST NOT consume a snapshot with an unrecognized format.",
           "examples": [
-            "jsonl+gzip",
-            "parquet"
+            "dev.ucp.common.format.jsonl",
+            "dev.ucp.common.format.parquet"
           ],
           "ucp_request": "omit"
         },
@@ -173,11 +173,11 @@
           "ucp_request": "omit"
         },
         "format": {
-          "type": "string",
-          "description": "Wire encoding of every file in `files`. Open vocabulary; compression is part of the token, not a separate field. Registered values in this version: `jsonl+gzip` (one JSON record per line, gzip-compressed) and `parquet` (one record per row across one or more files, with nested structures as nested columns per the record schema; compression is internal to Parquet). A Platform that does not recognize the value does not consume the snapshot. An extension that changes the file layout registers its own `format` value; extensions that only add fields to records do not.",
+          "$ref": "types/reverse_domain_name.json",
+          "description": "Specification-defined namespaced format identifier for every file in `files`, not a generic encoding label. Its defining specification describes record layout, serialization, and compression. Open vocabulary. Common Feed registers `dev.ucp.common.format.jsonl` (one record per line, JSON, gzip-compressed) and `dev.ucp.common.format.parquet` (one record per row, with nested structures as nested columns per the declared record schema; internal compression). Platforms advertising this Common Feed version MUST support both core values. Extensions register their own values under their namespaces, e.g. `com.provider.format.tsv`; third-party format support is optional. A Platform MUST use the full identifier when determining format support, MUST NOT infer a decoder from its suffix, and MUST NOT consume a snapshot with an unrecognized format. Record conformance remains declared by `ucp.capabilities`. The Business MUST set the feed list entry's `format` and the `format` in the manifest referenced by that entry's `manifest` URL to the same value. The manifest is authoritative. A Platform that fetches the manifest and finds that these values differ MUST NOT consume the snapshot.",
           "examples": [
-            "jsonl+gzip",
-            "parquet"
+            "dev.ucp.common.format.jsonl",
+            "dev.ucp.common.format.parquet"
           ],
           "ucp_request": "omit"
         },

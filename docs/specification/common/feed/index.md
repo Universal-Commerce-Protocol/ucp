@@ -18,16 +18,17 @@
 
 * **Capability Name:** `dev.ucp.common.feed`
 
-A feed is a materialized publication of records: the same records a Platform
-would receive from a capability's live operations, published in bulk as files
-so the Platform can index, embed, and rank them offline, then call the live
-operations at serving time for the authoritative values. The capability adds
-one endpoint declaration and two document shapes (a feed list and a manifest);
-it adds no record data model. The shape of a feed's records is declared by the
-manifest's `ucp.capabilities`, and the capability that defines those records
-remains authoritative at serving time. The feed and the live capability are
-complementary: the feed is point-in-time, the live operations are
-authoritative.
+A feed is a point-in-time publication of records—each representing one logical
+data item—delivered in bulk as files. Records normally use a UCP-defined shape
+from a service or capability, so a Platform can discover them in bulk, then
+call corresponding live operations for authoritative serving-time values. A
+Business **MAY** publish feeds using a custom record shape through a record-type
+extension negotiated with the Platform, and **MAY** publish feeds without
+corresponding live operations.
+
+Common Feed adds one endpoint declaration, a feed list, and a manifest; it
+defines no record model. The manifest's `ucp.capabilities` declares the record
+type, defined by an extension of Common Feed.
 
 The capability is built from UCP primitives. Discovery is a capability whose
 `config` names the endpoint that serves the feed list. Market scope is the UCP
@@ -153,7 +154,7 @@ Platform outside this capability.
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "jsonl+gzip",
+      "format": "dev.ucp.common.format.jsonl",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
@@ -165,7 +166,7 @@ Platform outside this capability.
         "language": "fr-CA",
         "currency": "CAD"
       },
-      "format": "jsonl+gzip",
+      "format": "dev.ucp.common.format.jsonl",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:10:00Z",
       "manifest": "https://merchant.example.com/feeds/ca-fr-cad/20260922T061000Z/manifest.json"
@@ -182,11 +183,11 @@ A feed list entry is the Business's advertisement of one feed and a pointer to
 its current snapshot. The entry is for discovery; the manifest is
 authoritative for what a snapshot contains.
 
-An entry does not name the record type of its feed; the manifest's
-`ucp.capabilities` does. A feed list may mix feeds of several record types, so
-a Platform that consumes only some of them fetches the manifest of an entry on
-first sight and, if the manifest declares a record type the Platform does not
-consume, remembers the `id` and skips the entry on later polls.
+An entry does not name its snapshot's record type; the manifest's
+`ucp.capabilities` declarations do. A feed list may mix feeds of several
+record types. A Platform does not consume snapshots whose record types it
+does not recognize (see [Manifest](#manifest)) and **MAY** skip entries with
+unrecognized `format` values without fetching their manifests.
 
 `id` is a Business-assigned, stable identifier, opaque to Platforms. The
 Business **MUST** keep `id` unique within its feed list and stable across
@@ -202,12 +203,13 @@ declared `config.endpoint` returned it, not because of its hostname (see
 [Access and Provenance](#access-and-provenance)). A Platform **MUST NOT**
 dereference a `manifest` value that is not an absolute HTTPS URL.
 
-`format` is the wire encoding of every file in the feed's current snapshot
-(see [Formats](#formats)). It equals the current manifest's `format`, which is
-authoritative; the Business **MUST** keep the two equal, and a Platform that
-fetches the manifest and finds a different value **MUST NOT** consume that
-snapshot. A Platform **MAY** skip an entry whose `format` it does not
-recognize without fetching its manifest.
+`format` is the specification-defined reverse-domain format identifier for
+every file in the feed's current snapshot (see [Formats](#formats)). The
+Business **MUST** set each feed-list entry's `format` to the same value as the
+`format` in the manifest it references. A Platform that fetches the manifest
+and finds different values **MUST NOT** consume that snapshot. A Platform
+**MAY** skip an entry whose `format` it does not recognize without fetching
+its manifest.
 
 A Business **MAY** publish the same content in more than one format, as
 separate entries with the same `context` and distinct `id`s. It **SHOULD**
@@ -296,7 +298,7 @@ carries no UCP request headers:
     }
   },
   "id": "us-en-usd",
-  "format": "jsonl+gzip",
+  "format": "dev.ucp.common.format.jsonl",
   "context": {
     "address_country": "US",
     "language": "en-US",
@@ -358,6 +360,17 @@ no version to validate the document against.
 * An entry that extends the record type adds fields to records. A Platform
   **MAY** ignore fields from one it does not recognize.
 
+For every record type, including custom record types, the Business **MUST**
+use stable entity identifiers that it can resolve in related operations. The
+record-type specification defines which identifiers corresponding operations
+accept and what they identify. Where those operations are advertised, the
+Business **MUST** resolve those identifiers to the same entities. Publishing a
+feed does not require advertising those operations.
+
+A Platform handles resolution failures through the corresponding operation's
+error contract. Stable identity does not guarantee availability or transaction
+success.
+
 A Platform **MUST NOT** consume a snapshot that declares an extension entry it
 cannot place in either group. A Platform validates records against the declared
 schemas and handles records that do not conform as [Malformed
@@ -374,8 +387,8 @@ carry, and a manifest's `ucp.capabilities` to learn which ones a snapshot
 extension that its profile does not advertise; a Platform that finds one
 **MUST NOT** consume the snapshot.
 
-An extension that changes the file layout **MUST** register its own `format`
-value, so that `format` remains the single compatibility signal. A Platform
+A `format` value identifies the file contract, not record conformance, which
+is declared by `ucp.capabilities` (see [Formats](#formats)). A Platform
 that recognizes every declared extension but not the `format` **MUST NOT**
 consume the snapshot, and a Platform that recognizes the record type and the
 `format` **MAY** consume the snapshot regardless of unrecognized field-adding
@@ -414,7 +427,7 @@ A feed is resolved for one `context`: the conditions under which every record
 in it was resolved, each member single-valued. The record type states which
 members its feeds use and what each means. A Business that materializes more
 than one `context` publishes separate feeds, one per `context`, or one per
-`context` and `format` where it offers more than one encoding.
+`context` and `format` where it offers more than one format.
 
 A Platform serves a feed's records only under conditions that match the feed's
 `context`. A Platform **MUST NOT** consume a feed whose `context` carries a
@@ -492,20 +505,31 @@ transient failure (for example, HTTP 503 with `Retry-After`).
 
 ## Formats
 
-`format` is an open string vocabulary naming the wire encoding of every file
-in a manifest. Compression is part of the token, not a separate field. This
-version registers two values:
+`format` is an open vocabulary of reverse-domain format identifiers. Each
+value is defined by its owning specification, which describes the record
+layout, serialization, and compression; it is not merely an encoding label.
+Common Feed registers these two core values:
 
-| `format` | Encoding |
+| `format` | Format contract |
 | :--- | :--- |
-| `jsonl+gzip` | One JSON record per line, gzip-compressed. |
-| `parquet` | One record per row across one or more files, with nested structures as nested columns per the record schema. Compression is internal to Parquet and not part of the token. |
+| `dev.ucp.common.format.jsonl` | One JSON record per line, gzip-compressed. |
+| `dev.ucp.common.format.parquet` | One record per row, with nested structures as nested columns per the declared record schema. Compression is internal to Parquet. |
 
-The Business **MUST** use a registered value for `format`. A Platform **MUST**
-support every value registered in the version of this capability it
-advertises (in this version, both `jsonl+gzip` and `parquet`), so that any
-conforming feed is consumable. A Platform that does not recognize a manifest's
-`format` **MUST NOT** consume that snapshot.
+Extension owners register additional values in their own namespaces, for
+example `com.provider.format.tsv`, by defining them in their extension
+specifications.
+
+The Business **MUST** use a `format` value defined by Common Feed or by an
+extension declared in the manifest's `ucp.capabilities`. A Platform **MUST**
+use the full identifier when determining format support, **MUST NOT** infer a
+decoder from its suffix, and **MUST NOT** consume a snapshot whose format is
+unrecognized or not defined by Common Feed or an extension declared in that
+manifest.
+
+A Platform advertising this version of Common Feed **MUST** support both core
+values. Support for third-party values is optional. Supporting a format does
+not imply support for every record type; record conformance is declared
+separately by the manifest's `ucp.capabilities` (see [Manifest](#manifest)).
 
 The support obligation sits with Platforms because a Platform is one
 implementation while Businesses are many; it also lets a Business materialize
@@ -559,11 +583,10 @@ Record shape extends as operation responses do: an extension declared in the
 manifest's `ucp.capabilities` adds typed fields to records, exactly as it does
 for the responses of the capability that defines them.
 
-An extension that changes the file layout **MUST** register a distinct
-`format` value for it (see [Formats](#formats)); an extension **MAY** define
-additional manifest fields, composing onto the manifest. Feed list entries
-are shared by every feed in the list and take no extension fields. An
-extension **MUST NOT** redefine the fields in this document.
+An extension **MAY** define additional manifest fields, composing onto the
+manifest. Feed list entries are shared by every feed in the list and take no
+extension fields. An extension **MUST NOT** redefine the fields in this
+document.
 
 ### Supplemental Feeds
 
@@ -576,14 +599,15 @@ it as to any other manifest.
 
 Records join on `id`. A record type that supports supplemental feeds **MUST**
 give each record an `id`: a Business-assigned identifier, opaque to Platforms,
-stable across snapshots, unique among the records of a feed, and the same
-identifier the Business's operations for that record type accept. It **MUST**
+stable across snapshots, and unique among the records of a feed. It **MUST**
 declare which of its lists are identified and give each element of an
 identified list an `id` with the same properties, unique within the list. A
 Platform applies a supplemental record to the base record with the same `id`
 and, inside an identified list, each supplemental element to the base element
 with the same `id`; each matches at most one. Lists the record type does not
-declare identified are replaced whole.
+declare identified are replaced whole. The record-type specification defines
+any correspondence between these identifiers and the Business's live
+operations.
 
 `id` is the Business's, whoever publishes the feed. A party that publishes a
 supplemental feed for the Business **MUST** use the Business's identifiers in
@@ -629,7 +653,8 @@ currency.
     therefore correct a Product and the variants inside it in one step, and the
     Business, not the Platform, is responsible for the composed record being
     coherent. Joining on `id` is also why no join key is declared: `id` is the
-    one member every record type guarantees present and unique. A publisher
+    one member every record type that supports supplemental feeds guarantees
+    present and unique. A publisher
     that carries a stable identifier of its own on the base, such as a feed
     manager's, could be allowed to name it as the join key in a later version,
     as an optional member defaulting to `id`.

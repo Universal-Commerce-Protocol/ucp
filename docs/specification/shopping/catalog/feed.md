@@ -87,20 +87,29 @@ serves every feed the Business publishes, whatever its record type.
 ## Records
 
 In this capability a record is a catalog [Product](index.md#product) with its
-nested `variants`, exactly as returned by Catalog Search, conforming to the
-schemas of the capabilities declared in the manifest's `ucp.capabilities`.
+nested `variants`, using the same Product shape as Catalog Search and
+conforming to the schemas of the capabilities declared in the manifest's
+`ucp.capabilities`.
 
-* For `jsonl+gzip`, each line is one Product.
-* For `parquet`, each row is one Product with `variants` as a nested column;
-  a snapshot may span several files.
+* For `dev.ucp.common.format.jsonl`, each line is one Product.
+* For `dev.ucp.common.format.parquet`, each row is one Product with `variants`
+  as a nested column; a snapshot may span several files.
 
-Records carry the Business's own identity. The Business **MUST** carry in each
-record the same product and variant identifiers that its Catalog Lookup
-resolves. A Business that publishes through a delegate remains responsible for
-the feed; it **MAY** include additional identifiers assigned by the delegate
-but **MUST NOT** replace its own. A Platform that resolves a feed
-identifier through Catalog Lookup at serving time observes a violation as a
-`not_found` outcome and handles it as it would for any unresolved identifier.
+Records carry the Business's own identity. The Business **MUST** use stable,
+Business-owned Product and Variant identifiers in each record. Where Catalog
+Lookup is advertised, the Business **MUST** resolve those Product and Variant
+identifiers to the same entities. Where Cart or Checkout operations are
+advertised, the Business **MUST** accept those Variant identifiers as `item.id`
+to identify the same Variants. Publishing a catalog feed does not require
+advertising corresponding live operations.
+
+A Business that publishes through a
+[third-party feed publisher](../../common/feed/index.md#discovery) remains
+responsible for the feed. The Business **MAY** include additional identifiers
+assigned by that publisher, but **MUST NOT** replace its own entity
+identifiers. A Platform handles resolution failures through the corresponding
+operation’s error contract. Stable identity does not guarantee availability or
+purchase success.
 
 ## Context
 
@@ -108,10 +117,10 @@ A catalog feed is resolved for one market. Its `context` **SHOULD** carry
 `address_country`, `language`, and `currency`; `CA`/`en-CA`/`CAD` and
 `CA`/`fr-CA`/`CAD` are two feeds. A Business that materializes sub-national
 markets **MAY** scope a feed further with `address_region` or `postal_code`. A
-catalog feed **SHOULD NOT** be scoped by members that describe a buyer rather
+catalog feed **SHOULD NOT** be scoped by members that describe a Buyer rather
 than a market (`location`, `eligibility`, `intent`, `payment`); a Platform
-obtains those resolutions, and the authoritative price and availability, from
-Catalog Search or Catalog Lookup at serving time.
+obtains those Buyer-specific resolutions and the authoritative serving-time
+price and availability from Catalog Search or Catalog Lookup when advertised.
 
 ## Filters
 
@@ -140,7 +149,7 @@ restricted to footwear. It declares both `dev.ucp.common.feed` and
     }
   },
   "id": "ca-fr-cad",
-  "format": "jsonl+gzip",
+  "format": "dev.ucp.common.format.jsonl",
   "context": {
     "address_country": "CA",
     "language": "fr-CA",
@@ -164,10 +173,13 @@ restricted to footwear. It declares both `dev.ucp.common.feed` and
 
 In a [supplemental feed](../../common/feed/index.md#supplemental-feeds) over a
 catalog feed, Product satisfies the record-type requirements for supplemental
-feeds. A Product's `id` and each Variant's `id` are the identifiers [Catalog
-Lookup](lookup.md) resolves, a Variant's `id` being the `item.id` checkout
-accepts, and `variants` is the identified list (see [Records](#records)). A
-supplemental record matches a Product by `id` and each of its variants by `id`.
+feeds. A Product's `id` and each Variant's `id` are stable, Business-owned
+Product and Variant identifiers, with the same bindings as in
+[Records](#records) when the corresponding live operations are advertised:
+Catalog Lookup resolves them to the same entities, and Cart and Checkout
+accept Variant identifiers as `item.id`. The `variants` list is the identified
+list. A supplemental record matches a Product by `id` and each of its variants
+by `id`.
 Every other member is replaced whole: a supplement that carries a variant's
 `price` carries `amount` and `currency`; one that carries `availability`
 carries the whole object.
@@ -200,7 +212,7 @@ only prices, rolls every two hours as gzipped JSON Lines:
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "parquet",
+      "format": "dev.ucp.common.format.parquet",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
@@ -213,7 +225,7 @@ only prices, rolls every two hours as gzipped JSON Lines:
         "language": "en-CA",
         "currency": "CAD"
       },
-      "format": "jsonl+gzip",
+      "format": "dev.ucp.common.format.jsonl",
       "interval": "PT2H",
       "generated_at": "2026-09-22T10:00:00Z",
       "manifest": "https://merchant.example.com/feeds/ca-en-cad/20260922T100000Z/manifest.json"
@@ -241,7 +253,7 @@ The supplemental manifest repeats `extends`, `context`, and
   },
   "id": "ca-en-cad",
   "extends": "us-en-usd",
-  "format": "jsonl+gzip",
+  "format": "dev.ucp.common.format.jsonl",
   "context": {
     "address_country": "CA",
     "language": "en-CA",
@@ -358,7 +370,7 @@ Feed list as provisioned to the marketplace in this example:
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "jsonl+gzip",
+      "format": "dev.ucp.common.format.jsonl",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
@@ -371,7 +383,7 @@ Feed list as provisioned to the marketplace in this example:
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "jsonl+gzip",
+      "format": "dev.ucp.common.format.jsonl",
       "interval": "P7D",
       "generated_at": "2026-09-21T00:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd-compliance/3f9c2a7e-5b41-4d8e-9c0a-1e6f7b2d8a54/manifest.json"
@@ -403,7 +415,7 @@ follow:
   },
   "id": "us-en-usd-compliance",
   "extends": "us-en-usd",
-  "format": "jsonl+gzip",
+  "format": "dev.ucp.common.format.jsonl",
   "context": {
     "address_country": "US",
     "language": "en-US",
