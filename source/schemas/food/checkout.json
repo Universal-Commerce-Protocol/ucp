@@ -16,6 +16,40 @@
     "links"
   ],
   "additionalProperties": true,
+  "anyOf": [
+    {
+      "properties": {
+        "food_establishment": {
+          "ucp_request": {
+            "create": "required",
+            "update": "omit",
+            "complete": "omit"
+          },
+          "ucp_response": "omit"
+        },
+        "line_items": {
+          "ucp_request": {
+            "create": "required",
+            "update": "omit",
+            "complete": "omit"
+          },
+          "ucp_response": "omit"
+        }
+      }
+    },
+    {
+      "properties": {
+        "cart_id": {
+          "ucp_request": {
+            "create": "required",
+            "update": "omit",
+            "complete": "omit"
+          },
+          "ucp_response": "omit"
+        }
+      }
+    }
+  ],
   "properties": {
     "ucp": {
       "$ref": "../ucp.json#/$defs/response_checkout_schema",
@@ -28,7 +62,7 @@
     },
     "food_establishment": {
       "$ref": "../common/types/location_summary.json",
-      "description": "Food establishment location the checkout is associated with.",
+      "description": "Food establishment location the checkout is associated with. In create requests, required when initializing with inline `line_items` and optional when initializing via `cart_id`. Required in update requests and checkout responses.",
       "ucp_request": {
         "create": "optional",
         "update": "required",
@@ -40,12 +74,22 @@
       "items": {
         "$ref": "types/line_item.json"
       },
-      "description": "List of dishes being checked out.",
+      "description": "List of dishes being checked out. In create requests, the Platform MUST include `line_items` (with `food_establishment`) or `cart_id`, and MAY include both. The Platform MUST include `line_items` in update requests and omits it from complete requests. The Business MUST include `line_items` in checkout responses.",
       "ucp_request": {
-        "create": "required",
+        "create": "optional",
         "update": "required",
         "complete": "omit"
       }
+    },
+    "cart_id": {
+      "type": "string",
+      "description": "Cart ID for checkout initialization, referencing a cart from a negotiated Cart capability (`dev.ucp.food.cart`) or an out-of-band cart mutually recognized by the Platform and Business. The Business MUST reject requests with an unsupported or unrecognized `cart_id`. Cart contents (`food_establishment`, `line_items`, `context`, `buyer`) take precedence over overlapping checkout fields; `food_establishment` and `line_items` may be omitted or empty.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "omit",
+        "complete": "omit"
+      },
+      "ucp_response": "omit"
     },
     "buyer": {
       "$ref": "types/buyer.json",

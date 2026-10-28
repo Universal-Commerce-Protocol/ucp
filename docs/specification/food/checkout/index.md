@@ -316,10 +316,10 @@ The following snippets illustrate canonical food pricing patterns:
     ]
     ```
 
-=== "Pattern 3: Promotions & Delivery Pass"
+=== "Pattern 3: Promotions & Free Delivery"
 
     A dish-level promotion (`items_discount`), an order-level promo code
-    (`discount`), and a delivery-pass membership that waives the delivery fee:
+    (`discount`), and free delivery:
 
     <!-- ucp:example schema=food/checkout target=$.totals op=read -->
     ```json
@@ -327,7 +327,7 @@ The following snippets illustrate canonical food pricing patterns:
       { "type": "subtotal", "display_text": "Subtotal", "amount": 5000 },
       { "type": "items_discount", "display_text": "Free Garlic Knots", "amount": -600 },
       { "type": "discount", "display_text": "Promo WELCOME10", "amount": -440 },
-      { "type": "fulfillment", "display_text": "Delivery (Free with Pass)", "amount": 0 },
+      { "type": "fulfillment", "display_text": "Free Delivery", "amount": 0 },
       { "type": "fee", "display_text": "Service Fee", "amount": 350 },
       { "type": "tax", "display_text": "Tax (8.75%)", "amount": 346 },
       { "type": "tip", "display_text": "Courier Tip (18%)", "amount": 900 },
@@ -456,18 +456,27 @@ buyer confirmation before submitting payment.
 
 ### Cart-to-Checkout Conversion
 
-A Platform can create a checkout by passing `cart_id`. Conversion follows
-[Cart — Cart-to-Checkout Conversion](../../shopping/cart/index.md#cart-to-checkout-conversion):
-the Business populates the session from the cart's `food_establishment`,
-`line_items[]` (dishes, modifications, and notes), `buyer`, and `context`, and
-ignores overlapping fields in the request. Checkout-only fields — `tip`,
-`fulfillment`, `payment` — **MAY** be sent alongside `cart_id`.
+The Platform can create a checkout when the Platform and Business share an
+out-of-band communicated cart identifier that both parties acknowledge (for
+example, a pre-built basket built on the food establishment's web/app surface).
 
-<!-- ucp:example schema=food/cart def=checkout op=create direction=request -->
+Conversion follows
+[Cart — Cart-to-Checkout Conversion](../../shopping/cart/index.md#cart-to-checkout-conversion):
+the Business initializes the session from the cart's `food_establishment`,
+`line_items[]` (dishes, modifications, and notes), `buyer`, and `context`, and
+**MUST** ignore overlapping fields in the request. The Platform **MAY** omit
+`food_establishment` and `line_items` (or send `"line_items": []`) when
+providing `cart_id`. Checkout-only fields — `tip`, `fulfillment`, `payment` —
+**MAY** be sent alongside `cart_id`. The Business **MUST** reject requests
+containing `cart_id` if an out-of-band cart source is recognized,
+and **MUST NOT** silently fall back to inline `line_items`.
+`cart_id` is an initialization input only and is omitted
+from checkout responses.
+
+<!-- ucp:example schema=food/checkout op=create direction=request -->
 ```json
 {
   "cart_id": "cart_food_8912",
-  "line_items": [],
   "tip": { "custom_amount": 500 }
 }
 ```
@@ -768,6 +777,18 @@ The Checkout capability defines the following logical operations:
 ### Create Checkout
 
 Invoked when the buyer expresses intent to order from a food establishment.
+
+The create request initializes the checkout from one of two sources:
+`food_establishment` and `line_items` provided inline, or the contents of a cart
+identified by `cart_id` — e.g., an out-of-band communicated cart that both the Platform
+and Business acknowledge (see
+[Cart-to-Checkout Conversion](#cart-to-checkout-conversion) and
+[Shopping Checkout — Create Checkout](../../shopping/checkout/index.md#create-checkout)).
+The Business **MUST** reject a create request that provides `cart_id` when
+out-of-band cart resolution is supported (or when `cart_id` cannot be resolved),
+and **MUST NOT** ignore `cart_id` and initialize the checkout from inline
+`line_items` instead. The Business **MUST** also reject a create request
+that provides neither inline items nor `cart_id`.
 
 {{ method_fields('create_checkout', 'food/rest.openapi.json', 'food/checkout') }}
 
