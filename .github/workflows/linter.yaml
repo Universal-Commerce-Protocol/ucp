@@ -23,9 +23,10 @@ on:
       - ".github/workflows/linter.yaml"
       - ".github/linters/**"
       - ".pre-commit-config.yaml"
+      - ".prettierignore"
+      - ".prettierrc"
+      - ".stylelintrc.json"
       - "pyproject.toml"
-      - "package.json"
-      - "package-lock.json"
       - "biome.json"
       - "scripts/**"
       - "source/**"
@@ -54,6 +55,7 @@ jobs:
           DEFAULT_BRANCH: ${{ github.base_ref }}
           MULTI_STATUS: false
           ENABLE_GITHUB_PULL_REQUEST_SUMMARY_COMMENT: false
+          CSS_FILE_NAME: ../../.stylelintrc.json
           MARKDOWN_CONFIG_FILE: ".markdownlint.json"
           PYTHON_RUFF_CONFIG_FILE: ../../pyproject.toml
           PYTHON_RUFF_FORMAT_CONFIG_FILE: ../../pyproject.toml
