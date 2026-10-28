@@ -654,10 +654,13 @@ where every account is a hosted mailbox); the grant asserts
 `email_verified` as the JSON boolean `true`; the existing account's
 address was verified by the business itself, not imported from an IdP
 claim; and neither the grant's `(iss, sub)` nor the account is already
-linked to a conflicting counterpart. Once linked, the business **MUST**
-resolve that account by `(iss, sub)` and **MUST NOT** re-target the link
-on a later change to `email`. Businesses **SHOULD** notify the account
-holder when a link is created this way. The cross-IdP risks in
+linked to a conflicting counterpart (for example, the account is
+already linked to a different `sub` from the same `iss`, or the grant's
+`(iss, sub)` is already linked to a different account). Once linked,
+the business **MUST** resolve that account by `(iss, sub)` and
+**MUST NOT** re-target the link on a later change to `email`.
+Businesses **SHOULD** notify the account holder when a link is created
+this way. The cross-IdP risks in
 [Security Considerations](#security-considerations) remain the
 business's to assess per domain, including the provider's
 address-recycling policy. DNS delegation per
