@@ -31,6 +31,7 @@ on:
       - "source/**"
       - "docs/**"
       - "*.py"
+      - "*.md"
 
 permissions:
   contents: read      # Required to checkout the code
