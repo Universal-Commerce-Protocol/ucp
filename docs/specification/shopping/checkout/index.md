@@ -1094,6 +1094,10 @@ general replacement rule does not apply during `complete_in_progress` because
 Update Checkout is not permitted; see
 [Accepted completion](#accepted-completion) for the frozen operation contract.
 
+Platforms send parent line items only; businesses MUST ignore, and MUST NOT
+reject, line items carrying `parent_id` (see
+[Nested Line Items](#nested-line-items)).
+
 {{ method_fields('update_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
 ### Complete Checkout
@@ -1223,6 +1227,182 @@ requirements.
 
 {{ schema_fields('types/line_item_resp', 'shopping/checkout') }}
 
+#### Nested Line Items
+
+`line_items[]` is flat. A line item carrying `parent_id` is a component of the
+line item with that `id`; the parent and its components together form a bundle
+— one purchasable unit, priced as a whole, composed of individually
+identifiable products.
+
+`parent_id` MUST reference the `id` of a different line item in the same
+`line_items[]` array. Nesting is one level deep: a line item carrying
+`parent_id` MUST NOT be referenced as the `parent_id` of another line item.
+
+A component's `quantity` is the total quantity across all units of the parent
+bundle.
+
+Components describe what the buyer receives, not what the buyer additionally
+pays. Component `totals[]` are a breakdown of the parent's `totals[]`, never
+additive to them — the same containment contract that governs
+[sub-lines](#sub-lines-lines) within a totals entry.
+
+**Invariant:** the sum of component `totals[type=total].amount` values MUST
+equal the bundle parent's `totals[type=subtotal].amount`.
+
+For example, a business may discount an individual component and apply an
+additional discount to the bundle. The component's discounted amount contributes
+to the bundle subtotal; the bundle discount then reduces that subtotal.
+
+Aggregation over `line_items[]` counts lines without `parent_id` only. Line items
+carrying `parent_id` MUST be excluded from `subtotal`, from `items_discount`,
+and from any platform verification sum; including them double-counts the
+bundle.
+
+`parent_id` establishes containment without asserting the nature of the
+relationship. This section defines the default semantics — bundle. A
+discriminator for other parent-child relationships is left to an extension.
+
+##### Submission
+
+Update operations perform a full replacement of `line_items[]`. Platforms send
+parent line items only. Businesses MUST NOT reject a request carrying line
+items with `parent_id`; those entries are ignored, and the business composes
+the component structure in the response. The business is authoritative for
+component membership, structure, and pricing.
+
+Bundles are formed in one of two directions, both converging on the same
+steady state:
+
+| Formation | Platform sends                         | Business returns                               |
+| --------- | -------------------------------------- | ---------------------------------------------- |
+| Expand    | The bundle product as one line item    | The parent plus its components                 |
+| Merge     | The constituent products as line items | A parent whose components are those line items |
+
+After the first response, subsequent requests address the parent: its `id` and
+`quantity` are the handle for the bundle. Businesses re-derive component
+structure when their inputs change; nothing here requires parentage to be
+recomputed on every request.
+
+##### Example
+
+A two-component bundle. Components break down the parent's amounts; the
+checkout-level `subtotal` counts the parent only.
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
+  "id": "chk_abc123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_kit",
+      "item": { "id": "prod_starter_kit", "title": "Coffee Starter Kit", "price": 5300 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 5300 },
+        { "type": "items_discount", "display_text": "Bundle Savings", "amount": -500 },
+        { "type": "total", "amount": 4800 }
+      ]
+    },
+    {
+      "id": "li_mug",
+      "parent_id": "li_kit",
+      "item": { "id": "prod_mug", "title": "Ceramic Mug", "price": 2000 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 2000 },
+        { "type": "items_discount", "amount": -200 },
+        { "type": "total", "amount": 1800 }
+      ]
+    },
+    {
+      "id": "li_beans",
+      "parent_id": "li_kit",
+      "item": { "id": "prod_beans", "title": "House Blend, 1kg", "price": 3500 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 3500 },
+        { "type": "total", "amount": 3500 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "display_text": "Subtotal", "amount": 5300 },
+    { "type": "items_discount", "display_text": "Item Discounts", "amount": -500 },
+    { "type": "total", "display_text": "Total", "amount": 4800 }
+  ],
+  "links": []
+}
+```
+
+Component totals sum to the bundle subtotal: `1800 + 3500 == 5300`. The mug's
+`200` discount is already reflected in that subtotal. The additional bundle
+discount gives `5300 - 500 == 4800`; the checkout counts the parent only.
+
+Raising the bundle quantity. The platform sends the parent only:
+
+<!-- ucp:example schema=shopping/checkout op=update direction=request -->
+```json
+{
+  "line_items": [
+    { "id": "li_kit", "item": { "id": "prod_starter_kit" }, "quantity": 2 }
+  ]
+}
+```
+
+The business returns the recomposed bundle:
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
+  "id": "chk_abc123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_kit",
+      "item": { "id": "prod_starter_kit", "title": "Coffee Starter Kit", "price": 5300 },
+      "quantity": 2,
+      "totals": [
+        { "type": "subtotal", "amount": 10600 },
+        { "type": "items_discount", "display_text": "Bundle Savings", "amount": -1000 },
+        { "type": "total", "amount": 9600 }
+      ]
+    },
+    {
+      "id": "li_mug",
+      "parent_id": "li_kit",
+      "item": { "id": "prod_mug", "title": "Ceramic Mug", "price": 2000 },
+      "quantity": 2,
+      "totals": [
+        { "type": "subtotal", "amount": 4000 },
+        { "type": "items_discount", "amount": -400 },
+        { "type": "total", "amount": 3600 }
+      ]
+    },
+    {
+      "id": "li_beans",
+      "parent_id": "li_kit",
+      "item": { "id": "prod_beans", "title": "House Blend, 1kg", "price": 3500 },
+      "quantity": 2,
+      "totals": [
+        { "type": "subtotal", "amount": 7000 },
+        { "type": "total", "amount": 7000 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "display_text": "Subtotal", "amount": 10600 },
+    { "type": "items_discount", "display_text": "Item Discounts", "amount": -1000 },
+    { "type": "total", "display_text": "Total", "amount": 9600 }
+  ],
+  "links": []
+}
+```
+
 ### Link
 
 {{ schema_fields('types/link', 'shopping/checkout') }}
@@ -1351,15 +1531,15 @@ escalate and ask for buyer review via `continue_url`.
 
 #### Well-Known Types
 
-| Type              | Sign | Default label    | Meaning                                   |
-| ----------------- | ---- | ---------------- | ----------------------------------------- |
-| `subtotal`        | +    | Subtotal         | Sum of line item prices                   |
-| `discount`        | −    | Discount         | Order or line-item level discount         |
-| `items_discount`  | −    | Item Discounts   | Rollup of line-item discounts             |
-| `fulfillment`     | +    | Shipping         | Shipping, delivery, or pickup charges     |
-| `tax`             | +    | Tax              | Tax charges                               |
-| `fee`             | +    | Fee              | Fees and surcharges                       |
-| `total`           | =    | Total            | Authoritative grand total (exactly one)   |
+| Type              | Sign | Default label    | Meaning                                                      |
+| ----------------- | ---- | ---------------- | ------------------------------------------------------------ |
+| `subtotal`        | +    | Subtotal         | Sum of line item prices; nested components excluded          |
+| `discount`        | −    | Discount         | Order or line-item level discount                            |
+| `items_discount`  | −    | Item Discounts   | Rollup of line-item discounts; nested components excluded    |
+| `fulfillment`     | +    | Shipping         | Shipping, delivery, or pickup charges                        |
+| `tax`             | +    | Tax              | Tax charges                                                  |
+| `fee`             | +    | Fee              | Fees and surcharges                                          |
+| `total`           | =    | Total            | Authoritative grand total (exactly one)                      |
 
 When `display_text` is provided, platforms MUST use it. When omitted on a
 well-known type, platforms SHOULD use the default label above. The sign
@@ -1370,6 +1550,10 @@ convention for well-known types is schema-enforced: subtractive types
 The `type` field is an open string — businesses MAY use values beyond the
 well-known set. Unknown types MUST include `display_text` (schema-enforced)
 and the sign on the amount is self-describing.
+
+Sums over `line_items[]` count lines without `parent_id` only — lines carrying
+`parent_id` are a breakdown of their parent and MUST NOT be counted again (see
+[Nested Line Items](#nested-line-items)).
 
 #### Repeating Types
 
