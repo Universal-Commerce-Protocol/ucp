@@ -30,6 +30,7 @@ Adhere strictly to the following parameters when editing the repository:
 * **Schemas:** Edit JSON schemas only in the `source/` directory. Maintain all `ucp_*` annotations.
 * **Commits:** Use Conventional Commits (e.g., `feat: add gateway`, `docs: update guide`). Use a `!` for breaking changes (e.g., `feat!: remove buyer field`).
 * **Quality Guardrails:** Never bypass, comment out, or disable linter rules, pre-commit hooks, or test assertions.
+* **Namespace & Scope Boundary:** This repository contains generic, cross-organization specifications and schemas under the `dev.ucp.*` namespace. Organization- or vendor-specific capabilities, extensions, and payment handlers (`com.{vendor}.*`, `org.{org}.*`) must be [self-hosted on the organization's own domain](https://ucp.dev/latest/specification/overview/#namespace-governance) and must not be added to this repository.
 * **Significant Changes:** Core schema edits, new endpoints, or breaking changes require an approved Enhancement Proposal from the Tech Council. See [CONTRIBUTING.md](https://raw.githubusercontent.com/Universal-Commerce-Protocol/.github/main/CONTRIBUTING.md#significant-changes) for details.
 * **Documentation:** Sync any MkDocs navigation additions (`mkdocs.yml`) with the `llmstxt` plugin section to ensure that content is discoverable and legible by agents.
 
