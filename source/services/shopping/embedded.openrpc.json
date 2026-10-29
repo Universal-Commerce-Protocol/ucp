@@ -82,6 +82,7 @@
       "params": [
         {
           "name": "type",
+          "required": true,
           "schema": {"$ref": "#/components/schemas/type"}
         }
       ],
@@ -425,6 +426,7 @@
       "params": [
         {
           "name": "type",
+          "required": true,
           "schema": {"$ref": "#/components/schemas/type"}
         }
       ],
