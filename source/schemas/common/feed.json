@@ -151,7 +151,7 @@
     },
     "manifest": {
       "type": "object",
-      "description": "The document at a feed entry's `manifest` URL: a complete materialization of one feed as of `generated_at`. Identified by (`id`, `generated_at`); once published, neither the manifest document nor its files change, and a correction is a new snapshot with a later `generated_at`. The manifest is authoritative; the feed list entry is for discovery.",
+      "description": "The document at a feed entry's `manifest` URL: a complete materialization of one feed as of `generated_at`. Identified by (`id`, `generated_at`); once published, the manifest document does not change, and a correction is a new snapshot with a later `generated_at` and a distinct manifest URL. The manifest is authoritative; the feed list entry is for discovery.",
       "required": [
         "ucp",
         "id",
@@ -240,12 +240,12 @@
         "url": {
           "type": "string",
           "format": "uri-reference",
-          "description": "Location of the file: an absolute HTTPS URL, or a reference relative to the manifest's URL. May be on any origin.",
+          "description": "Location of the file: an absolute HTTPS URL, or a reference relative to the manifest's URL. May be on any origin. File URLs SHOULD be immutable; mutable URLs require `digest` in every referring manifest.",
           "ucp_request": "omit"
         },
         "digest": {
           "type": "string",
-          "description": "RFC 9530 `Content-Digest` dictionary value for the file's bytes as served, e.g. `sha-256=:BASE64:`. Same syntax UCP uses for `Content-Digest` in signing. Optional but recommended. Verifies the file bytes against this manifest; it is not a signature and does not establish who published the file. A Platform that verifies and finds a mismatch treats the snapshot as incomplete.",
+          "description": "RFC 9530 `Content-Digest` dictionary value for the file's bytes as served, e.g. `sha-256=:BASE64:`. Same syntax UCP uses for `Content-Digest` in signing. Optional but recommended for immutable file URLs; required for mutable ones. A Platform MUST verify provided digests, including cached bytes, before treating the snapshot as complete; an unverifiable or mismatched digest leaves it incomplete. It is not a signature and does not establish who published the file.",
           "ucp_request": "omit"
         }
       }

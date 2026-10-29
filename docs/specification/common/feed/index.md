@@ -339,9 +339,8 @@ mismatch in either **MUST NOT** consume the snapshot.
 
 A snapshot is identified by (`id`, `generated_at`). The Business **MUST**
 publish strictly increasing `generated_at` values within a feed. Once a
-snapshot is published, the Business **MUST NOT** change the manifest document
-or the files it references; a correction is a new snapshot with a later
-`generated_at`.
+snapshot is published, the Business **MUST NOT** change the manifest document;
+a correction is a new snapshot with a later `generated_at`.
 `digest` lets a Platform verify file bytes against the manifest it holds; it
 does not detect a Business that republishes a snapshot together with matching
 replacement files, and it is not a signature. Authenticity of a manifest and
@@ -423,10 +422,14 @@ permitted. The Business **MUST** publish every file over HTTPS; a Platform
 `digest` is an [RFC 9530](https://www.rfc-editor.org/rfc/rfc9530)
 `Content-Digest` dictionary value over the file's bytes as served, for
 example `sha-256=:BASE64:`, the same syntax UCP uses for `Content-Digest` in
-signing. The Business **SHOULD** include `digest` on every file, unless the
+signing. The digest binds the expected bytes regardless of URL reuse. The
+Business **MUST** include `digest` for every file served at a mutable URL.
+For immutable files, the Business **SHOULD** include `digest`, unless the
 serving path re-encodes the bytes in transit so that a digest of the bytes as
-served cannot be computed in advance. A Platform that verifies `digest` and
-finds a mismatch **MUST** treat the snapshot as incomplete. `digest` is an
+served cannot be computed in advance. The Platform **MUST** verify every
+provided `digest` against the file bytes it uses, including cached bytes,
+before treating the snapshot as complete. Unverifiable or mismatched digests
+are handled as described in [Partial Fetch](#partial-fetch). `digest` is an
 integrity check over the bytes as served, not an authenticity check;
 authenticity derives from how the manifest URL was obtained (see
 [Access and Provenance](#access-and-provenance)).
@@ -473,16 +476,20 @@ nothing about other feeds.
 The Business **MUST** make all files in a manifest mutually consistent as of
 `generated_at`, and **MUST** publish every file before publishing the
 manifest that references it. The Business **MUST NOT** modify the manifest
-document or the files a snapshot references after publication at a given
-(`id`, `generated_at`); a correction is a new snapshot with a later
-`generated_at`.
+document after publication at a given (`id`, `generated_at`); a correction
+is a new snapshot with a later `generated_at`. The Business **SHOULD** use
+immutable file URLs, unless it uses mutable URLs in accordance with
+[File](#file).
 
 ### Partial Fetch
 
-A Platform that cannot retrieve every file in a manifest, or that verifies a
-`digest` and finds a mismatch, **MUST NOT** treat the snapshot as complete and
-**MUST NOT** apply removal semantics from it. The Platform keeps its prior
-copy of the feed until it applies a complete snapshot.
+A Platform that cannot retrieve every file in a manifest, cannot verify a
+provided `digest`, or finds a digest mismatch **MUST NOT** treat the snapshot
+as complete and **MUST NOT** apply removal semantics from it. The Platform
+keeps its prior copy of the feed until it applies a complete snapshot. On a
+digest verification failure, the Platform **SHOULD** re-read the feed list
+and fetch the current snapshot, unless [Etiquette](#etiquette) requires
+deferring those requests.
 
 ### Malformed Records
 
@@ -508,13 +515,14 @@ Unavailable` with `Retry-After`. A Platform that receives `Retry-After`
 
 ### Retention
 
-The Business **SHOULD** keep a manifest and its files retrievable until
-`expires_at`, unless it is required to withdraw content it is no
-longer permitted to distribute. A Platform that finds a manifest or file no
-longer retrievable, whether before or after `expires_at`, **SHOULD** re-read
-the feed list and fetch the current snapshot rather than retry the missing
-URL, unless the Business signals a transient failure (for example, HTTP 503
-with `Retry-After`).
+The Business **SHOULD** keep a manifest and the expected bytes of its files
+retrievable until `expires_at`, unless it is required to withdraw content it
+is no longer permitted to distribute. A file URL that still responds but
+serves different bytes does not satisfy this retention guidance. A Platform
+that finds a manifest or file no longer retrievable, whether before or after
+`expires_at`, **SHOULD** re-read the feed list and fetch the current snapshot
+rather than retry the missing URL, unless the Business signals a transient
+failure (for example, HTTP 503 with `Retry-After`).
 
 ## Formats
 
