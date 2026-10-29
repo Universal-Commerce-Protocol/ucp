@@ -1,0 +1,334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/incentives.json",
+  "name": "dev.ucp.shopping.incentives",
+  "title": "Incentives Extension",
+  "description": "Extends Catalog Search, Catalog Lookup, Cart, and Checkout with the offers a business is running: conditional, gated, code-based, or time-boxed promotions that cannot be expressed as a price on a variant. Response-only. Nothing here applies an offer; application stays with the Discount extension and the business remains authoritative on every amount.",
+  "$defs": {
+    "period": {
+      "title": "Incentive Period",
+      "description": "When an incentive is offered. Either bound may be omitted. Outside the period the incentive is not offered.",
+      "type": "object",
+      "properties": {
+        "start_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "First instant the incentive is offered (RFC 3339). Omitted means already in effect.",
+          "ucp_request": "omit"
+        },
+        "end_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last instant the incentive is offered (RFC 3339). Omitted means no stated end.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "benefit": {
+      "title": "Incentive Benefit",
+      "description": "What the incentive gives, typed by `type`. Well-known types: `amount_off` (carries `amount`), `percent_off` (carries `basis_points`), `fixed_price` (carries `price`), `free_shipping` (optionally carries `fulfillment_option_ids`). The vocabulary is open; a platform MUST ignore an incentive whose benefit type it does not recognize.",
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Benefit kind. Well-known values: `amount_off`, `percent_off`, `fixed_price`, `free_shipping`. Businesses MAY use reverse-domain names for custom kinds.",
+          "ucp_request": "omit"
+        },
+        "amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "For `amount_off`: the amount taken off, in the response currency. Off each targeted item; off the order subtotal when the incentive has no `targets` on a cart or checkout.",
+          "ucp_request": "omit"
+        },
+        "basis_points": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "For `percent_off`: the percentage taken off, in basis points (`1250` = 12.5%).",
+          "ucp_request": "omit"
+        },
+        "price": {
+          "$ref": "../common/types/price.json",
+          "description": "For `fixed_price`: what each targeted variant costs while the incentive applies.",
+          "ucp_request": "omit"
+        },
+        "fulfillment_option_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "For `free_shipping`: the fulfillment options whose cost becomes zero. Omitted means any option.",
+          "ucp_request": "omit"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "amount_off" } } },
+          "then": { "required": ["amount"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "percent_off" } } },
+          "then": { "required": ["basis_points"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "fixed_price" } } },
+          "then": { "required": ["price"] }
+        }
+      ]
+    },
+    "conditions": {
+      "title": "Incentive Conditions",
+      "description": "What must hold for the incentive to apply. All stated conditions must hold. Conditions are evaluated by the business at application; a platform MAY evaluate the ones it can to decide what to show.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "minimum_order_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Order subtotal the buyer must reach, in the response currency.",
+          "ucp_request": "omit"
+        },
+        "minimum_quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Units of a targeted variant the buyer must purchase.",
+          "ucp_request": "omit"
+        },
+        "eligibility": {
+          "$ref": "../common/types/reverse_domain_name.json",
+          "description": "An eligibility claim the buyer must hold and the business must accept, as in `context.eligibility` and `discounts.applied[].eligibility`.",
+          "ucp_request": "omit"
+        },
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Scopes the buyer's session must hold. Lets a business state that a gated price exists without resolving it for a caller that lacks the scope.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "targets": {
+      "title": "Incentive Targets",
+      "description": "What the incentive applies to. Every id MUST name an entity present in the same response. Omitted means every product, variant, or line item in the response.",
+      "type": "object",
+      "properties": {
+        "product_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Product ids in this response.",
+          "ucp_request": "omit"
+        },
+        "variant_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Variant ids in this response.",
+          "ucp_request": "omit"
+        },
+        "category_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Category ids as used in `product.categories`.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "incentive": {
+      "title": "Incentive",
+      "description": "One offer a business is running. Advisory until the business applies it at cart or checkout; `discounts.applied` is the record of what took effect.",
+      "type": "object",
+      "required": ["id", "title", "benefit", "application"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier, stable for this business. `approaching` entries and later responses refer to it.",
+          "ucp_request": "omit"
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable name, e.g. 'Free standard shipping over $50'.",
+          "ucp_request": "omit"
+        },
+        "description": {
+          "$ref": "../common/types/description.json",
+          "description": "Terms in plain, HTML, or Markdown form.",
+          "ucp_request": "omit"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Terms page.",
+          "ucp_request": "omit"
+        },
+        "active_period": {
+          "$ref": "#/$defs/period",
+          "description": "When the incentive is offered. Omitted means always on.",
+          "ucp_request": "omit"
+        },
+        "benefit": {
+          "$ref": "#/$defs/benefit",
+          "description": "What the incentive gives.",
+          "ucp_request": "omit"
+        },
+        "conditions": {
+          "$ref": "#/$defs/conditions",
+          "description": "What must hold for it to apply. Omitted means unconditional.",
+          "ucp_request": "omit"
+        },
+        "targets": {
+          "$ref": "#/$defs/targets",
+          "description": "What it applies to. Omitted means everything in the response.",
+          "ucp_request": "omit"
+        },
+        "application": {
+          "type": "string",
+          "enum": ["automatic", "code"],
+          "description": "`automatic` is applied by the business when the conditions hold. `code` requires the buyer to submit a code through `discounts.codes`.",
+          "ucp_request": "omit"
+        },
+        "code": {
+          "type": "string",
+          "description": "The code to submit, when `application` is `code` and the business chooses to disclose it. Absent with `application: code` means the buyer must already hold one.",
+          "ucp_request": "omit"
+        },
+        "combinable": {
+          "type": "boolean",
+          "default": true,
+          "description": "False means the incentive does not stack with others. Advisory; the business decides stacking at application.",
+          "ucp_request": "omit"
+        },
+        "provisional": {
+          "type": "boolean",
+          "description": "True if the incentive requires verification the business cannot do at this point, as in `discounts.applied[].provisional`.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "approaching": {
+      "title": "Approaching Incentive",
+      "description": "An incentive the current cart or checkout does not yet qualify for, with how far it is from qualifying.",
+      "type": "object",
+      "required": ["incentive_id"],
+      "properties": {
+        "incentive_id": {
+          "type": "string",
+          "description": "The `id` of an entry in `available`.",
+          "ucp_request": "omit"
+        },
+        "remaining_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Subtotal still needed to meet `minimum_order_amount`, in the response currency.",
+          "ucp_request": "omit"
+        },
+        "remaining_quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Units still needed to meet `minimum_quantity`.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "incentives": {
+      "title": "Incentives",
+      "description": "The incentives that apply to the entities in this response.",
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/incentive" },
+          "description": "Incentives the business is offering on what it returned.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "session_incentives": {
+      "title": "Session Incentives",
+      "description": "The incentives that apply to this cart or checkout, and the ones it is close to qualifying for.",
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/incentive" },
+          "description": "Incentives the business is offering on this session, whether or not it qualifies yet.",
+          "ucp_request": "omit"
+        },
+        "approaching": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/approaching" },
+          "description": "Entries of `available` the session does not yet qualify for, with the remaining gap.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "search_response": {
+      "allOf": [
+        { "$ref": "catalog_search.json#/$defs/search_response" },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": { "$ref": "#/$defs/incentives", "ucp_request": "omit" }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/lookup_response" },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": { "$ref": "#/$defs/incentives", "ucp_request": "omit" }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        { "$ref": "catalog_lookup.json#/$defs/get_product_response" },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": { "$ref": "#/$defs/incentives", "ucp_request": "omit" }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with incentives (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": { "$ref": "#/$defs/search_response" }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with incentives (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": { "$ref": "#/$defs/lookup_response" },
+        "get_product_response": { "$ref": "#/$defs/get_product_response" }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Incentives",
+      "description": "Cart extended with the incentives that apply to it.",
+      "allOf": [
+        { "$ref": "cart.json" },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": { "$ref": "#/$defs/session_incentives", "ucp_request": "omit" }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Incentives",
+      "description": "Checkout extended with the incentives that apply to it.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": { "$ref": "#/$defs/session_incentives", "ucp_request": "omit" }
+          }
+        }
+      ]
+    }
+  }
+}
