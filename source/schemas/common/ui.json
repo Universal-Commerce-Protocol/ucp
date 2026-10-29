@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/ui.json",
+  "name": "dev.ucp.common.ui",
+  "title": "UI Extension",
+  "description": "Extends Capabilities with an optional declarative UI rendition of the response. The containing response is the rendition's data; the response remains complete without it.",
+  "$defs": {
+    "formats": {
+      "type": "object",
+      "description": "UI formats keyed by media type (e.g. 'application/a2ui+json'). Each value is that format's own capability object, passed through verbatim as defined by the format's UCP binding.",
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "rendition": {
+      "type": "object",
+      "title": "UI Rendition",
+      "description": "A declarative rendition of the containing response in one negotiated UI format.",
+      "required": ["type", "content"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Media type of `content`. MUST be a format declared in the platform's `formats`. MUST NOT be an executable format such as HTML or JavaScript."
+        },
+        "content": {
+          "description": "Format-native payload, interpreted per the format's UCP binding. For 'application/a2ui+json': an array of A2UI messages."
+        }
+      }
+    },
+    "dev.ucp.common.ui": {
+      "platform_schema": {
+        "title": "UI Extension (Platform)",
+        "description": "Platform-level UI extension declaration. Platforms declare the UI formats they can render in 'config.formats'.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          },
+          {
+            "type": "object",
+            "required": ["config"],
+            "properties": {
+              "config": {
+                "type": "object",
+                "required": ["formats"],
+                "properties": {
+                  "formats": {
+                    "$ref": "#/$defs/formats",
+                    "description": "UI formats the platform can render, with each format's renderer capabilities."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "UI Extension (Business)",
+        "description": "Business-level UI extension declaration. Businesses MAY declare the UI formats they can emit in 'config.formats'; the declaration is informational.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "formats": {
+                    "$ref": "#/$defs/formats",
+                    "description": "UI formats the business can emit."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "title": "Catalog Search with UI",
+      "description": "Catalog Search response extended with an optional UI rendition.",
+      "allOf": [
+        {
+          "$ref": "../shopping/catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ui": {
+              "$ref": "#/$defs/rendition",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "title": "Catalog Lookup with UI",
+      "description": "Catalog Lookup response extended with an optional UI rendition.",
+      "oneOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "../shopping/catalog_lookup.json#/$defs/lookup_response"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "ui": {
+                  "$ref": "#/$defs/rendition",
+                  "ucp_request": "omit"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "../shopping/catalog_lookup.json#/$defs/get_product_response"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "ui": {
+                  "$ref": "#/$defs/rendition",
+                  "ucp_request": "omit"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with UI",
+      "description": "Cart extended with an optional UI rendition.",
+      "allOf": [
+        {
+          "$ref": "../shopping/cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ui": {
+              "$ref": "#/$defs/rendition",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
