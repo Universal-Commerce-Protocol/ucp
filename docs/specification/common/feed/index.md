@@ -620,12 +620,12 @@ carries replaces the base record's member of the same name, whole, or adds it
 where the base has none: a supplement that carries `price` carries the complete
 price, `amount` and `currency`. A member set to `null` removes the base member.
 One kind of member works differently: an *identified list*, such as a Product's
-`variants`. An identified list is not replaced. Each supplemental element updates the
-base element with the same `id` using these rules; it cannot insert or delete
-an element. Unmentioned base elements stay unchanged, and unmatched
-supplemental elements are ignored. Because members are replaced whole, an
-incomplete member, such as a `price` without `currency`, produces a composed
-record that fails validation and is handled as [Malformed
+`variants`. An identified list is not replaced. Each supplemental element
+updates the base element with the same `id` using these rules; it cannot
+insert or delete an element. Unmentioned base elements stay unchanged, and
+unmatched supplemental elements are ignored. Because members are replaced
+whole, an incomplete member, such as a `price` without `currency`, produces a
+composed record that fails validation and is handled as [Malformed
 Records](#malformed-records), rather than one that silently keeps the base
 currency.
 
@@ -653,10 +653,9 @@ currency.
     Business, not the Platform, is responsible for the composed record being
     coherent. Joining on `id` is also why no join key is declared: `id` is the
     one member every record type that supports supplemental feeds guarantees
-    present and unique. A publisher
-    that carries a stable identifier of its own on the base, such as a feed
-    manager's, could be allowed to name it as the join key in a later version,
-    as an optional member defaulting to `id`.
+    present and unique. A publisher that carries a stable identifier of its
+    own on the base, such as a feed manager's, could be allowed to name it as
+    the join key in a later version, as an optional member defaulting to `id`.
 
 An entry's `context` is the context of the feed a Platform obtains from it:
 for a standalone entry, its records; for a supplemental entry, the base feed
