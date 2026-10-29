@@ -1,0 +1,752 @@
+<!--
+   Copyright 2026 UCP Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# Fulfillment Extension
+
+## Overview
+
+The Food Fulfillment Extension (`dev.ucp.food.fulfillment`) adds a
+`fulfillment` field describing how a prepared order gets from the kitchen
+to the buyer: courier **delivery** to the buyer's address, or buyer **pickup**
+at the establishment.
+
+**Key features:**
+
+- Order-wide fulfillment: one method covers every dish in the order
+- Type-discriminated destinations: a buyer `delivery_address` or the
+  establishment's `business_location`
+- ASAP or scheduled ordering via `requested_fulfillment_time`
+- Structured handoff preferences (e.g., "Leave at my door", "Curbside Pickup")
+  plus free-form courier or pickup `notes`
+- Time-window options (`earliest_fulfillment_time` / `latest_fulfillment_time`)
+  priced through `totals`
+
+`fulfillment` contains:
+
+- `methods[]` — the fulfillment method for the order (`delivery`, `pickup`, or another business-supported method)
+    - `destination` — where the order goes (buyer address or establishment)
+    - `requested_fulfillment_time` — omitted for ASAP; a timestamp for scheduled orders
+    - `options[]` — Business-generated time windows, each with `totals`
+    - `preference_options[]` / `selected_preference_option_ids[]` — structured handoff preferences, multi-select (e.g., contactless drop-off plus ring the doorbell, curbside pickup)
+    - `notes` — courier or pickup instructions
+- `available_methods[]` — whether delivery and pickup are offered, when, and with what scheduling support
+
+**Mental model:**
+
+- `methods[0]` 🛵 Delivery
+    - `destination` 🏠 `delivery_address` 450 Serra Mall, Apt 3B
+    - `selected_preference_option_ids[]` 🔘✅ Leave at my door · 🔘 Hand it to me · ☑️ Ring the doorbell
+    - `requested_fulfillment_time` ⏱️ *(omitted → ASAP)*
+    - `notes` 📝 "Gate code #4210, second floor"
+    - `selected_option_id` = `options[1].id`
+        - `options[0]` 🔘 Priority Delivery · 6:25–6:35 PM · $5.99
+        - `options[1]` 🔘✅ Standard Delivery · 6:35–6:50 PM · $2.99
+- `available_methods[]` 🛵 delivery: now · 🛍️ pickup: now
+
+### Design Compared to Shopping Fulfillment
+
+Fulfillment shares its vocabulary with
+[Shopping Fulfillment](../../shopping/extensions/fulfillment.md) but is
+deliberately flatter, because a food order is cooked, bagged, and handed off
+together from a single kitchen:
+
+| Dimension | Shopping Fulfillment | Food Fulfillment | Why |
+| :--- | :--- | :--- | :--- |
+| **Scope** | Per line item (`line_item_ids[]`) | Whole order | Dishes from one kitchen travel together; there are no split shipments. |
+| **Hierarchy** | `methods[]` → `groups[]` → `options[]` | `methods[]` → `options[]` | No packaging layer; speed and time tiers attach to the method. |
+| **Destination** | `destinations[]` + `selected_destination_id` | One `destination`, discriminated by `type` | An order goes to one address or is collected at one counter. |
+| **Timing** | Chosen only from Business options | Platform may request a time (`requested_fulfillment_time`) | Buyers order "now" or for a specific dinner time. |
+| **Handoff** | — | `preference_options[]` + `selected_preference_option_ids[]` + `notes` | Contactless drop-off, curbside pickup, and building access are core to food handoff. |
+
+## Discovery
+
+Businesses advertise food fulfillment support in their profile:
+
+<!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.food.fulfillment": [
+        {
+          "version": "{{ ucp_version }}",
+          "extends": "dev.ucp.food.checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/food/extensions/fulfillment",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/fulfillment.json"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Schema
+
+### Entities
+
+#### Fulfillment
+
+{{ schema_fields('food/types/fulfillment_resp', 'food/extensions/fulfillment') }}
+
+#### Fulfillment Method
+
+{{ schema_fields('food/types/fulfillment_method_resp', 'food/extensions/fulfillment') }}
+
+#### Fulfillment Destination
+
+{{ schema_fields('food/types/fulfillment_destination_resp', 'food/extensions/fulfillment') }}
+
+#### Delivery Destination
+
+{{ schema_fields('food/types/delivery_destination_resp', 'food/extensions/fulfillment') }}
+
+#### Postal Address
+
+{{ schema_fields('types/postal_address', 'food/extensions/fulfillment') }}
+
+#### Geo
+
+{{ schema_fields('types/geo', 'food/extensions/fulfillment') }}
+
+#### Business Location Destination
+
+{{ schema_fields('food/types/location_destination_resp', 'food/extensions/fulfillment') }}
+
+#### Preference Option
+
+{{ schema_fields('food/types/preference_option_resp', 'food/extensions/fulfillment') }}
+
+#### Fulfillment Option
+
+{{ schema_fields('food/types/fulfillment_option_resp', 'food/extensions/fulfillment') }}
+
+#### Fulfillment Available Method
+
+{{ schema_fields('food/types/fulfillment_available_method_resp', 'food/extensions/fulfillment') }}
+
+## Destinations
+
+Each method has a single `destination`. As in
+[Shopping Fulfillment — Destinations](../../shopping/extensions/fulfillment.md#destinations),
+`destination.type` is required in Business responses and optional in Platform
+requests; the method `type` determines which destination contract applies:
+
+| Method `type` | Destination `type` | Authored by | Contents |
+| :--- | :--- | :--- | :--- |
+| `delivery` | `delivery_address` | Platform (address, coordinates) | [Postal Address](#postal-address) (`address`) and/or [Geo](#geo) (`geo`) |
+| `pickup` | `business_location` | Business only (response-only) | [Location Summary](../../reference.md#location-summary) of the establishment |
+
+### Delivery Address
+
+The Platform writes the buyer's address; the Business returns the available
+delivery windows and handoff preferences on the method.
+
+#### Platform Request
+
+<!-- ucp:example schema=food/types/fulfillment_method op=update direction=request -->
+```json
+{
+  "id": "method_delivery",
+  "type": "delivery",
+  "destination": {
+    "id": "dest_home",
+    "type": "delivery_address",
+    "address": {
+      "street_address": "450 Serra Mall",
+      "extended_address": "Apt 3B",
+      "address_locality": "Stanford",
+      "address_region": "CA",
+      "postal_code": "94305",
+      "address_country": "US"
+    }
+  },
+  "notes": "Gate code #4210, second floor"
+}
+```
+
+#### Business Response
+
+<!-- ucp:example schema=food/types/fulfillment_method op=read -->
+```json
+{
+  "id": "method_delivery",
+  "type": "delivery",
+  "destination": {
+    "id": "dest_home",
+    "type": "delivery_address",
+    "address": {
+      "street_address": "450 Serra Mall",
+      "extended_address": "Apt 3B",
+      "address_locality": "Stanford",
+      "address_region": "CA",
+      "postal_code": "94305",
+      "address_country": "US"
+    }
+  },
+  "preference_options": [
+    { "id": "pref_leave_at_door", "label": "Leave at my door" },
+    { "id": "pref_hand_to_me", "label": "Hand it to me" },
+    { "id": "pref_meet_outside", "label": "Meet outside" },
+    { "id": "pref_ring_bell", "label": "Ring the doorbell" }
+  ],
+  "selected_preference_option_ids": ["pref_leave_at_door", "pref_ring_bell"],
+  "notes": "Gate code #4210, second floor",
+  "selected_option_id": "opt_standard",
+  "options": [
+    {
+      "id": "opt_priority",
+      "title": "Priority Delivery",
+      "description": "Sent directly to you with no other stops",
+      "earliest_fulfillment_time": "2026-04-10T18:25:00-07:00",
+      "latest_fulfillment_time": "2026-04-10T18:35:00-07:00",
+      "totals": [{ "type": "total", "amount": 599 }]
+    },
+    {
+      "id": "opt_standard",
+      "title": "Standard Delivery",
+      "earliest_fulfillment_time": "2026-04-10T18:35:00-07:00",
+      "latest_fulfillment_time": "2026-04-10T18:50:00-07:00",
+      "totals": [{ "type": "total", "amount": 299 }]
+    }
+  ]
+}
+```
+
+### Delivery to Coordinates
+
+In markets where formal postal addressing is unreliable, the destination **MAY** be expressed as WGS 84 coordinates instead of,
+or in addition to, a postal address. At least one of `address` or `geo` **MUST** be provided.
+
+<!-- ucp:example schema=food/types/fulfillment_method op=read -->
+```json
+{
+  "id": "method_delivery_coord",
+  "type": "delivery",
+  "destination": {
+    "id": "dest_pin",
+    "type": "delivery_address",
+    "geo": {
+      "latitude": 12.9716,
+      "longitude": 77.5946
+    }
+  },
+  "options": [
+    {
+      "id": "standard",
+      "title": "Standard Delivery",
+      "description": "Estimated arrival in 30-45 minutes",
+      "totals": [
+        { "type": "total", "amount": 499 }
+      ]
+    }
+  ],
+  "selected_option_id": "standard",
+  "notes": "Blue gate opposite the bakery."
+}
+```
+
+### Business Location
+
+For pickup, the destination is the establishment itself. It is Business-authored
+and response-only: the Platform sends just the method `type` (and optional
+handoff preference or `notes`), and the Business fills in the location.
+
+#### Platform Request
+
+<!-- ucp:example schema=food/types/fulfillment_method op=update direction=request -->
+```json
+{
+  "type": "pickup"
+}
+```
+
+#### Business Response
+
+<!-- ucp:example schema=food/types/fulfillment_method op=read -->
+```json
+{
+  "id": "method_pickup",
+  "type": "pickup",
+  "destination": {
+    "id": "est_luigis_01",
+    "type": "business_location",
+    "name": "Luigi's Artisan Pizzeria",
+    "address": {
+      "street_address": "210 University Ave",
+      "address_locality": "Palo Alto",
+      "address_region": "CA",
+      "postal_code": "94301",
+      "address_country": "US"
+    }
+  },
+  "preference_options": [
+    { "id": "pref_counter", "label": "Counter Pickup" },
+    { "id": "pref_curbside", "label": "Curbside Pickup" }
+  ],
+  "selected_preference_option_ids": ["pref_counter"],
+  "selected_option_id": "opt_pickup_asap",
+  "options": [
+    {
+      "id": "opt_pickup_asap",
+      "title": "Ready in 15–25 min",
+      "description": "Ask for your order number at the pickup shelf",
+      "earliest_fulfillment_time": "2026-04-10T18:15:00-07:00",
+      "latest_fulfillment_time": "2026-04-10T18:25:00-07:00",
+      "totals": [{ "type": "total", "amount": 0 }]
+    }
+  ]
+}
+```
+
+### Handoff Preferences & Notes
+
+Order handoff is split into two channels on `methods[]` so couriers and counter
+staff get both structured handoff preferences and the details only the buyer knows:
+
+- **Preferences (`preference_options[]` → `selected_preference_option_ids[]`)**:
+  The Business lists the handoff preferences it supports for the active
+  method — such as `"Leave at my door"`, `"Hand it to me"`, or
+  `"Ring the doorbell"` for delivery, or `"Counter Pickup"` vs.
+  `"Curbside Pickup"` for pickup — each with an `id` and a display `label`.
+  The Platform selects one or more of them by `id`. The Business **MAY**
+  pre-select defaults (commonly contactless for delivery or counter for
+  pickup).
+- **Notes (`methods[].notes`)**: Free-form handoff instructions — gate codes,
+  building entrances, "call on arrival", or vehicle description for curbside
+  pickup. Kitchen requests belong in `line_items[].note`, not here.
+
+```text
+Drop-off preferences
+ [x] Leave at my door    [ ] Hand it to me    [ ] Meet outside
+ [x] Ring the doorbell
+Instructions for courier
+ ┌──────────────────────────────────────────────────────────────┐
+ │ Gate code #4210, second floor                                │
+ └──────────────────────────────────────────────────────────────┘
+```
+
+#### Operations
+
+Handoff preferences follow the same operational and warning patterns as discount
+codes in the
+[Discount Extension](../../shopping/extensions/discount.md#operations):
+
+**Request behavior:**
+
+- **Replacement semantics**: Submitting `selected_preference_option_ids[]`
+  replaces any previously submitted selections for that method.
+- **Clear preferences**: Send an empty array `"selected_preference_option_ids": []`
+  to clear optional selections. When `selected_preference_option_ids[]` is
+  omitted (e.g., on initial method selection), the Business **MAY** apply its
+  defaults.
+
+**Response behavior:**
+
+- **Authoritative selection**: `selected_preference_option_ids[]` contains only
+  the active preferences the Business will honor. Unlike `discounts`, which
+  splits input (`discounts.codes`) and output (`discounts.applied`) into two
+  fields, `selected_preference_option_ids[]` is a single field that serves as
+  the authoritative applied set in responses; rejected selections are omitted.
+- **Rejected preferences**: Communicated via `messages[]` warnings (see below).
+
+#### Rejected Preferences
+
+When a submitted preference option cannot be applied (e.g., curbside pickup is
+paused during a rush, contactless drop-off is disallowed for alcohol delivery,
+or two selected options such as `"Leave at my door"` and `"Hand it to me"`
+cannot be combined), the Business drops the unhonored option from
+`selected_preference_option_ids[]` and communicates the rejection via the
+`messages[]` array instead of failing the request:
+
+> **Implementation guidance:** Operations that change how the buyer expects the
+> order to be fulfilled **SHOULD** use `type: "warning"` with
+> `path: "$.fulfillment.methods[0].selected_preference_option_ids"` so they are
+> surfaced to the buyer rather than silently ignored by the Platform. These
+> warnings do not block `ready_for_complete`. When two submitted preferences
+> conflict with each other, the Business **SHOULD** keep the earlier entry in
+> the array and drop the conflicting one with a warning.
+
+=== "Request (`fulfillment.methods[0]`)"
+
+    <!-- ucp:example schema=food/types/fulfillment_method op=update direction=request -->
+    ```json
+    {
+      "id": "method_delivery",
+      "type": "delivery",
+      "selected_preference_option_ids": [
+        "pref_hand_to_me",
+        "pref_leave_at_door",
+        "pref_ring_bell"
+      ]
+    }
+    ```
+
+=== "Response (`fulfillment.methods[0]`)"
+
+    <!-- ucp:example schema=food/types/fulfillment_method op=read -->
+    ```json
+    {
+      "id": "method_delivery",
+      "type": "delivery",
+      "preference_options": [
+        { "id": "pref_leave_at_door", "label": "Leave at my door" },
+        { "id": "pref_hand_to_me", "label": "Hand it to me" },
+        { "id": "pref_meet_outside", "label": "Meet outside" },
+        { "id": "pref_ring_bell", "label": "Ring the doorbell" }
+      ],
+      "selected_preference_option_ids": ["pref_hand_to_me", "pref_ring_bell"]
+    }
+    ```
+
+=== "Response (`messages`)"
+
+    <!-- ucp:example schema=food/checkout target=$.messages op=read -->
+    ```json
+    [
+      {
+        "type": "warning",
+        "code": "preference_option_combination_disallowed",
+        "path": "$.fulfillment.methods[0].selected_preference_option_ids",
+        "content": "\"Leave at my door\" cannot be combined with \"Hand it to me\". Your courier will hand the order to you."
+      }
+    ]
+    ```
+
+**Warning codes for rejected preferences:**
+
+| Code | Description |
+| :--- | :--- |
+| `preference_option_invalid` | Option `id` is not found in the method's `preference_options[]` |
+| `preference_option_unavailable` | Option is offered but not eligible for this order (e.g., curbside paused, contactless not allowed for alcohol delivery) |
+| `preference_option_combination_disallowed` | Cannot combine with another active preference option |
+
+When the Platform switches the method (e.g., `delivery` → `pickup`), selections
+that the new method doesn't offer are dropped as part of that change. The
+Business **MAY** omit warnings for them, because the buyer initiated the switch.
+
+## Fulfillment Timing
+
+Food establishments sell both "as soon as possible" and "for a specific time". The
+method's `requested_fulfillment_time` expresses which one the buyer wants, and
+the Business answers with concrete windows in `options[]`.
+`requested_fulfillment_time` serves as the slot-discovery query input; once
+`selected_option_id` is set, the selected option's window
+(`earliest_fulfillment_time` / `latest_fulfillment_time`) takes precedence as
+the authoritative fulfillment window:
+
+| `requested_fulfillment_time` | Meaning | Business response |
+| :--- | :--- | :--- |
+| Omitted | **ASAP** — prepare as soon as the order is placed. | Windows based on live kitchen load and courier supply. |
+| RFC 3339 timestamp | **Scheduled** — ready or delivered at that time (e.g., dinner at 7:30 PM, a catering drop). | The nearest matching windows, see [Business Validation](#business-validation); if unavailable, a recoverable error plus alternative windows. |
+
+```text
+                 now                          7:30 PM
+  ───────────────┼──────────────────────────────┼──────────────────▶
+  ASAP           [■■■ 6:35–6:50 Standard ■■■]
+                 [■ 6:25–6:35 Priority ■]
+  Scheduled                               [■■ 7:25–7:40 ■■]
+```
+
+### Business Validation
+
+When `requested_fulfillment_time` is provided, the business validates the time and responds accordingly:
+
+- **Available:** Business returns fulfillment options with
+  `earliest_fulfillment_time` / `latest_fulfillment_time` windows that contain the requested time
+  (i.e., `earliest_fulfillment_time` <= `requested_fulfillment_time` <= `latest_fulfillment_time`).
+  Session proceeds normally.
+- **Unavailable:** Business returns a `recoverable` error (`fulfillment_time_unavailable` when
+  the establishment is open or accepting pre-orders for other windows, or `location_closed` when
+  closed). The fulfillment options array **SHOULD** contain the
+  nearest available alternatives so the platform can propose an adjusted time to the buyer.
+
+### Scheduled Fulfillment Examples
+
+Scheduled requests are where food differs most from retail: establishments
+have opening hours, pre-order horizons, and per-slot kitchen capacity. When a
+requested time cannot be honored, the Business keeps the session recoverable
+and offers alternatives instead of failing.
+
+=== "Scheduled Request"
+
+    <!-- ucp:example schema=food/types/fulfillment_method op=update direction=request -->
+    ```json
+    {
+      "id": "method_delivery",
+      "type": "delivery",
+      "destination": {
+        "id": "dest_home",
+        "type": "delivery_address",
+        "address": {
+          "street_address": "450 Serra Mall",
+          "address_locality": "Stanford",
+          "address_region": "CA",
+          "postal_code": "94305",
+          "address_country": "US"
+        }
+      },
+      "requested_fulfillment_time": "2026-04-10T22:30:00-07:00"
+    }
+    ```
+
+=== "Slot Unavailable — Alternatives (`messages`)"
+
+    <!-- ucp:example schema=food/checkout target=$.messages op=read -->
+    ```json
+    [
+      {
+        "type": "error",
+        "code": "fulfillment_time_unavailable",
+        "path": "$.fulfillment.methods[0].requested_fulfillment_time",
+        "content": "10:30 PM is past the last delivery window (kitchen closes at 10:00 PM). Choose one of the latest available delivery times.",
+        "severity": "recoverable"
+      }
+    ]
+    ```
+
+=== "Slot Unavailable — Alternatives (`options`)"
+
+    <!-- ucp:example schema=food/types/fulfillment_method op=read -->
+    ```json
+    {
+      "id": "method_delivery",
+      "type": "delivery",
+      "destination": {
+        "id": "dest_home",
+        "type": "delivery_address",
+        "address": {
+          "street_address": "450 Serra Mall",
+          "address_locality": "Stanford",
+          "address_region": "CA",
+          "postal_code": "94305",
+          "address_country": "US"
+        }
+      },
+      "requested_fulfillment_time": "2026-04-10T22:30:00-07:00",
+      "options": [
+        {
+          "id": "opt_2130",
+          "title": "Scheduled Delivery, 9:30 PM",
+          "earliest_fulfillment_time": "2026-04-10T21:25:00-07:00",
+          "latest_fulfillment_time": "2026-04-10T21:40:00-07:00",
+          "totals": [{ "type": "total", "amount": 299 }]
+        },
+        {
+          "id": "opt_2145",
+          "title": "Scheduled Delivery, 9:45 PM",
+          "earliest_fulfillment_time": "2026-04-10T21:40:00-07:00",
+          "latest_fulfillment_time": "2026-04-10T21:55:00-07:00",
+          "totals": [{ "type": "total", "amount": 299 }]
+        }
+      ]
+    }
+    ```
+
+## Rendering
+
+Food options follow the method-agnostic rendering contract in
+[Shopping Fulfillment — Rendering](../../shopping/extensions/fulfillment.md#rendering):
+`title` + `description` + `totals` is sufficient to render any option. For
+food, Businesses **SHOULD** put speed or slot in `title` (e.g., "Priority
+Delivery", "Scheduled Delivery, 9:30 PM") and provide
+`earliest_fulfillment_time` / `latest_fulfillment_time` so Platforms can show
+an arrival or ready window. Pickup options **MAY** have empty `totals`; Platforms
+**SHOULD** render a `0` or missing amount as "Free".
+
+```text
+Delivery to 450 Serra Mall, Apt 3B                      [ Change ]
+ ( ) Priority Delivery            6:25–6:35 PM               $5.99
+     Sent directly to you with no other stops
+ (•) Standard Delivery            6:35–6:50 PM               $2.99
+```
+
+## Available Methods
+
+`available_methods[]` tells the Platform whether delivery and pickup are
+offered for this establishment right now, later, or not at all, following
+[Shopping Fulfillment — Available Methods](../../shopping/extensions/fulfillment.md#available-methods):
+
+- `fulfillable_on: "now"` — available immediately.
+- An RFC 3339 timestamp — available from that time (e.g., delivery starts at
+  5:00 PM for dinner service).
+- Absent from the array — not offered (e.g., a pickup-only bakery).
+- `scheduling` (optional) — whether the method supports immediate ordering only
+  (`asap_only`), advance scheduled time slots only (`scheduled_only`), or both
+  (`asap_and_scheduled`). These are well-known values of an open string;
+  Businesses **MAY** use additional values, and Platforms **MUST NOT** reject
+  the response for an unrecognized value and **SHOULD** treat it as if
+  `scheduling` were absent.
+
+<!-- ucp:example schema=food/types/fulfillment op=read -->
+```json
+{
+  "available_methods": [
+    {
+      "type": "pickup",
+      "fulfillable_on": "now",
+      "scheduling": "asap_and_scheduled"
+    },
+    {
+      "type": "delivery",
+      "fulfillable_on": "2026-04-10T17:00:00-07:00",
+      "scheduling": "scheduled_only",
+      "description": "Delivery starts at 5:00 PM when dinner service opens"
+    }
+  ]
+}
+```
+
+The `description` lets Platforms surface the alternative in conversation:
+
+> 🤖 Luigi's is open for pickup now — your order would be ready in about 15
+> minutes. Delivery starts at 5:00 PM if you'd rather wait.
+
+## Guidelines
+
+### Platform
+
+- **MUST** omit `requested_fulfillment_time` for ASAP orders and send an RFC 3339
+  timestamp with a UTC offset for scheduled orders.
+- **MUST** select only `id` values present in `preference_options[]` without
+  duplicates.
+- **MUST** render the buyer's handoff preferences from the response's
+  `selected_preference_option_ids[]`, **MUST NOT** present a dropped selection
+  as applied, and **MUST** surface rejected-preference warnings to the buyer
+  before completion.
+- **MUST** put courier or pickup instructions in `methods[].notes`, not in
+  `line_items[].note`.
+- **SHOULD** offer every method in `available_methods[]`, and render each
+  option's window and price.
+- **SHOULD** send `requested_fulfillment_time` when the available method's `scheduling`
+  (when provided) is `scheduled_only`, and **SHOULD NOT** send it when it is `asap_only`.
+
+### Business
+
+- **MUST** return `destination.type` and `destination.id` whenever `destination`
+  is present.
+- **MUST** validate delivery addresses against the delivery zone and return
+  `address_undeliverable` with `path` pointing to the destination when the
+  address cannot be served.
+- **MUST** treat an omitted `requested_fulfillment_time` as ASAP and **MUST**
+  answer an unavailable requested time with a recoverable error; **SHOULD** provide
+  alternative `options[]` as well when requested time is unavailable.
+- **MUST** reflect the selected option's price in checkout `totals[]` as
+  `type: "fulfillment"` and recompute tax, fees, and percentage tips when the
+  method or option changes.
+- **SHOULD** pre-select a default `selected_option_id` and default handoff
+  preferences (`selected_preference_option_ids[]`) so the session can reach
+  `ready_for_complete` without extra round trips.
+- **MUST** return in `selected_preference_option_ids[]` only the preferences
+  it will honor, and **MUST NOT** add an option the Platform did not select,
+  except to apply a default when `selected_preference_option_ids[]` was omitted
+  or when a selection is required and none remains.
+- **MUST NOT** fail the request, or withhold `ready_for_complete`, only because
+  of preferences it cannot honor. It **SHOULD** drop each rejected option and
+  return a `preference_option_*` warning (see
+  [Rejected Preferences](#rejected-preferences)), keeping the earlier entry when
+  two selections conflict.
+- **MUST** answer a request that conflicts with the advertised scheduling with
+  a recoverable `fulfillment_time_unavailable` error, and **SHOULD** return the
+  valid windows in `options[]`.
+
+## Examples
+
+### Switching from Delivery to Pickup
+
+A buyer who started with delivery switches to pickup. The Platform replaces
+the method; the Business returns the establishment as the destination, a
+$0 pickup window, and updated totals without the delivery fee.
+
+=== "Request (`fulfillment`)"
+
+    <!-- ucp:example schema=food/types/fulfillment op=update direction=request -->
+    ```json
+    {
+      "methods": [
+        {
+          "type": "pickup"
+        }
+      ]
+    }
+    ```
+
+=== "Response (`fulfillment`)"
+
+    <!-- ucp:example schema=food/types/fulfillment op=read -->
+    ```json
+    {
+      "available_methods": [
+        { "type": "delivery", "fulfillable_on": "now" },
+        { "type": "pickup", "fulfillable_on": "now" }
+      ],
+      "methods": [
+        {
+          "id": "method_pickup",
+          "type": "pickup",
+          "destination": {
+            "id": "est_luigis_01",
+            "type": "business_location",
+            "name": "Luigi's Artisan Pizzeria",
+            "address": {
+              "street_address": "210 University Ave",
+              "address_locality": "Palo Alto",
+              "address_region": "CA",
+              "postal_code": "94301",
+              "address_country": "US"
+            }
+          },
+          "selected_option_id": "opt_pickup_asap",
+          "options": [
+            {
+              "id": "opt_pickup_asap",
+              "title": "Counter Pickup",
+              "earliest_fulfillment_time": "2026-04-10T18:15:00-07:00",
+              "latest_fulfillment_time": "2026-04-10T18:25:00-07:00",
+              "totals": [{ "type": "total", "amount": 0 }]
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+=== "Response (`totals`)"
+
+    <!-- ucp:example schema=food/checkout target=$.totals op=read -->
+    ```json
+    [
+      { "type": "subtotal", "display_text": "Subtotal", "amount": 5000 },
+      { "type": "fulfillment", "display_text": "Pickup", "amount": 0 },
+      { "type": "tax", "display_text": "Tax (8.75%)", "amount": 438 },
+      { "type": "tip", "display_text": "Staff Tip (10%)", "amount": 500 },
+      { "type": "total", "display_text": "Total", "amount": 5938 }
+    ]
+    ```
+
+## Security & Privacy Considerations
+
+A `destination` with type `delivery_address` carries precise Buyer location data. The following considerations mirror the
+[Location capability's Security & Privacy Considerations](../../common/location/index.md#security-privacy-considerations)
+and apply to any `address` or `geo` exchanged through this extension.
+
+### Consistency
+
+`address` and `geo` **MAY** both be present on a `destination`. When they are, Businesses **SHOULD** treat `geo`
+as authoritative for dispatch and routing, since it is unambiguous, and treat `address` as authoritative for
+display and manual verification. Platforms and Businesses **SHOULD** keep the two in sync when either is updated, and Businesses
+**SHOULD** flag a destination for review rather than silently discarding one value if the two appear to resolve
+to materially different physical locations.

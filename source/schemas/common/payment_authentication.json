@@ -97,6 +97,16 @@
           "$ref": "#/$defs/payment_actions"
         }
       ]
+    },
+    "dev.ucp.food.checkout": {
+      "allOf": [
+        {
+          "$ref": "../food/checkout.json"
+        },
+        {
+          "$ref": "#/$defs/payment_actions"
+        }
+      ]
     }
   }
 }

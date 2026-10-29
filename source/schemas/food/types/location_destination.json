@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/location_destination.json",
+  "title": "Business Location Destination",
+  "description": "A business location fulfillment destination for food pickup. Filled in entirely by the Business and response-only: the Platform sends just the method `type`, and the Business fills in the location. MUST be equivalent to the `food_establishment` in the session.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/types/location_summary.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "business_location",
+          "description": "Destination type discriminator. Response-only.",
+          "ucp_request": "omit"
+        }
+      }
+    }
+  ]
+}
