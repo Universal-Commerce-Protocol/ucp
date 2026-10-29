@@ -19,17 +19,15 @@
 ## Overview
 
 The Incentives Extension lets a business list the offers it is running on
-what it just returned: a free-shipping threshold, a quantity deal, a code it
-will accept, a price gated behind a membership, a promotion that ends on a
-date. It composes onto Catalog Search, Catalog Lookup, Cart, and Checkout.
+what it just returned: a free-shipping threshold, a quantity deal, a member
+price. It composes onto Catalog Search, Catalog Lookup, Cart, and Checkout.
 
-It is response-only. Nothing here applies an offer. Application stays with the
-business through Cart and Checkout, where the
-[Discount](discount.md) extension reports what took effect in
-`discounts.applied`. The business remains authoritative on every amount.
+It is response-only. Nothing here applies an offer; application stays with
+Cart and Checkout, where the [Discount](discount.md) extension reports what
+took effect in `discounts.applied`.
 
-Two things it is not. A plain sale price goes on the variant as `price` with
-`list_price`, as today. How a member price is computed and reported stays with
+A plain sale price goes on the variant as `price` with `list_price`, as today.
+How a member price is computed and reported stays with
 [Loyalty](../../common/extensions/loyalty.md). Incentives carry the offers a
 business cannot express as a price on a variant.
 
@@ -40,9 +38,9 @@ business cannot express as a price on a variant.
   gap (`approaching`)
 - A typed benefit: amount off, percent off, a fixed price, free shipping
 - Conditions the business evaluates: order minimum, quantity, an eligibility
-  claim, a scope
-- Gated offers that can be shown without resolving the gated price or
-  disclosing the code
+  claim
+- Offers that can be shown to a buyer who does not yet qualify, without
+  changing any price on a variant
 
 **Dependencies:**
 
@@ -82,77 +80,98 @@ A platform that has not negotiated the extension receives the same response
 it receives today. A platform that has negotiated it **MAY** present the
 incentives alongside the entities they target.
 
-### Scope
-
-The extension defines the well-known scope `dev.ucp.shopping.incentives:read`
-for incentives a business shows only to an authenticated buyer. Scope
-declaration and derivation follow
-[Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
-
 ## Schema
 
-Catalog Search, Catalog Lookup, and `get_product` responses gain an
+Catalog Search and Catalog Lookup responses, including `get_product`, gain an
 `incentives` member carrying `available`. Cart and Checkout responses gain an
 `incentives` member carrying `available` and `approaching`.
+
+### Incentives
+
+{{ extension_schema_fields('incentives.json#/$defs/incentives', 'shopping/extensions/incentives') }}
 
 ### Incentive
 
 {{ extension_schema_fields('incentives.json#/$defs/incentive', 'shopping/extensions/incentives') }}
 
-### Benefit
+### Incentive Period
+
+{{ extension_schema_fields('incentives.json#/$defs/period', 'shopping/extensions/incentives') }}
+
+### Incentive Benefit
 
 {{ extension_schema_fields('incentives.json#/$defs/benefit', 'shopping/extensions/incentives') }}
 
 | `type` | Carries | Meaning |
 | :-- | :-- | :-- |
 | `amount_off` | `amount` | Taken off each targeted item; off the order subtotal when the incentive has no `targets` on a cart or checkout. |
-| `percent_off` | `basis_points` | Percentage taken off, in basis points (`1250` = 12.5%). |
-| `fixed_price` | `price` | What each targeted variant costs while the incentive applies. |
+| `percent_off` | `basis_points`, optionally `maximum_amount` | Percentage taken off, in basis points (`1250` = 12.5%), capped at `maximum_amount` when stated. |
+| `fixed_price` | `price` | What each targeted variant costs while the incentive applies. **MUST** be below the variant's `price`. |
 | `free_shipping` | `fulfillment_option_ids` (optional) | The named fulfillment options cost nothing; any option when omitted. |
 
 The vocabulary is open. A business **MAY** use a reverse-domain name for a
 custom benefit kind. A platform **MUST** ignore an incentive whose benefit
 type it does not recognize.
 
-### Conditions
+### Incentive Conditions
 
 {{ extension_schema_fields('incentives.json#/$defs/conditions', 'shopping/extensions/incentives') }}
 
-### Targets
+`minimum_order_amount` is measured against the session's `subtotal` total:
+line item totals after item-level discounts, before fulfillment, tax, and
+fees. `minimum_quantity` is summed across every line item the incentive
+targets, so two units of one variant and one of another meet a minimum of
+three. The set of conditions is closed in this version; a condition a
+platform cannot read is one it cannot evaluate.
+
+### Incentive Targets
 
 {{ extension_schema_fields('incentives.json#/$defs/targets', 'shopping/extensions/incentives') }}
 
-### Approaching
+Incentives target by id rather than by path because catalog responses are
+keyed by product and variant id. Exclusions are taken out of whatever the
+other fields select, so "20% off everything except gift cards" is an
+incentive with no inclusion list and `excluded_product_ids`.
+
+### Approaching Incentive
 
 {{ extension_schema_fields('incentives.json#/$defs/approaching', 'shopping/extensions/incentives') }}
 
 ## Targeting and precedence
 
-- An incentive with `targets` applies to those entities only. One without
-  applies to every product, variant, or line item in the response.
-- Every id in `targets` **MUST** name an entity present in the same response.
-  A business **MUST NOT** use `targets` to advertise what it did not return.
-- Several incentives may target the same entity. The business decides which
-  apply together when it applies them. `combinable: false` tells the platform
-  not to present two incentives as cumulative.
-- An incentive outside its `active_period` is not offered. A platform
-  **MUST** drop it regardless of cache.
-- `conditions` are evaluated by the business at application. A platform
-  **MAY** evaluate the ones it can, such as an order minimum against a cart
-  it holds or a scope its session holds, to decide what to show. It **MUST
-  NOT** present an incentive it cannot evaluate as applying.
-- Incentives are scoped to the response's `context`, like every other value
-  in it. A business **MUST NOT** list an incentive that does not apply in
-  that market.
+An incentive with `targets` applies to those entities only; one without
+applies to every product, variant, or line item in the response. Every id in
+`targets` names an entity present in the same response. A business **MUST
+NOT** use `targets` to advertise what it did not return. This is not
+schema-validated.
+
+Several incentives may target the same entity. The business decides which
+apply together when it applies them. `combinable: false` tells the platform
+not to present the incentive as cumulative with any other. Tiered thresholds
+are several incentives, and `approaching` **MAY** list more than one.
+
+An incentive outside its `active_period` is not offered. A platform **MUST**
+drop it regardless of cache. A business **SHOULD** set `end_time` on anything
+time-limited.
+
+`conditions` are evaluated by the business at application. A platform **MAY**
+evaluate the ones it can, such as an order minimum against a cart it holds,
+to decide what to present, never what applies. It **MUST NOT** present an
+incentive it cannot evaluate as applying.
+
+Incentives are scoped to the response's `context`, like every other value in
+it. A business **MUST NOT** list an incentive that does not apply in that
+market.
 
 ## Gated incentives
 
-A business **MAY** list an incentive whose `conditions` name a scope or an
-eligibility claim the caller does not hold, so the platform can offer to link
-the buyer's account or supply the claim. The business **MUST NOT** resolve the
-gated price for that caller; it lists the incentive with its condition, and
-resolves the price only for a session that holds the scope. This follows the
-scope rules in [Catalog](../catalog/index.md#scopes).
+A business **MAY** list an incentive whose `conditions.eligibility` names a
+claim the buyer has not asserted, so the platform can offer to link the
+buyer's account or supply the claim. Listing the incentive states that the
+offer exists and what it gives; it does not change `price` on any variant,
+and the business resolves the price only for a session that holds the claim,
+following the scope rules in [Catalog](../catalog/index.md#scopes) and the
+member pricing rules in [Loyalty](../../common/extensions/loyalty.md).
 
 ## Codes
 
@@ -160,29 +179,24 @@ Disclosing a code is the business's choice. A disclosed `code` is submitted
 through `discounts.codes` exactly as any other code, and the Discount
 extension's [rejection codes](discount.md#rejected-codes) apply unchanged. An
 incentive with `application: code` and no `code` tells the platform that a
-code exists and the buyer must already hold it.
+code exists and the buyer must already hold it. `code` is only valid with
+`application: code`; the schema rejects it otherwise.
 
 ## Responsibilities
 
-### Business
+A business **MUST** list only incentives it will honor at application under
+the stated conditions, and **MUST NOT** target entities it did not return. It
+**MUST NOT** change `price` on a variant for a caller that lacks a claim the
+incentive is gated on. It **MAY** omit any incentive, and **MAY** list
+different incentives to different platforms.
 
-- **MUST** list only incentives it will honour at application under the stated
-  conditions.
-- **MUST NOT** target entities it did not return.
-- **MUST NOT** resolve a scope- or claim-gated price for a caller that lacks
-  the scope or claim.
-- **SHOULD** set `end_time` on anything time-limited.
-- **MAY** omit any incentive, and **MAY** list different incentives to
-  different platforms.
-
-### Platform
-
-- **MUST NOT** present an incentive as applied. `discounts.applied` is the
-  record of what took effect.
-- **MUST NOT** present a total derived from incentives as final. An indicative
-  price **MAY** be shown, labelled as conditional on the named incentive.
-- **MUST** submit a disclosed code through `discounts.codes`.
-- **MUST** ignore an incentive whose benefit type it does not recognize.
+A platform **MUST NOT** present an incentive as applied; `discounts.applied`
+is the record of what took effect. It **MUST NOT** present a total derived
+from incentives as final. It **MAY** show a figure the business supplied, such
+as a `fixed_price`, or one it computed itself, labelled as its own estimate
+and as conditional on the named incentive. It **MUST** submit a disclosed code
+through `discounts.codes`, and **MUST** ignore an incentive whose benefit type
+it does not recognize.
 
 ## Relationship to policies
 
@@ -190,11 +204,11 @@ The [`policies[]`](../../overview/index.md#policies) primitive carries terms:
 a type, a description, a URL, and what they apply to. An incentive carries a
 typed benefit and conditions. A business **MAY** point an incentive's `url` at
 a policy page, and **MAY** publish a policy that describes a promotion in
-prose, but a platform reasons over the numbers from the incentive.
+prose; a platform reads the benefit and conditions from the incentive.
 
 ## Examples
 
-### Catalog search with a threshold and a gated price
+### Catalog search with a threshold and a member offer
 
 <!-- ucp:example schema=shopping/incentives def=search_response op=search -->
 ```json
@@ -237,17 +251,16 @@ prose, but a platform reasons over the numbers from the incentive.
         "title": "Free standard shipping over $50",
         "application": "automatic",
         "benefit": { "type": "free_shipping" },
-        "conditions": { "minimum_order_amount": 5000 }
+        "conditions": {
+          "minimum_order_amount": { "amount": 5000, "currency": "USD" }
+        }
       },
       {
-        "id": "inc_member_trail",
-        "title": "Member price on Trail Runner",
+        "id": "inc_gold_15",
+        "title": "Gold members save 15%",
         "application": "automatic",
-        "benefit": {
-          "type": "fixed_price",
-          "price": { "amount": 10200, "currency": "USD" }
-        },
-        "conditions": { "scopes": ["dev.ucp.shopping.incentives:read"] },
+        "benefit": { "type": "percent_off", "basis_points": 1500 },
+        "conditions": { "eligibility": "com.example.loyalty.gold" },
         "targets": { "product_ids": ["prod_trail"] },
         "active_period": { "end_time": "2026-12-31T23:59:59Z" }
       }
@@ -256,9 +269,10 @@ prose, but a platform reasons over the numbers from the incentive.
 }
 ```
 
-The platform can tell the buyer that the shoe is $120, $102 with a linked
-account, and ships free at this order size. It applies nothing. The member
-price resolves only for a session that holds the scope.
+The platform can tell the buyer that the shoe is $120, that gold members save
+15% on it, and that an order this size ships free. It applies nothing, and
+`price` on the variant is unchanged for a buyer who has not asserted the
+claim.
 
 ### Product detail with a quantity deal and a disclosed code
 
@@ -276,11 +290,13 @@ price resolves only for a session that holds the scope.
     },
     {
       "id": "inc_welcome",
-      "title": "$10 off your first order",
+      "title": "$10 off with code WELCOME10",
       "application": "code",
       "code": "WELCOME10",
-      "benefit": { "type": "amount_off", "amount": 1000 },
-      "conditions": { "eligibility": "com.example.first_order" },
+      "benefit": {
+        "type": "amount_off",
+        "amount": { "amount": 1000, "currency": "USD" }
+      },
       "combinable": false,
       "url": "https://example.com/offers/welcome"
     }
@@ -299,11 +315,16 @@ price resolves only for a session that holds the scope.
       "title": "Free standard shipping over $50",
       "application": "automatic",
       "benefit": { "type": "free_shipping" },
-      "conditions": { "minimum_order_amount": 5000 }
+      "conditions": {
+        "minimum_order_amount": { "amount": 5000, "currency": "USD" }
+      }
     }
   ],
   "approaching": [
-    { "incentive_id": "inc_fs50", "remaining_amount": 4000 }
+    {
+      "incentive_id": "inc_fs50",
+      "remaining_amount": { "amount": 4000, "currency": "USD" }
+    }
   ]
 }
 ```
@@ -313,7 +334,7 @@ qualifies the order for free shipping. When the subtotal crosses the
 threshold, the business applies the incentive and it appears in
 `discounts.applied` with `automatic: true`; `approaching` no longer lists it.
 
-### Checkout with a time-boxed promotion
+### Checkout with a capped site-wide promotion
 
 <!-- ucp:example schema=shopping/incentives def=dev.ucp.shopping.checkout target=$.incentives -->
 ```json
@@ -321,9 +342,14 @@ threshold, the business applies the incentive and it appears in
   "available": [
     {
       "id": "inc_holiday",
-      "title": "Holiday sale, 20% off everything",
+      "title": "Holiday sale, 20% off everything except gift cards, up to $100",
       "application": "automatic",
-      "benefit": { "type": "percent_off", "basis_points": 2000 },
+      "benefit": {
+        "type": "percent_off",
+        "basis_points": 2000,
+        "maximum_amount": { "amount": 10000, "currency": "USD" }
+      },
+      "targets": { "excluded_product_ids": ["prod_gift_card"] },
       "active_period": {
         "start_time": "2026-11-20T00:00:00Z",
         "end_time": "2026-12-01T23:59:59Z"
