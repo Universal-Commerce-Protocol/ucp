@@ -367,6 +367,329 @@
         "name": "response",
         "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
       }
+    },
+    {
+      "name": "list_order_consultations",
+      "summary": "List Order consultations",
+      "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Mandatory authoritative discovery path; `status` defaults to `[\"open\"]`.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "status",
+          "required": false,
+          "description": "Status filter.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "open"
+            ]
+          }
+        },
+        {
+          "name": "cursor",
+          "required": false,
+          "description": "Pagination cursor.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit",
+          "required": false,
+          "description": "Page size.",
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      ],
+      "result": {
+        "name": "consultations",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_list"
+            },
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
+            }
+          ]
+        }
+      }
+    },
+{
+      "name": "get_order_consultation",
+      "summary": "Get Order consultation",
+      "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Current revision, status, revision index, and decision when recorded.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "consultation_id",
+          "required": true,
+          "description": "Consultation identifier.",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "consultation",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation"
+            },
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
+            }
+          ]
+        }
+      }
+    },
+{
+      "name": "get_order_consultation_revision",
+      "summary": "Get an exact consultation revision",
+      "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Exact immutable terms of one revision.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "consultation_id",
+          "required": true,
+          "description": "Consultation identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "description": "Revision number.",
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      ],
+      "result": {
+        "name": "revision",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_revision"
+            },
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
+            }
+          ]
+        }
+      }
+    },
+{
+      "name": "decide_order_consultation",
+      "summary": "Record a consultation decision",
+      "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] State-changing. Requires `idempotency-key` in `meta` and a buyer-authenticated token with the `decide` scope.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/meta"
+              }
+            ],
+            "required": [
+              "ucp-agent",
+              "idempotency-key"
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "consultation_id",
+          "required": true,
+          "description": "Consultation identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "decision",
+          "required": true,
+          "description": "Decision request body.",
+          "schema": {
+            "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_request"
+          }
+        }
+      ],
+      "result": {
+        "name": "decision",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_receipt"
+            },
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
+            }
+          ]
+        }
+      }
+    },
+{
+      "name": "lookup_order_consultation_decision",
+      "summary": "Look up a decision by the original idempotency key",
+      "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Read-only lost-response recovery.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "consultation_id",
+          "required": true,
+          "description": "Consultation identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "original_idempotency_key",
+          "required": true,
+          "description": "Idempotency key of the original decision submission.",
+          "schema": {
+            "type": "string",
+            "minLength": 22
+          }
+        }
+      ],
+      "result": {
+        "name": "lookup",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_lookup"
+            },
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
+            }
+          ]
+        }
+      }
+    },
+{
+      "name": "get_order_consultation_decision",
+      "summary": "Get a consultation decision receipt",
+      "description": "[Requires the `dev.ucp.shopping.order_consultation` extension to be negotiated; see the extension specification. Proposed, not approved.] Durable receipt with current application_status.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/meta"
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "Order identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "consultation_id",
+          "required": true,
+          "description": "Consultation identifier.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "decision_id",
+          "required": true,
+          "description": "Decision identifier.",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "decision",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/decision_receipt"
+            },
+            {
+              "$ref": "../../schemas/shopping/order_consultation.json#/$defs/consultation_error_response"
+            }
+          ]
+        }
+      }
     }
   ]
 }
