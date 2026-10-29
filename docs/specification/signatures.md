@@ -266,9 +266,9 @@ Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Signature-Agent: sig1="https://platform.example/.well-known/ucp";type=jwks_uri
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:X48E9q...:
+Content-Digest: sha-256=:XmgkaOke8y0x8ktvJd2/H7ygjWV7ZJI3yHho1XefrAI=:
 Signature-Input: sig1=("@method" "@authority" "@path" "signature-agent";key="sig1" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U";created=1738617600;expires=1738621200;tag="web-bot-auth"
-Signature: sig1=:base64_ed25519_signature_value:
+Signature: sig1=:DDwJUZwp9dCP/MvQuGH0ZWm8LFpWAcdrfvZYVjHpKe5LieniaXhQgqFt45mKKaqebAQJGwuHONfMjhS8zKqhAA==:
 
 {
   "line_items": [
@@ -525,9 +525,9 @@ Host: merchant.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:XmgkaOke8y0x8ktvJd2/H7ygjWV7ZJI3yHho1XefrAI=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:LEC0pdHhWGWMmXKE/TLk4FLz3MIvh1MDB/p3LpOFDq2pUM1OC66WBCFuFOoNpv4fyYha4gQjiA0ziofy+2gfdg==:
 
 {
   "line_items": [
@@ -544,8 +544,9 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 ```http
 GET /checkout-sessions/chk_123 HTTP/1.1
 Host: merchant.example.com
-Signature-Input: sig1=("@method" "@authority" "@path");keyid="platform-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent");keyid="test-key-ecc-p256"
+Signature: sig1=:NdtVgJzyEA93uOdae8mW5Wx6UHbcChssG7di8XQkN0Gn84o4LyGcEsMimteJ6TkVgFrH/cFREMYRvTSLnxvyQQ==:
 ```
 
 ### REST Response Signing
@@ -573,9 +574,9 @@ complete shape.
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
-Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:QcNkCF+sqcUYJarTEHjLlhhuuE9QkzoO03fw4PZziWQ=:
+Signature-Input: sig1=("@status" "content-digest" "content-type");created=1738617601;keyid="test-key-ecc-p256"
+Signature: sig1=:TQ6AaMj2SMEU3Qkf0lU1aqC4qsqNsFwt8rwxDsqLyu/bim/2mb1/KXXjX9joCDNdBKGOJy/u2zZbHAP6hcj6gg==:
 
 {
   "id": "chk_123",
@@ -915,11 +916,11 @@ Host: business.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:Qp2l5x64vGD9S8wI6sbkb5Fz3+vIYc2ylJOTutyzSbM=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="test-key-ecc-p256"
+Signature: sig1=:n7xIgE5jUusUnBBD9kat+5tI0zhimOb1q84wD84kN5tYIBukeHqc3puiNZE22jEWZ0jt3lNeE/DzfP8HS/LmQA==:
 
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"chk_123","checkout":{...}}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"chk_123","checkout":{"payment":{"instruments":[{"id":"pi_1","type":"card","handler_id":"tokenizer_1"}]}}}}}
 ```
 
 The JSON-RPC message is the HTTP body. `Content-Digest` binds it to the signature.
@@ -1013,6 +1014,13 @@ raw `r||s` (64 bytes), never DER.
 enforces freshness must disable or widen that check to accept these vectors;
 default UCP verification does not enforce it (see
 [Replay Protection](#replay-protection)).
+
+**Examples elsewhere in the specification.** Every signed request or response
+shown on the capability pages and earlier on this page is also a real message:
+its `Content-Digest` and `Signature` are computed over the exact bytes shown,
+with the same test keys and the same body convention as the vectors here. They
+are verified on every change to the specification, so an example and the rules
+it illustrates cannot drift apart.
 
 ### Test Keys
 

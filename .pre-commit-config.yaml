@@ -65,6 +65,16 @@ repos:
         pass_filenames: false
         files: ^(scripts/(signature_vectors|test_signature_vectors)\.py|docs/specification/signatures\.md|docs/specification/signatures/test-vectors\.json)$
         stages: [pre-commit, pre-push]
+      # Signed examples on the spec pages are real messages over the bytes
+      # shown. Editing one (a header, the body) invalidates its signature;
+      # re-sign with `signature_vectors.py sign-docs <file>`.
+      - id: signed-examples-changed
+        name: Verify signed examples (changed docs)
+        entry: uv run --frozen python scripts/signature_vectors.py verify-docs
+        language: system
+        pass_filenames: true
+        files: ^docs/specification/.*\.md$
+        stages: [pre-commit, pre-push]
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v9.3.3
     hooks:

@@ -387,6 +387,226 @@ def test_docs_quote_corpus_verbatim() -> None:
 
 
 # -----------------------------------------------------------
+# Signed examples on the specification pages
+# -----------------------------------------------------------
+
+SPEC_DIR = REPO_ROOT / "docs" / "specification"
+
+PAGE_COMPONENTS = (
+  '("@method" "@authority" "@path" "ucp-agent" "idempotency-key" '
+  '"content-digest" "content-type")'
+)
+
+PAGE_EXAMPLE = """\
+Some prose.
+
+```http
+POST /checkout-sessions HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Digest: sha-256=:X48E9q...:
+Signature-Input: sig1=PAGE_COMPONENTS;keyid="platform-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+
+{"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
+```
+
+A fragment that only shows the shape:
+
+```http
+POST /checkout-sessions HTTP/1.1
+Signature-Input: sig1=("@method" "@authority" ...);keyid="platform-2026"
+Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+```
+""".replace("PAGE_COMPONENTS", PAGE_COMPONENTS)
+
+
+def _page(tmp: Path, text: str = PAGE_EXAMPLE) -> Path:
+  path = tmp / "page.md"
+  path.write_text(text, encoding="utf-8")
+  return path
+
+
+def test_spec_pages_signed_examples_verify() -> None:
+  """Every complete signed example on the spec pages verifies."""
+  examples = sv.find_signed_examples([SPEC_DIR])
+  _check(
+    "spec_pages_have_signed_examples",
+    len(examples) >= 20,
+    f"found {len(examples)}",
+  )
+  for ex in examples:
+    problems = sv.verify_example(ex, sv.TEST_KEYS)
+    _check(f"spec_example_verifies[{ex.where}]", not problems, str(problems))
+
+
+def test_spec_pages_are_signed_in_place() -> None:
+  """sign-docs is a no-op on the committed pages."""
+  import tempfile
+  import shutil
+
+  with tempfile.TemporaryDirectory() as tmp:
+    copy_dir = Path(tmp) / "specification"
+    shutil.copytree(SPEC_DIR, copy_dir)
+    changed = sv.sign_docs([copy_dir])
+    _check("spec_pages_signed_in_place", changed == [], str(changed))
+
+
+def test_placeholder_example_fails_until_signed() -> None:
+  """A placeholder example fails verification; sign-docs repairs it."""
+  import tempfile
+
+  with tempfile.TemporaryDirectory() as tmp:
+    page = _page(Path(tmp))
+    found = sv.find_signed_examples([page])
+    _check("placeholder_found_fragment_skipped", len(found) == 1, str(found))
+    problems = sv.verify_example(found[0], sv.TEST_KEYS)
+    _check(
+      "placeholder_rejected",
+      any("not a published test key" in p for p in problems),
+      str(problems),
+    )
+    changed = sv.sign_docs([page])
+    _check("placeholder_signed", changed == [found[0].where], str(changed))
+    signed = sv.find_signed_examples([page])[0]
+    _check(
+      "placeholder_verifies_after_signing",
+      sv.verify_example(signed, sv.TEST_KEYS) == [],
+    )
+    body = signed.lines[-1]
+    _check("placeholder_body_untouched", body == PAGE_EXAMPLE.split("\n")[12])
+    digest = [
+      line for line in signed.lines if line.startswith("Content-Digest")
+    ]
+    expected = f"Content-Digest: {sv.content_digest(body.encode())}"
+    _check("placeholder_digest_is_real", digest == [expected], str(digest))
+    _check(
+      "placeholder_components_kept",
+      PAGE_COMPONENTS in signed.lines[6],
+      signed.lines[6],
+    )
+    _check("sign_docs_idempotent", sv.sign_docs([page]) == [])
+
+
+def test_tampered_page_example_is_reported() -> None:
+  """Editing a signed example's body or a covered header fails verification."""
+  import tempfile
+
+  with tempfile.TemporaryDirectory() as tmp:
+    page = _page(Path(tmp))
+    sv.sign_docs([page])
+    good = page.read_text(encoding="utf-8")
+
+    page.write_text(good.replace('"quantity":2', '"quantity":3'), "utf-8")
+    problems = sv.verify_example(
+      sv.find_signed_examples([page])[0], sv.TEST_KEYS
+    )
+    _check(
+      "tampered_body_reported",
+      any(p.startswith("content-digest") for p in problems),
+      str(problems),
+    )
+
+    page.write_text(
+      good.replace("Idempotency-Key: 550e", "Idempotency-Key: 660e"), "utf-8"
+    )
+    problems = sv.verify_example(
+      sv.find_signed_examples([page])[0], sv.TEST_KEYS
+    )
+    _check(
+      "tampered_header_reported",
+      problems == ["signature does not verify"],
+      str(problems),
+    )
+
+
+def test_page_example_coverage_gate() -> None:
+  """A header the spec requires to be covered but is not is reported."""
+  import tempfile
+
+  with tempfile.TemporaryDirectory() as tmp:
+    text = PAGE_EXAMPLE.replace(
+      ' "ucp-agent" "idempotency-key"', ' "idempotency-key"'
+    )
+    page = _page(Path(tmp), text)
+    sv.sign_docs([page])
+    problems = sv.verify_example(
+      sv.find_signed_examples([page])[0], sv.TEST_KEYS
+    )
+    _check(
+      "coverage_gate_reported",
+      problems == ["coverage gate: not covered ['\"ucp-agent\"']"],
+      str(problems),
+    )
+
+
+def test_page_example_der_signature_rejected() -> None:
+  """A DER-encoded ECDSA value on a page is named as such."""
+  import tempfile
+
+  with tempfile.TemporaryDirectory() as tmp:
+    page = _page(Path(tmp))
+    sv.sign_docs([page])
+    text = page.read_text(encoding="utf-8")
+    sig_line = next(
+      line for line in text.split("\n") if line.startswith("Signature: ")
+    )
+    der = (
+      # cspell:disable-next-line
+      "MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8wIgQ2hhbmdlZCB0aGUg"
+      # cspell:disable-next-line
+      "c2lnbmF0dXJlIHRvIERFUiBlbmNvZGluZw=="
+    )
+    page.write_text(text.replace(sig_line, f"Signature: sig1=:{der}:"), "utf-8")
+    problems = sv.verify_example(
+      sv.find_signed_examples([page])[0], sv.TEST_KEYS
+    )
+    _check(
+      "der_page_signature_rejected",
+      any("raw r||s is 64 (not DER)" in p for p in problems),
+      str(problems),
+    )
+
+
+def test_page_example_without_body_drops_digest() -> None:
+  """A GET example carries no Content-Digest after signing."""
+  import tempfile
+
+  text = """\
+```http
+GET /checkout-sessions/chk_123 HTTP/1.1
+Host: merchant.example.com
+UCP-Agent: profile="https://platform.example/.well-known/ucp"
+Content-Digest: sha-256=:X48E9q...:
+Signature-Input: sig1=GET_COMPONENTS;keyid="platform-2026"
+Signature: sig1=:placeholder:
+```
+""".replace("GET_COMPONENTS", '("@method" "@authority" "@path" "ucp-agent")')
+  with tempfile.TemporaryDirectory() as tmp:
+    page = _page(Path(tmp), text)
+    sv.sign_docs([page])
+    signed = sv.find_signed_examples([page])[0]
+    _check(
+      "get_example_has_no_digest",
+      not any(line.startswith("Content-Digest") for line in signed.lines),
+      str(signed.lines),
+    )
+    _check(
+      "get_example_verifies", sv.verify_example(signed, sv.TEST_KEYS) == []
+    )
+    corpus_get = next(
+      v for v in _load_corpus()["vectors"] if v["id"] == "rest-get-es256"
+    )
+    _check(
+      "get_example_matches_corpus_vector",
+      signed.lines[-1] == f"Signature: {corpus_get['signature']}",
+      signed.lines[-1],
+    )
+
+
+# -----------------------------------------------------------
 # Runner
 # -----------------------------------------------------------
 
@@ -415,6 +635,13 @@ def main() -> int:
     test_missing_covered_header_raises,
     test_query_component_includes_question_mark,
     test_docs_quote_corpus_verbatim,
+    test_spec_pages_signed_examples_verify,
+    test_spec_pages_are_signed_in_place,
+    test_placeholder_example_fails_until_signed,
+    test_tampered_page_example_is_reported,
+    test_page_example_coverage_gate,
+    test_page_example_der_signature_rejected,
+    test_page_example_without_body_drops_digest,
   ]
   for test in tests:
     try:

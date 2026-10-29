@@ -1067,11 +1067,11 @@ Host: business.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
-Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
+Content-Digest: sha-256=:HJk8FOOaUBN23zt7PuaWhrWxwiC5+sOyMQRen3JTUEY=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="test-key-ecc-p256"
+Signature: sig1=:2YLmxY3kCMpSoP26j5FQyVubMqyU3k7uIcZiT3KENtpL/eMaVKzNCTTDeYscO4E8T6RdteMQl99qFIGb+CrGeg==:
 
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_booking_session","arguments":{"id":"booking_123","booking":{"payment":{...}, ...}}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_booking_session","arguments":{"id":"booking_123","booking":{"payment":{"instruments":[{"id":"pi_1","type":"card","handler_id":"handler_1"}]}}}}}
 ```
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON
@@ -1095,11 +1095,11 @@ Response signatures are **OPTIONAL** for:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="business-2026"
-Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Content-Digest: sha-256=:14/jKxMZ1krKnCzaoNF2QavCVi5Hj2jPbyo9QQhQ3M0=:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:EMdmikSg2bkGLOJYS8ish8gj0C2a9oMguomNs2uTndTHpaC71KI3/Th7fU0TrCo50nnaH/jA0bQvYx+jYOK+Hg==:
 
-{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"booking_123","status":"completed", ...}}}
+{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"Booking booking_123 completed"}],"structuredContent":{"id":"booking_123","status":"completed","confirmation":{"id":"confirmation_123","label":"CON123AZ"}}}}
 ```
 
 See [Message Signatures - REST Response Signing](../../signatures.md#rest-response-signing)

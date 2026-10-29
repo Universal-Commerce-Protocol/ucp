@@ -61,6 +61,8 @@ CLI
   signature_vectors.py generate [--out PATH]   rewrite the corpus
   signature_vectors.py verify [--in PATH]      verify the corpus
   signature_vectors.py self-test               check against RFC 9421
+  signature_vectors.py verify-docs [PATH...]   verify signed spec examples
+  signature_vectors.py sign-docs [PATH...]     sign the spec examples in place
 
 Exit codes: 0 on success, 1 on any failure.
 """
@@ -69,10 +71,12 @@ from __future__ import annotations
 
 import argparse
 import base64
+import binascii
 from dataclasses import dataclass, field
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 
 from cryptography.exceptions import InvalidSignature
@@ -962,6 +966,296 @@ def verify_corpus(corpus: dict) -> dict[str, list[str]]:
 
 
 # -----------------------------------------------------------
+# Signed examples on the specification pages
+# -----------------------------------------------------------
+#
+# Besides the corpus, the specification shows signed requests and responses
+# inline on the checkout, order, booking and signatures pages. Those used to
+# carry placeholder digests and signatures that nothing could check, and
+# they drifted from the rules on the signatures page more than once. Every
+# fenced block that carries a complete Signature-Input is now a real signed
+# message over the exact bytes shown, signed with the test keys above.
+# `verify-docs` rebuilds each one and verifies it; `sign-docs` writes the
+# digest and signature values into the page.
+#
+# A block whose Signature-Input is truncated with "..." is an illustrative
+# fragment, not a message, and is left alone. A "..." inside a Signature or
+# Content-Digest value is a placeholder and fails verification.
+
+DOCS_DIR = REPO_ROOT / "docs" / "specification"
+REQUEST_LINE_RE = re.compile(r"^([A-Z]+) (\S+) HTTP/1\.1$")
+STATUS_LINE_RE = re.compile(r"^HTTP/1\.1 (\d{3})(?: .*)?$")
+FENCE_RE = re.compile(r"^\s*```")
+
+
+@dataclass
+class SignedExample:
+  """One fenced block on a page that carries a complete signature."""
+
+  path: Path
+  line: int  # 1-based line number of the opening fence
+  lines: list[str]  # block content, without the fences
+
+  @property
+  def where(self) -> str:
+    """Location string for reports."""
+    try:
+      rel = self.path.relative_to(REPO_ROOT)
+    except ValueError:
+      rel = self.path
+    return f"{rel}:{self.line}"
+
+  def header_line(self, name: str) -> int | None:
+    """Index in ``lines`` of the header ``name``, or None."""
+    prefix = f"{name.lower()}:"
+    for i, text in enumerate(self.lines):
+      if not text:
+        return None
+      if text.lower().startswith(prefix):
+        return i
+    return None
+
+
+def _is_illustrative(lines: list[str]) -> bool:
+  """Tell a fragment with a truncated Signature-Input from a message."""
+  return any(
+    text.lower().startswith("signature-input:") and "..." in text
+    for text in lines
+  )
+
+
+def find_signed_examples(
+  paths: list[Path] | None = None,
+) -> list[SignedExample]:
+  """Find every complete signed example under ``paths`` (default: docs)."""
+  roots = paths or [DOCS_DIR]
+  files: list[Path] = []
+  for root in roots:
+    if root.is_dir():
+      files += sorted(root.rglob("*.md"))
+    elif root.suffix == ".md":
+      files.append(root)
+  found = []
+  for path in files:
+    lines = path.read_text(encoding="utf-8").split("\n")
+    i = 0
+    while i < len(lines):
+      if FENCE_RE.match(lines[i]):
+        j = i + 1
+        while j < len(lines) and not FENCE_RE.match(lines[j]):
+          j += 1
+        block = lines[i + 1 : j]
+        if any(
+          text.lower().startswith("signature-input:") for text in block
+        ) and not _is_illustrative(block):
+          found.append(SignedExample(path, i + 1, block))
+        i = j
+      i += 1
+  return found
+
+
+def message_from_example(
+  example: SignedExample,
+) -> tuple[Message, str, list[Component], dict, str]:
+  """Parse a block into (message, label, components, params, signature).
+
+  The body is everything after the first blank line, joined with
+  newlines and without a trailing newline, exactly as the corpus signs
+  bodies. Headers keep their wire order and case.
+  """
+  lines = example.lines
+  if not lines:
+    raise ValueError("empty block")
+  first = lines[0]
+  headers: dict[str, str] = {}
+  i = 1
+  while i < len(lines) and lines[i]:
+    name, sep, value = lines[i].partition(":")
+    if not sep:
+      raise ValueError(f"malformed header line {lines[i]!r}")
+    headers[name.strip()] = value.strip()
+    i += 1
+  body = "\n".join(lines[i + 1 :]).rstrip("\n").encode("utf-8")
+
+  status_match = STATUS_LINE_RE.match(first)
+  request_match = REQUEST_LINE_RE.match(first)
+  if status_match:
+    message = Message(headers=headers, body=body, status=int(status_match[1]))
+  elif request_match:
+    method, target = request_match[1], request_match[2]
+    path, sep, query = target.partition("?")
+    host = [v for k, v in headers.items() if k.lower() == "host"]
+    if not host:
+      raise ValueError("request has no Host header to derive @authority")
+    message = Message(
+      headers=headers,
+      body=body,
+      method=method,
+      authority=host[0],
+      path=path,
+      query=query if sep else None,
+    )
+  else:
+    raise ValueError(f"first line is neither a request nor a status: {first!r}")
+
+  inputs = message.field_values("signature-input")
+  signatures = message.field_values("signature")
+  if len(inputs) != 1 or len(signatures) != 1:
+    raise ValueError("expected exactly one Signature-Input and one Signature")
+  label, components, params = parse_signature_input(inputs[0])
+  return message, label, components, params, signatures[0]
+
+
+def required_components(message: Message) -> set[str]:
+  """Components the specification's coverage gate requires for a message."""
+  headers = {k.lower() for k in message.headers}
+  if message.status is None:
+    required = {'"@method"', '"@authority"', '"@path"'}
+    if message.query:
+      required.add('"@query"')
+    for name in (
+      "ucp-agent",
+      "idempotency-key",
+      "webhook-id",
+      "webhook-timestamp",
+    ):
+      if name in headers:
+        required.add(sf_string(name))
+    if "signature-agent" in headers:
+      inputs = message.field_values("signature-input")
+      label = inputs[0].split("=", 1)[0] if inputs else "sig1"
+      required.add(f'"signature-agent";key="{label}"')
+  else:
+    required = {'"@status"'}
+  if message.body:
+    required |= {'"content-digest"', '"content-type"'}
+  return required
+
+
+def verify_example(example: SignedExample, keys: list[dict]) -> list[str]:
+  """Verify one page example from first principles; return its problems."""
+  problems: list[str] = []
+  try:
+    message, label, components, params, signature_value = message_from_example(
+      example
+    )
+  except ValueError as e:
+    return [str(e)]
+
+  kid = params.get("keyid")
+  try:
+    jwk = key_by_kid(keys, str(kid))
+  except KeyError:
+    return [
+      f"keyid {kid!r} is not a published test key; run"
+      " `signature_vectors.py sign-docs` to sign this example"
+    ]
+
+  if message.body:
+    expected = content_digest(message.body)
+    actual = message.field_values("content-digest")
+    if actual != [expected]:
+      problems.append(f"content-digest {actual} != {expected}")
+  elif message.field_values("content-digest"):
+    problems.append("content-digest present on a message without a body")
+
+  missing = required_components(message) - {c.serialize() for c in components}
+  if missing:
+    problems.append(f"coverage gate: not covered {sorted(missing)}")
+
+  if params.get("tag") == "web-bot-auth" and kid != jwk_thumbprint(jwk):
+    problems.append("WBA-shape keyid is not the key's RFC 7638 thumbprint")
+
+  try:
+    base = signature_base(message, components, params)
+  except ValueError as e:
+    return problems + [f"cannot build signature base: {e}"]
+  try:
+    signature = parse_signature(signature_value, label)
+  except (ValueError, binascii.Error) as e:
+    return problems + [f"malformed Signature: {e}"]
+  if jwk_algorithm(jwk) == "ES256" and len(signature) != 64:
+    problems.append(
+      f"ES256 signature is {len(signature)} bytes; raw r||s is 64 (not DER)"
+    )
+  elif not verify(jwk, base, signature):
+    problems.append("signature does not verify")
+  return problems
+
+
+def sign_example(example: SignedExample, keys: list[dict]) -> list[str]:
+  """Return the block with real Content-Digest and Signature values.
+
+  The key is the one ``keyid`` names when it is a test key; otherwise a
+  WBA-shape signature gets the Ed25519 key and anything else the P-256
+  key. Covered components and other parameters are kept as written, so
+  what the example says it signs does not change.
+  """
+  message, label, components, params, _ = message_from_example(example)
+  kid = params.get("keyid")
+  try:
+    jwk = key_by_kid(keys, str(kid))
+  except KeyError:
+    jwk = (
+      TEST_KEY_ED25519
+      if params.get("tag") == "web-bot-auth"
+      else (TEST_KEY_ECC_P256)
+    )
+  params = dict(params)
+  params["keyid"] = jwk["kid"]
+
+  lines = list(example.lines)
+  input_at = example.header_line("Signature-Input")
+  digest_at = example.header_line("Content-Digest")
+  if message.body:
+    digest = f"Content-Digest: {content_digest(message.body)}"
+    if digest_at is None:
+      lines.insert(input_at, digest)
+      input_at += 1
+    else:
+      lines[digest_at] = digest
+  elif digest_at is not None:
+    del lines[digest_at]
+    input_at -= 1
+  lines[input_at] = (
+    f"Signature-Input: {label}={signature_params_value(components, params)}"
+  )
+
+  # Re-read the block so the base sees the rewritten headers in wire order.
+  draft = SignedExample(example.path, example.line, lines)
+  message, label, components, params, _ = message_from_example(draft)
+  base = signature_base(message, components, params)
+  lines[draft.header_line("Signature")] = (
+    f"Signature: {label}=:{b64(sign(jwk, base))}:"
+  )
+  return lines
+
+
+def sign_docs(
+  paths: list[Path] | None = None, keys: list[dict] | None = None
+) -> list[str]:
+  """Rewrite every page example; return the locations that changed."""
+  keys = keys or TEST_KEYS
+  changed = []
+  by_file: dict[Path, list[SignedExample]] = {}
+  for example in find_signed_examples(paths):
+    by_file.setdefault(example.path, []).append(example)
+  for path, examples in by_file.items():
+    lines = path.read_text(encoding="utf-8").split("\n")
+    touched = False
+    for example in sorted(examples, key=lambda e: e.line, reverse=True):
+      new_lines = sign_example(example, keys)
+      start = example.line  # index of the first content line
+      if lines[start : start + len(example.lines)] != new_lines:
+        lines[start : start + len(example.lines)] = new_lines
+        changed.append(example.where)
+        touched = True
+    if touched:
+      path.write_text("\n".join(lines), encoding="utf-8")
+  return changed
+
+
+# -----------------------------------------------------------
 # Self-test against RFC 9421 Appendix B
 # -----------------------------------------------------------
 
@@ -1084,6 +1378,14 @@ def main(argv: list[str] | None = None) -> int:
   ver = sub.add_parser("verify", help="verify the vector corpus")
   ver.add_argument("--in", dest="inp", type=Path, default=VECTORS_PATH)
   sub.add_parser("self-test", help="check against RFC 9421 Appendix B")
+  verify_docs_cmd = sub.add_parser(
+    "verify-docs", help="verify the signed examples on the spec pages"
+  )
+  verify_docs_cmd.add_argument("paths", nargs="*", type=Path)
+  sign_docs_cmd = sub.add_parser(
+    "sign-docs", help="write real digests and signatures into the spec pages"
+  )
+  sign_docs_cmd.add_argument("paths", nargs="*", type=Path)
   args = parser.parse_args(argv)
 
   problems = self_test()
@@ -1101,6 +1403,26 @@ def main(argv: list[str] | None = None) -> int:
     args.out.write_text(_dump(corpus), encoding="utf-8")
     print(f"wrote {len(corpus['vectors'])} vectors to {args.out}")
     return 0
+
+  if args.command == "sign-docs":
+    changed = sign_docs(args.paths or None)
+    for where in changed:
+      print(f"  signed  {where}")
+    print(f"\n{len(changed)} example(s) rewritten")
+    return 0
+
+  if args.command == "verify-docs":
+    examples = find_signed_examples(args.paths or None)
+    failures = 0
+    for example in examples:
+      probs = verify_example(example, TEST_KEYS)
+      status = "PASS" if not probs else "FAIL"
+      print(f"  {status}  {example.where}")
+      for p in probs:
+        print(f"          {p}")
+      failures += bool(probs)
+    print(f"\n{len(examples) - failures} passed, {failures} failed")
+    return 1 if failures else 0
 
   corpus = json.loads(args.inp.read_text(encoding="utf-8"))
   failures = 0

@@ -92,6 +92,11 @@ jobs:
       - name: Run signature test vector checks
         run: uv run python scripts/test_signature_vectors.py
 
+      # Every signed request or response shown on a spec page is a real
+      # message over the bytes shown, signed with the published test keys.
+      - name: Verify signed examples on the spec pages
+        run: uv run python scripts/signature_vectors.py verify-docs
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest

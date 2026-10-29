@@ -1585,11 +1585,11 @@ Host: business.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
-Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
+Content-Digest: sha-256=:IGJ1w9YZYSIF3A9jotPTZnx1/J/pgJaPWFTXnz9SMT8=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:LrRdFahJ1ni0TeEnj1Wsz0Lq7K5C2iygiYGnHvIOv6jVVAD+/BfrC/8xxnJrkiuF1S+lgcD56NtVA8j6Ai+4cQ==:
 
-{"payment":{...}, ...}
+{"payment":{"instruments":[{"id":"pi_1","type":"card","handler_id":"handler_1"}]}}
 ```
 
 See [Message Signatures - REST Request Signing](../../signatures.md#rest-request-signing)
@@ -1610,11 +1610,11 @@ Response signatures are **OPTIONAL** for:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="business-2026"
-Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
+Content-Digest: sha-256=:4qQURLZ46trNGay7346Cddqe6EW9g3G5GXYaNrCwUt4=:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:1eU1tOODB0o5tk9yDFGOr+mbwNEAG3lJyNWAoU2Wwo/IWbAFNZ+ajk10DehxNc7cSPVDOlu4AzpEZ4i/ye/q+g==:
 
-{"id":"booking_123","status":"completed","confirmation":{...}}
+{"id":"booking_123","status":"completed","confirmation":{"id":"confirmation_123","label":"CON123AZ"}}
 ```
 
 See [Message Signatures - REST Response Signing](../../signatures.md#rest-response-signing)

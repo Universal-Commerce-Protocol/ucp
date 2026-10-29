@@ -768,11 +768,11 @@ Content-Type: application/json
 UCP-Agent: profile="https://merchant.example/.well-known/ucp"
 Webhook-Timestamp: 1737000000
 Webhook-Id: 018f8c2a-7b3e-7c1d-9a2b-4e5f6a7b8c9d
-Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="merchant-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:gkWkfiDXa5hQjTnvqyE1kyS1qCIdJNEd22SNr9a5/ZQ=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "content-digest" "content-type" "webhook-id" "webhook-timestamp");keyid="test-key-ecc-p256"
+Signature: sig1=:nojL/xG29XO9YXwTlJ0GSV0gSvAWOPncX+FKr7ABKv94bi2R+QRiIRMQJi+RS8GcvemRRnuYlEBOQaSoHoBqww==:
 
-{"id":"order_abc123",...}
+{"id":"order_abc123","checkout_id":"chk_123","status":"confirmed"}
 ```
 
 #### Signing (Business)
