@@ -101,6 +101,9 @@ current-state snapshot of an order.
 #### Input Schema
 
 * `meta` (Object, required): Request metadata with `ucp-agent.profile`.
+    * `ucp-order-token` (String, optional): Order credential issued at checkout
+        completion (see [Order Access](index.md#order-access)). Omit when the
+        request is authorized by platform credentials or a user identity token.
 * `id` (String, required): The ID of the order.
 
 #### Output Schema
