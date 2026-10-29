@@ -36,8 +36,9 @@ The capability is built from UCP primitives. Discovery is a capability whose
 defines; the examples in this document use
 [Shopping Catalog Feed](../../shopping/catalog/feed.md), whose records are
 catalog Products, as the illustrative domain. Access control is UCP's existing
-Platform authentication on the feed endpoint. Extensions compose onto records
-as they do onto operation responses.
+[Platform authentication](../../overview/index.md#authentication-mechanisms)
+on the feed endpoint. Extensions compose onto records as they do onto operation
+responses.
 
 ## Discovery
 
@@ -554,17 +555,11 @@ request conventions and authentication mechanisms as the Business's service
 endpoint would; a Platform treats a feed endpoint that does not as
 unavailable. The feed list is provisioned for the caller; a Business offers
 different feeds to different Platforms through this provisioning, not through
-separate profile entries. The feed endpoint is the only place feed access
-control runs: file URLs are not access control. For a feed the Business
-returns only to authenticated callers, the Business **MUST** make each
-snapshot's manifest URL unguessable, for example by using a UUID or a random
-token of equivalent entropy as the per-snapshot path segment, and **MUST**
-place file URLs under that segment or make them unguessable likewise, so that
-neither can be derived from the feed's `id`, from `generated_at`, or from
-other public information. For a public feed any unique per-snapshot segment,
-such as a timestamp, suffices. Whether the host additionally authenticates
-manifest and file requests (short-lived or scoped URLs, CDN credentials)
-remains the Business's data-plane choice and is out of scope.
+separate profile entries.
+
+For feeds returned only to authenticated callers, the Business **MUST** protect
+access to each snapshot's manifest and files, using resource-level authorization
+or unguessable URLs. The choice of mechanism is outside this capability.
 
 ### Scopes
 
