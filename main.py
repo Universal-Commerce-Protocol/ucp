@@ -1739,11 +1739,15 @@ def define_env(env):
         )
       )
     elif "$ref" in schema_data:
-      md.append(
-        _render_table_from_ref(
-          schema_data.get("$ref"), required_list, spec_file_name, context
-        )
+      body = _render_table_from_ref(
+        schema_data.get("$ref"), required_list, spec_file_name, context
       )
+      # A $ref to a scalar type (amenity_type -> reverse_domain_name) renders
+      # as prose. Under a table header, Markdown reads that prose as a row
+      # with an empty Type cell, so return it on its own.
+      if need_header and not body.lstrip().startswith("|"):
+        return body
+      md.append(body)
     else:
       for field_name, details in properties.items():
         if field_name == "$ref":

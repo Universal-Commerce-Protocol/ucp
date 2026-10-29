@@ -1373,6 +1373,21 @@ def test_declared_header_parameter_keeps_single_row(macros: dict) -> None:
 # -----------------------------------------------------------
 
 
+def test_scalar_ref_schema_renders_prose_without_header(macros: dict) -> None:
+  """A schema that is only a $ref to a scalar type renders as prose.
+
+  amenity_type.json is a $ref to reverse_domain_name.json, a string with a
+  pattern. Emitting the table header above that prose made Markdown read
+  the description as a row with an empty Type cell.
+  """
+  out = macros["schema_fields"]("types/amenity_type", "common/location/rest")
+  _check(
+    "scalar_ref_schema_renders_prose_without_header",
+    not out.lstrip().startswith("|") and "**Pattern:**" in out,
+    f"got {out[:120]!r}",
+  )
+
+
 def main() -> int:
   """Run all tests and report. Exit 0 on pass, 1 on failure."""
   print("Running schema and header table tests...\n")
@@ -1401,6 +1416,7 @@ def main() -> int:
   test_security_header_rows_follow_requirements()
   test_content_header_rows_follow_media_types()
   test_declared_header_parameter_keeps_single_row(macros)
+  test_scalar_ref_schema_renders_prose_without_header(macros)
   return _report()
 
 

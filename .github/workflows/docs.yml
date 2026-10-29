@@ -113,6 +113,7 @@ jobs:
         run: |
           bash scripts/build_local.sh --draft-only
           uv run python scripts/check_links.py local_preview
+          uv run python scripts/check_rendered_tables.py local_preview
 
   build_and_verify_release:
     needs: lint
@@ -144,6 +145,7 @@ jobs:
           export DOCS_MODE=spec
           uv run mkdocs build --strict
           uv run python scripts/check_links.py site
+          uv run python scripts/check_rendered_tables.py site
 
   deploy_main:
     needs: build_and_verify_main

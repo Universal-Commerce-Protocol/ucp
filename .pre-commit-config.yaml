@@ -51,6 +51,13 @@ repos:
         pass_filenames: false
         files: ^(main\.py|scripts/test_schema_tables\.py|source/schemas/ucp\.json|docs/specification/reference\.md)$
         stages: [pre-commit, pre-push]
+      - id: check-rendered-tables-tests
+        name: Rendered table checker unit tests
+        entry: uv run --frozen python scripts/test_check_rendered_tables.py
+        language: system
+        pass_filenames: false
+        files: ^scripts/(check_rendered_tables|test_check_rendered_tables)\.py$
+        stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
         entry: uv run --frozen python scripts/test_check_links.py

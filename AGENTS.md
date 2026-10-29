@@ -62,6 +62,7 @@ These commands should be run from the ucp root directory.
 * **Build Full Multi-Version Site**: `./scripts/build_local.sh`. The resulting build will be placed in the local_preview/ directory. Add `[--draft-only]` to avoid building every version of the specification.
 * **Serve the site locally after build**: `python3 -m http.server 8000 -d local_preview/`
 * **Check Broken Links after build:** `uv run ./scripts/check_links.py local_preview/`
+* **Check Rendered Schema Tables after build:** `uv run ./scripts/check_rendered_tables.py local_preview/`
 
 #### Optional: build and serve specification by version(s)
 
