@@ -315,6 +315,13 @@ carries no UCP request headers:
       "url": "part-00001.jsonl.gz",
       "digest": "sha-256=:d6wYF3+kJXsB1M2Hu1c0pV3xbFVQj4Kp0M4K0Zg2XqE=:"
     }
+  ],
+  "links": [
+    {
+      "type": "terms_of_service",
+      "url": "https://merchant.example.com/policies/feed-data-use",
+      "title": "Feed data-use terms"
+    }
   ]
 }
 ```
@@ -376,6 +383,10 @@ cannot place in either group. A Platform validates records against the declared
 schemas and handles records that do not conform as [Malformed
 Records](#malformed-records); for a supplemental feed it validates the composed
 record, since a supplemental record is partial by design.
+
+`links`, when present, references terms and policies governing the Platform's
+use of the records in this snapshot. A `terms_of_service` link can identify
+the feed's data-use terms.
 
 `messages`, when present, carries errors, warnings, or informational notices
 about the snapshot in the shape UCP responses use.
@@ -499,9 +510,10 @@ Unavailable` with `Retry-After`. A Platform that receives `Retry-After`
 The Business **SHOULD** keep a manifest and its files retrievable until
 `expires_at`, unless it is required to withdraw content it is no
 longer permitted to distribute. A Platform that finds a manifest or file no
-longer retrievable **SHOULD** re-read the feed list and fetch the current
-snapshot rather than retry the missing URL, unless the Business signals a
-transient failure (for example, HTTP 503 with `Retry-After`).
+longer retrievable, whether before or after `expires_at`, **SHOULD** re-read
+the feed list and fetch the current snapshot rather than retry the missing
+URL, unless the Business signals a transient failure (for example, HTTP 503
+with `Retry-After`).
 
 ## Formats
 
@@ -605,10 +617,10 @@ carries replaces the base record's member of the same name, whole, or adds it
 where the base has none: a supplement that carries `price` carries the complete
 price, `amount` and `currency`. A member set to `null` removes the base member.
 One kind of member works differently: an *identified list*, such as a Product's
-`variants`. An identified list is not replaced. Each element in the supplement
-is applied to the base element with the same `id` by these same rules; base
-elements the supplement does not mention stay as they are, and supplemental
-elements that match nothing are ignored. Because members are replaced whole, an
+`variants`. An identified list is not replaced. Each supplemental element updates the
+base element with the same `id` using these rules; it cannot insert or delete
+an element. Unmentioned base elements stay unchanged, and unmatched
+supplemental elements are ignored. Because members are replaced whole, an
 incomplete member, such as a `price` without `currency`, produces a composed
 record that fails validation and is handled as [Malformed
 Records](#malformed-records), rather than one that silently keeps the base

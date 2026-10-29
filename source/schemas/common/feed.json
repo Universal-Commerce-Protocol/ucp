@@ -212,6 +212,14 @@
           "description": "Flat list of the files that together make up this snapshot; a single file is a one-element list. All files are mutually consistent as of `generated_at`, and the Business publishes every file before publishing the manifest that references it. A Platform that cannot retrieve every file does not treat the snapshot as complete.",
           "ucp_request": "omit"
         },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "types/link.json"
+          },
+          "description": "Links to terms and policies governing the Platform's use of this snapshot's records.",
+          "ucp_request": "omit"
+        },
         "messages": {
           "type": "array",
           "items": {
