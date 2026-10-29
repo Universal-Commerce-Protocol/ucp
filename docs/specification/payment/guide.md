@@ -686,7 +686,7 @@ instrument **SHOULD** extend that instrument's target rather than restate it.
 | Schema                                                                                         | Description                                 |
 | :--------------------------------------------------------------------------------------------- | :------------------------------------------ |
 | [`payment_credential.json`](site:schemas/common/types/payment_credential.json)                 | Base: type discriminator only               |
-| [`token_credential.json`](site:schemas/common/types/token_credential.json)                     | Token: type + token string                  |
+| [`token_credential.json`](site:schemas/common/types/token_credential.json)                     | Token: string + optional binding/identity   |
 | [`pan_credential.json`](site:schemas/common/types/pan_credential.json)                         | Raw FPAN, verified with `cvc`. Source only. |
 | [`network_token_credential.json`](site:schemas/common/types/network_token_credential.json)     | Network token, verified with `cryptogram`   |
 
