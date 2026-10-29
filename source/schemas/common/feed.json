@@ -117,10 +117,10 @@
         },
         "format": {
           "$ref": "types/reverse_domain_name.json",
-          "description": "Specification-defined namespaced format identifier for every file in the feed's current snapshot. The Business MUST set the feed list entry's `format` and the `format` in the manifest referenced by that entry's `manifest` URL to the same value. The manifest is authoritative. A Platform that fetches the manifest and finds that these values differ MUST NOT consume the snapshot. Lets a Platform select feeds it can read, and skip ones it cannot, without fetching manifests. A Platform MUST use the full identifier when determining format support, MUST NOT infer a decoder from its suffix, and MUST NOT consume a snapshot with an unrecognized format.",
+          "description": "Specification-defined namespaced format identifier for a concrete record-type representation profile, covering every file in the feed's current snapshot. The format MUST be defined by a record-type or other extension declared in the manifest's `ucp.capabilities`. The Business MUST set the feed list entry's `format` and the `format` in the manifest referenced by that entry's `manifest` URL to the same value. The manifest is authoritative. A Platform that fetches the manifest and finds that these values differ MUST NOT consume the snapshot. Lets a Platform select feeds it can read, and skip ones it cannot, without fetching manifests. A Platform MUST use the full identifier when determining format support, MUST NOT infer a decoder from its suffix, and MUST NOT consume a snapshot with an unrecognized or unsupported format.",
           "examples": [
-            "dev.ucp.common.format.jsonl",
-            "dev.ucp.common.format.parquet"
+            "dev.ucp.shopping.catalog.jsonl",
+            "dev.ucp.shopping.catalog.parquet"
           ],
           "ucp_request": "omit"
         },
@@ -174,10 +174,10 @@
         },
         "format": {
           "$ref": "types/reverse_domain_name.json",
-          "description": "Specification-defined namespaced format identifier for every file in `files`, not a generic encoding label. Its defining specification describes record layout, serialization, and compression. Open vocabulary. Common Feed registers `dev.ucp.common.format.jsonl` (one record per line, JSON, gzip-compressed) and `dev.ucp.common.format.parquet` (one record per row, with nested structures as nested columns per the declared record schema; internal compression). Platforms advertising this Common Feed version MUST support both core values. Extensions register their own values under their namespaces, e.g. `com.provider.format.tsv`; third-party format support is optional. A Platform MUST use the full identifier when determining format support, MUST NOT infer a decoder from its suffix, and MUST NOT consume a snapshot with an unrecognized format. Record conformance remains declared by `ucp.capabilities`. The Business MUST set the feed list entry's `format` and the `format` in the manifest referenced by that entry's `manifest` URL to the same value. The manifest is authoritative. A Platform that fetches the manifest and finds that these values differ MUST NOT consume the snapshot.",
+          "description": "Specification-defined namespaced format identifier for a concrete record-type representation profile covering every file in `files`, not a generic encoding label. Its defining specification describes record layout, serialization, and compression. Open reverse-domain vocabulary. Common Feed defines no universal format values or decoder-support obligation. The Business MUST use a format defined by a record-type or other extension declared in this manifest's `ucp.capabilities`. A Platform MUST use the full identifier when determining format support, MUST NOT infer a decoder from its suffix, and MUST NOT consume a snapshot with an unrecognized or unsupported format or one not defined by an extension declared in this manifest. Record conformance remains declared by `ucp.capabilities`. The Business MUST set the feed list entry's `format` and the `format` in the manifest referenced by that entry's `manifest` URL to the same value. The manifest is authoritative. A Platform that fetches the manifest and finds that these values differ MUST NOT consume the snapshot.",
           "examples": [
-            "dev.ucp.common.format.jsonl",
-            "dev.ucp.common.format.parquet"
+            "dev.ucp.shopping.catalog.jsonl",
+            "dev.ucp.shopping.catalog.parquet"
           ],
           "ucp_request": "omit"
         },

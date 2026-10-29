@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/shopping/catalog_feed.json",
   "name": "dev.ucp.shopping.catalog.feed",
   "title": "Catalog Feed",
-  "description": "Catalog feed extension. Extends `dev.ucp.common.feed` with a record type: the records of a catalog feed are catalog Product objects with nested variants, using the same Product shape as Catalog Search. The Business MUST use stable, Business-owned Product and Variant identifiers. Where Catalog Lookup is advertised, it MUST resolve those Product and Variant IDs to the same entities. Where Cart or Checkout operations are advertised, they MUST use those Variant IDs as `item.id` to identify the same Variants. Stable identity does not guarantee availability or transaction success; operation error contracts still apply. Where Catalog Search or Catalog Lookup is advertised, it remains authoritative at serving time. Publishing a catalog feed does not require advertising corresponding live operations. A catalog feed manifest carries `filters`, in the Catalog Search filter vocabulary. Discovery, feed lists, manifests, files, and snapshot semantics are defined by the Feed capability.",
+  "description": "Extends `dev.ucp.common.feed` for catalog Products with nested Variants. Defines Catalog JSONL and Parquet formats and adds manifest `filters` using the Catalog Search vocabulary. Discovery, publication, and snapshot semantics are defined by Common Feed.",
   "$defs": {
     "dev.ucp.common.feed": {
       "title": "Catalog Feed Manifest",

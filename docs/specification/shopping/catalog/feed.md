@@ -27,10 +27,10 @@ point-in-time, the live operations are authoritative.
 
 This capability extends the **[Feed capability](../../common/feed/index.md)**
 (`dev.ucp.common.feed`) with a record type. Discovery, the feed list,
-manifests, files, snapshot semantics, formats, and access are defined there and
-not restated here. This document defines what a catalog feed's records are,
-which resolutions a Platform obtains from the live catalog at serving time, and
-the `filters` this capability adds to a catalog manifest.
+manifests, files, snapshot semantics, and access are defined there and not
+restated here. This document defines a catalog feed's records and formats,
+which resolutions a Platform obtains from the live catalog at serving time,
+and the `filters` this capability adds to a catalog manifest.
 
 **Dependencies:**
 
@@ -91,9 +91,24 @@ nested `variants`, using the same Product shape as Catalog Search and
 conforming to the schemas of the capabilities declared in the manifest's
 `ucp.capabilities`.
 
-* For `dev.ucp.common.format.jsonl`, each line is one Product.
-* For `dev.ucp.common.format.parquet`, each row is one Product with `variants`
-  as a nested column; a snapshot may span several files.
+Catalog Feed defines two representation profiles:
+
+* `dev.ucp.shopping.catalog.jsonl`: One Product encoded as JavaScript
+  Object Notation (JSON) per line; files are gzip-compressed.
+* `dev.ucp.shopping.catalog.parquet`: One Product per row, with nested
+  Variants and other structures represented as nested columns per the declared
+  schemas; compression is internal to Parquet.
+
+A snapshot may span several files. A Platform consuming Catalog Feed
+**SHOULD** support both profiles unless the Business and Platform have agreed
+to narrower format requirements.
+
+Both profiles permit fields from extensions declared in the manifest's
+`ucp.capabilities` and partial Product records for supplemental feeds, without
+a new format identifier for each compatible extension. For supplemental feeds,
+the Platform validates the composed Product against the declared schemas,
+not the partial record alone, under the existing
+[supplemental-feed rules](../../common/feed/index.md#supplemental-feeds).
 
 Records carry the Business's own identity. The Business **MUST** use stable,
 Business-owned Product and Variant identifiers in each record. Where Catalog
@@ -149,7 +164,7 @@ restricted to footwear. It declares both `dev.ucp.common.feed` and
     }
   },
   "id": "ca-fr-cad",
-  "format": "dev.ucp.common.format.jsonl",
+  "format": "dev.ucp.shopping.catalog.jsonl",
   "context": {
     "address_country": "CA",
     "language": "fr-CA",
@@ -212,7 +227,7 @@ only prices, rolls every two hours as gzipped JSON Lines:
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "dev.ucp.common.format.parquet",
+      "format": "dev.ucp.shopping.catalog.parquet",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
@@ -225,7 +240,7 @@ only prices, rolls every two hours as gzipped JSON Lines:
         "language": "en-CA",
         "currency": "CAD"
       },
-      "format": "dev.ucp.common.format.jsonl",
+      "format": "dev.ucp.shopping.catalog.jsonl",
       "interval": "PT2H",
       "generated_at": "2026-09-22T10:00:00Z",
       "manifest": "https://merchant.example.com/feeds/ca-en-cad/20260922T100000Z/manifest.json"
@@ -253,7 +268,7 @@ The supplemental manifest repeats `extends`, `context`, and
   },
   "id": "ca-en-cad",
   "extends": "us-en-usd",
-  "format": "dev.ucp.common.format.jsonl",
+  "format": "dev.ucp.shopping.catalog.jsonl",
   "context": {
     "address_country": "CA",
     "language": "en-CA",
@@ -370,7 +385,7 @@ Feed list as provisioned to the marketplace in this example:
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "dev.ucp.common.format.jsonl",
+      "format": "dev.ucp.shopping.catalog.jsonl",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
@@ -383,7 +398,7 @@ Feed list as provisioned to the marketplace in this example:
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "dev.ucp.common.format.jsonl",
+      "format": "dev.ucp.shopping.catalog.jsonl",
       "interval": "P7D",
       "generated_at": "2026-09-21T00:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd-compliance/3f9c2a7e-5b41-4d8e-9c0a-1e6f7b2d8a54/manifest.json"
@@ -415,7 +430,7 @@ follow:
   },
   "id": "us-en-usd-compliance",
   "extends": "us-en-usd",
-  "format": "dev.ucp.common.format.jsonl",
+  "format": "dev.ucp.shopping.catalog.jsonl",
   "context": {
     "address_country": "US",
     "language": "en-US",

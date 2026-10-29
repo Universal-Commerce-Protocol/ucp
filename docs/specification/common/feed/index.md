@@ -154,7 +154,7 @@ Platform outside this capability.
         "language": "en-US",
         "currency": "USD"
       },
-      "format": "dev.ucp.common.format.jsonl",
+      "format": "dev.ucp.shopping.catalog.jsonl",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:00:00Z",
       "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
@@ -166,7 +166,7 @@ Platform outside this capability.
         "language": "fr-CA",
         "currency": "CAD"
       },
-      "format": "dev.ucp.common.format.jsonl",
+      "format": "dev.ucp.shopping.catalog.jsonl",
       "interval": "P1D",
       "generated_at": "2026-09-22T06:10:00Z",
       "manifest": "https://merchant.example.com/feeds/ca-fr-cad/20260922T061000Z/manifest.json"
@@ -298,7 +298,7 @@ carries no UCP request headers:
     }
   },
   "id": "us-en-usd",
-  "format": "dev.ucp.common.format.jsonl",
+  "format": "dev.ucp.shopping.catalog.jsonl",
   "context": {
     "address_country": "US",
     "language": "en-US",
@@ -505,35 +505,19 @@ transient failure (for example, HTTP 503 with `Retry-After`).
 
 ## Formats
 
-`format` is an open vocabulary of reverse-domain format identifiers. Each
-value is defined by its owning specification, which describes the record
-layout, serialization, and compression; it is not merely an encoding label.
-Common Feed registers these two core values:
+`format` is an open vocabulary of reverse-domain identifiers. Each identifier
+names a concrete record-type representation profile defining record layout,
+serialization, and compression—not merely an encoding. Common Feed defines no
+universal format values and imposes no decoder-support obligation.
 
-| `format` | Format contract |
-| :--- | :--- |
-| `dev.ucp.common.format.jsonl` | One JSON record per line, gzip-compressed. |
-| `dev.ucp.common.format.parquet` | One record per row, with nested structures as nested columns per the declared record schema. Compression is internal to Parquet. |
+The Business **MUST** use a format defined by a record-type or other extension
+declared in the manifest's `ucp.capabilities`. A Platform **MUST** determine
+format support using the full identifier and **MUST NOT** infer a decoder from
+its suffix. A Platform **MUST NOT** consume a snapshot whose format is unknown,
+unsupported, or not defined by an extension declared in that manifest.
+Record conformance remains declared by the manifest's `ucp.capabilities`.
 
-Extension owners register additional values in their own namespaces, for
-example `com.provider.format.tsv`, by defining them in their extension
-specifications.
-
-The Business **MUST** use a `format` value defined by Common Feed or by an
-extension declared in the manifest's `ucp.capabilities`. A Platform **MUST**
-use the full identifier when determining format support, **MUST NOT** infer a
-decoder from its suffix, and **MUST NOT** consume a snapshot whose format is
-unrecognized or not defined by Common Feed or an extension declared in that
-manifest.
-
-A Platform advertising this version of Common Feed **MUST** support both core
-values. Support for third-party values is optional. Supporting a format does
-not imply support for every record type; record conformance is declared
-separately by the manifest's `ucp.capabilities` (see [Manifest](#manifest)).
-
-The support obligation sits with Platforms because a Platform is one
-implementation while Businesses are many; it also lets a Business materialize
-each feed in a single format.
+Each domain defines its own records and formats.
 
 ## Access and Provenance
 
