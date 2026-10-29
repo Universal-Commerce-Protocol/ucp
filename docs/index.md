@@ -1151,6 +1151,10 @@ image: assets/banner.png
         <span>Ant International</span>
       </div>
       <div class="partner-logo">
+        <img src="assets/partner/endorsed/Aven.svg" alt="Aven" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Aven</span>
+      </div>
+      <div class="partner-logo">
         <img src="assets/partner/endorsed/Best Buy.svg" alt="Best Buy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Best Buy</span>
       </div>
@@ -1350,6 +1354,10 @@ image: assets/banner.png
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Ant International.svg" alt="Ant International" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
         <span>Ant International</span>
+      </div>
+      <div class="partner-logo">
+        <img src="assets/partner/endorsed/Aven.svg" alt="Aven" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <span>Aven</span>
       </div>
       <div class="partner-logo">
         <img src="assets/partner/endorsed/Best Buy.svg" alt="Best Buy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
