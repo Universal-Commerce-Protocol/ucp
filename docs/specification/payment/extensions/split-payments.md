@@ -114,8 +114,10 @@ restriction.
 
 This is how a business offers an instrument it can charge only at completion
 — a gift card without a balance hold, a voucher — on a checkout where part of
-the payment is due later. The platform states an `amount` on it within what
-is due at completion, and the rest of the payment falls to the other
+the payment is due later. The platform MAY state an `amount` on it, within
+what is due at completion. Submitted without one, it contributes up to the
+remaining first charge, as any open-amount instrument does, and is never
+charged after completion; the rest of the payment falls to the other
 instruments.
 
 #### Example Configuration
@@ -232,12 +234,13 @@ only where such a later charge exists; otherwise nothing here applies.
   charge. On a checkout whose total is 0 — a free trial period before a
   subscription's first recurring order — the first charge is 0, so no
   stated amount above 0 is valid: the recurring orders are later charges and
-  are paid by the instruments submitted without an `amount`.
+  are paid as the next rule states.
 * Later charges are paid by the instruments submitted **without** an
-  `amount`, in array order, allocated as the first charge is: each takes up
-  to what remains of the charge. A submission with no such instrument, where
-  a later charge exists, MUST be rejected with `payment_failed` and `path` set
-  to `$.payment.instruments`.
+  `amount` and not assigned to an [`immediate` group](#schedule-type), in
+  array order, allocated as the first charge is: each takes up to what
+  remains of the charge. A submission with no such instrument, where a later
+  charge exists, MUST be rejected with `payment_failed` and `path` set to
+  `$.payment.instruments`.
 
 ### Error Handling
 
@@ -304,9 +307,8 @@ Error conditions:
 * If the sum of all specified `amount` values exceeds the first charge —
   the checkout total, or the selected payment term's first payment — the
   business MUST return an error.
-* If a later charge exists and no instrument was submitted without an
-  `amount` (see [Later charges](#later-charges)), the business MUST return an
-  error.
+* If a later charge exists and no submitted instrument can pay it (see
+  [Later charges](#later-charges)), the business MUST return an error.
 * If the submitted instruments did not match any valid `allowed_combinations`
   — those resolved for the checkout where the business returns them, the
   profile's otherwise — the business MUST return an error.
@@ -589,7 +591,9 @@ The gift card pays the $25 due at completion and is never charged again.
 The card contributes nothing today and is charged the $75 balance at
 check-in. Had the platform stated `"amount": 5000` on the gift card, the
 business would have rejected the submission (see [Schedule
-type](#schedule-type)).
+type](#schedule-type)). Submitted without an `amount`, the gift card would
+have contributed up to its balance toward the $25, and still never been
+charged at check-in.
 
 ### Deposit Now, Balance Later: Two Cards
 
