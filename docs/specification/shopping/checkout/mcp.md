@@ -764,11 +764,11 @@ Host: business.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
-Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="platform-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:PoWWPCehwVEs3wXEmSA2jjAI0gqyeuXPlTJwNtG1S0M=:
+Signature-Input: sig1=("@method" "@authority" "@path" "content-digest" "content-type" "ucp-agent" "idempotency-key");keyid="test-key-ecc-p256"
+Signature: sig1=:EQntxmMBLQU098VsiveR0ed4UDPvOGEsRukms8Cq0XBUXuqUe4SfygqeiYBhYXmaDCMm1iEmYUYZP84UYS4AJA==:
 
-{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"checkout_abc123","checkout":{"payment":{...}}}}}
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"complete_checkout","arguments":{"id":"checkout_abc123","checkout":{"payment":{"instruments":[{"id":"pi_1","type":"card","handler_id":"tokenizer_1"}]}}}}}
 ```
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON
@@ -792,11 +792,11 @@ Response signatures are **OPTIONAL** for:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:gvWqyW2x4N2Nrrw+KPt6ZlXU/TTjJipSon3eQJZ1IeM=:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:MWHN5mzMykgPt9+yve9gL4tOBVSL0sJJbYw60nfRc47qBP01/mAnxcuDt+Tx0dluURMCcq9eEL7hIrjALtIhoQ==:
 
-{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"checkout_abc123","status":"completed"}}}
+{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"Checkout checkout_abc123 completed"}],"structuredContent":{"id":"checkout_abc123","status":"completed"}}}
 ```
 
 See [Message Signatures - REST Response Signing](../../signatures.md#rest-response-signing)

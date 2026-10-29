@@ -1427,9 +1427,9 @@ Host: merchant.example.com
 Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:leXoa3FKKUAMFTdq8N3nWDxiosg58m3sa1Ijui1xSl4=:
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:7JjH0q1zfOB0WiXpb3FI3lxHqxfioJNQ2d4C6IK9NegIKkORb41Dn/kZL3rhiYih62E42Zj6SacQbr/MFTgZjQ==:
 
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
 ```
@@ -1452,9 +1452,9 @@ Response signatures are **OPTIONAL** for:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
-Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="merchant-2026"
-Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
+Content-Digest: sha-256=:hCS6H1URUFre40hT3u+SdCe0UlA2s+/FJV+uvvXI4cQ=:
+Signature-Input: sig1=("@status" "content-digest" "content-type");keyid="test-key-ecc-p256"
+Signature: sig1=:V4ZS0jmN63qJmi8hpHyv1sw+0Ax3zKnM7wx4fHP78VWJt9bCK3zyRkkcOCPmWbjUP1kyzElzqpohuaSMxZyO2A==:
 
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
