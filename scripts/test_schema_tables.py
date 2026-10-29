@@ -905,12 +905,6 @@ def _parse_table_type_cells(md_text: str) -> dict[str, str]:
 def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
   """Every cross-file `$ref` field rendered in `docs/` is linked or named."""
   main = sys.modules["main"]
-  # Untitled, unanchored base `$defs` in service.json and payment_handler.json
-  # intentionally carry no standalone anchor or title in the specification.
-  allowlisted_refs = {
-    "service.json#/$defs/base",
-    "payment_handler.json#/$defs/base",
-  }
   macro_re = re.compile(
     r"\{\{\s*(schema_fields|extension_schema_fields|extension_fields|"
     r"method_fields|auto_generate_schema_reference)\(([^)]*)\)\s*\}\}"
@@ -971,9 +965,7 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
         continue
       checked_fields += 1
       item = items[idx] if idx < len(items) else "<missing>"
-      if item in ("`object`", "object", "any", "<missing>") and not (
-        set(field_refs) <= allowlisted_refs
-      ):
+      if item in ("`object`", "object", "any", "<missing>"):
         unexpected.append(f"{label}.oneOf[{idx}]={item!r} (refs={field_refs})")
 
   def check_table(
@@ -986,9 +978,7 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
         continue
       checked_fields += 1
       cell = trows[fname]
-      if (
-        _is_degraded_type_cell(cell) and not set(field_refs) <= allowlisted_refs
-      ):
+      if _is_degraded_type_cell(cell):
         unexpected.append(f"{label}.{fname}={cell!r} (refs={field_refs})")
 
   for md_path in sorted((REPO_ROOT / "docs").rglob("*.md")):
@@ -1368,6 +1358,79 @@ def test_declared_header_parameter_keeps_single_row(macros: dict) -> None:
   )
 
 
+def test_inline_object_and_base_def_extraction(macros: dict) -> None:
+  """Inline objects render sub-sections and base $defs resolve root titles."""
+  order_li = macros["schema_fields"]("types/order_line_item", "reference")
+  order = macros["schema_fields"]("order", "reference")
+  variant = macros["schema_fields"]("types/variant", "reference")
+  card_pi = macros["schema_fields"](
+    "types/card_payment_instrument", "reference"
+  )
+  capacity = macros["schema_fields"]("types/capacity", "reference")
+  pay_actions = macros["extension_schema_fields"](
+    "payment_authentication.json#/$defs/payment_actions", "reference"
+  )
+  split_chk = macros["extension_schema_fields"](
+    "payment_split_payments.json#/$defs/dev.ucp.shopping.checkout", "reference"
+  )
+  order_meta = macros["extension_schema_fields"](
+    "ucp.json#/$defs/response_order_schema", "reference"
+  )
+  cart_meta = macros["extension_schema_fields"](
+    "ucp.json#/$defs/response_cart_schema", "reference"
+  )
+  cat_meta = macros["extension_schema_fields"](
+    "ucp.json#/$defs/response_catalog_schema", "reference"
+  )
+  loc_meta = macros["extension_schema_fields"](
+    "ucp.json#/$defs/response_location_schema", "reference"
+  )
+
+  _check(
+    "inline_object_and_base_def_extraction",
+    _type_cell(order_li, "quantity")
+    == "[Order Line Item Quantity](#order-line-item-quantity)"
+    and "#### Order Line Item Quantity" in order_li
+    and _type_cell(order_li, "original") == "integer"
+    and _type_cell(order_li, "total") == "integer"
+    and _type_cell(order_li, "fulfilled") == "integer"
+    and _type_cell(order, "fulfillment")
+    == "[Order Fulfillment](#order-fulfillment)"
+    and "#### Order Fulfillment" in order
+    and _type_cell(order, "expectations")
+    == "Array[[Expectation](site:specification/reference/#expectation)]"
+    and _type_cell(variant, "barcodes")
+    == "Array[[Variant Barcode](#variant-barcode)]"
+    and "#### Variant Barcode" in variant
+    and _type_cell(variant, "seller") == "[Variant Seller](#variant-seller)"
+    and "#### Variant Seller" in variant
+    and _type_cell(variant, "metadata") == "object"
+    and _type_cell(card_pi, "display")
+    == "[Card Payment Instrument Display](#card-payment-instrument-display)"
+    and "#### Card Payment Instrument Display" in card_pi
+    and _type_cell(capacity, "child_age_ranges")
+    == "Array[[Capacity Child Age Range](#capacity-child-age-range)]"
+    and "#### Capacity Child Age Range" in capacity
+    and _type_cell(capacity, "ages")
+    == "[Capacity Child Age Range Ages](#capacity-child-age-range-ages)"
+    and "#### Capacity Child Age Range Ages" in capacity
+    and _type_cell(pay_actions, "actions")
+    == "[Payment Actions Actions](#payment-actions-actions)"
+    and "#### Payment Actions Actions Device Data Collection Config"
+    in pay_actions
+    and _type_cell(split_chk, "payment")
+    == "[Payment](site:specification/reference/#payment)"
+    and "#### Checkout with Split Payments Payment" not in split_chk
+    and all(
+      _type_cell(meta, "services") == "Map[string, Array[UCP Service]]"
+      and _type_cell(meta, "payment_handlers")
+      == "Map[string, Array[Payment Handler]]"
+      for meta in (order_meta, cart_meta, cat_meta, loc_meta)
+    ),
+    f"order_li={order_li!r} card_pi={card_pi!r} order_meta={order_meta!r}",
+  )
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -1401,6 +1464,7 @@ def main() -> int:
   test_security_header_rows_follow_requirements()
   test_content_header_rows_follow_media_types()
   test_declared_header_parameter_keeps_single_row(macros)
+  test_inline_object_and_base_def_extraction(macros)
   return _report()
 
 
