@@ -78,11 +78,11 @@
     },
     "buyer": {
       "$ref": "types/buyer.json",
-      "description": "Representation of the buyer.",
+      "description": "Representation of the buyer. On complete requests, the Platform MAY supply buyer fields only to refine the Checkout; see Completion-Time Refinement.",
       "ucp_request": {
         "create": "optional",
         "update": "optional",
-        "complete": "omit"
+        "complete": "optional"
       }
     },
     "context": {

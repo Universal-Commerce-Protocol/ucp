@@ -15,7 +15,8 @@
       "description": "Unique fulfillment method identifier.",
       "ucp_request": {
         "create": "omit",
-        "update": "optional"
+        "update": "optional",
+        "complete": "required"
       }
     },
     "type": {
@@ -23,7 +24,8 @@
       "description": "Fulfillment method type. Well-known values: `shipping`, `pickup`. Businesses MAY use additional values.",
       "ucp_request": {
         "create": "required",
-        "update": "optional"
+        "update": "optional",
+        "complete": "optional"
       }
     },
     "line_item_ids": {
@@ -34,7 +36,8 @@
       },
       "ucp_request": {
         "create": "omit",
-        "update": "required"
+        "update": "required",
+        "complete": "omit"
       }
     },
     "destinations": {
@@ -50,11 +53,21 @@
         "string",
         "null"
       ],
-      "description": "ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`."
+      "description": "ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
     },
     "groups": {
       "type": "array",
       "description": "Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      },
       "items": {
         "$ref": "fulfillment_group.json"
       }
@@ -76,7 +89,7 @@
         "properties": {
           "destinations": {
             "type": "array",
-            "description": "Platform-authored shipping addresses for this method.",
+            "description": "Platform-authored shipping addresses for this method. On complete requests, carries only refinements of the selected destination.",
             "ucp_request": "optional",
             "items": {
               "$ref": "shipping_destination.json"
