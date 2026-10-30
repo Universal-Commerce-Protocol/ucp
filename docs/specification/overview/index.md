@@ -1463,7 +1463,9 @@ must be reliably hosted. An unreliable or misconfigured endpoint may prevent
 the other party from processing requests.
 
 1. Published artifacts **MUST** be served over HTTPS.
-2. Profile endpoints **MUST NOT** use redirects (3xx).
+2. Profile endpoints **MUST NOT** redirect to another URL (`301`, `302`,
+   `303`, `307`, `308`). Answering a conditional request with
+   `304 Not Modified` is not a redirect and is allowed.
 3. Published artifacts **MUST** include a `Cache-Control` header with
    `public` and `max-age` of at least 60 seconds, and **MUST NOT** be
    served with `private`, `no-store`, or `no-cache` directives.
@@ -1511,7 +1513,10 @@ These rules apply to any URL dereferenced during identity resolution —
 the profile, and any `jwks_uri` or CIMD document a verifier follows:
 
 1. Implementations **MUST** reject URLs not served over HTTPS.
-2. Implementations **MUST NOT** follow redirects (3xx).
+2. Implementations **MUST NOT** follow redirects to another URL (`301`,
+   `302`, `303`, `307`, `308`). A `304 Not Modified` received in response
+   to a conditional request is not a redirect; implementations should
+   keep using their cached copy.
 3. Implementations **SHOULD** enforce connect and response timeouts.
 4. Implementations **SHOULD** cache profiles with a minimum TTL floor
    of 60 seconds, regardless of the origin's `Cache-Control` headers.
@@ -1659,9 +1664,9 @@ below processes a single signature.
    request target (`@method`, `@authority`, `@path`; `@query` when a
    query string is present), the body when present (`content-digest`,
    `content-type`), and each of these request headers when present:
-   `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a
-   header added to UCP later is gate-required only if its defining
-   section says so). If any
+   `ucp-agent`, `signature-agent`, `idempotency-key`, `webhook-id`,
+   `webhook-timestamp` (a closed set — a header added to UCP later is
+   gate-required only if its defining section says so). If any
    such component is absent from the signature's covered set, **skip**
    this signature — a target, body, or header the signature does not
    cover is treated as unsigned. This prevents a signature satisfying only
