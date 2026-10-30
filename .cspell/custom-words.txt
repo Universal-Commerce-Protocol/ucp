@@ -205,3 +205,4 @@ mpegurl
 usdz
 vnd
 webm
+disclosable

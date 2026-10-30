@@ -13,6 +13,10 @@
       "type": "string",
       "description": "Media type. Well-known values: `image`, `video`, `external_video`, `model_3d`. A Platform MUST NOT reject the containing object for an unrecognized value; it MAY present the item from `preview` and `name`, or omit it."
     },
+    "role": {
+      "type": "string",
+      "description": "Semantic role of the media item within its container. Well-known values: `logo`, `icon`, `cover`. Open vocabulary; a Platform MUST NOT reject the containing media item for an unrecognized `role` value and MAY ignore the unrecognized `role` attribute."
+    },
     "url": {
       "type": "string",
       "format": "uri",
