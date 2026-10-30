@@ -114,6 +114,26 @@ Cart totals remain estimates (see [Total](#total)). A measure-denominated line
 counts as one line item in cart summaries; its `quantity` is an amount, not an
 item count.
 
+**List price.** A Business **MAY** include `item.list_price` on line items in
+Cart responses to provide the active pre-markdown unit comparison price (for
+strikethrough display) without requiring a separate Catalog lookup, and a
+Platform **MUST** accept its omission. `item.list_price` is response-only and
+**MUST** be omitted from Platform requests. Like `item.price`,
+`item.list_price` is denominated in ISO 4217 minor units of the cart's
+`currency` per one whole `item.quantity_unit.unit` (or per `each` when
+`quantity_unit` is absent).
+
+`item.list_price` is strictly informational. Line `subtotal` is always
+calculated from `item.price`, never `item.list_price`. `item.list_price`
+**MUST NOT** participate in `line_items[].totals[]`, cart `totals[]`, or
+discount allocations, and the catalog markdown (`item.list_price - item.price`)
+is already reflected in `item.price` and **MUST NOT** be emitted as a negative
+`items_discount` or `discount` entry in `totals[]`. Businesses **SHOULD** only
+populate `list_price` when advertising a comparison price above `price`
+(`list_price > price`), though the schema only enforces a non-negative integer;
+Platforms **MUST** accept `list_price <= price` without failing validation and
+**SHOULD** suppress strikethrough rendering when `list_price <= price`.
+
 ## Actions
 
 The cart surfaces outstanding Action instances in its response-only `actions`
