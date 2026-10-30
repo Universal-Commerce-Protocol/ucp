@@ -299,8 +299,11 @@ supplemental record to the Product with the same `id`, and each supplemental
 variant to the Variant with the same `id`, so titles, descriptions, and
 availability carry over unchanged. The Business restates `price_range`
 because it depends on the variant prices the supplement changes; that is the
-general obligation that a composed record be correct for its `context`. The
-base stays one set of files for both markets.
+general obligation that a composed record be correct for its `context`. If a
+changed price makes an existing Variant `unit_price` invalid, the Business
+also restates it in the supplement, even when the currency is unchanged. The
+Platform does not recalculate `unit_price`. The base stays one set of files
+for both markets.
 
 ### Example: Platform-Specific Fields as a Supplemental Feed
 
