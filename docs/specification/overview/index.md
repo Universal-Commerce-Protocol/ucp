@@ -676,6 +676,14 @@ Businesses that support older protocol versions **SHOULD** include a
 version-specific profile URI. See [Protocol Version](#protocol-version)
 for details.
 
+Businesses and sellers **MAY** also publish cryptographically signed
+third-party [Verifiable Attestations](../attestations.md) (`attestations[]` on
+[Business Summary](../reference.md#business-summary) and
+[Location](../common/location/index.md)) vouching for claims such as an
+acquirer's merchant verification, verified trader status, a brand's
+authorized-retailer credential, an accredited certification mark, or a
+branch-level culinary distinction.
+
 #### Platform Profile
 
 Platform profiles are similar and include signing keys for capabilities
