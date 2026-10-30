@@ -6,9 +6,34 @@
   "description": "Product catalog search capability.",
   "type": "object",
   "$defs": {
+    "business_config": {
+      "type": "object",
+      "title": "Business Catalog Search Config",
+      "description": "Business catalog search configuration.",
+      "properties": {
+        "purposes": {
+          "type": "object",
+          "description": "Non-default `purpose` values this Business supports, keyed by value (e.g., `recommendation`, `swap`). `search` is always supported and need not be listed. When absent or empty, only `search` is supported. A Platform MUST NOT send a `purpose` value absent from this map.",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/purpose_policy"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "purpose_policy": {
+      "type": "object",
+      "title": "Purpose Policy",
+      "description": "Policy for one supported `purpose` value. An empty object means the value is supported with no additional policy. Open for non-breaking extension.",
+      "additionalProperties": true
+    },
     "search_request": {
       "type": "object",
-      "description": "Request body for catalog search.",
+      "description": "Catalog search request.",
       "properties": {
         "query": {
           "type": "string",
@@ -16,7 +41,8 @@
         },
         "purpose": {
           "type": "string",
-          "description": "The retrieval purpose for the search request. Well-known values: `search` (general search or filter browse requiring `query`, `filters`, or an extension input; default when omitted), `recommendation` (complementary or related items anchored to `reference_ids` and/or `context`), `swap` (functional substitute items requiring `reference_ids`). Businesses MUST reject unsupported values using the binding's invalid-request mechanism (error code `unsupported_purpose`) rather than falling back to a general browse.",
+          "minLength": 1,
+          "description": "Retrieval purpose of the request. Well-known values: `search` (default when omitted), `recommendation`, `swap`. A Platform MUST NOT send a value the Business does not advertise in its capability `config.purposes`. A Business MUST reject a value it does not support (error code `unsupported_purpose`) rather than falling back to a general browse.",
           "examples": ["search", "recommendation", "swap"]
         },
         "reference_ids": {
@@ -27,7 +53,7 @@
           },
           "minItems": 1,
           "uniqueItems": true,
-          "description": "Anchor product or variant identifiers for relational discovery. Requires `purpose` (e.g., `recommendation` or `swap`; MUST NOT be `search`). Implementations MUST support product ID and variant ID; MAY support secondary identifiers (SKU, handle, etc.). Referenced items MUST be excluded from the returned products. When a variant ID is supplied, its parent product MUST be excluded for `recommendation` and SHOULD be excluded for `swap` unless a distinct substitute variant of that product is returned."
+          "description": "Anchor product or variant identifiers for relational discovery. Applies to non-default `purpose` values and is ignored when `purpose` is `search` or omitted. Resolution follows Catalog Lookup's supported identifiers. Referenced products and variants are excluded from the returned products."
         },
         "context": {
           "$ref": "../common/types/context.json"
@@ -47,18 +73,32 @@
       },
       "allOf": [
         {
-          "if": { "required": ["reference_ids"] },
+          "if": {
+            "properties": { "purpose": { "const": "recommendation" } },
+            "required": ["purpose"]
+          },
           "then": {
-            "required": ["purpose"],
-            "properties": { "purpose": { "not": { "const": "search" } } }
+            "properties": {
+              "reference_ids": {
+                "description": "Optional anchors for complementary or related items. Multiple identifiers form one joint anchor set, and results need not relate to every anchor. When a variant ID is supplied, its parent product MUST also be excluded. Omit to derive recommendations from `context` alone."
+              }
+            }
           }
         },
         {
           "if": {
-            "required": ["purpose"],
-            "properties": { "purpose": { "const": "swap" } }
+            "properties": { "purpose": { "const": "swap" } },
+            "required": ["purpose"]
           },
-          "then": { "required": ["reference_ids"] }
+          "then": {
+            "required": ["reference_ids"],
+            "properties": {
+              "reference_ids": {
+                "maxItems": 1,
+                "description": "Required single anchor to find functional substitutes for. Supply a variant ID when known so the Business can match options, price, and `quantity_unit`. When a variant ID is supplied, its parent product SHOULD be excluded unless a distinct substitute variant of that product is returned."
+              }
+            }
+          }
         }
       ]
     },
@@ -101,6 +141,33 @@
           },
           "description": "Policies (e.g., return/refund terms) that apply to the products in these search results. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
         }
+      }
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "platform_schema": {
+        "title": "Catalog Search Capability (Platform)",
+        "description": "Platform-level catalog search capability declaration. No platform config is required.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/platform_schema"
+          }
+        ]
+      },
+      "business_schema": {
+        "title": "Catalog Search Capability (Business)",
+        "description": "Business declaration for catalog search. Businesses advertise the non-default `purpose` values they support in `config.purposes`.",
+        "allOf": [
+          {
+            "$ref": "../capability.json#/$defs/business_schema"
+          },
+          {
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/business_config"
+              }
+            }
+          }
+        ]
       }
     }
   }

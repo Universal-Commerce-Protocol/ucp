@@ -61,22 +61,57 @@ catalog discovery:
     or filter-based browse.
 * **`recommendation`**: Returns complementary, related, or personalized items
     anchored to `reference_ids` and/or `context`.
-* **`swap`**: Returns functional substitute items for the anchor products or
-    variants in `reference_ids`.
+* **`swap`**: Returns functional substitute items for the anchor product or
+    variant in `reference_ids`.
+
+#### Supported Purposes
+
+Support for `recommendation` and `swap` varies by Business, so a Business
+advertises the non-default `purpose` values it supports in its catalog search
+capability `config.purposes`. Each key is a supported value; an empty object
+means the value is supported with no additional policy. `search` is always
+supported and need not be listed. When `config` or `purposes` is absent or
+empty, only `search` is supported.
+
+{{ extension_schema_fields('catalog_search.json#/$defs/business_config', 'shopping/catalog') }}
+
+A Business that supports recommendations but not swaps declares:
+
+<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
+```json
+{
+  "dev.ucp.shopping.catalog.search": [
+    {
+      "version": "{{ ucp_version }}",
+      "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/search",
+      "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json",
+      "config": {
+        "purposes": {
+          "recommendation": {}
+        }
+      }
+    }
+  ]
+}
+```
+
+A Platform **MUST NOT** send a `purpose` value that the Business does not
+advertise. A Platform reads `config.purposes` from the Business profile it
+already fetches for capability negotiation, so it can decide before calling
+whether to offer recommendations or swaps.
 
 The following rules apply:
 
-1. **Pairing**: When `reference_ids` is present, `purpose` **MUST** also be
-    provided and **MUST NOT** be `search`. When `purpose` is `search` (or
-    omitted), the request **MUST** include at least one of `query`, `filters`,
-    or an extension-defined input. When `purpose` is `swap`, `reference_ids`
-    **MUST** be provided. A Business **MUST** reject requests that violate
-    these pairing rules. Multiple `reference_ids` jointly describe one anchor
-    set: the Business returns candidates related to that set as a whole,
-    results need not relate to every anchor, and the response does not
-    correlate results to individual anchors. For `swap`, a Platform **SHOULD**
-    supply a single identifier per request; a Platform that needs per-item
-    substitutes sends one request per item.
+1. **Pairing**: When `purpose` is `search` (or omitted), the request **MUST**
+    include at least one of `query`, `filters`, or an extension-defined input;
+    `reference_ids` does not apply, and the Business **MUST** ignore it if
+    present. When `purpose` is `swap`, `reference_ids` **MUST** contain exactly
+    one identifier; a Platform that needs substitutes for several items sends
+    one request per item. A Business **MUST** reject requests that violate
+    these pairing rules. For `recommendation`, multiple `reference_ids` jointly
+    describe one anchor set: the Business returns candidates related to that
+    set as a whole, results need not relate to every anchor, and the response
+    does not correlate results to individual anchors.
 2. **Supported Identifiers**: A Business **MUST** support lookup of
     `reference_ids` by product ID and variant ID, and **MAY** additionally
     support the secondary identifiers permitted by
@@ -108,11 +143,11 @@ The following rules apply:
     a preference) and `filters`. Supplied `filters` narrow the returned
     candidates (with the `AND` semantics of [Search Filters](#search-filters));
     they do not constrain resolution of `reference_ids`.
-5. **Unsupported Purpose**: A Business that does not support a requested
-    `purpose` value **MUST** reject the request using the binding's
-    invalid-request mechanism (HTTP 400 `unsupported_purpose` for REST,
-    JSON-RPC `-32602` for MCP). It **MUST NOT** ignore `purpose` and fall back
-    to a general browse.
+5. **Unsupported Purpose**: A Business that receives a `purpose` value it
+    does not support (for example, from a Platform acting on a stale profile)
+    **MUST** reject the request using the binding's invalid-request mechanism
+    (HTTP 400 `unsupported_purpose` for REST, JSON-RPC `-32602` for MCP). It
+    **MUST NOT** ignore `purpose` and fall back to a general browse.
 
 #### Example: Guided Product Swap
 
