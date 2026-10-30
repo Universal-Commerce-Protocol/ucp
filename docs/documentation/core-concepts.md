@@ -93,6 +93,13 @@ typically acts as the **Merchant of Record (MoR)**, retaining financial
 liability and ownership of the transaction — though UCP's capability model
 is not limited to transactional use cases.
 
+By default a Business serving a catalog is the Merchant of Record for everything
+it returns, and its responses carry no per-offer seller attribution. A catalog
+**MAY** instead aggregate offers from other Businesses: only when a variant
+includes an `offers[]` array does each offer name its own Merchant of Record via
+`offers[].seller`, and the Platform then routes checkout to that Business. A
+response without `offers[]` describes a single seller: the serving Business.
+
 * **Responsibilities:** Publishing a UCP profile, declaring supported
     services, capabilities and extensions, processing capability invocations
     which may be stateful or stateless.
