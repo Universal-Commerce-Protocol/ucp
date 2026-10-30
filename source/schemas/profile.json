@@ -117,6 +117,23 @@
       ]
     },
 
+    "delegate_contribution_schema": {
+      "title": "UCP Business Profile Delegate Contribution",
+      "description": "Document shape required at a Business's declared `delegates[].profile` URI. Fetched and parsed the same way as a `supported_versions` profile URI, but validated against this restricted shape rather than `business_schema`: it carries only the registry configuration the Business delegated. It MUST NOT publish `keys` — Business signing keys remain exclusively at the authoritative Business root.",
+      "allOf": [
+        {
+          "type": "object",
+          "required": ["ucp"],
+          "properties": {
+            "ucp": { "$ref": "ucp.json#/$defs/delegate_contribution" }
+          }
+        },
+        {
+          "not": { "required": ["keys"] }
+        }
+      ]
+    },
+
     "platform_schema": {
       "title": "UCP Platform Profile Document",
       "description": "Profile document hosted by a platform and advertised to businesses via UCP-Agent.",
