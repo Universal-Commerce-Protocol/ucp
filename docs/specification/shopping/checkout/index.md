@@ -974,6 +974,78 @@ platform can prefill checkout state when initiating a buy-now flow.
 > [REST transport binding](rest.md). Accessing a permalink returns a
 > redirect to the checkout UI or renders the checkout page directly.
 
+## Platform Reference
+
+An opaque, platform-supplied correlation value. A single platform instance may
+serve many buyers across many businesses, and `checkout_id` is business-scoped,
+so it is not unique across businesses. `platform_reference` gives the platform a
+key it assigns itself, which lets it correlate later order events back to its own
+records without depending on a stored mapping of business-assigned identifiers.
+
+The platform **MAY** set `platform_reference` on Create Checkout. It is
+**immutable** from that point on. A business **SHOULD NOT** apply
+`platform_reference` from a [permalink](../../permalink.md) query parameter.
+When a Create Checkout that created the checkout returns no `platform_reference`
+although the platform set one, the platform **SHOULD** treat that as the
+business not supporting it.
+
+**Business:**
+
+* **MUST** persist the value for the lifetime of the checkout and of every
+  order created from it.
+* **MUST** echo the value verbatim on every checkout response.
+* **MUST** carry the value onto every order created from that checkout, return
+  it on Get Order responses to the originating platform (see
+  [Get Order authorization](../order/index.md#authorization)), and include it
+  in every order event webhook for that order. A business **SHOULD** omit it
+  from order representations returned to any other platform.
+* **MUST** treat the value as opaque, and **MUST NOT** interpret, parse, or modify
+  it.
+* **MUST NOT** use the value for authentication, authorization, or idempotency,
+  and **MUST NOT** reject or deduplicate checkouts by it. The value is
+  not required to be unique: distinct checkouts, at the same or different
+  businesses, **MAY** carry the same value.
+* **MUST** reject a Create Checkout request whose `platform_reference` exceeds
+  512 characters as an invalid request, without creating a checkout, and
+  **MUST NOT** truncate it. An empty string is not a valid value; a platform
+  with no reference omits the field.
+
+**Platform:**
+
+* **MUST NOT** place personally identifiable information, directly identifying
+  values (such as raw internal user or account identifiers), or credentials in
+  this field. It is persisted on the business order record and flows to
+  downstream systems, so it is not a confidential channel.
+* **SHOULD** use an opaque, non-guessable value (for example a UUID or ULID)
+  scoped to a single purchase flow, and **SHOULD NOT** reuse one value across
+  unrelated purchase flows.
+* **MUST NOT** use it for authentication, authorization, or idempotency. It is a
+  correlation value only, and it is not a secret.
+
+`platform_reference` is not defined on the update or complete requests, so
+Update Checkout, which is otherwise a full replacement, does not clear it. The
+checkout object is open, so a resent value still validates against the schema.
+A business therefore **MUST** ignore a `platform_reference` received on an
+update or complete request, **MUST NOT** reject the request because of it, and
+**MUST** retain the value established at Create Checkout. See
+[Update Checkout](#update-checkout).
+
+When Create Checkout returns an existing checkout rather than creating one (for
+example,
+[idempotent cart conversion](../cart/index.md#cart-to-checkout-conversion)),
+the business **MUST NOT** replace or add a `platform_reference` on that
+checkout. The response echoes the stored value, if any, and the platform
+correlates using the echoed value. Absence of the field in that response does
+not indicate that the business lacks support.
+
+The following example is non-normative. A platform fans one parent cart out
+into one checkout per business and sets the same `platform_reference`,
+`01J9Z6R7NQ2K4T8V0X3Y5B7C9D`, on each Create Checkout. Business A returns a
+checkout with `id` `chk_1`, and Business B also returns a checkout with `id`
+`chk_1`. Each later order event from either business carries the shared
+`platform_reference`, so the platform attributes both orders to the parent
+cart without relying on either business-scoped identifier.
+
 ## Scopes
 
 The Checkout capability defines the following well-known scopes for
@@ -1093,6 +1165,11 @@ will replace the existing checkout session state on the business side. This
 general replacement rule does not apply during `complete_in_progress` because
 Update Checkout is not permitted; see
 [Accepted completion](#accepted-completion) for the frozen operation contract.
+
+`platform_reference` is not defined on the update request, so full replacement
+does not clear it. A business **MUST** retain the value established at Create
+Checkout, **MUST** ignore a resent value, and **MUST NOT** reject the request
+because of it. See [Platform Reference](#platform-reference).
 
 {{ method_fields('update_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
