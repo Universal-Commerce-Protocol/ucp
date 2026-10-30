@@ -206,3 +206,5 @@ usdz
 vnd
 webm
 disclosable
+chargeback
+OCSP

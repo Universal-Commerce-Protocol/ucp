@@ -47,6 +47,13 @@
         "$ref": "contact.json"
       },
       "description": "Publicly routable business-wide contact channels (e.g., `general`, `customer_support`, `legal`, `press`)."
+    },
+    "attestations": {
+      "type": "array",
+      "items": {
+        "$ref": "attestation.json"
+      },
+      "description": "Cryptographically signed third-party attestations (OpenID Federation Trust Marks) vouching for claims about this business or seller. See Verifiable Attestations."
     }
   }
 }

@@ -63,6 +63,14 @@
           "type": "string",
           "description": "The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.",
           "ucp_request": "omit"
+        },
+        "attestations": {
+          "type": "array",
+          "description": "Third-party signed attestations scoped to this physical Location. Each entry's `sub` claim MUST match the canonical business profile URL and its `location_id` claim MUST equal this Location's `id`.",
+          "items": {
+            "$ref": "attestation.json"
+          },
+          "ucp_request": "omit"
         }
       }
     }
