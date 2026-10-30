@@ -1353,30 +1353,6 @@ today, is verified and retained, and pays every recurring order. Had the
 Platform submitted both without an `amount`, the first would have paid this
 order and both would have been retained, in that order.
 
-<!-- ucp:example schema=common/payment_split_payments def=dev.ucp.shopping.checkout extract=$.payment target=$.payment -->
-```json
-{
-  "payment": {
-    "instruments": [
-      {
-        "id": "pi_gc_1",
-        "handler_id": "example_handler_1",
-        "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
-        "amount": 3000
-      },
-      {
-        "id": "pi_card_1",
-        "handler_id": "example_handler_1",
-        "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
-        "amount": 0
-      }
-    ]
-  }
-}
-```
-
 ### Switching back to one-time
 
 The Platform changes the selection with an update. The Business reprices the
