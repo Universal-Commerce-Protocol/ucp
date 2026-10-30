@@ -115,6 +115,34 @@
       "description": "Policies (e.g., return/refund terms) that apply to the items in this cart. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`.",
       "ucp_request": "omit"
     },
+    "sellers": {
+      "type": "object",
+      "description": "Sellers or contracting legal entities for this session, keyed by `seller_id`. Resolved by the Business based on the items in the session and buyer context or shipping destination.",
+      "additionalProperties": {
+        "title": "Seller",
+        "allOf": [
+          {
+            "$ref": "../common/types/business_summary.json"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URI of the seller's UCP profile (`/.well-known/ucp`), when the seller publishes one."
+              }
+            }
+          }
+        ]
+      },
+      "ucp_request": "omit"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Default contracting seller identifier for this session, resolving to an entry in `sellers`. Individual line items MAY override this via `line_item.seller_id`.",
+      "ucp_request": "omit"
+    },
     "continue_url": {
       "type": "string",
       "format": "uri",

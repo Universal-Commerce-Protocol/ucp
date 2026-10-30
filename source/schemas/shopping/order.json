@@ -104,6 +104,34 @@
       "description": "Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. `applies_to` targets are relative to the response root.",
       "ucp_request": "omit"
     },
+    "sellers": {
+      "type": "object",
+      "description": "Snapshot of the sellers or contracting legal entities that applied to the order at checkout, keyed by `seller_id`.",
+      "additionalProperties": {
+        "title": "Seller",
+        "allOf": [
+          {
+            "$ref": "../common/types/business_summary.json"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "profile": {
+                "type": "string",
+                "format": "uri",
+                "description": "URI of the seller's UCP profile (`/.well-known/ucp`), when the seller publishes one."
+              }
+            }
+          }
+        ]
+      },
+      "ucp_request": "omit"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Default contracting seller identifier for this order, resolving to an entry in `sellers`. Individual line items MAY override this via `line_item.seller_id`.",
+      "ucp_request": "omit"
+    },
     "messages": {
       "type": "array",
       "items": {
