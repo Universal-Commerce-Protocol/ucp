@@ -64,6 +64,10 @@
     "parent_id": {
       "type": "string",
       "description": "Parent line item identifier for any nested structures."
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Seller identifier for this line item, resolving to an entry in the order's `sellers` map. Overrides the order-level `seller_id` when both are present."
     }
   }
 }

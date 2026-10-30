@@ -42,6 +42,11 @@
         "create": "omit",
         "update": "optional"
       }
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Seller identifier for this line item, resolving to an entry in the session's `sellers` map. Overrides the session-level `seller_id` when both are present.",
+      "ucp_request": "omit"
     }
   }
 }

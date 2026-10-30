@@ -112,6 +112,15 @@ underlying contract.
 Businesses MAY surface a snapshot of the policies that applied at checkout on
 the order. See [Policies](../../overview/index.md#policies) for the underlying contract.
 
+### Seller Attribution
+
+Businesses **MAY** surface a read-only snapshot of the `sellers` map, order-level `seller_id`, and per-line `line_items[].seller_id` that applied at checkout on the confirmed order:
+
+* **Precedence (`line_item.seller_id` > order `seller_id`)**: When `line_items[].seller_id` is present on an order line item, it identifies that line item's seller in `sellers` and overrides the order-level `seller_id`. When omitted, the line item inherits the order-level `seller_id`.
+* **Durable contracting record**: Capturing `sellers` and `seller_id` on the order preserves the authoritative contracting legal entity (such as a multi-entity global brand's regional subsidiary resolved from buyer context or shipping destination), third-party marketplace seller attribution, and any statutory seller disclosures (`legal_name`, statutory `address`, `contacts`, and policy `links`) presented at checkout without requiring every seller to host a UCP profile.
+
+See [Checkout: Seller Attribution](../checkout/index.md#seller-attribution) for the resolution and disclosure contract.
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of

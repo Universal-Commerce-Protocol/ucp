@@ -1253,6 +1253,79 @@ this response root (e.g., `$.line_items[0]`). See
 
 {{ schema_fields('types/policy', 'shopping/checkout') }}
 
+### Seller Attribution
+
+Businesses **MAY** include the response-only `sellers` map, a session-level `seller_id`, and per-line `line_items[].seller_id` on Checkout responses to disclose the authoritative seller or contracting legal entity for the transaction. Each value in `sellers` composes `Business Summary` (`name`, `legal_name`, `description`, `media`, `links`, `address`, `contacts`) with an optional `profile` URI pointing to the seller's `/.well-known/ucp` profile when the seller publishes one.
+
+* **Precedence (`line_item.seller_id` > session `seller_id`)**: A line item's `seller_id` overrides the session-level `seller_id` when both are present. When `line_items[].seller_id` is omitted, the line item inherits the session-level `seller_id`. If a `seller_id` does not resolve to an entry in `sellers`, the Platform **MUST** treat seller attribution for that scope as unavailable rather than failing response validation.
+* **Multi-entity global brands**: A brand that publishes a single discovery profile at `/.well-known/ucp` while operating distinct regional legal entities (such as US Inc., Canada Ltd., and EU GmbH subsidiaries) resolves the authoritative contracting entity once buyer `context` or the fulfillment shipping destination fixes the market, and surfaces that entity's `legal_name`, statutory `address`, `contacts`, and policy `links` in `sellers`.
+* **Multi-seller marketplaces**: Marketplaces attribute individual line items to third-party sellers symmetrically via `line_items[].seller_id` without requiring every seller to host a UCP server or `/.well-known/ucp` profile. Sellers that do publish a UCP profile **MAY** include `profile` on their `sellers` entry.
+* **Contextual statutory disclosures**: Statutory seller disclosures (such as jurisdiction-specific establishment addresses, legal entity names, or seller support contacts that should not sit in a static, world-readable `/.well-known/ucp` file) are surfaced in context during Checkout before purchase completion and snapshotted on the confirmed [Order](../order/index.md#seller-attribution).
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}", "status": "success", "payment_handlers": {} },
+  "id": "chk_regional_1",
+  "status": "incomplete",
+  "currency": "CAD",
+  "seller_id": "entity_ca",
+  "sellers": {
+    "entity_ca": {
+      "name": "Acme",
+      "legal_name": "Acme Canada Ltd.",
+      "address": {
+        "street_address": "100 King St W",
+        "address_locality": "Toronto",
+        "address_region": "ON",
+        "postal_code": "M5X 1A9",
+        "address_country": "CA"
+      },
+      "contacts": [
+        { "type": "customer_support", "email": "support-ca@acme.example.com" }
+      ],
+      "links": [
+        { "type": "terms_of_service", "url": "https://acme.example.com/ca/terms" }
+      ]
+    },
+    "seller_artisan": {
+      "name": "Artisan Roasters",
+      "legal_name": "Artisan Roasters Inc."
+    }
+  },
+  "line_items": [
+    {
+      "id": "li_mug",
+      "item": { "id": "sku_mug", "title": "Ceramic Travel Mug", "price": 2400 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 2400 },
+        { "type": "total", "amount": 2400 }
+      ]
+    },
+    {
+      "id": "li_beans",
+      "seller_id": "seller_artisan",
+      "item": { "id": "sku_beans", "title": "Whole Bean Espresso", "price": 1800 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 1800 },
+        { "type": "total", "amount": 1800 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 4200 },
+    { "type": "total", "amount": 4200 }
+  ],
+  "links": [
+    { "type": "terms_of_service", "url": "https://acme.example.com/ca/terms" }
+  ]
+}
+```
+
+{{ schema_fields('types/business_summary', 'shopping/checkout') }}
+
 ### Message
 
 {{ schema_fields('message', 'shopping/checkout') }}
