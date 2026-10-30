@@ -93,6 +93,28 @@
             "$ref": "../common/types/policy.json"
           },
           "description": "Policies (e.g., return/refund terms) that apply to the products in this response. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
+        },
+        "sellers": {
+          "type": "object",
+          "description": "Sellers referenced by the products in this response, keyed by `seller_id`. Only sellers referenced on the current page SHOULD be included.",
+          "additionalProperties": {
+            "title": "Seller",
+            "allOf": [
+              {
+                "$ref": "../common/types/business_summary.json"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "profile": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI of the seller's UCP profile (`/.well-known/ucp`), when the seller publishes one."
+                  }
+                }
+              }
+            ]
+          }
         }
       }
     },
@@ -194,6 +216,28 @@
             "$ref": "../common/types/policy.json"
           },
           "description": "Policies (e.g., return/refund terms) that apply to this product. `applies_to` targets are relative to the response root; when absent or empty, refer to the URLs in `links[]`."
+        },
+        "sellers": {
+          "type": "object",
+          "description": "Sellers referenced by the products in this response, keyed by `seller_id`. Only sellers referenced on the current page SHOULD be included.",
+          "additionalProperties": {
+            "title": "Seller",
+            "allOf": [
+              {
+                "$ref": "../common/types/business_summary.json"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "profile": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI of the seller's UCP profile (`/.well-known/ucp`), when the seller publishes one."
+                  }
+                }
+              }
+            ]
+          }
         }
       }
     }
