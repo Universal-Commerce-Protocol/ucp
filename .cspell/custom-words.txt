@@ -206,5 +206,8 @@ usdz
 vnd
 webm
 disclosable
+isic
+naics
+omnichannel
 rrggbb
 srgb
