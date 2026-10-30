@@ -71,24 +71,15 @@ and checkout and does not constrain what the Business records (a 0.25-lb
 ordering increment does not prevent recording an actual picked weight of
 1.90 lb).
 
-**List price snapshot.** A Business **MAY** include `item.list_price` on line
-items in Order responses and Order event webhooks, and a Platform **MUST**
-accept its omission. Because many order management systems only persist
-finalized transaction prices, Platforms requiring guaranteed post-purchase
-strikethrough display on buyer receipts or order histories **SHOULD** persist
-their own snapshot of `item.list_price` captured from the completed Checkout
-session.
-
-When present on an Order, `item.list_price` **MUST** be an immutable snapshot
-captured at order creation time, not a post-fact join against live Catalog
-state (which could misrepresent the historical transaction). If a Business did
-not persist `list_price` at order creation time, it **MUST** omit
-`item.list_price` from Order responses. Like in
-[Checkout](../checkout/index.md#quantity-and-sale-basis), `item.list_price` on
-an Order is denominated in minor units of the order's `currency` per one whole
-`item.quantity_unit.unit` (or per `each` when `quantity_unit` is absent), is
-strictly informational, and **MUST NOT** participate in
-`line_items[].totals[]`, order `totals[]`, or `adjustments[]`.
+**List price.** A Business **MAY** include `item.list_price` on Order line
+items (following the denomination and non-transactional rules in
+[Checkout](../checkout/index.md#quantity-and-sale-basis)), and a Platform
+**MUST** accept its omission. When present on an Order, `item.list_price`
+**MUST** be an immutable snapshot captured at order creation time and **MUST
+NOT** be populated or refreshed via a post-fact join against live Catalog
+state; a Business that did not persist `list_price` at order creation **MUST**
+omit it. Platforms requiring guaranteed post-purchase strikethrough display
+**SHOULD** persist the snapshot captured at Checkout completion.
 
 ### Fulfillment
 
