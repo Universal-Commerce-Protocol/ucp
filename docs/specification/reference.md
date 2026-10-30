@@ -47,6 +47,10 @@ within the UCP.
 
 {{ extension_schema_fields('types/pagination.json#/$defs/response', 'reference') }}
 
+### Color Pair {: #color-pair }
+
+{{ extension_schema_fields('types/business_summary.json#/$defs/color_pair', 'reference') }}
+
 ### Error Code {: #error-code }
 
 {{ schema_fields('types/error_code', 'reference') }}
