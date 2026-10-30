@@ -128,6 +128,7 @@ nav:
                   - Encrypted Credential:
                       specification/payment/examples/encrypted-credential-payment-handler.md
       - Signatures: specification/signatures.md
+      - Attestations: specification/attestations.md
       - Embedded Protocol: specification/embedded-protocol.md
       - Reference: specification/reference.md
 
@@ -472,6 +473,13 @@ plugins:
               Implementation details for RFC 9421 HTTP Message Signatures and
               RFC 9530 Content-Digests to achieve secure, transport-agnostic
               request authentication and replay protection.
+        Verifiable Attestations:
+          - specification/attestations.md: >-
+              Third-party signed business, seller, and location attestations
+              profiled from OpenID Federation Trust Marks, detailing compact JWS
+              token format, symmetric subject and scope binding, three-tier
+              privacy rules, issuer key discovery, and revocation via Token
+              Status Lists.
         Checkout Capability:
           - specification/shopping/checkout/index.md: >-
               Core Checkout Capability specifications detailing session state

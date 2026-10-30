@@ -47,6 +47,18 @@ within the UCP.
 
 {{ extension_schema_fields('types/pagination.json#/$defs/response', 'reference') }}
 
+### Attestation Claims {: #attestation-claims }
+
+{{ extension_schema_fields('types/attestation.json#/$defs/claims', 'reference') }}
+
+### Attestation Status {: #status }
+
+{{ extension_schema_fields('types/attestation.json#/$defs/status', 'reference') }}
+
+### Status List Reference {: #status-list }
+
+{{ extension_schema_fields('types/attestation.json#/$defs/status_list', 'reference') }}
+
 ### Error Code {: #error-code }
 
 {{ schema_fields('types/error_code', 'reference') }}
