@@ -84,6 +84,10 @@
     "metadata": {
       "type": "object",
       "description": "Business-defined custom data extending the standard product model."
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Default seller identifier for this product, resolving to an entry in the response's `sellers` map. Individual variants MAY override this via `variant.seller_id`."
     }
   }
 }

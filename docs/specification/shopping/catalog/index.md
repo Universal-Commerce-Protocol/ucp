@@ -347,6 +347,92 @@ relative to the response root — `$.products[N]` for search and batch lookup,
 
 {{ schema_fields('types/policy', 'shopping/catalog') }}
 
+### Seller Attribution
+
+Catalog `search`, `lookup`, and `get_product` responses **MAY** include a top-level `sellers` map alongside `product.seller_id` and `variant.seller_id` to attribute listings to their sellers without repeating seller metadata across every variant. Each entry in `sellers` is keyed by `seller_id` and composes `Business Summary` (`name`, `legal_name`, `description`, `media`, `links`, `address`, `contacts`) with an optional `profile` URI pointing to the seller's `/.well-known/ucp` profile when the seller publishes one.
+
+* **Precedence (`variant.seller_id` > `product.seller_id` > deprecated `variant.seller`)**: When `variant.seller_id` is present, it defines the seller for that variant and overrides `product.seller_id`. Otherwise, `product.seller_id` applies as the product-level default. If neither is present, a Platform falls back to the deprecated inline `variant.seller` object when supplied by the Business.
+* **Resolution and fallback**: Every `seller_id` referenced in a response **MUST** have a corresponding entry in `sellers`. A Platform that finds no matching entry in `sellers` **MUST** treat the seller identity for that product or variant as unavailable rather than failing the response.
+* **Key scope and pagination**: `seller_id` is scoped to the Business that owns the catalog response and **MUST** be unique within that response. When a seller publishes a UCP profile, the Business **SHOULD** use the seller's reverse-domain name as the key so the seller is recognizable across responses. Only sellers referenced on the current page **SHOULD** be included in `sellers`, and a Platform **MUST NOT** assume that a seller absent from one page is absent from the catalog.
+* **Symmetric 1P and 3P seller support**: Multi-seller marketplaces and aggregators can represent third-party shops that do not host their own UCP servers directly in `sellers` (including shop logos via `media[]` entries with `role: "logo"`, storefront and policy `links`, corporate `address`, and buyer support `contacts`), while linking UCP-enabled sellers via the optional `profile` URI.
+* **Backward compatibility and consistency**: Inline `variant.seller` is deprecated in favor of `seller_id` and the response-level `sellers` map. A response **MUST NOT** carry both an inline `variant.seller` and a conflicting `seller_id` for the same variant with different names; when both are present during migration, the normalized entry in `sellers` is authoritative for rich metadata.
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [
+        { "version": "{{ ucp_version }}" }
+      ]
+    }
+  },
+  "sellers": {
+    "acme-running.example": {
+      "name": "Acme Running Co.",
+      "profile": "https://acme-running.example/.well-known/ucp",
+      "media": [
+        {
+          "type": "image",
+          "role": "logo",
+          "url": "https://cdn.marketplace.example/sellers/acme/logo.png",
+          "alt_text": "Acme Running Co.",
+          "width": 128,
+          "height": 128
+        }
+      ],
+      "links": [
+        {
+          "type": "website",
+          "url": "https://marketplace.example/shops/acme-running"
+        }
+      ]
+    },
+    "resale-partner.example": {
+      "name": "Verified Resale Partner",
+      "links": [
+        {
+          "type": "refund_policy",
+          "url": "https://marketplace.example/shops/resale-partner/returns"
+        }
+      ]
+    }
+  },
+  "products": [
+    {
+      "id": "prod_shoe_1",
+      "title": "Trail Runner Pro",
+      "description": { "plain": "All-terrain trail running shoe." },
+      "seller_id": "acme-running.example",
+      "price_range": {
+        "min": { "amount": 11500, "currency": "USD" },
+        "max": { "amount": 13000, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_9_blk",
+          "title": "Size 9 / Black",
+          "description": { "plain": "Size 9 in Black." },
+          "price": { "amount": 13000, "currency": "USD" },
+          "availability": { "available": true }
+        },
+        {
+          "id": "var_10_blk",
+          "title": "Size 10 / Black",
+          "description": { "plain": "Size 10 in Black, fulfilled by Verified Resale Partner." },
+          "seller_id": "resale-partner.example",
+          "price": { "amount": 11500, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ]
+}
+```
+
+{{ schema_fields('types/business_summary', 'shopping/catalog') }}
+
 ## Actions
 
 Catalog Search, batch Lookup, and successful Get Product responses can include
