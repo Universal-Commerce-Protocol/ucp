@@ -1091,6 +1091,121 @@ def test_checkout_item_source() -> None:
       )
 
 
+def test_checkout_complete_refinement() -> None:
+  """Complete admits buyer and only selected shipping destination detail."""
+  if not _has_ucp_schema():
+    _check(
+      "checkout_complete_refinement",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  for op in ("create", "update", "complete"):
+    base = v.resolve_schema("shopping/checkout", "request", op, _SCHEMA_BASE)
+    properties = base.get("properties", {})
+    _check(f"checkout_{op}_buyer_projection", "buyer" in properties)
+    _check(
+      f"checkout_{op}_context_projection",
+      ("context" in properties) == (op != "complete"),
+    )
+
+  def method_schema(op: str) -> dict:
+    resolved = v.resolve_schema(
+      "shopping/fulfillment", "request", op, _SCHEMA_BASE
+    )
+    checkout = resolved["$defs"]["dev.ucp.shopping.checkout"]
+    fulfillment = checkout["allOf"][1].get("properties", {}).get("fulfillment")
+    if fulfillment is None:
+      return {}
+    return fulfillment["properties"]["methods"]["items"]
+
+  def branch_destinations(method: dict, method_type: str) -> dict | None:
+    for branch in method.get("allOf", []):
+      if branch["if"]["properties"]["type"]["const"] == method_type:
+        return branch["then"].get("properties", {}).get("destinations")
+    return None
+
+  def destination_required(destinations: dict) -> list[str]:
+    return [
+      field
+      for part in destinations["items"].get("allOf", [])
+      for field in part.get("required", [])
+    ]
+
+  complete = method_schema("complete")
+  _check(
+    "fulfillment_complete_method_projection",
+    complete.get("required") == ["id"]
+    and set(complete.get("properties", {})) == {"id", "type"},
+    f"required={complete.get('required')},"
+    f" properties={list(complete.get('properties', {}))}",
+  )
+  shipping = branch_destinations(complete, "shipping")
+  _check(
+    "fulfillment_complete_shipping_destination_id_required",
+    shipping is not None and destination_required(shipping) == ["id"],
+  )
+  _check(
+    "fulfillment_complete_pickup_destinations_omitted",
+    branch_destinations(complete, "pickup") is None,
+  )
+
+  update = method_schema("update")
+  _check(
+    "fulfillment_update_method_projection_unchanged",
+    update.get("required") == ["line_item_ids"]
+    and {"selected_destination_id", "groups"}
+    <= set(update.get("properties", {})),
+  )
+  shipping = branch_destinations(update, "shipping")
+  _check(
+    "fulfillment_update_shipping_destination_id_optional",
+    shipping is not None and destination_required(shipping) == [],
+  )
+
+  resolved = v.resolve_schema(
+    "shopping/fulfillment", "request", "complete", _SCHEMA_BASE
+  )
+  schema = resolved["$defs"]["dev.ucp.shopping.checkout"]
+  seed = v.load_scaffold(
+    "shopping/checkout", "request", "complete", _SCAFFOLDS_DIR
+  )
+  assert seed is not None
+  destination = {
+    "id": "dest_1",
+    "street_address": "123 Main St",
+    "postal_code": "62701-1234",
+  }
+  method = {"id": "method_1", "type": "shipping", "destinations": [destination]}
+
+  def without(obj: dict, key: str) -> dict:
+    return {k: value for k, value in obj.items() if k != key}
+
+  def methods(*entries: dict) -> dict:
+    return {"fulfillment": {"methods": list(entries)}}
+
+  for name, refinement, expected in (
+    ("buyer", {"buyer": {"email": "buyer@example.com"}}, True),
+    ("destination", methods(method), True),
+    ("method_without_id", methods(without(method, "id")), False),
+    ("destinations_without_type", methods(without(method, "type")), False),
+    (
+      "destination_without_id",
+      methods({**method, "destinations": [without(destination, "id")]}),
+      False,
+    ),
+  ):
+    valid, errors = v.validate_payload_with_schema(
+      {**seed, **refinement}, schema, "request", "complete", _SCHEMA_BASE
+    )
+    _check(
+      f"fulfillment_complete_refinement[{name}]",
+      valid == expected,
+      f"valid={valid}, errors={errors}",
+    )
+
+
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
   original_run = v.subprocess.run
@@ -1147,6 +1262,7 @@ def main() -> int:
   test_extension_validation()
   test_checkout_item_source_process_block()
   test_checkout_item_source()
+  test_checkout_complete_refinement()
   return _report()
 
 

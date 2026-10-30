@@ -240,7 +240,10 @@ business agent to complete the checkout process. `payment` is a structured data
 type specified as part of UCP. When processing a payment to complete the
 checkout, `payment` must be submitted to the business agent as a `DataPart` with
 attribute name `a2a.ucp.checkout.payment`. Any associated signals should be sent
-with attribute name `a2a.ucp.checkout.signals`.
+with attribute name `a2a.ucp.checkout.signals`. Any
+[completion-time refinements](index.md#completion-time-refinement) should be
+sent with attribute names `a2a.ucp.checkout.buyer` and
+`a2a.ucp.checkout.fulfillment`.
 
 Upon completion of the checkout process, the business agent must return the
 checkout object containing an `order` attribute with `id` and `permalink_url`.

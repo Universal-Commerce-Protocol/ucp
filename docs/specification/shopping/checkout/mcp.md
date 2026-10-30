@@ -614,9 +614,12 @@ Maps to the [Complete Checkout](index.md#complete-checkout) operation.
     * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
 * `id` (String): **Required**. The ID of the checkout session.
 * `checkout` ([Checkout](index.md#complete-checkout)): **Required**.
-    Contains payment credentials and other finalization data to execute the transaction.
+    Contains payment credentials and other finalization data to execute the
+    transaction, including any
+    [completion-time refinements](index.md#completion-time-refinement).
     * Extensions (Optional):
         * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](../extensions/buyer-consent.md)
+        * `dev.ucp.shopping.fulfillment`: [Fulfillment](../extensions/fulfillment.md#completion-time-refinement)
         * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema

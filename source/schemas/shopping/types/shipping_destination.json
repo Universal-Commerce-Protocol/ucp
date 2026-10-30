@@ -13,8 +13,12 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "ID specific to this shipping destination.",
-          "ucp_request": "optional"
+          "description": "ID specific to this shipping destination. Required on complete requests to identify the selected destination being refined.",
+          "ucp_request": {
+            "create": "optional",
+            "update": "optional",
+            "complete": "required"
+          }
         },
         "type": {
           "type": "string",
