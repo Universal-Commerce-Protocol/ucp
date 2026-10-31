@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/fulfillment_option.json",
+  "title": "Fulfillment Option",
+  "description": "A fulfillment option within a group (e.g., Standard delivery $5, Express delivery $15).",
+  "type": "object",
+  "required": ["id", "title", "totals"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique fulfillment option identifier."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short label (e.g., 'Express Delivery', 'Immediate Pickup')."
+    },
+    "description": {
+      "type": "string",
+      "description": "Complete context for buyer decision (e.g., 'Express delivery in 30 minutes, directly to you.')."
+    },
+    "earliest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Earliest fulfillment time."
+    },
+    "latest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Latest fulfillment time."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/total.json"
+      },
+      "description": "Fulfillment option totals breakdown. MAY be empty for pickup."
+    }
+  }
+}

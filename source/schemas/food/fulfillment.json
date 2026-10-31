@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/fulfillment.json",
+  "name": "dev.ucp.food.fulfillment",
+  "title": "Fulfillment Extension",
+  "description": "Extends capabilities with fulfillment support using methods and destinations.",
+  "$defs": {
+    "dev.ucp.food.checkout": {
+      "title": "Checkout with Fulfillment",
+      "description": "Checkout extended with hierarchical fulfillment.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "$ref": "types/fulfillment.json",
+              "description": "Fulfillment details.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

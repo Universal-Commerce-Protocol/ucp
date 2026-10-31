@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/cart.json",
+  "name": "dev.ucp.food.cart",
+  "title": "Cart",
+  "description": "Shopping cart with estimated pricing before checkout. Lightweight pre-purchase exploration with no payment info or complex status states.",
+  "$defs": {
+    "checkout": {
+      "title": "Checkout with Cart",
+      "description": "Checkout with Cart capability support, including cart-to-checkout conversion.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cart_id": {
+              "type": "string",
+              "description": "Cart ID for checkout initialization, referencing a cart from a negotiated Cart capability (`dev.ucp.food.cart`) or an out-of-band cart mutually recognized by the Platform and Business. The Business MUST reject requests with an unsupported or unrecognized `cart_id`. Cart contents (`food_establishment`, `line_items`, `context`, `buyer`) take precedence over overlapping checkout fields; `food_establishment` and `line_items` may be omitted or empty.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "omit",
+                "complete": "omit"
+              },
+              "ucp_response": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

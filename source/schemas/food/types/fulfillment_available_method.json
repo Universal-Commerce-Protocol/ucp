@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/food/types/fulfillment_available_method.json",
+  "title": "Fulfillment Available Method",
+  "description": "Inventory availability hint for a fulfillment method type.",
+  "type": "object",
+  "required": ["type"],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Fulfillment method type this availability applies to. Well-known values: `delivery`, `pickup`. Businesses MAY use additional values.",
+      "ucp_request": "omit"
+    },
+    "scheduling": {
+      "type": "string",
+      "description": "Scheduling capability supported for this fulfillment method type. Well-known values: `asap_only` (immediate ordering only), `scheduled_only` (advance scheduled time slots only), `asap_and_scheduled` (both). Businesses MAY use additional values; a Platform MUST NOT reject the containing object for an unrecognized value and SHOULD treat it as if `scheduling` were absent.",
+      "examples": ["asap_only", "scheduled_only", "asap_and_scheduled"],
+      "ucp_request": "omit"
+    },
+    "fulfillable_on": {
+      "type": "string",
+      "description": "'now' for immediate availability, or an RFC 3339 timestamp from which the method becomes available (e.g., delivery starting at dinner service).",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable availability info (e.g., 'Available for pickup at restaurant today after 5pm').",
+      "ucp_request": "omit"
+    }
+  }
+}
