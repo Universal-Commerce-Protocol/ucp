@@ -152,6 +152,7 @@ up-to-date list.
 | `dev.ucp.shopping.catalog.lookup` | Retrieve a specific product by ID |
 | `dev.ucp.shopping.order` | Order lifecycle events |
 | `dev.ucp.common.identity_linking` | OAuth-based account linking |
+| `dev.ucp.common.ask` | Natural-language questions about a business's resources, policies, and services |
 
 ### Extensions
 
