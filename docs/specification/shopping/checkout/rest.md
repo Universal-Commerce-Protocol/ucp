@@ -213,7 +213,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     Content-Type: application/json
 
     {
-      "ucp": { "version": "2026-01-11", "status": "error" },
+      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
       "messages": [
         {
           "type": "error",
@@ -402,6 +402,7 @@ state.
         "methods": [
           {
             "type": "shipping",
+            "line_item_ids": ["li_1"],
             "destinations": [
               {
                 "street_address": "123 Main St",
@@ -530,7 +531,7 @@ state.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -541,7 +542,7 @@ state.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -729,7 +730,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -740,7 +741,7 @@ Follow-up calls after initial `fulfillment` data to update selection.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -931,7 +932,7 @@ for status and `order` semantics.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -942,7 +943,7 @@ for status and `order` semantics.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1091,7 +1092,7 @@ for status and `order` semantics.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1102,7 +1103,7 @@ for status and `order` semantics.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1249,7 +1250,7 @@ for status and `order` semantics.
                   {
                     "id": "standard",
                     "title": "Standard Shipping",
-                    "description": "Arrives in 5-7 business days",
+                    "description": { "plain": "Arrives in 5-7 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1260,7 +1261,7 @@ for status and `order` semantics.
                   {
                     "id": "express",
                     "title": "Express Shipping",
-                    "description": "Arrives in 2-3 business days",
+                    "description": { "plain": "Arrives in 2-3 business days" },
                     "totals": [
                       {
                         "type": "total",
@@ -1301,17 +1302,7 @@ operations unless otherwise noted.
 
 ### Specific Header Requirements
 
-* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
-    containing the platform profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
-    Format: `profile="https://platform.example/profile"`.
-* **Idempotency-Key**: Operations that modify state **SHOULD** support
-    idempotency. When provided, the server **MUST**:
-    1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys whose request body matches the original.
-    3. Return `409 Conflict` if the key is reused with a mismatched body.
-    See [Message Signatures — Idempotency Key Requirements](../../signatures.md#replay-protection)
-    for the full payload-matching contract.
+{{ header_requirements('ucp_agent', 'idempotency_key') }}
 
 ## Protocol Mechanics
 
@@ -1394,7 +1385,7 @@ HTTP 200 and the UCP envelope containing `messages`
 <!-- ucp:example schema=common/types/error_response op=read -->
 ```json
 {
-  "ucp": { "version": "2026-01-11", "status": "error" },
+  "ucp": { "version": "{{ ucp_version }}", "status": "error" },
   "messages": [
     {
       "type": "error",
@@ -1437,7 +1428,7 @@ Content-Type: application/json
 UCP-Agent: profile="https://platform.example/.well-known/ucp"
 Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 Content-Digest: sha-256=:X48E9q...:
-Signature-Input: sig1=("@method" "@authority" "@path" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
+Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "content-digest" "content-type");keyid="platform-2025"
 Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}

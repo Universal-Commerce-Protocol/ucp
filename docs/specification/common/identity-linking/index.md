@@ -89,10 +89,10 @@ business **MAY** populate it from stored state on the response (for example,
 `buyer` and `payment.instruments[]`).
 
 Identity linking provides the authenticated user context for these values.
-Subject to the scopes that gate the operation, a business **MAY** return the
+When the request is user-authenticated, a business **MAY** return the
 user's loyalty membership in `loyalty` (see [Loyalty](../extensions/loyalty.md)), saved
 payment instruments in `payment.instruments[]` (see [Checkout](../../shopping/checkout/index.md)), or
-buyer profile data in `buyer`.
+buyer profile data in `buyer`, subject to the limits below.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is
 user-authenticated and authorized for the operation. They **MUST** only return
@@ -277,6 +277,16 @@ vocabulary); runtime messages carry per-request advisories.
     domain conventions and prepares the deployment for future delegated
     domain conventions. The business **MUST** publish this metadata when
     the authorization server does not live on the business domain.
+* Every entry in `authorization_servers` **MUST** be an authorization
+    server issuer identifier
+    ([RFC 8414 §2](https://datatracker.ietf.org/doc/html/rfc8414#section-2){ target="_blank" })
+    whose discovered metadata `issuer` is identical to the entry
+    ([RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
+    A hostname that serves OAuth endpoints is not an issuer identifier
+    unless its metadata declares it as `issuer`. Branding is a property
+    of endpoint URLs (RFC 8414 places no host constraint on
+    `authorization_endpoint` or `token_endpoint`) or of redirects from
+    them, never of the issuer identifier.
 * **SHOULD** support
     [OpenID RISC Profile 1.0](https://openid.net/specs/openid-risc-1_0-final.html){ target="_blank" }
     to signal revocation and account state changes to platforms.
@@ -285,43 +295,57 @@ vocabulary); runtime messages carry per-request advisories.
 
 UCP discovery is a three-step pipeline.
 
-**Step 1 — Resolve the AS issuer.** Platforms fetch the business's
-protected-resource metadata per
-[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" }
-and use the selected entry from `authorization_servers` as the AS
-issuer. The AS issuer **MAY** be hosted on a different origin than the
-business domain. If the business publishes no protected-resource
-metadata, the AS issuer defaults to the business domain (single-host
-deployments).
+**Step 1 — Resolve candidate AS issuers.** Platforms fetch the
+business's protected-resource metadata per
+[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" };
+each entry in `authorization_servers` is a candidate AS issuer (see
+[Selection](#selection)). A candidate issuer **MAY** be hosted on a
+different origin than the business domain. If the business publishes no
+protected-resource metadata, the business domain is the sole candidate
+issuer (single-host deployments).
 
-**Step 2 — Fetch AS metadata.** Using the issuer from Step 1, platforms
-resolve authorization-server metadata via a strict two-tier hierarchy.
-Well-known URLs are constructed per
+**Step 2 — Fetch AS metadata.** Using a candidate issuer from Step 1,
+platforms resolve authorization-server metadata via a strict two-tier
+hierarchy. Well-known URLs are constructed per
 [RFC 8414 §3.1](https://datatracker.ietf.org/doc/html/rfc8414#section-3.1){ target="_blank" }
 (the well-known segment is inserted between the host and any issuer
 path, not appended).
 
 1. **RFC 8414 (Primary):** Fetch
    `https://{host}/.well-known/oauth-authorization-server{path}`.
-    * `2xx` response: use this metadata. Discovery complete.
-    * `404 Not Found`: proceed to step 2.
+    * `2xx` response: use this metadata. Proceed to Step 3.
+    * `404 Not Found`: proceed to OIDC Discovery (item 2).
     * Any other non-2xx response, network error, or timeout: **MUST**
-      abort. **MUST NOT** proceed to step 2.
+      abort metadata resolution for this issuer. **MUST NOT** proceed to
+      item 2.
 
 2. **OIDC Discovery (Fallback):** Fetch
    `{issuer}/.well-known/openid-configuration`.
-    * `2xx` response: use this metadata. Discovery complete.
-    * Any non-2xx response, network error, or timeout: **MUST** abort.
+    * `2xx` response: use this metadata. Proceed to Step 3.
+    * Any non-2xx response, network error, or timeout: **MUST** abort
+      metadata resolution for this issuer.
 
-Platforms **MUST NOT** silently fall through on any error other than
-`404` in step 1.
+Platforms **MUST NOT** silently fall through to OIDC Discovery on any
+error other than `404` in item 1.
 
 **Step 3 — Validate the issuer.** The `issuer` value in the discovered
-metadata **MUST** byte-for-byte match the AS issuer selected in Step 1
-(per
+metadata **MUST** byte-for-byte match the candidate issuer being
+evaluated (per
 [RFC 8414 §3.3](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3){ target="_blank" }).
 Platforms **MUST NOT** normalize (e.g., strip trailing slashes) before
 comparison.
+
+### Selection
+
+Platforms evaluate each candidate entry from Step 1 through Steps 2
+and 3. An entry that fails either step (for example, because its metadata
+reports a different `issuer`) **MUST** be discarded and **MUST NOT**
+by itself cause discovery to fail. Platforms **MAY** also exclude entries
+for authorization servers at which they cannot act as a client (for
+example, because they hold no client registration there). Among the
+remaining entries, platforms **SHOULD** prefer array order, which
+expresses the business's preference. Discovery fails only when no entry
+remains.
 
 ## Account Linking Flow
 
@@ -1056,6 +1080,13 @@ field conveys the business's value prompt to the platform (e.g.,
   (byte-for-byte). Platforms **MUST NOT** normalize before comparison.
   Normalization (e.g., stripping trailing slashes) is a known source of
   `iss` validation bypass.
+* **Multiple authorization servers.** Array order in
+  `authorization_servers` is a preference, not a security boundary;
+  businesses **MUST** list only authorization servers they accept being
+  used for the protected resource. Platforms **SHOULD** log or surface
+  entries discarded during [Selection](#selection) so that a
+  misconfigured entry is visible to the business rather than silently
+  skipped.
 * **Transport security.** All communication between platform and business
   **MUST** use HTTPS with a minimum of TLS 1.2
   ([RFC 6749 §1.6](https://datatracker.ietf.org/doc/html/rfc6749#section-1.6){ target="_blank" }).
@@ -1069,10 +1100,10 @@ field conveys the business's value prompt to the platform (e.g.,
 * **JWT grant lifetime.** JWT authorization grants **MUST** be short-lived;
   the `exp` claim **SHOULD** be no more than 60 seconds after `iat`. Short
   lifetimes limit the window for grant theft and replay.
-* **JWT grant single-use.** Businesses **MUST** enforce single-use JWT;
-  a short exp narrows the replay window, but only jti tracking closes it.
+* **JWT grant single-use.** Businesses **MUST** enforce single-use JWT
   authorization grants by tracking the `jti` claim within the grant's
-  validity window.
+  validity window. A short `exp` narrows the replay window, but only
+  `jti` tracking closes it.
 * **Grant relay.** Businesses **MUST NOT** store or forward JWT
   authorization grants received from platforms. Grants are bearer
   credentials scoped to a single audience (`aud`) and a single use.

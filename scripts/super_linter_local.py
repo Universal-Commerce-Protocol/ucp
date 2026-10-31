@@ -60,7 +60,7 @@ def main():
     print(f"Error: {workflow_path} not found.")
     sys.exit(1)
 
-  with workflow_path.open() as f:
+  with workflow_path.open(encoding="utf-8") as f:
     workflow = yaml.safe_load(f)
 
   lint_step = None
@@ -83,7 +83,7 @@ def main():
   lint_env = lint_step.get("env", {})
   action_uses = lint_step.get("uses", "")
 
-  for line in workflow_path.read_text().splitlines():
+  for line in workflow_path.read_text(encoding="utf-8").splitlines():
     if "super-linter/super-linter" in line and "uses:" in line:
       action_uses = line.split("uses:", 1)[1].strip()
       break
