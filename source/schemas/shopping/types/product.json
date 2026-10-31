@@ -46,7 +46,7 @@
     },
     "list_price_range": {
       "$ref": "../../common/types/price_range.json",
-      "description": "List price range before discounts (for strikethrough display)."
+      "description": "Range of variant `list_price` values across all variants; see `variant.list_price`."
     },
     "media": {
       "type": "array",

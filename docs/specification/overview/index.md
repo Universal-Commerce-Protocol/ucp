@@ -2442,6 +2442,30 @@ Request assertions, mismatch handling, response echo, off-increment request
 handling, pricing, and lifecycle behavior are defined by the capability that
 uses the shared representation.
 
+## List price
+
+`list_price` is a **reference price**: a benchmark a Business offers so Buyers
+can judge the value of `price`, typically shown as a strikethrough. It is
+denominated like `price`: the same currency, per one whole `quantity_unit.unit`,
+or per `each` when `quantity_unit` is absent.
+
+UCP does not specify what a reference price is measured against. That is the
+Business's choice, within what applicable law allows, and jurisdictions
+differ. Bases in use include the price typically charged over a preceding
+period, the lowest price in a recent window (for example, the preceding 30
+days), a price openly offered for a substantial period, and the
+manufacturer's suggested retail price. Some jurisdictions prescribe or
+restrict which may be used, and the Business is generally expected to be
+able to substantiate the comparison.
+
+`price` is what the Buyer pays. The gap between `list_price` and `price` is an
+implied saving, not a deduction: a Business **MUST NOT** also report it as an
+applied discount, and a Platform **MUST NOT** derive an amount owed from
+`list_price`. `totals` remain authoritative.
+
+A Platform **SHOULD** show a comparison only when `list_price` is greater than
+`price`.
+
 ## Request Constraints
 
 After capabilities and extensions are negotiated, the resolved UCP request

@@ -25,7 +25,7 @@
     },
     "list_price": {
       "$ref": "../../common/types/amount.json",
-      "description": "List price before discounts (for strikethrough display). In an Order response, this represents the snapshot captured at order creation.",
+      "description": "Reference price for comparison display, typically shown as a strikethrough next to `price`, and denominated like `price`. It is not charged and is never part of `totals`; the gap against `price` is an implied saving, not a discount. The Business chooses what it is measured against (for example, the price typically charged over a preceding period, or the manufacturer's suggested retail price); what is permitted varies by jurisdiction. On an Order, this is the value captured at Checkout.",
       "ucp_request": "omit"
     },
     "quantity_unit": {
