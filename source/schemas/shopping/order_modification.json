@@ -1,0 +1,665 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/order_modification.json",
+  "name": "dev.ucp.shopping.order_modification",
+  "title": "Order Modification Extension (Draft)",
+  "description": "Draft reference schema for Enhancement Proposal #943. Extends the Order capability with capability-negotiated, cancellation-first post-purchase modification: a response-only modification declaration on Order read, a durable modification-attempt resource with per-operation outcomes, and read-only scoped lookup of an attempt whose submission response was lost, and an explicit idempotent fence operation for an authoritative negative. The `dev.ucp.shopping.order_modification` name is PROPOSED to the Tech Council and is NOT approved, sanctioned, or published; this draft follows the draft-reference approach of PR #930. Only the `cancel` operation is defined.",
+  "$defs": {
+    "order_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque Order state version. The Business MUST change it whenever any Platform-visible part of the Order changes (line quantities, fulfillment events, adjustments, or the modification declaration). Platforms MUST compare it only for equality and MUST NOT parse or order it.",
+      "examples": ["v14"]
+    },
+    "target": {
+      "type": "object",
+      "description": "What an operation applies to: the entire Order or one declared modification unit. Unknown `type` values MUST be rejected by Businesses and MUST NOT be interpreted by Platforms.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Target kind. Well-known values: `order` (the entire Order; `id` MUST be absent) and `unit` (a modification unit declared in `modification.units[]`; `id` is required).",
+          "examples": ["order", "unit"]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable opaque unit identifier when `type` is `unit`. MUST NOT be interpreted as an array index or as a line item or payment-settlement identifier."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "unit" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["id"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "order" } },
+            "required": ["type"]
+          },
+          "then": { "not": { "required": ["id"] } }
+        }
+      ]
+    },
+    "unit_target": {
+      "type": "object",
+      "description": "Relationship between a modification unit and a visible Order component. A unit is a stable modification target, not necessarily an independent payment-settlement unit.",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Kind of Order component. Well-known value: `line_item`. Platforms MUST tolerate unknown values.",
+          "examples": ["line_item"]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the Order component (for `line_item`, `line_items[].id`)."
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "Steps of the line item's quantity unit that this unit covers. Cancelling the unit cancels exactly this quantity; quantity-reduction requests are out of scope."
+        }
+      }
+    },
+    "processing_mode": {
+      "type": "string",
+      "description": "How the Business processes a cancellation. Well-known values: `immediate` (the Business decides and commits within the request) and `merchant_review` (the attempt is admitted and the Business decides later). Platforms MUST treat any unrecognized value as `merchant_review` and MUST NOT assume commitment.",
+      "examples": ["immediate", "merchant_review"]
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": ["cancel"]
+      },
+      "uniqueItems": true,
+      "description": "Supported operations. This draft defines only `cancel`. Platforms MUST ignore unknown values and MUST NOT submit an operation that is not listed."
+    },
+    "order_cancellation": {
+      "type": "object",
+      "description": "Whole-order cancellation metadata, declared whether or not whole-order cancellation is currently available and independent of `granularity`.",
+      "required": ["available"],
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Whether whole-order cancellation is currently offered. MUST be true if and only if the enclosing `modification.operations` contains `cancel`."
+        },
+        "processing_mode": {
+          "$ref": "#/$defs/processing_mode",
+          "description": "Required when `available` is true, including when `granularity` is `by_unit`."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable reason whole-order cancellation is unavailable. Open vocabulary; clients MUST tolerate unknown values.",
+          "examples": ["partially_fulfilled", "cutoff_passed", "final_sale"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation accompanying `reason_code`."
+        },
+        "reversible_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Non-negative amount attributed to whole-order cancellation, in the Order's `currency` minor units. Attribution, not a settlement instruction."
+        },
+        "estimated_refund_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Non-negative estimated refund for whole-order cancellation in the Order's `currency` minor units. Omitted means unknown, not zero; the estimate is not a guarantee and MAY differ from the final `adjustments[]` value."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "available": { "const": true } },
+            "required": ["available"]
+          },
+          "then": { "required": ["processing_mode"] }
+        }
+      ]
+    },
+    "unit": {
+      "type": "object",
+      "description": "An independently addressable modification unit declared on the authoritative Order read.",
+      "required": ["id", "targets", "operations"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable opaque unit identifier, unique within the Order. Unchanged while the unit remains addressable."
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/unit_target" },
+          "description": "Order components the unit maps to, with the quantities it covers."
+        },
+        "operations": {
+          "$ref": "#/$defs/operations",
+          "description": "Operations currently supported on this unit. An empty array means the unit is declared but not currently modifiable; `reason_code` SHOULD explain."
+        },
+        "processing_mode": {
+          "$ref": "#/$defs/processing_mode",
+          "description": "Required when `operations` is non-empty."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable reason the unit is unavailable. Open vocabulary; clients MUST tolerate unknown values.",
+          "examples": ["already_shipped", "customized_item", "cutoff_passed"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation accompanying `reason_code`."
+        },
+        "reversible_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Non-negative amount attributed to the unit in the Order's `currency` minor units. A pooled payment does not make unit attribution impossible."
+        },
+        "estimated_refund_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Non-negative estimated refund for cancelling the unit. Omitted means unknown, not zero; not a guarantee and distinct from the final adjustment."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "operations": { "minItems": 1 } },
+            "required": ["operations"]
+          },
+          "then": { "required": ["processing_mode"] }
+        }
+      ]
+    },
+    "modification_declaration": {
+      "type": "object",
+      "description": "Authoritative, response-only declaration of what post-purchase modification the Business supports for this Order at this `order_version`. Its presence means the extension is negotiated; absence means the Platform MUST NOT infer programmatic cancellation support. An Order-only implementation declares `granularity: order_only` explicitly.",
+      "required": ["granularity", "atomicity", "operations", "order_cancellation"],
+      "properties": {
+        "granularity": {
+          "type": "string",
+          "description": "Addressing granularity. Well-known values: `order_only` (only whole-order operations; `units` MUST be absent or empty) and `by_unit` (independently addressable `units[]` are declared). Open vocabulary: a Platform that does not recognize the value MUST NOT address units and MAY submit only a whole-order operation when `order_cancellation.available` is true.",
+          "examples": ["order_only", "by_unit"]
+        },
+        "atomicity": {
+          "type": "string",
+          "description": "Order mutation commitment model. Well-known values: `atomic` (all operations of one attempt commit as one all-or-nothing mutation) and `per_unit` (independently eligible units commit and fail independently). Applies to Order mutation commitment, not to downstream financial settlement. Open vocabulary: a Platform that does not recognize the value MUST submit single-operation requests only and MUST treat any result other than `committed` as unresolved.",
+          "examples": ["atomic", "per_unit"]
+        },
+        "operations": {
+          "$ref": "#/$defs/operations",
+          "description": "Supported Order-level operations. MUST contain `cancel` if and only if `order_cancellation.available` is true."
+        },
+        "order_cancellation": {
+          "$ref": "#/$defs/order_cancellation"
+        },
+        "units": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/unit" },
+          "description": "Independently addressable modification units. Required when `granularity` is `by_unit`."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "order_cancellation": { "properties": { "available": { "const": true } }, "required": ["available"] } },
+            "required": ["order_cancellation"]
+          },
+          "then": {
+            "properties": { "operations": { "contains": { "const": "cancel" } } }
+          },
+          "else": {
+            "properties": { "operations": { "not": { "contains": { "const": "cancel" } } } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "granularity": { "const": "by_unit" } },
+            "required": ["granularity"]
+          },
+          "then": { "required": ["units"] }
+        },
+        {
+          "if": {
+            "properties": { "granularity": { "const": "order_only" } },
+            "required": ["granularity"]
+          },
+          "then": {
+            "properties": { "units": { "maxItems": 0 } }
+          }
+        }
+      ]
+    },
+    "cancel_operation": {
+      "type": "object",
+      "description": "One requested operation. The same shape is used for whole-order and unit cancellation.",
+      "required": ["op", "target"],
+      "properties": {
+        "op": {
+          "type": "string",
+          "description": "Operation. Only `cancel` is defined; the Business MUST reject any operation not declared for the target.",
+          "examples": ["cancel"]
+        },
+        "target": { "$ref": "#/$defs/target" }
+      }
+    },
+    "create_request": {
+      "type": "object",
+      "title": "Create Modification Request",
+      "description": "Body of the request that creates a modification attempt. State-changing: carries a signed Idempotency-Key. The Business assigns `modification_id` on admission.",
+      "required": ["base_order_version", "operations"],
+      "properties": {
+        "base_order_version": {
+          "$ref": "#/$defs/order_version",
+          "description": "The `order_version` against which the declaration was observed. A mismatch on a new attempt is rejected with `stale_order_state` before admission."
+        },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/cancel_operation" },
+          "description": "One or more cancellation operations. Targets MUST be unique; an `order` target MUST NOT be combined with `unit` targets."
+        }
+      }
+    },
+    "blocked_by": {
+      "type": "object",
+      "description": "The dependency that prevented execution of a `not_attempted` operation.",
+      "required": ["type", "reason_code"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Kind of blocker. Well-known values: `operation` (another operation in the same attempt; `target` identifies it) and `order_state` (current Order state). Platforms MUST tolerate unknown values.",
+          "examples": ["operation", "order_state"]
+        },
+        "target": {
+          "$ref": "#/$defs/target",
+          "description": "The blocking operation's target when `type` is `operation`."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable blocking reason. Open vocabulary.",
+          "examples": ["atomic_group_not_committable", "predecessor_indeterminate"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation."
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "description": "Authoritative outcome of one requested operation. Outcomes are not interchangeable: `awaiting_business_decision` implies no execution; `committed` implies the Order mutated but not that any refund completed.",
+      "required": ["target", "op", "outcome"],
+      "properties": {
+        "target": { "$ref": "#/$defs/target" },
+        "op": {
+          "type": "string",
+          "description": "The operation this result belongs to.",
+          "examples": ["cancel"]
+        },
+        "outcome": {
+          "type": "string",
+          "description": "Well-known values: `awaiting_business_decision` (admitted, Business has not decided, nothing committed), `committed` (Order mutation committed; refund may still be pending), `refused` (Business declined before any mutation), `failed` (execution conclusively did not commit), `indeterminate` (whether execution committed is not yet authoritative; MUST NOT be used merely because approval is pending), `not_attempted` (execution did not start because of the dependency in `blocked_by`). Platforms MUST treat any unrecognized value as unresolved and not successful.",
+          "examples": [
+            "awaiting_business_decision",
+            "committed",
+            "refused",
+            "failed",
+            "indeterminate",
+            "not_attempted"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Machine-readable reason. Required for `refused` and `failed`. Well-known: `refused_by_policy`, `unit_unavailable`, `conflicting_modification`, `stale_eligibility`.",
+          "examples": ["refused_by_policy", "unit_unavailable", "conflicting_modification", "stale_eligibility"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation."
+        },
+        "blocked_by": {
+          "$ref": "#/$defs/blocked_by",
+          "description": "Required when `outcome` is `not_attempted`."
+        },
+        "affected_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Non-negative amount attributed to the target by a committed operation. Not the signed financial amount of any adjustment and not evidence a refund completed."
+        },
+        "adjustments": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "IDs of Order `adjustments[]` entries created or updated by this result. The Order `adjustments[]` array, not this result, is authoritative for refund and credit status."
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when the Business reached the outcome, when known."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "outcome": { "enum": ["refused", "failed"] } },
+            "required": ["outcome"]
+          },
+          "then": { "required": ["reason_code"] }
+        },
+        {
+          "if": {
+            "properties": { "outcome": { "const": "not_attempted" } },
+            "required": ["outcome"]
+          },
+          "then": { "required": ["blocked_by"] }
+        },
+        {
+          "if": {
+            "properties": { "outcome": { "enum": ["awaiting_business_decision", "refused", "failed", "indeterminate", "not_attempted"] } },
+            "required": ["outcome"]
+          },
+          "then": {
+            "not": { "required": ["affected_amount"] }
+          }
+        }
+      ]
+    },
+    "modification_record": {
+      "type": "object",
+      "title": "Modification",
+      "description": "Durable record of one admitted modification attempt. Authoritative for attempt-level status; the Order read remains authoritative for current Order and adjustment state. A cached replay of this record is not a substitute for reading it again.",
+      "required": ["modification_id", "order_id", "base_order_version", "atomicity", "status", "results"],
+      "properties": {
+        "modification_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Durable Business-assigned identifier of the attempt."
+        },
+        "order_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Order the attempt applies to."
+        },
+        "base_order_version": {
+          "$ref": "#/$defs/order_version",
+          "description": "The version the original request was admitted against. Immutable."
+        },
+        "atomicity": {
+          "type": "string",
+          "description": "Commitment model that governed this attempt; copied from the declaration at admission. Well-known values: `atomic`, `per_unit`; unrecognized values are handled as in `modification.atomicity`.",
+          "examples": ["atomic", "per_unit"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Request-level aggregate derived from `results`. `open`: at least one result is `awaiting_business_decision`, `indeterminate`, or an unrecognized outcome. `closed`: every result is one of the terminal outcomes `committed`, `refused`, `failed`, or `not_attempted`. Platforms MUST treat unrecognized values as `open`.",
+          "examples": ["open", "closed"]
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/result" },
+          "description": "One result per requested operation, in request order."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when the attempt was admitted."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp of the most recent change to any result."
+        },
+        "retained_until": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Until when the Business guarantees this record and its scoped-key association remain retrievable by `get_modification` and scoped lookup. MUST be at least 24 hours after `created_at` (the replay-cache minimum) and MAY be longer; the two lifetimes are separate contracts. Within this lifetime a scoped lookup MUST return `found`; after it lookup and fence MUST answer `unresolved` with `reason_code: record_expired`. The Business MUST keep a permanent claim marker for every claimed key, so a key it claimed is never fenced after the record expires."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "closed" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "results": {
+                "items": {
+                  "properties": { "outcome": { "enum": ["committed", "refused", "failed", "not_attempted"] } },
+                  "required": ["outcome"]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "open" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "results": {
+                "contains": {
+                  "not": {
+                    "properties": { "outcome": { "enum": ["committed", "refused", "failed", "not_attempted"] } },
+                    "required": ["outcome"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "atomicity": { "const": "atomic" } },
+            "required": ["atomicity"]
+          },
+          "then": {
+            "if": {
+              "properties": {
+                "results": {
+                  "contains": {
+                    "properties": { "outcome": { "const": "committed" } },
+                    "required": ["outcome"]
+                  }
+                }
+              },
+              "required": ["results"]
+            },
+            "then": {
+              "properties": {
+                "results": {
+                  "items": {
+                    "properties": { "outcome": { "const": "committed" } },
+                    "required": ["outcome"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "modification_response": {
+      "title": "Modification Response",
+      "description": "Response to creating or reading a modification attempt.",
+      "allOf": [
+        { "$ref": "#/$defs/modification_record" },
+        {
+          "type": "object",
+          "required": ["ucp"],
+          "properties": {
+            "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "type": "object",
+      "title": "Modification Lookup Response",
+      "description": "Result of a strictly read-only lookup of an attempt by the original scoped idempotency key. Scope is the authenticated Platform, the Order ID, the operation type, and the original key. The lookup never changes admission state: it installs no tombstone, claims no key, and cannot change whether the original request can later commit, so retrying or prefetching it is safe. It can answer only `found` or `unresolved`; an authoritative negative requires the explicit fence operation.",
+      "required": ["ucp", "status"],
+      "properties": {
+        "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" },
+        "status": {
+          "type": "string",
+          "description": "`found`: `modification` is present. `unresolved`: no record is visible; an original submission may still be in flight or the retention lifetime may have lapsed. The Platform MUST keep the attempt unresolved, MAY poll or replay the original request with the same key and identical body bytes, MAY invoke the fence operation to obtain an authoritative negative, and MUST NOT create a replacement attempt with a new key on this answer alone. Platforms MUST treat any other value, including `not_found`, as `unresolved`.",
+          "examples": ["found", "unresolved"]
+        },
+        "modification": {
+          "$ref": "#/$defs/modification_record",
+          "description": "Present when `status` is `found`."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Why the result is `unresolved`. Open vocabulary.",
+          "examples": ["admission_in_flight", "record_expired", "replica_lag"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation."
+        },
+        "retry_after": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Suggested seconds before the next lookup when `status` is `unresolved`."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "found" } },
+            "required": ["status"]
+          },
+          "then": { "required": ["modification"] }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "unresolved" } },
+            "required": ["status"]
+          },
+          "then": {
+            "not": { "required": ["modification"] }
+          }
+        }
+      ]
+    },
+    "fence_request": {
+      "type": "object",
+      "title": "Fence Modification Key Request",
+      "description": "Body of the explicit, state-changing request that asks the Business to resolve an unclaimed original key into an authoritative non-commit. Sent with its own fresh signed Idempotency-Key, distinct from the original key it names. By sending it the Platform abandons the original attempt: if the key is unclaimed the Business installs a permanent tombstone and the original can never commit.",
+      "required": ["operation", "original_idempotency_key"],
+      "properties": {
+        "operation": {
+          "type": "string",
+          "description": "Operation type of the original attempt; part of the scope.",
+          "examples": ["cancel"]
+        },
+        "original_idempotency_key": {
+          "type": "string",
+          "minLength": 22,
+          "description": "The Idempotency-Key of the original create request to fence. Carried in the body, not the URL."
+        }
+      }
+    },
+    "fence_response": {
+      "type": "object",
+      "title": "Fence Modification Key Response",
+      "description": "Outcome of the atomic fence operation. The Business performs one compare-and-set on the scoped key (authenticated Platform, Order ID, operation, original key): if a claim exists it returns `found` and installs nothing; otherwise it installs the permanent tombstone and returns `fenced`. The two outcomes are mutually exclusive.",
+      "required": ["ucp", "status"],
+      "properties": {
+        "ucp": { "$ref": "../ucp.json#/$defs/response_order_schema" },
+        "status": {
+          "type": "string",
+          "description": "`found`: the key was already claimed; `modification` is the attempt's record, nothing was fenced, and the Platform follows that attempt. `unresolved`: the key was claimed but its record has expired (`reason_code: record_expired`); nothing was fenced and non-commitment is not established. `fenced`: the key was unclaimed and a permanent tombstone is now installed; the original request can never commit, at any later time, and the Platform MAY submit a new request with a new key after re-reading the Order. Platforms MUST treat any other value as unresolved.",
+          "examples": ["found", "fenced", "unresolved"]
+        },
+        "modification": {
+          "$ref": "#/$defs/modification_record",
+          "description": "Present when `status` is `found`."
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "Why the result is `unresolved`. Open vocabulary.",
+          "examples": ["record_expired"]
+        },
+        "key_fenced": {
+          "type": "boolean",
+          "description": "True when `status` is `fenced`: the Business holds a PERMANENT tombstone for the scoped key, written by an atomic compare-and-set mutually exclusive with claiming the key. For as long as the Order can accept modifications the Business MUST reject, without executing or creating any modification, every submission under that scoped key, however late, including an in-flight admission that had not durably claimed the key. The tombstone does not expire with `retained_until` or the replay cache. A Business that cannot make it permanent MUST NOT fence; it rejects the operation with `fence_not_supported` and the Platform stays unresolved. A temporary fence cannot support an authoritative non-commit."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "found" } },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["modification"],
+            "not": { "required": ["key_fenced"] }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "fenced" } },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["key_fenced"],
+            "properties": { "key_fenced": { "const": true } },
+            "not": { "required": ["modification"] }
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "unresolved" } },
+            "required": ["status"]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["modification"] },
+                { "required": ["key_fenced"] }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "create_response": {
+      "$ref": "#/$defs/modification_response",
+      "title": "Create Modification Response"
+    },
+    "read_response": {
+      "$ref": "#/$defs/modification_response",
+      "title": "Get Modification Response"
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Modification",
+      "description": "Order extended with the modification declaration. When the extension is negotiated both fields are required on Order responses; for non-participating implementations the base Order is unchanged.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "required": ["order_version", "modification"],
+          "properties": {
+            "order_version": {
+              "$ref": "#/$defs/order_version",
+              "ucp_request": "omit"
+            },
+            "modification": {
+              "$ref": "#/$defs/modification_declaration",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
