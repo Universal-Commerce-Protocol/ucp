@@ -673,7 +673,7 @@ Platforms **MUST** communicate their profile URI with each request to enable cap
 **HTTP Transport:** Platforms **MUST** use Dictionary Structured Field syntax ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)) in the UCP-Agent header:
 
 ```text
-POST /checkout HTTP/1.1
+POST /checkout-sessions HTTP/1.1
 UCP-Agent: profile="https://agent.example/profiles/shopping-agent.json"
 Content-Type: application/json
 
