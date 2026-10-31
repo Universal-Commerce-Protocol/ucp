@@ -5298,8 +5298,30 @@ providers, IdPs <strong>SHOULD</strong> include relevant
 grant when available and the user has consented. Businesses
 <strong>SHOULD NOT</strong> auto-link accounts across IdPs by matching email or any
 other claim, and <strong>SHOULD</strong> require user-mediated linking (the user
-authenticating to the existing account) before merging identities. See
+authenticating to the existing account) before merging identities,
+except as permitted below. See
 <a href="#security-considerations">Security Considerations</a>.</p>
+<p>Businesses <strong>MAY</strong> resolve a grant to an existing account by matching
+<code>email</code> when all of the following hold: the business has independently
+established that the grant's issuer is the mailbox authority for the
+email's domain (for example, a consumer mailbox provider's own domain,
+where every account is a hosted mailbox); the grant asserts
+<code>email_verified</code> as the JSON boolean <code>true</code>; the existing account's
+address was verified by the business itself, not imported from an IdP
+claim; and neither the grant's <code>(iss, sub)</code> nor the account is already
+linked to a conflicting counterpart (for example, the account is
+already linked to a different <code>sub</code> from the same <code>iss</code>, or the grant's
+<code>(iss, sub)</code> is already linked to a different account). Once linked,
+the business <strong>MUST</strong> resolve that account by <code>(iss, sub)</code> and
+<strong>MUST NOT</strong> re-target the link on a later change to <code>email</code>.
+Businesses <strong>SHOULD</strong> notify the account holder when a link is created
+this way. The cross-IdP risks in
+<a href="#security-considerations">Security Considerations</a> remain the
+business's to assess per domain, including the provider's
+address-recycling policy. DNS delegation per
+<a href="https://www.ietf.org/archive/id/draft-hardt-email-verification-02.html#section-3" target="_blank">draft-hardt-email-verification §3</a>
+is one signal a business <strong>MAY</strong> consult when establishing authority;
+this specification does not define its evaluation.</p>
 <h3 id="chaining-errors-at-the-token-endpoint">Chaining Errors at the Token Endpoint<a class="headerlink" href="#chaining-errors-at-the-token-endpoint" title="Permanent link">&para;</a></h3>
 <p>Validation failures use the standard OAuth 2.0 token-endpoint error format
 (<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-5.2" target="_blank">RFC 6749 §5.2</a>).
@@ -5671,7 +5693,13 @@ field conveys the business's value prompt to the platform (e.g.,
   per-IdP identifier is <code>(iss, sub)</code>; other claims are advisory.
   Businesses <strong>SHOULD</strong> require user-mediated linking — the user
   demonstrating control of the existing account via current-session
-  authentication or equivalent — before merging accounts across IdPs.</li>
+  authentication or equivalent — before merging accounts across IdPs.
+  The one exception is email matching as permitted in
+  <a href="#business-token-issuance">Business Token Issuance</a>, where the business
+  has independently established that the grant's issuer is the mailbox
+  authority for the email's domain. That exception narrows these risks
+  but does not remove them: address recycling or reassignment by the
+  mailbox provider remains the business's to assess per domain.</li>
 </ul>
 <h2 id="future-extensibility">Future Extensibility<a class="headerlink" href="#future-extensibility" title="Permanent link">&para;</a></h2>
 <p>The schema is designed to accommodate non-OAuth provider mechanisms as
