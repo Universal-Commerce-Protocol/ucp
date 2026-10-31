@@ -71,6 +71,16 @@ and checkout and does not constrain what the Business records (a 0.25-lb
 ordering increment does not prevent recording an actual picked weight of
 1.90 lb).
 
+**List price.** A Business **MAY** include `item.list_price` on Order line
+items (following the denomination and non-transactional rules in
+[Checkout](../checkout/index.md#quantity-and-sale-basis)), and a Platform
+**MUST** accept its omission. When present on an Order, `item.list_price`
+**MUST** be an immutable snapshot captured at order creation time and **MUST
+NOT** be populated or refreshed via a post-fact join against live Catalog
+state; a Business that did not persist `list_price` at order creation **MUST**
+omit it. Platforms requiring guaranteed post-purchase strikethrough display
+**SHOULD** persist the snapshot captured at Checkout completion.
+
 ### Fulfillment
 
 Fulfillment tracks how items are delivered to the buyer.

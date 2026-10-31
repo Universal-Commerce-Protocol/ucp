@@ -337,6 +337,18 @@ For example, a Business sells bananas by the pound with `quantity_unit`
 }
 ```
 
+**List price.** The Business **MAY** include `item.list_price` on Cart and
+Checkout line responses to convey the pre-markdown unit comparison price (on
+the same currency and sale basis as `item.price`) without a separate Catalog
+lookup, and the Platform **MUST** accept its omission. `item.list_price` is
+strictly informational: it **MUST NOT** participate in `totals[]`, discount
+allocations, or settlement, and the catalog markdown
+(`item.list_price - item.price`) **MUST NOT** be emitted as an
+`items_discount` or `discount` entry. Businesses **SHOULD** populate
+`list_price` only when `list_price > price`; Platforms **MUST** accept
+`list_price <= price` and **SHOULD** suppress strikethrough rendering when
+`list_price <= price`.
+
 ### Checkout Status Lifecycle
 
 The checkout `status` field indicates the current phase of the session and
