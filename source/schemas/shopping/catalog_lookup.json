@@ -38,6 +38,15 @@
           "$ref": "types/search_filters.json",
           "description": "Filter criteria to narrow returned products and variants. All specified filters combine with AND logic."
         },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": ["substitutes", "recommendations"]
+          },
+          "uniqueItems": true,
+          "description": "Optional data to include with each returned product. Well-known values: `substitutes` (functionally similar items purchasable in place of a variant), `recommendations` (related items the Business selects for a product). A Business MUST omit values it does not recognize or support and MUST return an empty array for a supported value with no results; presence means the Business understood the request."
+        },
         "context": {
           "$ref": "../common/types/context.json"
         },
@@ -70,7 +79,8 @@
                     "items": { "$ref": "#/$defs/lookup_variant" }
                   }
                 }
-              }
+              },
+              { "$ref": "#/$defs/includes" }
             ]
           },
           "description": "Products matching the requested identifiers. May contain fewer items if some identifiers not found, or more if identifiers match multiple products."
@@ -123,6 +133,15 @@
           "$ref": "types/search_filters.json",
           "description": "Filter criteria to narrow returned variants. All specified filters combine with AND logic."
         },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": ["substitutes", "recommendations"]
+          },
+          "uniqueItems": true,
+          "description": "Optional data to include with each returned product. Well-known values: `substitutes` (functionally similar items purchasable in place of a variant), `recommendations` (related items the Business selects for a product). A Business MUST omit values it does not recognize or support and MUST return an empty array for a supported value with no results; presence means the Business understood the request."
+        },
         "context": {
           "$ref": "../common/types/context.json"
         },
@@ -134,10 +153,32 @@
         }
       }
     },
+    "includes": {
+      "title": "Includes",
+      "description": "Optional data returned with a product when `include` names it.",
+      "type": "object",
+      "properties": {
+        "substitutes": {
+          "type": "array",
+          "items": { "$ref": "types/product.json" },
+          "ucp_request": "omit",
+          "description": "Functionally similar items a Buyer could purchase in place of the requested variant — the featured variant (`variants[0]`) in `get_product`, or the variants the request identifiers resolved to in `lookup_catalog` — as the Business determines, most suitable first. Each entry's `variants[]` is narrowed to the qualifying variant(s); another variant of this product MAY appear. Present only when `include` names `substitutes`; absent when unsupported; empty when none qualify."
+        },
+        "recommendations": {
+          "type": "array",
+          "items": { "$ref": "types/product.json" },
+          "ucp_request": "omit",
+          "description": "Related items the Business selects for this product, most relevant first — typically complementary. Present only when `include` names `recommendations`; absent when unsupported; empty when none qualify."
+        }
+      }
+    },
     "detail_product": {
       "description": "A product in a get_product response, extended with effective selections and availability signals on option values.",
       "type": "object",
-      "allOf": [{ "$ref": "types/product.json" }],
+      "allOf": [
+        { "$ref": "types/product.json" },
+        { "$ref": "#/$defs/includes" }
+      ],
       "properties": {
         "selected": {
           "type": "array",
