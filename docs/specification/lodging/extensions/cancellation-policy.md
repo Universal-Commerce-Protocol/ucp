@@ -341,6 +341,30 @@ not introduce new wire fields or require a general prose-contradiction detector.
   the cash amount is unavailable. This is distinct from an invalid or
   unsupported schedule and does not imply free cancellation.
 
+### Agent integration guidance (non-normative)
+
+A response containing policy JSON does not necessarily expose the schema's
+field descriptions or these evaluation rules to a language model. In
+particular, the name `until` alone does not convey its exclusive boundary.
+Passing schema validation is also not evidence that a natural-language answer
+applied the rules correctly.
+
+A Platform can perform validation and exact term selection in deterministic
+code before asking a model to explain the result. It should keep the selected
+wire outcome distinct from a reliable monetary quote: selection does not
+establish agreement with the description or supply a missing monetary basis.
+The explanation step should receive the explicit evaluation instant, relevant
+currency and scope, and any independently established limitations or conflicts.
+It should not silently replace these facts with a natural-language reading of
+`until` or of an earlier `refundability` snapshot.
+
+For an integration that exposes raw policy JSON to a model, make the boundary,
+validation and fallback rules available to that consumer, and test its actual
+buyer-facing answers. Supplying those rules is not a guarantee that a model
+will follow them. A known conflict requires a visible limitation, not merely a
+different amount chosen from the prose. Neither approach requires an automatic
+legal-prose contradiction detector or defines additional Booking wire fields.
+
 ## Targeting and precedence
 
 Targeting and precedence are supplied by `policies[]` and are not redefined
@@ -551,6 +575,21 @@ paired prose-only/schedule inputs, missing monetary bases, malformed schedules,
 and a prose-conflict probe. These are experiment inputs, not agent results or
 an official conformance suite. Check their consistency with
 `python3 scripts/test_cancellation_lab.py`.
+
+Run `python3 scripts/test_cancellation_disclosure.py` for focused regressions
+against the same unchanged lab inputs. These tests cover the Phoenix and
+New York autumn cutoffs, including exact equality, fractional instants and
+equivalent UTC offsets. They also keep the conflict fixture's mechanically
+selected USD 75.00 distinct from its intended USD 150.00 terms. Negative checks
+verify that an inclusive-cutoff evaluator and corrupted expected answers are
+rejected, including relabeling the conflict probe as ordinary terms.
+
+These checks protect the deterministic oracle and the held-out answer key;
+they do not run models, detect arbitrary prose conflicts, or prove that a
+buyer-facing answer discloses uncertainty. The study inputs remain frozen for
+comparison with earlier runs. Any subsequent agent study should separately
+record whether schema descriptions, specification guidance or computed results
+were exposed, and report those conditions alongside the fixture and code pins.
 
 | ID | Schedule and evaluation instant | Expected result |
 | --- | --- | --- |

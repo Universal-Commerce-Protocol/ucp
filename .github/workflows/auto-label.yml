@@ -8,6 +8,7 @@ on:
 
 jobs:
   label_prs:
+    if: github.repository == 'Universal-Commerce-Protocol/ucp'
     runs-on: ubuntu-latest
 
     permissions:

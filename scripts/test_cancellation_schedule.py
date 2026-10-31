@@ -36,7 +36,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, UTC
 from fractions import Fraction
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -173,7 +173,7 @@ def local_example_instant(value: str, zone: ZoneInfo) -> datetime:
   aware = local.replace(tzinfo=zone)
   if aware.utcoffset() != aware.replace(fold=1).utcoffset():
     raise ValueError("Ambiguous or nonexistent local example time")
-  round_trip = aware.astimezone(timezone.utc).astimezone(zone)
+  round_trip = aware.astimezone(UTC).astimezone(zone)
   if round_trip.replace(tzinfo=None) != local:
     raise ValueError("Nonexistent local example time")
   return aware

@@ -15,6 +15,8 @@
 
 name: Docs Build and Deploy
 
+permissions: {}
+
 on:
   workflow_dispatch:
 
@@ -27,6 +29,7 @@ on:
       - main
       - "release/**"
     paths:
+      - ".github/actions/**"
       - ".github/workflows/docs.yml"
       - "pyproject.toml"
       - "uv.lock"
@@ -37,11 +40,10 @@ on:
       - "source/**"
       - "scripts/**"
 
-permissions:
-  contents: read
-
 jobs:
   lint:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Don't run this workflow if this is a release branch creation event
@@ -81,11 +83,17 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Run schema table macro tests
+        run: uv run python scripts/test_schema_tables.py
+
       - name: Validate cancellation schedule vectors
         run: uv run python scripts/test_cancellation_schedule.py
 
       - name: Validate cancellation lab fixtures
         run: uv run python scripts/test_cancellation_lab.py
+
+      - name: Test cancellation disclosure regressions
+        run: uv run python scripts/test_cancellation_disclosure.py
 
       - name: Validate cancellation multi-stay integration
         run: uv run python scripts/test_cancellation_booking.py
@@ -163,7 +171,10 @@ jobs:
     concurrency:
       group: gh-pages-deploy
       cancel-in-progress: false
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && github.ref == 'refs/heads/main'
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      github.ref == 'refs/heads/main'
     permissions:
       contents: write
       pages: read
@@ -220,7 +231,10 @@ jobs:
     concurrency:
       group: gh-pages-deploy
       cancel-in-progress: false
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
       pages: read
@@ -257,7 +271,10 @@ jobs:
     needs: deploy_release
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
     steps:
