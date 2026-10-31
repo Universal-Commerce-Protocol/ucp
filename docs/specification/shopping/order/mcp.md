@@ -87,7 +87,7 @@ include additional metadata fields.
 
 ## Tools
 
-UCP Capabilities map 1:1 to MCP Tools.
+In an MCP binding, each exposed UCP operation maps to one MCP tool.
 
 | Tool | Operation | Description |
 | :---- | :---- | :---- |
