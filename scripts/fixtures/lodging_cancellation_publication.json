@@ -1,0 +1,711 @@
+{
+  "format_version": 1,
+  "description": "Synthetic producer-publication safety regressions. Only policy_without_schedule and a schedule inserted into it are wire cancellation_item data. source_terms, candidate names, decisions, expected results, and money statuses are test metadata. They are not proposed fields or a completeness certificate. The runner consumes explicit author-supplied facts; it does not parse prose or discover omitted clauses.",
+  "source_note": "Inspired by the STR feedback in issue #807 (comment 5902925759), not a verified transcription of an operator policy. The public source link has not yet been supplied. Every enforcement detail and boundary below is an explicit synthetic Business choice.",
+  "source": "https://github.com/Universal-Commerce-Protocol/ucp/issues/807#issuecomment-5902925759",
+  "scope": "The supplied candidate describes the whole applicable cancellation timeline for one reservation/scope, not merely the current instant. An eligible grace period is still missing from that candidate after its window expires. An authoritatively inapplicable exception need not prevent publication.",
+  "boundary_choices": "Grace eligibility uses anchor minus booking completion >= 604800 elapsed seconds. Grace applies on [booking completion, booking completion + 86400 seconds). Base tier cutoffs are exclusive. These choices are synthetic, not inferred from an unlinked source.",
+  "monetary_scope": "No resolved monetary inputs are supplied. The money expectations concern refund amounts, not whether a full refund implies a zero cancellation penalty. Even matching percentage terms remain symbolic; omitted or conflicting schedules cannot justify a cash refund quote. Component percentages are independently supplied test answers, not a new wire outcome.",
+  "schedules": {
+    "elapsed_twenty_seven": {
+      "anchor": "2026-11-12T16:00:00-05:00",
+      "tiers": [
+        {
+          "until": "P20D",
+          "outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          }
+        },
+        {
+          "until": "P7D",
+          "outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          }
+        }
+      ],
+      "after_last_tier": {
+        "kind": "percentage",
+        "buyer_bps": 0
+      }
+    },
+    "resolved_calendar_twenty_seven": {
+      "anchor": "2026-11-12T16:00:00-05:00",
+      "tiers": [
+        {
+          "until": "PT481H",
+          "outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          }
+        },
+        {
+          "until": "P7D",
+          "outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          }
+        }
+      ],
+      "after_last_tier": {
+        "kind": "percentage",
+        "buyer_bps": 0
+      }
+    }
+  },
+  "fixtures": [
+    {
+      "id": "grace_ten_days",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "grace": {
+          "within_seconds": 86400,
+          "minimum_lead_seconds": 604800,
+          "booking_completed_at": "2026-11-02T16:00:00-05:00"
+        }
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "refundable",
+        "description": {
+          "plain": "For this synthetic single refund scope, cancellation strictly before 480 elapsed hours before check-in gives a full refund; from that instant until strictly before 168 elapsed hours before check-in gives a 50% refund; at or after the latter instant gives no refund. A booking completed at least 168 elapsed hours before check-in also has a full refund from completion up to, but not including, 24 elapsed hours after completion. These exact boundary choices are supplied by the synthetic Business for this test."
+        }
+      },
+      "expected_publication": "applicable_grace_not_represented",
+      "evaluations": [
+        {
+          "at": "2026-11-02T17:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-03T15:59:59-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-03T16:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-03T16:00:01-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-11-02T17:00:00-05:00"
+    },
+    {
+      "id": "grace_exact_seven_days",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "grace": {
+          "within_seconds": 86400,
+          "minimum_lead_seconds": 604800,
+          "booking_completed_at": "2026-11-05T16:00:00-05:00"
+        }
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "refundable",
+        "description": {
+          "plain": "For this synthetic single refund scope, cancellation strictly before 480 elapsed hours before check-in gives a full refund; from that instant until strictly before 168 elapsed hours before check-in gives a 50% refund; at or after the latter instant gives no refund. A booking completed at least 168 elapsed hours before check-in also has a full refund from completion up to, but not including, 24 elapsed hours after completion. These exact boundary choices are supplied by the synthetic Business for this test."
+        }
+      },
+      "expected_publication": "applicable_grace_not_represented",
+      "evaluations": [
+        {
+          "at": "2026-11-05T17:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-11-05T17:00:00-05:00"
+    },
+    {
+      "id": "grace_above_seven_days",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "grace": {
+          "within_seconds": 86400,
+          "minimum_lead_seconds": 604800,
+          "booking_completed_at": "2026-11-05T15:59:59-05:00"
+        }
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "refundable",
+        "description": {
+          "plain": "For this synthetic single refund scope, cancellation strictly before 480 elapsed hours before check-in gives a full refund; from that instant until strictly before 168 elapsed hours before check-in gives a 50% refund; at or after the latter instant gives no refund. A booking completed at least 168 elapsed hours before check-in also has a full refund from completion up to, but not including, 24 elapsed hours after completion. These exact boundary choices are supplied by the synthetic Business for this test."
+        }
+      },
+      "expected_publication": "applicable_grace_not_represented",
+      "evaluations": [
+        {
+          "at": "2026-11-05T15:59:59-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-05T16:59:59-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-11-05T15:59:59-05:00"
+    },
+    {
+      "id": "grace_below_seven_days",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "grace": {
+          "within_seconds": 86400,
+          "minimum_lead_seconds": 604800,
+          "booking_completed_at": "2026-11-05T16:00:01-05:00"
+        }
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "non_refundable",
+        "description": {
+          "plain": "For this synthetic single refund scope, cancellation strictly before 480 elapsed hours before check-in gives a full refund; from that instant until strictly before 168 elapsed hours before check-in gives a 50% refund; at or after the latter instant gives no refund. A booking completed at least 168 elapsed hours before check-in also has a full refund from completion up to, but not including, 24 elapsed hours after completion. These exact boundary choices are supplied by the synthetic Business for this test. For this reservation, booking completed only 167 hours, 59 minutes and 59 seconds before arrival, so the grace exception is inapplicable."
+        }
+      },
+      "expected_publication": "represented",
+      "evaluations": [
+        {
+          "at": "2026-11-05T17:00:01-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-11-05T17:00:01-05:00"
+    },
+    {
+      "id": "unknown_booking",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "grace": {
+          "within_seconds": 86400,
+          "minimum_lead_seconds": 604800,
+          "booking_completed_at": null
+        }
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "unknown",
+        "description": {
+          "plain": "For this synthetic single refund scope, cancellation strictly before 480 elapsed hours before check-in gives a full refund; from that instant until strictly before 168 elapsed hours before check-in gives a 50% refund; at or after the latter instant gives no refund. A booking completed at least 168 elapsed hours before check-in also has a full refund from completion up to, but not including, 24 elapsed hours after completion. These exact boundary choices are supplied by the synthetic Business for this test. The booking-completion instant is unavailable; clarify eligibility with the Business."
+        }
+      },
+      "expected_publication": "booking_instant_unknown",
+      "evaluations": [
+        {
+          "at": "2026-11-02T17:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "status": "unresolved",
+            "reason": "booking_instant_unknown"
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-11-02T17:00:00-05:00"
+    },
+    {
+      "id": "date_only_unconfirmed",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "unconfirmed_date_only",
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope"
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "unknown",
+        "description": {
+          "plain": "Full refund until 20 days before arrival, then 50% until seven days before arrival, then no refund. Arrival date is 12 November 2026. The Business has not confirmed a cutoff time, timezone interpretation, or whether days mean local dates or elapsed 24-hour periods."
+        }
+      },
+      "expected_publication": "cutoff_not_confirmed",
+      "evaluations": [
+        {
+          "at": "2026-10-23T16:00:00-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "authoritative": {
+            "status": "unresolved",
+            "reason": "cutoff_not_confirmed"
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-10-23T16:00:00-04:00"
+    },
+    {
+      "id": "calendar_naive_elapsed",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "calendar",
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "before_calendar_days": [
+          20,
+          7
+        ],
+        "timezone": "America/New_York",
+        "check_in_local": "2026-11-12T16:00:00",
+        "cutoff_local_time": "16:00:00"
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "refundable",
+        "description": {
+          "plain": "For this synthetic reservation in America/New_York, the Business confirms enforcement at 4:00 PM property-local time: full refund strictly before 20 calendar days before arrival, 50% from that instant until strictly before seven calendar days before arrival, and no refund thereafter. Check-in is 12 November 2026 at 4:00 PM. There are no additional exceptions for this single refund scope."
+        }
+      },
+      "expected_publication": "cutoffs_disagree",
+      "evaluations": [
+        {
+          "at": "2026-10-23T15:59:59-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-10-23T16:00:00-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-10-23T16:59:59-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-10-23T17:00:00-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "expected_cutoff_seconds": [
+        1731600,
+        604800
+      ],
+      "response_generated_at": "2026-10-23T15:59:59-04:00"
+    },
+    {
+      "id": "calendar_resolved",
+      "candidate": "resolved_calendar_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "calendar",
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope",
+        "before_calendar_days": [
+          20,
+          7
+        ],
+        "timezone": "America/New_York",
+        "check_in_local": "2026-11-12T16:00:00",
+        "cutoff_local_time": "16:00:00"
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "refundable",
+        "description": {
+          "plain": "For this synthetic reservation in America/New_York, the Business confirms enforcement at 4:00 PM property-local time: full refund strictly before 20 calendar days before arrival, 50% from that instant until strictly before seven calendar days before arrival, and no refund thereafter. Check-in is 12 November 2026 at 4:00 PM. There are no additional exceptions for this single refund scope."
+        }
+      },
+      "expected_publication": "represented",
+      "evaluations": [
+        {
+          "at": "2026-10-23T15:59:59-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-10-23T16:00:00-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-10-23T17:00:00-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "expected_cutoff_seconds": [
+        1731600,
+        604800
+      ],
+      "response_generated_at": "2026-10-23T15:59:59-04:00"
+    },
+    {
+      "id": "mixed_components",
+      "expected_refundability": "partially_refundable",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "room_only_with_refundable_fees"
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "partially_refundable",
+        "description": {
+          "plain": "The nightly room-rate component is refunded in full strictly before 480 elapsed hours before arrival, at 50% until strictly before 168 elapsed hours before arrival, and not thereafter. Cleaning fees and taxes remain fully refundable. No component amounts or unambiguous monetary basis are supplied; a single 50% statement for the whole policy would misrepresent these terms."
+        }
+      },
+      "expected_publication": "component_refunds_not_represented",
+      "evaluations": [
+        {
+          "at": "2026-11-02T17:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "component_percentages",
+            "room_bps": 5000,
+            "cleaning_bps": 10000,
+            "tax_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-05T16:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "authoritative": {
+            "kind": "component_percentages",
+            "room_bps": 0,
+            "cleaning_bps": 10000,
+            "tax_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-11-02T17:00:00-05:00"
+    },
+    {
+      "id": "simple_elapsed",
+      "candidate": "elapsed_twenty_seven",
+      "source_terms": {
+        "anchor": "2026-11-12T16:00:00-05:00",
+        "timing": "elapsed",
+        "before_seconds": [
+          1728000,
+          604800
+        ],
+        "refund_bps": [
+          10000,
+          5000,
+          0
+        ],
+        "percentage_scope": "single_scope"
+      },
+      "policy_without_schedule": {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "refundability": "refundable",
+        "description": {
+          "plain": "For this synthetic single refund scope, cancellation strictly before 480 elapsed hours before check-in gives a full refund; from that instant until strictly before 168 elapsed hours before check-in gives a 50% refund; at or after the latter instant gives no refund."
+        }
+      },
+      "expected_publication": "represented",
+      "evaluations": [
+        {
+          "at": "2026-10-23T16:59:59-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 10000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-10-23T17:00:00-04:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-05T15:59:59-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 5000
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        },
+        {
+          "at": "2026-11-05T16:00:00-05:00",
+          "candidate_outcome": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "authoritative": {
+            "kind": "percentage",
+            "buyer_bps": 0
+          },
+          "money": {
+            "status": "not_resolved"
+          }
+        }
+      ],
+      "response_generated_at": "2026-10-23T16:59:59-04:00"
+    }
+  ]
+}
