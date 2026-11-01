@@ -35,8 +35,8 @@
         },
         "alg": {
           "type": "string",
-          "examples": ["ES256", "ES384", "EdDSA"],
-          "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted. When present for a well-known curve it MUST match: ES256 with P-256, ES384 with P-384, EdDSA with Ed25519."
+          "examples": ["ES256", "ES384", "ES512", "EdDSA"],
+          "description": "JWA algorithm associated with this public key. Optional; verifiers derive the algorithm from crv when alg is omitted. When present for a well-known curve it MUST match: ES256 with P-256, ES384 with P-384, EdDSA with Ed25519. A P-521 key (used for AP2 Checkout JWS) MUST use ES512 when alg is present."
         },
         "use": {
           "type": "string",
@@ -63,6 +63,11 @@
           "title": "P-384 pairs with ES384",
           "if": { "properties": { "crv": { "const": "P-384" } }, "required": ["crv"] },
           "then": { "properties": { "alg": { "const": "ES384" } } }
+        },
+        {
+          "title": "P-521 pairs with ES512",
+          "if": { "properties": { "crv": { "const": "P-521" } }, "required": ["crv"] },
+          "then": { "properties": { "alg": { "const": "ES512" } } }
         },
         {
           "title": "Ed25519 pairs with EdDSA",
