@@ -1415,9 +1415,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &requested_token_type=urn:ietf:params:oauth:token-type:jwt
 ```
 
-The parameter names and values must be form-encoded per RFC 6749 Appendix B. The 
-`&` separators between parameters and the `=` separators between parameter names 
-and values must remain literal and must not be percent-encoded as separators. 
+The parameter names and values must be form-encoded per RFC 6749 Appendix B. The
+`&` separators between parameters and the `=` separators between parameter names
+and values must remain literal and must not be percent-encoded as separators.
 The URN values are shown decoded here for readability.
 
 The IdP validates the subject token, confirms the user has authorized identity
