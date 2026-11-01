@@ -110,10 +110,10 @@ compliant** because they will handle raw PANs. This includes:
 
 **Prerequisites Output:**
 
-| Field                   | Description                                                |
-| :---------------------- | :--------------------------------------------------------- |
-| `identity.access_token` | Business identifier assigned by platform during onboarding |
-| Public key registered   | Platform stores business's public key for encryption       |
+| Field                 | Description                                                                                   |
+| :-------------------- | :-------------------------------------------------------------------------------------------- |
+| `business_id`         | Business identifier assigned by platform during onboarding, published in the handler `config` |
+| Public key registered | Platform stores business's public key for encryption                                          |
 
 ### Handler Configuration
 
@@ -359,5 +359,5 @@ Content-Type: application/json
 
 ## References
 
-* **Identity Schema:** [schemas/common/types/payment_identity.json](site:schemas/common/types/payment_identity.json)
+* **Binding Schema:** [schemas/common/types/binding.json](site:schemas/common/types/binding.json)
 * **Instrument Schema:** [schemas/common/types/card_payment_instrument.json](site:schemas/common/types/card_payment_instrument.json)
