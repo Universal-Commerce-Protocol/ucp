@@ -1124,6 +1124,145 @@ def test_resolve_schema_cache_key() -> None:
 
 
 # -----------------------------------------------------------
+# JSONPath subset: bare, indexed and bracket-quoted segments
+# -----------------------------------------------------------
+
+
+def test_jsonpath_quoted_keys() -> None:
+  """Keys that are not bare-legal are reachable in bracket-quoted form.
+
+  UCP uses reverse-domain identifiers and scope tokens as object keys
+  (`dev.ucp.common.identity_linking`, `dev.ucp.shopping.order:read`).
+  Their dots and colons cannot appear in a bare segment, so extract=
+  and target= must accept the quoted form to address them at all.
+  """
+  doc = {
+    "capabilities": {
+      "dev.ucp.common.identity_linking": [{"config": {"scopes": {}}}]
+    },
+    "config": {
+      "scopes": {"dev.ucp.shopping.order:read": {"description": "d"}},
+      "providers": {"com.example.attestor": [{"type": "wallet_attestation"}]},
+    },
+    "messages": [{"code": "identity_optional"}],
+  }
+
+  # Bare and indexed paths are unchanged.
+  _check(
+    "jsonpath_bare_unchanged",
+    v.jsonpath_get(doc, "$.messages")[0]["code"] == "identity_optional",
+  )
+  _check(
+    "jsonpath_index_unchanged",
+    v.jsonpath_get(doc, "$.messages[0]")["code"] == "identity_optional",
+  )
+  _check("jsonpath_root_unchanged", v.jsonpath_get(doc, "$") is doc)
+
+  # Dotted key, with and without a trailing index.
+  _check(
+    "jsonpath_quoted_dotted_key",
+    v.jsonpath_get(doc, "$.config.providers['com.example.attestor'][0]")["type"]
+    == "wallet_attestation",
+  )
+  _check(
+    "jsonpath_quoted_capability_name",
+    v.jsonpath_get(doc, "$.capabilities['dev.ucp.common.identity_linking'][0]")[
+      "config"
+    ]
+    == {"scopes": {}},
+  )
+
+  # Colon-bearing scope token, and the double-quoted spelling.
+  _check(
+    "jsonpath_quoted_scope_token",
+    v.jsonpath_get(doc, "$.config.scopes['dev.ucp.shopping.order:read']")[
+      "description"
+    ]
+    == "d",
+  )
+  _check(
+    "jsonpath_quoted_double_quotes",
+    v.jsonpath_get(doc, '$.config.scopes["dev.ucp.shopping.order:read"]')[
+      "description"
+    ]
+    == "d",
+  )
+
+  # target= writes through the same parser.
+  target = {
+    "config": {"providers": {"com.example.attestor": [{"type": "oauth2"}]}}
+  }
+  v.jsonpath_set(
+    target,
+    "$.config.providers['com.example.attestor'][0]",
+    {"type": "wallet_attestation"},
+  )
+  _check(
+    "jsonpath_set_quoted_key",
+    target["config"]["providers"]["com.example.attestor"][0]["type"]
+    == "wallet_attestation",
+  )
+
+  # Elision paths are reported as JSON Pointers against the same subset.
+  _check(
+    "jsonpath_pointer_quoted_key",
+    v.jsonpath_to_pointer("$.config.providers['com.example.attestor'][0]")
+    == "/config/providers/com.example.attestor/0",
+  )
+
+  # Unparsable segments still raise rather than silently mis-navigating.
+  try:
+    v.jsonpath_get(doc, "$.config.providers.com.example.attestor")
+    _check("jsonpath_unquoted_dotted_key_raises", False, "expected KeyError")
+  except KeyError:
+    _check("jsonpath_unquoted_dotted_key_raises", True)
+
+
+def test_pointer_escaping() -> None:
+  """Quoted keys may hold `/` or `~`; pointers escape them per RFC 6901.
+
+  ucp-schema reports error paths with `~` as `~0` and `/` as `~1`
+  (`{"a/b": {"n": "x"}}` failing on `n` is reported at `/a~1b/n`), so
+  elision paths built from target= and from elided keys must use the same
+  form, or a suppressed error would be reported and vice versa.
+  """
+  _check(
+    "pointer_escapes_slash",
+    v.jsonpath_to_pointer("$.x['a/b'][0]") == "/x/a~1b/0",
+  )
+  _check(
+    "pointer_escapes_tilde",
+    v.jsonpath_to_pointer("$.x['c~d']") == "/x/c~0d",
+  )
+  # `~` first, so a literal `~1` in a key is not read back as `/`.
+  _check(
+    "pointer_escapes_tilde_before_slash",
+    v.jsonpath_to_pointer("$['~1']") == "/~01",
+  )
+  _check(
+    "pointer_leaves_dots_and_colons",
+    v.jsonpath_to_pointer("$['dev.ucp.shopping.order:read']")
+    == "/dev.ucp.shopping.order:read",
+  )
+
+  _, paths = v.strip_ellipsis({"a/b": "...", "c~d": {"n": "..."}})
+  _check(
+    "strip_ellipsis_escapes_keys",
+    paths == {"/a~1b", "/c~0d/n"},
+    f"got {sorted(paths)}",
+  )
+
+  # The two halves joined, as process_block does for target=, give the
+  # path ucp-schema itself reports.
+  target_pointer = v.jsonpath_to_pointer("$['a/b']")
+  _, rel = v.strip_ellipsis({"n": "..."})
+  _check(
+    "pointer_joined_matches_validator_form",
+    {f"{target_pointer}{r}" for r in rel} == {"/a~1b/n"},
+  )
+
+
+# -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
 
@@ -1142,6 +1281,8 @@ def main() -> int:
   test_missing_binary_says_how_to_install()
   test_required_anyof_coverage()
   test_scaffold_resolution()
+  test_jsonpath_quoted_keys()
+  test_pointer_escaping()
   test_resolve_schema_cache_key()
   test_process_block_integration()
   test_extension_validation()
