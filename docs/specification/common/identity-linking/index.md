@@ -548,6 +548,38 @@ UCP tightens the JWT authorization grant beyond what the base RFCs
 mandate: `aud` **MUST** be a single-valued URI plus a unique `jti` (see
 [JWT Authorization Grant](#jwt-authorization-grant)).
 
+### Subject Token
+
+The `subject_token` passed in [Step 2](#flow) is an access token the platform
+previously obtained from the IdP on behalf of the user. Platforms acquire this
+token by completing an OAuth 2.0 Authorization Code flow (with PKCE) directly
+against the IdP's authorization server — the same flow as
+[Account Linking Flow](#account-linking-flow), but targeting the IdP rather than
+a business.
+
+This initial IdP connection is a prerequisite for the Accelerated IdP Flow.
+Without it, platforms **MUST** fall back to direct OAuth on the business domain
+(see [Identity Providers](#identity-providers)).
+
+**Which token.** The subject token represents the user whose identity is being
+chained. The IdP issues the JWT authorization grant for the subject represented
+by that token, and the business resolves or provisions the account from the
+`(iss, sub)` carried in the grant (see [Business Token Issuance](#business-token-issuance)).
+
+The platform's selection of a subject token therefore determines which user's
+identity is linked at the business. Selecting a token associated with a different
+user can result in linking the wrong account.
+
+The IdP defines which scopes a token must carry to be accepted in a token
+exchange request. For OIDC-based IdPs, the `openid` scope can be requested
+during the initial authorization flow. Depending on the IdP's scope policy,
+additional scopes may be needed to make claims available in the resulting
+JWT authorization grant.
+
+For example, an IdP may require the `email` scope to include `email` and
+`email_verified` claims when these are listed in the target business's
+`required_claims` (see [Provider Configuration](#provider-configuration)).
+
 ### Flow
 
 1. Platform discovers `config.providers` in the business's identity linking
@@ -739,6 +771,25 @@ IdP **MUST**:
 * Issue a JWT authorization grant conforming to the
     [JWT Authorization Grant](#jwt-authorization-grant) requirements.
 * Return `issued_token_type` as `urn:ietf:params:oauth:token-type:jwt`.
+
+**Consent models.** UCP does not prescribe how the IdP establishes that the
+user has authorized identity sharing with a given business. Two common
+approaches are:
+
+* **Platform-level consent:** Authorization to share identity with relying
+    parties in the IdP's ecosystem is captured when the user connects their
+    account to the platform. The scope of authorized sharing depends on the
+    consent obtained and the IdP's policy. Subsequent grants can be issued
+    without additional per-business interaction when the target business is
+    covered by that authorization.
+* **Per-business consent:** The IdP prompts the user interactively the first
+    time a grant is requested for a new business, records the authorization, and
+    issues subsequent grants silently.
+
+The consent model implemented by an IdP affects when and how users authorize
+identity sharing. Documentation of the model can help platforms explain the
+authorization process to users before initiating identity chaining
+(see [General Guidelines for Platforms](#for-platforms)).
 
 IdPs **SHOULD** populate OIDC Core §5.1 standard claims in JWT
 authorization grants when the user has consented to share them — at
@@ -1326,3 +1377,150 @@ Business validates `code_verifier` against stored `code_challenge`, returns:
 
 Platform now includes `Authorization: Bearer <token>` on subsequent requests
 to user-authenticated capability endpoints.
+
+### End-to-End Walkthrough (Accelerated IdP Flow)
+
+**Setup:** Platform (AI shopping agent) + Business (B2C retailer). The business
+lists `app.example.login` as a trusted provider in `config.providers`:
+
+<!-- ucp:example skip reason="OAuth metadata, not UCP payload" -->
+```json
+{
+  "providers": {
+    "app.example.login": [
+      {
+        "type": "oauth2",
+        "auth_url": "https://accounts.example-login.app/",
+        "required_claims": ["email"]
+      }
+    ]
+  },
+  "scopes": {
+    "dev.ucp.shopping.order:read":   {},
+    "dev.ucp.shopping.order:manage": {}
+  }
+}
+```
+
+**Prerequisite — Subject token acquisition.** The platform previously linked
+the user's identity with `app.example.login` using the standard Authorization
+Code flow (see [Subject Token](#subject-token)):
+
+```text
+GET https://accounts.example-login.app/oauth2/authorize
+  ?response_type=code
+  &client_id=platform-client-id
+  &redirect_uri=https://agent.example.com/idp-callback
+  &scope=openid email
+  &code_challenge=<S256-hash>
+  &code_challenge_method=S256
+  &state=<random>
+```
+
+The user authenticated and consented at the IdP. In this example, the platform
+requested the `openid` and `email` scopes based on the IdP's scope policy.
+The platform exchanged the authorization code for an access token and stores
+it for that user for subsequent token exchange requests.
+
+**Step 1 — Discover providers.** Platform reads the business's `config.providers`
+and finds `app.example.login` with `required_claims: ["email"]`. The platform
+holds an IdP access token obtained with the `email` scope, which may enable
+the IdP to include the required claim in the JWT authorization grant.
+
+**Step 2 — Token exchange at the IdP.** Platform calls the IdP's token endpoint
+using the token exchange grant type
+([RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693){ target="_blank" }),
+presenting the subject token it holds for this user:
+
+```http
+POST https://accounts.example-login.app/oauth2/token
+Authorization: Basic <base64(platform-client-id:platform-client-secret)>
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+&subject_token=<idp-access-token>
+&subject_token_type=urn:ietf:params:oauth:token-type:access_token
+&audience=https://merchant.example.com
+&requested_token_type=urn:ietf:params:oauth:token-type:jwt
+```
+
+The parameter names and values must be form-encoded per RFC 6749 Appendix B. The
+`&` separators between parameters and the `=` separators between parameter names
+and values must remain literal and must not be percent-encoded as separators.
+The URN values are shown decoded here for readability.
+
+The IdP validates the subject token, confirms the user has authorized identity
+sharing with `https://merchant.example.com`, and returns a short-lived JWT
+authorization grant:
+
+<!-- ucp:example skip reason="OAuth metadata, not UCP payload" -->
+```json
+{
+  "access_token": "<jwt-authorization-grant>",
+  "issued_token_type": "urn:ietf:params:oauth:token-type:jwt",
+  "token_type": "N_A",
+  "expires_in": 60
+}
+```
+
+The JWT authorization grant decodes to:
+
+<!-- ucp:example skip reason="OAuth metadata, not UCP payload" -->
+```json
+{
+  "iss": "https://accounts.example-login.app",
+  "sub": "user-12345",
+  "aud": "https://merchant.example.com",
+  "iat": 1700000000,
+  "exp": 1700000060,
+  "jti": "unique-grant-id-abc123",
+  "email": "user@example.com",
+  "email_verified": true
+}
+```
+
+`aud` is the business's AS issuer URI (single value per UCP requirements).
+`jti` is unique per grant for replay protection. `exp` is 60 seconds after `iat`.
+
+**Step 3 — JWT bearer assertion at Business.** Platform derives the scope set
+from the business's `config.scopes` and presents the grant:
+
+```http
+POST https://merchant.example.com/oauth2/token
+Authorization: Basic <base64(platform-client-id:platform-client-secret)>
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+&assertion=<jwt-authorization-grant>
+&scope=dev.ucp.shopping.order:read dev.ucp.shopping.order:manage
+```
+
+Reserved characters in URN values and `:` in scope tokens must be
+percent-encoded in the actual request; they are shown decoded here for readability.
+
+The business validates the grant — `iss` against `config.providers`, `aud`
+against its own issuer URI, `exp`, `jti` for single-use replay protection, and
+signature via the IdP's `jwks_uri` — resolves or provisions the user account
+from `(iss, sub)`, and returns:
+
+<!-- ucp:example skip reason="OAuth metadata, not UCP payload" -->
+```json
+{
+  "access_token": "<merchant-access-token>",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "dev.ucp.shopping.order:read dev.ucp.shopping.order:manage"
+}
+```
+
+**Step 4 — Authenticated requests.** Platform includes the business-issued
+token on subsequent requests to user-authenticated capability endpoints:
+
+```http
+Authorization: Bearer <merchant-access-token>
+```
+
+No browser redirect was required after the initial IdP linking — the platform
+obtained access to the business silently on the user's behalf. When the
+business-issued token expires, the platform repeats Steps 2–3 to obtain a
+new grant (see [Token Lifecycle](#token-lifecycle)).
