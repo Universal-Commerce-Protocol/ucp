@@ -216,11 +216,11 @@
           "properties": {
             "fulfillment": {
               "$ref": "#/$defs/fulfillment",
-              "description": "Fulfillment details.",
+              "description": "Fulfillment details. On complete requests, the Platform MAY supply only refinements of the selected shipping destinations; see Completion-Time Refinement.",
               "ucp_request": {
                 "create": "optional",
                 "update": "optional",
-                "complete": "omit"
+                "complete": "optional"
               }
             }
           }

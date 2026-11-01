@@ -382,6 +382,65 @@ rejected Update: it **MUST** leave the current Checkout unchanged and
 [Error Handling](../checkout/index.md#error-handling) and
 [The `path` Field](../checkout/index.md#the-path-field).
 
+### Completion-Time Refinement
+
+[Complete Checkout](../checkout/index.md#complete-checkout) accepts a restricted
+`fulfillment` shape so that the Platform can deliver shipping details that a
+credential provider, such as a digital wallet, withheld until the Buyer
+authorized payment. The general rules are defined in
+[Checkout — Completion-Time Refinement](../checkout/index.md#completion-time-refinement).
+
+On Complete Checkout, each entry in `fulfillment.methods[]`:
+
+* **MUST** carry the `id` of an existing method on the Checkout.
+* **MAY** carry `type`, which **MUST** match the existing method's `type`
+    and **MUST** be present when `destinations[]` is present.
+* **MAY** carry `destinations[]` only for a `shipping` method. It contains
+    at most one Shipping Destination, whose `id` **MUST** equal the method's
+    current `selected_destination_id`.
+
+`line_item_ids`, `selected_destination_id`, and `groups` are not accepted on
+Complete Checkout. Methods and destinations that the request omits remain
+unchanged.
+
+The refined Shipping Destination is merged into the selected destination. It:
+
+* **MAY** add Postal Address fields that are absent from the selected
+    destination, for example `street_address`, `extended_address`,
+    `first_name`, `last_name`, and `phone_number`.
+* **MAY** replace a truncated `postal_code` with its full form when the
+    existing value is a prefix of it, for example `62701` to `62701-1234`, or
+    `SW1A` to `SW1A 1AA`.
+* **MUST NOT** change any other field already present on the selected
+    destination, such as `address_country`, `address_region`, or
+    `address_locality`.
+
+A Business that cannot match the method or destination, or that finds a
+refinement inconsistent with the selected destination, **MUST** reject it
+without placing the order, as defined in
+[Checkout — Completion-Time Refinement](../checkout/index.md#completion-time-refinement).
+The Business **MUST** likewise not place the order when the refined destination
+changes totals, fulfillment options, or deliverability. In that case, it
+**SHOULD** use `address_undeliverable` when the full address cannot be
+served.
+
+<!-- ucp:example schema=shopping/types/fulfillment_method op=complete direction=request -->
+```json
+{
+  "id": "method_1",
+  "type": "shipping",
+  "destinations": [
+    {
+      "id": "dest_1",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "street_address": "123 Main St",
+      "postal_code": "62701-1234"
+    }
+  ]
+}
+```
+
 ## Rendering
 
 Fulfillment options are designed for **method-agnostic rendering**. Platforms

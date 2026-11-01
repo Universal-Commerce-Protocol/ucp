@@ -1137,6 +1137,114 @@ events as the order, and its associated items, move through the supply chain.
 
 {{ method_fields('complete_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
+#### Completion-Time Refinement
+
+Some credential providers, notably digital wallets, withhold part of the
+Buyer's contact and shipping information until the Buyer authorizes payment.
+Before authorization, the Platform receives only a redacted shipping address
+that is sufficient to calculate tax and shipping, such as locality, region,
+country, and a partial postal code. It submits that address through
+[Update Checkout](#update-checkout). The full street address, recipient name,
+email, and phone number become available only together with the payment
+credential, when the Buyer has already authorized the totals they reviewed.
+See, for example,
+[Apple Pay on the Web](https://developer.apple.com/documentation/applepayontheweb/applepaysession/onshippingcontactselected),
+[Apple Pay in PassKit](https://developer.apple.com/documentation/passkit/pkpaymentauthorizationcontrollerdelegate/paymentauthorizationcontroller(_:didselectshippingcontact:handler:)),
+and [Google Pay `IntermediateAddress`](https://developers.google.com/pay/api/web/reference/response-objects#IntermediateAddress).
+
+So that the Platform can deliver this information without an additional
+Update Checkout round trip, Complete Checkout accepts `buyer` and, when the
+[Fulfillment Extension](../extensions/fulfillment.md#completion-time-refinement)
+is negotiated, a restricted `fulfillment` shape. These fields **refine** the
+Checkout the Buyer reviewed: they add detail to information already present and
+never change it.
+
+Refinement is merged into the current Checkout. Unlike Update Checkout, it does
+not replace the resource: buyer fields, fulfillment methods, and destinations
+that the request omits remain unchanged.
+
+The Platform:
+
+* **MAY** supply `buyer` fields that are absent from the current Checkout.
+* **MUST NOT** supply a `buyer` field whose value differs from the value
+    already present on the Checkout.
+* **MUST NOT** use Complete Checkout to change line items or to select a
+    different fulfillment method, destination, or option. Those changes
+    require Update Checkout.
+* **MUST** follow the fulfillment refinement rules in
+    [Fulfillment — Completion-Time Refinement](../extensions/fulfillment.md#completion-time-refinement).
+
+The Business:
+
+* **MUST** apply refinements before evaluating completion, as part of the
+    same Complete Checkout operation.
+* **MUST** verify that each refinement is consistent with the value already
+    present. The Business **MAY** normalize values before comparing them,
+    for example case or region abbreviations.
+* **MUST NOT** place the order or process payment when a refinement is
+    inconsistent with the current Checkout or references a method or
+    destination it cannot match. In that case, the Business **MUST** leave the
+    Checkout unchanged and **MUST** return it with an error Message with
+    `severity: "recoverable"` whose `path` selects the offending field.
+* **MUST NOT** place the order or process payment when applying a consistent
+    refinement changes `totals`, the available or selected fulfillment
+    options, or the eligibility of any line item. For example, the full
+    address might resolve to a different tax jurisdiction or turn out to be
+    undeliverable. In that case, the Business **MUST** return the refined
+    Checkout with `status: "incomplete"` and an error Message with
+    `severity: "recoverable"` whose `path` selects the affected component
+    (for example, `$.totals` or the destination). The Platform **MUST** obtain
+    new Buyer authorization before it submits another Complete Checkout.
+
+The Buyer authorizes a payment credential for the totals they reviewed. These
+rules ensure that a refinement never causes a charge for different totals.
+Platforms **MAY** continue to submit the same information through Update
+Checkout before Complete Checkout.
+
+<!-- ucp:example schema=shopping/fulfillment def=dev.ucp.shopping.checkout op=complete direction=request -->
+```json
+{
+  "buyer": {
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane.doe@example.com",
+    "phone_number": "+12175550123"
+  },
+  "fulfillment": {
+    "methods": [
+      {
+        "id": "method_1",
+        "type": "shipping",
+        "destinations": [
+          {
+            "id": "dest_1",
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "street_address": "123 Main St",
+            "extended_address": "Apt 4B",
+            "postal_code": "62701-1234"
+          }
+        ]
+      }
+    ]
+  },
+  "payment": {
+    "instruments": [
+      {
+        "id": "instr_1",
+        "handler_id": "wallet_handler",
+        "type": "card",
+        "selected": true,
+        "credential": {
+          "type": "token",
+          "token": "tok_wallet_123"
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Cancel Checkout
 
 This operation will be used to cancel a checkout session, if it can be canceled.
