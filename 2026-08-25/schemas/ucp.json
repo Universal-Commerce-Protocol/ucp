@@ -409,6 +409,26 @@
           }
         }
       ]
+    },
+    "response_ask_schema": {
+      "title": "UCP Ask Response Schema",
+      "description": "UCP metadata for ask responses.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": {
+                  "$ref": "https://ucp.dev/2026-08-25/schemas/capability.json#/$defs/response_schema"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

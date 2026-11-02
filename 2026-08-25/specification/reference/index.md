@@ -4,6 +4,12 @@ This page provides a reference for all the capability data models and types used
 
 ## Capability Schemas
 
+### Ask
+
+Natural-language Q&A with a Business. A Platform, on behalf of the Buyer, asks a free-form question about the Business's resources, policies, and services and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured commerce capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and Business-specific facts and knowledge not exposed by other capabilities. Optionally pass identifiers to ground the answer in Business resources across commerce domains.
+
+______________________________________________________________________
+
 ### Location Lookup
 
 Location lookup by identifiers. Supports batch retrieval and single-location detail.
@@ -279,11 +285,12 @@ ______________________________________________________________________
 
 ### Link
 
-| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                          |
-| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link. |
-| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                              |
-| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                         |
+| Name  | Type   | Requirement  | Description                                                                                                                                                                                                                                                  |
+| ----- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type  | string | **Required** | Type of link. Well-known values: `privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`. Consumers SHOULD handle unknown values gracefully by displaying them using the `title` field or omitting the link.                         |
+| url   | string | **Required** | The actual URL pointing to the content to be displayed.                                                                                                                                                                                                      |
+| title | string | Optional     | Optional display text for the link. When provided, use this instead of generating from type.                                                                                                                                                                 |
+| id    | string | Optional     | Optional identifier for the linked resource when it is an addressable UCP resource (for example, a product or variant), so a platform can act on it through the capability that owns it. Omit for resources without a UCP identifier, such as a policy page. |
 
 ______________________________________________________________________
 
@@ -363,13 +370,70 @@ ______________________________________________________________________
 
 ### Media
 
-| Name     | Type    | Requirement  | Description                                                  |
-| -------- | ------- | ------------ | ------------------------------------------------------------ |
-| type     | string  | **Required** | Media type. Well-known values: `image`, `video`, `model_3d`. |
-| url      | string  | **Required** | URL to the media resource.                                   |
-| alt_text | string  | Optional     | Accessibility text describing the media.                     |
-| width    | integer | Optional     | Width in pixels (for images/video).                          |
-| height   | integer | Optional     | Height in pixels (for images/video).                         |
+| Name     | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                        |
+| -------- | -------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type     | string                                                                     | **Required** | Media type. Well-known values: `image`, `video`, `external_video`, `model_3d`. A Platform MUST NOT reject the containing object for an unrecognized value; it MAY present the item from `preview` and `name`, or omit it.                                          |
+| url      | string                                                                     | **Required** | URL of the media resource the Platform renders; interpretation is specialized per `type`.                                                                                                                                                                          |
+| name     | string                                                                     | Optional     | Human-readable title or label for the media, distinct from `alt_text` (accessibility text). Often present for `video` and `model_3d`.                                                                                                                              |
+| alt_text | string                                                                     | Optional     | Accessibility text describing the media.                                                                                                                                                                                                                           |
+| width    | integer                                                                    | Optional     | Intrinsic pixel width of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry.                                                                                                                                       |
+| height   | integer                                                                    | Optional     | Intrinsic pixel height of the media item, for image and video types; a rendition's own dimensions are on its `sources` entry.                                                                                                                                      |
+| duration | integer                                                                    | Optional     | Duration in seconds, for time-based media such as `video` and `external_video`.                                                                                                                                                                                    |
+| preview  | object                                                                     | Optional     | Poster/thumbnail still the Platform renders before or instead of the primary resource. A Business SHOULD provide it for `video`, `external_video`, and `model_3d` unless no suitable still exists, and MAY provide it for `image` as a low-resolution placeholder. |
+| sources  | Array\[[Media Source](/2026-08-25/specification/reference/#media-source)\] | Optional     | Alternate renditions of the resource at `url`. The Business SHOULD include the rendition at `url`.                                                                                                                                                                 |
+
+______________________________________________________________________
+
+### Media External Video
+
+| Name    | Type                                                                       | Requirement  | Description                                                                                                                                          |
+| ------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url     | string                                                                     | **Required** | The third-party player the Platform embeds. A video the Business serves as files from any origin, including a CDN, is `video`, not `external_video`. |
+| sources | Array\[[Media Source](/2026-08-25/specification/reference/#media-source)\] | Optional     | Not used: a video presented through a player has no renditions.                                                                                      |
+
+______________________________________________________________________
+
+### Media Image
+
+| Name    | Type                                                                       | Requirement  | Description                                                                                                                                                                             |
+| ------- | -------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url     | string                                                                     | **Required** | A directly displayable image.                                                                                                                                                           |
+| sources | Array\[[Media Source](/2026-08-25/specification/reference/#media-source)\] | Optional     | Alternate encodings and sizes of the image (e.g. `image/avif`, `image/webp`, `image/jpeg`; width variants for responsive layout). `url` SHOULD be the most broadly decodable rendition. |
+
+______________________________________________________________________
+
+### Media Model 3D
+
+| Name    | Type                                                                       | Requirement  | Description                                          |
+| ------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------- |
+| url     | string                                                                     | **Required** | The primary model file (e.g. GLB).                   |
+| width   | integer                                                                    | Optional     | Not applicable: a 3D model has no pixel dimensions.  |
+| height  | integer                                                                    | Optional     | Not applicable: a 3D model has no pixel dimensions.  |
+| sources | Array\[[Media Source](/2026-08-25/specification/reference/#media-source)\] | Optional     | Alternate file formats of the model (glTF/GLB/USDZ). |
+
+______________________________________________________________________
+
+### Media Source
+
+| Name      | Type    | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------- | ------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url       | string  | **Required** | URL to this rendition's file or streaming manifest.                                                                                                                                                                                                                                                                                                                                                   |
+| mime_type | string  | Optional     | IANA media type of this source. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `image/avif`, `image/webp`, `image/jpeg`, `video/mp4`, `video/webm`, `application/vnd.apple.mpegurl` (HLS), `application/dash+xml` (DASH), `model/gltf-binary` (GLB), `model/gltf+json` (glTF), `model/vnd.usdz+zip` (USDZ). |
+| format    | string  | Optional     | Short format token for display/selection. A Platform MUST NOT reject the parent media item solely because this value is unknown, but MAY skip a source it cannot decode. Examples: `avif`, `webp`, `jpg`, `mp4`, `webm`, `m3u8`, `mpd`, `glb`, `gltf`, `usdz`.                                                                                                                                        |
+| width     | integer | Optional     | Pixel width of this rendition. Omitted for adaptive manifests and 3D models.                                                                                                                                                                                                                                                                                                                          |
+| height    | integer | Optional     | Pixel height of this rendition. Omitted for adaptive manifests and 3D models.                                                                                                                                                                                                                                                                                                                         |
+| filesize  | integer | Optional     | File size in bytes. Lets the Platform decide whether to prefetch a large asset (e.g. a multi-megabyte 3D model). Omitted for adaptive-streaming manifests, whose total size is not fixed.                                                                                                                                                                                                             |
+
+______________________________________________________________________
+
+### Media Video
+
+| Name    | Type                                                                       | Requirement  | Description                                                                                   |
+| ------- | -------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| url     | string                                                                     | **Required** | A playable rendition of the video: a progressive file or an adaptive-streaming manifest.      |
+| width   | integer                                                                    | Optional     | Intrinsic pixel width of the video; a rendition's own dimensions are on its `sources` entry.  |
+| height  | integer                                                                    | Optional     | Intrinsic pixel height of the video; a rendition's own dimensions are on its `sources` entry. |
+| sources | Array\[[Media Source](/2026-08-25/specification/reference/#media-source)\] | Optional     | Alternate renditions (MP4/WebM) and adaptive manifests (HLS/DASH).                            |
 
 ______________________________________________________________________
 
