@@ -182,15 +182,35 @@ complete requests, the Platform **MUST** provide an empty payment object
 
 **Compatibility with AP2 Mandates.** If
 `dev.ucp.common.payment.ap2_mandate` is active, the Business **MUST NOT** offer
-or select a fully deferred term whose completion requires `"payment": {}`
-without an instrument to carry AP2's required Payment Mandate. It **MUST NOT**
-return `ready_for_complete` with such a term selected. If a previously selected
-term becomes incompatible, the Business **MUST NOT** silently substitute a
-replacement and **MUST** apply the `payment_term_changed` warning rules when
-it changes the selection. If no compatible term can be offered, the Business
-**MUST** keep the Checkout out of `ready_for_complete` and provide an
-appropriate error or handoff. The empty-payment completion form above remains
-available when AP2 is not active; it does not waive AP2 mandate requirements.
+or select a fully deferred term whose completion necessarily requires
+`"payment": {}` with no instrument capable of carrying AP2's required
+Payment Mandate. It **MUST NOT** return `ready_for_complete` with an
+incompatible term selected. If a previously selected term becomes
+incompatible, the Business **MUST NOT** silently substitute a replacement
+and **MUST** apply the `payment_term_changed` warning rules when it changes
+the selection. If no compatible term can be offered, the Business **MUST**
+keep the Checkout out of `ready_for_complete` and provide an appropriate
+error or handoff.
+
+This prohibition turns on the ability to supply a valid Payment Mandate,
+**not** whether any payment is captured at checkout. A deferred term backed
+by a suitable, authorized instrument (such as a supported delayed-card
+or financed-payment arrangement) is not excluded by payment timing alone;
+it remains subject to the actual instrument/handler profile and mandate
+credential flow. Neither the payment schedule nor user consent alone proves
+that a financing provider has accepted the arrangement.
+
+**Instrument-free scope boundary.** Pay-on-arrival without a card guarantee
+and cash on delivery without any instrument cannot complete within the
+current AP2-protected paired-mandate flow. This amendment prevents that
+incompatible completion; it does not define later mandate collection,
+later-payment verification, or linked Checkout and Payment Receipts.
+A card guarantee, deposit, or pre-authorization with a supported instrument
+is not the instrument-free case merely because funds are collected later.
+The empty-payment completion form above remains available when AP2 is not
+active; AP2's session security lock prohibits switching an active session
+to an unprotected completion. Whether instrument-free reservations should
+be supported by a future AP2 profile is a Payments DTC scope decision.
 
 Checkout-specific handler and instrument eligibility is a **runtime result**.
 Profiles advertise broad support; the Business resolves that support against the
