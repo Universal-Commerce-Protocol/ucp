@@ -468,7 +468,7 @@ the Business initializes the session from the cart's `food_establishment`,
 `food_establishment` and `line_items` (or send `"line_items": []`) when
 providing `cart_id`. Checkout-only fields — `tip`, `fulfillment`, `payment` —
 **MAY** be sent alongside `cart_id`. The Business **MUST** reject requests
-containing `cart_id` if an out-of-band cart source is recognized,
+containing `cart_id` if an out-of-band cart source is not recognized,
 and **MUST NOT** silently fall back to inline `line_items`.
 `cart_id` is an initialization input only and is omitted
 from checkout responses.
@@ -785,7 +785,7 @@ and Business acknowledge (see
 [Cart-to-Checkout Conversion](#cart-to-checkout-conversion) and
 [Shopping Checkout — Create Checkout](../../shopping/checkout/index.md#create-checkout)).
 The Business **MUST** reject a create request that provides `cart_id` when
-out-of-band cart resolution is supported (or when `cart_id` cannot be resolved),
+out-of-band cart resolution is not supported (or when `cart_id` cannot be resolved),
 and **MUST NOT** ignore `cart_id` and initialize the checkout from inline
 `line_items` instead. The Business **MUST** also reject a create request
 that provides neither inline items nor `cart_id`.
