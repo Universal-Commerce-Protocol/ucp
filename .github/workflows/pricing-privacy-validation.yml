@@ -1,0 +1,57 @@
+name: Price-on-request privacy revision validation
+
+on:
+  push:
+    branches:
+      - review/969-airshelf-pricing-privacy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  price-on-request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout review branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pinned validation dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -r research/price-on-request/harness/requirements.txt
+          python -m pip install --disable-pip-version-check ruff==0.13.2
+
+      - name: Fetch pinned upstream schema baseline
+        run: |
+          git init ../ucp-pricing-baseline
+          git -C ../ucp-pricing-baseline remote add origin https://github.com/Universal-Commerce-Protocol/ucp.git
+          git -C ../ucp-pricing-baseline fetch --depth=1 origin 3ab41043b79373df33a6e2c377bc82a806175f78
+          git -C ../ucp-pricing-baseline checkout --detach FETCH_HEAD
+
+      - name: Check schema vectors and generated probes
+        run: |
+          python research/price-on-request/harness/run.py \
+            --baseline ../ucp-pricing-baseline --proposed . --fuzz 300
+
+      - name: Run all consumer tests
+        run: |
+          python -m unittest discover \
+            -s research/price-on-request/harness -p 'test_*.py' -v
+
+      - name: Check Python lint and formatting
+        run: |
+          ruff check research/price-on-request/harness/*.py
+          ruff format --check research/price-on-request/harness/*.py
+
+      - name: Check Python syntax and diff whitespace
+        run: |
+          python -m compileall -q research/price-on-request/harness
+          git diff --check 5ed98c923645f0700e24c6ad0117692b97627f67..HEAD
