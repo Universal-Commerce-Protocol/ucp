@@ -73,7 +73,7 @@ python research/price-on-request/harness/run.py \\
 python -m unittest discover -s research/price-on-request/harness -p 'test_*.py' -v
 ruff check research/price-on-request/harness/*.py
 ruff format --check research/price-on-request/harness/*.py
-git diff --check HEAD~1
+git diff --check 5ed98c923645f0700e24c6ad0117692b97627f67..HEAD
 ```
 
 Expected scope after changes: 52 fixture vectors, 600 baseline-subset
