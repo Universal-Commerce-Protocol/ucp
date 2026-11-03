@@ -27,8 +27,13 @@ def usable_price(
 
 
 def price_matches(
-  variant, currency, minimum=None, maximum=None,
-  *, buyer_authorized=False, pricing_profile_supported=False
+  variant,
+  currency,
+  minimum=None,
+  maximum=None,
+  *,
+  buyer_authorized=False,
+  pricing_profile_supported=False,
 ):
   """Exclude missing or unauthorized prices from numeric filters."""
   price = usable_price(
