@@ -7,7 +7,9 @@ This module does not authenticate buyers or implement an HTTP cache.
 from copy import deepcopy
 
 
-def usable_price(variant, *, buyer_authorized=False, pricing_profile_supported=False):
+def usable_price(
+  variant, *, buyer_authorized=False, pricing_profile_supported=False
+):
   """Fail closed on restricted prices without BOTH authorization and support.
 
   The booleans must be derived by the integrating Platform from authenticated
@@ -28,7 +30,7 @@ def price_matches(
   variant, currency, minimum=None, maximum=None,
   *, buyer_authorized=False, pricing_profile_supported=False
 ):
-  """A missing or unauthorized price never matches numeric filters."""
+  """Exclude missing or unauthorized prices from numeric filters."""
   price = usable_price(
     variant,
     buyer_authorized=buyer_authorized,
