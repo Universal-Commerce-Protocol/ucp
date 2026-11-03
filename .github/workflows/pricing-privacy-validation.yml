@@ -46,6 +46,10 @@ jobs:
           python -m unittest discover \
             -s research/price-on-request/harness -p 'test_*.py' -v
 
+      - name: Show formatter suggestion for review
+        run: |
+          ruff format --diff research/price-on-request/harness/*.py || true
+
       - name: Check Python lint and formatting
         run: |
           ruff check research/price-on-request/harness/*.py
