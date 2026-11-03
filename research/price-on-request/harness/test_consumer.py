@@ -142,7 +142,9 @@ class ConsumerTests(unittest.TestCase):
       )
       self.assertFalse(
         price_matches(
-          restricted, "USD", minimum=0,
+          restricted,
+          "USD",
+          minimum=0,
           buyer_authorized=auth,
           pricing_profile_supported=profile,
         )
@@ -167,8 +169,11 @@ class ConsumerTests(unittest.TestCase):
       )
       self.assertFalse(
         price_matches(
-          item, "USD", minimum=0,
-          buyer_authorized=True, pricing_profile_supported=True
+          item,
+          "USD",
+          minimum=0,
+          buyer_authorized=True,
+          pricing_profile_supported=True,
         )
       )
     self.assertIsNone(
@@ -186,9 +191,7 @@ class ConsumerTests(unittest.TestCase):
       },
     }
     self.assertIsNone(selling_range(product))
-    self.assertIsNone(
-      selling_range(product, buyer_authorized=True)
-    )
+    self.assertIsNone(selling_range(product, buyer_authorized=True))
     self.assertEqual(
       selling_range(
         product, buyer_authorized=True, pricing_profile_supported=True
