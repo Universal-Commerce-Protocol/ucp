@@ -171,10 +171,12 @@ class ConsumerTests(unittest.TestCase):
           buyer_authorized=True, pricing_profile_supported=True
         )
       )
-    self.assertIsNone(selling_range({"variants": [on_private_list, quote_only]}))
+    self.assertIsNone(
+      selling_range({"variants": [on_private_list, quote_only]})
+    )
 
-  def test_private_aggregate_is_not_usable_by_legacy_or_unauthorized_caller(self):
-    """Even a valid priced record and supplied aggregate cannot bypass guards."""
+  def test_private_aggregate_requires_entitlement_and_profile(self):
+    """Reject a supplied private aggregate unless both guards pass."""
     private = variant("buyer_specific", 100000)
     product = {
       "variants": [private],
@@ -219,7 +221,9 @@ class ConsumerTests(unittest.TestCase):
       usable_price(price, buyer_authorized=True, pricing_profile_supported=True)
     )
     self.assertIsNone(
-      usable_price(price, buyer_authorized=False, pricing_profile_supported=True)
+      usable_price(
+        price, buyer_authorized=False, pricing_profile_supported=True
+      )
     )
     cache = ContextCatalogCache()
     cache.put("merchant", "buyer:entitlement-v1", "product", price)
