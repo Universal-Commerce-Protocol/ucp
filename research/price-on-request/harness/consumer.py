@@ -7,17 +7,33 @@ This module does not authenticate buyers or implement an HTTP cache.
 from copy import deepcopy
 
 
-def usable_price(variant):
-  """Return a selling price only for modes understood by this consumer."""
+def usable_price(variant, *, buyer_authorized=False, pricing_profile_supported=False):
+  """Fail closed on restricted prices without BOTH authorization and support.
+
+  The booleans must be derived by the integrating Platform from authenticated
+  buyer entitlement and explicit pricing-profile negotiation. This module
+  neither authenticates callers nor negotiates UCP capabilities.
+  """
   mode = variant.get("pricing", {}).get("mode", "public")
   if mode not in {"public", "buyer_specific"}:
+    return None
+  if mode == "buyer_specific" and not (
+    buyer_authorized and pricing_profile_supported
+  ):
     return None
   return deepcopy(variant.get("price"))
 
 
-def price_matches(variant, currency, minimum=None, maximum=None):
-  """Exclude unavailable prices rather than interpreting omission as zero."""
-  price = usable_price(variant)
+def price_matches(
+  variant, currency, minimum=None, maximum=None,
+  *, buyer_authorized=False, pricing_profile_supported=False
+):
+  """A missing or unauthorized price never matches numeric filters."""
+  price = usable_price(
+    variant,
+    buyer_authorized=buyer_authorized,
+    pricing_profile_supported=pricing_profile_supported,
+  )
   if price is None or price["currency"] != currency:
     return False
   amount = price["amount"]
@@ -26,14 +42,26 @@ def price_matches(variant, currency, minimum=None, maximum=None):
   )
 
 
-def selling_range(product):
+def selling_range(
+  product, *, buyer_authorized=False, pricing_profile_supported=False
+):
   """Recompute from eligible variants instead of trusting a supplied range.
 
   Currency conversion and cross-unit comparison are intentionally unsupported.
   The result may cover only the priced subset and is not the product's full
   commercial range. The containing response retains the pricing markers.
   """
-  priced = [(variant, usable_price(variant)) for variant in product["variants"]]
+  priced = [
+    (
+      variant,
+      usable_price(
+        variant,
+        buyer_authorized=buyer_authorized,
+        pricing_profile_supported=pricing_profile_supported,
+      ),
+    )
+    for variant in product["variants"]
+  ]
   priced = [(variant, price) for variant, price in priced if price is not None]
   if not priced:
     return None
