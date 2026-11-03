@@ -73,7 +73,7 @@ def expected_mode_valid(mode, priced):
   """Express the proposed mode table independently of JSON Schema syntax."""
   if mode is None or mode == "public":
     return priced
-  if mode in {"quote_required", "contract_only"}:
+  if mode in {"quote_required", "contract_only", "undisclosed"}:
     return not priced
   return True
 
@@ -122,6 +122,7 @@ def verify(baseline, proposed, count):
           "buyer_specific",
           "quote_required",
           "contract_only",
+          "undisclosed",
           "future",
           "com.example.new",
         ]
