@@ -287,23 +287,51 @@ choose a neutral response; JSON Schema cannot decide its disclosure policy.
 For a synthetic single-SKU NDA case, the anonymous response when membership
 is private is:
 
+<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
 ```json
 {
-  "id": "v-nda", "title": "Subscription",
-  "description": {"plain": "Enterprise software"},
-  "pricing": {"mode": "undisclosed"}
+  "ucp": { "version": "{{ ucp_version }}" },
+  "product": {
+    "id": "prod-nda",
+    "title": "Subscription",
+    "description": { "plain": "Enterprise software" },
+    "variants": [
+      {
+        "id": "v-nda",
+        "title": "Subscription",
+        "description": { "plain": "Enterprise software" },
+        "pricing": { "mode": "undisclosed" }
+      }
+    ]
+  }
 }
 ```
 
 The *same* variant in a response to a fully entitled caller, **only after**
 both authentication and pricing-profile support are established, may be:
 
+<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
 ```json
 {
-  "id": "v-nda", "title": "Subscription",
-  "description": {"plain": "Enterprise software"},
-  "pricing": {"mode": "buyer_specific"},
-  "price": {"amount": 100000, "currency": "USD"}
+  "ucp": { "version": "{{ ucp_version }}" },
+  "product": {
+    "id": "prod-nda",
+    "title": "Subscription",
+    "description": { "plain": "Enterprise software" },
+    "price_range": {
+      "min": { "amount": 100000, "currency": "USD" },
+      "max": { "amount": 100000, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "v-nda",
+        "title": "Subscription",
+        "description": { "plain": "Enterprise software" },
+        "pricing": { "mode": "buyer_specific" },
+        "price": { "amount": 100000, "currency": "USD" }
+      }
+    ]
+  }
 }
 ```
 
