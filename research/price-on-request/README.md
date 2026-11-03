@@ -56,8 +56,11 @@ The original Oct 16 harness executed 44 schema vectors, 600 priced probes,
 600 mode probes and 10 consumer tests (historical results). This review branch
 adds eight synthetic AirShelf-inspired vectors (52 total), adds undisclosed to
 the mode-probe pool, and adds five consumer authorization/neutrality tests
-(15 total). **New revision results are unverified until the commands above
-are actually rerun**. These finite subsets do not prove interoperability.
+(15 total). The complete revision tests have been executed on GitHub Actions
+against pinned upstream main, with **52/52 schema vectors, 1,200/1,200 seeded
+probes, and 15/15 consumer tests passing**, plus Ruff and syntax/whitespace
+checks. See [focused CI](https://github.com/arjun2075/ucp/actions/runs/41685254592).
+These finite subsets do not prove interoperability.
 
 `consumer.py` accepts schema-validated inputs. Its cache is a reference map,
 not buyer authentication or an HTTP cache: callers must derive the correct
@@ -82,10 +85,14 @@ pricing objects and a selling price alongside a newly unpriced known mode.
 Release/version negotiation and the field-name collision survey require TC
 review. Do not describe this as purely additive or select a release version.
 
-This increment is published as a draft PR in Arjun's fork for review. The
-upstream schema decision, SDK generation, complete documentation-example
-validation, independent interoperability and Purchase Options composition
-remain gates before upstream implementation can be considered complete.
+The October 16 implementation is fork draft PR #1; the AirShelf follow-up is
+a separate review branch, not a change to the existing PR. The revised
+branch passed official `ucp-schema` v1.4.1 lint, changed Catalog example
+validation (9/9) and strict MkDocs build
+([official CI](https://github.com/arjun2075/ucp/actions/runs/41686106843)).
+The upstream schema decision, generated SDK conditional enforcement,
+buyer/client capability negotiation, independent Platform interoperability,
+privacy side-channel review and Purchase Options composition remain open.
 
 ## November 3, 2026 review response (AirShelf #969)
 
@@ -108,8 +115,9 @@ This review branch addresses three bounded findings:
    only records with missing prices. The consumer reference fails closed
    unless entitlement and profile support were established independently.
 
-Pending: run the full updated schema suite and format/lint checks, test SDK
-generation, decide the actual negotiated client-version signal, exercise an
-independent Platform, test mixed variants, and obtain expired-entitlement and
-anonymous price-filter behavior from an authorized implementer. This is
-experimental candidate text, not a UCP council disposition.
+Pending: generated SDK enforcement, the exact negotiated client-version
+signal, an independent Platform, actual mixed-variant and expired-entitlement
+seller-to-platform integration, privacy side-channel review, and an agreed
+anonymous price-filter policy. The synthetic mixed-variant regression is
+passing but is not an independent cross-implementation test. This is
+experimental review text, not a UCP council disposition.
