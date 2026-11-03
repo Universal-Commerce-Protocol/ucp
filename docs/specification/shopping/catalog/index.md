@@ -284,54 +284,49 @@ unresolved *commercial pricing contract* (not the mere existence of an NDA).
 A seller that cannot safely distinguish these without revealing policy must
 choose a neutral response; JSON Schema cannot decide its disclosure policy.
 
-For a synthetic single-SKU NDA case, the anonymous response when membership
-is private is:
+For a synthetic single-SKU NDA case, the anonymous Catalog Product record
+when membership is private is:
 
-<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
+<!-- ucp:example schema=shopping/types/product op=read -->
 ```json
 {
-  "ucp": { "version": "{{ ucp_version }}" },
-  "product": {
-    "id": "prod-nda",
-    "title": "Subscription",
-    "description": { "plain": "Enterprise software" },
-    "variants": [
-      {
-        "id": "v-nda",
-        "title": "Subscription",
-        "description": { "plain": "Enterprise software" },
-        "pricing": { "mode": "undisclosed" }
-      }
-    ]
-  }
+  "id": "prod-nda",
+  "title": "Subscription",
+  "description": { "plain": "Enterprise software" },
+  "variants": [
+    {
+      "id": "v-nda",
+      "title": "Subscription",
+      "description": { "plain": "Enterprise software" },
+      "pricing": { "mode": "undisclosed" }
+    }
+  ]
 }
 ```
 
-The *same* variant in a response to a fully entitled caller, **only after**
-both authentication and pricing-profile support are established, may be:
+The *same* variant in a Product record returned to a fully entitled caller,
+**only after** authentication and pricing-profile support are established,
+may be:
 
-<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
+<!-- ucp:example schema=shopping/types/product op=read -->
 ```json
 {
-  "ucp": { "version": "{{ ucp_version }}" },
-  "product": {
-    "id": "prod-nda",
-    "title": "Subscription",
-    "description": { "plain": "Enterprise software" },
-    "price_range": {
-      "min": { "amount": 100000, "currency": "USD" },
-      "max": { "amount": 100000, "currency": "USD" }
-    },
-    "variants": [
-      {
-        "id": "v-nda",
-        "title": "Subscription",
-        "description": { "plain": "Enterprise software" },
-        "pricing": { "mode": "buyer_specific" },
-        "price": { "amount": 100000, "currency": "USD" }
-      }
-    ]
-  }
+  "id": "prod-nda",
+  "title": "Subscription",
+  "description": { "plain": "Enterprise software" },
+  "price_range": {
+    "min": { "amount": 100000, "currency": "USD" },
+    "max": { "amount": 100000, "currency": "USD" }
+  },
+  "variants": [
+    {
+      "id": "v-nda",
+      "title": "Subscription",
+      "description": { "plain": "Enterprise software" },
+      "pricing": { "mode": "buyer_specific" },
+      "price": { "amount": 100000, "currency": "USD" }
+    }
+  ]
 }
 ```
 
