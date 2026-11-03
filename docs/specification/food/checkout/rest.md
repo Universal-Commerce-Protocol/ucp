@@ -245,8 +245,16 @@ prices them and asks for a fulfillment method.
       ],
       "fulfillment": {
         "available_methods": [
-          {"type": "delivery", "fulfillable_on": "now"},
-          {"type": "pickup", "fulfillable_on": "now"}
+          {
+            "type": "delivery",
+            "fulfillable_on": "2026-04-10T18:25:00-07:00",
+            "scheduling": "asap_and_scheduled"
+          },
+          {
+            "type": "pickup",
+            "fulfillable_on": "2026-04-10T18:15:00-07:00",
+            "scheduling": "asap_and_scheduled"
+          }
         ]
       },
       "tip": {
@@ -383,8 +391,16 @@ resolved tip.
       "line_items": [...],
       "fulfillment": {
         "available_methods": [
-          {"type": "delivery", "fulfillable_on": "now"},
-          {"type": "pickup", "fulfillable_on": "now"}
+          {
+            "type": "delivery",
+            "fulfillable_on": "2026-04-10T18:25:00-07:00",
+            "scheduling": "asap_and_scheduled"
+          },
+          {
+            "type": "pickup",
+            "fulfillable_on": "2026-04-10T18:15:00-07:00",
+            "scheduling": "asap_and_scheduled"
+          }
         ],
         "methods": [
           {

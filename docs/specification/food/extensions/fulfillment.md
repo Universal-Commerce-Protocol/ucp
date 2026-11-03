@@ -54,7 +54,7 @@ at the establishment.
     - `selected_option_id` = `options[1].id`
         - `options[0]` 🔘 Priority Delivery · 6:25–6:35 PM · $5.99
         - `options[1]` 🔘✅ Standard Delivery · 6:35–6:50 PM · $2.99
-- `available_methods[]` 🛵 delivery: now · 🛍️ pickup: now
+- `available_methods[]` 🛵 delivery: `2026-04-10T18:25:00-07:00` · 🛍️ pickup: `2026-04-10T18:15:00-07:00`
 
 ### Design Compared to Shopping Fulfillment
 
@@ -341,10 +341,6 @@ Instructions for courier
 
 #### Operations
 
-Handoff preferences follow the same operational and warning patterns as discount
-codes in the
-[Discount Extension](../../shopping/extensions/discount.md#operations):
-
 **Request behavior:**
 
 - **Replacement semantics**: Submitting `selected_preference_option_ids[]`
@@ -577,12 +573,14 @@ Delivery to 450 Serra Mall, Apt 3B                      [ Change ]
 ## Available Methods
 
 `available_methods[]` tells the Platform whether delivery and pickup are
-offered for this establishment right now, later, or not at all, following
+offered for this establishment, from what time, and with what scheduling
+support, following
 [Shopping Fulfillment — Available Methods](../../shopping/extensions/fulfillment.md#available-methods):
 
-- `fulfillable_on: "now"` — available immediately.
-- An RFC 3339 timestamp — available from that time (e.g., delivery starts at
-  5:00 PM for dinner service).
+- `fulfillable_on` (optional, RFC 3339 timestamp) — earliest timestamp from
+  which the method can fulfill orders (e.g., the current earliest ready/arrival
+  estimate, or `2026-04-10T17:00:00-07:00` when delivery starts for dinner
+  service).
 - Absent from the array — not offered (e.g., a pickup-only bakery).
 - `scheduling` (optional) — whether the method supports immediate ordering only
   (`asap_only`), advance scheduled time slots only (`scheduled_only`), or both
@@ -597,7 +595,7 @@ offered for this establishment right now, later, or not at all, following
   "available_methods": [
     {
       "type": "pickup",
-      "fulfillable_on": "now",
+      "fulfillable_on": "2026-04-10T16:15:00-07:00",
       "scheduling": "asap_and_scheduled"
     },
     {
@@ -690,8 +688,16 @@ $0 pickup window, and updated totals without the delivery fee.
     ```json
     {
       "available_methods": [
-        { "type": "delivery", "fulfillable_on": "now" },
-        { "type": "pickup", "fulfillable_on": "now" }
+        {
+          "type": "delivery",
+          "fulfillable_on": "2026-04-10T18:25:00-07:00",
+          "scheduling": "asap_and_scheduled"
+        },
+        {
+          "type": "pickup",
+          "fulfillable_on": "2026-04-10T18:15:00-07:00",
+          "scheduling": "asap_and_scheduled"
+        }
       ],
       "methods": [
         {

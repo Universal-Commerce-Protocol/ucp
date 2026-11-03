@@ -19,7 +19,8 @@
     },
     "fulfillable_on": {
       "type": "string",
-      "description": "'now' for immediate availability, or an RFC 3339 timestamp from which the method becomes available (e.g., delivery starting at dinner service).",
+      "format": "date-time",
+      "description": "Earliest RFC 3339 timestamp at which this method can fulfill orders (e.g., current earliest ready/arrival estimate, or when delivery opens for dinner service).",
       "ucp_request": "omit"
     },
     "description": {
