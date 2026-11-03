@@ -34,3 +34,12 @@ jobs:
             --schema-base source/schemas/ \
             --file docs/specification/shopping/catalog/index.md \
                    docs/specification/shopping/catalog/search.md
+
+      - name: Install documentation build environment
+        run: |
+          python3 -m pip install --disable-pip-version-check uv==0.9.4
+          uv sync --frozen
+
+      - name: Build strict draft documentation
+        run: |
+          uv run mkdocs build --strict
