@@ -45,7 +45,14 @@ class ConsumerTests(unittest.TestCase):
     for mode in ("public", "buyer_specific"):
       value = variant(mode, 49900)
       value["pricing"]["next_step"] = "request_quote"
-      self.assertEqual(usable_price(value)["amount"], 49900)
+      self.assertEqual(
+        usable_price(
+          value,
+          buyer_authorized=True,
+          pricing_profile_supported=True,
+        )["amount"],
+        49900,
+      )
 
   def test_range_excludes_unresolved_and_unknown(self):
     """Do not zero-fill a missing price or trust a supplied aggregate."""
@@ -59,7 +66,9 @@ class ConsumerTests(unittest.TestCase):
       "price_range": {"min": {"amount": 1, "currency": "USD"}},
     }
     self.assertEqual(
-      selling_range(product),
+      selling_range(
+        product, buyer_authorized=True, pricing_profile_supported=True
+      ),
       {
         "min": {"amount": 100, "currency": "USD"},
         "max": {"amount": 150, "currency": "USD"},
@@ -90,7 +99,9 @@ class ConsumerTests(unittest.TestCase):
       ("buyer-b:v1:caps-a", 740),
     ):
       response = {"variants": [variant("buyer_specific", amount)]}
-      response["price_range"] = selling_range(response)
+      response["price_range"] = selling_range(
+        response, buyer_authorized=True, pricing_profile_supported=True
+      )
       cache.put("merchant", buyer, "sku", response)
     a = cache.get("merchant", "buyer-a:v1:caps-a", "sku")
     b = cache.get("merchant", "buyer-b:v1:caps-a", "sku")
@@ -117,6 +128,104 @@ class ConsumerTests(unittest.TestCase):
     """Missing authorization context must not collapse to a shared key."""
     with self.assertRaises(ValueError):
       ContextCatalogCache().get("merchant", "", "sku")
+
+  def test_restricted_prices_require_both_guards(self):
+    """Neither auth alone nor profile support alone permits disclosure."""
+    restricted = variant("buyer_specific", 100000)
+    for auth, profile in ((False, False), (True, False), (False, True)):
+      self.assertIsNone(
+        usable_price(
+          restricted,
+          buyer_authorized=auth,
+          pricing_profile_supported=profile,
+        )
+      )
+      self.assertFalse(
+        price_matches(
+          restricted, "USD", minimum=0,
+          buyer_authorized=auth,
+          pricing_profile_supported=profile,
+        )
+      )
+    self.assertEqual(
+      usable_price(
+        restricted, buyer_authorized=True, pricing_profile_supported=True
+      )["amount"],
+      100000,
+    )
+
+  def test_disclosure_neutral_caller_sees_no_price_or_price_list_signal(self):
+    """Same public representation can cover list-member and quote-only cases."""
+    on_private_list = variant("undisclosed")
+    quote_only = variant("undisclosed")
+    self.assertEqual(on_private_list, quote_only)
+    for item in (on_private_list, quote_only):
+      self.assertIsNone(
+        usable_price(
+          item, buyer_authorized=True, pricing_profile_supported=True
+        )
+      )
+      self.assertFalse(
+        price_matches(
+          item, "USD", minimum=0,
+          buyer_authorized=True, pricing_profile_supported=True
+        )
+      )
+    self.assertIsNone(selling_range({"variants": [on_private_list, quote_only]}))
+
+  def test_private_aggregate_is_not_usable_by_legacy_or_unauthorized_caller(self):
+    """Even a valid priced record and supplied aggregate cannot bypass guards."""
+    private = variant("buyer_specific", 100000)
+    product = {
+      "variants": [private],
+      "price_range": {
+        "min": {"amount": 100000, "currency": "USD"},
+        "max": {"amount": 100000, "currency": "USD"},
+      },
+    }
+    self.assertIsNone(selling_range(product))
+    self.assertIsNone(
+      selling_range(product, buyer_authorized=True)
+    )
+    self.assertEqual(
+      selling_range(
+        product, buyer_authorized=True, pricing_profile_supported=True
+      )["min"]["amount"],
+      100000,
+    )
+
+  def test_mixed_variant_recomputes_only_authorized_subset(self):
+    """Never trust a precomputed aggregate containing restricted prices."""
+    response = {
+      "variants": [variant(amount=300), variant("buyer_specific", 100)],
+      "price_range": {
+        "min": {"amount": 100, "currency": "USD"},
+        "max": {"amount": 300, "currency": "USD"},
+      },
+    }
+    self.assertEqual(selling_range(response)["min"]["amount"], 300)
+    self.assertEqual(selling_range(response)["max"]["amount"], 300)
+    self.assertEqual(
+      selling_range(
+        response, buyer_authorized=True, pricing_profile_supported=True
+      )["min"]["amount"],
+      100,
+    )
+
+  def test_expired_entitlement_is_not_a_cache_key_or_authorization(self):
+    """Entitlement loss requires fresh independent authorization decisions."""
+    price = variant("buyer_specific", 4800)
+    self.assertIsNotNone(
+      usable_price(price, buyer_authorized=True, pricing_profile_supported=True)
+    )
+    self.assertIsNone(
+      usable_price(price, buyer_authorized=False, pricing_profile_supported=True)
+    )
+    cache = ContextCatalogCache()
+    cache.put("merchant", "buyer:entitlement-v1", "product", price)
+    self.assertIsNone(
+      cache.get("merchant", "buyer:entitlement-v2-revoked", "product")
+    )
 
 
 if __name__ == "__main__":
