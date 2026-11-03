@@ -9,7 +9,6 @@
     "title",
     "price"
   ],
-  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",

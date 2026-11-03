@@ -130,7 +130,7 @@ menu [Dish](#dish) from buyer-selected customization:
 
 | Mechanism | Field | Priced? | Contract |
 | :--- | :--- | :--- | :--- |
-| **Structured modifications** | `line_items[].modifications[]` ([Modification](#modification)) | Yes | Platform sends menu-backed modification `id`s. Business validates modifier-group rules (required choices, min/max selections, mutually exclusive options), echoes `title` and `price`, and includes the charges in `line_items[].totals`. |
+| **Structured modifications** | `line_items[].modifications[]` ([Modification](#modification)) | Yes ($0 or more) | Platform sends menu-backed modification `id`s. Business validates modifier-group rules (required choices, min/max selections, mutually exclusive options), echoes `title` and `price`, and includes the charges in `line_items[].totals`. |
 | **Special instructions** | `line_items[].note` | No | Free-form buyer text for the kitchen (e.g., "sauce on the side", "cut in half", "well done crust"). **MUST NOT** alter price or structured modifications. |
 
 * **Modification quantity applies per unit of the dish.** `modification.quantity`
@@ -371,18 +371,18 @@ Business suggests from what the buyer chooses:
 | :--- | :--- | :--- | :--- |
 | Preset | ✅ | — | Buyer picked a suggested option (on update). |
 | Custom | — | ✅ | Buyer entered an amount in minor units (`0` = no tip). |
-| Unset | — | — | No choice yet; the Business **MAY** apply a default. |
+| Unset | — | — | No choice yet; adds nothing to `totals[]` until the Platform submits an explicit selection via `selected_option_id` or `custom_amount`. |
 | ❌ Invalid | ✅ | ✅ | Rejected by schema validation. |
 
 * **Resolution (`totals[]`, Business-authored)**: The Business resolves the
   choice into money — percentage `tip.options[]` are computed against the
-  pre-discount `subtotal` entry in `totals[]` unless otherwise stated in
-  `display_text` — and **MUST** report any non-zero tip as a `type: "tip"`
-  entry in `totals[]`. `tip` holds the choice; `totals[]` holds the amount.
+  pre-discount `subtotal` entry in `totals[]` — and **MUST** report any
+  non-zero selected tip as a `type: "tip"` entry in `totals[]`. `tip` holds
+  the choice; `totals[]` holds the amount.
   When a fulfillment switch (e.g., `delivery` → `pickup`) replaces
   `tip.options[]` and invalidates a prior `selected_option_id`, the Business
-  **MUST** clear (or re-default) `selected_option_id` and **SHOULD** surface
-  a `notice` warning.
+  **MUST** clear `selected_option_id` (returning `tip` to `Unset` state) and
+  **SHOULD** surface a `notice` warning.
 
 A Platform renders the suggestions as quick-select chips:
 
@@ -491,10 +491,21 @@ food ordering they typically mean:
 | :--- | :--- | :--- |
 | `incomplete` | No fulfillment method yet, a dish was 86'd, or the basket is under the delivery minimum. | Resolve `messages[]` via Update Checkout. |
 | `requires_escalation` | Alcohol in the basket requires ID verification, or a catering order needs business review. | Hand off via `continue_url`. |
-| `ready_for_complete` | Dishes, fulfillment, buyer contact, and tip are valid. | Show the final summary and disclosures; call Complete Checkout. |
-| `complete_in_progress` | Payment capture or kitchen POS injection is still running. See [Accepted Completion](../../shopping/checkout/index.md#accepted-completion). `order` **MUST NOT** be present. | Poll Get Checkout. |
+| `ready_for_complete` | Dishes, fulfillment, buyer contact, and tip are valid, and no gating Action remains outstanding. | Show the final summary and disclosures; call Complete Checkout. |
+| `complete_in_progress` | Payment capture or kitchen POS injection is still running. See [Accepted Completion](../../shopping/checkout/index.md#accepted-completion). `order` **MUST NOT** be present. | Process any outstanding Action, then poll Get Checkout. |
 | `completed` | The kitchen has the ticket. `order` is present. | Show confirmation screen. |
 | `canceled` | Canceled by the Platform or expired (default TTL: 6 hours). | Start a new session if needed. |
+
+#### Actions
+
+When an active extension has outstanding step-up work for the checkout (such as
+3D Secure device data collection or a buyer authentication challenge), the
+Business surfaces instances in the response-only `actions` map. Food Checkout
+adopts the [Overview — Actions](../../overview/index.md#actions) model and
+follows the lifecycle, message-targeting, and
+[Accepted Completion](../../shopping/checkout/index.md#accepted-completion)
+contracts defined in
+[Shopping Checkout — Actions](../../shopping/checkout/index.md#actions).
 
 ### Error Handling
 
@@ -514,6 +525,7 @@ Businesses **SHOULD** use these codes so Platforms can offer targeted recovery:
 | `item_unavailable` | `$.line_items[1].dish` | Dish not on the current menu (e.g., breakfast-only). | Remove or schedule for a later time. |
 | `modification_required` | `$.line_items[0]` | Required modifier group (e.g., protein or size) is missing a selection. | Prompt the buyer to choose a required modification. |
 | `modification_invalid` | `$.line_items[0].modifications[1]` | Modification is not valid for the dish or violates group min/max rules. | Adjust or remove the invalid modification. |
+| `note_not_supported` | `$.line_items[0].note` | Kitchen request in `note` cannot be honored (e.g., half-topping not offered). | Edit or remove the note, or offer an alternative. |
 | `location_closed` | `$.food_establishment` | Establishment closed or paused for intake. | Offer scheduled ordering or another location. |
 | `fulfillment_time_unavailable` | `$.fulfillment.methods[0].requested_fulfillment_time` | Requested scheduled time is outside operating hours or slot capacity. | Propose one of the alternative windows in `options[]`. |
 | `address_undeliverable` | `$.fulfillment.methods[0].destination` | Address outside the delivery zone. | Offer pickup or a different address. |
@@ -833,9 +845,6 @@ The abstract operations above are bound to specific transport protocols:
 
 ### Actions
 
-Executable recovery actions that an agent or Platform can invoke to resolve a
-checkout issue.
-
 {{ schema_fields('types/actions', 'food/checkout') }}
 
 ### Buyer
@@ -893,8 +902,8 @@ referenced by `food_establishment`.
 
 ### Modification
 
-A priced customization applied to a [Line Item](#line-item) (e.g., "Extra
-Mozzarella", "Gluten-Free Crust").
+A menu-defined customization (priced or `$0`, such as "Extra Mozzarella",
+"Gluten-Free Crust", or "No Onions") applied to a [Line Item](#line-item).
 
 A modification with `quantity` omitted **MUST** be treated as `quantity: 1`.
 `price` remains the price of a single unit regardless of `quantity`, and

@@ -4,7 +4,6 @@
   "title": "Preference Option",
   "description": "A selectable value for communicating user preference.",
   "type": "object",
-  "additionalProperties": true,
   "required": [
     "id",
     "label"

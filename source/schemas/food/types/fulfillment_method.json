@@ -5,7 +5,6 @@
   "description": "A fulfillment method (delivery or pickup) with a destination and options.",
   "type": "object",
   "required": ["id", "type"],
-  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",

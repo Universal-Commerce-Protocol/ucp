@@ -4,7 +4,6 @@
   "title": "Tip",
   "description": "Tip object.",
   "type": "object",
-  "additionalProperties": true,
   "properties": {
     "options": {
       "type": "array",

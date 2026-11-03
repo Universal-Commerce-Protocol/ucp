@@ -4,7 +4,6 @@
   "title": "Tip Option",
   "description": "A selectable value for communicating user tip preference.",
   "type": "object",
-  "additionalProperties": true,
   "required": [
     "id",
     "amount",
