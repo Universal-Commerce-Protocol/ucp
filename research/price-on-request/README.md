@@ -19,12 +19,14 @@ endorsement is implied.
 
 ## Behavior
 
-| Mode | Selling price |
-| --- | --- |
-| Absent or public | Required |
-| buyer_specific | Optional; retained when resolved |
-| quote_required or contract_only | Forbidden |
-| Unknown string | Structurally optional; no usable price to an unaware client |
+| Mode | Selling price | Anonymous disclosure |
+| --- | --- | --- |
+| Absent or public | Required | Ordinary public price |
+| buyer_specific | Optional; retained if resolved for entitled caller | Only use without price if price-list membership may be disclosed |
+| quote_required | Forbidden | Reveals that quoting is required; use only if this is public |
+| contract_only | Forbidden | Commercial pricing contract required; NOT a synonym for disclosure-only NDA |
+| undisclosed (review revision) | Forbidden | Does not reveal price-list membership, quote route, or expected outcome of identity linking |
+| Unknown string | Structurally optional; unaware client must suppress price | Treat conservatively |
 
 Missing price never means zero. Reference list prices are not selling prices.
 Quote hints may coexist with a usable price. Price ranges and cache entries
@@ -50,11 +52,12 @@ python research/price-on-request/harness/run.py \
 python -m unittest discover -s research/price-on-request/harness -p 'test_*.py' -v
 ```
 
-The suite exercises 44 baseline/proposed schema vectors, 600 generated priced
-compatibility probes and 600 generated mode probes. These finite subsets do
-not prove universal compatibility. Ten consumer tests cover the motivating
-free-price error, unknown-mode fallback, reference prices, range recomputation,
-quote hints and isolated response storage.
+The original Oct 16 harness executed 44 schema vectors, 600 priced probes,
+600 mode probes and 10 consumer tests (historical results). This review branch
+adds eight synthetic AirShelf-inspired vectors (52 total), adds undisclosed to
+the mode-probe pool, and adds five consumer authorization/neutrality tests
+(15 total). **New revision results are unverified until the commands above
+are actually rerun**. These finite subsets do not prove interoperability.
 
 `consumer.py` accepts schema-validated inputs. Its cache is a reference map,
 not buyer authentication or an HTTP cache: callers must derive the correct
@@ -66,7 +69,14 @@ validation or end-to-end Cart/Checkout interoperability.
 ## Compatibility and publication
 
 Old validating consumers reject unpriced payloads. An old lenient consumer
-may incorrectly show a missing amount as zero. Reserving the previously-open
+may incorrectly show a missing amount as zero. Worse, older consumers can
+accept a numeric buyer_specific price (and its derived product price_range),
+ignore the unknown pricing marker, and treat it as public. Sending restricted
+prices therefore requires BOTH authenticated buyer entitlement and explicit
+pricing-profile support. No interoperable negotiation signal is approved by
+this draft. The reference consumer now defaults to refusing buyer_specific
+amounts unless both booleans are supplied by the caller; these booleans are
+not an authentication implementation. Reserving the previously-open
 pricing property also invalidates some formerly accepted payloads: malformed
 pricing objects and a selling price alongside a newly unpriced known mode.
 Release/version negotiation and the field-name collision survey require TC
@@ -76,3 +86,30 @@ This increment is published as a draft PR in Arjun's fork for review. The
 upstream schema decision, SDK generation, complete documentation-example
 validation, independent interoperability and Purchase Options composition
 remain gates before upstream implementation can be considered complete.
+
+## November 3, 2026 review response (AirShelf #969)
+
+AirShelf independently reports reproducing the original 44/1,200/10 harness
+checks and mapping 12 saved Product records from seven products across two
+B2B seller integrations. Those results are externally **reported**, not
+reproduced by this branch. The redacted saved seller responses are not in
+this repository, and no independent Platform or paid buyer exercised #969.
+See [AirShelf's comment](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6599693166).
+
+This review branch addresses three bounded findings:
+
+1. A neutral anonymous `undisclosed` mode hides price-list membership and
+   prohibits price, reference price, reason and next-step fields on that
+   variant. Other response-side side channels still require Business review.
+2. A disclosure-only NDA with a common restricted price list is
+   `buyer_specific` after entitlement; `contract_only` means a *commercial*
+   pricing contract, not merely an NDA. Schema alone cannot infer this.
+3. Legacy client safety applies to **priced** buyer_specific records, not
+   only records with missing prices. The consumer reference fails closed
+   unless entitlement and profile support were established independently.
+
+Pending: run the full updated schema suite and format/lint checks, test SDK
+generation, decide the actual negotiated client-version signal, exercise an
+independent Platform, test mixed variants, and obtain expired-entitlement and
+anonymous price-filter behavior from an authorized implementer. This is
+experimental candidate text, not a UCP council disposition.
