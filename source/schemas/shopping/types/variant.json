@@ -22,7 +22,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["type", "value"],
+        "required": [
+          "type",
+          "value"
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -62,18 +65,26 @@
     },
     "price": {
       "$ref": "../../common/types/price.json",
-      "description": "Current selling price. REQUIRED when `pricing` is absent or `pricing.mode` is `public` [PROPOSED: conditional requiredness — see `pricing`]. MUST NOT be present when `pricing.mode` is `quote_required` or `contract_only` [PROPOSED]. MAY be absent or present when `pricing.mode` is `buyer_specific`, or any unrecognized/unknown mode [PROPOSED — see `pricing` for the per-mode rules]. Price is the amount per one whole `quantity_unit.unit` (for example, per lb or per hour); when `quantity_unit` is absent, it is per `each`. Line total is `price × quantity × 10^-scale`, computed and rounded once by the Business; `totals` remain authoritative."
+      "description": "Current selling price. [PROPOSED] Required for absent/public pricing mode. May be absent or present for buyer_specific and unknown modes, subject to consumer authorization. Forbidden for quote_required, contract_only, and undisclosed. A resolved buyer_specific price is restricted to its authenticated, negotiated caller context, including derived price_range and unit_price; JSON Schema validation alone does not authorize display or caching."
     },
     "pricing": {
       "type": "object",
-      "description": "[PROPOSED — requires a TC-approved Enhancement Proposal] Pricing state of this variant in this response. `mode` describes how price is (or is not) advertised to the caller of *this response* — it is a property of the response, not a fixed property of the variant: the same variant may be `buyer_specific` to an anonymous caller and carry a numeric price for a linked buyer. `mode` is an OPEN vocabulary (not a closed enum): well-known values are `public` (default; a numeric price is advertised and `price` is REQUIRED), `buyer_specific` (price depends on the caller; a numeric `price` MAY be present when this response is addressed to a recognized buyer — when present, `mode` MUST remain `buyer_specific` so a Platform can tell the value is specific to that caller; a Platform MUST NOT expose or reuse a buyer-specific price, or any value derived from it such as a product `price_range`, for a different caller; `buyer_specific` does not necessarily mean the amount was mathematically computed just for that one person — the same negotiated/list price may be visible to multiple entitled buyers while remaining non-public; the mode primarily communicates disclosure context, not individualized computation), `quote_required` (no price is advertised; the buyer must request a quote — `price` MUST NOT be present), `contract_only` (no price is advertised; pricing exists only under contract — `price` MUST NOT be present. This describes the unresolved response to a caller who has not established the necessary entitlement; once the Business resolves pricing for a recognized/entitled buyer, the response transitions to `buyer_specific` + `price` — `contract_only` itself remains a genuinely unpriced state). A Platform MUST tolerate `mode` values it does not recognize: an unrecognized `mode` MUST NOT make the payload invalid merely for being unrecognized, and `price` MAY be absent or present alongside it. When a Platform does not recognize a `mode`, it MUST treat the item conservatively as having no usable display price — it MUST NOT interpret a missing price as zero, MUST NOT display an accompanying numeric price as authoritative, and MUST exclude the item from numeric price filtering, sorting, or ranking unless it understands that mode. A generated SDK's binding for `mode` MUST preserve unknown string values rather than failing deserialization on an unrecognized enum member.",
-      "required": ["mode"],
+      "description": "[PROPOSED, not released] Response-scoped pricing disclosure mode; OPEN vocabulary. public requires a price. buyer_specific may be unpriced until an authorized caller's price is resolved; when priced it remains buyer_specific, never public. A disclosure-only NDA granting access to a common non-public price list is buyer_specific, NOT contract_only. contract_only is reserved for commercial contract-dependent pricing that cannot be quoted as a standard listed price in the current response; it is unpriced. quote_required means a quote must be obtained and is unpriced. undisclosed is a privacy-neutral, unpriced state: it says neither whether an entitled buyer will see a listed price nor whether a quote is needed. Use it for anonymous/non-entitled callers when revealing price-list membership is itself confidential. An undisclosed variant MUST omit price, unit_price, list_price, pricing.reason, and pricing.next_step; also avoid other revealing metadata, messages, filters, and aggregates that could defeat neutrality. Unknown modes remain allowed, but an unaware client MUST treat their amounts as unusable. This object does not grant buyer entitlement and must not be sent to legacy clients as a substitute for explicit capability negotiation.",
+      "required": [
+        "mode"
+      ],
       "properties": {
         "mode": {
           "type": "string",
           "minLength": 1,
-          "examples": ["public", "buyer_specific", "quote_required", "contract_only"],
-          "description": "Pricing mode for this variant in this response. Open vocabulary: well-known values are listed in `examples`, but this is not a closed set — a Business MAY introduce new values, and a Platform MUST tolerate values it does not recognize (see parent `pricing` description for the required safe-fallback behavior)."
+          "examples": [
+            "public",
+            "buyer_specific",
+            "quote_required",
+            "contract_only",
+            "undisclosed"
+          ],
+          "description": "Open vocabulary of response-scoped modes. undisclosed is neutral about whether a subsequent entitled response will be buyer_specific or quote_required; do not infer a successful identity-linking outcome. Unknown values must survive deserialization and are unusable to an unaware consumer."
         },
         "reason": {
           "type": "string",
@@ -150,53 +161,146 @@
   },
   "allOf": [
     {
-      "description": "[PROPOSED] Neither `price` nor `unit_price` (a per-unit selling price) may be present when the variant advertises `quote_required` or `contract_only` — both known modes are genuinely unpriced states: `quote_required` says a quote is needed to resolve pricing, and `contract_only` describes the unresolved response to a caller who has not established the necessary entitlement. Once the Business resolves pricing for a recognized/entitled buyer, the response transitions to `buyer_specific` + `price` rather than retaining `contract_only` with a price. An unrecognized/unknown `mode` is not constrained by this rule (it checks only these two known literal values, not a closed set on `mode` itself).",
+      "description": "[PROPOSED] quote_required, contract_only and undisclosed have no price or unit_price; undisclosed additionally hides list_price, reason and next_step. These schema constraints cover only known mode strings; protocol messages and metadata are governed by separate behavioral confidentiality rules.",
       "if": {
         "properties": {
           "pricing": {
             "type": "object",
             "properties": {
-              "mode": { "enum": ["quote_required", "contract_only"] }
+              "mode": {
+                "enum": [
+                  "quote_required",
+                  "contract_only",
+                  "undisclosed"
+                ]
+              }
             },
-            "required": ["mode"]
+            "required": [
+              "mode"
+            ]
           }
         },
-        "required": ["pricing"]
+        "required": [
+          "pricing"
+        ]
       },
       "then": {
-        "not": { "anyOf": [{ "required": ["price"] }, { "required": ["unit_price"] }] }
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "price"
+              ]
+            },
+            {
+              "required": [
+                "unit_price"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "[PROPOSED] An undisclosed response must not reveal a reference price, reason or next step that could disclose private price-list membership.",
+      "if": {
+        "properties": {
+          "pricing": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "const": "undisclosed"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        "required": [
+          "pricing"
+        ]
+      },
+      "then": {
+        "allOf": [
+          {
+            "not": {
+              "required": [
+                "list_price"
+              ]
+            }
+          },
+          {
+            "properties": {
+              "pricing": {
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "reason"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "next_step"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
       }
     },
     {
       "description": "[PROPOSED] Price is REQUIRED for publicly priced variants (the default when `pricing` is absent).",
       "if": {
         "anyOf": [
-          { "not": { "required": ["pricing"] } },
+          {
+            "not": {
+              "required": [
+                "pricing"
+              ]
+            }
+          },
           {
             "properties": {
               "pricing": {
                 "type": "object",
                 "properties": {
-                  "mode": { "const": "public" }
+                  "mode": {
+                    "const": "public"
+                  }
                 },
-                "required": ["mode"]
+                "required": [
+                  "mode"
+                ]
               }
             },
-            "required": ["pricing"]
+            "required": [
+              "pricing"
+            ]
           }
         ]
       },
       "then": {
-        "required": ["price"]
+        "required": [
+          "price"
+        ]
       }
     },
     {
       "description": "[PROPOSED] `unit_price` is derived from the selling price and requires `price` to be present.",
       "if": {
-        "required": ["unit_price"]
+        "required": [
+          "unit_price"
+        ]
       },
       "then": {
-        "required": ["price"]
+        "required": [
+          "price"
+        ]
       }
     }
   ]
