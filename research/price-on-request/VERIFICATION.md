@@ -47,3 +47,37 @@ rerun after that correction. Requirements pin the versions actually used.
 The PR remains an experimental draft. Complete UCP lint, full documentation
 examples/rendering, generated-SDK conditional enforcement, migration and
 independent interoperability before any claim of upstream readiness.
+
+## 2026-11-03 AirShelf review revision (separate from historical results)
+
+The historical successful 44-vector / 1,200-probe / 10-consumer-test
+results above apply to head 5ed98c9; AirShelf independently reported
+reproducing that original harness on its saved two-seller data
+([comment](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6599693166)).
+This branch introduces NEW implementation and tests and **has not yet
+executed the Python/jsonschema, official UCP CLI, pre-commit or generated SDK
+suites**. Do not report 52/52 or 15/15 as passing until verified.
+
+Changed artifacts: experimental `undisclosed` mode (including schema
+rejections for price/list_price/reason/next_step), revised NDA semantics,
+legacy-consumer guard requiring external buyer entitlement and pricing
+profile support, eight synthetic schema fixtures and five consumer tests,
+and updated spec/search documentation.
+
+Local checks to execute with a pinned old-main checkout:
+
+```sh
+python -m pip install -r research/price-on-request/harness/requirements.txt
+python research/price-on-request/harness/run.py \\
+  --baseline ../ucp-pricing-baseline --proposed . --fuzz 300
+python -m unittest discover -s research/price-on-request/harness -p 'test_*.py' -v
+ruff check research/price-on-request/harness/*.py
+ruff format --check research/price-on-request/harness/*.py
+git diff --check HEAD~1
+```
+
+Expected scope after changes: 52 fixture vectors, 600 baseline-subset
+compatibility probes, 600 mode probes, 15 consumer tests. These are targets,
+not asserted outcomes. Official UCP CLI, generated SDK, multi-version docs,
+privacy side-channel review, real capability negotiation, independent Platform
+integration, mixed-variant and expired-entitlement runs remain unresolved.
