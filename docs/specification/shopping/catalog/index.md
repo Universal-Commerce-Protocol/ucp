@@ -249,57 +249,101 @@ item they present as featured.
     specification: core schema changes require an Enhancement Proposal and
     Technical Council approval before implementation.
 
-A variant's `pricing` object states how price is — or is not — advertised
-**in this response**. The mode describes the response, not a fixed property of
-the variant: the same variant may be `buyer_specific` to an anonymous caller
-and carry a numeric price once the caller links their identity (see
-[Identity Linking](../../common/identity-linking/index.md)).
+A variant's `pricing` object is a **response-scoped disclosure statement**,
+not a permanent SKU characteristic or a buyer authorization. The Business
+chooses a response appropriate for the caller; the Platform must enforce its
+own authenticated entitlement and agreed pricing-profile support.
 
-| `pricing.mode` | Meaning | `price` in this response |
+| `pricing.mode` | Meaning | Selling `price` |
 |---|---|---|
-| `public` | A numeric price is advertised (the default when `pricing` is absent). | REQUIRED |
-| `buyer_specific` | Price depends on the caller. | MAY be present when the response is addressed to a recognized buyer; MUST be treated as specific to that caller. Which buyers see which price is Business policy — the schema carries no access-control semantics. |
-| `quote_required` | No price is advertised; the buyer must request a quote. | MUST NOT be present |
-| `contract_only` | No price is advertised; pricing exists only under contract. | MUST NOT be present |
+| absent / `public` | Ordinary public advertised selling price. | REQUIRED |
+| `buyer_specific` | Price disclosure is restricted to an entitled caller, even if the same list price is shared by many entitled buyers. | MAY be absent while unresolved; MAY be present only in an appropriately restricted response |
+| `quote_required` | The caller is permitted to know that a quotation is required. | FORBIDDEN |
+| `contract_only` | Commercial pricing requires an applicable contract or negotiated terms, rather than an ordinary listed price available following a disclosure-only gate. | FORBIDDEN |
+| `undisclosed` | **Disclosure-neutral**: the Business is not revealing whether a listed price becomes available after entitlement, or whether a quotation is needed. | FORBIDDEN |
 
-`mode` is an open vocabulary. An unknown value does not invalidate the
-record merely because it is unknown. Until a Platform understands that mode,
-it **MUST NOT** present an accompanying amount as an authoritative selling
-price or include it in numeric filtering, sorting or price comparison.
+The additional `undisclosed` mode addresses the privacy finding reported by
+AirShelf in [#969](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6599693166).
+For example, if an anonymous caller must not learn which products appear on
+an NDA-gated price list, the Business should return `undisclosed` for both
+price-list and quote-only products. It **MUST NOT** attach `price`,
+`unit_price`, `list_price`, `pricing.reason`, or
+`pricing.next_step` to an `undisclosed` variant (schema enforced).
+It must also avoid leaking that distinction through other descriptions,
+metadata, availability, message codes, result ordering, filters, or aggregates
+(not schema-enforced). The neutral state does **not** promise that signing in
+or accepting an NDA will produce a price.
 
-An entitled caller's resolved contract price uses `buyer_specific` plus
-`price`; `contract_only` remains unpriced. A priced `buyer_specific` response
-retains that mode even when the same amount is available to other entitled
-buyers. Platforms **MUST NOT** reuse its prices or derived values such as
-`price_range` outside the authorization context for which they were returned.
-Isolation must account for buyer, entitlement changes, negotiated capabilities
-and any other price-relevant context; the mode string alone is insufficient.
+A **disclosure-only NDA** protecting a seller's common price list is not a
+commercial negotiated-price contract. After a buyer is entitled to see that
+list, `buyer_specific` plus `price` is the candidate response; to an
+anonymous caller who is allowed to know list membership,
+`buyer_specific` without price is permissible. Where list membership is
+private, use `undisclosed` instead. Reserve `contract_only` for an
+unresolved *commercial pricing contract* (not the mere existence of an NDA).
+A seller that cannot safely distinguish these without revealing policy must
+choose a neutral response; JSON Schema cannot decide its disclosure policy.
 
-`next_step: "request_quote"` is only a prototype interaction hint. It may
-accompany a public or buyer-specific price and never changes requiredness or
-filter eligibility. It identifies no endpoint or supported quote workflow.
+For a synthetic single-SKU NDA case, the anonymous response when membership
+is private is:
 
-A Platform **MUST NOT** display, infer, or compute a numeric price for a
-variant that does not carry one in the response, and **MUST NOT** treat a
-missing price as zero (a present `price` with `amount: 0` still means free).
-A variant that is explicitly on-request is therefore distinguishable from a
-variant whose price was accidentally omitted: the latter fails validation
-(`price` is required for publicly priced variants). For in-proximity
-"price on request" rendering, Businesses **SHOULD** pair the variant with the
-well-known `price_on_request` warning code using `presentation: "disclosure"`.
+```json
+{
+  "id": "v-nda", "title": "Subscription",
+  "description": {"plain": "Enterprise software"},
+  "pricing": {"mode": "undisclosed"}
+}
+```
 
-Related price fields on unpriced variants: `list_price` (the pre-discount
-reference price) MAY accompany an unpriced variant — for example, a
-strikethrough "List $100" beside a "request quote" disclosure — but it MUST
-NOT be treated as the selling price. `unit_price`, by contrast, is a per-unit
-*selling* price: it MUST NOT be present when the variant carries no `price`
-(schema-enforced), since it would be a conflicting price signal.
+The *same* variant in a response to a fully entitled caller, **only after**
+both authentication and pricing-profile support are established, may be:
 
-How an on-request variant becomes purchasable is outside this proposal.
-Identity linking can establish buyer context but does not itself guarantee
-price resolution. Accepted-term handoff (#845) and Quote (#929/#930) remain
-separate proposals, not established catalog behavior.
-This section defines no quote, RFQ, expiry, invoice, or payment workflow.
+```json
+{
+  "id": "v-nda", "title": "Subscription",
+  "description": {"plain": "Enterprise software"},
+  "pricing": {"mode": "buyer_specific"},
+  "price": {"amount": 100000, "currency": "USD"}
+}
+```
+
+A different SKU in the anonymous response can also use `undisclosed`,
+yet transition to `quote_required` once the caller is entitled. Thus the
+anonymous mode does not expose the seller's private price-list membership.
+
+**Legacy and restricted-price safety:** a priced `buyer_specific` record
+can pass the old Variant schema because older validators ignore the unknown
+`pricing` property. Validation therefore does not prevent an old Platform
+from treating that price, `unit_price`, or `price_range` as public.
+Before returning any restricted price or derived aggregate, the Business
+**MUST** independently establish caller entitlement and explicit support
+for the revised pricing semantics. A disclosure message or
+`pricing.mode` alone is not evidence of client understanding. If either
+requirement is absent, fail closed: omit restricted prices from that
+consumer's response, return only genuinely public data where safe, or use
+an existing supported denial/negotiation path. **Do not** send a malformed
+public-price record in an attempt to disguise it; the exact UCP capability
+negotiation and migration signal remain a TC decision. Platforms **MUST**
+suppress buyer-specific prices and aggregates without their own verified
+authorization and profile negotiation, and must partition caches by the
+authenticated buyer, entitlement revision, capabilities and freshness.
+Transport caches and logs must not redistribute restricted price data.
+
+`mode` remains an open vocabulary. Unknown modes remain structurally
+valid, but an unaware Platform **MUST NOT** display their amounts,
+filter/sort numerically on them, or treat a missing amount as zero.
+`next_step: "request_quote"` is only a prototype availability hint; it
+does not establish a quote endpoint, and must not be used on an
+`undisclosed` record. Likewise, an automatic `price_on_request` message
+can leak whether a hidden item requires a quote and must not accompany a
+privacy-neutral response. `list_price` is a reference figure, not the
+selling price, and `unit_price` requires a selling `price`.
+
+How a product becomes purchasable is outside this proposal. Identity
+linking, quote formation (#929/#930), and accepted-term handoff (#845)
+remain separate interfaces and governance decisions. The proposal does
+not guarantee end-to-end seller/platform interoperability or protect
+information against every side channel.
 
 <!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
 ```json
