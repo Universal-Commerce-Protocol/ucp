@@ -54,9 +54,24 @@ The historical successful 44-vector / 1,200-probe / 10-consumer-test
 results above apply to head 5ed98c9; AirShelf independently reported
 reproducing that original harness on its saved two-seller data
 ([comment](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6599693166)).
-This branch introduces NEW implementation and tests and **has not yet
-executed the Python/jsonschema, official UCP CLI, pre-commit or generated SDK
-suites**. Do not report 52/52 or 15/15 as passing until verified.
+The revised implementation has now been executed in the author's GitHub
+Actions CI. The following results were verified from completed job steps:
+
+- [Focused suite](https://github.com/arjun2075/ucp/actions/runs/41685254592)
+  on commit 8959be8: **52/52** pinned schema vectors, **600+600/1,200**
+  generated probes, **15/15** reference consumer unit tests; Ruff lint
+  and formatter, Python compileall and full-branch whitespace diff passed.
+- [Official tooling](https://github.com/arjun2075/ucp/actions/runs/41686106843)
+  on commit 735f287: official `ucp-schema` **v1.4.1** lint passed,
+  changed Catalog specification examples **9 passed, 0 failed, 0 errors,
+  0 skipped**, `uv sync --frozen` and strict MkDocs draft build passed.
+- Both suites exercise authored code and synthetic fixtures. They are NOT
+  an independent seller/platform interoperability run, UCP TC approval,
+  actual privacy-side-channel guarantee, or production adoption.
+
+Generated SDK conditional enforcement, full multi-version specification
+build, pre-commit hooks, and production entitlement/cache behavior remain
+**unverified** in this revision.
 
 Changed artifacts: experimental `undisclosed` mode (including schema
 rejections for price/list_price/reason/next_step), revised NDA semantics,
@@ -76,8 +91,9 @@ ruff format --check research/price-on-request/harness/*.py
 git diff --check 5ed98c923645f0700e24c6ad0117692b97627f67..HEAD
 ```
 
-Expected scope after changes: 52 fixture vectors, 600 baseline-subset
-compatibility probes, 600 mode probes, 15 consumer tests. These are targets,
-not asserted outcomes. Official UCP CLI, generated SDK, multi-version docs,
-privacy side-channel review, real capability negotiation, independent Platform
-integration, mixed-variant and expired-entitlement runs remain unresolved.
+Executed scope: 52 fixture vectors, 600 baseline-subset compatibility
+probes, 600 mode probes, 15 consumer tests. Official UCP CLI lint,
+changed docs examples and strict draft MkDocs PASS. Generated SDK,
+full multi-version docs, privacy side-channel review, real capability
+negotiation, independent Platform integration, and full mixed-variant
+and expired-entitlement seller-to-platform runs remain unresolved.
