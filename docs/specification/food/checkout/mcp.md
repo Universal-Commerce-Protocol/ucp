@@ -57,6 +57,14 @@ Businesses advertise MCP transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/fulfillment.json",
           "extends": "dev.ucp.food.checkout"
         }
+      ],
+      "dev.ucp.food.tip": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/food/extensions/tip",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/tip.json",
+          "extends": "dev.ucp.food.checkout"
+        }
       ]
     },
     "payment_handlers": {
@@ -152,6 +160,7 @@ prices them and asks for a fulfillment method.
     the establishment, dishes, and optional buyer and extension data.
     * Extensions (Optional):
         * `dev.ucp.food.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
+        * `dev.ucp.food.tip`: [Tip](../extensions/tip.md)
         * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
@@ -228,6 +237,9 @@ prices them and asks for a fulfillment method.
                 {"version": "{{ ucp_version }}"}
               ],
               "dev.ucp.food.fulfillment": [
+                {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+              ],
+              "dev.ucp.food.tip": [
                 {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
               ]
             },
@@ -408,6 +420,7 @@ Message.
     Contains the full writable checkout state.
     * Extensions (Optional):
         * `dev.ucp.food.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
+        * `dev.ucp.food.tip`: [Tip](../extensions/tip.md)
         * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
@@ -513,6 +526,9 @@ resolved tip line.
                 {"version": "{{ ucp_version }}"}
               ],
               "dev.ucp.food.fulfillment": [
+                {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+              ],
+              "dev.ucp.food.tip": [
                 {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
               ]
             },
@@ -706,6 +722,9 @@ and optionally a pickup `label`) if completion succeeds. See
                 {"version": "{{ ucp_version }}"}
               ],
               "dev.ucp.food.fulfillment": [
+                {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+              ],
+              "dev.ucp.food.tip": [
                 {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
               ]
             },

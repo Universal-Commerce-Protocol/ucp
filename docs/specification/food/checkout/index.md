@@ -96,7 +96,7 @@ Checkout follows a progressive session lifecycle:
     * `note` 📝 "Dressing on the side"
 * `fulfillment.methods[0]` 🛵 delivery → 450 Serra Mall, Apt 3B *(via the [Fulfillment Extension](../extensions/fulfillment.md))*
     * `selected_option_id` 🔘✅ Standard Delivery, 6:35–6:50 PM, $2.99
-* `tip` 💵 `selected_option_id` 🔘✅ 18%
+* `tip` 💵 `selected_option_id` 🔘✅ 18% *(via the [Tip Extension](../extensions/tip.md))*
 * `totals[]` 🧾 subtotal · delivery · fees · tax · tip · **total**
 * `order` 🎫 `#42` → `tracking_url` *(after completion)*
 
@@ -269,9 +269,9 @@ non-total entries sum to the single `total` entry.
 * **Tax (`tax`)**: Sales tax and prepared-food or beverage taxes, which may
   differ from grocery rates and may apply to fees and delivery in some
   jurisdictions.
-* **Gratuity (`tip`)**: A **food-defined total type**. Because `tip` is not in
-  the common well-known set, Businesses **MUST** include `display_text` on it.
-  See [Tips & Gratuity](#tips-and-gratuity).
+* **Gratuity (`tip`)**: A **food-defined total type** populated when the
+  [Tip Extension](../extensions/tip.md) is active. Because `tip` is not in the
+  common well-known set, Businesses **MUST** include `display_text` on it.
 
 The following snippets illustrate canonical food pricing patterns:
 
@@ -349,100 +349,6 @@ Courier Tip (18%)                                              $9.00
 Total                                                         $71.87
 ```
 
-### Tips and Gratuity
-
-Gratuity for couriers and counter staff is part of the checkout itself,
-not an afterthought. The top-level [Tip](#tip) object separates what the
-Business suggests from what the buyer chooses:
-
-* **Suggestions (`tip.options[]`, Business-authored)**: Each
-  [Tip Option](#tip-option) has an `id`, a `unit` (`percentage` or `absolute`),
-  and an `amount`. With `unit: "percentage"`, `amount` is the percent (e.g.,
-  `18`); with `unit: "absolute"`, it is in ISO 4217 minor units (e.g., `500` for
-  $5.00). Tip options carry no label: the Platform renders one from `unit` and
-  `amount` (e.g., "18%", "$5").
-* **Choice (`tip.selected_option_id` or `tip.custom_amount`, Platform-authored)**:
-  `selected_option_id` is omitted on Create Checkout (`create: omit`) and
-  available on Update Checkout (`update: optional`) once the Business has
-  returned `tip.options[]`; `custom_amount` **MAY** be sent on either create or
-  update. The schema's `oneOf` admits exactly three states:
-
-| State | `selected_option_id` | `custom_amount` | Meaning |
-| :--- | :--- | :--- | :--- |
-| Preset | ✅ | — | Buyer picked a suggested option (on update). |
-| Custom | — | ✅ | Buyer entered an amount in minor units (`0` = no tip). |
-| Unset | — | — | No choice yet; adds nothing to `totals[]` until the Platform submits an explicit selection via `selected_option_id` or `custom_amount`. |
-| ❌ Invalid | ✅ | ✅ | Rejected by schema validation. |
-
-* **Resolution (`totals[]`, Business-authored)**: The Business resolves the
-  choice into money — percentage `tip.options[]` are computed against the
-  pre-discount `subtotal` entry in `totals[]` — and **MUST** report any
-  non-zero selected tip as a `type: "tip"` entry in `totals[]`. `tip` holds
-  the choice; `totals[]` holds the amount.
-  When a fulfillment switch (e.g., `delivery` → `pickup`) replaces
-  `tip.options[]` and invalidates a prior `selected_option_id`, the Business
-  **MUST** clear `selected_option_id` (returning `tip` to `Unset` state) and
-  **SHOULD** surface a `notice` warning.
-
-A Platform renders the suggestions as quick-select chips:
-
-```text
-Add a tip for your courier
- [ 15% ]  [ ✅ 18% ]  [ 20% ]  [ Custom ]                  Tip: $9.00
-```
-
-=== "Business Suggests Options"
-
-    <!-- ucp:example schema=food/checkout target=$.tip op=read -->
-    ```json
-    {
-      "options": [
-        { "id": "tip_15", "unit": "percentage", "amount": 15 },
-        { "id": "tip_18", "unit": "percentage", "amount": 18 },
-        { "id": "tip_20", "unit": "percentage", "amount": 20 },
-        { "id": "tip_5usd", "unit": "absolute", "amount": 500 }
-      ]
-    }
-    ```
-
-=== "Platform Selects a Preset"
-
-    <!-- ucp:example schema=food/checkout op=update direction=request -->
-    ```json
-    {
-      "food_establishment": { "id": "est_luigis_01" },
-      "line_items": [
-        {
-          "id": "li_1",
-          "quantity": 2,
-          "dish": { "id": "dish_margherita_12" }
-        }
-      ],
-      "tip": {
-        "selected_option_id": "tip_18"
-      }
-    }
-    ```
-
-=== "Platform Sends a Custom Amount"
-
-    <!-- ucp:example schema=food/checkout op=update direction=request -->
-    ```json
-    {
-      "food_establishment": { "id": "est_luigis_01" },
-      "line_items": [
-        {
-          "id": "li_1",
-          "quantity": 2,
-          "dish": { "id": "dish_margherita_12" }
-        }
-      ],
-      "tip": {
-        "custom_amount": 700
-      }
-    }
-    ```
-
 ### Payments
 
 Payment handlers are discovered from the Business's UCP profile at
@@ -450,9 +356,9 @@ Payment handlers are discovered from the Business's UCP profile at
 as [Checkout — Payments](../../shopping/checkout/index.md#payments). `payment`
 is optional on create & update and **REQUIRED** on Complete Checkout.
 
-Because the tip and the delivery fee can change up to the moment of completion,
-Platforms **MUST** present the final `totals[]` — including `type: "tip"` — for
-buyer confirmation before submitting payment.
+Because dynamic charges such as delivery fees and tips can change up to the
+moment of completion, Platforms **MUST** present the final `totals[]` for buyer
+confirmation before submitting payment.
 
 ### Cart-to-Checkout Conversion
 
@@ -466,18 +372,17 @@ the Business initializes the session from the cart's `food_establishment`,
 `line_items[]` (dishes, modifications, and notes), `buyer`, and `context`, and
 **MUST** ignore overlapping fields in the request. The Platform **MAY** omit
 `food_establishment` and `line_items` (or send `"line_items": []`) when
-providing `cart_id`. Checkout-only fields — `tip`, `fulfillment`, `payment` —
-**MAY** be sent alongside `cart_id`. The Business **MUST** reject requests
-containing `cart_id` if an out-of-band cart source is not recognized,
-and **MUST NOT** silently fall back to inline `line_items`.
-`cart_id` is an initialization input only and is omitted
-from checkout responses.
+providing `cart_id`. Checkout-only and extension fields — such as
+`fulfillment`, `tip`, and `payment` — **MAY** be sent alongside `cart_id`. The
+Business **MUST** reject requests containing `cart_id` if an out-of-band cart
+source is not recognized, and **MUST NOT** silently fall back to inline
+`line_items`. `cart_id` is an initialization input only and is omitted from
+checkout responses.
 
 <!-- ucp:example schema=food/checkout op=create direction=request -->
 ```json
 {
-  "cart_id": "cart_food_8912",
-  "tip": { "custom_amount": 500 }
+  "cart_id": "cart_food_8912"
 }
 ```
 
@@ -709,10 +614,7 @@ The `continue_url` field enables checkout handoff from the Platform to the
 Business UI — for example, for ID verification or catering approval. URL
 construction (server-side state vs. permalink) and security/recovery
 considerations follow
-[Checkout — Continue URL](../../shopping/checkout/index.md#continue-url). When
-a Platform hands off before a tip has been selected, it **SHOULD** label the
-displayed total as pre-tip so the buyer expects gratuity selection on the
-Business UI.
+[Checkout — Continue URL](../../shopping/checkout/index.md#continue-url).
 
 ### Availability
 
@@ -735,8 +637,6 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   that differ in modifications or notes.
 * **MUST** keep kitchen instructions in `line_items[].note` and courier
   instructions in `fulfillment.methods[].notes`.
-* **MUST NOT** send both `tip.selected_option_id` and `tip.custom_amount`, and
-  **MUST** render the tip from the `type: "tip"` entry in `totals[]`.
 * **SHOULD** collect `buyer.phone_number` (E.164) for delivery orders so the
   courier or kitchen can reach the buyer.
 * **MUST** render `presentation: "disclosure"` warnings (consumer advisories,
@@ -757,8 +657,6 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   single line item, and **SHOULD** reject duplicate modification IDs as invalid.
 * **MUST NOT** add charges based on `line_items[].note`; **SHOULD** return a
   warning message when a note requests a menu-modeled modification.
-* **MUST** include `display_text` on `type: "tip"` totals and report any non-zero
-  tip in `totals[]`.
 * **SHOULD** use the food error codes in [Error Handling](#error-handling) with a
   precise `path`.
 * **MUST** return `order.id` and `order.tracking_url` on `completed`, and
@@ -942,18 +840,6 @@ Business-specific policies applicable to the checkout session.
 Platform-supplied fraud and security context.
 
 {{ schema_fields('types/signals', 'food/checkout') }}
-
-### Tip
-
-The buyer's gratuity choice and the Business's suggested options.
-
-{{ schema_fields('food/types/tip', 'food/checkout') }}
-
-### Tip Option
-
-A suggested gratuity, expressed as a percentage or an absolute amount.
-
-{{ schema_fields('food/types/tip_option', 'food/checkout') }}
 
 ### Total
 

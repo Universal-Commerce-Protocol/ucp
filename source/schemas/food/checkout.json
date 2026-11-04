@@ -175,15 +175,6 @@
       "description": "URL for checkout handoff and session recovery. MUST be provided when status is requires_escalation. See specification for format and availability requirements.",
       "ucp_request": "omit"
     },
-    "tip": {
-      "$ref": "types/tip.json",
-      "description": "Tip amounts requested by the platform on the checkout session. Business MUST return applied amounts in totals.",
-      "ucp_request": {
-        "create": "optional",
-        "update": "optional",
-        "complete": "omit"
-      }
-    },
     "payment": {
       "$ref": "../common/types/payment.json",
       "ucp_request": {

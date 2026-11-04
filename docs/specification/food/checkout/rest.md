@@ -57,6 +57,14 @@ Businesses advertise REST transport availability through their UCP profile at
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/food/extensions/fulfillment",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/fulfillment.json"
         }
+      ],
+      "dev.ucp.food.tip": [
+        {
+          "version": "{{ ucp_version }}",
+          "extends": "dev.ucp.food.checkout",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/food/extensions/tip",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/tip.json"
+        }
       ]
     },
     "payment_handlers": {
@@ -174,6 +182,9 @@ prices them and asks for a fulfillment method.
             {"version": "{{ ucp_version }}"}
           ],
           "dev.ucp.food.fulfillment": [
+            {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+          ],
+          "dev.ucp.food.tip": [
             {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
           ]
         },
@@ -375,6 +386,9 @@ resolved tip.
           ],
           "dev.ucp.food.fulfillment": [
             {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+          ],
+          "dev.ucp.food.tip": [
+            {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
           ]
         },
         "payment_handlers": {
@@ -524,6 +538,9 @@ and returns the order confirmation.
             {"version": "{{ ucp_version }}"}
           ],
           "dev.ucp.food.fulfillment": [
+            {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+          ],
+          "dev.ucp.food.tip": [
             {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
           ]
         },
