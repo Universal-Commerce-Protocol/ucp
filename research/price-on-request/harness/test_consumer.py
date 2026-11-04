@@ -234,7 +234,6 @@ class ConsumerTests(unittest.TestCase):
       cache.get("merchant", "buyer:entitlement-v2-revoked", "product")
     )
 
-
   def test_public_zero_and_undisclosed_are_distinct_values(self):
     """Retain a real free price without converting the hidden offer to zero."""
     public_free = variant("public", 0)
@@ -266,9 +265,7 @@ class ConsumerTests(unittest.TestCase):
 
   def test_public_free_partial_range_may_be_omitted(self):
     """Recompute a partial zero range even when the producer omits it."""
-    response = {
-      "variants": [variant("public", 0), variant("undisclosed")]
-    }
+    response = {"variants": [variant("public", 0), variant("undisclosed")]}
     self.assertNotIn("price_range", response)
     self.assertEqual(selling_range(response)["max"]["amount"], 0)
 
