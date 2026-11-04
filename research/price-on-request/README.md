@@ -108,7 +108,13 @@ and the distinction between structural schema validity and arithmetic
 correctness. A general "Sign-in is available" message is a conditional
 documentation recommendation, not a tested standardized protocol field.
 The actual capability/version signal and anonymous filter completeness
-remain TC decisions. New results must be verified in CI before reporting.
+remain TC decisions. The new [focused CI](https://github.com/arjun2075/ucp/actions/runs/41857846611)
+passed 60/60 schema vectors, 1,200/1,200 generated probes, 20/20
+consumer tests and Ruff/compile/whitespace gates. The
+[official-tooling run](https://github.com/arjun2075/ucp/actions/runs/41857846707)
+passed UCP schema lint, all nine changed Catalog JSON examples and
+strict MkDocs build. The two runs validate author-controlled synthetic
+fixtures; AirShelf has not reported running this new mixed-free test.
 
 ## November 3, 2026 review response (AirShelf #969)
 

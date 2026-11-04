@@ -97,3 +97,56 @@ changed docs examples and strict draft MkDocs PASS. Generated SDK,
 full multi-version docs, privacy side-channel review, real capability
 negotiation, independent Platform integration, and full mixed-variant
 and expired-entitlement seller-to-platform runs remain unresolved.
+
+## 2026-11-04 public-free + undisclosed mixed-variant review
+
+AirShelf's [second public comment](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6628941466)
+reports independently rerunning the *previous* authored revision at `5e969d1`
+against saved seller responses. AirShelf reported all then-current 52
+schema vectors, 1,200 probes, and 15 consumer tests passed. AirShelf also
+reported the proposed neutral `undisclosed` mode fits its anonymous NDA
+seller, provided message disclosure is corrected. This is independent
+technical validation of the earlier draft using AirShelf's own mapping,
+NOT deployment, an independent Platform integration, or interoperability
+of the later public-free regression tests. AirShelf corrected an earlier
+classification: one product has a public/free offering on its own site,
+but its actual UCP multi-variant representation remains unknown; they had
+not run the corrected mixed case when the comment was posted. The
+author's [follow-up](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6633827683)
+requested its redacted multi-variant fixture and test results.
+
+A single bounded implementation commit `de5d32edc11f2ad800ed395f99af2223c3481379`
+added eight synthetic Product fixtures (60 total), five consumer tests
+(20 total), and provisional guidance for generic sign-in messages and
+public/free partial ranges. Subsequent commit
+`d9ce4eeea9abe9918931fd0fc29048f652eab88a`
+only corrected Python formatting. **Executed verification at the latter
+commit**, not projected outcomes:
+
+- [Focused GitHub Actions run](https://github.com/arjun2075/ucp/actions/runs/41857846611):
+  60/60 pinned baseline/proposal schema fixtures, 600 priced compatibility
+  probes plus 600 mode probes, 20/20 Python consumer tests. Ruff lint and
+  formatting, Python syntax, and Git whitespace checks all passed.
+- [Official UCP tooling run](https://github.com/arjun2075/ucp/actions/runs/41857846707):
+  pinned `ucp-schema` v1.4.1: 145 files linted successfully (pre-existing
+  missing-`$id` warnings in service descriptions do not fail lint).
+  All nine changed Catalog JSON examples passed; frozen `uv` sync and
+  strict MkDocs build succeeded.
+- The intentionally inaccurate partial-range fixture remains **schema-valid**:
+  JSON Schema cannot prove arithmetic. The reference consumer recomputes
+  and discards the incorrect aggregate. This is NOT permission for a Business
+  to send a semantically incorrect numeric range.
+- A genuine public `price.amount=0` remains usable without buyer entitlement
+  while `undisclosed` and `quote_required` missing prices are not numeric
+  zeros. Mixed public-free + hidden range `0–0` is *optional* and describes
+  only the visible priced subset, not all commercial offers.
+- The generic sign-in affordance is only a conditional disclosure-neutrality
+  recommendation. These tests cannot validate arbitrary seller-produced
+  messages or side channels, or demonstrate that anonymous price filters
+  reveal complete results.
+
+Generated SDK conditional enforcement, genuine mixed seller/Platform
+execution, privacy-side-channel audit, capability/version negotiation,
+expired-entitlement integration and Shopping TC decisions remain open.
+No new upstream comment, normative proposal, PR merge, or production
+adoption is implied by these synthetic checks.

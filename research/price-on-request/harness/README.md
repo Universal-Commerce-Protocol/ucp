@@ -19,8 +19,11 @@ negotiation, HTTP cache safety or generated SDK enforcement.
 ## Mixed public/free and unresolved review
 
 AirShelf's November 4 correction prompted eight additional synthetic Product
-fixtures and five consumer tests; planned totals are 60 schema vectors,
-1,200 seeded probes and 20 consumer tests. These cases distinguish a real
+fixtures and five consumer tests; executed totals are 60/60 schema vectors,
+1,200/1,200 seeded probes and 20/20 consumer tests
+([focused run](https://github.com/arjun2075/ucp/actions/runs/41857846611)).
+Official CLI lint, Catalog examples and strict MkDocs also passed
+([official-tooling run](https://github.com/arjun2075/ucp/actions/runs/41857846707)). These cases distinguish a real
 public zero from an unpriced/undisclosed variant, exercise a partial range
 of 0-0 and optional omitted range, and prevent a restricted priced variant
 from entering a legacy consumer's aggregate. The intentionally inaccurate
