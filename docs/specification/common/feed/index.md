@@ -109,11 +109,10 @@ changing or removing `config.endpoint` changes or revokes it.
 ## Feed List
 
 A Platform fetches `config.endpoint` with an HTTPS `GET`, sending the
-`UCP-Agent` header and, where the Business requires authentication, the same
-mechanisms available for requests to the Business's service endpoint: an API
-key, OAuth 2.0, mTLS, or a request signature per the
-[Message Signatures](../../signatures.md) specification. The response is the
-feed list document.
+`UCP-Agent` header and, where the Business requires authentication, using
+a mechanism supported by the Business: an API key, OAuth 2.0, mTLS, or a
+request signature per the [Message Signatures](../../signatures.md)
+specification. The response is the feed list document.
 
 The feed list is provisioned for the caller: an unauthenticated fetch returns
 the Business's public feeds, if any; an authenticated fetch returns the feeds
@@ -558,9 +557,10 @@ apply when a Platform dereferences them.
 
 The Business **MAY** serve the feed endpoint publicly, or **MAY** require
 Platform authentication using any mechanism UCP already defines for requests
-to the Business. The operator of `config.endpoint` **MUST** apply the same
-request conventions and authentication mechanisms as the Business's service
-endpoint would; a Platform treats a feed endpoint that does not as
+to the Business. The operator of `config.endpoint` **MUST** follow UCP
+request conventions and, where the Business requires authentication,
+authenticate Platforms using a mechanism supported by the Business. A
+Platform treats a feed endpoint that does not meet these requirements as
 unavailable. The feed list is provisioned for the caller; a Business offers
 different feeds to different Platforms through this provisioning, not through
 separate profile entries.
