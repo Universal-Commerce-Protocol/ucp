@@ -235,5 +235,95 @@ class ConsumerTests(unittest.TestCase):
     )
 
 
+  def test_public_zero_and_undisclosed_are_distinct_values(self):
+    """Retain a real free price without converting the hidden offer to zero."""
+    public_free = variant("public", 0)
+    hidden = variant("undisclosed")
+    product = {"variants": [public_free, hidden]}
+    self.assertEqual(usable_price(public_free)["amount"], 0)
+    self.assertIsNone(usable_price(hidden))
+    self.assertTrue(price_matches(public_free, "USD", minimum=0, maximum=0))
+    self.assertFalse(price_matches(hidden, "USD", minimum=0, maximum=0))
+    self.assertEqual(
+      selling_range(product),
+      {
+        "min": {"amount": 0, "currency": "USD"},
+        "max": {"amount": 0, "currency": "USD"},
+      },
+    )
+
+  def test_free_price_filter_does_not_match_quote_only(self):
+    """Include public zero in a zero-dollar filter, not unresolved quotes."""
+    free = variant(amount=0)
+    needs_quote = variant("quote_required")
+    self.assertTrue(price_matches(free, "USD", maximum=0))
+    self.assertFalse(price_matches(free, "USD", minimum=1))
+    self.assertFalse(price_matches(needs_quote, "USD", maximum=0))
+    self.assertFalse(price_matches(needs_quote, "USD", minimum=0))
+    self.assertEqual(
+      selling_range({"variants": [needs_quote, free]})["min"]["amount"], 0
+    )
+
+  def test_public_free_partial_range_may_be_omitted(self):
+    """Recompute a partial zero range even when the producer omits it."""
+    response = {
+      "variants": [variant("public", 0), variant("undisclosed")]
+    }
+    self.assertNotIn("price_range", response)
+    self.assertEqual(selling_range(response)["max"]["amount"], 0)
+
+  def test_inaccurate_producer_range_cannot_turn_hidden_offer_into_price(self):
+    """Ignore untrusted precomputed ranges; JSON Schema cannot do arithmetic."""
+    response = {
+      "variants": [variant("public", 0), variant("undisclosed")],
+      "price_range": {
+        "min": {"amount": 0, "currency": "USD"},
+        "max": {"amount": 99000, "currency": "USD"},
+      },
+    }
+    computed = selling_range(response)
+    self.assertEqual(computed["min"]["amount"], 0)
+    self.assertEqual(computed["max"]["amount"], 0)
+
+  def test_zero_public_and_priced_private_offer_require_two_guards(self):
+    """A public free offer remains visible when private prices are withheld."""
+    product = {
+      "variants": [
+        variant("public", 0),
+        variant("buyer_specific", 50000),
+      ],
+      "price_range": {
+        "min": {"amount": 0, "currency": "USD"},
+        "max": {"amount": 50000, "currency": "USD"},
+      },
+    }
+    for authorized, supported in (
+      (False, False),
+      (True, False),
+      (False, True),
+    ):
+      actual = selling_range(
+        product,
+        buyer_authorized=authorized,
+        pricing_profile_supported=supported,
+      )
+      self.assertEqual(actual["min"]["amount"], 0)
+      self.assertEqual(actual["max"]["amount"], 0)
+      self.assertFalse(
+        price_matches(
+          product["variants"][1],
+          "USD",
+          maximum=50000,
+          buyer_authorized=authorized,
+          pricing_profile_supported=supported,
+        )
+      )
+    entitled = selling_range(
+      product, buyer_authorized=True, pricing_profile_supported=True
+    )
+    self.assertEqual(entitled["min"]["amount"], 0)
+    self.assertEqual(entitled["max"]["amount"], 50000)
+
+
 if __name__ == "__main__":
   unittest.main()

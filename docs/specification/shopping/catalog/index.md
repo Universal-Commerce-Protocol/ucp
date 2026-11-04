@@ -330,6 +330,26 @@ may be:
 }
 ```
 
+A Product may have a genuinely public **free** variant (`price.amount = 0`) next
+to an `undisclosed` variant that has no selling price in the anonymous
+response. If the Business intends to advertise the free offer through UCP,
+it should not suppress that public zero merely to make all variants look
+unpriced. The public zero is a real eligible price; the neutral variant
+is **not** free. When this Product includes a partial `price_range`,
+`min` and `max` are both zero **only for the publicly priced subset**.
+The range may instead be omitted because not every variant is priced.
+Neither representation claims that the undisclosed offer is free or that
+the Product's overall commercial options are limited to zero.
+
+A generic "Sign-in is available" affordance can remain disclosure-neutral
+if it is offered consistently across products regardless of NDA price-list
+membership and does not imply that signing in reveals an amount or annual
+pricing. Do not emit a product-specific `price_on_request` message for
+an `undisclosed` variant: it leaks whether quoting is necessary.
+Such presentation and message consistency are **behavioral privacy
+requirements**, not invariants JSON Schema can verify. This proposal
+introduces no portable sign-in message code or pricing-outcome promise.
+
 A different SKU in the anonymous response can also use `undisclosed`,
 yet transition to `quote_required` once the caller is entitled. Thus the
 anonymous mode does not expose the seller's private price-list membership.

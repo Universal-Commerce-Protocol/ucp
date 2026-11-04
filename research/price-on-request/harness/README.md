@@ -15,3 +15,16 @@ Official CLI lint, changed Catalog examples and strict MkDocs also passed
 ([verification run](https://github.com/arjun2075/ucp/actions/runs/41686106843)).
 Neither the consumer nor the tests implement authentication, transport
 negotiation, HTTP cache safety or generated SDK enforcement.
+
+## Mixed public/free and unresolved review
+
+AirShelf's November 4 correction prompted eight additional synthetic Product
+fixtures and five consumer tests; planned totals are 60 schema vectors,
+1,200 seeded probes and 20 consumer tests. These cases distinguish a real
+public zero from an unpriced/undisclosed variant, exercise a partial range
+of 0-0 and optional omitted range, and prevent a restricted priced variant
+from entering a legacy consumer's aggregate. The intentionally inaccurate
+range fixture can remain structurally schema-valid: the consumer recomputes
+and does not trust that aggregate. The fixtures are not AirShelf's live data.
+A generic sign-in affordance is a behavioral privacy review item; JSON
+Schema alone cannot validate its non-disclosure across catalog messages.

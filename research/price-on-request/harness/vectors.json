@@ -1,5 +1,5 @@
 {
-  "_comment": "Pinned upstream schema against review revision: 44 original vectors + 8 AirShelf-inspired synthetic vectors; not private seller data. kind selects variant/product validation.",
+  "_comment": "Pinned upstream schema against experimental proposal: 44 original vectors + 8 anonymous-privacy vectors + 8 synthetic mixed free/unresolved vectors (60 total). No AirShelf seller records. Baseline/proposed statuses check structure; notably inaccurate-range fixture is schema-valid but behaviorally nonconformant.",
   "vectors": [
     {
       "baseline": "valid",
@@ -361,6 +361,62 @@
       "kind": "product",
       "note": "mixed anonymous catalog: public-only range with a neutral variant",
       "proposed": "valid"
+    },
+    {
+      "file": "free_neutral_partial_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Public free plan and undisclosed offer; optional partial price_range 0–0 cannot mean hidden item is free."
+    },
+    {
+      "file": "free_neutral_without_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Mixed public-free and undisclosed variants permit omitted product price_range."
+    },
+    {
+      "file": "free_quote_partial_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Real zero amount and quote_required missing amount are distinct; range contains only public free offer."
+    },
+    {
+      "file": "free_buyer_specific_priced_range.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "For an authorized, negotiated consumer the priced buyer_specific offer and free public offer yield full range 0–50000; old-client disclosure remains unsafe."
+    },
+    {
+      "file": "free_neutral_hidden_list_price.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Rejected: undisclosed cannot reveal a private list/reference price even beside a public free offer."
+    },
+    {
+      "file": "free_neutral_missing_public_price.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Rejected: public/free requires explicit price.amount=0; missing public price is not free."
+    },
+    {
+      "file": "free_neutral_inaccurate_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Structural limit only: JSON Schema cannot verify range arithmetic. Consumer MUST recompute the effective range as 0–0; this is not a semantically conformant producer output."
+    },
+    {
+      "file": "free_neutral_hidden_zero_price.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "invalid",
+      "note": "Rejected by revised schema: price.amount=0 is forbidden on an undisclosed variant, even when a separate public free variant exists."
     }
   ]
 }

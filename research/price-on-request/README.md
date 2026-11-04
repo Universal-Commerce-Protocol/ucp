@@ -94,6 +94,22 @@ The upstream schema decision, generated SDK conditional enforcement,
 buyer/client capability negotiation, independent Platform interoperability,
 privacy side-channel review and Purchase Options composition remain open.
 
+## November 4, 2026 mixed free/unresolved regression
+
+Following [AirShelf's second independent response](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6628941466),
+a public/free plan was identified in one existing seller Product previously
+treated as unpriced. Whether its public/free and hidden offers are separate
+UCP variants is **awaiting external clarification**; the fixtures here
+are **synthetic**, not seller data. The new matrix adds eight Product
+vectors (60 total) and five consumer regression tests (20 total) covering
+public amount zero alongside undisclosed/quote-only, optional zero-only
+partial ranges, buyer-specific access guards, malformed zero-as-unpriced,
+and the distinction between structural schema validity and arithmetic
+correctness. A general "Sign-in is available" message is a conditional
+documentation recommendation, not a tested standardized protocol field.
+The actual capability/version signal and anonymous filter completeness
+remain TC decisions. New results must be verified in CI before reporting.
+
 ## November 3, 2026 review response (AirShelf #969)
 
 AirShelf independently reports reproducing the original 44/1,200/10 harness
