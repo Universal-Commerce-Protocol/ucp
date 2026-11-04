@@ -98,6 +98,10 @@ Applicability to Catalog Feed does not automatically make added fields
 applicable to live Search or Lookup; those capabilities need explicit
 bindings. Extensions for non-Product record types extend Common directly.
 
+An extension of Catalog Feed keys its schema additions on
+`dev.ucp.shopping.catalog.feed`, using the `record` and `manifest` shapes (see
+[Schema Resolution Convention](../../overview/index.md#schema-resolution-convention)).
+
 Catalog Feed defines two representation profiles:
 
 * `dev.ucp.shopping.catalog.jsonl`: One Product encoded as JavaScript

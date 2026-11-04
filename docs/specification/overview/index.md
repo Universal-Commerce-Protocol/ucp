@@ -446,13 +446,25 @@ To validate payloads, implementations resolve extension schemas as follows:
 
 1. Determine the root capability from the operation (e.g., checkout operations
     use `dev.ucp.shopping.checkout`)
-2. For each active extension, resolve and apply its `$defs[{root_capability}]`
+2. For each active extension, resolve and apply its `$defs[{root_capability}]`.
+    An extension of another extension that has no root entry applies the
+    `$defs` entry of an active declared parent instead. The applied entry
+    composes onto the root capability, so it uses the root's shapes.
 
 **Example:** A checkout response includes the discount extension.
 
 - Root capability: `dev.ucp.shopping.checkout`
 - Extension schema: `discount.json`
 - Resolve: `discount.json#/$defs/dev.ucp.shopping.checkout`
+
+**Example:** A catalog feed manifest declares an extension of
+`dev.ucp.shopping.catalog.feed`, which extends `dev.ucp.common.feed`.
+
+- Root capability: `dev.ucp.common.feed`
+- Extension schema: `ads.json`, declaring
+    `extends: "dev.ucp.shopping.catalog.feed"`
+- Resolve: `ads.json#/$defs/dev.ucp.shopping.catalog.feed`, whose `record`
+    shape composes onto the Catalog Feed record
 
 #### Resolution Flow
 
