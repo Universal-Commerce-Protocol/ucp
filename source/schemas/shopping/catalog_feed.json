@@ -5,7 +5,12 @@
   "title": "Catalog Feed",
   "description": "Extends `dev.ucp.common.feed` for catalog Products with nested Variants. Defines Catalog JSONL and Parquet formats and adds manifest `filters` using the Catalog Search vocabulary. Discovery, publication, and snapshot semantics are defined by Common Feed.",
   "$defs": {
-    "dev.ucp.common.feed": {
+    "record": {
+      "title": "Catalog Feed Record",
+      "description": "Catalog Product with nested Variants.",
+      "$ref": "types/product.json"
+    },
+    "manifest": {
       "title": "Catalog Feed Manifest",
       "description": "Feed manifest whose records are catalog Products. Adds `filters` to the manifest, using the Catalog Search filter vocabulary.",
       "allOf": [
@@ -23,6 +28,18 @@
           }
         }
       ]
+    },
+    "dev.ucp.common.feed": {
+      "title": "Catalog Feed",
+      "description": "Composes catalog records and manifests for Common Feed.",
+      "$defs": {
+        "record": {
+          "$ref": "#/$defs/record"
+        },
+        "manifest": {
+          "$ref": "#/$defs/manifest"
+        }
+      }
     }
   }
 }

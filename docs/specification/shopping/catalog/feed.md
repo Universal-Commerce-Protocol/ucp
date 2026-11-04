@@ -91,6 +91,13 @@ nested `variants`, using the same Product shape as Catalog Search and
 conforming to the schemas of the capabilities declared in the manifest's
 `ucp.capabilities`.
 
+Extensions can add record fields, manifest fields, or both; a manifest-only
+extension does not need to declare a record schema. Record enrichment
+preserves the shape and identity of Product and its nested Variants.
+Applicability to Catalog Feed does not automatically make added fields
+applicable to live Search or Lookup; those capabilities need explicit
+bindings. Extensions for non-Product record types extend Common directly.
+
 Catalog Feed defines two representation profiles:
 
 * `dev.ucp.shopping.catalog.jsonl`: One Product encoded as JavaScript
@@ -149,7 +156,7 @@ The manifest below materializes the Business's Canadian French catalog
 restricted to footwear. It declares both `dev.ucp.common.feed` and
 `dev.ucp.shopping.catalog.feed`, and the latter is what defines `filters`:
 
-<!-- ucp:example schema=shopping/catalog_feed op=list def=dev.ucp.common.feed -->
+<!-- ucp:example schema=shopping/catalog_feed op=list def=manifest -->
 ```json
 {
   "ucp": {
@@ -252,7 +259,7 @@ only prices, rolls every two hours as gzipped JSON Lines:
 The supplemental manifest repeats `extends`, `context`, and
 `format`, and declares the record type of its base feed:
 
-<!-- ucp:example schema=shopping/catalog_feed op=list def=dev.ucp.common.feed -->
+<!-- ucp:example schema=shopping/catalog_feed op=list def=manifest -->
 ```json
 {
   "ucp": {
