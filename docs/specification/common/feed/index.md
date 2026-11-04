@@ -377,11 +377,13 @@ A Platform handles resolution failures through the corresponding operation's
 error contract. Stable identity does not guarantee availability or transaction
 success.
 
-A Platform **MUST NOT** consume a snapshot that declares an extension entry it
-cannot place in either group. A Platform validates records against the declared
-schemas and handles records that do not conform as [Malformed
-Records](#malformed-records); for a supplemental feed it validates the composed
-record, since a supplemental record is partial by design.
+A Platform **MUST NOT** consume a snapshot that declares an extension
+entry it cannot place in either group. A Platform validates records for
+conformance with the record-type specification and recognized extensions,
+using record schemas where defined, and handles records that do not
+conform as [Malformed Records](#malformed-records). For a supplemental
+feed, it validates the composed record, since a supplemental record is
+partial by design.
 
 `links`, when present, references terms and policies governing the Platform's
 use of the records in this snapshot. A `terms_of_service` link can identify
