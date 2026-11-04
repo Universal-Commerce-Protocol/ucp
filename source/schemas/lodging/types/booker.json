@@ -34,7 +34,7 @@
     "nationality": {
       "type": "string",
       "pattern": "^[A-Z]{2}$",
-      "description": "Nationality (citizenship) of the booker as an ISO 3166-1 alpha-2 country code."
+      "description": "Nationality (citizenship) of the booker as an ISO 3166-1 alpha-2 country code. At booking this is a value declared by the booker, not an identity-document record or a guest registration filed at check-in. A Business SHOULD NOT require it at booking solely to meet a registration duty that applies on arrival."
     },
     "company": {
       "type": "string",
