@@ -212,8 +212,8 @@ A Business sells in the United States and Canada. Titles, descriptions, and
 media are shared between the two markets; only prices differ, and they change
 faster than the catalog does. Rather than materialize a second full feed for
 Canada, the Business publishes `ca-en-cad` as a supplemental feed extending
-`us-en-usd`. The base rolls daily as Parquet; the supplement, which carries
-only prices, rolls every two hours as gzipped JSON Lines:
+`us-en-usd`. The base refreshes daily as Parquet; the supplement, which
+carries only prices, refreshes hourly as gzipped JSON Lines:
 
 <!-- ucp:example schema=common/feed op=list def=feed_list -->
 ```json
@@ -248,7 +248,7 @@ only prices, rolls every two hours as gzipped JSON Lines:
         "currency": "CAD"
       },
       "format": "dev.ucp.shopping.catalog.jsonl",
-      "interval": "PT2H",
+      "interval": "PT1H",
       "generated_at": "2026-09-22T10:00:00Z",
       "manifest": "https://merchant.example.com/feeds/ca-en-cad/20260922T100000Z/manifest.json"
     }
@@ -311,6 +311,14 @@ changed price makes an existing Variant `unit_price` invalid, the Business
 also restates it in the supplement, even when the currency is unchanged. The
 Platform does not recalculate `unit_price`. The base stays one set of files
 for both markets.
+
+The `interval` values express independent publication cadences: `P1D` for the
+daily base feed and `PT1H` for the hourly pricing supplement. A Business can
+update faster-changing prices independently of slower-changing titles,
+descriptions, and media, allowing a Platform to refresh prices without the
+Business republishing unchanged base files. The same pattern applies when
+both feeds share the same `context`; it is not limited to feeds representing
+different markets.
 
 ### Example: Platform-Specific Fields as a Supplemental Feed
 
