@@ -448,7 +448,11 @@ To validate payloads, implementations resolve extension schemas as follows:
     use `dev.ucp.shopping.checkout`)
 2. For each active extension, resolve and apply its `$defs[{root_capability}]`.
     An extension of another extension that has no root entry applies the
-    `$defs` entry of an active declared parent instead. The applied entry
+    `$defs` entry of its active declared parent instead, provided exactly one
+    active declared parent has an entry; inactive parents are ignored. If two
+    or more active declared parents have entries, the extension **MUST**
+    include a root entry, and implementations **MUST** reject an extension
+    without one rather than choose by declaration order. The applied entry
     composes onto the root capability, so it uses the root's shapes.
 
 **Example:** A checkout response includes the discount extension.
