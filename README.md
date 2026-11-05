@@ -136,12 +136,16 @@ operation-specific schema variants (e.g., for 'create', 'update', or 'read'
 operations) from the master schemas, ensuring they only process fields relevant
 to the current action and direction (request vs. response).
 
-1. Ensure `ucp-schema` is installed:
+1. Install or upgrade `ucp-schema` to version 1.4.1 or newer:
 
    ```bash
-   cargo install ucp-schema                 # from crates.io
-   cargo install --git https://github.com/universal-commerce-protocol/ucp-schema  # from git
+   cargo install ucp-schema --version ">=1.4.1" --locked
+   ucp-schema --version
    ```
+
+   Ensure the version command finds the upgraded binary on `PATH`. Older
+   versions, such as 0.1.0, can miss extension validation and fail the schema
+   table tests. See the [validator setup guide](docs/documentation/schema-authoring.md#running-the-validator-locally).
 
 1. Make updates to JSON files in `source/`
 

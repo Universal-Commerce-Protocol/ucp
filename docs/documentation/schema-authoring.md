@@ -1002,14 +1002,20 @@ file path isn't part of it.
 
 The validator is pure stdlib Python and shells out to the
 [`ucp-schema`](https://github.com/universal-commerce-protocol/ucp-schema)
-binary for schema resolution and payload validation. First-time setup:
+binary for schema resolution and payload validation. Use version 1.4.1 or
+newer: older binaries, such as 0.1.0, can miss extension validation and fail
+the schema table tests. Initial setup or upgrade:
 
 ```bash
-uv sync                                   # Python deps
-cargo install ucp-schema                  # validator backend
+uv sync
+cargo install ucp-schema --version ">=1.4.1" --locked
+ucp-schema --version
 uv tool install pre-commit                # if not already installed
 pre-commit install --hook-type pre-commit --hook-type pre-push
 ```
+
+Verify that `ucp-schema --version` finds the upgraded binary on `PATH`, not an
+older installation or another tool with the same name.
 
 The `--hook-type pre-push` flag is important: pre-commit only installs the
 `pre-commit` stage hook by default, but this repo also uses `pre-push`

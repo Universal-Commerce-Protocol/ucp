@@ -102,6 +102,8 @@ repos:
     rev: v17.15.0
     hooks:
       - id: stylelint
+        # Resolve shared configs from the hook environment, not the host Node prefix.
+        entry: sh -c 'exec stylelint --config-basedir "$NODE_PATH" "$@"' --
         args: ["--fix"]
         additional_dependencies:
           - stylelint@17.15.0

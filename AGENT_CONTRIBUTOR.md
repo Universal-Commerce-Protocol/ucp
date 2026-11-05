@@ -24,7 +24,7 @@ Validate your changes locally using these commands before considering a task com
 
 ### Prerequisites
 
-* **Install `ucp-schema`:** `cargo install ucp-schema` (from crates.io) or `cargo install --git https://github.com/Universal-Commerce-Protocol/ucp-schema`
+* **Install or upgrade `ucp-schema`:** `cargo install ucp-schema --version ">=1.4.1" --locked`. Verify `ucp-schema --version` reports 1.4.1 or newer from the intended binary on `PATH`.
 * **Sync Python Dependencies:** `uv sync`
 
 ### Schema Validation & Resolution
