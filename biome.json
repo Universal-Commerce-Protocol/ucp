@@ -5,15 +5,12 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!docs/assets/**/*.svg"]
+    "includes": ["**", "!docs/assets/**/*.svg", "!**/*.css"]
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
-      "complexity": {
-        "noImportantStyles": "off"
-      }
+      "preset": "recommended"
     }
   }
 }

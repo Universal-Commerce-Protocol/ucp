@@ -81,7 +81,11 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
     fixture per schema/op/direction). Example fields win; scaffold
     fills required gaps.
   - Coverage walk: for each object in the example, verify every
-    schema-required field is either present or elision-acknowledged.
+    schema-required field is either present or elision-acknowledged;
+    required-key anyOf alternatives must have at least one branch
+    represented by authored keys before scaffold merge.
+  - Empty objects only bypass body validation for unscoped read/cancel
+    requests, whose operations have no request body.
   - The merged payload is validated by `ucp-schema validate`.
   - Extension fields: if the payload carries a top-level field that
     the annotated capability does not declare but an extension
@@ -549,6 +553,22 @@ def _collect_required(schema: dict) -> set[str]:
   return required
 
 
+def _collect_required_alternatives(schema: dict) -> list[list[set[str]]]:
+  """Collect required-key anyOf alternatives from an object and its allOf."""
+  alternatives = []
+  for layer in (schema, *schema.get("allOf", [])):
+    if not isinstance(layer, dict) or "anyOf" not in layer:
+      continue
+    alternatives.append(
+      [
+        _collect_required(branch) if isinstance(branch, dict) else set()
+        for branch in layer["anyOf"]
+        if branch is not False
+      ]
+    )
+  return alternatives
+
+
 def _collect_properties(schema: dict) -> dict:
   """Collect properties, merging allOf branches."""
   props = dict(schema.get("properties", {}))
@@ -591,12 +611,13 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
   # Object coverage
   if isinstance(example, dict):
     obj_type = schema.get("type")
-    # Schemas without explicit "type" but with
-    # "properties" or "allOf" are still objects.
+    # Schemas without explicit "type" but with properties or required-key
+    # alternatives are still objects for authored-key coverage.
     has_object_shape = (
       obj_type == "object"
       or "properties" in schema
       or any("properties" in b for b in schema.get("allOf", []))
+      or bool(_collect_required_alternatives(schema))
     )
     if has_object_shape:
       required = _collect_required(schema)
@@ -604,6 +625,19 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
       missing = required - present
       for field in sorted(missing):
         errors.append(f'{path}: missing required field "{field}"')
+
+      for alternatives in _collect_required_alternatives(schema):
+        # A branch without required keys imposes no authored-key coverage
+        # constraint (as in non-create operation projections).
+        if any(not required_keys for required_keys in alternatives):
+          continue
+        if not any(required_keys <= present for required_keys in alternatives):
+          choices = " or ".join(
+            "+".join(sorted(required_keys)) for required_keys in alternatives
+          )
+          errors.append(
+            f"{path}: missing required field alternative ({choices})"
+          )
 
       # Recurse into non-ellipsis fields
       for key, value in example.items():
@@ -1085,8 +1119,15 @@ def process_block(
       annotation,
     )
 
-  # Empty body — trivially valid (e.g. GET, cancel)
-  if example == {}:
+  # Read and cancel requests have no body. Keep their authored empty-object
+  # notation lightweight, but never bypass an explicitly selected shape.
+  if (
+    example == {}
+    and direction == "request"
+    and op in ("read", "cancel")
+    and schema_def is None
+    and target_path is None
+  ):
     return Result(file, line, "ok", annotation=annotation)
 
   # Layer 3: resolve schema
