@@ -1050,12 +1050,14 @@ The create request initializes the checkout from one of two item sources: the
 `line_items` provided inline, or the contents of a [Cart](../cart/index.md)
 identified by `cart_id`. The Platform **MUST** provide `line_items` or
 `cart_id`, and **MAY** provide both. Neither field is required on its own; the
-create request schema requires at least one of them. When both are present,
-the cart contents are authoritative and the Business ignores the overlapping
-checkout fields; see
+create request schema requires at least one of them. When `cart_id` is present,
+the cart's line items and buyer take precedence over overlapping checkout
+fields. Explicitly supplied `context` members override the cart's context
+defaults, and the current buyer IP can update the country when the request
+does not supply `context.address_country`. See
 [Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion)
-for the conversion contract, including precedence, idempotent conversion, and
-cart lifecycle.
+for the complete precedence rules, including higher-confidence transaction
+data, idempotent conversion, and cart lifecycle.
 
 The `cart_id` source is available only when the Cart capability is negotiated.
 The Platform **MUST NOT** provide `cart_id` otherwise. The Business **MUST**

@@ -65,17 +65,82 @@ contents (`line_items`, `context`, `buyer`) initialize the checkout session.
 
 The Platform **MAY** omit `line_items`, or send an empty array
 (`"line_items": []`), when it provides `cart_id`. The Business **MUST** use the
-cart contents and **MUST** ignore overlapping fields in the checkout payload.
+cart's `line_items` and `buyer` and **MUST** ignore overlapping values for those
+fields in the checkout payload. The cart's `context` supplies defaults; explicit
+request context and a current buyer-IP signal take precedence as described below.
 All other input and negotiation requirements of
 [Create Checkout](../checkout/index.md#create-checkout) apply to the request.
 `cart_id` is a checkout initialization input only; the Business does not return
 it in checkout responses.
 
+**Context and buyer-IP precedence:**
+
+Providing `context` in a cart conversion request expresses an intention to
+update the context used for the checkout. The Business **MUST** apply each
+explicitly supplied member in preference to the corresponding value carried from
+the cart. This applies to all context members.
+
+Members omitted from the request retain their cart values, except where the
+buyer-IP country rule below supersedes the carried-forward country. Omitting
+`context` or sending an empty object does not clear the cart's context. This
+conversion-specific overlay does not change the full-replacement contracts of
+[Update Cart](#update-cart) or
+[Update Checkout](../checkout/index.md#update-checkout).
+
+For country localization, the Business **MUST** use the following precedence:
+
+1. `context.address_country` explicitly supplied in the conversion request.
+2. A country resolved from a valid buyer IP supplied in the current request.
+3. The country carried forward from the cart.
+
+A current buyer IP is the
+[`signals["dev.ucp.buyer_ip"]`](../../overview/index.md#signals) value, or an
+equivalent buyer-IP header documented by the Business for its transport. This
+rule does not introduce a standard header name.
+
+If no current buyer IP is supplied, or it cannot resolve to a usable country,
+the Business retains the cart country unless the request supplies
+`context.address_country`. Normal signal validation still applies. A usable
+current buyer IP takes precedence over the cart country regardless of whether
+that country was originally supplied in context or inferred from GeoIP.
+
+These rules determine precedence among provisional localization inputs. They
+do not override the [Context](../checkout/index.md#context) contract: binding
+transaction data such as shipping or billing addresses, higher-confidence
+signals, and regulatory constraints still govern how the Business uses context.
+
+The Business **MUST** apply the resulting context before calculating and
+returning checkout prices, availability, and currency.
+
+For example, this request overrides a cart's previous country and language
+hints while retaining its line items and buyer:
+
+<!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
+```json
+{
+  "cart_id": "cart_abc123",
+  "context": {
+    "address_country": "GB",
+    "language": "fr-CA"
+  }
+}
+```
+
+With no higher-confidence transaction data, country resolution is:
+
+| Cart country | Request `context.address_country` | Country from current buyer IP | Resolved country |
+| :--- | :--- | :--- | :--- |
+| US | GB | CA | GB |
+| US | Not supplied | GB | GB |
+| US | Not supplied | Not supplied or unresolved | US |
+
 **Idempotent conversion:**
 
-If an incomplete checkout already exists for the given `cart_id`, the business
-MUST return the existing checkout session rather than creating a new one. This
-ensures a single active checkout per cart and prevents conflicting sessions.
+If an incomplete checkout already exists for the given `cart_id`, the Business
+**MUST** reuse that checkout session, apply the context and buyer-IP precedence
+rules above, and return the updated session rather than creating a new one.
+When reusing a checkout, use its current context as defaults. This ensures a
+single active checkout per cart and prevents conflicting sessions.
 
 **Cart lifecycle after conversion:**
 
