@@ -73,6 +73,43 @@ jobs:
         if: steps.source_files_changed.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: ucp-schema lint source/
 
+      - name: Validate IR compilation (all verticals)
+        if: >-
+          steps.source_files_changed.outputs.any_changed == 'true' ||
+          github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/ucp-ir-gate.XXXXXX")"
+          trap 'rm -rf "$TMP_ROOT"' EXIT
+          found_vertical=0
+          for vertical_path in source/schemas/*/; do
+            [ -d "$vertical_path" ] || continue
+            vertical="$(basename "$vertical_path")"
+            case "$vertical" in
+              common|transports) continue ;;
+            esac
+            found_vertical=1
+            echo "Validating IR compilation for vertical: $vertical"
+            TMP_VERTICAL="$TMP_ROOT/$vertical"
+            mkdir -p "$TMP_VERTICAL"
+            if compgen -G "source/schemas/*.json" > /dev/null; then
+              cp source/schemas/*.json "$TMP_VERTICAL"/
+            fi
+            for shared in common transports "$vertical"; do
+              if [ -d "source/schemas/$shared" ]; then
+                cp -R "source/schemas/$shared" "$TMP_VERTICAL/$shared"
+              fi
+            done
+            ucp-schema lint "$TMP_VERTICAL/$vertical"
+            ucp-schema generate-types \
+              --schema-dir "$TMP_VERTICAL" \
+              --output /dev/null
+          done
+          if [ "$found_vertical" -eq 0 ]; then
+            echo "Error: No vertical directories found in source/schemas/" >&2
+            exit 1
+          fi
+
       # Enforce the schema-authoring contract end-to-end: every ```json block
       # in the spec docs either validates against its declared schema, or is
       # explicitly skipped with a precise reason. The validator is pure stdlib
