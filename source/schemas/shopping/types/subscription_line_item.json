@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription_line_item.json",
+  "title": "Subscription Line Item",
+  "description": "One recurring line of a subscription: what each recurring order contains for it, and the purchase option it recurs on.",
+  "type": "object",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "purchase_option"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier of the line, unique within the subscription."
+    },
+    "item": {
+      "$ref": "item.json",
+      "description": "The item each recurring order contains. `price` is the unit price the next recurring order is placed at, and equals `purchase_option.price`."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Quantity of the item in each recurring order, as a step count of the item's `quantity_unit`."
+    },
+    "purchase_option": {
+      "allOf": [
+        {
+          "$ref": "purchase_option.json"
+        },
+        {
+          "type": "object",
+          "required": [
+            "schedules"
+          ]
+        }
+      ],
+      "description": "The purchase option the line recurs on, as currently in effect: the same object as the Order line's `purchase_option`, updated for every change since checkout. `title` and `description` name the plan; `price` is the unit price of the next recurring order; `schedules` are the recurring orders still to come, binding. `id` is opaque and need not resolve in the catalog."
+    }
+  }
+}

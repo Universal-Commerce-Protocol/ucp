@@ -43,6 +43,18 @@
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
+      "subscription_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription_management.json#/$defs/subscription_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "subscription_list_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription_management.json#/$defs/list_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -366,6 +378,223 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
+      }
+    },
+    {
+      "name": "list_subscriptions",
+      "summary": "List subscriptions",
+      "description": "List the subscriptions the authenticated buyer owns, optionally filtered by status or originating Order, with cursor pagination.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "filters",
+          "required": false,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/list_request/properties/filters"}
+        },
+        {
+          "name": "pagination",
+          "required": false,
+          "schema": {"$ref": "../../schemas/common/types/pagination.json#/$defs/request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_list_result"}
+      }
+    },
+    {
+      "name": "get_subscription",
+      "summary": "Get subscription",
+      "description": "Get the current state of a subscription, including the operations the Business accepts on it now.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_result"}
+      }
+    },
+    {
+      "name": "pause_subscription",
+      "summary": "Pause subscription",
+      "description": "Pause an active subscription. The Business places no recurring orders until the subscription is resumed.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/precondition/properties/revision"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_result"}
+      }
+    },
+    {
+      "name": "resume_subscription",
+      "summary": "Resume subscription",
+      "description": "Resume a paused subscription, or a canceled one where the Business offers it.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/precondition/properties/revision"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_result"}
+      }
+    },
+    {
+      "name": "skip_subscription_order",
+      "summary": "Skip subscription order",
+      "description": "Skip one upcoming order of a subscription.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/precondition/properties/revision"}
+        },
+        {
+          "name": "upcoming_order_id",
+          "required": true,
+          "schema": {"type": "string", "description": "`id` of the entry in `upcoming_orders` the operation applies to."}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_result"}
+      }
+    },
+    {
+      "name": "unskip_subscription_order",
+      "summary": "Unskip subscription order",
+      "description": "Reverse a skip before the order was due.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/precondition/properties/revision"}
+        },
+        {
+          "name": "upcoming_order_id",
+          "required": true,
+          "schema": {"type": "string", "description": "`id` of the entry in `upcoming_orders` the operation applies to."}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_result"}
+      }
+    },
+    {
+      "name": "cancel_subscription",
+      "summary": "Cancel subscription",
+      "description": "Cancel a subscription. The Business places no further recurring orders beyond those its terms still require.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {"required": ["ucp-agent", "idempotency-key"]}
+            ]
+          }
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/precondition/properties/revision"}
+        },
+        {
+          "name": "reason",
+          "required": false,
+          "schema": {"$ref": "../../schemas/shopping/subscription_management.json#/$defs/cancel_request/properties/reason"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_result"}
       }
     }
   ]

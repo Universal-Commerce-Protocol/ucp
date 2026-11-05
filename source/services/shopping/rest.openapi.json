@@ -730,6 +730,323 @@
           }
         }
       }
+    },
+    "/subscriptions": {
+      "get": {
+        "operationId": "list_subscriptions",
+        "summary": "List Subscriptions",
+        "description": "List the subscriptions the authenticated buyer owns. Returns full subscription entities, most recently started first.",
+        "parameters": [
+          { "$ref": "#/components/parameters/subscription_status_query" },
+          { "$ref": "#/components/parameters/subscription_order_id_query" },
+          { "$ref": "#/components/parameters/cursor_query" },
+          { "$ref": "#/components/parameters/limit_query" },
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriptions listed or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_list_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "get": {
+        "operationId": "get_subscription",
+        "summary": "Get Subscription",
+        "description": "Get the current state of a subscription, including the operations the Business accepts on it now.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription retrieved or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/pause": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "post": {
+        "operationId": "pause_subscription",
+        "summary": "Pause Subscription",
+        "description": "Pause an active subscription. The Business places no recurring orders until the subscription is resumed.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_precondition" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription paused or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/resume": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "post": {
+        "operationId": "resume_subscription",
+        "summary": "Resume Subscription",
+        "description": "Resume a paused subscription, or a canceled one where the Business offers it. The Business states the next recurring order in `upcoming_orders`.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_precondition" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription resumed or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/skip": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "post": {
+        "operationId": "skip_subscription_order",
+        "summary": "Skip Subscription Order",
+        "description": "Skip one upcoming order. The Business does not place it; the orders after it keep their dates.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_upcoming_order_precondition" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order skipped or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/unskip": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "post": {
+        "operationId": "unskip_subscription_order",
+        "summary": "Unskip Subscription Order",
+        "description": "Reverse a skip before the order was due. The Business places the order as scheduled.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_upcoming_order_precondition" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Skip reversed or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/cancel": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "post": {
+        "operationId": "cancel_subscription",
+        "summary": "Cancel Subscription",
+        "description": "Cancel a subscription. The Business places no further recurring orders beyond those its terms still require, which remain in `upcoming_orders`.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_cancel_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription canceled or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_response" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -752,6 +1069,47 @@
           "content": {
             "application/json": {
               "schema": { "$ref": "#/components/schemas/order" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event received and acknowledged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["ucp"],
+                  "properties": {
+                    "ucp": {
+                      "$ref": "#/components/schemas/ucp"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "subscriptionManagementEvent": {
+      "post": {
+        "operationId": "subscription_management_event_webhook",
+        "summary": "Subscription Event Webhook",
+        "description": "Business notifies a Platform that one of the buyer's subscriptions changed. Sent only to Platforms that subscribed through `config.webhook` and hold the buyer's `dev.ucp.shopping.subscription_management:read` grant. The body is a thin event; the Platform reads current state with Get Subscription.",
+        "parameters": [
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/webhook_timestamp" },
+          { "$ref": "#/components/parameters/webhook_id" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_event" }
             }
           }
         },
@@ -803,6 +1161,55 @@
         "description": "The unique identifier of the order.",
         "schema": {
           "type": "string"
+        }
+      },
+      "subscription_id_path": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the subscription.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "subscription_status_query": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "description": "Return only subscriptions in one of these `status` values. Repeat the parameter for several.",
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "subscription_order_id_query": {
+        "name": "order_id",
+        "in": "query",
+        "required": false,
+        "description": "Return only subscriptions whose `origin.order_id` is this Order.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "cursor_query": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "description": "Opaque cursor from a previous response's `pagination.cursor`.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit_query": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Requested page size. The Business applies a default when omitted and MAY return fewer results.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
         }
       },
       "authorization": {
@@ -994,6 +1401,30 @@
           { "$ref": "../../schemas/shopping/order.json" },
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
+      },
+      "subscription_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription_management.json#/$defs/subscription_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "subscription_list_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription_management.json#/$defs/list_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "subscription_precondition": {
+        "$ref": "../../schemas/shopping/subscription_management.json#/$defs/precondition"
+      },
+      "subscription_event": {
+        "$ref": "../../schemas/shopping/subscription_management.json#/$defs/event"
+      },
+      "subscription_cancel_request": {
+        "$ref": "../../schemas/shopping/subscription_management.json#/$defs/cancel_request"
+      },
+      "subscription_upcoming_order_precondition": {
+        "$ref": "../../schemas/shopping/subscription_management.json#/$defs/upcoming_order_precondition"
       },
       "payment": {
         "$ref": "../../schemas/common/types/payment.json"

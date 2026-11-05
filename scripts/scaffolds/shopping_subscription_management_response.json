@@ -1,0 +1,58 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.subscription_management": [
+        {
+          "version": "2026-01-01"
+        }
+      ]
+    }
+  },
+  "subscription": {
+    "id": "sub_scaffold",
+    "status": "active",
+    "revision": "rev_scaffold",
+    "permalink_url": "https://example.com/subscriptions/scaffold",
+    "currency": "USD",
+    "line_items": [
+      {
+        "id": "sli_scaffold",
+        "item": {
+          "id": "item_scaffold",
+          "title": "Scaffold Item",
+          "price": 1000
+        },
+        "quantity": 1,
+        "purchase_option": {
+          "id": "po_scaffold",
+          "title": "Scaffold plan",
+          "price": {
+            "amount": 1000,
+            "currency": "USD"
+          },
+          "schedules": [
+            {
+              "description": {
+                "plain": "$10.00 every month until you cancel."
+              },
+              "totals": [
+                {
+                  "type": "total",
+                  "amount": 1000
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "upcoming_orders": [],
+    "operations": {
+      "cancel_subscription": {
+        "available": true
+      }
+    }
+  }
+}

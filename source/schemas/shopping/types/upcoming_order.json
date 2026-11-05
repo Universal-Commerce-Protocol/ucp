@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/upcoming_order.json",
+  "title": "Upcoming Order",
+  "description": "A recurring order the Business plans to place under a subscription.",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "expected_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque identifier of this planned order, stable while it is planned. A Platform sends it to skip or unskip the order."
+    },
+    "status": {
+      "type": "string",
+      "description": "Well-known values: `scheduled` (the Business will place this order) and `skipped` (the Business will not place it). Platforms MUST tolerate unknown values."
+    },
+    "expected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 date-time when the Business expects to place the order. Indicative: the Business owns the calendar."
+    },
+    "line_item_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "IDs of the subscription lines this order contains. Absent when it contains every line."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/total.json"
+      },
+      "minItems": 1,
+      "description": "Breakdown of what the order is expected to cost, with exactly one `total` entry, before taxes, fulfillment, and fees unless the Business can state them.",
+      "contains": {
+        "properties": {
+          "type": {
+            "const": "total"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "operations": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "subscription_operation.json"
+      },
+      "description": "Operations on this order, keyed by operation name: `skip_subscription_order` and `unskip_subscription_order`. A key that is absent means the operation does not apply to this order."
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription_operation.json",
+  "title": "Subscription Operation",
+  "description": "Whether the Business accepts an operation through this capability now, and where the buyer can do it instead when it does not.",
+  "type": "object",
+  "required": [
+    "available"
+  ],
+  "properties": {
+    "available": {
+      "type": "boolean",
+      "description": "`true` when the Business accepts the operation now from a caller authorized to perform it; independent of the scopes the caller holds. `false` when the operation applies but the Business does not accept it through this capability now; a `messages[]` entry whose `path` names this operation says why."
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Where the buyer can perform the operation on the Business's site. Only when `available` is `false`; required on `update_payment`."
+    }
+  }
+}

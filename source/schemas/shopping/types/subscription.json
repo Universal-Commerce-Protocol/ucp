@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription.json",
+  "title": "Subscription",
+  "description": "A Business-defined grouping of recurring line items that the Business places recurring orders for on the buyer's behalf, as it stands now.",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "revision",
+    "permalink_url",
+    "currency",
+    "line_items",
+    "upcoming_orders",
+    "operations"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque, stable identifier of the subscription. Never reused for another subscription."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for identifying the subscription (e.g. 'Coffee, every month'). MUST only be provided by the business."
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle state of the subscription. Well-known values: `active` (recurring orders are being placed), `paused` (no recurring orders are placed until the subscription is resumed), `canceled` (the buyer or the Business ended it), `ended` (it reached the end of its last schedule). Platforms MUST tolerate unknown values and rely on `operations` for what can be done."
+    },
+    "revision": {
+      "type": "string",
+      "description": "Opaque token that changes whenever the subscription, or a policy or message that targets it, changes. Sent back on every operation that changes the subscription, so the operation applies only to the state the buyer saw."
+    },
+    "permalink_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Page on the Business's site where the buyer manages the subscription. The authoritative management experience, including every change this capability does not expose."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code of every amount on the subscription."
+    },
+    "origin": {
+      "type": "object",
+      "required": [
+        "order_id"
+      ],
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "ID of the Order whose checkout started the subscription."
+        },
+        "line_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "IDs of the lines on that Order that became this subscription."
+        }
+      },
+      "description": "The Order whose checkout started the subscription, and which of its lines. Present when the Business can identify it."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "subscription_line_item.json"
+      },
+      "minItems": 1,
+      "description": "What each recurring order contains, on the terms currently in effect."
+    },
+    "upcoming_orders": {
+      "type": "array",
+      "items": {
+        "$ref": "upcoming_order.json"
+      },
+      "description": "Recurring orders the Business plans to place, in the order it plans to place them. Empty when it plans none, as while the subscription is paused."
+    },
+    "operations": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "subscription_operation.json"
+      },
+      "description": "Operations on the whole subscription, keyed by operation name: `pause_subscription`, `resume_subscription`, and `cancel_subscription`, plus the handoff-only `update_payment`. A key that is absent means the operation does not apply to the subscription in its current state."
+    }
+  }
+}
