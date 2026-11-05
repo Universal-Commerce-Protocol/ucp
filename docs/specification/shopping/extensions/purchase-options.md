@@ -290,7 +290,9 @@ the Order the Order's `id`, the Order line item's `id`, and its
 does: one policy **MAY** govern several line items that share its terms. Whether
 the Business groups recurring line items into one subscription or several —
 billing, shipping, and cancelling them together — is its own, surfaces where
-the buyer manages them, and is for a management capability to expose.
+the buyer manages them, and is for the
+[Subscription Management Capability](../subscription-management/index.md) to
+expose.
 
 On a catalog surface a Business **SHOULD** emit the policy targeting the
 product or variant whose options carry `schedules`, so that a buyer can read
@@ -535,7 +537,9 @@ to the Order line, and **MUST** carry the disclosure that paired with it, its
 authoritative record of what was disclosed and agreed; a dispute is resolved
 against them. They state what was agreed, not what has happened since: price
 changes the Business notifies later, pauses, and cancellation belong to the
-subscription, which a separate capability may expose. Recurring orders are
+subscription, which the
+[Subscription Management Capability](../subscription-management/index.md)
+exposes. Recurring orders are
 Orders in their own right, not adjustments to this one.
 
 The Order is also where the buyer manages the subscription. Every Order carries
@@ -544,9 +548,9 @@ originate from this Order, so a buyer who can reach it can reach them.
 
 ## Out of scope
 
-- **Subscription identity and management.** Status, modification, pause, and
-  cancellation operations, and the lifecycle of the recurring orders, are a
-  separate capability.
+- **Subscription identity and management.** Status, pause, skip, and
+  cancellation operations, and the lifecycle of the recurring orders, are the
+  [Subscription Management Capability](../subscription-management/index.md).
 - **Payment execution.** Credential storage, recurring authorization models,
   mandates, and off-session recovery are payment-handler behavior.
 - **When the current purchase is paid.** Payment terms.

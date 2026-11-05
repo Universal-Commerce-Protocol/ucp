@@ -89,6 +89,11 @@ nav:
               - Transports:
                   - REST: specification/shopping/order/rest.md
                   - MCP: specification/shopping/order/mcp.md
+          - Subscription Management Capability:
+              - Overview: specification/shopping/subscription-management/index.md
+              - Transports:
+                  - REST: specification/shopping/subscription-management/rest.md
+                  - MCP: specification/shopping/subscription-management/mcp.md
           - Extensions:
               - Fulfillment: specification/shopping/extensions/fulfillment.md
               - Discounts: specification/shopping/extensions/discount.md
@@ -566,6 +571,24 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
+        Subscription Management Capability:
+          - specification/shopping/subscription-management/index.md: >-
+              Subscription Management Capability for managing recurring
+              orders after checkout: listing a buyer's subscriptions, reading
+              their lines, purchase options, and upcoming orders, and pausing,
+              resuming, skipping or unskipping an upcoming order, or
+              cancelling, with per-subscription operation availability,
+              disclosures before an operation, revision preconditions,
+              identity linking scopes, cancellation guarantees, and a thin
+              updated event delivered by webhook.
+          - specification/shopping/subscription-management/rest.md: >-
+              HTTP REST transport binding for the Subscription Management
+              Capability, detailing endpoints, query parameters, request
+              bodies, HTTP headers, and error structures.
+          - specification/shopping/subscription-management/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the
+              Subscription Management Capability, detailing the JSON-RPC tools
+              and their parameters.
         Shopping Extensions:
           - specification/shopping/extensions/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,

@@ -1359,6 +1359,9 @@ A root capability is relevant if it matches the operation type:
     `dev.ucp.shopping.checkout`
 - `create_cart` / `update_cart` → `dev.ucp.shopping.cart`
 - Order webhooks → `dev.ucp.shopping.order`
+- `list_subscriptions` / `get_subscription`, the operations that change a
+    subscription, and subscription events →
+    `dev.ucp.shopping.subscription_management`
 
 **Extension Relevance:**
 
@@ -1372,6 +1375,7 @@ root capability.
 | Checkout      | checkout, discount, fulfillment | cart, order                  |
 | Cart          | cart, discount                  | checkout, fulfillment, order |
 | Order         | order                           | checkout, cart, discount     |
+| Subscription  | subscription                    | checkout, cart, order        |
 
 ## Identity & Authentication
 

@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/subscription_management.json",
+  "name": "dev.ucp.shopping.subscription_management",
+  "title": "Subscription",
+  "description": "Subscription management capability: lets a Platform show a buyer their subscriptions and pause, resume, skip an order of, or cancel one.",
+  "type": "object",
+  "$defs": {
+    "platform_schema": {
+      "title": "Platform Subscription Management Config",
+      "description": "Platform configuration for this capability in a platform profile. Same shape as the capability-wide `config.webhook` proposed in #938.",
+      "type": "object",
+      "properties": {
+        "webhook": {
+          "$ref": "#/$defs/platform_webhook",
+          "description": "Subscription to subscription events. Omit to poll with Get Subscription instead."
+        }
+      }
+    },
+    "platform_webhook": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "HTTPS URL where the Business delivers signed subscription events."
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+:[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true,
+          "description": "Event types the Platform subscribes to. When omitted, every event type the Business sends for this capability."
+        }
+      },
+      "title": "Platform Webhook",
+      "description": "Where and which subscription events the Platform receives."
+    },
+    "business_schema": {
+      "title": "Business Subscription Management Config",
+      "description": "Business configuration for this capability in a business profile.",
+      "type": "object",
+      "properties": {
+        "webhook": {
+          "$ref": "#/$defs/business_webhook",
+          "description": "The events the Business sends. A Business without it sends none, and Platforms poll."
+        }
+      }
+    },
+    "business_webhook": {
+      "type": "object",
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+:[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true,
+          "description": "Event types the Business sends for this capability."
+        }
+      },
+      "title": "Business Webhook",
+      "description": "Which subscription events the Business sends."
+    },
+    "event": {
+      "title": "Subscription Event",
+      "description": "Thin notification that a subscription changed. Same envelope as the capability event proposed in #938: it carries identifiers and hints, and the Platform reads current state with Get Subscription.",
+      "type": "object",
+      "required": [
+        "ucp",
+        "type",
+        "occurred_at",
+        "data"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_subscription_management_schema"
+        },
+        "type": {
+          "type": "string",
+          "const": "dev.ucp.shopping.subscription_management:updated",
+          "description": "Event type."
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 date-time when the change was committed."
+        },
+        "data": {
+          "$ref": "#/$defs/event_data",
+          "description": "What changed."
+        }
+      }
+    },
+    "event_data": {
+      "type": "object",
+      "required": [
+        "subscription_id"
+      ],
+      "properties": {
+        "subscription_id": {
+          "type": "string",
+          "description": "`id` of the subscription that changed."
+        },
+        "revision": {
+          "type": "string",
+          "description": "The subscription's `revision` after the change. A Platform that already holds it can skip the read."
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Hints at what changed, so a Platform can decide whether to tell the buyer. Well-known values: `status`, `upcoming_orders`, `terms`, `operations`. Not exhaustive; the read is authoritative."
+        },
+        "order_id": {
+          "type": "string",
+          "description": "ID of the Order the Business placed, when the change is a recurring order being placed. From then on, that Order is the Order capability's concern."
+        }
+      },
+      "title": "Subscription Event Data",
+      "description": "Identifiers and hints about the change. Carries no other subscription data."
+    },
+    "subscription_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "subscription"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_subscription_management_schema"
+        },
+        "subscription": {
+          "$ref": "types/subscription.json",
+          "description": "The subscription as it stands after the operation."
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/policy.json"
+          },
+          "description": "Policies governing the subscription, including the `dev.ucp.shopping.policy.subscription` policy covering each line. `applies_to` targets are relative to the response root (e.g. `$.subscription.line_items[0]`)."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/message.json"
+          },
+          "description": "Messages about the subscription. A warning with `presentation: \"disclosure\"` whose `path` names an operation states what performing it means for the buyer, and is presented before the operation is requested."
+        }
+      }
+    },
+    "precondition": {
+      "type": "object",
+      "required": [
+        "revision"
+      ],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "description": "The subscription's `revision` as the buyer last saw it. The Business applies the operation only if it is still current."
+        }
+      }
+    },
+    "upcoming_order_precondition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/precondition"
+        },
+        {
+          "type": "object",
+          "required": [
+            "upcoming_order_id"
+          ],
+          "properties": {
+            "upcoming_order_id": {
+              "type": "string",
+              "description": "`id` of the entry in `upcoming_orders` the operation applies to."
+            }
+          }
+        }
+      ]
+    },
+    "list_request": {
+      "type": "object",
+      "description": "Request for the authenticated buyer's subscriptions, optionally filtered.",
+      "properties": {
+        "filters": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "Return only subscriptions in one of these `status` values."
+            },
+            "order_id": {
+              "type": "string",
+              "description": "Return only subscriptions whose `origin.order_id` is this Order."
+            }
+          },
+          "description": "Filters, combined with AND. Omitted filters match every subscription."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "list_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "subscriptions"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_subscription_management_schema"
+        },
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "types/subscription.json"
+          },
+          "description": "Subscriptions matching the request, most recently started first."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/response"
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/policy.json"
+          },
+          "description": "Policies governing the listed subscriptions. `applies_to` targets are relative to the response root (e.g. `$.subscriptions[0].line_items[0]`)."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/message.json"
+          },
+          "description": "Messages about the listed subscriptions, targeted by `path`."
+        }
+      }
+    },
+    "get_response": {
+      "$ref": "#/$defs/subscription_response"
+    },
+    "pause_request": {
+      "$ref": "#/$defs/precondition"
+    },
+    "pause_response": {
+      "$ref": "#/$defs/subscription_response"
+    },
+    "resume_request": {
+      "$ref": "#/$defs/precondition"
+    },
+    "resume_response": {
+      "$ref": "#/$defs/subscription_response"
+    },
+    "skip_request": {
+      "$ref": "#/$defs/upcoming_order_precondition"
+    },
+    "skip_response": {
+      "$ref": "#/$defs/subscription_response"
+    },
+    "unskip_request": {
+      "$ref": "#/$defs/upcoming_order_precondition"
+    },
+    "unskip_response": {
+      "$ref": "#/$defs/subscription_response"
+    },
+    "cancel_request": {
+      "type": "object",
+      "required": [
+        "revision"
+      ],
+      "properties": {
+        "revision": {
+          "$ref": "#/$defs/precondition/properties/revision"
+        },
+        "reason": {
+          "type": "string",
+          "description": "The buyer's reason for cancelling, in their words. Optional: the Business MUST NOT require it or make cancellation depend on it."
+        }
+      }
+    },
+    "cancel_response": {
+      "$ref": "#/$defs/subscription_response"
+    }
+  }
+}
