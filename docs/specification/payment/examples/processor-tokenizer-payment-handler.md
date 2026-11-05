@@ -231,7 +231,8 @@ Platform's payment credential provider calls the configured `endpoint`.
 **Note:** In PSP Mode the credential provider **MUST** send the business's
 participant identifier as `identity.access_token` alongside `binding`, using the
 value the business publishes in `config.business_id`. In Direct Mode the
-business is the authenticated caller and `identity` is omitted.
+platform's credential provider still calls `/tokenize`, but because the Business
+hosts the endpoint, participant identity is implicit and `identity` is omitted.
 
 Response:
 
