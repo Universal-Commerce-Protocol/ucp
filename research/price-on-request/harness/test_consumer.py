@@ -1,6 +1,7 @@
 """Regression cases for catalog privacy, filtering and unknown-mode handling."""
 
 import unittest
+from copy import deepcopy
 
 from consumer import (
   ContextCatalogCache,
@@ -321,6 +322,35 @@ class ConsumerTests(unittest.TestCase):
     self.assertEqual(entitled["min"]["amount"], 0)
     self.assertEqual(entitled["max"]["amount"], 50000)
 
+
+  def test_airshelf_redacted_four_plan_shape_and_zero_filter(self):
+    """Synthetic external shape; current seller prices remain unverified."""
+    import json
+    from pathlib import Path
+
+    fixture = json.loads(
+      (Path(__file__).parent / "fixtures" / "airshelf_mixed_four_plan_redacted.json").read_text()
+    )
+    plans = {v["id"]: v for v in fixture["variants"]}
+    self.assertEqual(len(plans), 4)
+    self.assertEqual(selling_range(fixture), fixture["price_range"])
+    self.assertEqual(
+      [v["id"] for v in fixture["variants"]
+       if price_matches(v, "USD", minimum=0, maximum=0)],
+      ["plan-free"],
+    )
+    self.assertFalse(price_matches(plans["plan-enterprise"], "USD", minimum=0))
+    self.assertIsNone(usable_price(plans["plan-enterprise"]))
+
+    inaccurate = deepcopy(fixture)
+    inaccurate["price_range"]["min"]["amount"] = 10000
+    self.assertNotEqual(selling_range(inaccurate), inaccurate["price_range"])
+
+    ambiguous = deepcopy(plans["plan-enterprise"])
+    ambiguous.pop("pricing")
+    ambiguous["price"] = {"amount": 0, "currency": "USD"}
+    self.assertEqual(usable_price(ambiguous)["amount"], 0)
+    # This demonstrates legacy ambiguity, not valid quote semantics.
 
 if __name__ == "__main__":
   unittest.main()
