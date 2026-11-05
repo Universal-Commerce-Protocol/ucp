@@ -123,6 +123,42 @@ the relevant lifetime rule to be explicit?
   is an adjacent example where cancellation policy can change independently
   of price; it does not itself validate the #845 contract.
 
+## B2B procurement council composition (approved charter #947)
+
+The Governing Council [approved the B2B Procurement DTC charter](https://github.com/Universal-Commerce-Protocol/ucp/issues/947)
+on 2026-11-04. This note is a **scope map for architectural review**, not a
+claim that the new council has selected this design or that nominations have
+opened. The Shopping TC retains the current #845 review request until UCP
+governance explicitly routes or coordinates the work.
+
+- **Phase 1 — catalog and requisition discovery:** [price-on-request #969](https://github.com/Universal-Commerce-Protocol/ucp/issues/969)
+  concerns whether a seller can expose an item without disclosing its price,
+  and how the client interprets buyer-restricted values. That is **before**
+  quote/award acceptance. Neither a catalog `pricing` state nor identity
+  linking proves authority to bind a commercial artifact.
+- **Phase 2 — buyer approval to supplier commitment:** requisition approval
+  records *buyer-side* permission to proceed; a supplier-issued quotation or
+  awarded commercial artifact carries potentially different Business-side
+  authority, revision, scope, and commitment semantics. The key handoff
+  question is what survives when the receiving Business evaluates and
+  binds a **particular accepted revision** into Cart/Checkout. Approval,
+  accepted quote, successful binding, and completed order must not be
+  conflated.
+- **Phase 3 — reconciliation and adjustments:** a later invoice, PO
+  acknowledgment, revision, return, or credit can require an authorized
+  change without silently rewriting the original accepted commercial basis.
+  Cross-domain invariants would define what must remain attributable;
+  procurement-specific messages, artifacts and exception workflows remain
+  the B2B council's design choices.
+
+This mapping favors reviewing **Option C** against actual procurement and
+independently authored quotation-carrier examples, without imposing a universal
+requisition/quote JSON object or a new UCP endpoint. The council decision
+requested is **whether any of the candidate invariants should be shared**,
+which domain owns the normative location, and which concrete carrier should
+be tested first. No acceptance, use by buyers, implementation of #845, or
+standards approval is implied.
+
 ## Scope and requested review
 
 This review does **not** standardize negotiation, RFQ, price calculation,
