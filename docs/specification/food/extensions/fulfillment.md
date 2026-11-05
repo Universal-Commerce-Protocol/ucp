@@ -643,8 +643,9 @@ The `description` lets Platforms surface the alternative in conversation:
   answer an unavailable requested time with a recoverable error; **SHOULD** provide
   alternative `options[]` as well when requested time is unavailable.
 - **MUST** reflect the selected option's price in checkout `totals[]` as
-  `type: "fulfillment"` and recompute tax, fees, and percentage tips when the
-  method or option changes.
+  `type: "fulfillment"` and recompute tax, fees, and (if the
+  [Tip Extension](tip.md) is active) percentage tips when the method or option
+  changes.
 - **SHOULD** pre-select a default `selected_option_id` and default handoff
   preferences (`selected_preference_option_ids[]`) so the session can reach
   `ready_for_complete` without extra round trips.
@@ -738,8 +739,7 @@ $0 pickup window, and updated totals without the delivery fee.
       { "type": "subtotal", "display_text": "Subtotal", "amount": 5000 },
       { "type": "fulfillment", "display_text": "Pickup", "amount": 0 },
       { "type": "tax", "display_text": "Tax (8.75%)", "amount": 438 },
-      { "type": "tip", "display_text": "Staff Tip (10%)", "amount": 500 },
-      { "type": "total", "display_text": "Total", "amount": 5938 }
+      { "type": "total", "display_text": "Total", "amount": 5438 }
     ]
     ```
 

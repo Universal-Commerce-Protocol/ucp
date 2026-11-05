@@ -396,7 +396,7 @@ food ordering they typically mean:
 | :--- | :--- | :--- |
 | `incomplete` | No fulfillment method yet, a dish was 86'd, or the basket is under the delivery minimum. | Resolve `messages[]` via Update Checkout. |
 | `requires_escalation` | Alcohol in the basket requires ID verification, or a catering order needs business review. | Hand off via `continue_url`. |
-| `ready_for_complete` | Dishes, fulfillment, buyer contact, and tip are valid, and no gating Action remains outstanding. | Show the final summary and disclosures; call Complete Checkout. |
+| `ready_for_complete` | Dishes, buyer contact, and any active extension's inputs (e.g., fulfillment, tip) are valid, and no gating Action remains outstanding. | Show the final summary and disclosures; call Complete Checkout. |
 | `complete_in_progress` | Payment capture or kitchen POS injection is still running. See [Accepted Completion](../../shopping/checkout/index.md#accepted-completion). `order` **MUST NOT** be present. | Process any outstanding Action, then poll Get Checkout. |
 | `completed` | The kitchen has the ticket. `order` is present. | Show confirmation screen. |
 | `canceled` | Canceled by the Platform or expired (default TTL: 6 hours). | Start a new session if needed. |

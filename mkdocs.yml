@@ -616,7 +616,7 @@ plugins:
               a human-readable penalty schedule for lodging reservations.
         Food Checkout Capability:
           - specification/food/checkout/index.md: >-
-              Core Food Checkout Capability specification detailing cart and checkout
+              Core Food Checkout Capability specification detailing checkout
               operations, dish line items, food establishment context, and payment
               processing for online food orders.
           - specification/food/checkout/rest.md: >-

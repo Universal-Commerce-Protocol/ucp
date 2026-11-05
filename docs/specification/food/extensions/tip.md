@@ -156,6 +156,8 @@ holds the choice; `totals[]` holds the amount.
 - When a fulfillment switch replaces `tip.options[]` and invalidates a prior
   `selected_option_id`, **MUST** clear `selected_option_id` (returning `tip` to
   `Unset` state) and **SHOULD** surface a `notice` warning.
+- **MAY** require an explicit choice before completion; where it does, a `custom_amount`
+  of `0` **MUST** satisfy that requirement.
 
 ## Schema
 
