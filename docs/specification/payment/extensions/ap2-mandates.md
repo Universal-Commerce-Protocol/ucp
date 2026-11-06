@@ -101,7 +101,7 @@ Businesses declare support by adding `dev.ucp.common.payment.ap2_mandate` to the
 ### Platform Profile Advertisement
 
 Platforms declare support in their profile. If the platform is operating under
-the trusted platform provider model, the platform **MUST** provide at least one
+the Trusted Agent Provider model, the platform **MUST** provide at least one
 key in the top-level `keys` array in their profile.
 
 ### Activation and Session Locking
@@ -121,8 +121,8 @@ key in the top-level `keys` array in their profile.
 To utilize this extension, a public signing key **MUST** be available for the
 business to verify the mandate's signature.
 
-* **Platform Provider Flow:** Key provided in the platform profile's `keys`.
-* **User Credential Flow:** Key bound to the digital payment credential.
+* **Trusted Agent Provider:** Key provided in the platform profile's `keys`.
+* **User Credential:** Key bound to the User Credential.
 
 If a public key cannot be resolved, or if the signature is invalid, the business
 **MUST** return an error.
@@ -335,32 +335,80 @@ verify_merchant_authorization(checkout, merchant_profile):
     return verify(encoded_signature, signing_input, public_key, header.alg)
 ```
 
-### Step 2: User Consent & Mandate Generation
+### Step 2: User Consent & Mandate Delegation
 
-When the user confirms the purchase, the platform **MUST** facilitate the
-generation of cryptographically verifiable mandates.
+When the user confirms the purchase, the platform **MUST** obtain mandates
+through AP2 **Mandate Delegation**, which proceeds as follows:
 
-#### Option 1: Trusted Platform Provider
+1. The platform constructs the **Mandate Content** it wishes the user to
+    authorize.
+2. The Mandate Content is shown to the user on a **Trusted Surface**.
+3. After the user's authorization and consent, a Mandate is created and passed
+    back to the platform.
+4. The platform retains the Mandate for use in Step 3.
 
-A trusted platform provider acts on the user's behalf to generate the
-mandate credentials. The platform provider **MUST** ensure that mandates
-are not created without explicit user consent from trusted, deterministic
-channels.
+In UCP the platform occupies AP2's Agent role, and the platform provider
+occupies AP2's Agent Provider role. AP2 defines two models for establishing the
+trust a business places in that delegation, and both are available here. The
+business is AP2's Verifier in each.
 
-Upon user consent, the platform signs the mandates using their server-side
-key. The business trusts the platform's signature implies user consent.
+> **Note on future models.** Mandate Content is independent of the means used
+> to establish trust in its integrity. Further AP2 models for Mandate
+> Delegation therefore apply to this extension without changing what a mandate
+> contains or where UCP places it.
 
-#### Option 2: Digital Payment Credential
+#### Option 1: Trusted Agent Provider
 
-In this model the user has a VDC issued from a source trusted by the business
-(for example: a digital payment credential issued by a bank or network).
+In this model the platform provider is trusted by businesses directly to
+construct Mandates only after obtaining appropriate user consent and
+authorization. It requires no pre-issued credential.
 
-The platform requests a presentation via a protocol like OpenID4VP. The User's
-Wallet (or equivalent) processes the request and signs the mandates using the
-private key associated with their payment credential.
+* The platform constructs the Mandate Content and passes it to a Trusted
+    Surface controlled by the platform provider — for example, a separate
+    deterministic part of its application.
+* The platform provider's Trusted Surface displays the Mandate Content to the
+    user and obtains the necessary authorization and consent.
+* The platform provider creates the Mandate using a securely stored signing
+    key, published in the platform profile's `keys`.
 
-The business trusts the Credential Issuer (Bank) and verifies the user's Key
-Binding (+kb) signature.
+The platform provider **MUST** ensure that the platform cannot access the
+platform provider's signing key, or use it without the Trusted Surface.
+
+#### Option 2: User Credential
+
+This is a three-party model involving the **User Credential Issuer**, the
+**Trusted Surface** acting as Holder of the User Credential, and the platform.
+The business trusts the Issuer of the User Credential to ensure that the
+Trusted Surface constructs Mandates only after obtaining appropriate user
+consent and authorization.
+
+The User Credential is issued to the Holder in advance; issuance is outside the
+scope of this extension.
+
+**Credential schema.** The User Credential model specifies who is trusted and
+how delegation occurs, not what the credential contains. In the payment
+context, the **Digital Payment Credential (DPC)** supplies that schema
+framework: a credential issued by a bank or a network under the DPC claim set,
+identified by the `vct` value `com.emvco.dpc` and presented in `dc+sd-jwt`
+format, as in AP2's worked example. That format is the one a business
+advertises in `vp_formats_supported` (see
+[Business Profile Advertisement](#business-profile-advertisement)). DPC is the
+schema this extension expects in the payment context rather than the only one
+the model admits — any User Credential whose Issuer the business trusts
+satisfies AP2.
+
+Delegation is performed as part of the presentation of the user's VDC. The
+platform requests that presentation using a protocol such as OpenID4VP,
+selecting the credential by its `vct` and carrying the Mandate Content in the
+`transaction_data` array as a mandate delegation object with `type` of
+`delegate`. The Trusted Surface obtains consent and returns the Mandate bound
+to the key of the User Credential.
+
+The business verifies the user's Key Binding (`+kb`) signature against that
+credential. The delegation request and response structure is defined by the
+[AP2 Protocol Specification](https://ap2-protocol.org/specification); this
+extension only requires that the resulting mandates are placed as described in
+Step 3.
 
 ### Step 3: Submission (`complete_checkout`)
 
