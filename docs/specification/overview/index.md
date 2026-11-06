@@ -2456,15 +2456,19 @@ period, the lowest price in a recent window (for example, the preceding 30
 days), a price openly offered for a substantial period, and the
 manufacturer's suggested retail price. Some jurisdictions prescribe or
 restrict which may be used, and the Business is generally expected to be
-able to substantiate the comparison.
+able to substantiate the comparison. It is the Business's responsibility to
+determine whether to send a `list_price`, and which, for the Buyer's context.
+Platforms do not resolve what is appropriate; they present what they receive.
 
-`price` is what the Buyer pays. The gap between `list_price` and `price` is an
-implied saving, not a deduction: a Business **MUST NOT** also report it as an
+`price` is what the Buyer pays. The gap between `list_price` and `price` is a
+comparison, not a deduction: a Business **MUST NOT** also report it as an
 applied discount, and a Platform **MUST NOT** derive an amount owed from
 `list_price`. `totals` remain authoritative.
 
-A Platform **SHOULD** show a comparison only when `list_price` is greater than
-`price`.
+A Platform **SHOULD NOT** present a saving (a strikethrough, percentage, or
+"save" amount) unless `list_price` is greater than `price`. A `list_price` at or
+below `price` is valid, for example a manufacturer's suggested retail price on
+goods sold at a premium.
 
 ## Request Constraints
 
