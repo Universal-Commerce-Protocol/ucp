@@ -3155,7 +3155,9 @@ hooks as a safety net. Pass both to opt into the full enforcement story.</p>
 </span></code></pre></div>
 <p>The <code>--audit</code> mode lists blocks without validating them — useful for counting
 skips and identifying unannotated blocks. <code>--file</code> accepts one or more paths
-for incremental validation.</p>
+for incremental validation. Blocks are validated concurrently by default
+(<code>--jobs</code>, default <code>min(8, CPU count)</code>); pass <code>--jobs 1</code> for serial execution.
+Reporting order and exit codes are identical either way.</p>
 <h4 id="what-runs-automatically">What runs automatically<a class="headerlink" href="#what-runs-automatically" title="Permanent link">&para;</a></h4>
 <p>The "schema drift breaks CI" claim above is enforced by three surfaces:</p>
 <table>

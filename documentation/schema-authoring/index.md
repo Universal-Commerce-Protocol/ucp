@@ -716,7 +716,7 @@ python3 scripts/validate_examples.py --schema-base source/schemas/ --file docs/s
 python3 scripts/validate_examples.py --schema-base source/schemas/ --audit
 ```
 
-The `--audit` mode lists blocks without validating them — useful for counting skips and identifying unannotated blocks. `--file` accepts one or more paths for incremental validation.
+The `--audit` mode lists blocks without validating them — useful for counting skips and identifying unannotated blocks. `--file` accepts one or more paths for incremental validation. Blocks are validated concurrently by default (`--jobs`, default `min(8, CPU count)`); pass `--jobs 1` for serial execution. Reporting order and exit codes are identical either way.
 
 #### What runs automatically
 
