@@ -96,9 +96,11 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 * Reference line items by ID and quantity
 * Include tracking information
-* Type is an open string field - businesses can use any values that make sense
-  (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
-  `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
+* Type is an open string with five
+  [well-known values](#well-known-fulfillment-event-types)
+* Businesses **MUST** use the corresponding well-known value when its semantics
+  match; other values **MUST** include a non-empty, consumer-understandable
+  `description`
 
 ### Attribution
 
@@ -167,6 +169,15 @@ else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
 
+This status describes how much of a line item's active quantity has been
+fulfilled. [Fulfillment Events](#fulfillment-event) describe what happened to
+specified quantities during physical fulfillment. These fields **MUST NOT** be
+treated as interchangeable state machines: `status: "fulfilled"` does not
+necessarily mean that the buyer has received the goods.
+
+Multiple events can describe successive stages for the same quantities.
+Platforms **MUST NOT** sum event quantities to derive `quantity.fulfilled`.
+
 ### Expectation
 
 Expectations are buyer-facing groupings representing when/how items will be
@@ -177,14 +188,109 @@ split, merged, or adjusted post-order.
 
 ### Fulfillment Event
 
-Events are append-only records tracking actual shipments. The `type` field is
-an open string - businesses can use any values that make sense for their
-fulfillment process.
+Events are append-only records tracking facts in physical fulfillment. The
+`type` field remains an open string in the schema and **MUST NOT** be represented
+as a closed enum in generated SDKs.
 
 {{ schema_fields('fulfillment_event', 'shopping/order') }}
 
-Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
-`canceled`, `undeliverable`, `returned_to_sender`, etc.
+#### Well-known Fulfillment Event Types
+
+| Value | Normative meaning |
+| :--- | :--- |
+| `processing` | The Business is preparing the goods or package before handoff to a carrier or delivery network. |
+| `shipped` | The goods or package have left the Business's control, normally through handoff to a carrier or delivery provider. A carrier-network movement scan is not required. |
+| `in_transit` | The carrier or delivery network has confirmed that the package is moving through transportation or delivery. |
+| `delivered` | The package was delivered to the buyer or the agreed delivery location. |
+| `canceled` | This fulfillment was canceled and its current fulfillment flow is not expected to complete. This does not necessarily mean that the entire Order was canceled. |
+
+Businesses **MUST** use these exact lowercase `snake_case` values whenever an
+event matches the corresponding semantics. A custom value **MUST NOT** rename a
+well-known semantic: an event meaning "delivered" **MUST** use `delivered`,
+rather than `finished`, even if a `description` is provided.
+
+Creating a shipping label while the goods remain under the Business's control
+does not, by itself, mean `shipped`. Handoff can be reported as `shipped` before
+the first movement confirmation; `in_transit` reports confirmation by the
+carrier or delivery network.
+
+For well-known values, `description` is optional. If provided, it **MUST** be
+non-empty and **MUST NOT** change the value's normative meaning.
+
+#### Custom Fulfillment Event Types
+
+Businesses **MAY** use additional values for semantics outside the well-known
+vocabulary, such as `failed_attempt`, `undeliverable`, or `returned_to_sender`.
+These are examples of custom values, not additional well-known values.
+
+Every custom event **MUST** include a non-empty, consumer-understandable
+`description`. Whitespace alone does not provide a consumer-understandable
+description, even though it satisfies the schema's `minLength` constraint.
+
+#### Platform Presentation
+
+Platforms **MUST** accept all five well-known values and **MUST NOT** reject an
+Order solely because an event has an unknown `type`. When presenting an unknown
+type, Platforms **MUST** use its `description` as the consumer-facing fallback.
+This does not waive other schema validation requirements.
+
+Platforms **SHOULD** provide presentation, notifications, filtering, or
+analytics tailored to well-known values. Platforms **MUST** treat `description`
+as untrusted Business-provided text and apply the same escaping and
+content-safety controls used for other Business-provided text.
+
+Orders can contain split shipments, partial fulfillment, multiple destinations,
+and concurrent fulfillments with different line-item scopes. Platforms
+**MUST NOT** infer a single global linear Order status from the latest event
+alone. UCP does not define a single transition graph or a canonical order-level
+fulfillment status.
+
+#### Migration
+
+The wire type remains a string, but producer validation is stricter. Businesses
+using a custom synonym for a well-known semantic **MUST** migrate to the
+corresponding well-known value. Genuinely custom events **MUST** add a non-empty,
+consumer-understandable `description`. An explicitly empty `description` is
+invalid even for a well-known value; it can be omitted for those values.
+
+Since fulfillment events are append-only and Order responses contain the full
+snapshot, Businesses migrating historical events **MUST** ensure the full
+snapshot conforms to the schema version they advertise, including descriptions
+for historical custom events.
+
+#### Example: Standard Event
+
+A standard event can omit `description`:
+
+<!-- ucp:example schema=shopping/types/fulfillment_event op=read -->
+```json
+{
+  "id": "evt_delivered",
+  "occurred_at": "2026-08-14T10:00:00Z",
+  "type": "delivered",
+  "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+  "tracking_number": "123456789",
+  "tracking_url": "https://carrier.example.com/track/123456789"
+}
+```
+
+#### Example: Custom Event
+
+An unsuccessful delivery attempt has semantics outside the well-known values.
+The description allows Platforms to explain the event without a custom mapping:
+
+<!-- ucp:example schema=shopping/types/fulfillment_event op=read -->
+```json
+{
+  "id": "evt_attempt",
+  "occurred_at": "2026-08-14T09:00:00Z",
+  "type": "failed_attempt",
+  "description": "Delivery could not be completed because no one was available.",
+  "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+  "tracking_number": "123456789",
+  "tracking_url": "https://carrier.example.com/track/123456789"
+}
+```
 
 ### Adjustment
 
@@ -295,6 +401,64 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
     { "type": "fulfillment", "amount": 1200 },
     { "type": "tax", "amount": 1142 },
     { "type": "total", "amount": 15342 }
+  ]
+}
+```
+
+## Example: split shipments and partial fulfillment
+
+Two pairs of shoes were ordered; one pair has been delivered and the other is
+still being prepared. The line item is `partial` because one of its two units has
+been fulfilled. The later `processing` event applies to the other unit and does
+not undo the earlier delivery or establish a global Order status.
+
+<!-- ucp:example schema=shopping/order op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.order": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "id": "order_split",
+  "checkout_id": "checkout_split",
+  "permalink_url": "https://business.example.com/orders/split",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "li_shoes",
+      "item": { "id": "prod_shoes", "title": "Running Shoes", "price": 3000 },
+      "quantity": { "original": 2, "total": 2, "fulfilled": 1 },
+      "totals": [
+        { "type": "subtotal", "amount": 6000 },
+        { "type": "total", "amount": 6000 }
+      ],
+      "status": "partial"
+    }
+  ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_first_package",
+        "occurred_at": "2026-08-14T10:00:00Z",
+        "type": "delivered",
+        "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+        "tracking_number": "123456789",
+        "tracking_url": "https://carrier.example.com/track/123456789"
+      },
+      {
+        "id": "evt_second_package",
+        "occurred_at": "2026-08-14T11:00:00Z",
+        "type": "processing",
+        "line_items": [{ "id": "li_shoes", "quantity": 1 }],
+        "description": "The remaining pair is being prepared in a second package."
+      }
+    ]
+  },
+  "totals": [
+    { "type": "subtotal", "amount": 6000 },
+    { "type": "total", "amount": 6000 }
   ]
 }
 ```
