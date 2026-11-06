@@ -1,0 +1,211 @@
+{
+  "format_version": 1,
+  "id": "two_stays_independent_cancellation",
+  "source_scaffold": "scripts/scaffolds/lodging_booking_response.json",
+  "response_generated_at": "2026-12-19T20:00:00Z",
+  "booking": {
+    "ucp": {
+      "version": "2026-01-01",
+      "status": "success",
+      "capabilities": {
+        "dev.ucp.lodging.booking": [
+          { "version": "2026-01-01" }
+        ],
+        "dev.ucp.lodging.policy.cancellation": [
+          { "version": "2026-01-01" }
+        ]
+      },
+      "payment_handlers": {}
+    },
+    "id": "booking_two_stays",
+    "status": "incomplete",
+    "property": {
+      "id": "pp_synthetic",
+      "name": "Synthetic Example Hotel",
+      "address": {
+        "street_address": "123 Example Way",
+        "address_locality": "Example City",
+        "address_region": "NY",
+        "address_country": "US",
+        "postal_code": "10001"
+      }
+    },
+    "stays": [
+      {
+        "id": "ss_dec22",
+        "accommodation_type": {
+          "id": "room_example",
+          "title": "Example Room",
+          "capacity": { "adults": 2, "total": 2 }
+        },
+        "rate_plan": { "id": "rp_dec22", "title": "December 22 Rate" },
+        "occupancy": { "adults": 1, "total": 1 },
+        "stay_dates": {
+          "start_date": "2026-12-22",
+          "end_date": "2026-12-24"
+        },
+        "totals": [
+          { "type": "subtotal", "amount": 30000 },
+          { "type": "total", "amount": 30000 }
+        ]
+      },
+      {
+        "id": "ss_dec24",
+        "accommodation_type": {
+          "id": "room_example",
+          "title": "Example Room",
+          "capacity": { "adults": 2, "total": 2 }
+        },
+        "rate_plan": { "id": "rp_dec24", "title": "December 24 Rate" },
+        "occupancy": { "adults": 1, "total": 1 },
+        "stay_dates": {
+          "start_date": "2026-12-24",
+          "end_date": "2026-12-26"
+        },
+        "totals": [
+          { "type": "subtotal", "amount": 40000 },
+          { "type": "total", "amount": 40000 }
+        ]
+      }
+    ],
+    "currency": "USD",
+    "totals": [
+      { "type": "subtotal", "amount": 70000 },
+      { "type": "total", "amount": 70000 }
+    ],
+    "links": [
+      { "type": "terms_of_service", "url": "https://example.com/terms" }
+    ],
+    "continue_url": "https://example.com/booking-sessions/two-stays",
+    "expires_at": "2026-12-19T20:30:00Z",
+    "policies": [
+      {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "For stay ss_dec22, check-in is December 22, 2026 at 15:00 UTC-05:00. Cancellation is free strictly before December 20, 2026 at 15:00 UTC-05:00; a Business-resolved USD 75.00 cancellation fee applies at or after that cutoff."
+        },
+        "applies_to": ["$.stays[0]"],
+        "refundability": "refundable",
+        "schedule": {
+          "anchor": "2026-12-22T20:00:00Z",
+          "tiers": [
+            {
+              "until": "PT48H",
+              "outcome": { "kind": "percentage", "buyer_bps": 10000 }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": { "amount": 7500 }
+          }
+        },
+        "url": "https://example.com/cancellation-terms#ss-dec22"
+      },
+      {
+        "type": "dev.ucp.lodging.policy.cancellation",
+        "description": {
+          "plain": "For stay ss_dec24, check-in is December 24, 2026 at 15:00 UTC-05:00. Cancellation is free strictly before December 22, 2026 at 15:00 UTC-05:00; a Business-resolved USD 125.00 cancellation fee applies at or after that cutoff."
+        },
+        "applies_to": ["$.stays[1]"],
+        "refundability": "refundable",
+        "schedule": {
+          "anchor": "2026-12-24T20:00:00Z",
+          "tiers": [
+            {
+              "until": "PT48H",
+              "outcome": { "kind": "percentage", "buyer_bps": 10000 }
+            }
+          ],
+          "after_last_tier": {
+            "kind": "fixed_fee",
+            "penalty": { "amount": 12500 }
+          }
+        },
+        "url": "https://example.com/cancellation-terms#ss-dec24"
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "policy_index": 0,
+      "stay_id": "ss_dec22",
+      "stay_dates": {
+        "start_date": "2026-12-22",
+        "end_date": "2026-12-24"
+      },
+      "anchor": "2026-12-22T20:00:00Z",
+      "cutoff": "2026-12-20T20:00:00Z",
+      "refundability_snapshot": "refundable",
+      "evaluations": [
+        {
+          "at": "2026-12-20T19:59:59Z",
+          "result": {
+            "status": "selected",
+            "pointer": "/schedule/tiers/0/outcome"
+          },
+          "outcome": { "kind": "percentage", "buyer_bps": 10000 }
+        },
+        {
+          "at": "2026-12-20T20:00:00Z",
+          "result": {
+            "status": "selected",
+            "pointer": "/schedule/after_last_tier"
+          },
+          "outcome": { "kind": "fixed_fee", "penalty": { "amount": 7500 } }
+        }
+      ]
+    },
+    {
+      "policy_index": 1,
+      "stay_id": "ss_dec24",
+      "stay_dates": {
+        "start_date": "2026-12-24",
+        "end_date": "2026-12-26"
+      },
+      "anchor": "2026-12-24T20:00:00Z",
+      "cutoff": "2026-12-22T20:00:00Z",
+      "refundability_snapshot": "refundable",
+      "evaluations": [
+        {
+          "at": "2026-12-22T19:59:59Z",
+          "result": {
+            "status": "selected",
+            "pointer": "/schedule/tiers/0/outcome"
+          },
+          "outcome": { "kind": "percentage", "buyer_bps": 10000 }
+        },
+        {
+          "at": "2026-12-22T20:00:00Z",
+          "result": {
+            "status": "selected",
+            "pointer": "/schedule/after_last_tier"
+          },
+          "outcome": { "kind": "fixed_fee", "penalty": { "amount": 12500 } }
+        }
+      ]
+    }
+  ],
+  "mixed_evaluation": {
+    "at": "2026-12-20T20:00:00Z",
+    "expected": [
+      {
+        "policy_index": 0,
+        "stay_id": "ss_dec22",
+        "result": {
+          "status": "selected",
+          "pointer": "/schedule/after_last_tier"
+        },
+        "outcome": { "kind": "fixed_fee", "penalty": { "amount": 7500 } }
+      },
+      {
+        "policy_index": 1,
+        "stay_id": "ss_dec24",
+        "result": {
+          "status": "selected",
+          "pointer": "/schedule/tiers/0/outcome"
+        },
+        "outcome": { "kind": "percentage", "buyer_bps": 10000 }
+      }
+    ]
+  }
+}
