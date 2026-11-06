@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/event_feed.json",
+  "title": "Event Feed",
+  "description": "Declares a business's agent-subscribable commerce event feed. Agents discover this via the profile and choose a supported transport to receive typed commerce events without out-of-band configuration.",
+
+  "type": "object",
+  "required": ["url", "event_types"],
+  "additionalProperties": false,
+
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL for the event feed endpoint."
+    },
+
+    "event_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Commerce event types this business emits. Use reverse-domain notation (e.g. dev.ucp.order.status_changed).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "examples": [
+        ["dev.ucp.order.status_changed", "dev.ucp.order.shipped", "dev.ucp.cart.price_changed"]
+      ]
+    },
+
+    "transports": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Supported delivery transports for this feed. At least one must be present.",
+      "items": {
+        "type": "string",
+        "enum": ["webhook", "sse", "poll"],
+        "description": "webhook: business pushes to a caller-registered URL. sse: caller opens a long-lived GET. poll: caller GETs the url with optional cursor."
+      },
+      "default": ["poll"]
+    },
+
+    "poll_cursor_param": {
+      "type": "string",
+      "description": "Query parameter name for the cursor token when transport includes 'poll'. Defaults to 'after' if omitted.",
+      "default": "after"
+    }
+  }
+}
