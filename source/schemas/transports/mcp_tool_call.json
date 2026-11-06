@@ -9,7 +9,7 @@
     { "$ref": "jsonrpc.json#/$defs/error_response" }
   ],
   "$defs": {
-    "ucp_agent": {
+    "agent": {
       "type": "object",
       "description": "UCP-Agent metadata carried inside MCP tool arguments.",
       "required": ["profile"],
@@ -26,7 +26,7 @@
       "type": "object",
       "description": "UCP request metadata passed through MCP params.arguments.meta.",
       "properties": {
-        "ucp-agent": { "$ref": "#/$defs/ucp_agent" },
+        "ucp-agent": { "$ref": "#/$defs/agent" },
         "idempotency-key": {
           "type": "string",
           "description": "Optional idempotency key for retry-safe mutating operations."
