@@ -96,6 +96,8 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
               - Return Policy:
                   specification/shopping/extensions/return-policy.md
+              - Order Consultation (Draft):
+                  specification/shopping/extensions/order-consultation.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -577,6 +579,11 @@ plugins:
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
+          - specification/shopping/extensions/order-consultation.md: >-
+              Order Consultation Extension (Working Draft), a Business-initiated
+              post-order proposal with immutable revisions, revision-bound
+              buyer decisions, durable receipts, idempotent lost-response
+              recovery, and separately reported Order application.
           - specification/shopping/extensions/return-policy.md: >-
               Return Policy Extension, defining the
               dev.ucp.shopping.policy.return type on the core policies
