@@ -343,37 +343,30 @@ The checkout `status` field indicates the current phase of the session and
 determines what processing is required next. The business sets the status; the
 platform receives messages indicating what's needed to progress.
 
-```text
-       +------------+                         +---------------------+
-       | incomplete |<----------------------->| requires_escalation |
-       +-----+------+                         |   (buyer handoff    |
-             |                                |  via continue_url)  |
-             | all info collected             +----------+----------+
-             v                                           |
-    +------------------+                                 |
-    |ready_for_complete|                                 |
-    |                  |                                 |
-    | (platform can    |                                 | continue_url
-    | call Complete    |                                 |
-    |   Checkout)      |                                 |
-    +--------+---------+                                 |
-             |                                           |
-             | Complete Checkout                         |
-             v                                           |
-   +--------------------+                                |
-   |complete_in_progress|                                |
-   +---------+----------+                                |
-             |                                           |
-             +-----------------------+-------------------+
-                                     v
-                               +-------------+
-                               |  completed  |
-                               +-------------+
+```mermaid
+stateDiagram-v2
+    [*] --> incomplete
 
-                               +-------------+
-                               |  canceled   |
-                               +-------------+
-          (session invalid/expired - can occur from any state)
+    incomplete --> requires_escalation: buyer handoff
+    requires_escalation --> incomplete: recoverable update
+
+    incomplete --> ready_for_complete: all info collected
+    ready_for_complete --> incomplete: Update / Complete (recoverable)
+
+    ready_for_complete --> requires_escalation: Complete Checkout (escalation)
+    ready_for_complete --> complete_in_progress: Complete Checkout (async)
+    ready_for_complete --> completed: Complete Checkout (sync)
+
+    complete_in_progress --> requires_escalation: continue_url
+    complete_in_progress --> completed
+
+    requires_escalation --> completed: continue_url
+
+    canceled
+    note right of canceled
+        Session invalid/expired
+        (from any active state)
+    end note
 ```
 
 ### Status Values
@@ -1053,10 +1046,28 @@ To be invoked by the platform when the user has expressed purchase intent
 product data (price/title etc.) provided by the business through the feeds
 **SHOULD** match the actual attributes returned in the response.
 
-When the [Cart](../cart/index.md) capability is negotiated, the request payload
-should accept an additional `cart_id` field for cart-to-checkout conversion. See
-[Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion) for
-the field contract.
+The create request initializes the checkout from one of two item sources: the
+`line_items` provided inline, or the contents of a [Cart](../cart/index.md)
+identified by `cart_id`. The Platform **MUST** provide `line_items` or
+`cart_id`, and **MAY** provide both. Neither field is required on its own; the
+create request schema requires at least one of them. When both are present,
+the cart contents are authoritative and the Business ignores the overlapping
+checkout fields; see
+[Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion)
+for the conversion contract, including precedence, idempotent conversion, and
+cart lifecycle.
+
+The `cart_id` source is available only when the Cart capability is negotiated.
+The Platform **MUST NOT** provide `cart_id` otherwise. The Business **MUST**
+reject a create request that provides `cart_id` when the Cart capability is
+not negotiated, and **MUST NOT** ignore `cart_id` and initialize the checkout
+from the inline `line_items` instead. Schema validation establishes only that
+the request names an item source; it does not establish that the Cart
+capability is negotiated, that the cart exists, or that the Buyer may access
+it.
+
+The Business **MUST** reject a create request that provides neither
+`line_items` nor `cart_id` as an invalid request, without creating a checkout.
 
 {{ method_fields('create_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
