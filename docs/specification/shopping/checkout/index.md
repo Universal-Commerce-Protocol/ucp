@@ -1050,9 +1050,9 @@ The create request initializes the checkout from one of two item sources: the
 `line_items` provided inline, or the contents of a [Cart](../cart/index.md)
 identified by `cart_id`. The Platform **MUST** provide `line_items` or
 `cart_id`, and **MAY** provide both. Neither field is required on its own; the
-create request schema requires at least one of them. When both are present,
-the cart contents are authoritative and the Business ignores the overlapping
-checkout fields; see
+create request schema requires at least one of them. When `cart_id` is present,
+the Business **MUST** use the cart contents and **MUST** ignore all other
+checkout fields in the payload; see
 [Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion)
 for the conversion contract, including precedence, idempotent conversion, and
 cart lifecycle.
