@@ -59,6 +59,8 @@ Tokenization handlers transform credentials between source and checkout forms:
 |   |                 |<---------------      |                         |  |
 |   | * pan           |                      | What comes OUT          |  |
 |   | * network_token |                ----->| * token                 |  |
+|   |                 |                      | * binding (optional)    |  |
+|   |                 |                      | * identity (optional)   |  |
 |   |                 |                      |                         |  |
 |   +-----------------+                      +-------------------------+  |
 |                                                                         |
@@ -66,7 +68,8 @@ Tokenization handlers transform credentials between source and checkout forms:
 ```
 
 Tokenization handlers accept source credentials (e.g., a PAN credential) and
-produce checkout credentials (e.g., tokens).
+produce checkout credentials (e.g., tokens). A token credential can carry the
+binding and participant identity established during tokenization.
 
 A network token does not always need this round-trip. A handler **MAY** accept
 `network_token_credential.json` as a source credential for tokenization, or
@@ -114,6 +117,22 @@ required when the caller acts on behalf of another participant, and omitted
 when the authenticated caller is that participant. See
 [Payment Identity Schema](site:schemas/common/types/payment_identity.json).
 
+`TokenCredential` defines optional `binding` and `identity` members so the
+Platform can carry this issuance context into checkout. Existing credentials
+remain valid, and a concrete handler **MAY** require either member.
+
+When either member is included, the Platform **MUST** copy it unchanged from
+the tokenization request. Before detokenization or processing, the Business
+**MUST** validate a carried binding according to the handler's binding policy.
+The carried identity remains a participant identifier; caller authentication
+is separate, as required by rule 4 below.
+
+A tokenize-to-process handler has no `/detokenize` request that can carry the
+binding. Its concrete credential schema therefore **SHOULD** require `binding`,
+and its specification **MUST** define how the Business passes the binding to the
+Processor. Before processing, the Processor **MUST** compare it by exact
+equality with the binding recorded at issuance.
+
 Binding is a replay guard, not a resource reference. The following rules apply
 to every tokenizer:
 
@@ -133,15 +152,16 @@ to every tokenizer:
    implementation.
 4. Every token is issued to exactly one participant. A Tokenizer **MUST**
    record that participant at `/tokenize` — from `identity` when present,
-   otherwise the authenticated caller. On `/detokenize` a Tokenizer **MUST**
-   resolve the requesting participant the same way, **MUST** verify it matches
-   the participant recorded at issuance, and **MUST** verify that the
-   authenticated caller is that participant or is authorized to act for it. A
-   Tokenizer **MUST NOT** return the credential when either check fails.
-   `identity` is a participant identifier, not a credential, and a Tokenizer
-   **MUST NOT** accept it as authentication. The mechanism by which one
-   participant is authorized to act for another is handler-defined and outside
-   the scope of this specification.
+   otherwise the authenticated caller. On `/detokenize` or a combined
+   processing operation, a Tokenizer **MUST** resolve the requesting participant
+   the same way, **MUST** verify it matches the participant recorded at
+   issuance, and **MUST** verify that the authenticated caller is that
+   participant or is authorized to act for it. A Tokenizer **MUST NOT** return
+   the credential or process the payment when either check fails. `identity` is
+   a participant identifier, not a credential, and a Tokenizer **MUST NOT**
+   accept it as authentication. The mechanism by which one participant is
+   authorized to act for another is handler-defined and outside the scope of
+   this specification.
 
 ---
 
@@ -239,7 +259,7 @@ See the full [OpenAPI specification](site:handlers/tokenization/openapi.json) fo
 | Requirement                  | Description                                                                                                                    |
 | :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
 | **Binding required**         | Credentials **MUST** be bound to a `binding` resource (`type` and `id`) and issued to exactly one participant to prevent reuse |
-| **Binding verified**         | Tokenizer **MUST** verify binding matches before returning credentials                                                         |
+| **Binding verified**         | Tokenizer **MUST** exact-match binding on detokenization; Processor **MUST** exact-match it during processing                  |
 | **Cryptographically random** | Use secure random generators; tokens must be unguessable                                                                       |
 | **Sufficient length**        | Minimum 128 bits of entropy                                                                                                    |
 | **Non-reversible**           | Cannot derive the credential from the token                                                                                    |
@@ -298,11 +318,12 @@ A tokenizer handler conforms to this pattern if it:
 - [ ] Defines authentication and onboarding requirements
 - [ ] Documents credential transformation between source and checkout forms
 - [ ] Produces tokens compatible with the `TokenCredential` schema
+- [ ] Preserves carried `binding` and `identity` unchanged from tokenization through checkout
 - [ ] Specifies token lifecycle policy (TTL, single-use, etc.)
 - [ ] Requires `binding` with `type` and `id` on tokenization requests
 - [ ] Uses `PaymentIdentity` for participant identification
-- [ ] Verifies `binding` matches by exact equality on detokenization requests
-- [ ] Records the participant each token is issued to, and on detokenization verifies both that participant and the caller's authority to act for it
+- [ ] Verifies `binding` by exact equality on detokenization and, for tokenize-to-process, during processing
+- [ ] Records the participant each token is issued to, and on detokenization or processing verifies both that participant and the caller's authority to act for it
 - [ ] Accepts binding types it does not recognize
 - [ ] Requires security acknowledgements from participants receiving raw credentials
 
