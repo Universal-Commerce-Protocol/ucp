@@ -58,6 +58,10 @@ This is vertical-agnostic and enables key commerce flows such as:
 * **Operating Hours**: Regular weekly schedules (`hours`) and date-specific
     exceptions (`exception_hours`), interpreted in the Location's `timezone`.
     See [Operating Hours](#operating-hours).
+* **Attestations**: Optional third-party signed statements (`attestations[]`)
+    scoped to a specific physical Location via `location_id` (such as a culinary
+    guide distinction or physical branch verification). See
+    [Verifiable Attestations](../../attestations.md).
 
 ### Relationship to Other Capabilities
 

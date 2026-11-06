@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/attestation.json",
+  "title": "Attestation",
+  "description": "A third-party signed statement about a business, seller, or physical Location, carried as a compact JWS Trust Mark ([RFC 7515](https://www.rfc-editor.org/rfc/rfc7515)).",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["type", "token"],
+  "properties": {
+    "type": {
+      "$ref": "reverse_domain_name.json",
+      "description": "Reverse-domain attestation type identifier owned by the issuer's domain. MUST equal the signed `trust_mark_type` claim inside `token` so verifiers can filter candidate attestations before decoding tokens or fetching issuer keys."
+    },
+    "token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+      "description": "Compact JWS ([RFC 7515](https://www.rfc-editor.org/rfc/rfc7515)) carrying protected header `typ: 'ucp-attestation+jwt'`, asymmetric `alg`, and `kid`, and an OpenID Federation Trust Mark payload (`#/$defs/claims`) signed by a key published at `iss`."
+    }
+  },
+  "$defs": {
+    "status_list": {
+      "title": "Status List Reference",
+      "description": "Pointer to a revocation entry inside an IETF Token Status List (`draft-ietf-oauth-status-list`).",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["idx", "uri"],
+      "properties": {
+        "idx": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based index of this attestation's status entry in the referenced Status List Token."
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "HTTPS URL of the issuer's signed Status List Token."
+        }
+      }
+    },
+    "status": {
+      "title": "Attestation Status",
+      "description": "Revocation status reference carried in the `status` JWT claim.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["status_list"],
+      "properties": {
+        "status_list": {
+          "$ref": "#/$defs/status_list",
+          "description": "Token Status List reference identifying the list URI and bit index for this attestation."
+        }
+      }
+    },
+    "claims": {
+      "title": "Attestation Claims",
+      "description": "Decoded JWT payload of a UCP attestation token, profiled from OpenID Federation 1.0 Trust Marks. Issuers MAY include additional top-level claims defined by `trust_mark_type`.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["iss", "sub", "trust_mark_type", "iat", "exp"],
+      "not": {
+        "required": ["location_id", "seller_id"]
+      },
+      "properties": {
+        "iss": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "HTTPS URL of the issuer's key document (`/.well-known/ucp` or `/.well-known/jwks.json`, unless explicitly pinned by verifier policy). Its host MUST satisfy Authority Binding for `trust_mark_type`."
+        },
+        "sub": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Canonical HTTPS `/.well-known/ucp` profile URL of the subject business, seller, or host, matched as an exact string."
+        },
+        "trust_mark_type": {
+          "$ref": "reverse_domain_name.json",
+          "description": "Reverse-domain attestation type identifier. MUST equal the enclosing entry's `type`."
+        },
+        "iat": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Issuance time in seconds since the Unix epoch."
+        },
+        "exp": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Expiration time in seconds since the Unix epoch. Required in UCP."
+        },
+        "nbf": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optional not-before time in seconds since the Unix epoch."
+        },
+        "logo_uri": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Optional HTTPS URL of the issuer's visual mark for display."
+        },
+        "ref": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Optional HTTPS URL of a human-readable certificate or verification page for this attestation."
+        },
+        "location_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Physical Location identifier (`Location.id`) when the attestation is scoped to a single branch. Forbidden on `business_summary.json` (`dev.ucp.common.business` and `sellers` entries) and REQUIRED (MUST equal `Location.id`) on `Location.attestations[]`."
+        },
+        "seller_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Seller key in a response `sellers` map when the attestation is scoped to a marketplace seller or regional entity bound to the host's profile URL (`sub`) rather than a standalone seller profile URL. Forbidden on profile-level `dev.ucp.common.business` and `Location.attestations[]`."
+        },
+        "status": {
+          "$ref": "#/$defs/status",
+          "description": "Optional revocation status pointer using an IETF Token Status List."
+        }
+      }
+    }
+  }
+}

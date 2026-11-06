@@ -206,5 +206,7 @@ usdz
 vnd
 webm
 disclosable
+chargeback
+OCSP
 rrggbb
 srgb
