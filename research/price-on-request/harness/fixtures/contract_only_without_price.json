@@ -1,0 +1,1 @@
+{"description":{"plain":"Contract-gated stranger: no public price exists; caller has not established entitlement, so contract_only carries no price."},"id":"var_sec_suite","pricing":{"mode":"contract_only"},"title":"Security Suite"}

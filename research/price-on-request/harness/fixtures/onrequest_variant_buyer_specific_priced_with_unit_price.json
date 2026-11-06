@@ -1,0 +1,1 @@
+{"id":"var_nda_widget","title":"NDA Widget","description":{"plain":"Price resolved for linked buyer."},"pricing":{"mode":"buyer_specific"},"price":{"amount":8000,"currency":"USD"},"unit_price":{"amount":500,"currency":"USD","measure":{"unit":"ml","display_text":"ml","value":750},"reference":{"unit":"ml","display_text":"ml","value":100}}}

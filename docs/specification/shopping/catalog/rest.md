@@ -321,7 +321,17 @@ messages indicating which identifiers were not found.
           "id": "prod_abc123",
           "title": "Blue Runner Pro",
           "description": { "plain": "Lightweight running shoes." },
-          "variants": [ ... ],
+          "variants": [
+            {
+              "id": "var_abc123_m",
+              "title": "Medium",
+              "description": { "plain": "Medium." },
+              "price": { "amount": 12000, "currency": "USD" },
+              "inputs": [
+                { "id": "prod_abc123", "match": "featured" }
+              ]
+            }
+          ],
           "price_range": {
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
@@ -331,7 +341,17 @@ messages indicating which identifiers were not found.
           "id": "prod_def456",
           "title": "Trail Blazer X",
           "description": { "plain": "Trail shoes with superior traction." },
-          "variants": [ ... ],
+          "variants": [
+            {
+              "id": "var_def456_m",
+              "title": "Medium",
+              "description": { "plain": "Medium." },
+              "price": { "amount": 15000, "currency": "USD" },
+              "inputs": [
+                { "id": "prod_def456", "match": "featured" }
+              ]
+            }
+          ],
           "price_range": {
             "min": { "amount": 15000, "currency": "USD" },
             "max": { "amount": 15000, "currency": "USD" }

@@ -10,6 +10,7 @@
     "fulfillment_changed",
     "payment_term_changed",
     "totals_changed",
-    "age_restricted"
+    "age_restricted",
+    "price_on_request"
   ]
 }

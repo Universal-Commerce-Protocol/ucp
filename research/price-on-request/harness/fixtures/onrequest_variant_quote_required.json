@@ -1,0 +1,1 @@
+{"description":{"plain":"High-volume printer leased on quoted terms."},"id":"var_industrial_printer","pricing":{"mode":"quote_required","next_step":"request_quote","reason":"contract_or_volume_dependent"},"title":"Industrial Printer"}

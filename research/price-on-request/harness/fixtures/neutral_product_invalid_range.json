@@ -1,0 +1,29 @@
+{
+  "id": "prod-hidden-list",
+  "title": "Seller catalog listing",
+  "description": {
+    "plain": "Range leaks where no price is visible"
+  },
+  "variants": [
+    {
+      "id": "var-confidential",
+      "title": "Redacted B2B item",
+      "description": {
+        "plain": "Synthetic regression example; not customer data"
+      },
+      "pricing": {
+        "mode": "undisclosed"
+      }
+    }
+  ],
+  "price_range": {
+    "min": {
+      "amount": 4100,
+      "currency": "USD"
+    },
+    "max": {
+      "amount": 4100,
+      "currency": "USD"
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "id": "mixed-live-redacted",
+  "title": "Subscription product",
+  "description": {
+    "plain": "Redacted shape; amounts synthetic, current seller prices unverified"
+  },
+  "variants": [
+    {
+      "id": "plan-small",
+      "title": "Plan Small",
+      "description": {
+        "plain": "Synthetic"
+      },
+      "pricing": {
+        "mode": "public"
+      },
+      "price": {
+        "amount": 10000,
+        "currency": "USD"
+      },
+      "quantity_unit": {
+        "unit": "MON",
+        "display_text": "month"
+      }
+    },
+    {
+      "id": "plan-large",
+      "title": "Plan Large",
+      "description": {
+        "plain": "Synthetic"
+      },
+      "pricing": {
+        "mode": "public"
+      },
+      "price": {
+        "amount": 30000,
+        "currency": "USD"
+      },
+      "quantity_unit": {
+        "unit": "MON",
+        "display_text": "month"
+      }
+    },
+    {
+      "id": "plan-enterprise",
+      "title": "Plan Enterprise",
+      "description": {
+        "plain": "Synthetic"
+      },
+      "pricing": {
+        "mode": "quote_required"
+      }
+    },
+    {
+      "id": "plan-free",
+      "title": "Plan Free",
+      "description": {
+        "plain": "Synthetic"
+      },
+      "pricing": {
+        "mode": "public"
+      },
+      "price": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "quantity_unit": {
+        "unit": "MON",
+        "display_text": "month"
+      }
+    }
+  ],
+  "price_range": {
+    "min": {
+      "amount": 0,
+      "currency": "USD"
+    },
+    "max": {
+      "amount": 30000,
+      "currency": "USD"
+    }
+  }
+}

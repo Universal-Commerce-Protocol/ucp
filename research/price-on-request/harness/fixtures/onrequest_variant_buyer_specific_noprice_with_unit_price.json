@@ -1,0 +1,1 @@
+{"id":"var_nda_widget","title":"NDA Widget","description":{"plain":"Price depends on caller."},"pricing":{"mode":"buyer_specific"},"unit_price":{"amount":500,"currency":"USD","measure":{"unit":"ml","display_text":"ml","value":750},"reference":{"unit":"ml","display_text":"ml","value":100}}}
