@@ -320,3 +320,16 @@ this response root (e.g., `$.line_items[0]`). See
 [Policies](../../overview/index.md#policies) for the full model.
 
 {{ schema_fields('types/policy', 'shopping/cart') }}
+
+### Seller Attribution
+
+Businesses **MAY** populate the response-only `sellers` map (`Map[string, Seller]`, extending `Business Summary` with an optional `profile` URI) alongside a session-level `seller_id` and per-line `line_items[].seller_id` to identify the seller or contracting legal entity for the cart and its items:
+
+* **Precedence (`line_item.seller_id` > session `seller_id`)**: When `line_items[].seller_id` is present on a line item, it identifies that line item's seller in `sellers` and overrides the cart-level `seller_id`. When `line_items[].seller_id` is omitted, the line item inherits the cart-level `seller_id`.
+* **Multi-entity global brands**: A brand operating multiple regional legal entities under one root `/.well-known/ucp` profile (for example, distinct US Inc., Canada Ltd., and EU GmbH subsidiaries) can resolve and surface the applicable regional entity (`legal_name`, statutory `address`, `contacts`, and policy `links`) in `sellers` once buyer `context` fixes the market.
+* **Multi-seller marketplaces**: A marketplace can attribute individual line items to third-party sellers via `line_items[].seller_id` without requiring every seller to host a standalone UCP profile. When a seller also publishes a UCP profile, the entry in `sellers` **MAY** include `profile`.
+* **Contextual statutory disclosures**: Seller disclosures that depend on buyer region or that should not sit in a static, world-readable `/.well-known/ucp` document are surfaced in context on the cart and checkout responses and snapshotted on the resulting order.
+
+See [Checkout: Seller Attribution](../checkout/index.md#seller-attribution) for the full resolution and disclosure contract.
+
+{{ schema_fields('types/business_summary', 'shopping/cart') }}
