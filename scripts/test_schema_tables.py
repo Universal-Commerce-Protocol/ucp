@@ -564,7 +564,7 @@ def test_fragment_ref_real_anchor_vs_title_fallback(macros: dict) -> None:
       "Map[string, [Amenity](site:specification/common/location/rest/#amenity)]"
     )
     and _type_cell(get_prod, "product")
-    == "[Product](site:specification/reference/#product)"
+    == "[Product](site:specification/shopping/catalog/#product)"
     and restored["properties"]["anchored_frag"]["allOf"][0].get("$ref")
     == "../common/types/pagination.json#/$defs/request"
     and "$ref" not in restored["properties"]["unanchored_frag"]
@@ -1099,10 +1099,13 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
           is_ext = "Extension" in sdata.get("title", "")
           if (is_ext and not inc_ext) or (not is_ext and not inc_cap):
             continue
+          # Qualify by path under source/schemas/ (e.g. `food/cart`): bare
+          # stems are ambiguous once verticals share filenames.
           ent = (
-            schema_file.stem
-            if sub_dir == "."
-            else f"{Path(sub_dir).as_posix()}/{schema_file.stem}"
+            schema_file.resolve()
+            .relative_to(main.SCHEMAS_DIR.resolve())
+            .with_suffix("")
+            .as_posix()
           )
           resolved_file = schema_file.resolve()
           raw_root = main._resolve_schema(resolved_file)
