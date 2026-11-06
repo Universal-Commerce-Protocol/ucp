@@ -52,9 +52,11 @@ Carts support:
 
 ## Cart-to-Checkout Conversion
 
-When the Cart capability is negotiated, the Platform converts a cart to a
-checkout by providing `cart_id` in the Create Checkout request. The cart
-contents (`line_items`, `context`, `buyer`) initialize the checkout session.
+A Platform can initialize a checkout from a cart in two ways:
+
+**By reference:** When the Cart capability is negotiated, provide `cart_id`
+in the Create Checkout request. The cart contents (`line_items`, `context`,
+`buyer`) initialize the checkout session.
 
 <!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
 ```json
@@ -65,11 +67,30 @@ contents (`line_items`, `context`, `buyer`) initialize the checkout session.
 
 The Platform **MAY** omit `line_items`, or send an empty array
 (`"line_items": []`), when it provides `cart_id`. The Business **MUST** use the
-cart contents and **MUST** ignore overlapping fields in the checkout payload.
+cart contents and **MUST** ignore all other checkout fields in the payload.
 All other input and negotiation requirements of
 [Create Checkout](../checkout/index.md#create-checkout) apply to the request.
 `cart_id` is a checkout initialization input only; the Business does not return
 it in checkout responses.
+
+To change the existing cart, use [Update Cart](#update-cart) before passing
+its `cart_id`.
+
+**Inline:** Omit `cart_id` and provide the complete
+[Create Checkout](../checkout/index.md#create-checkout) input, copying the
+cart's contents and applying any desired changes. For example, to use a
+different country:
+
+<!-- ucp:example schema=shopping/checkout op=create direction=request -->
+```json
+{
+  "line_items": [
+    { "item": { "id": "item_123" }, "quantity": 1 }
+  ],
+  "buyer": { "email": "buyer@example.com" },
+  "context": { "address_country": "GB" }
+}
+```
 
 **Idempotent conversion:**
 
