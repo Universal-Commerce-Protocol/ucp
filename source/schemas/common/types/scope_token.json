@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/scope_token.json",
+  "title": "Scope Token",
+  "description": "Scope string formed by joining a capability name and a scope name with a colon: '{capability}:{scope}', e.g. 'dev.ucp.shopping.order:read'. Capability names use reverse-DNS naming; scope names denote the permission granted, defined by each capability's spec (e.g. 'read', 'manage', 'create'). The grammar is shared by every UCP surface that names a permission — OAuth 'scope' parameters and token claims under Identity Linking, and credentials scoped to a single resource such as Order Access.",
+  "type": "string",
+  "pattern": "^[a-z](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9_-]*[a-z0-9_])?)+:[a-z][a-z0-9_]*$",
+  "examples": [
+    "dev.ucp.shopping.order:read",
+    "dev.ucp.shopping.order:manage",
+    "dev.ucp.shopping.checkout:manage",
+    "com.example.loyalty:points"
+  ]
+}

@@ -334,7 +334,19 @@
         {
           "name": "meta",
           "required": true,
-          "schema": {"$ref": "#/components/schemas/meta"}
+          "schema": {
+            "allOf": [
+              {"$ref": "#/components/schemas/meta"},
+              {
+                "properties": {
+                  "ucp-order-token": {
+                    "type": "string",
+                    "description": "Order credential issued at checkout completion, authorizing access to the order it is bound to. Omit when the request is authorized by platform credentials or a user identity token. Maps to HTTP UCP-Order-Token header."
+                  }
+                }
+              }
+            ]
+          }
         },
         {
           "name": "id",
