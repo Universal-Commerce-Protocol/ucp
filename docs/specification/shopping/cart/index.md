@@ -73,26 +73,6 @@ All other input and negotiation requirements of
 `cart_id` is a checkout initialization input only; the Business does not return
 it in checkout responses.
 
-To change the existing cart, use [Update Cart](#update-cart) before passing
-its `cart_id`.
-
-**Inline:** Omit `cart_id` and provide the complete
-Create Checkout](../checkout/index.md#create-checkout) input, which can be
-derived from a previous cart negotiation with additional updates, or constructed
-as direct input for a checkout. 
-different country:
-
-<!-- ucp:example schema=shopping/checkout op=create direction=request -->
-```json
-{
-  "line_items": [
-    { "item": { "id": "item_123" }, "quantity": 1 }
-  ],
-  "buyer": { "email": "buyer@example.com" },
-  "context": { "address_country": "GB" }
-}
-```
-
 **Idempotent conversion:**
 
 If an incomplete checkout already exists for the given `cart_id`, the business
