@@ -110,9 +110,14 @@
       "type": "object",
       "description": "Business-defined custom data extending the standard variant model."
     },
+    "seller_id": {
+      "type": "string",
+      "description": "Seller identifier for this variant, resolving to an entry in the response's `sellers` map. Overrides `product.seller_id` when both are present."
+    },
     "seller": {
       "type": "object",
-      "description": "Optional seller context for this variant.",
+      "deprecated": true,
+      "description": "Deprecated: prefer `seller_id` referencing the top-level `sellers` map on the catalog response. Optional inline seller context for this variant.",
       "properties": {
         "name": {
           "type": "string",
