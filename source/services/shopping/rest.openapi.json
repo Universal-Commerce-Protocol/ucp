@@ -266,7 +266,7 @@
             "$ref": "#/components/parameters/content_digest"
           },
           {
-            "$ref": "#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key_required"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -346,7 +346,7 @@
             "$ref": "#/components/parameters/content_digest"
           },
           {
-            "$ref": "#/components/parameters/idempotency_key"
+            "$ref": "#/components/parameters/idempotency_key_required"
           },
           {
             "$ref": "#/components/parameters/request_id"
@@ -535,7 +535,7 @@
           { "$ref": "#/components/parameters/signature" },
           { "$ref": "#/components/parameters/signature_input" },
           { "$ref": "#/components/parameters/content_digest" },
-          { "$ref": "#/components/parameters/idempotency_key" },
+          { "$ref": "#/components/parameters/idempotency_key_required" },
           { "$ref": "#/components/parameters/request_id" },
           { "$ref": "#/components/parameters/user_agent" },
           { "$ref": "#/components/parameters/ucp_agent" },
@@ -851,6 +851,16 @@
         "description": "Body digest per RFC 9530. Required for requests/responses with a body. Format: `sha-256=:<base64-digest>:`."
       },
       "idempotency_key": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Ensures duplicate operations don't happen during retries."
+      },
+      "idempotency_key_required": {
         "name": "Idempotency-Key",
         "in": "header",
         "required": true,
