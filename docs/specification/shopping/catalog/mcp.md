@@ -775,6 +775,10 @@ results.
 
 ## Entities
 
+### Like Item {: #like-item }
+
+{{ extension_schema_fields('catalog_search.json#/$defs/like_item', 'shopping/catalog/mcp') }}
+
 ### Detail Product {: #detail-product }
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'shopping/catalog/mcp') }}

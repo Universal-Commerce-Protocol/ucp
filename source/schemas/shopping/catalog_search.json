@@ -6,12 +6,30 @@
   "description": "Product catalog search capability.",
   "type": "object",
   "$defs": {
+    "like_item": {
+      "title": "Like Item",
+      "description": "A similarity anchor. Carries exactly one anchor key. Core defines `id`; extensions MAY add anchor kinds (for example an inline image) by adding keys. A Business MUST ignore items carrying no anchor key it recognizes.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Product or variant identifier in the Business's namespace. Resolution follows Catalog Lookup's Supported Identifiers: product ID and variant ID MUST be supported; secondary identifiers MAY be."
+        }
+      }
+    },
     "search_request": {
       "type": "object",
       "properties": {
         "query": {
           "type": "string",
           "description": "Free-text search query."
+        },
+        "like": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/like_item"
+          },
+          "description": "Similarity anchors. Results are ranked by resemblance to the request's inputs (`query` and every anchor) as the Business determines it; this specification does not define the resemblance function. A product anchor excludes that product from results; a variant anchor excludes that variant only — its product MAY appear with other variants. An anchor that does not resolve contributes nothing (the Business SHOULD include an informational `not_found` message); if no anchor resolves, the result is empty."
         },
         "context": {
           "$ref": "../common/types/context.json"
@@ -60,7 +78,7 @@
           "items": {
             "$ref": "../common/types/message.json"
           },
-          "description": "Errors, warnings, or informational messages about the search results."
+          "description": "Errors, warnings, or informational messages about the search results, including `not_found` for a `like` anchor that does not resolve and `batch_limit_applied` when the Business processes only its configured maximum number of anchors."
         },
         "policies": {
           "type": "array",
