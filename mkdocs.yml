@@ -96,6 +96,7 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
               - Return Policy:
                   specification/shopping/extensions/return-policy.md
+              - Incentives: specification/shopping/extensions/incentives.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -585,6 +586,14 @@ plugins:
               limit, or returns not accepted), supported resolutions, return
               channels, and typed return fees optionally scoped to channels,
               across catalog, cart, checkout, and order.
+          - specification/shopping/extensions/incentives.md: >-
+              Incentives Extension, letting a business list the offers it is
+              running on catalog search, catalog lookup, cart, and checkout
+              responses: a typed benefit (amount off, percent off, fixed
+              price, free shipping), the conditions the business evaluates,
+              what the offer targets, when it is valid, and the offers a cart
+              is close to qualifying for. Response-only; application stays
+              with the Discount extension.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
