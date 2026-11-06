@@ -77,8 +77,9 @@ To change the existing cart, use [Update Cart](#update-cart) before passing
 its `cart_id`.
 
 **Inline:** Omit `cart_id` and provide the complete
-[Create Checkout](../checkout/index.md#create-checkout) input, copying the
-cart's contents and applying any desired changes. For example, to use a
+Create Checkout](../checkout/index.md#create-checkout) input, which can be
+derived from a previous cart negotiation with additional updates, or constructed
+as direct input for a checkout. 
 different country:
 
 <!-- ucp:example schema=shopping/checkout op=create direction=request -->
