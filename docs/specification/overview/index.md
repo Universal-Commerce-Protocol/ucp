@@ -968,7 +968,7 @@ capability negotiation.
 in the UCP-Agent header:
 
 ```text
-POST /checkout HTTP/1.1
+POST /checkout-sessions HTTP/1.1
 UCP-Agent: profile="https://agent.example/profiles/shopping-agent.json"
 Content-Type: application/json
 
