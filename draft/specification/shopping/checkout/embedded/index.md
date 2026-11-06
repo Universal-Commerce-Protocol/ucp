@@ -1304,13 +1304,20 @@ The object returned upon successful completion of a checkout, containing confirm
 | checkout_id   | string                                                                                 | **Required** | Associated checkout ID for reconciliation.                                                                                                                         |
 | permalink_url | string                                                                                 | **Required** | Permalink to access the order on merchant site.                                                                                                                    |
 | line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Required** | Line items representing what was purchased — can change post-order via edits or exchanges.                                                                         |
-| fulfillment   | object                                                                                 | **Required** | Fulfillment data: buyer expectations and what actually happened.                                                                                                   |
+| fulfillment   | [Order Fulfillment](#order-fulfillment)                                                | **Required** | Fulfillment data: buyer expectations and what actually happened.                                                                                                   |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                      | Optional     | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                                              |
 | currency      | string                                                                                 | **Required** | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                                             |
 | totals        | [Totals](/draft/specification/reference/#totals)                                       | **Required** | Different totals for the order.                                                                                                                                    |
 | policies      | Array\[[Policy](/draft/specification/reference/#policy)\]                              | Optional     | Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. `applies_to` targets are relative to the response root. |
 | messages      | Array\[[Message](/draft/specification/reference/#message)\]                            | Optional     | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.                      |
 | attribution   | [Attribution](/draft/specification/reference/#attribution)                             | Optional     | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                                      |
+
+#### Order Fulfillment
+
+| Name         | Type                                                                            | Requirement | Description                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| expectations | Array\[[Expectation](/draft/specification/reference/#expectation)\]             | Optional    | Buyer-facing groups representing when/how items will be delivered. Can be split, merged, or adjusted post-order. |
+| events       | Array\[[Fulfillment Event](/draft/specification/reference/#fulfillment-event)\] | Optional    | Append-only event log of actual shipments. Each event references line items by ID.                               |
 
 ### Payment
 
@@ -1354,8 +1361,19 @@ A payment instrument with selection state.
 | type            | string                                                                   | **Required** | **Constant = card**. Indicates this is a card payment instrument. The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value.                                                                                                                                                                                    |
 | billing_address | [Postal Address](/draft/specification/reference/#postal-address)         | Optional     | The billing address associated with this payment method.                                                                                                                                                                                                                                                                                                                              |
 | credential      | [Payment Credential](/draft/specification/reference/#payment-credential) | Optional     | The base definition for any payment credential. Handlers define specific credential types.                                                                                                                                                                                                                                                                                            |
-| display         | object                                                                   | Optional     | Display information for this card payment instrument. Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler.                                                                                                                                                                    |
+| display         | [Card Payment Instrument Display](#card-payment-instrument-display)      | Optional     | Display information for this card payment instrument. Display information for this payment instrument. Each payment instrument schema defines its specific display properties, as outlined by the payment handler.                                                                                                                                                                    |
 | network         | string                                                                   | Optional     | Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another.                                                                                                                                                                                                  |
+
+#### Card Payment Instrument Display
+
+| Name         | Type    | Requirement | Description                                                                                                          |
+| ------------ | ------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| brand        | string  | Optional    | The card brand/network shown to the buyer (e.g., visa, mastercard, amex). Presentational only.                       |
+| last_digits  | string  | Optional    | Last 4 digits of the card number.                                                                                    |
+| expiry_month | integer | Optional    | The month of the card's expiration date (1-12).                                                                      |
+| expiry_year  | integer | Optional    | The year of the card's expiration date.                                                                              |
+| description  | string  | Optional    | An optional rich text description of the card to display to the user (e.g., 'Visa ending in 1234, expires 12/2025'). |
+| card_art     | string  | Optional    | An optional URI to a rich image representing the card (e.g., card art provided by the issuer).                       |
 
 ### Payment Credential
 

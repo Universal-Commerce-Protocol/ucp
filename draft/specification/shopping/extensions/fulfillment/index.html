@@ -2883,6 +2883,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Business Profile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#business-fulfillment-config-multi-destination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business Fulfillment Config Multi Destination
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4717,6 +4734,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Business Profile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#business-fulfillment-config-multi-destination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business Fulfillment Config Multi Destination
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -6182,7 +6216,7 @@ checkout and on catalog discovery):</p>
 <tbody>
 <tr>
 <td style="text-align: left;">multi_destination</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="#business-fulfillment-config-multi-destination">Business Fulfillment Config Multi Destination</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type.</td>
 </tr>
@@ -6191,6 +6225,25 @@ checkout and on catalog discovery):</p>
 <td style="text-align: left;">Array[Array[string]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Method-type combinations the business permits within one cart. Each inner array is a permitted set of method <code>type</code> values (e.g. shipping + pickup).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="business-fulfillment-config-multi-destination">Business Fulfillment Config Multi Destination<a class="headerlink" href="#business-fulfillment-config-multi-destination" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">method</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Fulfillment method type (e.g. <code>shipping</code>, <code>pickup</code>). Optional per-method constraints MAY be added alongside.</td>
 </tr>
 </tbody>
 </table>

@@ -77,13 +77,20 @@ Returns the current-state snapshot of an order.
 | checkout_id   | string                                                                                 | **Required** | Associated checkout ID for reconciliation.                                                                                                                         |
 | permalink_url | string                                                                                 | **Required** | Permalink to access the order on merchant site.                                                                                                                    |
 | line_items    | Array\[[Order Line Item](/draft/specification/reference/#order-line-item)\]            | **Required** | Line items representing what was purchased — can change post-order via edits or exchanges.                                                                         |
-| fulfillment   | object                                                                                 | **Required** | Fulfillment data: buyer expectations and what actually happened.                                                                                                   |
+| fulfillment   | [Order Fulfillment](#order-fulfillment)                                                | **Required** | Fulfillment data: buyer expectations and what actually happened.                                                                                                   |
 | adjustments   | Array\[[Adjustment](/draft/specification/reference/#adjustment)\]                      | Optional     | Post-order events (refunds, returns, credits, disputes, cancellations, etc.) that exist independently of fulfillment.                                              |
 | currency      | string                                                                                 | **Required** | ISO 4217 currency code. MUST match the currency from the originating checkout session.                                                                             |
 | totals        | [Totals](/draft/specification/reference/#totals)                                       | **Required** | Different totals for the order.                                                                                                                                    |
 | policies      | Array\[[Policy](/draft/specification/reference/#policy)\]                              | Optional     | Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. `applies_to` targets are relative to the response root. |
 | messages      | Array\[[Message](/draft/specification/reference/#message)\]                            | Optional     | Business outcome messages (errors, warnings, informational). Present when the business needs to communicate status or issues to the platform.                      |
 | attribution   | [Attribution](/draft/specification/reference/#attribution)                             | Optional     | Snapshot of the attribution associated with the originating checkout. Read-only on the order.                                                                      |
+
+#### Order Fulfillment
+
+| Name         | Type                                                                            | Requirement | Description                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| expectations | Array\[[Expectation](/draft/specification/reference/#expectation)\]             | Optional    | Buyer-facing groups representing when/how items will be delivered. Can be split, merged, or adjusted post-order. |
+| events       | Array\[[Fulfillment Event](/draft/specification/reference/#fulfillment-event)\] | Optional    | Append-only event log of actual shipments. Each event references line items by ID.                               |
 
 #### Example
 

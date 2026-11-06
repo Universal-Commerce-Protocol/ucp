@@ -120,9 +120,15 @@ Standard Location filters are `hours`, `amenities`, and `items`. A Business **MA
 
 | Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
 | --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| hours     | [Location Filter Hours](#location-filter-hours)                       | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
 | amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
 | items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+#### Location Filter Hours
+
+| Name    | Type   | Requirement  | Description                                                                                                                                                                                                                                                                                                                    |
+| ------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| open_at | string | **Required** | The RFC 3339 instant at which matching Locations must be open, expressed with `Z` or a numeric offset. The Platform selects the instant that represents the Buyer's intent. The Business evaluates it exactly as supplied using each Location's authoritative `timezone`; the supplied offset does not identify that timezone. |
 
 ### Hours-Based Filter
 

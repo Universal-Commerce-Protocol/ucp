@@ -914,6 +914,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#location-filter-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Filter Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#hours-based-filter" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3990,6 +4001,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#location-filter-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Filter Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#hours-based-filter" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4517,7 +4539,7 @@ results.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">hours</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="#location-filter-hours">Location Filter Hours</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter by operating hours, evaluated at the one supplied instant.</td>
 </tr>
@@ -4532,6 +4554,25 @@ results.</p>
 <td style="text-align: left;">Array[string]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="location-filter-hours">Location Filter Hours<a class="headerlink" href="#location-filter-hours" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">open_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The RFC 3339 instant at which matching Locations must be open, expressed with <code>Z</code> or a numeric offset. The Platform selects the instant that represents the Buyer's intent. The Business evaluates it exactly as supplied using each Location's authoritative <code>timezone</code>; the supplied offset does not identify that timezone.</td>
 </tr>
 </tbody>
 </table>

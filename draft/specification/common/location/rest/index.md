@@ -234,9 +234,9 @@ UCP metadata for location responses.
 | version          | string                                             | **Required** | Version identifier in YYYY-MM-DD format.                                                                                                       |
 | map_order        | Map\[string, Array[string]\]                       | Optional     | Preferred key-traversal order for sibling registry fields inside the root `ucp` envelope (`services`, `capabilities`, and `payment_handlers`). |
 | status           | string                                             | Optional     | Application-level status of the UCP operation. **Enum:** `success`, `error`                                                                    |
-| services         | Map\[string, Array[object]\]                       | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
+| services         | Map\[string, Array[UCP Service]\]                  | Optional     | Service registry keyed by reverse-domain name.                                                                                                 |
 | capabilities     | Map\[string, Array[Capability (Response Schema)]\] | Optional     | Capability registry keyed by reverse-domain name.                                                                                              |
-| payment_handlers | Map\[string, Array[object]\]                       | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
+| payment_handlers | Map\[string, Array[Payment Handler]\]              | Optional     | Payment handler registry keyed by reverse-domain name.                                                                                         |
 
 ### Amenity Type
 
@@ -281,15 +281,27 @@ Location with required correlation metadata for lookup responses.
 | hours           | Array\[[Daily Hour](/draft/specification/reference/#daily-hour)\]         | Optional     | Regular weekly operating hours whose day and time values use this Location's canonical local civil-time frame. Multiple entries for the same day support split shifts. An omitted day has no regular interval beginning that day; an interval beginning on the preceding day can carry into it. Omission of the entire `hours` property means the regular schedule is unknown. |
 | exception_hours | Array\[[Exception Hour](/draft/specification/reference/#exception-hour)\] | Optional     | Date-specific operating-hour exceptions, including full closures, whose date and time values use this Location's canonical local civil-time frame.                                                                                                                                                                                                                             |
 | timezone        | string                                                                    | Optional     | The Business-owned IANA Time Zone Database identifier (e.g., 'America/New_York') defining this Location's canonical local civil-time frame for all returned schedule day, time, and date fields. The Business does not vary this canonical framing by the requesting Platform's or Buyer's timezone. Required when hours or exception_hours is present.                        |
-| inputs          | Array[object]                                                             | **Required** | Which request identifiers resolved to this Location. Each entry preserves one identifier exactly as supplied in the request.                                                                                                                                                                                                                                                   |
+| inputs          | Array\[[Lookup Location Inputs](#lookup-location-inputs)\]                | **Required** | Which request identifiers resolved to this Location. Each entry preserves one identifier exactly as supplied in the request.                                                                                                                                                                                                                                                   |
+
+#### Lookup Location Inputs
+
+| Name | Type   | Requirement  | Description                                               |
+| ---- | ------ | ------------ | --------------------------------------------------------- |
+| id   | string | **Required** | The identifier exactly as supplied in the lookup request. |
 
 ### Location Filter
 
 | Name      | Type                                                                  | Requirement | Description                                                                                                                                                                                            |
 | --------- | --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| hours     | object                                                                | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
+| hours     | [Location Filter Hours](#location-filter-hours)                       | Optional    | Filter by operating hours, evaluated at the one supplied instant.                                                                                                                                      |
 | amenities | Array\[[Amenity Type](/draft/specification/reference/#amenity-type)\] | Optional    | Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching. |
 | items     | Array[string]                                                         | Optional    | Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.                   |
+
+#### Location Filter Hours
+
+| Name    | Type   | Requirement  | Description                                                                                                                                                                                                                                                                                                                    |
+| ------- | ------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| open_at | string | **Required** | The RFC 3339 instant at which matching Locations must be open, expressed with `Z` or a numeric offset. The Platform selects the instant that represents the Buyer's intent. The Business evaluates it exactly as supplied using each Location's authoritative `timezone`; the supplied offset does not identify that timezone. |
 
 ### Location Distance
 

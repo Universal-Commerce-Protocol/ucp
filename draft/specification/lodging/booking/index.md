@@ -784,12 +784,26 @@ The legal contracting party and primary point of contact making the reservation.
 
 Occupancy limits and child age thresholds supported by a physical accommodation type.
 
-| Name             | Type          | Requirement | Description                                                                                                                                             |
-| ---------------- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| adults           | integer       | Optional    | Maximum number of adult occupants.                                                                                                                      |
-| children         | integer       | Optional    | Maximum number of child occupants.                                                                                                                      |
-| child_age_ranges | Array[object] | Optional    | Child age brackets and optional per-bracket capacity limits. A guest whose age falls within a bracket is counted as a child; otherwise as an adult.     |
-| total            | integer       | Optional    | Maximum number of total occupants (adult or child). If adults and/or children are present, this MUST be greater than or equal to max(adults, children). |
+| Name             | Type                                                             | Requirement | Description                                                                                                                                             |
+| ---------------- | ---------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| adults           | integer                                                          | Optional    | Maximum number of adult occupants.                                                                                                                      |
+| children         | integer                                                          | Optional    | Maximum number of child occupants.                                                                                                                      |
+| child_age_ranges | Array\[[Capacity Child Age Ranges](#capacity-child-age-ranges)\] | Optional    | Child age brackets and optional per-bracket capacity limits. A guest whose age falls within a bracket is counted as a child; otherwise as an adult.     |
+| total            | integer                                                          | Optional    | Maximum number of total occupants (adult or child). If adults and/or children are present, this MUST be greater than or equal to max(adults, children). |
+
+#### Capacity Child Age Ranges
+
+| Name  | Type                                                              | Requirement  | Description                                                                                                                                           |
+| ----- | ----------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ages  | [Capacity Child Age Ranges Ages](#capacity-child-age-ranges-ages) | **Required** | Age range this bracket covers.                                                                                                                        |
+| limit | integer                                                           | Optional     | Maximum number of children permitted within this age bracket (e.g., crib or extra bed limit). When absent, bounded only by overall capacity.children. |
+
+#### Capacity Child Age Ranges Ages
+
+| Name | Type    | Requirement  | Description                                                             |
+| ---- | ------- | ------------ | ----------------------------------------------------------------------- |
+| min  | integer | **Required** | Lowest age in this bracket, inclusive, in completed years at check-in.  |
+| max  | integer | **Required** | Highest age in this bracket, inclusive, in completed years at check-in. |
 
 ### Context
 
@@ -805,7 +819,14 @@ Buyer location and market context hints.
 | language        | string                                                                              | Optional    | Preferred language for content. Use IETF BCP 47 language tags (e.g., 'en', 'fr-CA', 'zh-Hans'). For REST, equivalent to Accept-Language header—platforms SHOULD fall back to Accept-Language when this field is absent; when provided, overrides Accept-Language. Businesses MAY return content in a different language if unavailable.                                                                                                                            |
 | currency        | string                                                                              | Optional    | Preferred currency (ISO 4217, e.g., 'EUR', 'USD'). Businesses determine presentment currency from context and authoritative signals; this hint MAY inform selection in multi-currency markets. Also serves as the denomination for price filter values — platforms SHOULD include this field when sending price filters. Response prices include explicit currency confirming the resolution.                                                                      |
 | eligibility     | Array\[[Reverse Domain Name](/draft/specification/reference/#reverse-domain-name)\] | Optional    | Buyer claims about eligible benefits such as loyalty membership, payment instrument perks, and similar. Recognized claims MAY inform the Business response (e.g., member-only product availability, adjusted pricing in catalog, provisional discounts at cart or checkout). Businesses MUST ignore unrecognized values without error. Values MUST use reverse-domain naming (e.g., 'com.example.loyalty_gold', 'org.school.student') and MUST be non-identifying. |
-| payment         | Array[object]                                                                       | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
+| payment         | Array\[[Context Payment](#context-payment)\]                                        | Optional    | Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's `ucp.payment_handlers`, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.                                                |
+
+#### Context Payment
+
+| Name    | Type                                                                       | Requirement  | Description                                                                                                                                                                                                          |
+| ------- | -------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| handler | [Reverse Domain Name](/draft/specification/reference/#reverse-domain-name) | **Required** | Handler registry key advertised in the Business profile's `ucp.payment_handlers`.                                                                                                                                    |
+| types   | Array[string]                                                              | Optional     | Optional preferred instrument types for this handler, in priority order, aligned with the handler's advertised `payment_instrument.type` values (for example `card` or `bank`). Unrecognized values MUST be ignored. |
 
 ### Date Interval
 

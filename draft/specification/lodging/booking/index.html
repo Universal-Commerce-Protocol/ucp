@@ -3074,6 +3074,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Capacity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#capacity-child-age-ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capacity Child Age Ranges
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capacity-child-age-ranges-ages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capacity Child Age Ranges Ages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -3084,6 +3112,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4691,6 +4736,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Capacity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#capacity-child-age-ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capacity Child Age Ranges
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capacity-child-age-ranges-ages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capacity Child Age Ranges Ages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4701,6 +4774,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -6282,7 +6372,7 @@ property-collected charges and flexible payment terms integration.</p>
 </tr>
 <tr>
 <td style="text-align: left;">child_age_ranges</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="#capacity-child-age-ranges">Capacity Child Age Ranges</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Child age brackets and optional per-bracket capacity limits. A guest whose age falls within a bracket is counted as a child; otherwise as an adult.</td>
 </tr>
@@ -6291,6 +6381,56 @@ property-collected charges and flexible payment terms integration.</p>
 <td style="text-align: left;">integer</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Maximum number of total occupants (adult or child). If adults and/or children are present, this MUST be greater than or equal to max(adults, children).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="capacity-child-age-ranges">Capacity Child Age Ranges<a class="headerlink" href="#capacity-child-age-ranges" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ages</td>
+<td style="text-align: left;"><a href="#capacity-child-age-ranges-ages">Capacity Child Age Ranges Ages</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Age range this bracket covers.</td>
+</tr>
+<tr>
+<td style="text-align: left;">limit</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Maximum number of children permitted within this age bracket (e.g., crib or extra bed limit). When absent, bounded only by overall capacity.children.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="capacity-child-age-ranges-ages">Capacity Child Age Ranges Ages<a class="headerlink" href="#capacity-child-age-ranges-ages" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">min</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Lowest age in this bracket, inclusive, in completed years at check-in.</td>
+</tr>
+<tr>
+<td style="text-align: left;">max</td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Highest age in this bracket, inclusive, in completed years at check-in.</td>
 </tr>
 </tbody>
 </table>
@@ -6356,9 +6496,34 @@ property-collected charges and flexible payment terms integration.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="#context-payment">Context Payment</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's <code>ucp.payment_handlers</code>, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="context-payment">Context Payment<a class="headerlink" href="#context-payment" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">handler</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Handler registry key advertised in the Business profile's <code>ucp.payment_handlers</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">types</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional preferred instrument types for this handler, in priority order, aligned with the handler's advertised <code>payment_instrument.type</code> values (for example <code>card</code> or <code>bank</code>). Unrecognized values MUST be ignored.</td>
 </tr>
 </tbody>
 </table>

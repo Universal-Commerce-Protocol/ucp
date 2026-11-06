@@ -647,10 +647,16 @@ Opt-in declaration (business MAY return multiple groups per method):
 
 Businesses declare what fulfillment configurations they support using `business_config`:
 
-| Name                | Type                   | Requirement | Description                                                                                                                                                                                                 |
-| ------------------- | ---------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| multi_destination   | Array[object]          | Optional    | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
-| method_combinations | Array\[Array[string]\] | Optional    | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
+| Name                | Type                                                                                                     | Requirement | Description                                                                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| multi_destination   | Array\[[Business Fulfillment Config Multi Destination](#business-fulfillment-config-multi-destination)\] | Optional    | Method types that permit multiple destinations within one cart (e.g. split shipping across addresses). Listing a method permits it; an omitted method does not. Open — businesses MAY list any method type. |
+| method_combinations | Array\[Array[string]\]                                                                                   | Optional    | Method-type combinations the business permits within one cart. Each inner array is a permitted set of method `type` values (e.g. shipping + pickup).                                                        |
+
+#### Business Fulfillment Config Multi Destination
+
+| Name   | Type   | Requirement  | Description                                                                                                  |
+| ------ | ------ | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| method | string | **Required** | Fulfillment method type (e.g. `shipping`, `pickup`). Optional per-method constraints MAY be added alongside. |
 
 ```json
 {

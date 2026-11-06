@@ -1125,6 +1125,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Lookup Location">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lookup-location-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lookup Location Inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1135,6 +1152,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Location Filter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#location-filter-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Filter Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4106,6 +4140,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Lookup Location">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lookup-location-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lookup Location Inputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4116,6 +4167,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Location Filter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#location-filter-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Location Filter Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4704,7 +4772,7 @@ operations unless otherwise noted.</p>
 </tr>
 <tr>
 <td style="text-align: left;">services</td>
-<td style="text-align: left;">Map[string, Array[object]]</td>
+<td style="text-align: left;">Map[string, Array[UCP Service]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Service registry keyed by reverse-domain name.</td>
 </tr>
@@ -4716,7 +4784,7 @@ operations unless otherwise noted.</p>
 </tr>
 <tr>
 <td style="text-align: left;">payment_handlers</td>
-<td style="text-align: left;">Map[string, Array[object]]</td>
+<td style="text-align: left;">Map[string, Array[Payment Handler]]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Payment handler registry keyed by reverse-domain name.</td>
 </tr>
@@ -4885,9 +4953,28 @@ operations unless otherwise noted.</p>
 </tr>
 <tr>
 <td style="text-align: left;">inputs</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="#lookup-location-inputs">Lookup Location Inputs</a>]</td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Which request identifiers resolved to this Location. Each entry preserves one identifier exactly as supplied in the request.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="lookup-location-inputs">Lookup Location Inputs<a class="headerlink" href="#lookup-location-inputs" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">id</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The identifier exactly as supplied in the lookup request.</td>
 </tr>
 </tbody>
 </table>
@@ -4904,7 +4991,7 @@ operations unless otherwise noted.</p>
 <tbody>
 <tr>
 <td style="text-align: left;">hours</td>
-<td style="text-align: left;">object</td>
+<td style="text-align: left;"><a href="#location-filter-hours">Location Filter Hours</a></td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Filter by operating hours, evaluated at the one supplied instant.</td>
 </tr>
@@ -4919,6 +5006,25 @@ operations unless otherwise noted.</p>
 <td style="text-align: left;">Array[string]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="location-filter-hours">Location Filter Hours<a class="headerlink" href="#location-filter-hours" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">open_at</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">The RFC 3339 instant at which matching Locations must be open, expressed with <code>Z</code> or a numeric offset. The Platform selects the instant that represents the Buyer's intent. The Business evaluates it exactly as supplied using each Location's authoritative <code>timezone</code>; the supplied offset does not identify that timezone.</td>
 </tr>
 </tbody>
 </table>

@@ -922,6 +922,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4043,6 +4060,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4507,9 +4541,34 @@ serviceability, nor item availability (see
 </tr>
 <tr>
 <td style="text-align: left;">payment</td>
-<td style="text-align: left;">Array[object]</td>
+<td style="text-align: left;">Array[<a href="#context-payment">Context Payment</a>]</td>
 <td style="text-align: left;">Optional</td>
 <td style="text-align: left;">Buyer-preferred payment handlers in priority order (most preferred first). Each entry names a handler advertised in the Business profile's <code>ucp.payment_handlers</code>, optionally narrowed to preferred instrument types. The Business SHOULD use it to preselect or prioritize the handler (and type, when given) and MAY ignore unavailable or ineligible entries; unrecognized values MUST be ignored without error.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="context-payment">Context Payment<a class="headerlink" href="#context-payment" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Requirement</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">handler</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#reverse-domain-name">Reverse Domain Name</a></td>
+<td style="text-align: left;"><strong>Required</strong></td>
+<td style="text-align: left;">Handler registry key advertised in the Business profile's <code>ucp.payment_handlers</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">types</td>
+<td style="text-align: left;">Array[string]</td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Optional preferred instrument types for this handler, in priority order, aligned with the handler's advertised <code>payment_instrument.type</code> values (for example <code>card</code> or <code>bank</code>). Unrecognized values MUST be ignored.</td>
 </tr>
 </tbody>
 </table>
