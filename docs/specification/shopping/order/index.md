@@ -117,9 +117,9 @@ the order. See [Policies](../../overview/index.md#policies) for the underlying c
 **Adjustments** are post-order events that exist independently of
 fulfillment:
 
-* Type is an open string field - businesses can use any values that make sense
-  (typically money movements like `refund`, `return`, `credit`,
-  `price_adjustment`, `dispute`, `cancellation`)
+* `type` has [standard values](#adjustment-types) with defined semantics
+  (`refund`, `return`, `credit`, `price_adjustment`, `dispute`,
+  `cancellation`); freeform values are permitted
 * Can be any post-order change
 * Optionally link to line items (or order-level for things like shipping refunds)
 * Quantities are signed step counts and amounts are signed—negative for
@@ -189,13 +189,30 @@ Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
 ### Adjustment
 
 Adjustments are polymorphic events that exist independently of fulfillment.
-The `type` field is an open string - businesses can use any values that make
-sense to them.
+The `type` field accepts the [standard values](#adjustment-types) below or
+any freeform string.
 
 {{ schema_fields('adjustment', 'shopping/order') }}
 
-Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
-`cancellation`, etc.
+#### Adjustment Types
+
+Standard `type` values have the semantics defined below, so platforms can
+apply type-specific handling without merchant-specific integration work.
+Any other value is freeform and carries no protocol-defined semantics;
+`description`, `line_items`, and `totals` still describe its effect.
+
+| Type | Semantics |
+| :--- | :--- |
+| `refund` | Money returned to the original payment method, whatever the cause. `line_items` **MAY** carry a negative `quantity` when items also come off the order. |
+| `return` | Goods coming back from the buyer; `line_items` **SHOULD** carry the negative `quantity`. |
+| `credit` | Value issued to store credit, account balance, or gift card instead of the original payment method. |
+| `price_adjustment` | Reconciles what was charged against what was supplied. Carries the signed step delta on a measure sale basis ([catch-weight](#example-catch-weight-reconciliation)), or `quantity: 0` with the settled `measure` when only the price settles ([count-sold](#example-count-sold-measure-priced-settlement)). |
+| `dispute` | Payment dispute or chargeback, initiated by the buyer or their issuer rather than by the business. |
+| `cancellation` | Items will not be fulfilled; `line_items` **SHOULD** carry the negative `quantity` canceled. Applies to the unfulfilled remainder of a partially shipped order. |
+
+`refund` and `return` describe money movement and goods movement
+respectively; a business **MAY** record them as one entry or as separate
+entries.
 
 ## Example
 
