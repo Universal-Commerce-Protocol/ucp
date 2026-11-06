@@ -38,6 +38,7 @@ nav:
       - UCP and AP2: documentation/ucp-and-ap2.md
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
+      - Extension Authoring: documentation/extension-authoring.md
       - Versioning: versioning.md
       - Announcements: documentation/announcements.md
       - Contributing: documentation/contributing.md
@@ -400,6 +401,11 @@ plugins:
               Comprehensive guidelines and JSON Schema design conventions when
               authoring or extending UCP schemas, including strict versioning
               and registry patterns.
+          - documentation/extension-authoring.md: >-
+              End-to-end guide for businesses and platforms publishing UCP
+              extensions under their own namespace: naming and authority
+              binding, schema composition, versioning, hosting, negotiation,
+              and local testing.
           - versioning.md: >-
               UCP's strict date-based versioning policy (YYYY-MM-DD) and
               compatibility guidelines for managing breaking changes and
