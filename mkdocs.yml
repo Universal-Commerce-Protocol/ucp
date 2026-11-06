@@ -46,6 +46,7 @@ nav:
       - Getting Started: specification/getting-started.md
       - Glossary: specification/glossary.md
       - Common:
+          - Business Capability: specification/common/business/index.md
           - Identity Linking: specification/common/identity-linking/index.md
           - Location Capability:
               - Overview: specification/common/location/index.md
@@ -422,6 +423,11 @@ plugins:
               including Capability, Extension, Action, Platform, Business, and
               Merchant of Record.
         Common:
+          - specification/common/business/index.md: >-
+              Core Business Capability (`dev.ucp.common.business`), defining
+              location-independent business and brand identity metadata in
+              discovery profiles and the extensibility model for vertical and
+              third-party business attributes.
           - specification/common/identity-linking/index.md: >-
               User authentication via the Identity Linking Capability,
               specifying direct B2C/B2B OAuth 2.0 flows (with PKCE and
