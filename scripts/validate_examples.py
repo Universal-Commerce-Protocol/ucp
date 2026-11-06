@@ -113,18 +113,27 @@ CLI
 
   validate_examples.py --schema-base source/schemas/
   validate_examples.py --schema-base source/schemas/ --file FILE
+  validate_examples.py --schema-base source/schemas/ --jobs 8
   validate_examples.py --schema-base source/schemas/ --audit
 
 Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
+
+Block validation is independent per example, and each one shells out to
+ucp-schema. They are therefore validated concurrently, with results
+reassembled in document order so reporting and exit codes are unchanged
+for any --jobs value.
 """
 
 import argparse
+import concurrent.futures
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 # -----------------------------------------------------------
@@ -684,6 +693,10 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
 # -----------------------------------------------------------
 
 _schema_cache: dict[tuple, dict] = {}
+# Blocks are validated on worker threads, so two misses for the same key
+# would otherwise spawn the same resolve twice. Holding the lock across the
+# subprocess call keeps it to exactly one resolve per key.
+_schema_cache_lock = threading.Lock()
 
 UCP_SCHEMA_MISSING = (
   "ucp-schema not found on PATH. Install it with"
@@ -718,33 +731,34 @@ def resolve_schema(
 ) -> dict:
   """Resolve a schema via ucp-schema, with caching."""
   key = (schema_base.resolve(), schema_path, direction, op)
-  if key in _schema_cache:
-    return _schema_cache[key]
+  with _schema_cache_lock:
+    if key in _schema_cache:
+      return _schema_cache[key]
 
-  full_path = schema_base / f"{schema_path}.json"
-  result = run_ucp_schema(
-    [
-      "resolve",
-      str(full_path),
-      f"--{direction}",
-      "--op",
-      op,
-      "--bundle",
-      "--pretty",
-    ],
-    capture_output=True,
-    text=True,
-    cwd=str(schema_base.parent),
-  )
-  if result.returncode != 0:
-    raise RuntimeError(
-      f"ucp-schema resolve failed for"
-      f" {schema_path} ({direction}/{op}):"
-      f" {result.stderr.strip()}"
+    full_path = schema_base / f"{schema_path}.json"
+    result = run_ucp_schema(
+      [
+        "resolve",
+        str(full_path),
+        f"--{direction}",
+        "--op",
+        op,
+        "--bundle",
+        "--pretty",
+      ],
+      capture_output=True,
+      text=True,
+      cwd=str(schema_base.parent),
     )
-  schema = json.loads(result.stdout)
-  _schema_cache[key] = schema
-  return schema
+    if result.returncode != 0:
+      raise RuntimeError(
+        f"ucp-schema resolve failed for"
+        f" {schema_path} ({direction}/{op}):"
+        f" {result.stderr.strip()}"
+      )
+    schema = json.loads(result.stdout)
+    _schema_cache[key] = schema
+    return schema
 
 
 # -----------------------------------------------------------
@@ -857,6 +871,7 @@ def validate_payload_with_schema(
 # -----------------------------------------------------------
 
 _extension_cache: dict[Path, tuple[dict, dict]] = {}
+_extension_cache_lock = threading.Lock()
 
 
 def load_extensions(schema_base: Path) -> tuple[dict, dict]:
@@ -870,33 +885,34 @@ def load_extensions(schema_base: Path) -> tuple[dict, dict]:
   declare.
   """
   key = schema_base.resolve()
-  if key in _extension_cache:
-    return _extension_cache[key]
+  with _extension_cache_lock:
+    if key in _extension_cache:
+      return _extension_cache[key]
 
-  schemas = {}
-  for path in sorted(schema_base.rglob("*.json")):
-    rel = path.relative_to(schema_base).with_suffix("").as_posix()
-    schemas[rel] = json.loads(path.read_text(encoding="utf-8"))
+    schemas = {}
+    for path in sorted(schema_base.rglob("*.json")):
+      rel = path.relative_to(schema_base).with_suffix("").as_posix()
+      schemas[rel] = json.loads(path.read_text(encoding="utf-8"))
 
-  capabilities = {
-    schema["name"]: rel
-    for rel, schema in schemas.items()
-    if str(schema.get("name", "")).startswith("dev.ucp.")
-  }
-  extensions: dict[str, list[tuple[str, frozenset[str]]]] = {}
-  for rel, schema in schemas.items():
-    for name, composed in schema.get("$defs", {}).items():
-      if name not in capabilities or capabilities[name] == rel:
-        continue
-      added = set(composed.get("properties", {}))
-      for branch in composed.get("allOf", []):
-        if "$ref" not in branch:
-          added.update(branch.get("properties", {}))
-      if added:
-        extensions.setdefault(name, []).append((rel, frozenset(added)))
+    capabilities = {
+      schema["name"]: rel
+      for rel, schema in schemas.items()
+      if str(schema.get("name", "")).startswith("dev.ucp.")
+    }
+    extensions: dict[str, list[tuple[str, frozenset[str]]]] = {}
+    for rel, schema in schemas.items():
+      for name, composed in schema.get("$defs", {}).items():
+        if name not in capabilities or capabilities[name] == rel:
+          continue
+        added = set(composed.get("properties", {}))
+        for branch in composed.get("allOf", []):
+          if "$ref" not in branch:
+            added.update(branch.get("properties", {}))
+        if added:
+          extensions.setdefault(name, []).append((rel, frozenset(added)))
 
-  _extension_cache[key] = (capabilities, extensions)
-  return capabilities, extensions
+    _extension_cache[key] = (capabilities, extensions)
+    return capabilities, extensions
 
 
 def validate_extensions(
@@ -1313,6 +1329,15 @@ def main() -> int:
     action="store_true",
     help="Just list blocks without validating",
   )
+  parser.add_argument(
+    "--jobs",
+    type=int,
+    default=min(8, os.cpu_count() or 1),
+    help=(
+      "Validate this many blocks concurrently (default: min(8, CPU count);"
+      " use 1 for serial execution)."
+    ),
+  )
   args = parser.parse_args()
 
   # Resolve paths relative to script location
@@ -1359,11 +1384,23 @@ def main() -> int:
           print(f"  {b['file']}:{b['line']}")
     return 1 if unannotated else 0
 
-  # Validate
-  results: list[Result] = []
-  for block in all_blocks:
-    result = process_block(block, schema_base, scaffolds_dir)
-    results.append(result)
+  # Validate. Blocks are independent, so run them concurrently and keep the
+  # executor's ordering: reporting and exit codes stay identical to serial
+  # execution regardless of --jobs.
+  if args.jobs < 1:
+    parser.error("--jobs must be at least 1")
+  if args.jobs == 1:
+    results = [
+      process_block(block, schema_base, scaffolds_dir) for block in all_blocks
+    ]
+  else:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+      results = list(
+        pool.map(
+          lambda block: process_block(block, schema_base, scaffolds_dir),
+          all_blocks,
+        )
+      )
 
   # Report
   passed = sum(1 for r in results if r.status == "ok")
