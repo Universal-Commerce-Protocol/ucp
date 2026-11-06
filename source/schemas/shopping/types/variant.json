@@ -118,6 +118,10 @@
           "type": "string",
           "description": "Seller display name."
         },
+        "logo": {
+          "$ref": "../../common/types/media.json",
+          "description": "Seller or shop logo. SHOULD use type `image`."
+        },
         "links": {
           "type": "array",
           "items": {
