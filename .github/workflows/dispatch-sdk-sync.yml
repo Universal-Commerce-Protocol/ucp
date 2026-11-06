@@ -1,0 +1,182 @@
+---
+#   Copyright 2026 UCP Authors
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+name: Dispatch SDK Schema Sync
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+      - "release/**"
+    paths:
+      - 'source/schemas/*.json'
+      - 'source/schemas/common/**'
+      - 'source/schemas/transports/**'
+      - 'source/schemas/shopping/**'
+  create:
+  workflow_dispatch:
+    inputs:
+      ucp_ref:
+        description: "UCP branch ref to sync (main or release/YYYY-MM-DD)"
+        required: false
+        default: "main"
+        type: string
+
+jobs:
+  dispatch-sdk-sync:
+    name: Dispatch SDK Schema Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'create' &&
+          github.event.ref_type == 'branch' &&
+          startsWith(github.event.ref, 'release/')
+        ) ||
+        (
+          github.event_name == 'push' &&
+          github.event.before != '0000000000000000000000000000000000000000'
+        )
+      )
+    steps:
+      - name: Resolve and validate target ref and commit SHA
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          EVENT_REF: ${{ github.event.ref }}
+          EVENT_REF_TYPE: ${{ github.event.ref_type }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          EVENT_SHA: ${{ github.sha }}
+          INPUT_UCP_REF: ${{ inputs.ucp_ref }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          case "$EVENT_NAME" in
+            push)
+              ZERO_SHA="0000000000000000000000000000000000000000"
+              if [ "${EVENT_BEFORE:-}" = "$ZERO_SHA" ]; then
+                echo "Skipping zero-SHA push (handled by create event)."
+                echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              UCP_REF="$REF_NAME"
+              UCP_SHA="$EVENT_SHA"
+              ;;
+            create)
+              if [ "${EVENT_REF_TYPE:-}" != "branch" ] || \
+                 [[ "${EVENT_REF:-}" != release/* ]]; then
+                echo "Skipping non-release branch create event."
+                echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              UCP_REF="$EVENT_REF"
+              UCP_SHA="$EVENT_SHA"
+              ;;
+            workflow_dispatch)
+              UCP_REF="${INPUT_UCP_REF:-main}"
+              UCP_SHA=""
+              ;;
+            *)
+              echo "::error::Unsupported event type: $EVENT_NAME"
+              exit 1
+              ;;
+          esac
+
+          REF_PATTERN='^(main|release/[0-9]{4}-[0-9]{2}-[0-9]{2})$'
+          if [[ ! "$UCP_REF" =~ $REF_PATTERN ]]; then
+            echo "::error::Invalid ucp_ref '$UCP_REF'."
+            exit 1
+          fi
+
+          if [ "$UCP_REF" = "main" ]; then
+            CHANNEL="draft"
+          else
+            REL_DATE="${UCP_REF#release/}"
+            EPOCH="${REL_DATE//-/}"
+            if [ "$EPOCH" -lt 20261001 ]; then
+              echo "Skipping legacy release branch $UCP_REF ($EPOCH < 20261001)."
+              echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            CHANNEL="release"
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ -n "${UCP_REMOTE_URL:-}" ]; then
+              LS_OUT="$(git ls-remote --exit-code "$UCP_REMOTE_URL" "refs/heads/${UCP_REF}")"
+            else
+              LS_OUT="$(git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${UCP_REF}")"
+            fi
+            UCP_SHA="$(printf '%s\n' "$LS_OUT" | awk 'NR==1 {print $1}')"
+          fi
+
+          if [[ ! "$UCP_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Invalid 40-char commit SHA: '$UCP_SHA'."
+            exit 1
+          fi
+
+          echo "should_dispatch=true" >> "$GITHUB_OUTPUT"
+          echo "channel=$CHANNEL" >> "$GITHUB_OUTPUT"
+          echo "ucp_ref=$UCP_REF" >> "$GITHUB_OUTPUT"
+          echo "ucp_sha=$UCP_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Generate GitHub App Token
+        id: app-token
+        if: steps.resolve.outputs.should_dispatch == 'true'
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: Universal-Commerce-Protocol
+          repositories: python-sdk,js-sdk
+          permission-contents: write
+
+      - name: Dispatch ucp-schemas-updated to SDK repositories
+        if: steps.resolve.outputs.should_dispatch == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          CHANNEL: ${{ steps.resolve.outputs.channel }}
+          UCP_REF: ${{ steps.resolve.outputs.ucp_ref }}
+          UCP_SHA: ${{ steps.resolve.outputs.ucp_sha }}
+        run: |
+          set -euo pipefail
+          PAYLOAD="$(jq -n \
+            --arg channel "$CHANNEL" \
+            --arg ucp_ref "$UCP_REF" \
+            --arg ucp_sha "$UCP_SHA" \
+            '{
+              event_type: "ucp-schemas-updated",
+              client_payload: {
+                channel: $channel,
+                ucp_ref: $ucp_ref,
+                ucp_sha: $ucp_sha
+              }
+            }')"
+          for repo in python-sdk js-sdk; do
+            echo "Dispatching ucp-schemas-updated to ${repo} (${UCP_REF}@${UCP_SHA})"
+            printf '%s\n' "$PAYLOAD" | gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "repos/Universal-Commerce-Protocol/${repo}/dispatches" \
+              --input -
+          done
