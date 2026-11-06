@@ -1289,6 +1289,27 @@ this response root (e.g., `$.line_items[0]`). See
 
 {{ schema_fields('postal_address', 'shopping/checkout') }}
 
+The optional `company` field names the company or organization associated with
+the address, such as a recipient's workplace or a company on a billing address.
+It is independent of the contact's `first_name` and `last_name` and does not
+identify a purchasing account or establish membership in that organization.
+The same field is available wherever Postal Address is used, including shipping
+destinations and payment-instrument billing addresses.
+
+<!-- ucp:example schema=common/types/postal_address op=update direction=request -->
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "company": "Example Company",
+  "street_address": "123 Main St",
+  "address_locality": "Springfield",
+  "address_region": "IL",
+  "postal_code": "62701",
+  "address_country": "US"
+}
+```
+
 ### Response
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'shopping/checkout') }}
