@@ -29,6 +29,40 @@
       "type": "integer",
       "minimum": 0,
       "description": "Number of reviews contributing to the rating."
+    },
+    "distribution": {
+      "type": "object",
+      "description": "Per-bucket review counts so agents can detect patterns like bimodal distributions that an average would obscure. Sum of bucket counts SHOULD equal `count`.",
+      "required": ["buckets"],
+      "additionalProperties": false,
+      "properties": {
+        "buckets": {
+          "type": "array",
+          "minItems": 1,
+          "description": "One entry per discrete scale value. Continuous scales bucket at integers by default; producers grading at half-integers MAY include half-integer bucket values.",
+          "items": {
+            "type": "object",
+            "required": ["value", "count"],
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "Bucket value on the rating scale. MUST fall within `scale_min`/`scale_max`."
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of reviews at this bucket value."
+              }
+            }
+          }
+        }
+      }
+    },
+    "verified_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of reviews from verified purchasers. MUST be less than or equal to `count`. The definition of \"verified\" is business-defined (e.g., purchase confirmed, identity-linked)."
     }
   }
 }
