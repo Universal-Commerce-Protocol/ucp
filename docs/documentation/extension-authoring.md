@@ -44,6 +44,19 @@ An extension is the right tool when you need to add typed fields to another
 capability's requests or responses, and both parties need to agree to support
 them.
 
+## Where Your Extension Lives
+
+You publish and maintain your extension yourself. Its schema and specification
+live on your own domain, under your own namespace; they are not added to the
+UCP repository, and you do not need UCP's approval to publish them (see
+[Namespace Governance](../specification/overview/index.md#namespace-governance)).
+
+If your extension proves useful to many Businesses and Platforms, it can become
+a candidate for the core protocol. UCP keeps the core light: new functionality
+starts self-hosted under a vendor namespace and is proposed for `dev.ucp.*`
+once it has broad, multi-party adoption, through the Enhancement Proposal
+process (see [Contributing](contributing.md)).
+
 ## What You'll Build
 
 A complete extension has five parts:
@@ -244,35 +257,6 @@ See
 [Container Capabilities](https://github.com/Universal-Commerce-Protocol/ucp-schema#container-capabilities)
 in the `ucp-schema` documentation.
 
-### Extend Another Extension
-
-An extension can extend another extension rather than a root capability. Its
-additions still compose onto the root capability at the top of the chain, so
-they use the root's shapes.
-
-This is the one case where two Overview rules point at different `$defs`
-keys: extension schemas **MUST** have an entry for each declared parent (see
-[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)),
-while schema resolution applies the root capability's entry (see
-[Schema Resolution Convention](../specification/overview/index.md#schema-resolution-convention)).
-To satisfy both, include an entry under each key, pointing at the same
-definition:
-
-<!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
-```json
-"$defs": {
-  "acme_contribution": { "...": "your additions, using the root's shapes" },
-  "{root capability}": { "$ref": "#/$defs/acme_contribution" },
-  "{parent extension}": { "$ref": "#/$defs/acme_contribution" }
-}
-```
-
-Current `ucp-schema` releases compose only the root-keyed entry.
-[ucp-schema#100](https://github.com/Universal-Commerce-Protocol/ucp-schema/pull/100)
-proposes letting an extension key only on its parent when exactly one active
-declared parent has an entry. Until your tooling includes that change, include
-both entries.
-
 ### Type Your Profile Configuration
 
 If your extension takes configuration in profiles, describe it under a `$defs`
@@ -301,6 +285,16 @@ UCP fulfillment extension uses this pattern for its `config`:
 }
 ```
 
+### Declare Action Types
+
+If your extension needs the Platform to carry out a step, such as a
+verification or a payment challenge, it can declare Action types (see
+[Actions](../specification/overview/index.md#actions)). Each Action type's key
+must be in your namespace, and your specification must define its full
+contract; see
+[Extension-Declared Action Types](schema-authoring.md#extension-declared-action-types)
+for what to cover.
+
 ### Avoid Composition Pitfalls
 
 `allOf` only ever adds constraints, which shapes what an extension can do:
@@ -309,9 +303,16 @@ UCP fulfillment extension uses this pattern for its `config`:
   satisfy the base and your extension, so you cannot widen a base type, relax a
   base requirement, or add a value to a closed `enum`. See
   [Extensibility and Forward Compatibility](schema-authoring.md#extensibility-and-forward-compatibility).
-- **Property names are not namespaced.** If two active extensions add a
-  property with the same name, a payload must satisfy both definitions at once.
-  Choose names that describe your feature specifically.
+- **Property names are not namespaced.** The fields your extension adds sit
+  alongside UCP's own fields and those of other extensions. If two active
+  extensions add a property with the same name, a payload must satisfy both
+  definitions at once, and a future UCP release could add a field with the same
+  name. Choose names that describe your feature specifically. A namespacing
+  rule for third-party fields is under discussion in
+  [#983](https://github.com/Universal-Commerce-Protocol/ucp/issues/983).
+- **Expect generated types.** SDKs and code generators turn composed schemas
+  into typed classes, which makes conflicting definitions of the same property,
+  and closed `enum` values you later need to extend, especially costly.
 - **Keep your own types open.** Avoid `additionalProperties: false` on objects
   you introduce, so later versions of your extension, or other extensions, can
   add to them.
@@ -351,7 +352,10 @@ The schema, like a profile, must be reliably hosted (see
 The `spec` URL in your profile entries points to human-readable documentation.
 It must be HTTPS but may be served from any host. Describe there what your
 extension adds and how each party should behave, including what happens when
-the other party does not support it.
+the other party does not support it. If your extension extends more than one
+capability, also describe what happens to its state as a resource moves
+between them, for example when a cart becomes a checkout: what carries over,
+what is recomputed, and what is dropped.
 
 ## Advertise and Negotiate
 
@@ -448,7 +452,6 @@ payload. For a container capability, pass the operation (for example,
 - [ ] A `$defs` entry for each capability in `extends`, composed with `allOf`
 - [ ] UCP base schemas referenced by absolute, versioned URL
 - [ ] Container parents extended per shape
-- [ ] Extensions of extensions keyed on both the root and the parent
 - [ ] `version` and `requires` declared
 - [ ] Hosted over HTTPS, without redirects, with cacheable headers
 - [ ] A `spec` page describing behavior and fallbacks
