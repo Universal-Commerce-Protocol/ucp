@@ -6803,9 +6803,13 @@ Update Checkout is not permitted; see
 <p><strong>Output</strong></p>
 <p>This object MUST be one of the following types: <a href="/draft/specification/shopping/checkout/#checkout">Checkout</a>, <a href="/draft/specification/reference/#error-response">Error Response</a>.</p>
 <h3 id="complete-checkout">Complete Checkout<a class="headerlink" href="#complete-checkout" title="Permanent link">&para;</a></h3>
-<p>This is the final checkout placement call. To be invoked when the user has
+<p>This is the final checkout placement call. To be invoked when the Buyer has
 committed to pay and place an order for the chosen items. Complete Checkout
 completes checkout and places the order from <code>ready_for_complete</code>.</p>
+<p><strong>Complete Checkout is a command, not an update.</strong> It finalizes the checkout
+without changing its purchase terms. Changes to those terms <strong>MUST</strong> happen
+through Update Checkout before completion. This invariant ensures that the act
+of placing an order cannot also change what the Buyer authorized.</p>
 <p>The response is the checkout object:</p>
 <ul>
 <li>When completion finishes synchronously, <code>status</code> is <code>completed</code> and the

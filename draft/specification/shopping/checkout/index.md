@@ -751,7 +751,9 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 ### Complete Checkout
 
-This is the final checkout placement call. To be invoked when the user has committed to pay and place an order for the chosen items. Complete Checkout completes checkout and places the order from `ready_for_complete`.
+This is the final checkout placement call. To be invoked when the Buyer has committed to pay and place an order for the chosen items. Complete Checkout completes checkout and places the order from `ready_for_complete`.
+
+**Complete Checkout is a command, not an update.** It finalizes the checkout without changing its purchase terms. Changes to those terms **MUST** happen through Update Checkout before completion. This invariant ensures that the act of placing an order cannot also change what the Buyer authorized.
 
 The response is the checkout object:
 
