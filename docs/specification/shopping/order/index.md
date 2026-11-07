@@ -197,6 +197,42 @@ sense to them.
 Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 `cancellation`, etc.
 
+### Cause
+
+`type` records what was done about a problem. The optional `cause` object
+records what the problem was.
+
+The three axes are independent and are recorded separately:
+
+* `category` — what went wrong. An incorrect amount, a purchase outside the
+  authority it was made under, goods that do not match the order, a technical
+  failure.
+* `attributed_to` — which role the recording system holds responsible. Any
+  party can be the cause of any category: an amount can diverge because a
+  business quoted wrongly, because a platform sent the wrong figure, or because
+  a payment service provider captured the wrong one.
+* `nature` — whether it appears deliberate. An `error` is an honest mistake, a
+  `fault` is a technical failure, `abuse` is deliberate, `compromise` is a party
+  acting under someone else's direction, and `disagreement` is a case where
+  nothing malfunctioned and the parties read the same transaction differently.
+
+Collapsing these into a single reason code loses information that the parties
+need later: a business that quoted the wrong price by mistake and one that did
+so deliberately share a `category` and differ in `nature`.
+
+`scope` records the level at which the cause is expressed. A transaction can be
+unremarkable alone and anomalous as part of a task, as a pattern by one actor or
+counterparty, or over a period. Recording the level distinguishes an adjustment
+for one transaction from one addressing a run of them.
+
+Every field is optional and a recording system **SHOULD** omit an axis it cannot
+determine rather than guessing. `undetermined` is available where the question
+was considered and not resolved, which is different from silence.
+
+Values are **assertions by the party recording them, not adjudications**. A
+platform and a business may record the same event differently, and `determined_by`
+says which of them is speaking. Nothing in this object establishes liability.
+
 ## Example
 
 <!-- ucp:example schema=shopping/order op=read -->
