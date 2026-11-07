@@ -257,6 +257,28 @@ See
 [Container Capabilities](https://github.com/Universal-Commerce-Protocol/ucp-schema#container-capabilities)
 in the `ucp-schema` documentation.
 
+### Extend Another Extension
+
+An extension can extend another extension rather than a root capability. For
+example, an extension of `dev.ucp.shopping.catalog.feed`, which itself extends
+`dev.ucp.common.feed`, adds fields to Catalog Feed records (see
+[Extend a Feed](#extend-a-feed)). Its additions still compose onto the root
+capability at the top of the chain, so they use the root's shapes.
+
+This is the one case where two Overview rules point at different `$defs`
+keys: extension schemas **MUST** have an entry for each declared parent (see
+[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)),
+while schema resolution applies the root capability's entry (see
+[Schema Resolution Convention](../specification/overview/index.md#schema-resolution-convention)).
+To satisfy both, include an entry under each key, pointing at the same
+definition. [Extend a Feed](#extend-a-feed) shows a complete example.
+
+Current `ucp-schema` releases compose only the root-keyed entry.
+[ucp-schema#100](https://github.com/Universal-Commerce-Protocol/ucp-schema/pull/100)
+proposes letting an extension key only on its parent when exactly one active
+declared parent has an entry. Until your tooling includes that change, include
+both entries.
+
 ### Type Your Profile Configuration
 
 If your extension takes configuration in profiles, describe it under a `$defs`
@@ -316,6 +338,210 @@ for what to cover.
 - **Keep your own types open.** Avoid `additionalProperties: false` on objects
   you introduce, so later versions of your extension, or other extensions, can
   add to them.
+
+## Extend a Feed
+
+[Feeds](../specification/common/feed/index.md) deliver records in bulk. Common
+Feed (`dev.ucp.common.feed`) is the root: it defines discovery, the feed list,
+and the manifest, but no record shape of its own. A record type extends it and
+defines what a record is. Catalog Feed (`dev.ucp.shopping.catalog.feed`) is the
+record type whose records are UCP Products with nested Variants (see
+[Records](../specification/shopping/catalog/feed.md#records)).
+
+There are two ways to extend feeds:
+
+| You want to | Extend | Records are |
+| --- | --- | --- |
+| Add fields to catalog Products | `dev.ucp.shopping.catalog.feed` | UCP Products, plus your fields |
+| Publish records in your own shape | `dev.ucp.common.feed` | Defined by your specification |
+
+### Add Fields to Catalog Products
+
+An extension of Catalog Feed is an extension of an extension (see
+[Extend Another Extension](#extend-another-extension)). Its records stay UCP
+Products, with the same identity and Catalog Lookup resolution, and your fields
+are added to them.
+
+Catalog Feed exposes two shapes under `$defs["dev.ucp.common.feed"]`: `record`
+(the Product) and `manifest`. Compose onto the one you extend. This extension
+adds an `ads_eligible` flag to every Product, keyed on both the root and the
+parent:
+
+<!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ads.example.com/ucp/schemas/ads.json",
+  "name": "com.example.ads",
+  "version": "2026-09-01",
+  "title": "Ads Eligibility",
+  "description": "Marks whether each catalog Product may appear in ads.",
+  "$defs": {
+    "ads_record": {
+      "allOf": [
+        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_feed.json#/$defs/record" },
+        {
+          "type": "object",
+          "properties": {
+            "ads_eligible": {
+              "type": "boolean",
+              "description": "Whether the Business permits this Product in ads."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.common.feed": {
+      "$defs": { "record": { "$ref": "#/$defs/ads_record" } }
+    },
+    "dev.ucp.shopping.catalog.feed": {
+      "$defs": { "record": { "$ref": "#/$defs/ads_record" } }
+    }
+  }
+}
+```
+
+An extension that only adds manifest fields composes onto `manifest` instead and
+needs no `record` entry.
+
+The Business advertises the extension next to Common Feed and Catalog Feed:
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.common.feed": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/feed",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/feed.json",
+          "config": { "endpoint": "https://merchant.example.com/ucp/feeds" }
+        }
+      ],
+      "dev.ucp.shopping.catalog.feed": [
+        {
+          "version": "{{ ucp_version }}",
+          "extends": "dev.ucp.common.feed",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/feed",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_feed.json"
+        }
+      ],
+      "com.example.ads": [
+        {
+          "version": "2026-09-01",
+          "extends": "dev.ucp.shopping.catalog.feed",
+          "spec": "https://ads.example.com/docs/ucp/ads",
+          "schema": "https://ads.example.com/ucp/schemas/ads.json"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+Each manifest whose records carry the field declares the extension in its
+`ucp.capabilities`:
+
+<!-- ucp:example schema=shopping/catalog_feed op=list def=manifest -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.feed": [
+        {"version": "{{ ucp_version }}"}
+      ],
+      "dev.ucp.shopping.catalog.feed": [
+        {"version": "{{ ucp_version }}", "extends": "dev.ucp.common.feed"}
+      ],
+      "com.example.ads": [
+        {"version": "2026-09-01", "extends": "dev.ucp.shopping.catalog.feed"}
+      ]
+    }
+  },
+  "id": "us-en-usd",
+  "format": "dev.ucp.shopping.catalog.jsonl",
+  "context": {
+    "address_country": "US",
+    "language": "en-US",
+    "currency": "USD"
+  },
+  "generated_at": "2026-09-22T06:00:00Z",
+  "expires_at": "2026-09-29T06:00:00Z",
+  "files": [
+    {
+      "url": "part-00000.jsonl.gz",
+      "digest": "sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:"
+    }
+  ]
+}
+```
+
+Records then carry the field inline, alongside the Product's own fields:
+
+```text
+{"id": "P100", "title": "Oxford Shirt", "description": {"plain": "Cotton oxford shirt."}, "price_range": {"min": {"amount": 4500, "currency": "USD"}, "max": {"amount": 4500, "currency": "USD"}}, "variants": [{"id": "V100", "title": "Medium", "description": {"plain": "Medium"}, "price": {"amount": 4500, "currency": "USD"}}], "ads_eligible": true}
+```
+
+A Platform that recognizes `com.example.ads` reads `ads_eligible`. One that does
+not may ignore the field and still consume the snapshot as plain Products (see
+[Manifest](../specification/common/feed/index.md#manifest)). To deliver the field separately from the base
+catalog, for example on a different cadence or to only some Platforms, publish
+it as a [supplemental feed](../specification/common/feed/index.md#supplemental-feeds).
+
+### Publish Your Own Record Type
+
+If your records are not Products, define a record type of your own that extends
+Common Feed directly. Your specification defines what a record is and which
+identifiers related operations accept. The Business still **MUST** use stable
+identifiers that it can resolve in those operations (see
+[Manifest](../specification/common/feed/index.md#manifest)).
+
+A record type that changes the file layout, such as tab-separated rows, also
+defines its own `format` identifier (see
+[Formats](../specification/common/feed/index.md#formats)). Rows in a non-JSON
+format are governed by your specification rather than a JSON Schema, so the
+schema needs only the Common Feed entry, which must still contain a nested
+`$defs`, even if it is empty:
+
+<!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://provider.example/ucp/schemas/catalog_feed.json",
+  "name": "com.provider.shopping.catalog.feed",
+  "version": "2026-09-01",
+  "title": "Provider Catalog Feed",
+  "description": "Tab-separated catalog rows in the provider's own layout.",
+  "$defs": {
+    "dev.ucp.common.feed": { "$defs": {} }
+  }
+}
+```
+
+A record type with JSON records can instead define a `record` shape under that
+entry, and Platforms validate records against it. A Platform that does not
+recognize your record type, or its format, does not consume the snapshot.
+
+### Serve the Same Fields in Feeds and Live Search
+
+If your fields belong in both feed records and live Catalog Search responses,
+one extension can serve both: declare both parents in `extends` and add a
+`$defs` entry for each surface, reusing shared definitions as
+[multi-parent extensions](#extend-more-than-one-capability) do across cart and
+checkout. Applicability is explicit: declaring Catalog Feed does not make your
+fields appear in Search responses, or the reverse, so an extension can expose
+different data on each surface.
+
+When testing such an extension, note that `ucp-schema` 1.4.1 reports
+`references unknown parent` when a payload declares a parent that is not active
+in that payload, such as Catalog Search in a feed manifest. The `ucp-schema`
+main branch has since removed that check, so inactive parents are ignored as
+they are in negotiation.
 
 ## Version Your Extension
 
@@ -452,6 +678,7 @@ payload. For a container capability, pass the operation (for example,
 - [ ] A `$defs` entry for each capability in `extends`, composed with `allOf`
 - [ ] UCP base schemas referenced by absolute, versioned URL
 - [ ] Container parents extended per shape
+- [ ] Extensions of extensions keyed on both the root and the parent
 - [ ] `version` and `requires` declared
 - [ ] Hosted over HTTPS, without redirects, with cacheable headers
 - [ ] A `spec` page describing behavior and fallbacks
