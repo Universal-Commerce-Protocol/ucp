@@ -690,3 +690,6 @@ A conforming REST transport implementation **MUST**:
     pagination contract (see [Pagination](search.md#pagination)).
 4. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 5. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.
+6. Return HTTP 400 with `unsupported_purpose` error for search requests whose
+    `purpose` value is not supported (see
+    [Unsupported Purpose](search.md#purpose-and-reference-identifiers)).
