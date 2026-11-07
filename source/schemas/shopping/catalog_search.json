@@ -20,7 +20,16 @@
           },
           "additionalProperties": {
             "$ref": "#/$defs/purpose_policy"
-          }
+          },
+          "allOf": [
+            {
+              "properties": {
+                "recommendation": {
+                  "$ref": "#/$defs/recommendation_policy"
+                }
+              }
+            }
+          ]
         }
       },
       "additionalProperties": true
@@ -30,6 +39,23 @@
       "title": "Purpose Policy",
       "description": "Policy for one supported `purpose` value. An empty object means the value is supported with no additional policy. Open for non-breaking extension.",
       "additionalProperties": true
+    },
+    "recommendation_policy": {
+      "title": "Recommendation Policy",
+      "description": "Policy for the `recommendation` purpose.",
+      "allOf": [
+        { "$ref": "#/$defs/purpose_policy" },
+        {
+          "type": "object",
+          "properties": {
+            "supports_contextual": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether the Business returns recommendations when `reference_ids` is omitted, from `context` and `signals` alone. When `false` or absent, a `recommendation` request MUST carry at least one `reference_ids` entry, and a Platform MUST NOT send one without it."
+            }
+          }
+        }
+      ]
     },
     "search_request": {
       "type": "object",
@@ -80,7 +106,7 @@
           "then": {
             "properties": {
               "reference_ids": {
-                "description": "Optional anchors for complementary or related items. Multiple identifiers form one joint anchor set, and results need not relate to every anchor. When a variant ID is supplied, its parent product MUST also be excluded. Omit to derive recommendations from `context` alone."
+                "description": "Anchors for complementary or related items. Multiple identifiers form one joint anchor set, and results need not relate to every anchor. When a variant ID is supplied, its parent product MUST also be excluded. Required unless the Business advertises `supports_contextual: true` for `recommendation`, in which case omitting it requests recommendations from `context` and `signals` alone."
               }
             }
           }

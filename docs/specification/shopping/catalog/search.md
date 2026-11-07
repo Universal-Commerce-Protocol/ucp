@@ -60,7 +60,8 @@ catalog discovery:
 * **`search`** (default when `purpose` is omitted): Standard free-text search
     or filter-based browse.
 * **`recommendation`**: Returns complementary, related, or personalized items
-    anchored to `reference_ids` and/or `context`.
+    anchored to `reference_ids`, or derived from `context` alone when the
+    Business supports contextual recommendations.
 * **`swap`**: Returns functional substitute items for the anchor product or
     variant in `reference_ids`.
 
@@ -75,7 +76,16 @@ empty, only `search` is supported.
 
 {{ extension_schema_fields('catalog_search.json#/$defs/business_config', 'shopping/catalog') }}
 
-A Business that supports recommendations but not swaps declares:
+Many Businesses recommend items related to an anchor (for example, "frequently
+bought together") but cannot generate recommendations from `context` alone. The
+`recommendation` entry therefore carries `supports_contextual`, which defaults
+to `false`. A Business sets it to `true` only when it returns recommendations
+for requests that omit `reference_ids`.
+
+{{ extension_schema_fields('catalog_search.json#/$defs/recommendation_policy', 'shopping/catalog') }}
+
+A Business that supports anchored and contextual recommendations, but not
+swaps, declares:
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
@@ -87,7 +97,7 @@ A Business that supports recommendations but not swaps declares:
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json",
       "config": {
         "purposes": {
-          "recommendation": {}
+          "recommendation": { "supports_contextual": true }
         }
       }
     }
@@ -96,9 +106,11 @@ A Business that supports recommendations but not swaps declares:
 ```
 
 A Platform **MUST NOT** send a `purpose` value that the Business does not
-advertise. A Platform reads `config.purposes` from the Business profile it
-already fetches for capability negotiation, so it can decide before calling
-whether to offer recommendations or swaps.
+advertise, and **MUST NOT** send a `recommendation` request without
+`reference_ids` unless the Business advertises `supports_contextual: true`. A
+Platform reads `config.purposes` from the Business profile it already fetches
+for capability negotiation, so it can decide before calling whether to offer
+recommendations, contextual recommendations, or swaps.
 
 The following rules apply:
 
@@ -107,11 +119,14 @@ The following rules apply:
     `reference_ids` does not apply, and the Business **MUST** ignore it if
     present. When `purpose` is `swap`, `reference_ids` **MUST** contain exactly
     one identifier; a Platform that needs substitutes for several items sends
-    one request per item. A Business **MUST** reject requests that violate
-    these pairing rules. For `recommendation`, multiple `reference_ids` jointly
-    describe one anchor set: the Business returns candidates related to that
-    set as a whole, results need not relate to every anchor, and the response
-    does not correlate results to individual anchors.
+    one request per item. When `purpose` is `recommendation` and the Business
+    does not advertise `supports_contextual: true`, `reference_ids` **MUST**
+    contain at least one identifier. A Business **MUST** reject requests that
+    violate these pairing rules rather than returning an empty or general
+    result. For `recommendation`, multiple `reference_ids` jointly describe one
+    anchor set: the Business returns candidates related to that set as a
+    whole, results need not relate to every anchor, and the response does not
+    correlate results to individual anchors.
 2. **Supported Identifiers**: A Business **MUST** support lookup of
     `reference_ids` by product ID and variant ID, and **MAY** additionally
     support the secondary identifiers permitted by
@@ -127,7 +142,8 @@ The following rules apply:
     **MUST** return an empty `products` array rather than falling back to a
     general browse. This applies to `recommendation` even when `context` alone
     could drive results; a Platform that wants contextual recommendations
-    omits `reference_ids`.
+    omits `reference_ids`, which it does only when the Business advertises
+    `supports_contextual: true`.
 3. **Self-Exclusion**: The Business **MUST** exclude any product or variant
     listed in `reference_ids` from the response. When a variant ID is supplied,
     the Business **MUST** exclude its parent product for `recommendation`, and
