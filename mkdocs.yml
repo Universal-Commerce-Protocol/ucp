@@ -140,6 +140,7 @@ nav:
                       specification/payment/examples/encrypted-credential-payment-handler.md
       - Signatures: specification/signatures.md
       - Embedded Protocol: specification/embedded-protocol.md
+      - MCP Apps: specification/mcp-apps.md
       - Reference: specification/reference.md
 
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
@@ -433,6 +434,12 @@ plugins:
               standards terms and acronyms used throughout the specification,
               including Capability, Extension, Action, Platform, Business, and
               Merchant of Record.
+          - specification/mcp-apps.md: >-
+              MCP Apps (`io.modelcontextprotocol/ui`) integration specification
+              for UCP MCP servers and Platform hosts, covering static `ui://`
+              templates for Catalog, Cart, and Ask tools, `_meta.ui` visibility
+              rules, and Platform mediation of view-initiated `tools/call`
+              operations.
         Common:
           - specification/common/identity-linking/index.md: >-
               User authentication via the Identity Linking Capability,

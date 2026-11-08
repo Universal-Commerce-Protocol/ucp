@@ -2246,6 +2246,8 @@ MCP servers:
 - **SHOULD** also return serialized JSON in `content[]` for backward
     compatibility with clients not supporting `structuredContent`. Documentation
     examples abbreviate that serialized JSON string with `…` for readability.
+- **MAY** declare MCP Apps views on UCP tools, as defined in
+    [MCP Apps Integration](../mcp-apps.md).
 
 <!-- ucp:example schema=shopping/checkout extract=$.result.structuredContent.ucp target=$.ucp -->
 ```json
