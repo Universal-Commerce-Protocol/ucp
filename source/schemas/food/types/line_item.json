@@ -13,6 +13,7 @@
   "properties": {
     "id": {
       "type": "string",
+      "description": "Session-scoped line item identifier. Under full replacement on update, an echoed id is preserved on the resulting line, an omitted id is minted as a new line, and an unknown or duplicate id returns a recoverable error.",
       "ucp_request": {
         "create": "omit",
         "update": "optional"
@@ -20,6 +21,17 @@
     },
     "dish": {
       "$ref": "dish.json"
+    },
+    "modifications": {
+      "type": "array",
+      "items": {
+        "$ref": "modification.json"
+      },
+      "description": "List of modifications selected for the dish on this line item."
+    },
+    "note": {
+      "type": "string",
+      "description": "Buyer-specified freeform note for the kitchen on this line item. Passed verbatim; MUST NOT alter price or structured modifications."
     },
     "quantity": {
       "type": "integer",

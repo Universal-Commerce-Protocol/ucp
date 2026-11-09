@@ -3,7 +3,6 @@
   "$id": "https://ucp.dev/schemas/food/types/buyer.json",
   "title": "Buyer",
   "type": "object",
-  "additionalProperties": true,
   "properties": {
     "first_name": {
       "type": "string",

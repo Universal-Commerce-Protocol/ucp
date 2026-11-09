@@ -57,6 +57,14 @@ Businesses advertise MCP transport availability through their UCP profile at
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/fulfillment.json",
           "extends": "dev.ucp.food.checkout"
         }
+      ],
+      "dev.ucp.food.tip": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/food/extensions/tip",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/tip.json",
+          "extends": "dev.ucp.food.checkout"
+        }
       ]
     },
     "payment_handlers": {
@@ -152,6 +160,8 @@ prices them and asks for a fulfillment method.
     the establishment, dishes, and optional buyer and extension data.
     * Extensions (Optional):
         * `dev.ucp.food.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
+        * `dev.ucp.food.tip`: [Tip](../extensions/tip.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 
@@ -183,20 +193,20 @@ prices them and asks for a fulfillment method.
               {
                 "quantity": 2,
                 "dish": {
-                  "id": "dish_margherita_12",
-                  "modifications": [
-                    {"id": "mod_extra_mozzarella"},
-                    {"id": "mod_fresh_basil"}
-                  ],
-                  "note": "Well done crust, please"
-                }
+                  "id": "dish_margherita_12"
+                },
+                "modifications": [
+                  {"id": "mod_extra_mozzarella"},
+                  {"id": "mod_fresh_basil"}
+                ],
+                "note": "Well done crust, please"
               },
               {
                 "quantity": 1,
                 "dish": {
-                  "id": "dish_caesar",
-                  "note": "Dressing on the side"
-                }
+                  "id": "dish_caesar"
+                },
+                "note": "Dressing on the side"
               }
             ],
             "buyer": {
@@ -227,6 +237,9 @@ prices them and asks for a fulfillment method.
                 {"version": "{{ ucp_version }}"}
               ],
               "dev.ucp.food.fulfillment": [
+                {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+              ],
+              "dev.ucp.food.tip": [
                 {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
               ]
             },
@@ -269,13 +282,13 @@ prices them and asks for a fulfillment method.
                 "price": 1600,
                 "media": [
                   {"type": "image", "url": "https://food.example.com/img/margherita.jpg"}
-                ],
-                "modifications": [
-                  {"id": "mod_extra_mozzarella", "title": "Extra Mozzarella", "price": 200},
-                  {"id": "mod_fresh_basil", "title": "Fresh Basil", "price": 150}
-                ],
-                "note": "Well done crust, please"
+                ]
               },
+              "modifications": [
+                {"id": "mod_extra_mozzarella", "title": "Extra Mozzarella", "price": 200},
+                {"id": "mod_fresh_basil", "title": "Fresh Basil", "price": 150}
+              ],
+              "note": "Well done crust, please",
               "totals": [
                 {"type": "subtotal", "amount": 3900},
                 {"type": "total", "amount": 3900}
@@ -287,9 +300,9 @@ prices them and asks for a fulfillment method.
               "dish": {
                 "id": "dish_caesar",
                 "title": "Caesar Salad",
-                "price": 1100,
-                "note": "Dressing on the side"
+                "price": 1100
               },
+              "note": "Dressing on the side",
               "totals": [
                 {"type": "subtotal", "amount": 1100},
                 {"type": "total", "amount": 1100}
@@ -298,8 +311,8 @@ prices them and asks for a fulfillment method.
           ],
           "fulfillment": {
             "available_methods": [
-              {"type": "delivery", "fulfillable_on": "now"},
-              {"type": "pickup", "fulfillable_on": "now"}
+              {"type": "delivery", "fulfillable_on": "2026-04-10T18:25:00-07:00", "scheduling": "asap_and_scheduled"},
+              {"type": "pickup", "fulfillable_on": "2026-04-10T18:15:00-07:00", "scheduling": "asap_and_scheduled"}
             ]
           },
           "tip": {
@@ -407,6 +420,8 @@ Message.
     Contains the full writable checkout state.
     * Extensions (Optional):
         * `dev.ucp.food.fulfillment`: [Fulfillment](../extensions/fulfillment.md)
+        * `dev.ucp.food.tip`: [Tip](../extensions/tip.md)
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 
@@ -444,21 +459,21 @@ resolved tip line.
                 "id": "li_1",
                 "quantity": 2,
                 "dish": {
-                  "id": "dish_margherita_12",
-                  "modifications": [
-                    {"id": "mod_extra_mozzarella"},
-                    {"id": "mod_fresh_basil"}
-                  ],
-                  "note": "Well done crust, please"
-                }
+                  "id": "dish_margherita_12"
+                },
+                "modifications": [
+                  {"id": "mod_extra_mozzarella"},
+                  {"id": "mod_fresh_basil"}
+                ],
+                "note": "Well done crust, please"
               },
               {
                 "id": "li_2",
                 "quantity": 1,
                 "dish": {
-                  "id": "dish_caesar",
-                  "note": "Dressing on the side"
-                }
+                  "id": "dish_caesar"
+                },
+                "note": "Dressing on the side"
               }
             ],
             "buyer": {
@@ -512,6 +527,9 @@ resolved tip line.
               ],
               "dev.ucp.food.fulfillment": [
                 {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+              ],
+              "dev.ucp.food.tip": [
+                {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
               ]
             },
             "payment_handlers": {
@@ -528,8 +546,16 @@ resolved tip line.
           "line_items": [...],
           "fulfillment": {
             "available_methods": [
-              {"type": "delivery", "fulfillable_on": "now"},
-              {"type": "pickup", "fulfillable_on": "now"}
+              {
+                "type": "delivery",
+                "fulfillable_on": "2026-04-10T18:25:00-07:00",
+                "scheduling": "asap_and_scheduled"
+              },
+              {
+                "type": "pickup",
+                "fulfillable_on": "2026-04-10T18:15:00-07:00",
+                "scheduling": "asap_and_scheduled"
+              }
             ],
             "methods": [
               {
@@ -545,13 +571,13 @@ resolved tip line.
                     "address_region": "CA",
                     "postal_code": "94305",
                     "address_country": "US"
-                  },
-                  "preference_options": [
-                    {"id": "pref_leave_at_door", "label": "Leave at my door"},
-                    {"id": "pref_hand_to_me", "label": "Hand it to me"}
-                  ],
-                  "selected_preference_option_ids": ["pref_leave_at_door"]
+                  }
                 },
+                "preference_options": [
+                  {"id": "pref_leave_at_door", "label": "Leave at my door"},
+                  {"id": "pref_hand_to_me", "label": "Hand it to me"}
+                ],
+                "selected_preference_option_ids": ["pref_leave_at_door"],
                 "notes": "Gate code #4210, second floor",
                 "selected_option_id": "opt_standard",
                 "options": [
@@ -623,6 +649,8 @@ returns the order confirmation.
 * `id` (String): **Required**. The ID of the checkout session.
 * `checkout` ([Checkout](index.md#complete-checkout)): **Required**.
     Contains `payment` and optional `signals`.
+    * Extensions (Optional):
+        * `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](../../payment/extensions/ap2-mandates.md)
 
 #### Output Schema
 
@@ -695,6 +723,9 @@ and optionally a pickup `label`) if completion succeeds. See
               ],
               "dev.ucp.food.fulfillment": [
                 {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
+              ],
+              "dev.ucp.food.tip": [
+                {"version": "{{ ucp_version }}", "extends": "dev.ucp.food.checkout"}
               ]
             },
             "payment_handlers": {
@@ -727,7 +758,9 @@ and optionally a pickup `label`) if completion succeeds. See
           "order": {
             "id": "ord_food_9876543210",
             "label": "#42",
-            "tracking_url": "https://food.example.com/orders/ord_food_9876543210"
+            "tracking_url": "https://food.example.com/orders/ord_food_9876543210",
+            "earliest_fulfillment_time": "2026-04-10T18:35:00-07:00",
+            "latest_fulfillment_time": "2026-04-10T18:50:00-07:00"
           },
           "links": [...]
         },

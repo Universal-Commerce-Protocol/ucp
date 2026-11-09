@@ -5,7 +5,6 @@
   "description": "A fulfillment option within a group (e.g., Standard delivery $5, Express delivery $15).",
   "type": "object",
   "required": ["id", "title", "totals"],
-  "additionalProperties": true,
   "properties": {
     "id": {
       "type": "string",

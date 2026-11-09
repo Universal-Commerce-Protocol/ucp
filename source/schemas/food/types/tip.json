@@ -4,7 +4,6 @@
   "title": "Tip",
   "description": "Tip object.",
   "type": "object",
-  "additionalProperties": true,
   "properties": {
     "options": {
       "type": "array",
@@ -16,7 +15,12 @@
     },
     "selected_option_id": {
       "type": "string",
-      "description": "The ID of the selected tip option."
+      "description": "The ID of the selected tip option.",
+      "ucp_request": {
+        "create": "omit",
+        "update": "optional",
+        "complete": "omit"
+      }
     },
     "custom_amount": {
       "$ref": "../../common/types/amount.json",

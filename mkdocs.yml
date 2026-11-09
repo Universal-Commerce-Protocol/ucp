@@ -40,6 +40,7 @@ nav:
       - Schema Authoring: documentation/schema-authoring.md
       - Versioning: versioning.md
       - Announcements: documentation/announcements.md
+      - Contributing: documentation/contributing.md
   - Specification:
       - Overview: specification/overview/index.md
       - Getting Started: specification/getting-started.md
@@ -93,6 +94,8 @@ nav:
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
+              - Return Policy:
+                  specification/shopping/extensions/return-policy.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -110,6 +113,7 @@ nav:
                   - MCP: specification/food/checkout/mcp.md
           - Extensions:
               - Fulfillment: specification/food/extensions/fulfillment.md
+              - Tip: specification/food/extensions/tip.md
               - Discounts: specification/food/extensions/discount.md
       - Payment:
           - Extensions:
@@ -412,6 +416,10 @@ plugins:
           - documentation/announcements.md: >-
               General announcements, release notes, and community updates for
               the Universal Commerce Protocol.
+          - documentation/contributing.md: >-
+              Guidelines for contributing to the Universal Commerce Protocol,
+              including the Enhancement Proposal (EP) lifecycle, capability
+              maturity levels, and repository workflows.
         Specification:
           - specification/overview/index.md: >-
               Master technical specification of UCP, discovery mechanisms,
@@ -580,6 +588,14 @@ plugins:
               Buyer Consent Extension, defining data schemas for transmitting
               buyer privacy choices (analytics, marketing, personalization) to
               assist with privacy compliance (CCPA/GDPR).
+          - specification/shopping/extensions/return-policy.md: >-
+              Return Policy Extension, defining the
+              dev.ucp.shopping.policy.return type on the core policies
+              primitive with machine-readable return terms: an explicit
+              eligibility statement (a return window with anchor, no time
+              limit, or returns not accepted), supported resolutions, return
+              channels, and typed return fees optionally scoped to channels,
+              across catalog, cart, checkout, and order.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
@@ -601,7 +617,7 @@ plugins:
               a human-readable penalty schedule for lodging reservations.
         Food Checkout Capability:
           - specification/food/checkout/index.md: >-
-              Core Food Checkout Capability specification detailing cart and checkout
+              Core Food Checkout Capability specification detailing checkout
               operations, dish line items, food establishment context, and payment
               processing for online food orders.
           - specification/food/checkout/rest.md: >-
@@ -617,6 +633,10 @@ plugins:
               Food Fulfillment Extension, defining delivery and pickup fulfillment
               methods, delivery addresses, and food establishment pickup locations
               for online food orders.
+          - specification/food/extensions/tip.md: >-
+              Food Tip Extension, defining Business-suggested tip options,
+              buyer-selected preset or custom gratuity amounts, and resolution
+              into checkout totals for online food orders.
           - specification/food/extensions/discount.md: >-
               Food Discount Extension, covering discount code discovery, applied
               discounts, allocation method stacking orders, rejected code

@@ -444,6 +444,98 @@ def test_missing_binary_says_how_to_install() -> None:
 
 
 # -----------------------------------------------------------
+# Coverage walker
+# -----------------------------------------------------------
+
+
+def test_required_anyof_coverage() -> None:
+  """Authored keys satisfy one required-key alternative per anyOf layer."""
+  source_alternatives = {
+    "type": "object",
+    "anyOf": [
+      {"required": ["line_items"]},
+      {"required": ["cart_id"]},
+    ],
+  }
+  for name, example, expected in (
+    ("inline", {"line_items": []}, True),
+    ("cart", {"cart_id": "cart_123"}, True),
+    ("neither", {"buyer": {}}, False),
+    ("both", {"line_items": [], "cart_id": "cart_123"}, True),
+    ("elided_inline", {"line_items": "..."}, True),
+  ):
+    errors = v.check_coverage(example, source_alternatives)
+    _check(
+      f"coverage_required_anyof[{name}]",
+      bool(errors) is not expected,
+      f"got {errors!r}",
+    )
+
+  neutral = {
+    "type": "object",
+    "anyOf": [{}, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_neutral_branch",
+    not v.check_coverage({}, neutral),
+  )
+  true_neutral = {
+    "type": "object",
+    "anyOf": [True, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_true_branch_is_neutral",
+    not v.check_coverage({}, true_neutral),
+  )
+  false_alternative = {
+    "type": "object",
+    "anyOf": [False, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_false_branch_rejects_neither",
+    bool(v.check_coverage({}, false_alternative)),
+  )
+  _check(
+    "coverage_required_anyof_false_branch_accepts_inline",
+    not v.check_coverage({"line_items": []}, false_alternative),
+  )
+
+  pure_alternatives = {
+    "anyOf": [
+      {"required": ["line_items"]},
+      {"required": ["cart_id"]},
+    ],
+  }
+  _check(
+    "coverage_required_pure_anyof_rejects_neither",
+    bool(v.check_coverage({}, pure_alternatives)),
+  )
+  _check(
+    "coverage_required_pure_anyof_accepts_either",
+    not v.check_coverage({"cart_id": "cart_123"}, pure_alternatives),
+  )
+
+  layered = {
+    "allOf": [
+      {
+        "anyOf": [
+          {"required": ["line_items"]},
+          {"required": ["cart_id"]},
+        ]
+      }
+    ],
+  }
+  _check(
+    "coverage_required_anyof_in_allof_layer",
+    bool(v.check_coverage({"buyer": {}}, layered)),
+  )
+  _check(
+    "coverage_required_anyof_in_allof_layer_satisfied",
+    not v.check_coverage({"cart_id": "cart_123"}, layered),
+  )
+
+
+# -----------------------------------------------------------
 # process_block: integration tests requiring ucp-schema
 # -----------------------------------------------------------
 
@@ -647,17 +739,356 @@ def test_process_block_integration() -> None:
     f"got {result.status}: {result.message}",
   )
 
-  # Empty body trivially valid
+  # Only no-body read/cancel requests retain the empty-body shortcut.
+  for op in ("read", "cancel"):
+    md = (
+      "<!-- ucp:example schema=shopping/checkout "
+      f"op={op} direction=request -->\n"
+      "```json\n{}\n```\n"
+    )
+    result = _process(md)
+    _check(
+      f"process_empty_no_body_request_ok[{op}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+  # Responses are authored payloads, even when empty, and must not bypass
+  # coverage merely because a scaffold could fill the missing fields.
   md = (
-    "<!-- ucp:example schema=shopping/checkout op=cancel direction=request -->\n"  # noqa: E501
+    "<!-- ucp:example schema=shopping/checkout op=read direction=response -->\n"
     "```json\n{}\n```\n"
   )
   result = _process(md)
   _check(
-    "process_empty_body_ok",
+    "process_empty_response_not_blindly_accepted",
+    result.status == "fail" and "coverage:" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  # Explicit def=/target= validation is never hidden by the request shortcut.
+  scoped_examples = (
+    (
+      "def",
+      "schema=shopping/cart def=checkout op=read direction=request",
+    ),
+    (
+      "target",
+      "schema=shopping/checkout target=$.line_items op=read direction=request",
+    ),
+  )
+  for scope, annotation in scoped_examples:
+    result = _process(
+      f"<!-- ucp:example {annotation} -->\n```json\n{{}}\n```\n"
+    )
+    _check(
+      f"process_empty_explicit_{scope}_not_shortcut",
+      result.status != "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+
+def test_extension_validation() -> None:
+  """Fields an extension adds are validated against that extension.
+
+  Capability schemas are open, so a checkout example carrying
+  `fulfillment` passes the checkout schema whatever `fulfillment`
+  contains. The validator must also check it against the fulfillment
+  extension's composition of checkout.
+  """
+  capabilities, extensions = v.load_extensions(_SCHEMA_BASE)
+  checkout_exts = dict(extensions.get("dev.ucp.shopping.checkout", []))
+  _check(
+    "extensions_index_capability_path",
+    capabilities.get("dev.ucp.shopping.checkout") == "shopping/checkout",
+    f"got {capabilities.get('dev.ucp.shopping.checkout')!r}",
+  )
+  _check(
+    "extensions_index_fulfillment_fields",
+    "fulfillment" in checkout_exts.get("shopping/fulfillment", ()),
+    f"got {sorted(checkout_exts)}",
+  )
+  _check(
+    "extensions_index_excludes_capability_itself",
+    "shopping/checkout" not in checkout_exts,
+  )
+
+  if not _has_ucp_schema():
+    _check(
+      "extension_validation_integration",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  def option(description: str) -> str:
+    return (
+      "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+      "```json\n"
+      '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], '  # noqa: E501
+      '"groups": [ { "id": "g1", "line_item_ids": ["li_1"], "options": [ '
+      f'{{ "id": "o1", "title": "Standard", "description": {description}, '
+      '"totals": [ { "type": "total", "amount": 500 } ] } ] } ] } ] }\n'
+      "```\n"
+    )
+
+  result = _process(option('"Arrives soon"'))
+  _check(
+    "extension_field_type_error_fails",
+    result.status == "fail"
+    and "extension shopping/fulfillment:" in result.message
+    and "/description" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  result = _process(option('{ "plain": "Arrives soon" }'))
+  _check(
+    "extension_field_valid_ok",
     result.status == "ok",
     f"got {result.status}: {result.message}",
   )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    '```json\n{ "methods": [ { "id": "m1", "type": "shipping" } ] }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "extension_missing_required_fails",
+    result.status == "fail" and '"line_item_ids"' in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    "```json\n"
+    '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], "groups": [ ... ] } ] }\n'  # noqa: E501
+    "```\n"
+  )
+  result = _process(md)
+  _check(
+    "extension_elided_paths_suppressed",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+
+def test_checkout_item_source_process_block() -> None:
+  """Authored checkout create examples provide an item source before merge."""
+  if not _has_ucp_schema():
+    _check(
+      "checkout_item_source_process_block",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  annotations = (
+    "schema=shopping/checkout op=create direction=request",
+    "schema=shopping/cart def=checkout op=create direction=request",
+  )
+  examples = (
+    ("buyer_only", '{"buyer": {"email": "buyer@example.com"}}', False),
+    ("empty", "{}", False),
+    ("cart_only", '{"cart_id": "cart_abc123"}', True),
+    ("inline", '{"line_items": []}', True),
+    (
+      "both",
+      '{"cart_id": "cart_abc123", "line_items": []}',
+      True,
+    ),
+    ("elided_source", '{"line_items": "..."}', True),
+  )
+  for annotation in annotations:
+    schema_name = "cart_def" if "def=" in annotation else "base"
+    for example_name, payload, expected in examples:
+      md = f"<!-- ucp:example {annotation} -->\n```json\n{payload}\n```\n"
+      result = _process(md)
+      _check(
+        f"process_checkout_create_source[{schema_name}/{example_name}]",
+        (result.status == "ok") == expected,
+        f"got {result.status}: {result.message}",
+      )
+
+
+def test_checkout_item_source() -> None:
+  """Checkout owns the create-only line_items or cart_id requirement."""
+  if not _has_ucp_schema():
+    _check(
+      "checkout_item_source", False, "SKIPPED: ucp-schema binary not on PATH"
+    )
+    return
+
+  items = [{"item": {"id": "item_123"}, "quantity": 1}]
+  for schema_path in ("shopping/checkout", "shopping/cart"):
+    resolved = v.resolve_schema(schema_path, "request", "create", _SCHEMA_BASE)
+    schema = (
+      resolved
+      if schema_path == "shopping/checkout"
+      else resolved["$defs"]["checkout"]
+    )
+    body = schema if schema_path == "shopping/checkout" else schema["allOf"][0]
+    _check(
+      f"checkout_create_source_disjunction[{schema_path}]",
+      [branch.get("required", []) for branch in body.get("anyOf", [])]
+      == [["line_items"], ["cart_id"]],
+    )
+    # Validate complete resolved schemas directly, without process_block's
+    # empty-body shortcut or scaffold merge masking absent item sources.
+    for name, payload, expected in (
+      ("empty", {}, False),
+      ("buyer_only", {"buyer": {"email": "buyer@example.com"}}, False),
+      ("unknown_source_only", {"unknown_source": "source_123"}, False),
+      ("cart_id_only", {"cart_id": "cart_abc123"}, True),
+      ("inline_items", {"line_items": items}, True),
+      ("inline_empty_items", {"line_items": []}, True),
+      (
+        "legacy_empty_items",
+        {"cart_id": "cart_abc123", "line_items": []},
+        True,
+      ),
+      (
+        "overlapping_items",
+        {"cart_id": "cart_abc123", "line_items": items},
+        True,
+      ),
+      (
+        "extension_items",
+        {"line_items": items, "unknown_source": "source_123"},
+        True,
+      ),
+      ("null_items", {"cart_id": "cart_abc123", "line_items": None}, False),
+      ("non_array_items", {"cart_id": "cart_abc123", "line_items": {}}, False),
+      (
+        "malformed_item",
+        {"cart_id": "cart_abc123", "line_items": [None]},
+        False,
+      ),
+      ("null_cart_id", {"cart_id": None, "line_items": items}, False),
+      ("non_string_cart_id", {"cart_id": 123, "line_items": items}, False),
+    ):
+      valid, errors = v.validate_payload_with_schema(
+        payload, schema, "request", "create", _SCHEMA_BASE
+      )
+      _check(
+        f"checkout_create[{schema_path}/{name}]",
+        valid == expected,
+        f"valid={valid}, errors={errors}",
+      )
+
+  complete = v.load_scaffold(
+    "shopping/checkout", "request", "complete", _SCAFFOLDS_DIR
+  )
+  assert complete is not None and set(complete) == {"payment"}
+  for op in ("create", "update", "complete", "read"):
+    base = v.resolve_schema("shopping/checkout", "request", op, _SCHEMA_BASE)
+    cart = v.resolve_schema("shopping/cart", "request", op, _SCHEMA_BASE)
+    for name, schema in (
+      ("base", base),
+      ("cart_composed", cart["$defs"]["checkout"]),
+    ):
+      bodies = [schema] if name == "base" else schema["allOf"]
+      body = bodies[0]
+      properties = body.get("properties", {})
+      required = body.get("required", [])
+      _check(
+        f"checkout_{op}_line_items_projection[{name}]",
+        ("line_items" in properties) == (op != "complete")
+        and ("line_items" in required) == (op in ("update", "read")),
+        f"properties={list(properties)}, required={required}",
+      )
+      _check(
+        f"checkout_{op}_cart_id_projection[{name}]",
+        ("cart_id" in properties) == (op == "create")
+        and any("cart_id" in b.get("properties", {}) for b in bodies)
+        == (op == "create"),
+      )
+      if op != "create":
+        _check(
+          f"checkout_{op}_source_unconstrained[{name}]",
+          all(
+            not b.get("required") and not b.get("properties")
+            for b in body.get("anyOf", [])
+          ),
+        )
+        # Read retains the shared schema's existing item requirement
+        # and line IDs; the new source branches must not add constraints.
+        op_items = [{"id": "line_123", **items[0]}] if op == "read" else items
+        for label, payload, expected in (
+          ("seed", complete if op == "complete" else {}, op == "complete"),
+          ("items", {"line_items": op_items}, op != "complete"),
+          ("cart_only", {"cart_id": "cart_abc123"}, False),
+        ):
+          valid, errors = v.validate_payload_with_schema(
+            payload, schema, "request", op, _SCHEMA_BASE
+          )
+          _check(
+            f"checkout_{op}[{name}/{label}]",
+            valid == expected,
+            f"valid={valid}, errors={errors}",
+          )
+
+  for op in ("create", "update"):
+    cart = v.resolve_schema("shopping/cart", "request", op, _SCHEMA_BASE)
+    _check(
+      f"cart_{op}_line_items_required",
+      "line_items" in cart.get("required", []),
+    )
+    valid, errors = v.validate_payload_with_schema(
+      {}, cart, "request", op, _SCHEMA_BASE
+    )
+    _check(f"cart_{op}_missing_items_rejected", not valid, str(errors))
+
+  response = v.load_scaffold(
+    "shopping/checkout", "response", "read", _SCAFFOLDS_DIR
+  )
+  assert response is not None
+  for op in ("create", "read", "update", "complete", "cancel"):
+    base = v.resolve_schema("shopping/checkout", "response", op, _SCHEMA_BASE)
+    cart = v.resolve_schema("shopping/cart", "response", op, _SCHEMA_BASE)
+    for name, schema in (
+      ("base", base),
+      ("cart_composed", cart["$defs"]["checkout"]),
+    ):
+      body = schema if name == "base" else schema["allOf"][0]
+      bodies = [schema] if name == "base" else schema["allOf"]
+      _check(
+        f"checkout_{op}_response_cart_id_projection[{name}]",
+        all("cart_id" not in b.get("properties", {}) for b in bodies),
+      )
+      # Omitted contract fields remain tolerated as unknown extra properties.
+      for cart_id in ("cart_abc123", None, 123):
+        valid, errors = v.validate_payload_with_schema(
+          {**response, "cart_id": cart_id},
+          schema,
+          "response",
+          op,
+          _SCHEMA_BASE,
+        )
+        _check(
+          f"checkout_{op}_response_unknown_cart_id[{name}/{cart_id!r}]",
+          valid,
+          str(errors),
+        )
+      _check(
+        f"checkout_{op}_response_items_required[{name}]",
+        "line_items" in body.get("required", []),
+      )
+      valid, errors = v.validate_payload_with_schema(
+        response, schema, "response", op, _SCHEMA_BASE
+      )
+      _check(f"checkout_{op}_response_seed_valid[{name}]", valid, str(errors))
+      missing_items = {
+        k: value for k, value in response.items() if k != "line_items"
+      }
+      valid, errors = v.validate_payload_with_schema(
+        missing_items, schema, "response", op, _SCHEMA_BASE
+      )
+      _check(
+        f"checkout_{op}_response_missing_items_rejected[{name}]",
+        not valid,
+        str(errors),
+      )
 
 
 def test_resolve_schema_cache_key() -> None:
@@ -709,9 +1140,13 @@ def main() -> int:
   test_extract_blocks()
   test_reads_are_utf8()
   test_missing_binary_says_how_to_install()
+  test_required_anyof_coverage()
   test_scaffold_resolution()
   test_resolve_schema_cache_key()
   test_process_block_integration()
+  test_extension_validation()
+  test_checkout_item_source_process_block()
+  test_checkout_item_source()
   return _report()
 
 
