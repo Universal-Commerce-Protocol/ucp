@@ -362,32 +362,19 @@ extension adds no authorization field of its own.
 Recurring orders are paid with instruments the Business can charge after
 completion. Checkout already requires a
 Business to filter the payment handlers it offers to the context of the cart,
-and names subscriptions as the example. Without [Split
-Payments](../../payment/extensions/split-payments.md), the single instrument
-pays this order and is **retained** for the recurring orders, and that filter
-is the whole rule. A complete request for a checkout that carries a
-subscription policy **MUST** include an instrument the Business can charge
-after completion, even where the checkout `total` is `0`; the Business rejects
-one without it with `payment_failed` at `$.payment.instruments`.
+and names subscriptions as the example. The single instrument pays this
+order and is **retained** for the recurring orders, and that filter is the
+whole rule. A complete request for a checkout that carries a subscription
+policy **MUST** include an instrument the Business can charge after
+completion, even where the checkout `total` is `0`; the Business rejects one
+without it with `payment_failed` at `$.payment.instruments`.
 
-With Split Payments, recurring orders are [later
-charges](../../payment/extensions/split-payments.md#later-charges): the
-instruments submitted without an `amount` that the Business can charge after
-completion are retained, in allocation priority order, and each recurring
-order is paid from them as Split Payments allocates a later charge. An
-instrument submitted with an `amount`, or one the Business can charge at
-completion only, pays toward this order only and is never used for a
-recurring order. A submission with no instrument that can be retained is
-rejected, as Split Payments defines. Where the profile's combinations admit
-one that cannot fund the recurring orders, the Business narrows them for the
-checkout, as
-[per-checkout
-combinations](../../payment/extensions/split-payments.md#per-checkout-combinations)
-define. The Business **MUST** process each retained instrument even where it
-contributes nothing to this order; its contribution is `0`, as Split Payments
-reports any open-amount instrument that contributes nothing.
+A checkout that carries a subscription policy **MUST** be funded by a single
+instrument; the Business rejects a submission of more than one the same way.
+[Split Payments](../../payment/extensions/split-payments.md) composes with a
+checkout that carries no subscription policy, and not otherwise.
 
-A Platform **MUST** treat the handlers and `allowed_combinations` in each
+A Platform **MUST** treat the handlers in each
 response as authoritative, and re-read them after any change that adds or
 removes a subscription policy. How a handler stores an instrument, and how a
 payment for a recurring order is executed or recovers from a decline, are
@@ -476,11 +463,6 @@ none.
 
 An option whose current purchase depends on a payment term **MUST NOT** be
 offered unless `dev.ucp.common.payment.terms` is active for the checkout.
-
-A payment term's later schedules and the recurring orders are both later
-charges, paid from the instruments submitted without an `amount` in array
-order, as [Split
-Payments](../../payment/extensions/split-payments.md#later-charges) defines.
 
 ### Nested line items
 
@@ -594,11 +576,8 @@ Businesses **MUST**:
 - Carry the selected option onto the Order line as `purchase_option`, with its
   `schedules` as agreed, and the line's subscription policy and disclosure onto
   the Order.
-- Require an instrument it can charge after completion on every checkout that
-  carries a subscription policy, even where the `total` is `0`. Where Split
-  Payments is active, retain the instruments submitted without an `amount`
-  that it can charge after completion, in the submitted order, and pay for
-  recurring orders only from them.
+- Require a single instrument it can charge after completion on every checkout
+  that carries a subscription policy, even where the `total` is `0`.
 
 Platforms **MUST**:
 
@@ -611,9 +590,6 @@ Platforms **MUST**:
   indicative.
 - Meet the [Platform obligations](#platform-obligations) for every
   subscription disclosure.
-- Submit the instruments meant to pay for the recurring orders without an
-  `amount`, in the order the buyer prefers them, matching the
-  `allowed_combinations` resolved for the checkout.
 
 Platforms **SHOULD**:
 
@@ -1247,110 +1223,6 @@ marks a subscription that ends on its own and whose `description` states it.
   "links": [ ... ]
 }
 ```
-
-### Checkout: which instruments are kept
-
-A one-time mug and a coffee subscription, $30.00 today. Because the checkout
-includes a subscription, the Business narrows the combinations it resolves for
-the checkout: gift cards alone would cover today's order but cannot be charged
-after completion, so it lists them in an `immediate` group and every
-combination it returns requires a card.
-
-<!-- ucp:example schema=shopping/checkout extract=$.ucp target=$.ucp -->
-```json
-{
-  "ucp": {
-    "version": "{{ ucp_version }}",
-    "status": "success",
-    "capabilities": {
-      "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }],
-      "dev.ucp.shopping.purchase_options": [{ "version": "{{ ucp_version }}" }],
-      "dev.ucp.common.payment.split_payments": [
-        {
-          "version": "{{ ucp_version }}",
-          "config": {
-            "allowed_combinations": [
-              [
-                { "types": ["gift_card"], "max": 2, "schedule_type": "immediate" },
-                { "types": ["card"], "min": 1, "max": 1 }
-              ]
-            ]
-          }
-        }
-      ]
-    },
-    "payment_handlers": { ... }
-  }
-}
-```
-
-The instruments kept for the recurring orders are the ones submitted without
-an `amount` that the Business can charge after completion. The buyer pays
-with a gift card and a card. The gift card can be charged at completion only,
-so it is never kept; here the Platform states an `amount` on it, within
-today's total. The card is submitted without one and is retained.
-
-<!-- ucp:example schema=common/payment_split_payments def=dev.ucp.shopping.checkout op=complete direction=request extract=$.payment target=$.payment -->
-```json
-{
-  "payment": {
-    "instruments": [
-      {
-        "id": "pi_gc_1",
-        "handler_id": "example_handler_1",
-        "type": "gift_card",
-        "credential": { "type": "gift_card", "token": "gc_abc123" },
-        "amount": 3000
-      },
-      {
-        "id": "pi_card_1",
-        "handler_id": "example_handler_1",
-        "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" }
-      }
-    ]
-  }
-}
-```
-
-The gift card covers this order and is never charged again. The card
-contributes nothing today; the Business verifies and retains it for the
-recurring orders, and its contribution is `0`, as for a gift card with no
-balance.
-
-The same lever works between two cards. The buyer has two cards, either of
-which the Business could charge later, and wants the first used for this
-purchase only. The Platform states the whole total as its `amount` and leaves
-the second card without one:
-
-<!-- ucp:example schema=common/payment_split_payments def=dev.ucp.shopping.checkout op=complete direction=request extract=$.payment target=$.payment -->
-```json
-{
-  "payment": {
-    "instruments": [
-      {
-        "id": "pi_card_1",
-        "handler_id": "example_handler_1",
-        "type": "card",
-        "credential": { "type": "card", "token": "tok_visa_xxxx" },
-        "amount": 3000
-      },
-      {
-        "id": "pi_card_2",
-        "handler_id": "example_handler_1",
-        "type": "card",
-        "credential": { "type": "card", "token": "tok_mc_yyyy" }
-      }
-    ]
-  }
-}
-```
-
-The first card pays this order and is never used for a recurring order,
-because its `amount` bounds it to this order. The second contributes nothing
-today, is verified and retained, and pays every recurring order. Had the
-Platform submitted both without an `amount`, the first would have paid this
-order and both would have been retained, in that order.
 
 ### Switching back to one-time
 
