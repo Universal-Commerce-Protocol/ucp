@@ -2457,12 +2457,17 @@ days), a price openly offered for a substantial period, and the
 manufacturer's suggested retail price. Some jurisdictions prescribe or
 restrict which may be used, and the Business is generally expected to be
 able to substantiate the comparison. It is the Business's responsibility to
-determine whether to send a `list_price`, and which, for the Buyer's context.
-Platforms do not resolve what is appropriate; they present what they receive.
+determine whether to send a `list_price`, and which, for the Buyer's context
+(when known). Because `list_price` carries no basis label and typically reads
+as a price reduction, a Business omits it where its basis (such as a suggested
+retail price) cannot lawfully be shown that way. Platforms do not resolve what
+basis is appropriate; presenting `list_price` is optional, and a Platform that
+presents it uses the value received.
 
-`price` is what the Buyer pays. The gap between `list_price` and `price` is a
-comparison, not a deduction: a Business **MUST NOT** also report it as an
-applied discount, and a Platform **MUST NOT** derive an amount owed from
+`price` is the item's unit selling price (before any discounts in `totals`). The
+gap between `list_price` and `price` is a comparison, not a deduction: a
+Business **MUST NOT** also report it as a discount (for example, in `totals` or
+`discounts.applied`), and a Platform **MUST NOT** derive an amount owed from
 `list_price`. `totals` remain authoritative.
 
 A Platform **SHOULD NOT** present a saving (a strikethrough, percentage, or
