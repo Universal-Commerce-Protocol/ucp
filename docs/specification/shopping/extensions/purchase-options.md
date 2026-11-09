@@ -1438,6 +1438,7 @@ manages the subscription.
       "purchase_option": {
         "id": "po_monthly",
         "title": "Subscribe & save 15%",
+        "description": { "plain": "A fresh bag delivered every month, 15% off the one-time price." },
         "price": { "amount": 850, "currency": "USD" },
         "schedules": [
           {
@@ -1468,7 +1469,7 @@ manages the subscription.
       "code": "dev.ucp.shopping.policy.subscription",
       "path": "$.line_items[0]",
       "presentation": "disclosure",
-      "content": "$17.00 plus tax and shipping every month from November 2, 2026, until you cancel. Cancel anytime at example.com/account."
+      "content": "$18.36 today. Then $17.00 plus tax and shipping every month from November 2, 2026, until you cancel. Cancel anytime at example.com/account."
     }
   ]
 }
