@@ -26,6 +26,17 @@
             "read": "omit"
           },
           "ucp_response": "omit"
+        },
+        "cart_id": {
+          "$comment": "Prohibits cart_id in the line_items branch.",
+          "not": {},
+          "ucp_request": {
+            "create": "optional",
+            "update": "omit",
+            "complete": "omit",
+            "read": "omit"
+          },
+          "ucp_response": "omit"
         }
       }
     },
@@ -34,6 +45,17 @@
         "cart_id": {
           "ucp_request": {
             "create": "required",
+            "update": "omit",
+            "complete": "omit",
+            "read": "omit"
+          },
+          "ucp_response": "omit"
+        },
+        "line_items": {
+          "$comment": "Prohibits line_items in the cart_id branch.",
+          "not": {},
+          "ucp_request": {
+            "create": "optional",
             "update": "omit",
             "complete": "omit",
             "read": "omit"
@@ -58,7 +80,7 @@
       "items": {
         "$ref": "types/line_item.json"
       },
-      "description": "List of line items being checked out. In create requests, the Platform MUST include line_items or cart_id and MAY include both. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.",
+      "description": "List of line items being checked out. In create requests, the Platform MUST provide exactly one of line_items or cart_id. The Platform MUST include line_items in update requests and omits it from complete requests. The Business MUST include line_items in checkout responses.",
       "ucp_request": {
         "create": "optional",
         "update": "required",
@@ -67,7 +89,7 @@
     },
     "cart_id": {
       "type": "string",
-      "description": "Cart ID for checkout initialization. The Business MUST reject requests using it without negotiated Cart support. Cart contents take precedence over overlapping checkout fields; line_items may be omitted or empty.",
+      "description": "Cart ID for checkout initialization. In create requests, the Platform MUST provide exactly one of cart_id or line_items. The Business MUST reject requests using cart_id without negotiated Cart support.",
       "ucp_request": {
         "create": "optional",
         "update": "omit",

@@ -895,7 +895,7 @@ def test_checkout_item_source_process_block() -> None:
     (
       "both",
       '{"cart_id": "cart_abc123", "line_items": []}',
-      True,
+      False,
     ),
     ("elided_source", '{"line_items": "..."}', True),
   )
@@ -945,12 +945,12 @@ def test_checkout_item_source() -> None:
       (
         "legacy_empty_items",
         {"cart_id": "cart_abc123", "line_items": []},
-        True,
+        False,
       ),
       (
         "overlapping_items",
         {"cart_id": "cart_abc123", "line_items": items},
-        True,
+        False,
       ),
       (
         "extension_items",

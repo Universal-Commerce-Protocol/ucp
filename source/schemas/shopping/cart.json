@@ -17,7 +17,7 @@
           "properties": {
             "cart_id": {
               "type": "string",
-              "description": "Cart ID for checkout initialization. The Business MUST reject requests using it without negotiated Cart support. Cart contents take precedence over overlapping checkout fields; line_items may be omitted or empty.",
+              "description": "Cart ID for checkout initialization. In create requests, the Platform MUST provide exactly one of cart_id or line_items. The Business MUST reject requests using cart_id without negotiated Cart support.",
               "ucp_request": {
                 "create": "optional",
                 "update": "omit",
