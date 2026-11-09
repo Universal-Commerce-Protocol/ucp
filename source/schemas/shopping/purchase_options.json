@@ -306,7 +306,8 @@
               "type": "array",
               "items": {
                 "$ref": "#/$defs/line_item"
-              }
+              },
+              "ucp_request": "required"
             },
             "policies": {
               "type": "array",
@@ -333,6 +334,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/$defs/line_item"
+              },
+              "ucp_request": {
+                "create": "optional",
+                "update": "required",
+                "complete": "omit"
               }
             },
             "policies": {

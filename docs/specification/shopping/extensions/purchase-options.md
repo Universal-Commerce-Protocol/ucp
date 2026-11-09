@@ -360,7 +360,7 @@ extension adds no authorization field of its own.
 ### Payment eligibility
 
 Recurring orders are paid with instruments the Business can charge after
-completion, when the buyer is not present. Checkout already requires a
+completion. Checkout already requires a
 Business to filter the payment handlers it offers to the context of the cart,
 and names subscriptions as the example. Without [Split
 Payments](../../payment/extensions/split-payments.md), the single instrument
