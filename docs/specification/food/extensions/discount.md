@@ -91,10 +91,10 @@ effect on the receipt (negative for discounts).
 
 The `method` field indicates how the discount was calculated:
 
-| Method   | Meaning                                 | Example                                          |
-| -------- | --------------------------------------- | ------------------------------------------------ |
-| `each`   | Applied independently per eligible dish | "10% off each dish" → 10% × dish price           |
-| `across` | Split proportionally by value           | "$10 off order" → $6 to $60 dish, $4 to $40 dish |
+| Method   | Meaning                                            | Example                                                    |
+| -------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| `each`   | Calculated per target dish (including BOGO promos) | "10% off each dish" or "BOGO" → based on target dish price |
+| `across` | Split proportionally across target dishes by value | "$10 off order" → $6 to $60 dish, $4 to $40 dish           |
 
 ### Stacking Order
 
@@ -176,14 +176,18 @@ via the `messages[]` array:
 
 **Error codes for rejected discounts:**
 
-| Code                                   | Description                                 |
-| -------------------------------------- | ------------------------------------------- |
-| `discount_code_expired`                | Code has expired                            |
-| `discount_code_invalid`                | Code not found or malformed                 |
-| `discount_code_already_applied`        | Code is already applied                     |
-| `discount_code_combination_disallowed` | Cannot combine with another active discount |
-| `discount_code_user_not_logged_in`     | Code requires authenticated user            |
-| `discount_code_user_ineligible`        | User does not meet eligibility criteria     |
+| Code                                   | Description                                                                                                          |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `discount_code_expired`                | Code has expired                                                                                                     |
+| `discount_code_invalid`                | Code not found or malformed                                                                                          |
+| `discount_code_already_applied`        | Code is already applied                                                                                              |
+| `discount_code_combination_disallowed` | Cannot combine with another active discount                                                                          |
+| `discount_code_user_not_logged_in`     | Code requires authenticated user                                                                                     |
+| `discount_code_user_ineligible`        | User does not meet eligibility criteria (e.g., first-order only, per-guest usage limit reached)                      |
+| `discount_code_minimum_not_met`        | Order subtotal does not meet the promotion's minimum threshold                                                       |
+| `discount_code_ineligible_items`       | No qualifying dish in the order                                                                                      |
+| `discount_code_fulfillment_ineligible` | Not valid for the selected fulfillment method (e.g., pickup-only promo on a delivery order)                          |
+| `discount_code_time_ineligible`        | Not valid for the requested fulfillment time (e.g., happy hour, day-part, or scheduled time outside promo window) |
 
 ## Automatic Discounts
 
@@ -300,18 +304,21 @@ purchase)*" with full confidence in the attribution, amount, and allocation.
 Applied discounts are reflected in the core cart or checkout fields using two
 distinct total types:
 
-| Total Type       | When to Use                                               |
-| ---------------- | --------------------------------------------------------- |
-| `items_discount` | Discounts allocated to line items (`$.line_items[*]`)     |
-| `discount`       | Order-level discounts (delivery, fees, flat order amount) |
+| Total Type       | When to Use                                                         |
+| ---------------- | ------------------------------------------------------------------- |
+| `items_discount` | Dish-level promotions (e.g., BOGO, percentage off a specific dish)  |
+| `discount`       | Order-level promotions (delivery, fees, flat or percentage off order) |
 
-**Determining the type:** If a discount has `allocations` pointing to line
-items, it contributes to `items_discount`. Discounts without allocations, or
-with allocations to delivery/fees, contribute to `discount`.
+**Determining the type:** The Business chooses `items_discount` vs. `discount`
+based on how the promotion is presented to the buyer on the receipt. The
+`allocations` array is informational attribution showing where discount dollars
+landed—for example, when a POS prorates an order-level discount across
+`$.line_items[*]` to compute item-specific taxes, the promotion MAY still be
+reported as an order-level `discount` in `totals[]`.
 
 | Discount Type        | Where Reflected                            |
 | -------------------- | ------------------------------------------ |
-| Line-item discount   | `line_items[].totals[type=items_discount]` |
+| Dish-level discount  | `line_items[].totals[type=items_discount]` |
 | Order-level discount | `totals[type=discount]`                    |
 
 **Invariant:** `totals[type=items_discount].amount` equals

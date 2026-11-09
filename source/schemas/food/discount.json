@@ -54,7 +54,7 @@
             "each",
             "across"
           ],
-          "description": "Allocation method. 'each' = applied independently per dish. 'across' = split proportionally by value."
+          "description": "Allocation method. 'each' = calculated per target dish (including BOGO and per-dish promos). 'across' = split proportionally by value."
         },
         "priority": {
           "type": "integer",
