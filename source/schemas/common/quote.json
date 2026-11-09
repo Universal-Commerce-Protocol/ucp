@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/quote.json",
+  "name": "dev.ucp.common.quote",
+  "title": "Quote Extension",
+  "description": "Extends Cart and Checkout with a Business-issued quotation for the current line items. The Buyer may propose a price or ask for one; the Business accepts, declines, defers, or issues a quotation the Buyer accepts by id; an accepted quotation is reflected in the authoritative totals and projected onto the resulting Order.",
+  "$defs": {
+    "quote_proposal": {
+      "title": "Quote Proposal",
+      "description": "The Buyer's proposal for the current line items. An empty object asks the Business to quote without proposing a price.",
+      "type": "object",
+      "properties": {
+        "subtotal": {
+          "$ref": "types/amount.json",
+          "description": "Subtotal the Buyer proposes to pay for the current line items, in ISO 4217 minor units in the Cart or Checkout `currency`, before fulfillment, tax, and fees. Omit to ask for a quotation without proposing a price."
+        },
+        "message": {
+          "type": "string",
+          "description": "Buyer note to the Business accompanying the proposal, such as context on quantity or timing. Businesses MUST NOT require this field and MUST NOT require personal data in it; buyer identity travels through `buyer` and identity linking."
+        }
+      }
+    },
+    "quote": {
+      "title": "Quote",
+      "description": "Quote state for a Cart or Checkout: the Business's current quotation, the lifecycle status of the open cycle, and the Buyer's proposal or acceptance. On a response, an empty object means the Business will consider a proposal and no cycle is open.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Lifecycle state of the open quote cycle; absent when no cycle is open. Well-known values: `pending` (a proposal was received and the Business has not yet answered), `quoted` (the Business issued a quotation that awaits the Buyer), `accepted` (the quotation was accepted and `totals` reflect it), `declined` (the Business declined the proposal), `expired` (the quotation lapsed before acceptance), `withdrawn` (the Business revoked a quotation before it lapsed). A Platform that receives a value it does not recognize MUST treat no quotation as acceptable and MUST NOT offer to accept one; `totals` remain authoritative.",
+          "examples": [
+            "pending",
+            "quoted",
+            "accepted",
+            "declined",
+            "expired",
+            "withdrawn"
+          ],
+          "ucp_request": "omit"
+        },
+        "id": {
+          "type": "string",
+          "description": "Identifier of the Business's current quotation. Unique within the Business and immutable once issued: a quotation with different terms is a new quotation with a new `id`. Present when `status` is `quoted`, `accepted`, or `withdrawn`, and when `expired` follows a quotation. Absent when no quotation has been issued.",
+          "ucp_request": "omit"
+        },
+        "subtotal": {
+          "$ref": "types/amount.json",
+          "description": "Subtotal the Business quotes for the line items the quotation was issued against, in ISO 4217 minor units in the Cart or Checkout `currency`, before fulfillment, tax, and fees. Present whenever `id` is.",
+          "ucp_request": "omit"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp at which the quotation lapses if not accepted. Required when `status` is `quoted`. After acceptance it records the validity the Buyer accepted under. The Business MAY extend it in place and MUST NOT shorten it.",
+          "ucp_request": "omit"
+        },
+        "message": {
+          "type": "string",
+          "description": "Business note accompanying the response, such as the reason a proposal was declined, what to expect while `pending`, or a condition attached to the quotation.",
+          "ucp_request": "omit"
+        },
+        "proposal": {
+          "$ref": "#/$defs/quote_proposal",
+          "description": "The Buyer's proposal. In a request, submitting it opens a new quote cycle and supersedes any quotation that has not been accepted. In a response, the Business echoes the proposal of the current cycle."
+        },
+        "accepted_id": {
+          "type": "string",
+          "description": "ID of the quotation the Buyer accepts: the `id` from the latest response, whose `status` MUST be `quoted`, or the `id` of a quotation this Business issued to this Buyer outside the Cart or Checkout. An update carries at most one of `proposal` and `accepted_id`. Omitted on complete because a quotation is agreed, if at all, before completion. Accepting is a mutation: the Business response is authoritative for all derived state. The Business echoes it on every response while the quotation it names is current, so an `accepted` status without it means the Business accepted the Buyer's proposal outright."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "quoted"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "id",
+              "subtotal",
+              "expires_at"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "accepted",
+                  "withdrawn"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "id",
+              "subtotal"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "required": [
+              "subtotal"
+            ]
+          }
+        }
+      ]
+    },
+    "order_quote": {
+      "title": "Order Quote",
+      "description": "The quotation accepted before the Order was placed.",
+      "type": "object",
+      "required": [
+        "id",
+        "subtotal"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of the accepted quotation, as issued on the Cart or Checkout."
+        },
+        "subtotal": {
+          "$ref": "types/amount.json",
+          "description": "Quoted subtotal the Buyer accepted, in ISO 4217 minor units in the Order `currency`, before fulfillment, tax, and fees."
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Quote",
+      "description": "Cart extended with a quotation for its line items.",
+      "allOf": [
+        {
+          "$ref": "../shopping/cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "quote": {
+              "$ref": "#/$defs/quote",
+              "description": "Quote state for this Cart. A Business includes it when it will consider a proposal for the Cart or a quote cycle is open; its absence means no quotation is available for the Cart in its current state.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Quote",
+      "description": "Checkout extended with a quotation for its line items.",
+      "allOf": [
+        {
+          "$ref": "../shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "quote": {
+              "$ref": "#/$defs/quote",
+              "description": "Quote state for this Checkout. A Business includes it when it will consider a proposal for the Checkout or a quote cycle is open; its absence means no quotation is available for the Checkout in its current state. Omitted on complete because a quotation is agreed, if at all, before completion.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Accepted Quote",
+      "description": "Order extended with the quotation accepted at checkout.",
+      "allOf": [
+        {
+          "$ref": "../shopping/order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "quote": {
+              "$ref": "#/$defs/order_quote",
+              "description": "The quotation accepted before the Order was placed. The proposal and the lifecycle state are not projected.",
+              "ucp_response": "optional"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

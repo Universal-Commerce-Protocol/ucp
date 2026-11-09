@@ -11,6 +11,7 @@
     "address_undeliverable",
     "payment_failed",
     "eligibility_invalid",
+    "quote_unavailable",
     "identity_required",
     "insufficient_scope"
   ]
