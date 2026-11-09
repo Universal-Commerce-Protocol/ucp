@@ -1031,7 +1031,7 @@ The Checkout capability defines the following logical operations.
 
 | Operation             | Description                                                                        |
 | :-------------------- | :--------------------------------------------------------------------------------- |
-| **Create Checkout**   | Initiates a new checkout session. Called as soon as a user adds an item to a cart. |
+| **Create Checkout**   | Initiates a checkout session when the Buyer expresses purchase intent.             |
 | **Get Checkout**      | Retrieves the current state of a checkout session.                                 |
 | **Update Checkout**   | Updates a checkout session.                                                        |
 | **Complete Checkout** | Finalizes the checkout and places the order.                                       |
@@ -1039,35 +1039,28 @@ The Checkout capability defines the following logical operations.
 
 ### Create Checkout
 
-To be invoked by the platform when the user has expressed purchase intent
-(e.g., click on Buy) to initiate the checkout session with the item details.
+The Platform invokes this operation when the Buyer has expressed purchase intent
+(e.g., clicking Buy) to initiate the checkout session with the item details.
 
 **Recommendation**: To minimize discrepancies and a streamlined user experience,
 product data (price/title etc.) provided by the business through the feeds
 **SHOULD** match the actual attributes returned in the response.
 
-The create request initializes the checkout from one of two item sources: the
-`line_items` provided inline, or the contents of a [Cart](../cart/index.md)
-identified by `cart_id`. The Platform **MUST** provide `line_items` or
-`cart_id`, and **MAY** provide both. Neither field is required on its own; the
-create request schema requires at least one of them. When `cart_id` is present,
-the Business **MUST** use the cart contents and **MUST** ignore all other
-checkout fields in the payload; see
-[Cart → Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion)
-for the conversion contract, including precedence, idempotent conversion, and
-cart lifecycle.
+The Platform **MUST** provide exactly one source in a Create Checkout request:
+`line_items` inline or a [Cart](../cart/index.md) identified by `cart_id`. The
+Business **MUST** reject a request containing both or neither as invalid,
+without creating a checkout. See
+[Cart-to-Checkout Conversion](../cart/index.md#cart-to-checkout-conversion)
+for conversion by reference or value, idempotent conversion, and the cart
+lifecycle.
 
 The `cart_id` source is available only when the Cart capability is negotiated.
 The Platform **MUST NOT** provide `cart_id` otherwise. The Business **MUST**
 reject a create request that provides `cart_id` when the Cart capability is
 not negotiated, and **MUST NOT** ignore `cart_id` and initialize the checkout
-from the inline `line_items` instead. Schema validation establishes only that
-the request names an item source; it does not establish that the Cart
-capability is negotiated, that the cart exists, or that the Buyer may access
-it.
-
-The Business **MUST** reject a create request that provides neither
-`line_items` nor `cart_id` as an invalid request, without creating a checkout.
+from the inline `line_items` instead. Schema validation checks that the request
+names exactly one item source; it does not establish that the Cart capability
+is negotiated, that the cart exists, or that the Buyer may access it.
 
 {{ method_fields('create_checkout', 'shopping/rest.openapi.json', 'shopping/checkout') }}
 
