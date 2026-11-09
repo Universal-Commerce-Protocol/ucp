@@ -2442,6 +2442,39 @@ Request assertions, mismatch handling, response echo, off-increment request
 handling, pricing, and lifecycle behavior are defined by the capability that
 uses the shared representation.
 
+## List price
+
+`list_price` is a **reference price**: a benchmark a Business offers so Buyers
+can judge the value of `price`, typically shown as a strikethrough. It is
+denominated like `price`: the same currency, per one whole `quantity_unit.unit`,
+or per `each` when `quantity_unit` is absent.
+
+UCP does not specify what a reference price is measured against. That is the
+Business's choice, within what applicable law allows, and jurisdictions
+differ. Bases in use include the price typically charged over a preceding
+period, the lowest price in a recent window (for example, the preceding 30
+days), a price openly offered for a substantial period, and the
+manufacturer's suggested retail price. Some jurisdictions prescribe or
+restrict which may be used, and the Business is generally expected to be
+able to substantiate the comparison. It is the Business's responsibility to
+determine whether to send a `list_price`, and which, for the Buyer's context
+(when known). Because `list_price` carries no basis label and typically reads
+as a price reduction, a Business omits it where its basis (such as a suggested
+retail price) cannot lawfully be shown that way. Platforms do not resolve what
+basis is appropriate; presenting `list_price` is optional, and a Platform that
+presents it uses the value received.
+
+`price` is the item's unit selling price (before any discounts in `totals`). The
+gap between `list_price` and `price` is a comparison, not a deduction: a
+Business **MUST NOT** also report it as a discount (for example, in `totals` or
+`discounts.applied`), and a Platform **MUST NOT** derive an amount owed from
+`list_price`. `totals` remain authoritative.
+
+A Platform **SHOULD NOT** present a saving (a strikethrough, percentage, or
+"save" amount) unless `list_price` is greater than `price`. A `list_price` at or
+below `price` is valid, for example a manufacturer's suggested retail price on
+goods sold at a premium.
+
 ## Request Constraints
 
 After capabilities and extensions are negotiated, the resolved UCP request
