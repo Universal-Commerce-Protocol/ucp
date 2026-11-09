@@ -4854,6 +4854,10 @@ revised totals — are bounded only by <code>scale</code>: a declared ordering
 and checkout and does not constrain what the Business records (a 0.25-lb
 ordering increment does not prevent recording an actual picked weight of
 1.90 lb).</p>
+<p><strong>List price.</strong> Businesses <strong>MAY</strong> surface a snapshot of the originating
+Checkout's <a href="../../overview/#list-price"><code>item.list_price</code></a> on Order
+lines. This is the value captured at Checkout, not recomputed from live
+Catalog; a Business that did not retain it omits it.</p>
 <h3 id="fulfillment">Fulfillment<a class="headerlink" href="#fulfillment" title="Permanent link">&para;</a></h3>
 <p>Fulfillment tracks how items are delivered to the buyer.</p>
 <h4 id="expectations">Expectations<a class="headerlink" href="#expectations" title="Permanent link">&para;</a></h4>
@@ -6199,6 +6203,12 @@ zero-downtime key rotation procedures.</p>
 <td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
 <td style="text-align: left;"><strong>Required</strong></td>
 <td style="text-align: left;">Unit price in ISO 4217 minor units. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">list_price</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Reference price for comparison display, typically shown as a strikethrough next to <code>price</code>, and denominated like <code>price</code>. It is not charged and is never part of <code>totals</code>; the gap against <code>price</code> is a comparison, not a discount. The Business chooses what it is measured against (for example, the price typically charged over a preceding period, or the manufacturer's suggested retail price); what is permitted varies by jurisdiction. On an Order, this is the value captured at Checkout.</td>
 </tr>
 <tr>
 <td style="text-align: left;">quantity_unit</td>

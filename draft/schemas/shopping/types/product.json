@@ -46,7 +46,7 @@
     },
     "list_price_range": {
       "$ref": "https://ucp.dev/draft/schemas/common/types/price_range.json",
-      "description": "List price range before discounts (for strikethrough display)."
+      "description": "Range of variant `list_price` values across all variants; see `variant.list_price`. The range MUST use the same currency as `price_range`."
     },
     "media": {
       "type": "array",

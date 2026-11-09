@@ -1674,6 +1674,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List price
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#request-constraints" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6419,6 +6430,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List price
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#request-constraints" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -9598,6 +9620,34 @@ comparison.</p>
 <p>Request assertions, mismatch handling, response echo, off-increment request
 handling, pricing, and lifecycle behavior are defined by the capability that
 uses the shared representation.</p>
+<h2 id="list-price">List price<a class="headerlink" href="#list-price" title="Permanent link">&para;</a></h2>
+<p><code>list_price</code> is a <strong>reference price</strong>: a benchmark a Business offers so Buyers
+can judge the value of <code>price</code>, typically shown as a strikethrough. It is
+denominated like <code>price</code>: the same currency, per one whole <code>quantity_unit.unit</code>,
+or per <code>each</code> when <code>quantity_unit</code> is absent.</p>
+<p>UCP does not specify what a reference price is measured against. That is the
+Business's choice, within what applicable law allows, and jurisdictions
+differ. Bases in use include the price typically charged over a preceding
+period, the lowest price in a recent window (for example, the preceding 30
+days), a price openly offered for a substantial period, and the
+manufacturer's suggested retail price. Some jurisdictions prescribe or
+restrict which may be used, and the Business is generally expected to be
+able to substantiate the comparison. It is the Business's responsibility to
+determine whether to send a <code>list_price</code>, and which, for the Buyer's context
+(when known). Because <code>list_price</code> carries no basis label and typically reads
+as a price reduction, a Business omits it where its basis (such as a suggested
+retail price) cannot lawfully be shown that way. Platforms do not resolve what
+basis is appropriate; presenting <code>list_price</code> is optional, and a Platform that
+presents it uses the value received.</p>
+<p><code>price</code> is the item's unit selling price (before any discounts in <code>totals</code>). The
+gap between <code>list_price</code> and <code>price</code> is a comparison, not a deduction: a
+Business <strong>MUST NOT</strong> also report it as a discount (for example, in <code>totals</code> or
+<code>discounts.applied</code>), and a Platform <strong>MUST NOT</strong> derive an amount owed from
+<code>list_price</code>. <code>totals</code> remain authoritative.</p>
+<p>A Platform <strong>SHOULD NOT</strong> present a saving (a strikethrough, percentage, or
+"save" amount) unless <code>list_price</code> is greater than <code>price</code>. A <code>list_price</code> at or
+below <code>price</code> is valid, for example a manufacturer's suggested retail price on
+goods sold at a premium.</p>
 <h2 id="request-constraints">Request Constraints<a class="headerlink" href="#request-constraints" title="Permanent link">&para;</a></h2>
 <p>After capabilities and extensions are negotiated, the resolved UCP request
 schema defines the fields and structure allowed for an operation. In an

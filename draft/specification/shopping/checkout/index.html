@@ -7170,6 +7170,12 @@ requirements.</p>
 <td style="text-align: left;">Unit price in ISO 4217 minor units. Price is the amount per one whole <code>quantity_unit.unit</code> (for example, per lb or per hour); when <code>quantity_unit</code> is absent, it is per <code>each</code>.</td>
 </tr>
 <tr>
+<td style="text-align: left;">list_price</td>
+<td style="text-align: left;"><a href="/draft/specification/reference/#amount">Amount</a></td>
+<td style="text-align: left;">Optional</td>
+<td style="text-align: left;">Reference price for comparison display, typically shown as a strikethrough next to <code>price</code>, and denominated like <code>price</code>. It is not charged and is never part of <code>totals</code>; the gap against <code>price</code> is a comparison, not a discount. The Business chooses what it is measured against (for example, the price typically charged over a preceding period, or the manufacturer's suggested retail price); what is permitted varies by jurisdiction. On an Order, this is the value captured at Checkout.</td>
+</tr>
+<tr>
 <td style="text-align: left;">quantity_unit</td>
 <td style="text-align: left;"><a href="/draft/specification/reference/#quantity-unit">Quantity Unit</a></td>
 <td style="text-align: left;">Optional</td>
