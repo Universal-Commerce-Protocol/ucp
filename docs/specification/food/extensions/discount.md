@@ -21,7 +21,7 @@
 ## Overview
 
 Discount extension allows businesses to indicate that they support discount
-codes on cart and checkout sessions, and specifies how the discount codes are
+codes on checkout sessions, and specifies how the discount codes are
 to be shared between the platform and the business.
 
 **Key features:**
@@ -33,12 +33,11 @@ to be shared between the platform and the business.
 
 **Dependencies:**
 
-- Cart Capability or Checkout Capability
+- [Checkout Capability](../checkout/index.md)
 
 ## Discovery
 
-Businesses advertise discount support in their profile. The capability can
-extend cart, checkout, or both:
+Businesses advertise discount support in their profile:
 
 <!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
@@ -49,7 +48,7 @@ extend cart, checkout, or both:
       "dev.ucp.food.discount": [
         {
           "version": "{{ ucp_version }}",
-          "extends": ["dev.ucp.food.cart", "dev.ucp.food.checkout"],
+          "extends": "dev.ucp.food.checkout",
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/food/extensions/discount",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/food/discount.json"
         }
@@ -59,13 +58,9 @@ extend cart, checkout, or both:
 }
 ```
 
-Businesses MAY advertise discount support for cart only, checkout only, or
-both. Platforms SHOULD check which resources are extended before submitting
-discount codes.
-
 ## Schema
 
-When this capability is active, cart and/or checkout are extended with a
+When this capability is active, checkout is extended with a
 `discounts` object.
 
 ### Discounts Object
@@ -102,7 +97,7 @@ When multiple discounts are applied, `priority` indicates the calculation order.
 Lower numbers are applied first:
 
 ```text
-Cart: $100
+Order: $100
 Discount A (priority: 1): 20% off → $100 × 0.8 = $80
 Discount B (priority: 2): $10 off → $80 - $10 = $70
 ```
@@ -130,8 +125,7 @@ omits it is reported in `totals[]` as a single `discount` entry.
 
 ## Operations
 
-Discount codes are submitted via standard cart or checkout create/update
-operations. The same semantics apply to both resources.
+Discount codes are submitted via standard checkout create/update operations.
 
 **Request behavior:**
 
@@ -144,12 +138,6 @@ operations. The same semantics apply to both resources.
 - `discounts.applied` contains all active discounts (code-based + automatic)
 - Rejected codes communicated via `messages[]` (see below)
 - Discount amounts reflected in `totals[]` and `line_items[].totals[]`
-
-**Cart-to-checkout continuity:** When a cart is converted to a checkout via the
-cart capability's `cart_id` field, businesses MUST carry forward any discount
-codes that were applied to the cart. Codes that are no longer valid at checkout
-time (e.g., expired, ineligible) SHOULD be communicated via `messages[]` using
-standard rejection codes.
 
 ## Rejected Codes
 
@@ -191,7 +179,7 @@ via the `messages[]` array:
 
 ## Automatic Discounts
 
-Businesses may apply discounts automatically based on cart contents, customer
+Businesses may apply discounts automatically based on order contents, customer
 segment, or promotional rules:
 
 - Appear in `discounts.applied` with `automatic: true` and no `code` field
@@ -210,7 +198,7 @@ provisional discounts to the buyer.
 
 ### Discount Behavior
 
-Platforms send buyer claims via `context.eligibility` on cart or checkout
+Platforms send buyer claims via `context.eligibility` on checkout
 requests (see [Context](../checkout/index.md#context)). When a Business recognizes a
 claim and it affects pricing, it **MUST** surface a corresponding provisional
 discount in the `discounts.applied` array. This gives the Platform structured
@@ -246,9 +234,10 @@ stacking and allocation details:
 
 === "Request"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=create direction=request -->
+    <!-- ucp:example schema=food/checkout op=create direction=request -->
     ```json
     {
+      "food_establishment": { ... },
       "context": {
         "eligibility": ["com.example.store_card"]
       },
@@ -265,11 +254,13 @@ stacking and allocation details:
 
 === "Response"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=read -->
+    <!-- ucp:example schema=food/checkout op=read -->
     ```json
     {
       "ucp": { ... },
       "id": "...",
+      "food_establishment": { ... },
+      "status": "...",
       "currency": "...",
       "line_items": [ ... ],
       "discounts": {
@@ -292,7 +283,8 @@ stacking and allocation details:
         {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
         {"type": "items_discount", "display_text": "Discounts", "amount": -250},
         {"type": "total", "display_text": "Total", "amount": 4750}
-      ]
+      ],
+      "links": [ ... ]
     }
     ```
 
@@ -301,7 +293,7 @@ purchase)*" with full confidence in the attribution, amount, and allocation.
 
 ## Impact on Line Items and Totals
 
-Applied discounts are reflected in the core cart or checkout fields using two
+Applied discounts are reflected in the core checkout fields using two
 distinct total types:
 
 | Total Type       | When to Use                                                         |
@@ -333,17 +325,18 @@ negative (the effect on the receipt) — the sign is schema-enforced.
 
 ## Examples
 
-### Cart with discount codes
+### Checkout with discount codes
 
-Discount codes applied during cart exploration. The cart response includes
-estimated discount amounts, giving the buyer visibility into savings before
-proceeding to checkout.
+Discount codes applied to a checkout session. The checkout response includes
+applied discount amounts, giving the buyer visibility into savings before
+completing the order.
 
 === "Request"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=create direction=request -->
+    <!-- ucp:example schema=food/checkout op=create direction=request -->
     ```json
     {
+      "food_establishment": { ... },
       "line_items": [
         {
           "dish": {
@@ -360,11 +353,13 @@ proceeding to checkout.
 
 === "Response"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=read -->
+    <!-- ucp:example schema=food/checkout op=read -->
     ```json
     {
       "ucp": { ... },
-      "id": "cart_abc123",
+      "id": "chk_abc123",
+      "food_establishment": { ... },
+      "status": "incomplete",
       "currency": "USD",
       "line_items": [
         {
@@ -400,7 +395,8 @@ proceeding to checkout.
         {"type": "subtotal", "display_text": "Subtotal", "amount": 4000},
         {"type": "items_discount", "display_text": "Item Discounts", "amount": -2000},
         {"type": "total", "display_text": "Estimated Total", "amount": 2000}
-      ]
+      ],
+      "links": [ ... ]
     }
     ```
 
@@ -411,9 +407,10 @@ to the order as a whole and uses `type: "discount"` in totals.
 
 === "Request"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=update direction=request -->
+    <!-- ucp:example schema=food/checkout op=update direction=request -->
     ```json
     {
+      "food_establishment": { ... },
       "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10"]
@@ -423,11 +420,13 @@ to the order as a whole and uses `type: "discount"` in totals.
 
 === "Response"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=read -->
+    <!-- ucp:example schema=food/checkout op=read -->
     ```json
     {
       "ucp": { ... },
       "id": "...",
+      "food_establishment": { ... },
+      "status": "...",
       "currency": "...",
       "line_items": [ ... ],
       "discounts": {
@@ -444,7 +443,8 @@ to the order as a whole and uses `type: "discount"` in totals.
         {"type": "subtotal", "display_text": "Subtotal", "amount": 5000},
         {"type": "discount", "display_text": "Order Discount", "amount": -1000},
         {"type": "total", "display_text": "Total", "amount": 4000}
-      ]
+      ],
+      "links": [ ... ]
     }
     ```
 
@@ -456,9 +456,10 @@ level.
 
 === "Request"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=update direction=request -->
+    <!-- ucp:example schema=food/checkout op=update direction=request -->
     ```json
     {
+      "food_establishment": { ... },
       "line_items": [ ... ],
       "discounts": {
         "codes": ["BOGOPIZZA"]
@@ -468,11 +469,13 @@ level.
 
 === "Response"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=read -->
+    <!-- ucp:example schema=food/checkout op=read -->
     ```json
     {
       "ucp": { ... },
       "id": "...",
+      "food_establishment": { ... },
+      "status": "...",
       "currency": "...",
       "line_items": [
         {
@@ -514,7 +517,8 @@ level.
         {"type": "discount", "display_text": "Free delivery on orders over $30", "amount": -499},
         {"type": "fulfillment", "display_text": "Delivery Fee", "amount": 499},
         {"type": "total", "display_text": "Total", "amount": 2000}
-      ]
+      ],
+      "links": [ ... ]
     }
     ```
 
@@ -526,9 +530,10 @@ but not in `discounts.applied`.
 
 === "Request"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=update direction=request -->
+    <!-- ucp:example schema=food/checkout op=update direction=request -->
     ```json
     {
+      "food_establishment": { ... },
       "line_items": [ ... ],
       "discounts": {
         "codes": ["SAVE10", "EXPIRED50"]
@@ -538,11 +543,13 @@ but not in `discounts.applied`.
 
 === "Response"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=read -->
+    <!-- ucp:example schema=food/checkout op=read -->
     ```json
     {
       "ucp": { ... },
       "id": "...",
+      "food_establishment": { ... },
+      "status": "...",
       "currency": "...",
       "line_items": [ ... ],
       "discounts": {
@@ -567,7 +574,8 @@ but not in `discounts.applied`.
           "path": "$.discounts.codes[1]",
           "content": "Code 'EXPIRED50' expired on December 1st"
         }
-      ]
+      ],
+      "links": [ ... ]
     }
     ```
 
@@ -577,11 +585,13 @@ Multiple discounts applied with full allocation breakdown:
 
 === "Response"
 
-    <!-- ucp:example schema=food/discount def=dev.ucp.food.cart op=read -->
+    <!-- ucp:example schema=food/checkout op=read -->
     ```json
     {
       "ucp": { ... },
       "id": "...",
+      "food_establishment": { ... },
+      "status": "...",
       "currency": "...",
       "line_items": [
         {
@@ -644,7 +654,8 @@ Multiple discounts applied with full allocation breakdown:
         {"type": "subtotal", "display_text": "Subtotal", "amount": 10000},
         {"type": "items_discount", "display_text": "Item Discounts", "amount": -2500},
         {"type": "total", "display_text": "Total", "amount": 7500}
-      ]
+      ],
+      "links": [ ... ]
     }
     ```
 

@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/food/discount.json",
   "name": "dev.ucp.food.discount",
   "title": "Discount Extension",
-  "description": "Extends Cart and Checkout with discount support, including discount codes, automatic discounts, and eligibility-triggered provisional discounts.",
+  "description": "Extends Checkout with discount support, including discount codes, automatic discounts, and eligibility-triggered provisional discounts.",
   "$defs": {
     "allocation": {
       "type": "object",
@@ -99,27 +99,6 @@
           "ucp_request": "omit"
         }
       }
-    },
-    "dev.ucp.food.cart": {
-      "title": "Cart with Discount",
-      "description": "Cart extended with discount capability.",
-      "allOf": [
-        {
-          "$ref": "cart.json"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "discounts": {
-              "$ref": "#/$defs/discounts_object",
-              "ucp_request": {
-                "create": "optional",
-                "update": "optional"
-              }
-            }
-          }
-        }
-      ]
     },
     "dev.ucp.food.checkout": {
       "title": "Checkout with Discount",
