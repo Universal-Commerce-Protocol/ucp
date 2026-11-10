@@ -105,11 +105,13 @@ swaps, declares:
 }
 ```
 
-A Platform **MUST NOT** send a `purpose` value that the Business does not
-advertise, and **MUST NOT** send a `recommendation` request without
-`reference_ids` unless the Business advertises `supports_contextual: true`. A
-Platform reads `config.purposes` from the Business profile it already fetches
-for capability negotiation, so it can decide before calling whether to offer
+A Platform **MUST NOT** send a non-default `purpose` value that the Business
+does not advertise, and **MUST NOT** send a `recommendation` request without
+`reference_ids` unless the Business advertises `supports_contextual: true`.
+`search` is always supported, whether explicit or implied by omission, subject
+to the [Search Inputs](#search-inputs) requirements. A Platform reads
+`config.purposes` from the Business profile it already fetches for capability
+negotiation, so it can decide before calling whether to offer
 recommendations, contextual recommendations, or swaps.
 
 The following rules apply:
@@ -130,12 +132,25 @@ The following rules apply:
 2. **Supported Identifiers**: A Business **MUST** support lookup of
     `reference_ids` by product ID and variant ID, and **MAY** additionally
     support the secondary identifiers permitted by
-    [Catalog Lookup](lookup.md#supported-identifiers). When one identifier
-    resolves to several products or variants (for example, a shared SKU), each
-    is an anchor and each is excluded under Self-Exclusion. When a specific
-    variant is known (e.g., swapping an unavailable cart item), a Platform
-    **SHOULD** supply the variant ID so the Business can match variant-level
-    attributes (such as options, price, and `quantity_unit`). When
+    [Catalog Lookup](lookup.md#supported-identifiers). For `recommendation`,
+    when one identifier resolves to several products or variants (for example,
+    a shared SKU), each is an anchor and each is excluded under Self-Exclusion.
+    For `swap`, the reference **MUST** resolve to one product or variant; a
+    product ID is one anchor even when the product has several variants. When
+    a `swap` reference resolves to more than one product or variant, the
+    Business **MUST NOT** choose one and **MUST** return an error response
+    (`ucp.status: "error"`) with an `ambiguous_reference` error message whose
+    `severity` is `recoverable`, whose `path` points at the reference (e.g.,
+    `$.reference_ids[0]`), and whose `content` names the matching identifiers,
+    so the Platform can resend with one of them (see
+    [Example: Ambiguous Swap Reference](#example-ambiguous-swap-reference)).
+    Ambiguity depends on the Business's catalog data, so it is a business
+    outcome like Catalog Lookup's `not_found`, not a request error. When a
+    specific variant is known (e.g., swapping an unavailable cart item), a
+    Platform **SHOULD** supply the variant ID so the Business can consider
+    variant-level attributes (such as options, price, and `quantity_unit`);
+    a Platform swapping a cart line **SHOULD** use that line's product or
+    variant ID. When
     `reference_ids` is provided, the Business evaluates the request using the
     identifiers that resolve (and **MAY** include informational `not_found`
     messages for unresolved identifiers); if none resolve, the Business
@@ -158,7 +173,15 @@ The following rules apply:
     `reference_ids` with `query` (e.g., a guided swap where the buyer specifies
     a preference) and `filters`. Supplied `filters` narrow the returned
     candidates (with the `AND` semantics of [Search Filters](#search-filters));
-    they do not constrain resolution of `reference_ids`.
+    they do not constrain resolution of `reference_ids`. For `swap`,
+    `reference_ids` identifies the item being replaced: its attributes guide
+    relevance but are not matching constraints, so a Platform **MUST NOT**
+    assume that a candidate preserves attributes such as pack size,
+    `quantity_unit`, or compatibility solely because the request used `swap`.
+    Hard constraints come only from supported `filters` and negotiated
+    extensions, under their documented semantics. Substitution policy for a
+    category remains with the Business, and Checkout remains authoritative (see
+    [Relationship to Checkout](index.md#relationship-to-checkout)).
 5. **Unsupported Purpose**: A Business that receives a `purpose` value it
     does not support (for example, from a Platform acting on a stale profile)
     **MUST** reject the request using the binding's invalid-request mechanism
@@ -189,6 +212,63 @@ while `query` guides the swap toward the buyer's stated preference:
   "pagination": {
     "limit": 5
   }
+}
+```
+
+#### Example: Swap for Store Pickup
+
+When the [Fulfillment extension](../extensions/fulfillment.md) is negotiated,
+`filters.fulfills_to` and `filters.methods` constrain the replacement
+candidates, not the anchor. The unavailable item still resolves as the anchor
+even though it cannot be picked up at the selected store, only candidates
+available for pickup there are returned, and if none qualify, `products` is
+empty:
+
+<!-- ucp:example schema=shopping/fulfillment def=fulfillment_search_request op=search direction=request -->
+```json
+{
+  "purpose": "swap",
+  "reference_ids": ["prod_abc123_size10"],
+  "context": {
+    "currency": "USD"
+  },
+  "filters": {
+    "fulfills_to": {
+      "location": "loc_downtown"
+    },
+    "methods": ["pickup"]
+  }
+}
+```
+
+#### Example: Ambiguous Swap Reference
+
+A swap that names a shared SKU (`TEE-BLK`) matching two variants has no single
+item to replace. Rather than guessing, the Business returns an error response
+naming the matching variant IDs, and the Platform sends the swap again with the
+variant ID from the cart line:
+
+<!-- ucp:example schema=common/types/error_response op=read -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "error",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "messages": [
+    {
+      "type": "error",
+      "code": "ambiguous_reference",
+      "path": "$.reference_ids[0]",
+      "content": "TEE-BLK matches prod_tee_black_m and prod_tee_black_l; resend with one of these IDs.",
+      "severity": "recoverable"
+    }
+  ]
 }
 ```
 

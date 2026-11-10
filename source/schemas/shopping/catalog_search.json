@@ -13,7 +13,7 @@
       "properties": {
         "purposes": {
           "type": "object",
-          "description": "Non-default `purpose` values this Business supports, keyed by value (e.g., `recommendation`, `swap`). `search` is always supported and need not be listed. When absent or empty, only `search` is supported. A Platform MUST NOT send a `purpose` value absent from this map.",
+          "description": "Non-default `purpose` values this Business supports, keyed by value (e.g., `recommendation`, `swap`). `search` is always supported, whether explicit or implied by omission, and need not be listed. When absent or empty, only `search` is supported. A Platform MUST NOT send a non-default `purpose` value absent from this map.",
           "propertyNames": {
             "type": "string",
             "minLength": 1
@@ -68,7 +68,7 @@
         "purpose": {
           "type": "string",
           "minLength": 1,
-          "description": "Retrieval purpose of the request. Well-known values: `search` (default when omitted), `recommendation`, `swap`. A Platform MUST NOT send a value the Business does not advertise in its capability `config.purposes`. A Business MUST reject a value it does not support (error code `unsupported_purpose`) rather than falling back to a general browse.",
+          "description": "Retrieval purpose of the request. Well-known values: `search` (default when omitted), `recommendation`, `swap`. A Platform MUST NOT send a non-default value the Business does not advertise in its capability `config.purposes`; `search` is always supported, whether explicit or implied by omission. A Business MUST reject a value it does not support (error code `unsupported_purpose`) rather than falling back to a general browse.",
           "examples": ["search", "recommendation", "swap"]
         },
         "reference_ids": {
@@ -121,7 +121,7 @@
             "properties": {
               "reference_ids": {
                 "maxItems": 1,
-                "description": "Required single anchor to find functional substitutes for. Supply a variant ID when known so the Business can match options, price, and `quantity_unit`. When a variant ID is supplied, its parent product SHOULD be excluded unless a distinct substitute variant of that product is returned."
+                "description": "Required single anchor identifying the item being replaced. It MUST resolve to one product or variant; a product ID is one anchor even when the product has several variants. If it resolves to more than one, the Business MUST NOT choose one and MUST return an `ambiguous_reference` error. Supply a variant ID when known so the Business can consider options, price, and `quantity_unit`; these guide relevance but are not matching constraints. When a variant ID is supplied, its parent product SHOULD be excluded unless a distinct substitute variant of that product is returned."
               }
             }
           }

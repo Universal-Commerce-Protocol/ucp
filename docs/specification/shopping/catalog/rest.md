@@ -693,3 +693,7 @@ A conforming REST transport implementation **MUST**:
 6. Return HTTP 400 with `unsupported_purpose` error for search requests whose
     `purpose` value is not supported (see
     [Unsupported Purpose](search.md#purpose-and-reference-identifiers)).
+7. Return HTTP 200 with `ucp.status: "error"` and a recoverable
+    `ambiguous_reference` message for `swap` requests whose reference resolves
+    to more than one product or variant (see
+    [Supported Identifiers](search.md#purpose-and-reference-identifiers)).
