@@ -15,7 +15,6 @@ Braintree
 CFRG
 CEFACT
 CIMD
-Camino
 Carrefour
 Centricity
 Chewy
@@ -23,7 +22,6 @@ Commerce
 CReq
 CRes
 Credentialless
-Crittenden
 DDC
 Depot
 Diffie

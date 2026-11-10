@@ -962,11 +962,11 @@ image: assets/banner.png
       "id": "est_thai_restaurant",
       "name": "Thai Restaurant",
       "address": {
-        "street_address": "4146 El Camino Real",
-        "address_locality": "Palo Alto",
+        "street_address": "2821 Bristol St",
+        "address_locality": "Costa Mesa",
         "address_region": "CA",
         "address_country": "US",
-        "postal_code": "94306"
+        "postal_code": "92626"
       },
       "media": [
         {
@@ -1025,10 +1025,10 @@ image: assets/banner.png
             "address": {
               "first_name": "Camille",
               "last_name": "Walsh",
-              "street_address": "1500 Crittenden Lane",
-              "address_locality": "Mountain View",
+              "street_address": "19510 Jamboree Road",
+              "address_locality": "Irvine",
               "address_region": "CA",
-              "postal_code": "94043",
+              "postal_code": "92612",
               "address_country": "US"
             }
           },
