@@ -2075,11 +2075,12 @@ A policy is a business rule — return terms, warranty, subscription terms, and 
 
 A Business publishes well-known and custom policies. Every policy carries a `type` drawn from an open, reverse-DNS vocabulary.
 
-| Well-known type                       | Description                                  |
-| ------------------------------------- | -------------------------------------------- |
-| `dev.ucp.shopping.policy.return`      | Return terms.                                |
-| `dev.ucp.shopping.policy.warranty`    | Warranty terms.                              |
-| `dev.ucp.lodging.policy.cancellation` | Cancellation terms for lodging reservations. |
+| Well-known type                        | Description                                                                                                                                                                                |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dev.ucp.shopping.policy.return`       | Return terms.                                                                                                                                                                              |
+| `dev.ucp.shopping.policy.warranty`     | Warranty terms.                                                                                                                                                                            |
+| `dev.ucp.shopping.policy.subscription` | Terms for the recurring orders that follow a purchase. See the [Purchase Options Extension](http://ucp.dev/draft/specification/shopping/extensions/purchase-options/#subscription-policy). |
+| `dev.ucp.lodging.policy.cancellation`  | Cancellation terms for lodging reservations.                                                                                                                                               |
 
 A Business **MAY** define custom types in its own domain (e.g., `com.example.policy.price_match`) and **MAY** add type-specific fields that a Platform modeling that `type` can read for structured context. Because the vocabulary is open, a Platform **MUST** tolerate unknown `type` values, presenting the policy from its `description` (see [Presenting policies](#presenting-policies)).
 
