@@ -959,14 +959,14 @@ image: assets/banner.png
       "last_name": "Walsh"
     },
     "food_establishment": {
-      "id": "est_thai_basil_01",
-      "name": "Thai Basil Restaurant",
+      "id": "est_thai_restaurant",
+      "name": "Thai Restaurant",
       "address": {
-        "street_address": "103 S Murphy Ave",
-        "address_locality": "Sunnyvale",
+        "street_address": "4146 El Camino Real",
+        "address_locality": "Palo Alto",
         "address_region": "CA",
         "address_country": "US",
-        "postal_code": "94086"
+        "postal_code": "94306"
       },
       "media": [
         {

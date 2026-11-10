@@ -15,6 +15,7 @@ Braintree
 CFRG
 CEFACT
 CIMD
+Camino
 Carrefour
 Centricity
 Chewy
