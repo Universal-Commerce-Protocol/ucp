@@ -62,6 +62,7 @@ within verticals (e.g. "Fulfillment") remain individually addressable.
 
 import ast
 import dataclasses
+import itertools
 import json
 import os
 from pathlib import Path
@@ -499,6 +500,48 @@ def _link_anchor(raw_name: str, fragment: str | None, is_ucp: bool) -> str:
 # --- TABLE HELPERS ---
 
 
+@dataclasses.dataclass(frozen=True)
+class _FieldTypeMeta:
+  """Structured provenance for a rendered property Type cell across `allOf`."""
+
+  kind: str
+  inline_key: tuple[str, int] | None = None
+
+
+_inline_table_seq = itertools.count()
+
+
+def _with_base_def_root_title(
+  node: dict[str, Any],
+  ref_str: str,
+  root_schema: dict[str, Any] | None,
+  schema_filename: str | None,
+) -> dict[str, Any]:
+  """Attach `root_schema['title']` to an untitled `#/$defs/base` definition.
+
+  Single-entity schemas such as `service.json` ("UCP Service") and
+  `payment_handler.json` ("Payment Handler") factor their shared fields into an
+  untitled `#/$defs/base` sub-schema while keeping the entity's display title on
+  the document root. `ucp.json` is excluded because it is a multi-definition
+  envelope schema ("UCP Metadata") whose `$defs` (`base`, `entity`,
+  `platform_schema`, etc.) are distinct types named and linked via
+  `_ucp_def_type` rather than aliases for the root title.
+  """
+  is_base_def = ref_str == "#/$defs/base" or ref_str.endswith("#/$defs/base")
+  is_ucp = "ucp.json" in ref_str or (
+    schema_filename is not None and Path(schema_filename).name == "ucp.json"
+  )
+  if (
+    is_base_def
+    and not is_ucp
+    and "title" not in node
+    and isinstance(root_schema, dict)
+    and root_schema.get("title")
+  ):
+    return {**node, "title": root_schema["title"]}
+  return node
+
+
 def _field_requirement(field_name, ucp_request, required_list):
   """Render the Requirement cell for a schema field.
 
@@ -572,82 +615,107 @@ def _field_requirement(field_name, ucp_request, required_list):
   return base_disp
 
 
-def _merge_cells(new_parts: list[str], prior: list[str]) -> list[str]:
-  """Merge two renderings of the same field, cell by cell.
-
-  - Type (col 2): "any" is the renderer's placeholder for a branch that adds
-    no `type`, which defers to the base branch. Also, generic "string",
-    "object", or "Array[object]" in a specialization should not overwrite a
-    more specific referenced type from the base branch.
-  - Description (col 4): merge specialization description with base
-    description so protocol rules from base are not lost.
-  """
-  merged = list(new_parts)
-  for i, new_val in enumerate(new_parts):
-    old_val = prior[i] if i < len(prior) else ""
-    if i == 2:  # Type column
-      if new_val and new_val != "any":
-        if (
-          new_val in ("string", "object", "Array[object]")
-          and old_val
-          and old_val not in ("any", new_val)
-        ):
-          merged[i] = old_val
-        else:
-          merged[i] = new_val
-      else:
-        merged[i] = old_val or new_val
-    elif i == 4:  # Description column
-      if new_val and old_val and new_val != old_val:
-        if old_val in new_val:
-          merged[i] = new_val
-        elif new_val in old_val:
-          merged[i] = old_val
-        else:
-          sep = " " if new_val.endswith((".", "!", "?")) else ". "
-          merged[i] = f"{new_val}{sep}{old_val}"
-      else:
-        merged[i] = new_val or old_val
-    else:
-      merged[i] = (
-        new_val if new_val and new_val != "any" else (old_val or new_val)
-      )
-  return merged
-
-
-def _dedupe_table_rows(blocks: list[str]) -> str:
+def _dedupe_table_rows(
+  md_blocks: list[tuple[str, dict[str, _FieldTypeMeta]]],
+  *,
+  inline_tables: dict[tuple[str, int], str] | None = None,
+  row_meta: dict[str, _FieldTypeMeta] | None = None,
+) -> str:
   """Combine rendered allOf branches, emitting each field row only once.
 
   When allOf composition overrides a property from an earlier branch, prefer
   the outer (later) definition per cell, falling back to the base branch for
   cells the specialization leaves empty.
   """
-  rows: dict[str, list[str]] = {}
+  deduped_rows: dict[str, list[str]] = {}
+  deduped_meta: dict[str, _FieldTypeMeta] = {}
   other_lines = []
-  for block in blocks:
+  for block, branch_meta in md_blocks:
     for line in block.splitlines():
       stripped = line.strip()
       if not stripped:
         continue
-      is_row = (
+      if (
         stripped.startswith("|")
         and stripped.endswith("|")
         and not stripped.endswith(r"\|")
-      )
-      if is_row:
+      ):
         parts = [p.strip() for p in re.split(r"(?<!\\)\|", stripped)]
         # Exclude header and separator rows if any were embedded.
         if len(parts) >= 5 and parts[1] not in ("Name", ":---"):
           field_name = parts[1]
-          prior = rows.get(field_name)
-          rows[field_name] = (
-            parts if prior is None else _merge_cells(parts, prior)
-          )
+          new_meta = branch_meta.get(field_name, _FieldTypeMeta("empty"))
+          prior = deduped_rows.get(field_name)
+          if prior is None:
+            deduped_rows[field_name] = parts
+            deduped_meta[field_name] = new_meta
+          else:
+            old_meta = deduped_meta.get(field_name, _FieldTypeMeta("empty"))
+            # Merge cell-by-cell using structured `_FieldTypeMeta`:
+            # - Type (col 2): "empty" ("any") defers to the base branch;
+            #   "generic" ("string"/"object"/"Array[object]") defers to any
+            #   more specific prior type; an untitled "inline" override defers
+            #   when the base branch already carries a "named" schema type
+            #   (e.g. a `$ref` or titled `$def`). Any superseded inline
+            #   sub-table key is pruned from `inline_tables`.
+            # - Description (col 4): merge specialization description with
+            #   base description so protocol rules from base are not lost.
+            merged_parts = list(parts)
+            for i in range(len(parts)):
+              new_val = parts[i]
+              old_val = prior[i] if i < len(prior) else ""
+              if i == 2:  # Type column
+                if new_meta.kind == "empty" or not new_val or new_val == "any":
+                  keep_old = bool(old_val)
+                elif new_meta.kind == "generic":
+                  keep_old = bool(old_val and old_val not in ("any", new_val))
+                elif new_meta.kind == "inline":
+                  keep_old = old_meta.kind == "named"
+                else:
+                  keep_old = False
+
+                if keep_old:
+                  merged_parts[i] = old_val
+                  winning_meta, losing_meta = old_meta, new_meta
+                else:
+                  merged_parts[i] = new_val
+                  winning_meta, losing_meta = new_meta, old_meta
+
+                if (
+                  inline_tables is not None
+                  and losing_meta.inline_key is not None
+                  and losing_meta.inline_key != winning_meta.inline_key
+                ):
+                  inline_tables.pop(losing_meta.inline_key, None)
+                deduped_meta[field_name] = winning_meta
+              elif i == 4:  # Description column
+                if new_val and old_val and new_val != old_val:
+                  if old_val in new_val:
+                    merged_parts[i] = new_val
+                  elif new_val in old_val:
+                    merged_parts[i] = old_val
+                  else:
+                    sep = " " if new_val.endswith((".", "!", "?")) else ". "
+                    merged_parts[i] = f"{new_val}{sep}{old_val}"
+                else:
+                  merged_parts[i] = new_val or old_val
+              else:
+                merged_parts[i] = (
+                  new_val
+                  if new_val and new_val != "any"
+                  else (old_val or new_val)
+                )
+            deduped_rows[field_name] = merged_parts
           continue
       other_lines.append(line)
 
-  result = ["| " + " | ".join(p[1:-1]) + " |" for p in rows.values()]
-  result.extend(other_lines)
+  if row_meta is not None:
+    row_meta.update(deduped_meta)
+
+  result = ["| " + " | ".join(p[1:-1]) + " |" for p in deduped_rows.values()]
+  if other_lines:
+    result.extend(other_lines)
+
   return "\n".join(result)
 
 
@@ -1079,22 +1147,22 @@ def _restore_fragment_refs(
       )
       if not isinstance(resolved_node, dict):
         break
-      if (
-        not table_level and "title" in resolved_node and "title" not in bundled
-      ):
-        bundled = {**bundled, "title": resolved_node["title"]}
-      elif (
-        not table_level
-        and "title" not in bundled
-        and "#/$defs/" in ref_str
-        and "ucp.json" not in ref_str
-      ):
-        bundled = {
-          **bundled,
-          "x-ucp-def-name": (
-            ref_str.rsplit("/", 1)[-1].replace("_", " ").title()
-          ),
-        }
+      if not table_level and "title" not in bundled:
+        titled_node = _with_base_def_root_title(
+          resolved_node,
+          ref_str,
+          next_root,
+          next_path.name if next_path is not None else None,
+        )
+        if "title" in titled_node:
+          bundled = {**bundled, "title": titled_node["title"]}
+        elif "#/$defs/" in ref_str and "ucp.json" not in ref_str:
+          bundled = {
+            **bundled,
+            "x-ucp-def-name": (
+              ref_str.rsplit("/", 1)[-1].replace("_", " ").title()
+            ),
+          }
       merged_raw = dict(resolved_node)
       for k, v in raw.items():
         if k != "$ref":
@@ -1609,7 +1677,14 @@ def define_env(env):
 
   # --- Table rendering ---
   def _render_table_from_ref(
-    properties_ref, required_list, spec_file_name, ctx
+    properties_ref,
+    required_list,
+    spec_file_name,
+    ctx,
+    *,
+    parent_title=None,
+    inline_tables=None,
+    row_meta=None,
   ):
     """Inline the fields of a referenced schema.
 
@@ -1619,6 +1694,9 @@ def define_env(env):
       required_list: The list of required properties from the parent schema.
       spec_file_name: The page the table is rendered on.
       ctx: RenderContext of the referencing schema.
+      parent_title: Optional. Display title of the enclosing schema table.
+      inline_tables: Optional. Accumulator for inline object sub-sections.
+      row_meta: Optional. Mapping populated with `_FieldTypeMeta` per field.
 
     Returns:
     -------
@@ -1652,11 +1730,26 @@ def define_env(env):
       ref_schema_data = ref_schema_data.get("schema", ref_schema_data)
 
     return _render_table_from_schema(
-      ref_schema_data, spec_file_name, False, required_list, ctx.at(target)
+      ref_schema_data,
+      spec_file_name,
+      False,
+      required_list,
+      ctx.at(target),
+      parent_title=parent_title,
+      inline_tables=inline_tables,
+      row_meta=row_meta,
     )
 
   def _render_embedded_table(
-    properties_list, required_list, spec_file_name, ctx, root_schema=None
+    properties_list,
+    required_list,
+    spec_file_name,
+    ctx,
+    root_schema=None,
+    *,
+    parent_title=None,
+    inline_tables=None,
+    row_meta=None,
   ):
     """Render the members of an `allOf` as one table.
 
@@ -1668,6 +1761,9 @@ def define_env(env):
       ctx: RenderContext of the composing schema.
       root_schema: Optional. Outermost schema dictionary supplying `$id` and
         `$defs` across `allOf` branches.
+      parent_title: Optional. Display title of the enclosing schema table.
+      inline_tables: Optional. Accumulator for inline object sub-sections.
+      row_meta: Optional. Mapping populated with `_FieldTypeMeta` per field.
 
     Returns:
     -------
@@ -1693,6 +1789,9 @@ def define_env(env):
           False,
           capability_required,
           ctx,
+          parent_title=parent_title,
+          inline_tables=inline_tables,
+          row_meta=row_meta,
         )
       # If the ref was already resolved, render the schema directly.
       return _render_table_from_schema(
@@ -1702,6 +1801,9 @@ def define_env(env):
         capability_required,
         ctx,
         root_schema=root_schema,
+        parent_title=parent_title,
+        inline_tables=inline_tables,
+        row_meta=row_meta,
       )
 
     # Merge required arrays from all allOf siblings so that requirements
@@ -1712,14 +1814,20 @@ def define_env(env):
         if req not in merged_required:
           merged_required.append(req)
 
-    blocks = []
+    md_blocks: list[tuple[str, dict[str, _FieldTypeMeta]]] = []
     for properties in properties_list:
+      branch_meta: dict[str, _FieldTypeMeta] = {}
       if len(properties) == 1 and "$ref" in properties:
-        blocks.append(
-          _render_table_from_ref(
-            properties["$ref"], merged_required, spec_file_name, ctx
-          )
+        embedded_data = _render_table_from_ref(
+          properties["$ref"],
+          merged_required,
+          spec_file_name,
+          ctx,
+          parent_title=parent_title,
+          inline_tables=inline_tables,
+          row_meta=branch_meta,
         )
+        md_blocks.append((embedded_data, branch_meta))
         continue
 
       # Skip allOf siblings that only carry constraints (required,
@@ -1731,18 +1839,26 @@ def define_env(env):
       ):
         continue
 
-      blocks.append(
-        _render_table_from_schema(
-          properties,
-          spec_file_name,
-          False,
-          merged_required,
-          ctx,
-          root_schema=root_schema,
+      md_blocks.append(
+        (
+          _render_table_from_schema(
+            properties,
+            spec_file_name,
+            False,
+            merged_required,
+            ctx,
+            root_schema=root_schema,
+            parent_title=parent_title,
+            inline_tables=inline_tables,
+            row_meta=branch_meta,
+          ),
+          branch_meta,
         )
       )
 
-    return _dedupe_table_rows(blocks)
+    return _dedupe_table_rows(
+      md_blocks, inline_tables=inline_tables, row_meta=row_meta
+    )
 
   def _render_table_from_schema(
     schema_data,
@@ -1752,6 +1868,9 @@ def define_env(env):
     ctx=None,
     *,
     root_schema=None,
+    parent_title=None,
+    inline_tables=None,
+    row_meta=None,
   ):
     """Render a Markdown table from a schema dictionary.
 
@@ -1767,6 +1886,11 @@ def define_env(env):
       ctx: Optional RenderContext (operation view and `$ref` base).
       root_schema: Optional. Outermost schema dictionary supplying `$id` and
         `$defs` across `allOf` branches.
+      parent_title: Optional. Display title of the enclosing schema table,
+        used to form unique headings and anchors for extracted inline objects.
+      inline_tables: Optional. Accumulator mapping `(sub_anchor, seq)` to
+        rendered `####` sub-section Markdown across composed branches.
+      row_meta: Optional. Mapping populated with `_FieldTypeMeta` per field.
 
     Returns:
     -------
@@ -1777,12 +1901,31 @@ def define_env(env):
     if not schema_data:
       return "_No content fields defined._"
 
+    if isinstance(ctx, dict):
+      ctx = RenderContext(
+        io_type=ctx.get("io_type"),
+        operation_id=ctx.get("operation_id", ""),
+        vertical=_page_vertical(spec_file_name),
+      )
     ctx = (ctx or RenderContext(vertical=_page_vertical(spec_file_name))).at(
       schema_path_from_url(schema_data.get("$id"))
     )
 
     def link(ref):
       return create_link(ref, spec_file_name, ctx)
+
+    effective_parent_title = (
+      parent_title
+      if parent_title is not None
+      else (schema_data.get("title") or "")
+    )
+    # Only allocate an inline sub-table accumulator when this call renders a
+    # top-level table (`need_header=True`). Standalone `need_header=False` calls
+    # with no caller-supplied accumulator cannot append `####` sections, so
+    # keeping `inline_tables=None` prevents emitting dangling `#...` links.
+    own_inline_tables = inline_tables is None and need_header
+    if own_inline_tables:
+      inline_tables = {}
 
     # A bare "#" is a self-root reference naming the schema being rendered.
     # It carries no filename, so create_link derives an empty anchor and emits
@@ -1813,21 +1956,35 @@ def define_env(env):
 
     def _resolve_fragment_def(ref_value: str) -> dict[str, Any] | None:
       """Resolve a `#/...` or `<file>.json#/...` fragment to its raw schema."""
+      self_file = self_ref_name or (
+        ctx.base.name if ctx.base is not None else None
+      )
       if ref_value.startswith("#/"):
         target = _resolve_json_pointer(ref_value, effective_root)
         if isinstance(target, dict):
-          return target
-        root = _load_json(ctx.base) if ctx.base else None
+          return _with_base_def_root_title(
+            target, ref_value, effective_root, self_file
+          )
+        base_path = ctx.base or (
+          _resolve(self_ref_name, ctx) if self_ref_name else None
+        )
+        root = _load_json(base_path) if base_path else None
         if isinstance(root, dict):
           resolved = _resolve_json_pointer(ref_value, root)
-          return resolved if isinstance(resolved, dict) else None
+          if isinstance(resolved, dict):
+            return _with_base_def_root_title(
+              resolved, ref_value, root, self_file
+            )
         return None
       if "#/" in ref_value:
         file_part, frag_part = ref_value.split("#/", 1)
         root = _load_json(_resolve(file_part, ctx))
         if isinstance(root, dict):
           resolved = _resolve_json_pointer(f"#/{frag_part}", root)
-          return resolved if isinstance(resolved, dict) else None
+          if isinstance(resolved, dict):
+            return _with_base_def_root_title(
+              resolved, ref_value, root, file_part
+            )
       return None
 
     def _is_type_branch(branch: Any) -> bool:
@@ -2011,6 +2168,77 @@ def define_env(env):
         return f"OneOf[{', '.join(f'`{t}`' for t in raw_type)}]"
       return "`object`" if branch_mode else "any"
 
+    def _has_named_schema_type(node: Any) -> bool:
+      """Return True when `node` names or `$ref`s a schema definition."""
+      if not isinstance(node, dict):
+        return False
+      if _branch_ref(node) or node.get("title") or node.get("x-ucp-def-name"):
+        return True
+      if any(
+        _has_named_schema_type(node.get(k))
+        for k in ("items", "additionalProperties")
+      ):
+        return True
+      return any(
+        isinstance(node.get(k), list)
+        and any(_has_named_schema_type(b) for b in node[k])
+        for k in ("allOf", "oneOf", "anyOf")
+      )
+
+    def _get_inline_object_schema(
+      details: Any, f_type: str
+    ) -> tuple[dict[str, Any], bool] | None:
+      """Return `(inline_schema, is_array)` for untitled inline objects.
+
+      Scope is intentionally restricted to untitled `object` and
+      `Array[object]` properties that declare direct `properties` without
+      `$ref`, `allOf`, `oneOf`, `anyOf`, or a restored `$def` name; maps and
+      nested arrays keep their inline Type labels.
+      """
+      if not isinstance(details, dict) or f_type not in (
+        "object",
+        "Array[object]",
+      ):
+        return None
+      if (
+        "$ref" in details
+        or "allOf" in details
+        or "oneOf" in details
+        or "anyOf" in details
+        or "x-ucp-def-name" in details
+      ):
+        return None
+      if f_type == "object":
+        props = details.get("properties")
+        if isinstance(props, dict) and props and "allOf" not in props:
+          return details, False
+        return None
+      items = details.get("items")
+      if (
+        isinstance(items, dict)
+        and "$ref" not in items
+        and "allOf" not in items
+        and "oneOf" not in items
+        and "anyOf" not in items
+        and "x-ucp-def-name" not in items
+      ):
+        props = items.get("properties")
+        if isinstance(props, dict) and props and "allOf" not in props:
+          return items, True
+      return None
+
+    def _format_inline_sub_title(base_title: str, field_name: str) -> str:
+      """Format a sub-section heading title for an extracted inline object."""
+      short_name = (
+        field_name.rsplit(".", 1)[-1] if "." in field_name else field_name
+      )
+      field_label = " ".join(
+        w.capitalize() for w in re.split(r"[_-]+", short_name) if w
+      )
+      if base_title:
+        return f"{base_title} {field_label}".strip()
+      return field_label
+
     # If schema is ONLY a oneOf, render as prose instead of table.
     if (
       "oneOf" in schema_data
@@ -2075,11 +2303,12 @@ def define_env(env):
           spec_file_name,
           ctx,
           root_schema=effective_root,
+          parent_title=effective_parent_title,
+          inline_tables=inline_tables,
+          row_meta=row_meta,
         )
       )
-      return "\n".join(md)
-
-    if "allOf" in schema_data:
+    elif "allOf" in schema_data:
       all_of_list = list(schema_data.get("allOf", []))
       if properties:
         all_of_list.append(
@@ -2095,97 +2324,156 @@ def define_env(env):
           spec_file_name,
           ctx,
           root_schema=effective_root,
+          parent_title=effective_parent_title,
+          inline_tables=inline_tables,
+          row_meta=row_meta,
         )
       )
-      return "\n".join(md)
-
-    if "$ref" in schema_data:
+    elif "$ref" in schema_data:
       md.append(
         _render_table_from_ref(
-          schema_data.get("$ref"), required_list, spec_file_name, ctx
+          schema_data.get("$ref"),
+          required_list,
+          spec_file_name,
+          ctx,
+          parent_title=effective_parent_title,
+          inline_tables=inline_tables,
+          row_meta=row_meta,
         )
       )
-      return "\n".join(md)
+    else:
+      for field_name, details in properties.items():
+        if field_name == "$ref":
+          md.append(
+            _render_table_from_ref(
+              details,
+              required_list,
+              spec_file_name,
+              ctx,
+              parent_title=effective_parent_title,
+              inline_tables=inline_tables,
+              row_meta=row_meta,
+            )
+          )
+          continue
 
-    for field_name, details in properties.items():
-      if field_name == "$ref":
-        md.append(
-          _render_table_from_ref(details, required_list, spec_file_name, ctx)
+        # Capture the request-requirement annotation before `details` may be
+        # reassigned during $ref resolution below.
+        ucp_annotation = (
+          details.get("ucp_request") if isinstance(details, dict) else None
         )
-        continue
 
-      # Capture the request-requirement annotation before `details` may be
-      # reassigned during $ref resolution below.
-      ucp_annotation = (
-        details.get("ucp_request") if isinstance(details, dict) else None
-      )
+        ref = _branch_ref(details)
 
-      ref = _branch_ref(details)
+        # Resolve UCP $defs references inline so properties render with
+        # descriptions/constants from ucp.json while preserving links.
+        # e.g., "$ref": "../../ucp.json#/$defs/error" -> inline the allOf
+        ucp_def_override = None
+        if ref and "ucp.json#/$defs/" in ref:
+          def_name = ref.split("/")[-1]
+          resolved_def = _ucp_type_index()["defs"].get(def_name)
+          if isinstance(resolved_def, dict):
+            embedder_desc = details.get("description")
+            details = dict(resolved_def)
+            if embedder_desc:
+              details["description"] = embedder_desc
+            ref = None
+            ucp_def_override = details.get("type") or _ucp_def_type(def_name)
 
-      # Resolve UCP $defs references inline so properties render with
-      # descriptions/constants from ucp.json while preserving links.
-      # e.g., "$ref": "../../ucp.json#/$defs/error" -> inline the allOf
-      ucp_def_override = None
-      if ref and "ucp.json#/$defs/" in ref:
-        def_name = ref.split("/")[-1]
-        resolved_def = _ucp_type_index()["defs"].get(def_name)
-        if isinstance(resolved_def, dict):
-          embedder_desc = details.get("description")
-          details = dict(resolved_def)
-          if embedder_desc:
-            details["description"] = embedder_desc
-          ref = None
-          ucp_def_override = details.get("type") or _ucp_def_type(def_name)
+        # Special handling for UCP version.
+        version_data = None
+        if ref and ref.endswith("#/$defs/version"):
+          version_data = _ucp_type_index()["defs"].get("version", {})
 
-      # Special handling for UCP version.
-      version_data = None
-      if ref and ref.endswith("#/$defs/version"):
-        version_data = _ucp_type_index()["defs"].get("version", {})
+        # --- Logic to determine Display Type ---
+        if ucp_def_override is not None:
+          f_type = ucp_def_override
+        elif version_data:
+          f_type = version_data.get("type", "any")
+        else:
+          f_type = _format_schema_type(details)
 
-      # --- Logic to determine Display Type ---
-      if ucp_def_override is not None:
-        f_type = ucp_def_override
-      elif version_data:
-        f_type = version_data.get("type", "any")
-      else:
-        f_type = _format_schema_type(details)
+        generic_types = ("any", "string", "object", "Array[object]")
+        inline_key = None
+        if inline_tables is not None:
+          inline_info = _get_inline_object_schema(details, f_type)
+          if inline_info is not None:
+            inline_schema, is_array = inline_info
+            sub_title = _format_inline_sub_title(
+              effective_parent_title, field_name
+            )
+            sub_rendered = _render_table_from_schema(
+              inline_schema,
+              spec_file_name,
+              True,
+              None,
+              ctx,
+              root_schema=effective_root,
+              parent_title=sub_title,
+            )
+            if sub_rendered and sub_rendered not in (
+              "_No properties defined._",
+              "_No content fields defined._",
+            ):
+              sub_anchor = _slugify_heading(sub_title)
+              sub_link = f"[{sub_title}](#{sub_anchor})"
+              f_type = f"Array[{sub_link}]" if is_array else sub_link
+              inline_key = (sub_anchor, next(_inline_table_seq))
+              inline_tables[inline_key] = f"#### {sub_title}\n\n{sub_rendered}"
 
-      # --- Handle Description ---
-      desc = ""
-      # Handle additional description text for constant.
-      if "const" in details:
-        desc += f"**Constant = {details.get('const')}**. "
-      # Special handling for UCP version.
-      elif version_data and ref == "#/$defs/version":
-        desc += version_data.get("description", "")
+        if inline_key is not None:
+          field_meta = _FieldTypeMeta("inline", inline_key)
+        elif f_type == "any":
+          field_meta = _FieldTypeMeta("empty")
+        elif f_type in generic_types:
+          field_meta = _FieldTypeMeta("generic")
+        elif ucp_def_override is not None or _has_named_schema_type(details):
+          field_meta = _FieldTypeMeta("named")
+        else:
+          field_meta = _FieldTypeMeta("concrete")
 
-      # Get embedder's description, or inherit from ref'd type if omitted.
-      embedder_desc = details.get("description")
-      if embedder_desc is not None:
-        desc += embedder_desc
-      elif ref and not ref.startswith("#"):
-        ref_schema = _load_json(_resolve(ref, ctx))
-        if ref_schema:
-          desc += ref_schema.get("description", "")
+        if row_meta is not None:
+          row_meta[field_name] = field_meta
 
-      # --- Handle Enum ---
-      enum_values = details.get("enum")
-      if enum_values and isinstance(enum_values, list):
-        # Format values like: `val1`, `val2`.
-        formatted_enums = ", ".join([f"`{str(v)}`" for v in enum_values])
-        # Add a line break if description exists, then append Enum list.
-        if desc:
-          desc += "<br>"
-        desc += f"**Enum:** {formatted_enums}"
+        # --- Handle Description ---
+        desc = ""
+        # Handle additional description text for constant.
+        if "const" in details:
+          desc += f"**Constant = {details.get('const')}**. "
+        # Special handling for UCP version.
+        elif version_data and ref == "#/$defs/version":
+          desc += version_data.get("description", "")
 
-      # --- Handle Requirement (per request op + response) ---
-      requirement = _field_requirement(
-        field_name, ucp_annotation, required_list
-      )
+        # Get embedder's description, or inherit from ref'd type if omitted.
+        embedder_desc = details.get("description")
+        if embedder_desc is not None:
+          desc += embedder_desc
+        elif ref and not ref.startswith("#"):
+          ref_schema = _load_json(_resolve(ref, ctx))
+          if ref_schema:
+            desc += ref_schema.get("description", "")
 
-      md.append(f"| {field_name} | {f_type} | {requirement} | {desc} |")
+        # --- Handle Enum ---
+        enum_values = details.get("enum")
+        if enum_values and isinstance(enum_values, list):
+          # Format values like: `val1`, `val2`.
+          formatted_enums = ", ".join([f"`{str(v)}`" for v in enum_values])
+          # Add a line break if description exists, then append Enum list.
+          if desc:
+            desc += "<br>"
+          desc += f"**Enum:** {formatted_enums}"
 
-    return "\n".join(md)
+        # --- Handle Requirement (per request op + response) ---
+        requirement = _field_requirement(
+          field_name, ucp_annotation, required_list
+        )
+
+        md.append(f"| {field_name} | {f_type} | {requirement} | {desc} |")
+
+    rendered = "\n".join(md)
+    if own_inline_tables and inline_tables:
+      return "\n\n".join([rendered, *inline_tables.values()])
+    return rendered
 
   def _read_schema_from_defs(
     entity_name,
@@ -2193,6 +2481,10 @@ def define_env(env):
     need_header=True,
     parent_required_list=None,
     ctx=None,
+    *,
+    parent_title=None,
+    inline_tables=None,
+    row_meta=None,
   ):
     """Render a table for a `<file>.json#/<pointer>` definition.
 
@@ -2204,6 +2496,9 @@ def define_env(env):
       need_header: Whether to render the header row (and description).
       parent_required_list: Required properties from the parent schema.
       ctx: Optional RenderContext of the caller.
+      parent_title: Optional. Display title of the enclosing schema table.
+      inline_tables: Optional. Accumulator for inline object sub-sections.
+      row_meta: Optional. Mapping populated with `_FieldTypeMeta` per field.
 
     """
     if ".json#/" not in entity_name:
@@ -2253,12 +2548,23 @@ def define_env(env):
       ),
     )
 
+    def_name = pointer.rsplit("/", 1)[-1]
+    effective_def_title = (
+      parent_title
+      if parent_title is not None
+      else (
+        embedded_schema_data.get("title") or def_name.replace("_", " ").title()
+      )
+    )
     table = _render_table_from_schema(
       embedded_schema_data,
       spec_file_name,
       need_header,
       parent_required_list,
       table_ctx,
+      parent_title=effective_def_title,
+      inline_tables=inline_tables,
+      row_meta=row_meta,
     )
     desc = embedded_schema_data.get("description", "")
     # Scalar schemas (a string/enum with no properties or composition) already
@@ -2401,11 +2707,19 @@ def define_env(env):
       resolved_schema, parent_required = _inherit_base_fields(
         resolved_schema, base_schema
       )
+    schema_title = (
+      resolved_schema.get(
+        "title", Path(base_name).stem.replace("_", " ").title()
+      )
+      if resolved_schema
+      else Path(base_name).stem.replace("_", " ").title()
+    )
     return _render_table_from_schema(
       resolved_schema,
       spec_file_name,
       parent_required_list=parent_required,
       ctx=ctx.at(full_path),
+      parent_title=schema_title,
     )
 
   @env.macro
@@ -2457,12 +2771,15 @@ def define_env(env):
       lines = [heading]
       rel_path = schema_file.relative_to(SCHEMAS_DIR).as_posix()
       for def_name, def_schema in defs.items():
+        def_title = def_schema.get("title", def_name.replace("_", " ").title())
         table = _read_schema_from_defs(
-          f"{rel_path}#/$defs/{def_name}", spec_file_name, ctx=ctx
+          f"{rel_path}#/$defs/{def_name}",
+          spec_file_name,
+          ctx=ctx,
+          parent_title=def_title,
         )
         if table == "_No properties defined._":
           continue
-        def_title = def_schema.get("title", def_name.replace("_", " ").title())
         anchor_tag = _reference_anchor_tag(schema_file, def_name)
         lines += [f"#### {def_title}{anchor_tag}\n", table, "\n"]
       return [*lines, "\n---\n"]
@@ -2483,6 +2800,7 @@ def define_env(env):
       spec_file_name,
       parent_required_list=parent_required,
       ctx=ctx,
+      parent_title=title,
     )
     if table == "_No properties defined._":
       return []
@@ -2581,16 +2899,27 @@ def define_env(env):
       for key, schema_def in data.get("$defs", {}).items()
       if isinstance(schema_def, dict) and "allOf" in schema_def
     ]
+    base_label = Path(entity_name).stem.replace("_", " ").title()
+    target_label = target.rsplit(".", 1)[-1].replace("_", " ").title()
     # Prefer the requested target, then fall back to any composed type.
     preferred = [
-      schema_def
+      (
+        schema_def,
+        schema_def.get("title") or f"{base_label} {target_label}",
+      )
       for key, schema_def in composed
       if key == target or key.endswith("." + target)
     ]
-    for schema_def in preferred[:1] + [d for _, d in composed]:
+    fallbacks = [
+      (schema_def, schema_def.get("title") or base_label)
+      for _, schema_def in composed
+    ]
+    for schema_def, ext_title in preferred[:1] + fallbacks:
       for item in schema_def["allOf"]:
         if "properties" in item:
-          return _render_table_from_schema(item, spec_file_name, ctx=ctx)
+          return _render_table_from_schema(
+            item, spec_file_name, ctx=ctx, parent_title=ext_title
+          )
 
     raise RuntimeError(
       f"Could not find extension properties for target '{target}' "
@@ -2663,6 +2992,9 @@ def define_env(env):
       base=_normalize(OPENAPI_DIR / file_name),
       vertical=_page_vertical(spec_file_name),
     )
+    op_title = (
+      operation.get("summary") or operation_id.replace("_", " ").title()
+    )
     output = ""
 
     # -- Render Request --
@@ -2713,7 +3045,10 @@ def define_env(env):
         output += "**Inputs**\n\n"
         output += (
           _render_table_from_schema(
-            combined_schema, spec_file_name, ctx=req_ctx
+            combined_schema,
+            spec_file_name,
+            ctx=req_ctx,
+            parent_title=f"{op_title} Input",
           )
           + "\n\n"
         )
@@ -2727,7 +3062,12 @@ def define_env(env):
           output += "**Output**\n\n"
         res_ctx = dataclasses.replace(base_ctx, io_type="response")
         output += (
-          _render_table_from_schema(res_schema, spec_file_name, ctx=res_ctx)
+          _render_table_from_schema(
+            res_schema,
+            spec_file_name,
+            ctx=res_ctx,
+            parent_title=f"{op_title} Output",
+          )
           + "\n\n"
         )
       else:
@@ -2859,3 +3199,8 @@ def define_env(env):
         "**Response Headers**\n\n" + render_headers_table(res_headers)
       )
     return "\n\n".join(output_parts)
+
+  return {
+    "_render_table_from_schema": _render_table_from_schema,
+    "_read_schema_from_defs": _read_schema_from_defs,
+  }
