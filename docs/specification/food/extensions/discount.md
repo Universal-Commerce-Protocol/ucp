@@ -16,7 +16,7 @@
 
 # Discount Extension
 
-<!-- cSpell:ignore BOGOPIZZA -->
+<!-- cSpell:ignore BOGOPIZZA BOGO -->
 
 ## Overview
 
@@ -164,17 +164,17 @@ via the `messages[]` array:
 
 **Error codes for rejected discounts:**
 
-| Code                                   | Description                                                                                                          |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `discount_code_expired`                | Code has expired                                                                                                     |
-| `discount_code_invalid`                | Code not found or malformed                                                                                          |
-| `discount_code_already_applied`        | Code is already applied                                                                                              |
-| `discount_code_combination_disallowed` | Cannot combine with another active discount                                                                          |
-| `discount_code_user_not_logged_in`     | Code requires authenticated user                                                                                     |
-| `discount_code_user_ineligible`        | User does not meet eligibility criteria (e.g., first-order only, per-guest usage limit reached)                      |
-| `discount_code_minimum_not_met`        | Order subtotal does not meet the promotion's minimum threshold                                                       |
-| `discount_code_ineligible_items`       | No qualifying dish in the order                                                                                      |
-| `discount_code_fulfillment_ineligible` | Not valid for the selected fulfillment method (e.g., pickup-only promo on a delivery order)                          |
+| Code                                   | Description                                                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `discount_code_expired`                | Code has expired                                                                                                  |
+| `discount_code_invalid`                | Code not found or malformed                                                                                       |
+| `discount_code_already_applied`        | Code is already applied                                                                                           |
+| `discount_code_combination_disallowed` | Cannot combine with another active discount                                                                       |
+| `discount_code_user_not_logged_in`     | Code requires authenticated user                                                                                  |
+| `discount_code_user_ineligible`        | User does not meet eligibility criteria (e.g., first-order only, per-guest usage limit reached)                   |
+| `discount_code_minimum_not_met`        | Order subtotal does not meet the promotion's minimum threshold                                                    |
+| `discount_code_ineligible_items`       | No qualifying dish in the order                                                                                   |
+| `discount_code_fulfillment_ineligible` | Not valid for the selected fulfillment method (e.g., pickup-only promo on a delivery order)                       |
 | `discount_code_time_ineligible`        | Not valid for the requested fulfillment time (e.g., happy hour, day-part, or scheduled time outside promo window) |
 
 ## Automatic Discounts
@@ -296,9 +296,9 @@ purchase)*" with full confidence in the attribution, amount, and allocation.
 Applied discounts are reflected in the core checkout fields using two
 distinct total types:
 
-| Total Type       | When to Use                                                         |
-| ---------------- | ------------------------------------------------------------------- |
-| `items_discount` | Dish-level promotions (e.g., BOGO, percentage off a specific dish)  |
+| Total Type       | When to Use                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| `items_discount` | Dish-level promotions (e.g., BOGO, percentage off a specific dish)    |
 | `discount`       | Order-level promotions (delivery, fees, flat or percentage off order) |
 
 **Determining the type:** The Business chooses `items_discount` vs. `discount`
