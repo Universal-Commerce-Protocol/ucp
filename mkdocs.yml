@@ -96,6 +96,8 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
               - Return Policy:
                   specification/shopping/extensions/return-policy.md
+              - Purchase Options:
+                  specification/shopping/extensions/purchase-options.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -585,6 +587,16 @@ plugins:
               limit, or returns not accepted), supported resolutions, return
               channels, and typed return fees optionally scoped to channels,
               across catalog, cart, checkout, and order.
+          - specification/shopping/extensions/purchase-options.md: >-
+              Purchase Options Extension, letting a business advertise the
+              ways a variant can be bought (once, or as a subscription) as
+              purchase_options[] on catalog variants and cart or checkout
+              lines, a platform select one by
+              selected_purchase_option_id, and the Order preserve the selected
+              option. An option's schedules state the recurring orders it
+              results in; the extension also defines the
+              dev.ucp.shopping.policy.subscription policy type, its required
+              buyer disclosure, and the Platform obligations that come with it.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
