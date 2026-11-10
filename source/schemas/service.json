@@ -20,7 +20,7 @@
             "schema": {
               "type": "string",
               "format": "uri",
-              "description": "URL to the machine-readable definition for this entity. For service bindings, this is a transport definition (`rest` uses OpenAPI 3.x, `mcp` and `embedded` use OpenRPC, and `a2a` advertises an Agent Card via `endpoint` so `schema` is not required), not a JSON Schema. For `rest` and `mcp`, paths or method names declared in this document resolve against `endpoint`."
+              "description": "URL to the transport definition for this binding, not a JSON Schema: OpenAPI 3.x for `rest`, OpenRPC for `mcp` and `embedded`. For `rest` and `mcp`, its paths or methods resolve against `endpoint`. Required in platform profiles for `rest`, `mcp`, and `embedded`; `a2a` uses the Agent Card at `endpoint` instead. Optional in business profiles."
             },
             "endpoint": {
               "type": "string",

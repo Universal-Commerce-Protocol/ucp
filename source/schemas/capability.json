@@ -14,7 +14,7 @@
             "schema": {
               "type": "string",
               "format": "uri",
-              "description": "URL to the machine-readable definition for this entity. For capabilities and extensions, this is a JSON Schema defining payload and configuration types."
+              "description": "URL to the JSON Schema defining payload and configuration types for this capability or extension."
             },
             "extends": {
               "oneOf": [

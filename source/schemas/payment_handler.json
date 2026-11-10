@@ -18,7 +18,7 @@
             "schema": {
               "type": "string",
               "format": "uri",
-              "description": "URL to the machine-readable definition for this entity. For payment handlers, this is a JSON Schema defining handler configuration, instrument, and credential shapes."
+              "description": "URL to the JSON Schema defining handler configuration, instrument, and credential shapes."
             },
             "available_instruments": {
               "type": "array",
