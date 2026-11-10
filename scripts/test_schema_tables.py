@@ -1400,7 +1400,10 @@ def test_inline_object_subsection_extraction(macros: dict) -> None:
   _check_eq(
     "inline_object_order_fulfillment_expectations",
     _type_cell(order, "expectations"),
-    "Array[[Expectation](site:specification/reference/#expectation)]",
+    (
+      "Array[[Expectation]"
+      "(site:specification/reference/#shopping-types-expectation)]"
+    ),
   )
 
   variant = macros["schema_fields"]("types/variant", "reference")
