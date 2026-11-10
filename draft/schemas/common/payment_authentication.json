@@ -97,6 +97,16 @@
           "$ref": "#/$defs/payment_actions"
         }
       ]
+    },
+    "dev.ucp.food.checkout": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/food/checkout.json"
+        },
+        {
+          "$ref": "#/$defs/payment_actions"
+        }
+      ]
     }
   },
   "version": "2026-11-10"

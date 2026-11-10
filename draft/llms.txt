@@ -113,6 +113,17 @@ specifications:
 
 - [Cancellation Policy](http://ucp.dev/draft/specification/lodging/extensions/cancellation-policy/index.md): Lodging Cancellation Policy Extension, defining the dev.ucp.lodging.policy.cancellation type on the core policies[] primitive with a machine-readable refundability classification and a human-readable penalty schedule for lodging reservations.
 
+## Food Checkout Capability
+
+- [Overview](http://ucp.dev/draft/specification/food/checkout/index.md): Core Food Checkout Capability specification detailing checkout operations, dish line items, food establishment context, and payment processing for online food orders.
+- [REST](http://ucp.dev/draft/specification/food/checkout/rest/index.md): HTTP REST transport binding for Food Checkout operations, including endpoints for checkout creation, modification, retrieval, and cancellation.
+- [MCP](http://ucp.dev/draft/specification/food/checkout/mcp/index.md): Model Context Protocol (MCP) transport binding for Food Checkout operations, mapping food checkout session management to JSON-RPC tools for AI food ordering agents.
+
+## Food Extensions
+
+- [Fulfillment](http://ucp.dev/draft/specification/food/extensions/fulfillment/index.md): Food Fulfillment Extension, defining delivery and pickup fulfillment methods, delivery addresses, and food establishment pickup locations for online food orders.
+- [Tip](http://ucp.dev/draft/specification/food/extensions/tip/index.md): Food Tip Extension, defining Business-suggested tip options, buyer-selected preset or custom gratuity amounts, and resolution into checkout totals for online food orders.
+
 ## Payment
 
 - [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md): AP2 Mandates Extension, detailing secure, cryptographically bound checkout commitments (using SD-JWT+kb digital credentials and detached JWS signatures) between business, platform, and payment providers.

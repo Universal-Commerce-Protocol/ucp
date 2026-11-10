@@ -69,6 +69,26 @@
          <lastmod>2026-11-10</lastmod>
     </url>
     <url>
+         <loc>http://ucp.dev/draft/specification/food/checkout/</loc>
+         <lastmod>2026-11-10</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/food/checkout/mcp/</loc>
+         <lastmod>2026-11-10</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/food/checkout/rest/</loc>
+         <lastmod>2026-11-10</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/food/extensions/fulfillment/</loc>
+         <lastmod>2026-11-10</lastmod>
+    </url>
+    <url>
+         <loc>http://ucp.dev/draft/specification/food/extensions/tip/</loc>
+         <lastmod>2026-11-10</lastmod>
+    </url>
+    <url>
          <loc>http://ucp.dev/draft/specification/lodging/booking/</loc>
          <lastmod>2026-11-10</lastmod>
     </url>

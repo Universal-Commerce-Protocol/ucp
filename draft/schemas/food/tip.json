@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/draft/schemas/food/tip.json",
+  "name": "dev.ucp.food.tip",
+  "title": "Tip Extension",
+  "description": "Extends capabilities with tip support using suggested options and custom amounts.",
+  "$defs": {
+    "dev.ucp.food.checkout": {
+      "title": "Checkout with Tip",
+      "description": "Checkout extended with tip.",
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/draft/schemas/food/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "tip": {
+              "$ref": "https://ucp.dev/draft/schemas/food/types/tip.json",
+              "description": "Tip amounts requested by the platform on the checkout session. Business MUST return applied amounts in totals.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "version": "2026-11-10"
+}
