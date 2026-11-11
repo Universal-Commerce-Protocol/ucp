@@ -224,6 +224,10 @@ most relevant variant and media item first — default for lookups, best match
 based on query and context for search. Platforms **SHOULD** treat the first
 media item they present as featured.
 
+`brand` is the brand under which the product is marketed, and applies to every
+variant. It is a Business assertion that UCP does not verify; see
+[Brand](#brand).
+
 {{ schema_fields('types/product', 'shopping/catalog') }}
 
 ### Variant
@@ -238,6 +242,17 @@ was `exact` or `featured` (server-selected). See
 `media` is an ordered array. Businesses **SHOULD** return the featured variant
 media item as the first element. Platforms **SHOULD** treat the first media
 item they present as featured.
+
+A variant can carry three kinds of identifier, each with a different scope:
+
+| Field | Assigned by | Scope |
+| --- | --- | --- |
+| `sku` | The Business | Unique within the Business's own catalog. |
+| `barcodes` | A registry (for example, GS1 for GTINs) | Globally unique; the same code identifies the same item at every seller. |
+| `mpn` | The manufacturer | Unique only together with the brand (`Product.brand`). |
+
+Platforms recognizing the same item across sellers **SHOULD** prefer
+`barcodes`, and **SHOULD NOT** match on `mpn` without also matching the brand.
 
 {{ schema_fields('types/variant', 'shopping/catalog') }}
 
@@ -337,6 +352,17 @@ alternate formats such as glTF and USDZ.
 ### Rating
 
 {{ schema_fields('types/rating', 'shopping/catalog') }}
+
+### Brand
+
+`brand` is an object so that members such as a logo or a brand identifier can
+be added later without changing the meaning of existing data. `name` is the
+brand as presented to buyers, and is what feeds commonly send as a plain
+string. Platforms **MAY** use it for search, filtering, and recognizing the
+same product across sellers. It is not verified: a Platform that needs
+assurance about a brand claim needs a separate mechanism.
+
+{{ schema_fields('types/brand', 'shopping/catalog') }}
 
 ### Policy
 

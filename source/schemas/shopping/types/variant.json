@@ -27,7 +27,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "description": "Barcode standard. Well-known values: UPC, EAN, ISBN, GTIN, JAN."
+            "description": "Identifier standard. Well-known values: `GTIN`, `UPC`, `EAN`, `JAN`, `ISBN`. UPC, EAN, JAN, and ISBN-13 are GTIN formats, and Platforms MAY treat them as GTINs."
           },
           "value": {
             "type": "string",
@@ -35,7 +35,11 @@
           }
         }
       },
-      "description": "Industry-standard product identifiers for cross-reference and correlation."
+      "description": "Scannable trade item identifiers printed on the item or its packaging, such as GTINs (including UPC, EAN, JAN, and ISBN-13). Used to recognize the same item across sellers. Manufacturer part numbers belong in `mpn`; other supplier-assigned codes do not belong here."
+    },
+    "mpn": {
+      "type": "string",
+      "description": "Manufacturer part number: the identifier the manufacturer assigns to this item. Not a barcode. Unique only together with the brand (see `Product.brand`), so Platforms SHOULD NOT match items across sellers on `mpn` alone."
     },
     "handle": {
       "type": "string",
