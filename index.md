@@ -1,5 +1,3 @@
-UCP is expanding beyond retail: Lodging draft specification now available. **Food coming soon.**
-
 # Universal Commerce Protocol
 
 The common language for platforms, agents, and businesses.
@@ -682,13 +680,135 @@ Enable high-quality booking flows within AI surfaces with real time pricing and 
 }
 ```
 
-### Food
+### Checkout
 
-Powers conversational food ordering journeys that seamlessly handle nuanced meal customization, real-time availability and deals, tipping, and delivery instructions through a scalable checkout experience on AI surfaces.
+Powers conversational food ordering journeys that seamlessly handle tipping, and delivery/pickup instructions through a scalable checkout experience on AI surfaces.
 
-[Learn more](https://developers.google.com/actions-center/verticals/ordering/ucp)
+[Get Started](http://ucp.dev/draft/specification/food/checkout/index.md)
 
-Detailed specifications coming soon
+```json
+{
+  "ucp": { ... },
+  "id": "chk_123456789",
+  "status": "ready_for_complete",
+  "currency": "USD",
+  "buyer": {
+    "email": "c.walsh@example.com",
+    "first_name": "Camille",
+    "last_name": "Walsh"
+  },
+  "food_establishment": {
+    "id": "est_thai_restaurant",
+    "name": "Thai Restaurant",
+    "address": {
+      "street_address": "2821 Bristol St",
+      "address_locality": "Costa Mesa",
+      "address_region": "CA",
+      "address_country": "US",
+      "postal_code": "92626"
+    },
+    "media": [
+      {
+        "type": "image",
+        "url": "https://example.com/thai-basil-restaurant.jpg"
+      }
+    ]
+  },
+  "line_items": [
+    {
+      "id": "li_1",
+      "dish": {
+        "id": "duck_spicy_basil",
+        "title": "Duck Spicy Basil",
+        "price": 750
+      },
+      "modifications": [
+        {
+          "id": "jasmine_rice",
+          "title": "Jasmine Rice",
+          "price": 150
+        }
+      ],
+      "note": "Extra spicy, please.",
+      "quantity": 1,
+      "totals": [ ... ]
+    },
+    {
+      "id": "li_2",
+      "dish": {
+        "id": "salmon_green_curry",
+        "title": "Salmon Green Curry",
+        "price": 650
+      },
+      "quantity": 1,
+      "totals": [ ... ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "display_text": "Subtotal", "amount": 1550 },
+    { "type": "fulfillment", "display_text": "Express Delivery", "amount": 299 },
+    { "type": "tax", "display_text": "Tax", "amount": 141 },
+    { "type": "tip", "display_text": "Tip", "amount": 700 },
+    { "type": "total", "display_text": "Total", "amount": 2690 }
+  ],
+  "links": [ ... ],
+  "payment": { ... },
+  "fulfillment": {
+    "methods": [
+      {
+        "id": "method_1",
+        "type": "delivery",
+        "destination": {
+          "id": "dest_1",
+          "type": "delivery_address",
+          "address": {
+            "first_name": "Camille",
+            "last_name": "Walsh",
+            "street_address": "19510 Jamboree Road",
+            "address_locality": "Irvine",
+            "address_region": "CA",
+            "postal_code": "92612",
+            "address_country": "US"
+          }
+        },
+        "options": [
+          {
+            "id": "opt_express",
+            "title": "Express Delivery",
+            "description": "19-34 min · Direct to you",
+            "earliest_fulfillment_time": "2026-05-12T18:19:00-07:00",
+            "latest_fulfillment_time": "2026-05-12T18:34:00-07:00",
+            "totals": [{ "type": "total", "amount": 299 }]
+          },
+          {
+            "id": "opt_standard",
+            "title": "Standard Delivery",
+            "description": "Arrives in 35-45 minutes.",
+            "earliest_fulfillment_time": "2026-05-12T18:35:00-07:00",
+            "latest_fulfillment_time": "2026-05-12T18:45:00-07:00",
+            "totals": [{ "type": "total", "amount": 99 }]
+          }
+        ],
+        "selected_option_id": "opt_express",
+        "preference_options": [
+          { "id": "pref_hand_to_me", "label": "Hand it to me" },
+          { "id": "pref_leave_at_door", "label": "Leave at the door" }
+        ],
+        "selected_preference_option_ids": ["pref_leave_at_door"],
+        "notes": "Gate code 4321. Please ring the bell."
+      }
+    ]
+  },
+  "tip": {
+    "options": [
+      { "id": "tip_650", "unit": "absolute", "amount": 650 },
+      { "id": "tip_700", "unit": "absolute", "amount": 700 },
+      { "id": "tip_750", "unit": "absolute", "amount": 750 }
+    ],
+    "selected_option_id": "tip_700"
+  }
+}
+```
 
 ### Power native checkout
 

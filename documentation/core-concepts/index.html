@@ -1518,6 +1518,7 @@ extensions publish versions on their own cadence.</p>
 <p>The following are examples of capabilities defined in UCP — see the
 <a href="/latest/specification/overview/">Specification</a> for the authoritative and
 up-to-date list.</p>
+<div class="capabilities-table">
 <table>
 <thead>
 <tr>
@@ -1570,8 +1571,13 @@ up-to-date list.</p>
 <td style="text-align: left;"><code>dev.ucp.lodging.booking</code></td>
 <td style="text-align: left;">Initiates and completes booking session for hotels</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.food.checkout</code></td>
+<td style="text-align: left;">Initiates and completes checkout session for food ordering</td>
+</tr>
 </tbody>
 </table>
+</div>
 <h3 id="extensions">Extensions<a class="headerlink" href="#extensions" title="Permanent link">&para;</a></h3>
 <p>Extensions optionally augment a base capability. They use the
 <code>extends</code> field to declare their parent(s) and compose onto the base schema
@@ -1595,6 +1601,7 @@ you never activate a discount extension without the checkout it extends.</p>
 <p>The following are examples of extensions defined in UCP — see the
 <a href="/latest/specification/overview/">Specification</a> for the authoritative and
 up-to-date list.</p>
+<div class="capabilities-table">
 <table>
 <thead>
 <tr>
@@ -1644,8 +1651,19 @@ up-to-date list.</p>
 <td style="text-align: left;">checkout</td>
 <td style="text-align: left;">Deposits, installments, and deferred payment schedules</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.food.fulfillment</code></td>
+<td style="text-align: left;">food checkout</td>
+<td style="text-align: left;">Food delivery and pickup options</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev.ucp.food.tip</code></td>
+<td style="text-align: left;">food checkout</td>
+<td style="text-align: left;">Food delivery and pickup gratuity options</td>
+</tr>
 </tbody>
 </table>
+</div>
 <h3 id="services">Services<a class="headerlink" href="#services" title="Permanent link">&para;</a></h3>
 <p><strong>Services</strong> group the operations and events for a vertical or common domain under a
 reverse-domain registry key (e.g., <code>dev.ucp.shopping</code>, <code>dev.ucp.common</code>). The key identifies the

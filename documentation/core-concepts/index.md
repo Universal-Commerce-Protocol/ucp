@@ -80,6 +80,7 @@ The following are examples of capabilities defined in UCP — see the [Specifica
 | `dev.ucp.common.location.lookup`  | Retrieve location details, operating hours, and amenities                       |
 | `dev.ucp.common.ask`              | Natural-language questions about a business's resources, policies, and services |
 | `dev.ucp.lodging.booking`         | Initiates and completes booking session for hotels                              |
+| `dev.ucp.food.checkout`           | Initiates and completes checkout session for food ordering                      |
 
 ### Extensions
 
@@ -112,6 +113,8 @@ The following are examples of extensions defined in UCP — see the [Specificati
 | `dev.ucp.common.payment.ap2_mandate`    | checkout                | Non-repudiable authorization for autonomous commerce      |
 | `dev.ucp.common.payment.split_payments` | checkout                | Multi-instrument allocation and split settlements         |
 | `dev.ucp.common.payment.terms`          | checkout                | Deposits, installments, and deferred payment schedules    |
+| `dev.ucp.food.fulfillment`              | food checkout           | Food delivery and pickup options                          |
+| `dev.ucp.food.tip`                      | food checkout           | Food delivery and pickup gratuity options                 |
 
 ### Services
 
