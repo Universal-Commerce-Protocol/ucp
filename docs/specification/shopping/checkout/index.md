@@ -70,7 +70,8 @@ require the payer's taxpayer document, such as the CPF or CNPJ for Pix and
 boleto in Brazil.
 
 A payment instrument **MAY** carry an optional
-[`payer`](site:schemas/common/types/payer.json) object with an `identification`
+[`payer`](site:schemas/common/types/payer.json) object whose `identification`
+is a [legal identification](site:schemas/common/types/legal_identification.json)
 (`type` and `number`). When `payer` is omitted, the payer is the buyer. Because
 the payer lives on the instrument, a checkout using
 [split payments](../../payment/extensions/split-payments.md) can carry a
@@ -95,10 +96,14 @@ A business:
   attached to and for the tax obligations of that payment.
 * **MUST NOT** treat `payer.identification` as an authentication credential or
   as the buyer's identity.
-* **SHOULD NOT** return `payer.identification.number` in checkout responses.
-  The platform already holds the value it sent, and **MUST** resend it on
-  Update Checkout and Complete Checkout when it is still required.
 * **MAY** accept and normalize common formatting variants of `number`.
+
+`number` is write-only: it is never returned in responses, while `type` is, so
+the platform can see which kind of document is on file. Like a token
+credential, the platform already holds the value it sent and **MUST** resend it
+on Update Checkout and Complete Checkout when it is still required. A business
+that wants to show the buyer a hint of the document **SHOULD** use the
+instrument's handler-defined `display` instead.
 
 A handler that requires the payer's identification **SHOULD** declare it in its
 [request constraints](../../payment/guide.md#handler-declaration), so a platform
@@ -1392,6 +1397,10 @@ this response root (e.g., `$.line_items[0]`). See
 #### Payer
 
 {{ schema_fields('payer', 'shopping/checkout') }}
+
+#### Legal Identification
+
+{{ schema_fields('legal_identification', 'shopping/checkout') }}
 
 ### Payment Credential
 

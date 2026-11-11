@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/legal_identification.json",
+  "title": "Legal Identification",
+  "description": "A legal or tax identification document of a party, such as a taxpayer number. The role of the party (payer, invoice recipient, tax-document receiver) is defined by the schema that references this type. This is sensitive personal data: it MUST NOT be used as an authentication credential, and its number is write-only.",
+  "type": "object",
+  "required": [
+    "type",
+    "number"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Document type as an open, lowercase token: the ISO 3166-1 alpha-2 country code, a dot, and the document name. Open so a new jurisdiction needs no spec change. Non-exhaustive registry: br.cpf, br.cnpj, mx.rfc, ar.cuit, ar.cuil, cl.rut, uy.ci, co.nit, pe.ruc.",
+      "examples": [
+        "br.cpf",
+        "br.cnpj",
+        "mx.rfc",
+        "ar.cuit",
+        "cl.rut"
+      ]
+    },
+    "number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The document value as issued. Senders SHOULD use the issuer's canonical form. Core applies no per-jurisdiction format or check-digit validation; the receiving business or payment handler validates and MAY normalize common variants. Never returned in responses: a sender that still needs it MUST resend it.",
+      "ucp_response": "omit"
+    }
+  },
+  "additionalProperties": true
+}
