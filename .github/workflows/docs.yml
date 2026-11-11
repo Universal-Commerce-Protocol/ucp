@@ -86,6 +86,21 @@ jobs:
       - name: Run schema table macro tests
         run: uv run python scripts/test_schema_tables.py
 
+      - name: Validate cancellation schedule vectors
+        run: uv run python scripts/test_cancellation_schedule.py
+
+      - name: Validate cancellation lab fixtures
+        run: uv run python scripts/test_cancellation_lab.py
+
+      - name: Test cancellation disclosure regressions
+        run: uv run python scripts/test_cancellation_disclosure.py
+
+      - name: Validate cancellation multi-stay integration
+        run: uv run python scripts/test_cancellation_booking.py
+
+      - name: Validate cancellation publication safety
+        run: uv run python scripts/test_cancellation_publication.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
