@@ -13,6 +13,8 @@
     "eligibility_invalid",
     "identity_required",
     "insufficient_scope",
-    "purchase_option_unavailable"
+    "purchase_option_unavailable",
+    "payer_identification_required",
+    "payer_identification_invalid"
   ]
 }

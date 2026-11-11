@@ -61,6 +61,107 @@ requires credential collection is not distinguished by the base schema today, so
 platforms should not infer readiness from the absence of a `credential` or from
 `id` naming.
 
+#### Payer Identification
+
+The party that funds a payment, the payer, can differ from the buyer who places
+the order: a third party paying for someone else's order, a business paying for
+an individual's order, or a gift. Some payment methods and jurisdictions also
+require the payer's taxpayer document, such as the CPF or CNPJ for Pix and
+boleto in Brazil.
+
+A payment instrument **MAY** carry an optional
+[`payer`](site:schemas/common/types/payer.json) object with an `identification`
+(`type` and `number`). When `payer` is omitted, the payer is the buyer. Because
+the payer lives on the instrument, a checkout using
+[split payments](../../payment/extensions/split-payments.md) can carry a
+different payer per instrument.
+
+`identification.type` is an open, lowercase token made of the ISO 3166-1
+alpha-2 country code, a dot, and the document name (for example `br.cpf`,
+`br.cnpj`, `mx.rfc`, `cl.rut`). Core applies no format or check-digit
+validation to `number`: the business or the payment handler validates it.
+
+A platform:
+
+* **SHOULD** send `payer.identification` only when the selected handler or the
+  jurisdiction requires it.
+* **SHOULD** send `number` in the issuer's canonical form.
+* **MUST NOT** place `payer.identification` in a URL or query string, and
+  **MUST NOT** log it in cleartext.
+
+A business:
+
+* **MUST** use `payer.identification` only for processing the payment it is
+  attached to and for the tax obligations of that payment.
+* **MUST NOT** treat `payer.identification` as an authentication credential or
+  as the buyer's identity.
+* **SHOULD NOT** return `payer.identification.number` in checkout responses.
+  The platform already holds the value it sent, and **MUST** resend it on
+  Update Checkout and Complete Checkout when it is still required.
+* **MAY** accept and normalize common formatting variants of `number`.
+
+A handler that requires the payer's identification **SHOULD** declare it in its
+[request constraints](../../payment/guide.md#handler-declaration), so a platform
+can collect it before submission rather than discovering the requirement through
+an error:
+
+<!-- ucp:example schema=payment_handler def=business_schema -->
+```json
+{
+  "id": "br_pix_1234",
+  "version": "{{ ucp_version }}",
+  "available_instruments": [
+    {
+      "type": "pix",
+      "ucp": {
+        "request_constraints": {
+          "path": "$['payment']['instruments'][?@['handler_id'] == 'br_pix_1234' && @['type'] == 'pix']",
+          "required": ["payer"],
+          "properties": {
+            "payer": {
+              "required": ["identification"],
+              "properties": {
+                "identification": {
+                  "properties": { "type": { "enum": ["br.cpf", "br.cnpj"] } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+In this example a third party pays a Pix for an order placed by the buyer. The
+payer's CPF is on the instrument; the buyer is unchanged:
+
+<!-- ucp:example schema=shopping/checkout op=complete direction=request -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_1",
+        "handler_id": "br_pix_1234",
+        "type": "pix",
+        "selected": true,
+        "payer": {
+          "identification": { "type": "br.cpf", "number": "12345678909" }
+        }
+      }
+    ]
+  }
+}
+```
+
+When the selected handler requires the payer's identification and it is absent,
+or the business rejects it, the business **SHOULD** return a recoverable error
+whose `path` points at the instrument's `payer.identification`, using
+`payer_identification_required` or `payer_identification_invalid`. The error
+`content` **MUST NOT** repeat the submitted number.
+
 ### Fulfillment
 
 Fulfillment is modelled as an extension in UCP to account for diverse use cases.
@@ -609,13 +710,15 @@ ELSE IF requires_buyer_review is not empty
 Standard errors are standardized error codes that platforms are expected to
 handle with specific, appropriate UX rather than generic error treatment.
 
-| Code                     | Description                                                                |
-| :----------------------- | :------------------------------------------------------------------------- |
-| `out_of_stock`           | Specific item or variant is unavailable                                    |
-| `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
-| `address_undeliverable`  | Cannot deliver to the provided address                                     |
-| `payment_failed`         | Payment processing failed                                                  |
-| `eligibility_invalid`    | Eligibility claim could not be verified at completion                      |
+| Code                            | Description                                                                |
+| :------------------------------ | :------------------------------------------------------------------------- |
+| `out_of_stock`                  | Specific item or variant is unavailable                                    |
+| `item_unavailable`              | Item cannot be purchased (e.g. delisted)                                   |
+| `address_undeliverable`         | Cannot deliver to the provided address                                     |
+| `payment_failed`                | Payment processing failed                                                  |
+| `eligibility_invalid`           | Eligibility claim could not be verified at completion                      |
+| `payer_identification_required` | The selected handler requires the payer's identification and none was sent |
+| `payer_identification_invalid`  | The payer's identification was rejected (e.g. invalid check digit)         |
 
 Businesses **SHOULD** mark standard errors with `severity: recoverable` to
 signal that platforms should provide appropriate UX (out-of-stock messaging,
@@ -1285,6 +1388,10 @@ this response root (e.g., `$.line_items[0]`). See
 #### Selected Payment Instrument
 
 {{ extension_schema_fields('../common/types/payment_instrument.json#/$defs/selected_payment_instrument', 'shopping/checkout') }}
+
+#### Payer
+
+{{ schema_fields('payer', 'shopping/checkout') }}
 
 ### Payment Credential
 

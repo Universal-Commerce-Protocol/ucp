@@ -26,6 +26,10 @@
       "$ref": "postal_address.json",
       "description": "The billing address associated with this payment method."
     },
+    "payer": {
+      "$ref": "payer.json",
+      "description": "The party funding this instrument, when it differs from the buyer or when the handler requires the payer's identification. When omitted, the payer is the buyer."
+    },
     "credential": {
       "$ref": "payment_credential.json"
     },

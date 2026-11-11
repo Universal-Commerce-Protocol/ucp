@@ -214,3 +214,13 @@ mpegurl
 usdz
 vnd
 webm
+boleto
+CNPJ
+CUIL
+CUIT
+RFC
+RUC
+CPF
+Pix
+NIT
+RUT
