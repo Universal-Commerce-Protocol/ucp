@@ -16,19 +16,28 @@
 
 # Extension Authoring Guide
 
-This guide walks through building a UCP extension outside the core protocol:
-an extension a Business or Platform publishes under its own reverse-domain
-namespace (`com.{vendor}.*`, `org.{org}.*`) to add fields or behavior to a
-UCP capability such as checkout, cart, or catalog search.
+UCP already defines features such as checkout. Sometimes you need to share an
+extra piece of information, such as loyalty points earned on an order. This
+guide shows how to add that field, publish its schema on your own website,
+and tell other UCP participants that you support it.
 
-It is a practical companion to the normative rules in the
-[Specification Overview](../specification/overview/index.md), which this guide
-links to rather than restates. If you are changing UCP itself, see the
-[Schema Authoring Guide](schema-authoring.md) instead.
+Here are the terms used in this guide:
+
+- A **Business** is the merchant or service offering a UCP feature.
+- A **Platform** is the app, shopping assistant, or other system using it.
+- A **capability** is a UCP feature, such as checkout.
+- An **extension** adds fields or behavior to an existing capability.
+- A **profile** is the JSON document that lists what a participant supports.
+
+These roles describe who offers and who uses a feature, not a particular
+industry. For the protocol rules, see the
+[Specification Overview](../specification/overview/index.md). If you are
+changing UCP itself rather than publishing your own extension, see the
+[Schema Authoring Guide](schema-authoring.md).
 
 ## Before You Start
 
-An extension augments an existing capability. Consider the alternatives first:
+An extension adds to an existing capability. Consider the alternatives first:
 
 - **Profile configuration.** If you only need to tell the other party how you
   are set up, a capability's `config` may already cover it.
@@ -68,52 +77,32 @@ A complete extension has five parts:
 4. **A specification page** that explains the extension's behavior.
 5. **Profile entries** that advertise it, so it can be negotiated.
 
-The sections below take these in order, then cover local testing.
+The walkthrough below builds those parts for one small extension. The later
+sections explain other patterns; you do not need to use every pattern at once.
 
-## Choose a Name
+## Walkthrough: Add Loyalty Points to Checkout
 
-Extension names follow the same rules as every capability name (see
-[Namespace Governance](../specification/overview/index.md#namespace-governance)):
+Acme calculates the points earned on a checkout. The Business returns those
+points; the Platform can display them, but does not send or calculate them.
 
-- Use the format `{reverse-domain}.{service}.{capability}`, for example
-  `com.acme.shopping.loyalty`.
-- Use a domain you control. The `dev.ucp.*` namespace is reserved for the UCP
-  governing body.
-- Choose a registrable domain you exclusively control, not a shared suffix
-  such as a hosting platform's subdomain.
+This example uses the published UCP release `2026-08-25` and Acme's extension
+version `2026-09-01`. Keep the UCP version in the schema URLs and declarations
+consistent. Replace the fictional Acme name and domain when publishing your
+own extension.
 
-The name is bound to the host that serves your schema. A Platform derives the
-authority from the `schema` URL's host and rejects the extension, without
-fetching it, unless that authority matches the name (see
-[Authority Binding](../specification/overview/index.md#authority-binding)).
-For `com.acme.shopping.loyalty`, a schema served from `acme.com` binds; one
-served from a shared CDN host such as `cdn.example.net` does not.
+### 1. Write the Extension Schema
 
-## Write the Schema
+Install the validation tool and create a directory for the example:
 
-### Metadata
+```bash
+cargo install ucp-schema
+mkdir -p schemas
+```
 
-An extension schema is self-describing. At the top level, declare:
+Save the following complete file as `schemas/loyalty.json`:
 
-| Field | Purpose |
-| --- | --- |
-| `$id` | Canonical URL of the schema, on the host that binds to your name |
-| `name` | The extension's reverse-domain name |
-| `version` | Your extension version, an ISO 8601 date you control |
-| `title`, `description` | Human-readable summary |
-| `requires` | The UCP protocol and capability versions the extension depends on (see [Versioning](#version-your-extension)) |
-
-### Extend a Capability
-
-For each capability your extension extends, add a `$defs` entry keyed by that
-capability's full name. The entry composes onto the capability's schema with
-`allOf`: it references the base schema, then adds your fields (see
-[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)).
-
-Because your schema is hosted on your domain, reference UCP base schemas by
-absolute URL, including the UCP release in the path:
-
-<!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
+<!-- extension-authoring-example: loyalty-schema -->
+<!-- ucp:example skip reason="third-party extension schema; checked by test_extension_authoring_examples.py" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -140,11 +129,14 @@ absolute URL, including the UCP release in the path:
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Acme Loyalty",
       "allOf": [
-        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json" },
+        { "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json" },
         {
           "type": "object",
           "properties": {
-            "loyalty": { "$ref": "#/$defs/loyalty" }
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": "omit"
+            }
           }
         }
       ]
@@ -152,6 +144,208 @@ absolute URL, including the UCP release in the path:
   }
 }
 ```
+
+`$defs` holds named schema parts. Here, `loyalty` describes the new data and
+`dev.ucp.shopping.checkout` describes how it adds to checkout. `allOf` means
+the same payload must satisfy both the checkout schema and the added rules.
+It does not replace the checkout schema.
+
+`ucp_request: "omit"` keeps the Business-computed field out of the resolved
+request schema. The Business remains responsible for treating its own
+calculated points as authoritative, rather than trusting unsolicited input.
+
+### 2. Advertise Support on Both Sides
+
+Save this minimal Business profile as `business-profile.json`:
+
+<!-- extension-authoring-example: loyalty-profile -->
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "2026-08-25",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-08-25",
+          "spec": "https://ucp.dev/2026-08-25/specification/checkout",
+          "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
+        }
+      ],
+      "com.acme.shopping.loyalty": [
+        {
+          "version": "2026-09-01",
+          "spec": "https://acme.com/docs/ucp/loyalty",
+          "schema": "https://acme.com/ucp/schemas/loyalty.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+For this example, the Platform supports the same features and versions, so
+save the same minimal declarations as `platform-profile.json`:
+
+```bash
+cp business-profile.json platform-profile.json
+```
+
+These files demonstrate capability agreement, not a complete checkout
+installation. Keep the service endpoints, signing keys, and payment handlers
+needed by your real deployment in its profiles.
+
+Both profiles list Acme Loyalty version `2026-09-01` and its checkout parent,
+so the extension can be selected. If one side does not list it, the parties
+can still use checkout without Acme Loyalty. See
+[Advertise and Negotiate](#advertise-and-negotiate) for version selection.
+
+### 3. Validate a Complete Response
+
+Save this complete example as `checkout-response.json`. The local schema path
+lets you test before hosting the Acme schema; the UCP base schema is fetched
+from its published URL.
+
+<!-- extension-authoring-example: loyalty-response -->
+<!-- ucp:example skip reason="local development payload; checked by test_extension_authoring_examples.py" -->
+```json
+{
+  "ucp": {
+    "version": "2026-08-25",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-08-25",
+          "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
+        }
+      ],
+      "com.acme.shopping.loyalty": [
+        {
+          "version": "2026-09-01",
+          "schema": "schemas/loyalty.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  },
+  "id": "checkout_123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "line_1",
+      "item": { "id": "V100", "title": "Oxford Shirt", "price": 4500 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 4500 },
+        { "type": "total", "amount": 4500 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 4500 },
+    { "type": "total", "amount": 4500 }
+  ],
+  "links": [
+    { "type": "terms_of_service", "url": "https://merchant.example.com/terms" },
+    { "type": "privacy_policy", "url": "https://merchant.example.com/privacy" }
+  ],
+  "loyalty": { "points_earned": 120 }
+}
+```
+
+From the directory containing these files, run:
+
+```bash
+ucp-schema lint schemas/loyalty.json
+ucp-schema validate checkout-response.json --op read --response --json
+```
+
+The validation should succeed and report `"valid": true`. For local schema
+paths, the tool skips the name/host binding check; that shortcut is only for
+local development. A published declaration must use the matching HTTPS URL
+shown in the profiles.
+
+### 4. Check a Failing Case Too
+
+Make a second response with an invalid points value:
+
+```bash
+python3 -c '
+import json
+from pathlib import Path
+response = json.loads(Path("checkout-response.json").read_text())
+response["loyalty"]["points_earned"] = -1
+Path("checkout-bad.json").write_text(json.dumps(response))
+'
+ucp-schema validate checkout-bad.json --op read --response --json
+```
+
+This should fail because `points_earned` cannot be negative. The command
+returns exit code `1` and reports `"valid": false`. A passing case alone does
+not show that your extension's rules are being applied.
+
+### 5. Publish the Files and Explain the Behavior
+
+Host the schema at the URL declared in the profiles and write the `spec` page.
+For this example, that page should explain when points are calculated, what
+`member_id` means, and what happens when the extension is unsupported. Use
+HTTPS without schema redirects and send cacheable response headers, as
+[Host and Document It](#host-and-document-it) describes.
+
+The profiles advertise support; each checkout response declares the extension
+actually used. The response carries the points themselves.
+
+## Choose a Name
+
+Extension names follow the same rules as every capability name (see
+[Namespace Governance](../specification/overview/index.md#namespace-governance)):
+
+- Use the format `{reverse-domain}.{service}.{capability}`, for example
+  `com.acme.shopping.loyalty`.
+- Use a domain you control. The `dev.ucp.*` namespace is reserved for the UCP
+  governing body.
+- Choose a registrable domain you exclusively control, not a shared suffix
+  such as a hosting platform's subdomain.
+
+The schema host must match the domain represented by the name. This is called
+*authority binding*: the Platform checks the name and host before fetching the
+schema, and rejects the extension if they do not match (see
+[Authority Binding](../specification/overview/index.md#authority-binding)).
+For `com.acme.shopping.loyalty`, a schema served from `acme.com` matches; one
+served from a shared CDN host such as `cdn.example.net` does not.
+
+## Write the Schema
+
+### Metadata
+
+An extension schema is self-describing. At the top level, declare:
+
+| Field | Purpose |
+| --- | --- |
+| `$id` | Canonical URL of the schema, on the host that binds to your name |
+| `name` | The extension's reverse-domain name |
+| `version` | Your extension version, an ISO 8601 date you control |
+| `title`, `description` | Human-readable summary |
+| `requires` | The UCP protocol and capability versions the extension depends on (see [Versioning](#version-your-extension)) |
+
+### Extend a Capability
+
+For each capability your extension extends, add a `$defs` entry keyed by that
+capability's full name. The entry composes onto the capability's schema with
+`allOf`: it references the base schema, then adds your fields (see
+[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)).
+
+Because your schema is hosted on your domain, reference UCP base schemas by
+absolute URL, including the UCP release in the path:
+
+The [complete loyalty schema](#1-write-the-extension-schema) shows this pattern
+with a published UCP URL. Use the release your extension supports; do not mix
+schema URLs from one release with capability declarations from another.
 
 Put the types your extension introduces (`loyalty` above) in their own `$defs`
 entries and reference them from the composed entry, so they can be reused across
@@ -259,25 +453,34 @@ in the `ucp-schema` documentation.
 
 ### Extend Another Extension
 
-An extension can extend another extension rather than a root capability. For
-example, an extension of `dev.ucp.shopping.catalog.feed`, which itself extends
-`dev.ucp.common.feed`, adds fields to Catalog Feed records (see
-[Extend a Feed](#extend-a-feed)). Its additions still compose onto the root
-capability at the top of the chain, so they use the root's shapes.
+An extension can extend another extension. The immediate parent is the feature
+you add to. The root capability tells tooling which message or record schema
+to start with. For example:
 
-This is the one case where two Overview rules point at different `$defs`
-keys: extension schemas **MUST** have an entry for each declared parent (see
-[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)),
-while schema resolution applies the root capability's entry (see
-[Schema Resolution Convention](../specification/overview/index.md#schema-resolution-convention)).
-To satisfy both, include an entry under each key, pointing at the same
-definition. [Extend a Feed](#extend-a-feed) shows a complete example.
+```text
+dev.ucp.common.feed                         root: feed list and manifest
+  +-- dev.ucp.shopping.catalog.feed         record type: Product
+        +-- com.example.ads.eligibility     enrichment: ads_eligible
+```
 
-Current `ucp-schema` releases compose only the root-keyed entry.
+The ads extension declares `extends: "dev.ucp.shopping.catalog.feed"`, not a
+new record type. Its records remain Products. See [Extend a Feed](#extend-a-feed)
+for the complete schema, profile, manifest, and record examples.
+
+Keep entries under both the immediate parent's name and the root capability's
+name in your schema's `$defs`, pointing at the same definition. The parent key
+satisfies the Overview's [Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern);
+the root key supplies the entry applied by its
+[Schema Resolution Convention](../specification/overview/index.md#schema-resolution-convention).
+The two keys are aliases, not two different versions of your fields.
+
+`ucp-schema` 1.4.1 composes the root-keyed entry.
 [ucp-schema#100](https://github.com/Universal-Commerce-Protocol/ucp-schema/pull/100)
-proposes letting an extension key only on its parent when exactly one active
-declared parent has an entry. Until your tooling includes that change, include
-both entries.
+proposes a fallback to an immediate-parent entry when exactly one active
+declared parent has an entry and no root entry is present. Tool support alone
+does not change the specification you target: remove a compatibility key only
+when both that specification and the tooling your consumers use support the
+resulting schema. The examples here keep both keys.
 
 ### Type Your Profile Configuration
 
@@ -355,6 +558,20 @@ There are two ways to extend feeds:
 | Add fields to catalog Products | `dev.ucp.shopping.catalog.feed` | UCP Products, plus your fields |
 | Publish records in your own shape | `dev.ucp.common.feed` | Defined by your specification |
 
+The examples below connect three different documents:
+
+- **Profile:** advertises the extensions a Business's feeds may carry and the
+  Common Feed endpoint that serves its feed list.
+- **Manifest:** describes one immutable snapshot and declares the record type
+  and extensions its records conform to. It describes the files, not a live
+  request where two participants negotiate which features to use.
+- **Record:** carries the domain data, such as a Product and its extension
+  fields. Each record does not need its own `ucp` block: the manifest lists
+  versions and extensions for the whole snapshot.
+
+The [feed list](../specification/common/feed/index.md#feed-list) connects the
+profile's endpoint to the current manifest URL for each feed.
+
 ### Add Fields to Catalog Products
 
 An extension of Catalog Feed is an extension of an extension (see
@@ -363,19 +580,27 @@ Products, with the same identity and Catalog Lookup resolution, and your fields
 are added to them.
 
 Catalog Feed exposes two shapes under `$defs["dev.ucp.common.feed"]`: `record`
-(the Product) and `manifest`. Compose onto the one you extend. This extension
-adds an `ads_eligible` flag to every Product, keyed on both the root and the
-parent:
+(the Product) and `manifest`. Compose onto the one you extend. This extension,
+`com.example.ads.eligibility`, adds an optional `ads_eligible` boolean to
+Products. Both the root and the immediate-parent entries point to its record
+composition:
 
+<!-- extension-authoring-example: feed-extension -->
 <!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ads.example.com/ucp/schemas/ads.json",
-  "name": "com.example.ads",
+  "name": "com.example.ads.eligibility",
   "version": "2026-09-01",
   "title": "Ads Eligibility",
-  "description": "Marks whether each catalog Product may appear in ads.",
+  "description": "Adds an optional Business declaration of Product ads eligibility.",
+  "requires": {
+    "protocol": { "min": "{{ ucp_version }}" },
+    "capabilities": {
+      "dev.ucp.shopping.catalog.feed": { "min": "{{ ucp_version }}" }
+    }
+  },
   "$defs": {
     "ads_record": {
       "allOf": [
@@ -385,7 +610,7 @@ parent:
           "properties": {
             "ads_eligible": {
               "type": "boolean",
-              "description": "Whether the Business permits this Product in ads."
+              "description": "Whether the Business permits considering this Product for ads. An absent field gives no permission."
             }
           }
         }
@@ -402,10 +627,14 @@ parent:
 ```
 
 An extension that only adds manifest fields composes onto `manifest` instead and
-needs no `record` entry.
+needs no `record` entry. Adding a manifest field does not add that field to
+Products; adding a record field does not add it to the manifest.
 
-The Business advertises the extension next to Common Feed and Catalog Feed:
+The Business advertises the extension next to Common Feed and Catalog Feed.
+Only Common Feed carries `config.endpoint`; the other entries declare what
+those feeds may contain:
 
+<!-- extension-authoring-example: feed-profile -->
 <!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
@@ -429,7 +658,7 @@ The Business advertises the extension next to Common Feed and Catalog Feed:
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_feed.json"
         }
       ],
-      "com.example.ads": [
+      "com.example.ads.eligibility": [
         {
           "version": "2026-09-01",
           "extends": "dev.ucp.shopping.catalog.feed",
@@ -444,8 +673,10 @@ The Business advertises the extension next to Common Feed and Catalog Feed:
 ```
 
 Each manifest whose records carry the field declares the extension in its
-`ucp.capabilities`:
+`ucp.capabilities`. The declarations are bounded by the Business's profile;
+they describe this snapshot, not every feed the Business publishes:
 
+<!-- extension-authoring-example: feed-manifest -->
 <!-- ucp:example schema=shopping/catalog_feed op=list def=manifest -->
 ```json
 {
@@ -458,7 +689,7 @@ Each manifest whose records carry the field declares the extension in its
       "dev.ucp.shopping.catalog.feed": [
         {"version": "{{ ucp_version }}", "extends": "dev.ucp.common.feed"}
       ],
-      "com.example.ads": [
+      "com.example.ads.eligibility": [
         {"version": "2026-09-01", "extends": "dev.ucp.shopping.catalog.feed"}
       ]
     }
@@ -481,67 +712,133 @@ Each manifest whose records carry the field declares the extension in its
 }
 ```
 
-Records then carry the field inline, alongside the Product's own fields:
+The file URL resolves relative to the manifest URL. Catalog JSONL files are
+gzip-compressed; `digest` is computed over the file's bytes as served, not the
+uncompressed JSON. The digest above is illustrative: compute your own for the
+actual file, and do not reuse it after changing or recompressing that file.
 
+Records carry the field inline, alongside the Product's own fields. Expanded
+for readability, one record is:
+
+<!-- extension-authoring-example: feed-record -->
+<!-- ucp:example schema=shopping/catalog_feed op=list def=record -->
+```json
+{
+  "id": "P100",
+  "title": "Oxford Shirt",
+  "description": { "plain": "Cotton oxford shirt." },
+  "price_range": {
+    "min": { "amount": 4500, "currency": "USD" },
+    "max": { "amount": 4500, "currency": "USD" }
+  },
+  "variants": [
+    {
+      "id": "V100",
+      "title": "Medium",
+      "description": { "plain": "Medium" },
+      "price": { "amount": 4500, "currency": "USD" }
+    }
+  ],
+  "ads_eligible": true
+}
+```
+
+In the JSONL file, that same Product occupies one line, not the multiple lines
+of the readable example:
+
+<!-- extension-authoring-example: feed-record-jsonl -->
 ```text
 {"id": "P100", "title": "Oxford Shirt", "description": {"plain": "Cotton oxford shirt."}, "price_range": {"min": {"amount": 4500, "currency": "USD"}, "max": {"amount": 4500, "currency": "USD"}}, "variants": [{"id": "V100", "title": "Medium", "description": {"plain": "Medium"}, "price": {"amount": 4500, "currency": "USD"}}], "ads_eligible": true}
 ```
 
-A Platform that recognizes `com.example.ads` reads `ads_eligible`. One that does
-not may ignore the field and still consume the snapshot as plain Products (see
-[Manifest](../specification/common/feed/index.md#manifest)). To deliver the field separately from the base
-catalog, for example on a different cadence or to only some Platforms, publish
-it as a [supplemental feed](../specification/common/feed/index.md#supplemental-feeds).
+For this example, the extension's specification defines `true` as Business
+permission to consider the Product for ads, subject to other applicable
+conditions. `false` denies permission through this extension. An absent flag
+makes no permission assertion; it is not an implicit `true`.
+
+A Platform that recognizes `com.example.ads.eligibility` processes the flag
+with those semantics. One that does not recognize the extension may ignore its
+fields and still consume the snapshot as ordinary Products, provided it
+supports the record type, format, and context (see
+[Manifest](../specification/common/feed/index.md#manifest)). Ignoring enrichment
+does not turn it into ads permission: neither an absent nor an unrecognized
+flag supplies that permission. Normal catalog consumption can continue without
+treating the Product as authorized for ads by this extension.
+
+To deliver the field separately from the base catalog, for example on a
+different update schedule or to only some Platforms, publish it as a
+[supplemental feed](../specification/common/feed/index.md#supplemental-feeds).
 
 ### Publish Your Own Record Type
 
 If your records are not Products, define a record type of your own that extends
 Common Feed directly. Your specification defines what a record is and which
 identifiers related operations accept. The Business still **MUST** use stable
-identifiers that it can resolve in those operations (see
+identifiers that it can resolve in those operations; publishing a feed does
+not require advertising corresponding live operations (see
 [Manifest](../specification/common/feed/index.md#manifest)).
 
 A record type that changes the file layout, such as tab-separated rows, also
 defines its own `format` identifier (see
 [Formats](../specification/common/feed/index.md#formats)). Rows in a non-JSON
-format are governed by your specification rather than a JSON Schema, so the
-schema needs only the Common Feed entry, which must still contain a nested
-`$defs`, even if it is empty:
+format are governed by your specification rather than a JSON Schema. If you
+add no manifest fields, the schema needs only the Common Feed entry, which
+must still contain a nested `$defs`, even if it is empty:
 
+<!-- extension-authoring-example: feed-custom-extension -->
 <!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://provider.example/ucp/schemas/catalog_feed.json",
+  "$id": "https://provider.com/ucp/schemas/catalog_feed.json",
   "name": "com.provider.shopping.catalog.feed",
   "version": "2026-09-01",
   "title": "Provider Catalog Feed",
   "description": "Tab-separated catalog rows in the provider's own layout.",
+  "requires": {
+    "protocol": { "min": "{{ ucp_version }}" },
+    "capabilities": {
+      "dev.ucp.common.feed": { "min": "{{ ucp_version }}" }
+    }
+  },
   "$defs": {
     "dev.ucp.common.feed": { "$defs": {} }
   }
 }
 ```
 
-A record type with JSON records can instead define a `record` shape under that
-entry, and Platforms validate records against it. A Platform that does not
-recognize your record type, or its format, does not consume the snapshot.
+The Business advertises this record type with `extends: "dev.ucp.common.feed"`;
+its manifest declares the record type and uses the format its specification
+defines. A record type with JSON records can instead define a `record` shape
+under that Common Feed entry, and Platforms validate records against it.
+Unlike optional enrichment of a recognized record type, a record type or
+format the Platform does not recognize prevents consumption of the snapshot.
 
 ### Serve the Same Fields in Feeds and Live Search
 
 If your fields belong in both feed records and live Catalog Search responses,
-one extension can serve both: declare both parents in `extends` and add a
-`$defs` entry for each surface, reusing shared definitions as
+one extension can serve both. Declare `dev.ucp.shopping.catalog.feed` and
+`dev.ucp.shopping.catalog.search` as parents in `extends`, and add the
+corresponding `$defs` entries, reusing shared types as
 [multi-parent extensions](#extend-more-than-one-capability) do across cart and
-checkout. Applicability is explicit: declaring Catalog Feed does not make your
-fields appear in Search responses, or the reverse, so an extension can expose
-different data on each surface.
+checkout. Keep the root-keyed `dev.ucp.common.feed` alias for the feed
+composition as described in [Extend Another Extension](#extend-another-extension).
+The feed contribution uses `record`; the Search contribution uses
+`search_response` and composes fields into its `products` items.
 
-When testing such an extension, note that `ucp-schema` 1.4.1 reports
-`references unknown parent` when a payload declares a parent that is not active
-in that payload, such as Catalog Search in a feed manifest. The `ucp-schema`
-main branch has since removed that check, so inactive parents are ignored as
-they are in negotiation.
+Applicability is explicit: declaring Catalog Feed does not make your fields
+appear in Search responses, or the reverse. An extension can expose different
+data on each surface. At least one negotiated parent keeps a multi-parent
+extension active; operation responses declare only extensions relevant to
+that operation. Static feed manifests declare snapshot conformance instead.
+
+When testing such an extension, note that the `ucp-schema` 1.4.1 release reports
+`references unknown parent` when a payload declares an alternative parent that
+is not active in that payload, such as Catalog Search in a feed manifest.
+Newer tooling can ignore inactive alternative parents when an active path
+still reaches the root, matching UCP's any-parent negotiation rule. That older
+tool failure is not a reason to change the extension's declared applicability
+or add an unrelated root capability to the manifest.
 
 ## Version Your Extension
 
@@ -620,56 +917,36 @@ that response's capability (see
 
 ## Test Locally
 
-[`ucp-schema`](https://github.com/Universal-Commerce-Protocol/ucp-schema)
-composes and validates schemas the way a Platform does. Install it with
-`cargo install ucp-schema`.
+The [walkthrough](#walkthrough-add-loyalty-points-to-checkout) gives complete
+files for a passing response and a failing case. Repeat those checks whenever
+you change the schema, not only before the first publication.
 
-Lint your schema for syntax, broken references, and invalid annotations:
-
-```bash
-ucp-schema lint schemas/loyalty.json
-```
-
-Validate a sample payload against your extension before publishing it. Write a
-payload whose `ucp.capabilities` lists the published UCP capability and your
-extension, with your extension's `schema` set to the local file path.
-`ucp-schema` skips the authority-binding check for local paths and fetches the
-UCP base schema from `ucp.dev`. Fill in the elided base fields with valid
-checkout data:
-
-<!-- ucp:example skip reason="local development payload; references a local schema path" -->
-```json
-{
-  "ucp": {
-    "version": "2026-08-25",
-    "capabilities": {
-      "dev.ucp.shopping.checkout": [
-        { "version": "2026-08-25", "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json" }
-      ],
-      "com.acme.shopping.loyalty": [
-        { "version": "2026-09-01", "schema": "schemas/loyalty.json", "extends": "dev.ucp.shopping.checkout" }
-      ]
-    },
-    "payment_handlers": {}
-  },
-  "id": "checkout_123",
-  "status": "incomplete",
-  "currency": "USD",
-  "line_items": [ ... ],
-  "totals": [ ... ],
-  "links": [ ... ],
-  "loyalty": { "points_earned": 120 }
-}
-```
+To inspect the schema the consumer will use, run:
 
 ```bash
-ucp-schema validate checkout-response.json --op read --response
+ucp-schema compose checkout-response.json --pretty
+ucp-schema resolve checkout-response.json --request --op create --pretty
 ```
 
-Check that a payload violating your extension fails, not just that a valid one
-passes. To inspect the composed schema, run `ucp-schema compose` on the same
-payload. For a container capability, pass the operation (for example,
-`--op search`) to select the shape to validate.
+The resolved create-request schema should not define the Business-computed
+`loyalty` field. The annotations describe which fields belong in a message;
+open-object validation can still permit unknown fields, so do not mistake
+annotation resolution for a rule that automatically rejects every extra input.
+
+For a container capability, pass the operation, such as `--op search`, so the
+tool selects the right request or response schema. For local schemas that
+reference published UCP schemas, the tool needs network access or local copies
+configured with `--schema-local-base` and `--schema-remote-base`.
+
+When contributing to this guide, run its extracted-example tests too:
+
+```bash
+uv run python scripts/test_extension_authoring_examples.py
+```
+
+These tests check the full examples and the response-only annotation against
+local UCP schemas, including values that must fail. They do not fetch fictional
+vendor URLs.
 
 ## Checklist
 
