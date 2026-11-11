@@ -3,7 +3,7 @@
   "info": {
     "title": "UCP Food Service",
     "description": "Canonical REST interface for UCP Food service. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.food\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility.",
-    "version": "2026-11-10"
+    "version": "2026-11-11"
   },
   "servers": [
     {
