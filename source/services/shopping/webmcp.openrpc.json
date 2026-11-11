@@ -1,0 +1,87 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "UCP Shopping Service - WebMCP",
+    "description": "WebMCP interface for the UCP Shopping service. Each method is a WebMCP tool that a business page registers: the method `name` is the tool name, the `params` are the properties of the tool's input schema, and the `result` is the value the tool returns. There is no endpoint: the page that registers the tools serves them, and the tools act on the session the page holds, so they take no resource `id`. Schema references are logical pointers; the actual payload shape is determined by the capabilities the page offers."
+  },
+  "methods": [
+    {
+      "name": "get_checkout",
+      "summary": "Get checkout",
+      "description": "Returns the checkout the page holds.",
+      "params": [],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "update_checkout",
+      "summary": "Update checkout",
+      "description": "Update Checkout is a full replacement operation. See the Checkout capability for the rules.",
+      "params": [
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "complete_checkout",
+      "summary": "Complete checkout",
+      "description": "Places the order. MUST be idempotent: once the order is placed, a repeated call returns the completed checkout without placing another order. See the Checkout capability for status and order semantics.",
+      "params": [
+        {
+          "name": "checkout",
+          "required": true,
+          "schema": {
+            "$ref": "../../schemas/shopping/checkout.json"
+          }
+        }
+      ],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    },
+    {
+      "name": "cancel_checkout",
+      "summary": "Cancel checkout",
+      "description": "Cancels the checkout. Optional: a business MAY register this tool; when registered it carries consequentialHint. A repeated call on a canceled checkout returns it unchanged.",
+      "params": [],
+      "result": {
+        "name": "checkout",
+        "schema": {
+          "$ref": "#/components/schemas/checkout_result"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "checkout_result": {
+        "oneOf": [
+          {
+            "$ref": "../../schemas/shopping/checkout.json"
+          },
+          {
+            "$ref": "../../schemas/common/types/error_response.json"
+          }
+        ]
+      }
+    }
+  }
+}
