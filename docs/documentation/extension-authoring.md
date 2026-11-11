@@ -16,19 +16,28 @@
 
 # Extension Authoring Guide
 
-This guide walks through building a UCP extension outside the core protocol:
-an extension a Business or Platform publishes under its own reverse-domain
-namespace (`com.{vendor}.*`, `org.{org}.*`) to add fields or behavior to a
-UCP capability such as checkout, cart, or catalog search.
+UCP already defines features such as checkout. Sometimes you need to share an
+extra piece of information, such as loyalty points earned on an order. This
+guide shows how to add that field, publish its schema on your own website,
+and tell other UCP participants that you support it.
 
-It is a practical companion to the normative rules in the
-[Specification Overview](../specification/overview/index.md), which this guide
-links to rather than restates. If you are changing UCP itself, see the
-[Schema Authoring Guide](schema-authoring.md) instead.
+Here are the terms used in this guide:
+
+- A **Business** is the merchant or service offering a UCP feature.
+- A **Platform** is the app, shopping assistant, or other system using it.
+- A **capability** is a UCP feature, such as checkout.
+- An **extension** adds fields or behavior to an existing capability.
+- A **profile** is the JSON document that lists what a participant supports.
+
+These roles describe who offers and who uses a feature, not a particular
+industry. For the protocol rules, see the
+[Specification Overview](../specification/overview/index.md). If you are
+changing UCP itself rather than publishing your own extension, see the
+[Schema Authoring Guide](schema-authoring.md).
 
 ## Before You Start
 
-An extension augments an existing capability. Consider the alternatives first:
+An extension adds to an existing capability. Consider the alternatives first:
 
 - **Profile configuration.** If you only need to tell the other party how you
   are set up, a capability's `config` may already cover it.
@@ -68,52 +77,32 @@ A complete extension has five parts:
 4. **A specification page** that explains the extension's behavior.
 5. **Profile entries** that advertise it, so it can be negotiated.
 
-The sections below take these in order, then cover local testing.
+The walkthrough below builds those parts for one small extension. The later
+sections explain other patterns; you do not need to use every pattern at once.
 
-## Choose a Name
+## Walkthrough: Add Loyalty Points to Checkout
 
-Extension names follow the same rules as every capability name (see
-[Namespace Governance](../specification/overview/index.md#namespace-governance)):
+Acme calculates the points earned on a checkout. The Business returns those
+points; the Platform can display them, but does not send or calculate them.
 
-- Use the format `{reverse-domain}.{service}.{capability}`, for example
-  `com.acme.shopping.loyalty`.
-- Use a domain you control. The `dev.ucp.*` namespace is reserved for the UCP
-  governing body.
-- Choose a registrable domain you exclusively control, not a shared suffix
-  such as a hosting platform's subdomain.
+This example uses the published UCP release `2026-08-25` and Acme's extension
+version `2026-09-01`. Keep the UCP version in the schema URLs and declarations
+consistent. Replace the fictional Acme name and domain when publishing your
+own extension.
 
-The name is bound to the host that serves your schema. A Platform derives the
-authority from the `schema` URL's host and rejects the extension, without
-fetching it, unless that authority matches the name (see
-[Authority Binding](../specification/overview/index.md#authority-binding)).
-For `com.acme.shopping.loyalty`, a schema served from `acme.com` binds; one
-served from a shared CDN host such as `cdn.example.net` does not.
+### 1. Write the Extension Schema
 
-## Write the Schema
+Install the validation tool and create a directory for the example:
 
-### Metadata
+```bash
+cargo install ucp-schema
+mkdir -p schemas
+```
 
-An extension schema is self-describing. At the top level, declare:
+Save the following complete file as `schemas/loyalty.json`:
 
-| Field | Purpose |
-| --- | --- |
-| `$id` | Canonical URL of the schema, on the host that binds to your name |
-| `name` | The extension's reverse-domain name |
-| `version` | Your extension version, an ISO 8601 date you control |
-| `title`, `description` | Human-readable summary |
-| `requires` | The UCP protocol and capability versions the extension depends on (see [Versioning](#version-your-extension)) |
-
-### Extend a Capability
-
-For each capability your extension extends, add a `$defs` entry keyed by that
-capability's full name. The entry composes onto the capability's schema with
-`allOf`: it references the base schema, then adds your fields (see
-[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)).
-
-Because your schema is hosted on your domain, reference UCP base schemas by
-absolute URL, including the UCP release in the path:
-
-<!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
+<!-- extension-authoring-example: loyalty-schema -->
+<!-- ucp:example skip reason="third-party extension schema; checked by test_extension_authoring_examples.py" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -140,11 +129,14 @@ absolute URL, including the UCP release in the path:
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Acme Loyalty",
       "allOf": [
-        { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json" },
+        { "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json" },
         {
           "type": "object",
           "properties": {
-            "loyalty": { "$ref": "#/$defs/loyalty" }
+            "loyalty": {
+              "$ref": "#/$defs/loyalty",
+              "ucp_request": "omit"
+            }
           }
         }
       ]
@@ -152,6 +144,208 @@ absolute URL, including the UCP release in the path:
   }
 }
 ```
+
+`$defs` holds named schema parts. Here, `loyalty` describes the new data and
+`dev.ucp.shopping.checkout` describes how it adds to checkout. `allOf` means
+the same payload must satisfy both the checkout schema and the added rules.
+It does not replace the checkout schema.
+
+`ucp_request: "omit"` keeps the Business-computed field out of the resolved
+request schema. The Business remains responsible for treating its own
+calculated points as authoritative, rather than trusting unsolicited input.
+
+### 2. Advertise Support on Both Sides
+
+Save this minimal Business profile as `business-profile.json`:
+
+<!-- extension-authoring-example: loyalty-profile -->
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "2026-08-25",
+    "services": {},
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-08-25",
+          "spec": "https://ucp.dev/2026-08-25/specification/checkout",
+          "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
+        }
+      ],
+      "com.acme.shopping.loyalty": [
+        {
+          "version": "2026-09-01",
+          "spec": "https://acme.com/docs/ucp/loyalty",
+          "schema": "https://acme.com/ucp/schemas/loyalty.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+For this example, the Platform supports the same features and versions, so
+save the same minimal declarations as `platform-profile.json`:
+
+```bash
+cp business-profile.json platform-profile.json
+```
+
+These files demonstrate capability agreement, not a complete checkout
+installation. Keep the service endpoints, signing keys, and payment handlers
+needed by your real deployment in its profiles.
+
+Both profiles list Acme Loyalty version `2026-09-01` and its checkout parent,
+so the extension can be selected. If one side does not list it, the parties
+can still use checkout without Acme Loyalty. See
+[Advertise and Negotiate](#advertise-and-negotiate) for version selection.
+
+### 3. Validate a Complete Response
+
+Save this complete example as `checkout-response.json`. The local schema path
+lets you test before hosting the Acme schema; the UCP base schema is fetched
+from its published URL.
+
+<!-- extension-authoring-example: loyalty-response -->
+<!-- ucp:example skip reason="local development payload; checked by test_extension_authoring_examples.py" -->
+```json
+{
+  "ucp": {
+    "version": "2026-08-25",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "2026-08-25",
+          "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
+        }
+      ],
+      "com.acme.shopping.loyalty": [
+        {
+          "version": "2026-09-01",
+          "schema": "schemas/loyalty.json",
+          "extends": "dev.ucp.shopping.checkout"
+        }
+      ]
+    },
+    "payment_handlers": {}
+  },
+  "id": "checkout_123",
+  "status": "incomplete",
+  "currency": "USD",
+  "line_items": [
+    {
+      "id": "line_1",
+      "item": { "id": "V100", "title": "Oxford Shirt", "price": 4500 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 4500 },
+        { "type": "total", "amount": 4500 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 4500 },
+    { "type": "total", "amount": 4500 }
+  ],
+  "links": [
+    { "type": "terms_of_service", "url": "https://merchant.example.com/terms" },
+    { "type": "privacy_policy", "url": "https://merchant.example.com/privacy" }
+  ],
+  "loyalty": { "points_earned": 120 }
+}
+```
+
+From the directory containing these files, run:
+
+```bash
+ucp-schema lint schemas/loyalty.json
+ucp-schema validate checkout-response.json --op read --response --json
+```
+
+The validation should succeed and report `"valid": true`. For local schema
+paths, the tool skips the name/host binding check; that shortcut is only for
+local development. A published declaration must use the matching HTTPS URL
+shown in the profiles.
+
+### 4. Check a Failing Case Too
+
+Make a second response with an invalid points value:
+
+```bash
+python3 -c '
+import json
+from pathlib import Path
+response = json.loads(Path("checkout-response.json").read_text())
+response["loyalty"]["points_earned"] = -1
+Path("checkout-bad.json").write_text(json.dumps(response))
+'
+ucp-schema validate checkout-bad.json --op read --response --json
+```
+
+This should fail because `points_earned` cannot be negative. The command
+returns exit code `1` and reports `"valid": false`. A passing case alone does
+not show that your extension's rules are being applied.
+
+### 5. Publish the Files and Explain the Behavior
+
+Host the schema at the URL declared in the profiles and write the `spec` page.
+For this example, that page should explain when points are calculated, what
+`member_id` means, and what happens when the extension is unsupported. Use
+HTTPS without schema redirects and send cacheable response headers, as
+[Host and Document It](#host-and-document-it) describes.
+
+The profiles advertise support; each checkout response declares the extension
+actually used. The response carries the points themselves.
+
+## Choose a Name
+
+Extension names follow the same rules as every capability name (see
+[Namespace Governance](../specification/overview/index.md#namespace-governance)):
+
+- Use the format `{reverse-domain}.{service}.{capability}`, for example
+  `com.acme.shopping.loyalty`.
+- Use a domain you control. The `dev.ucp.*` namespace is reserved for the UCP
+  governing body.
+- Choose a registrable domain you exclusively control, not a shared suffix
+  such as a hosting platform's subdomain.
+
+The schema host must match the domain represented by the name. This is called
+*authority binding*: the Platform checks the name and host before fetching the
+schema, and rejects the extension if they do not match (see
+[Authority Binding](../specification/overview/index.md#authority-binding)).
+For `com.acme.shopping.loyalty`, a schema served from `acme.com` matches; one
+served from a shared CDN host such as `cdn.example.net` does not.
+
+## Write the Schema
+
+### Metadata
+
+An extension schema is self-describing. At the top level, declare:
+
+| Field | Purpose |
+| --- | --- |
+| `$id` | Canonical URL of the schema, on the host that binds to your name |
+| `name` | The extension's reverse-domain name |
+| `version` | Your extension version, an ISO 8601 date you control |
+| `title`, `description` | Human-readable summary |
+| `requires` | The UCP protocol and capability versions the extension depends on (see [Versioning](#version-your-extension)) |
+
+### Extend a Capability
+
+For each capability your extension extends, add a `$defs` entry keyed by that
+capability's full name. The entry composes onto the capability's schema with
+`allOf`: it references the base schema, then adds your fields (see
+[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)).
+
+Because your schema is hosted on your domain, reference UCP base schemas by
+absolute URL, including the UCP release in the path:
+
+The [complete loyalty schema](#1-write-the-extension-schema) shows this pattern
+with a published UCP URL. Use the release your extension supports; do not mix
+schema URLs from one release with capability declarations from another.
 
 Put the types your extension introduces (`loyalty` above) in their own `$defs`
 entries and reference them from the composed entry, so they can be reused across
@@ -394,56 +588,36 @@ that response's capability (see
 
 ## Test Locally
 
-[`ucp-schema`](https://github.com/Universal-Commerce-Protocol/ucp-schema)
-composes and validates schemas the way a Platform does. Install it with
-`cargo install ucp-schema`.
+The [walkthrough](#walkthrough-add-loyalty-points-to-checkout) gives complete
+files for a passing response and a failing case. Repeat those checks whenever
+you change the schema, not only before the first publication.
 
-Lint your schema for syntax, broken references, and invalid annotations:
-
-```bash
-ucp-schema lint schemas/loyalty.json
-```
-
-Validate a sample payload against your extension before publishing it. Write a
-payload whose `ucp.capabilities` lists the published UCP capability and your
-extension, with your extension's `schema` set to the local file path.
-`ucp-schema` skips the authority-binding check for local paths and fetches the
-UCP base schema from `ucp.dev`. Fill in the elided base fields with valid
-checkout data:
-
-<!-- ucp:example skip reason="local development payload; references a local schema path" -->
-```json
-{
-  "ucp": {
-    "version": "2026-08-25",
-    "capabilities": {
-      "dev.ucp.shopping.checkout": [
-        { "version": "2026-08-25", "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json" }
-      ],
-      "com.acme.shopping.loyalty": [
-        { "version": "2026-09-01", "schema": "schemas/loyalty.json", "extends": "dev.ucp.shopping.checkout" }
-      ]
-    },
-    "payment_handlers": {}
-  },
-  "id": "checkout_123",
-  "status": "incomplete",
-  "currency": "USD",
-  "line_items": [ ... ],
-  "totals": [ ... ],
-  "links": [ ... ],
-  "loyalty": { "points_earned": 120 }
-}
-```
+To inspect the schema the consumer will use, run:
 
 ```bash
-ucp-schema validate checkout-response.json --op read --response
+ucp-schema compose checkout-response.json --pretty
+ucp-schema resolve checkout-response.json --request --op create --pretty
 ```
 
-Check that a payload violating your extension fails, not just that a valid one
-passes. To inspect the composed schema, run `ucp-schema compose` on the same
-payload. For a container capability, pass the operation (for example,
-`--op search`) to select the shape to validate.
+The resolved create-request schema should not define the Business-computed
+`loyalty` field. The annotations describe which fields belong in a message;
+open-object validation can still permit unknown fields, so do not mistake
+annotation resolution for a rule that automatically rejects every extra input.
+
+For a container capability, pass the operation, such as `--op search`, so the
+tool selects the right request or response schema. For local schemas that
+reference published UCP schemas, the tool needs network access or local copies
+configured with `--schema-local-base` and `--schema-remote-base`.
+
+When contributing to this guide, run its extracted-example tests too:
+
+```bash
+uv run python scripts/test_extension_authoring_examples.py
+```
+
+These tests check the full examples and the response-only annotation against
+local UCP schemas, including values that must fail. They do not fetch fictional
+vendor URLs.
 
 ## Checklist
 

@@ -22,12 +22,15 @@ Two layers of testing exist for the validator:
 Run: python3 scripts/test_validate_examples.py
 Exit: 0 on all pass, 1 on any failure.
 
-No external dependencies. Tests that require the `ucp-schema` binary
-are gated and skipped if the binary is missing.
+Individual validator cases that require the `ucp-schema` binary are gated
+when it is missing. The full entry point also runs the extension authoring
+worked examples afterward; that suite requires the binary to be installed.
+All Python dependencies are from the standard library.
 """
 
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -1151,4 +1154,12 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-  sys.exit(main())
+  status = main()
+  if status == 0:
+    # CI already invokes this entry point. Keep the complete authoring
+    # examples covered without requiring a separate workflow change.
+    examples = Path(__file__).with_name("test_extension_authoring_examples.py")
+    status = subprocess.run(
+      [sys.executable, str(examples)], check=False
+    ).returncode
+  sys.exit(status)

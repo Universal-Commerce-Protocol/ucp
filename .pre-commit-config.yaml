@@ -51,6 +51,13 @@ repos:
         pass_filenames: false
         files: ^(main\.py|scripts/test_schema_tables\.py|source/schemas/ucp\.json|docs/specification/reference\.md)$
         stages: [pre-commit, pre-push]
+      - id: extension-authoring-examples
+        name: Extension authoring worked examples
+        entry: uv run --frozen python scripts/test_extension_authoring_examples.py
+        language: system
+        pass_filenames: false
+        files: ^(docs/documentation/extension-authoring\.md|scripts/test_extension_authoring_examples\.py)$
+        stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
         entry: uv run --frozen python scripts/test_check_links.py
