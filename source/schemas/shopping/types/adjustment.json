@@ -33,6 +33,10 @@
       ],
       "description": "Adjustment status."
     },
+    "cause": {
+      "$ref": "../../common/types/adjustment_cause.json",
+      "description": "Why this adjustment occurred. Optional. `type` records what was done about it; `cause` records what went wrong and, where the recording system can determine them, which party it holds responsible and whether the cause appears deliberate."
+    },
     "line_items": {
       "type": "array",
       "items": {
