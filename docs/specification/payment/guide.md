@@ -576,6 +576,7 @@ Each variant has its own config schema tailored to its context:
 | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | [`payment_instrument.json`](site:schemas/common/types/payment_instrument.json)             | Base: id, handler_id, type, billing_address, credential, display |
 | [`card_payment_instrument.json`](site:schemas/common/types/card_payment_instrument.json)   | Extends base with display: brand, last_digits, expiry, card art  |
+| [`offsite_payment_instrument.json`](site:schemas/common/types/offsite_payment_instrument.json) | Extends base with display: description, instructions, instructions_image_url, link; no credential |
 
 UCP provides base schemas for universal payment instruments like `card`. Spec
 authors **MAY** extend any of the base instruments to add handler-specific
