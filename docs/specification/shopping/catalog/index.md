@@ -324,6 +324,41 @@ alternate formats such as glTF and USDZ.
 
 ### Product Option
 
+<!-- cspell:ignore Farbe Schwarz Blau -->
+
+`name` is display text in the response language, so the same option can be
+named "Color", "Colour", or "Farbe" depending on the Business and the
+buyer's language. `key` is a stable identifier for what the option varies,
+which lets a Platform recognize the option regardless of how it is named:
+
+<!-- ucp:example schema=shopping/types/product_option op=read direction=response -->
+```json
+{
+  "name": "Farbe",
+  "key": "color",
+  "values": [
+    { "label": "Schwarz" },
+    { "label": "Blau" }
+  ]
+}
+```
+
+`key` is an open string with these well-known values:
+
+| Key | The option varies the item's |
+| --- | --- |
+| `color` | Color. |
+| `size` | Size. |
+| `gender` | Intended gender. |
+| `age_group` | Intended age group. |
+| `material` | Main material. |
+| `pattern` | Pattern or print. |
+
+Businesses **SHOULD** set `key` when an option matches a well-known value.
+When `key` is present, Platforms **SHOULD** rely on it rather than on `name`
+to identify the option. Option value labels remain display text; `key` does
+not standardize them.
+
 {{ schema_fields('types/product_option', 'shopping/catalog') }}
 
 ### Option Value
