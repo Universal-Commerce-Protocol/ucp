@@ -359,6 +359,13 @@ When `key` is present, Platforms **SHOULD** rely on it rather than on `name`
 to identify the option. Option value labels remain display text; `key` does
 not standardize them.
 
+The well-known values identify product attributes, not options as such. An
+attribute is an option only when the buyer chooses between its values; a
+television sold only in black still has a color. Other catalog fields that
+need a stable identifier for one of these attributes **SHOULD** use the same
+values, so a Platform recognizes `color` the same way whether or not it is a
+selectable option.
+
 {{ schema_fields('types/product_option', 'shopping/catalog') }}
 
 ### Option Value
