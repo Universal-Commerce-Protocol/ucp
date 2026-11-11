@@ -239,6 +239,22 @@ was `exact` or `featured` (server-selected). See
 media item as the first element. Platforms **SHOULD** treat the first media
 item they present as featured.
 
+`condition` states the physical condition of the item the buyer receives. It
+is an open string with three well-known values:
+
+| Value | Meaning |
+| --- | --- |
+| `new` | Brand new, unused, in its original packaging where applicable. |
+| `refurbished` | Restored to working order by the manufacturer, the Business, or a third party. |
+| `used` | Previously owned or used, and not refurbished. |
+
+Condition is set per variant because variants of one product can differ (for
+example, a new and a refurbished edition of the same phone). Businesses
+**SHOULD** set `condition` on every variant that is not `new`. When
+`condition` is absent, the condition is not stated; a Platform filtering for
+new items decides for itself whether to include such variants. Platforms
+**MUST NOT** treat an unrecognized value as `new`.
+
 {{ schema_fields('types/variant', 'shopping/catalog') }}
 
 ### Price

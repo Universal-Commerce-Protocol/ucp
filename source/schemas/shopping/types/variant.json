@@ -81,6 +81,10 @@
       "$ref": "availability.json",
       "description": "Variant availability for purchase."
     },
+    "condition": {
+      "type": "string",
+      "description": "Physical condition of the item the buyer receives. Well-known values: `new`, `refurbished`, `used`. Absent means the Business has not stated a condition. Platforms MUST NOT reject a variant with an unrecognized value, and MUST NOT treat an unrecognized value as `new`."
+    },
     "options": {
       "type": "array",
       "items": {
