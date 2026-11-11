@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/payment/payment-handlers/offsite.json",
+  "name": "dev.ucp.common.payment.handlers.offsite",
+  "title": "Offsite Payment Handler Schema",
+  "description": "Schema for the dev.ucp.common.payment.handlers.offsite payment handler: a single, generic handler for payments that are settled out of band (e.g., cash on delivery, bank transfer, pay by invoice, pay at pickup). Each way to pay is a distinct offsite instrument, not a distinct handler. The business enumerates the offsite instruments available for a checkout in payment.instruments and describes each through its display; the platform presents them to the buyer and submits the chosen one with selected set to true. The platform collects no credential and takes no part in processing or settling the payment; a checkout may complete before the payment is received, and whether it arrives is tracked by the business outside of UCP. The handler defines no configuration.",
+  "$defs": {
+    "offsite_payment_instrument": {
+      "title": "Offsite Payment Instrument",
+      "description": "The offsite instrument accepted by this handler. Extends the base offsite payment instrument and forbids a credential: the platform contributes nothing beyond the selection itself, and the business supplies display in responses.",
+      "allOf": [
+        { "$ref": "../../common/types/offsite_payment_instrument.json" },
+        {
+          "type": "object",
+          "not": { "required": ["credential"] }
+        }
+      ]
+    },
+    "payment_instrument": {
+      "$ref": "#/$defs/dev.ucp.common.payment.handlers.offsite/payment_instrument"
+    },
+    "business_schema": {
+      "$ref": "#/$defs/dev.ucp.common.payment.handlers.offsite/business_schema"
+    },
+    "platform_schema": {
+      "$ref": "#/$defs/dev.ucp.common.payment.handlers.offsite/platform_schema"
+    },
+    "response_schema": {
+      "$ref": "#/$defs/dev.ucp.common.payment.handlers.offsite/response_schema"
+    },
+    "dev.ucp.common.payment.handlers.offsite": {
+      "payment_instrument": {
+        "title": "Offsite Payment Instrument",
+        "description": "Payment instrument used with the offsite handler. One instrument represents one way to pay out of band: the business provides each instrument's id and display (description, instructions, instructions_image_url, link); the platform echoes the buyer's choice with selected set to true and never attaches a credential.",
+        "oneOf": [
+          { "$ref": "#/$defs/offsite_payment_instrument" }
+        ]
+      },
+      "business_schema": {
+        "title": "Offsite Payment Handler (Business)",
+        "description": "Business-level handler declaration for discovery. A business declares a single instance of this handler to indicate it accepts out-of-band payment. The individual ways to pay are not declared here; they are surfaced as offsite instruments in checkout responses.",
+        "allOf": [
+          { "$ref": "../../payment_handler.json#/$defs/business_schema" }
+        ]
+      },
+      "platform_schema": {
+        "title": "Offsite Payment Handler (Platform)",
+        "description": "Platform-level handler declaration for discovery. Platforms advertise that they can present offsite instruments, submit the buyer's selection, and display the business's payment instructions.",
+        "allOf": [
+          { "$ref": "../../payment_handler.json#/$defs/platform_schema" }
+        ]
+      },
+      "response_schema": {
+        "title": "Offsite Payment Handler (Response)",
+        "description": "Runtime handler declaration in checkout responses. Identifies the handler that the offsite instruments in payment.instruments belong to via their handler_id. No handler-specific config is defined; everything the buyer needs to see (description, instructions) lives on the instruments themselves.",
+        "allOf": [
+          { "$ref": "../../payment_handler.json#/$defs/response_schema" }
+        ]
+      }
+    }
+  }
+}
