@@ -101,9 +101,14 @@ A business:
 `number` is write-only: it is never returned in responses, while `type` is, so
 the platform can see which kind of document is on file. Like a token
 credential, the platform already holds the value it sent and **MUST** resend it
-on Update Checkout and Complete Checkout when it is still required. A business
-that wants to show the buyer a hint of the document **SHOULD** use the
-instrument's handler-defined `display` instead.
+on Update Checkout and Complete Checkout when it is still required.
+
+A business that wants the buyer to confirm which document is on file **MAY**
+return `last_digits`, a masked hint it derives from `number`, the same way a
+card instrument returns `display.last_digits`. It holds only the trailing
+characters of `number`, at most 4, because many documents are alphanumeric.
+The business **MUST** omit it when `number` has 4 or fewer characters, so the
+full value is never echoed. A platform never sends `last_digits`.
 
 A handler that requires the payer's identification **SHOULD** declare it in its
 [request constraints](../../payment/guide.md#handler-declaration), so a platform
@@ -154,6 +159,28 @@ payer's CPF is on the instrument; the buyer is unchanged:
         "selected": true,
         "payer": {
           "identification": { "type": "br.cpf", "number": "12345678909" }
+        }
+      }
+    ]
+  }
+}
+```
+
+In its responses, the business returns the document `type` and, optionally, a
+masked `last_digits`, never the `number`:
+
+<!-- ucp:example schema=shopping/checkout op=read -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_1",
+        "handler_id": "br_pix_1234",
+        "type": "pix",
+        "selected": true,
+        "payer": {
+          "identification": { "type": "br.cpf", "last_digits": "8909" }
         }
       }
     ]
