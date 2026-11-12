@@ -44,14 +44,25 @@ export function logKey(day: string, id: string): string {
   return `log:${day}:${id}`;
 }
 
-export async function writeLog(kv: KVNamespace, entry: LogEntry, ttlDays: number): Promise<void> {
+export async function writeLog(
+  kv: KVNamespace,
+  entry: LogEntry,
+  ttlDays: number
+): Promise<void> {
   await kv.put(logKey(entry.day, entry.id), JSON.stringify(entry), {
     expirationTtl: Math.max(1, ttlDays) * 86400,
   });
 }
 
-export async function recordFeedback(kv: KVNamespace, day: string, id: string, helpful: boolean, ttlDays: number): Promise<boolean> {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !/^[0-9a-f]{16}$/.test(id)) return false;
+export async function recordFeedback(
+  kv: KVNamespace,
+  day: string,
+  id: string,
+  helpful: boolean,
+  ttlDays: number
+): Promise<boolean> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !/^[0-9a-f]{16}$/.test(id))
+    return false;
   const entry = await kv.get<LogEntry>(logKey(day, id), "json");
   if (!entry) return false;
   entry.helpful = helpful;

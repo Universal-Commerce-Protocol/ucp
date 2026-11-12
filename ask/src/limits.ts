@@ -10,7 +10,9 @@
 export async function sha256Hex(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
   const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export interface LimitResult {
@@ -23,7 +25,7 @@ export async function checkLimits(
   kv: KVNamespace,
   ip: string,
   perIpHourly: number,
-  dailyBudget: number,
+  dailyBudget: number
 ): Promise<LimitResult> {
   const now = new Date();
   const hour = `${now.toISOString().slice(0, 13)}`; // YYYY-MM-DDTHH
@@ -31,7 +33,10 @@ export async function checkLimits(
   const ipKey = `rl:ip:${(await sha256Hex(ip)).slice(0, 24)}:${hour}`;
   const dayKey = `rl:day:${day}`;
 
-  const [ipCountRaw, dayCountRaw] = await Promise.all([kv.get(ipKey), kv.get(dayKey)]);
+  const [ipCountRaw, dayCountRaw] = await Promise.all([
+    kv.get(ipKey),
+    kv.get(dayKey),
+  ]);
   const ipCount = Number(ipCountRaw ?? 0);
   const dayCount = Number(dayCountRaw ?? 0);
 
@@ -41,7 +46,10 @@ export async function checkLimits(
   }
   if (dayCount >= dailyBudget) {
     const secondsLeft =
-      86400 - (now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds());
+      86400 -
+      (now.getUTCHours() * 3600 +
+        now.getUTCMinutes() * 60 +
+        now.getUTCSeconds());
     return { allowed: false, retryAfterSeconds: secondsLeft, reason: "budget" };
   }
   await Promise.all([

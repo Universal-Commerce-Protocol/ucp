@@ -44,7 +44,7 @@ const STOPWORDS = new Set(
     // question filler that carries no topical signal
     "work works working use using used need needs want add get make like way mean means help " +
     "know tell explain show give also please any some one someone something"
-  ).split(" "),
+  ).split(" ")
 );
 
 /**
@@ -121,11 +121,13 @@ export function expandQuery(query: string): string {
  */
 const INTENT_PINS: { intent: RegExp; pages: string[] }[] = [
   {
-    intent: /\b(what('s| is| are)|explain|describe|about|overview of|introduction to|intro to)\b.*\b(ucp|universal commerce protocol|the protocol)\b|^(ucp|universal commerce protocol)\??$/i,
+    intent:
+      /\b(what('s| is| are)|explain|describe|about|overview of|introduction to|intro to)\b.*\b(ucp|universal commerce protocol|the protocol)\b|^(ucp|universal commerce protocol)\??$/i,
     pages: ["documentation/core-concepts/", "specification/overview/"],
   },
   {
-    intent: /\b(implement|get(ting)? started|start|integrate|integration|build|adopt|set ?up|onboard|begin|tutorial|quick ?start|how do i (use|support))/i,
+    intent:
+      /\b(implement|get(ting)? started|start|integrate|integration|build|adopt|set ?up|onboard|begin|tutorial|quick ?start|how do i (use|support))/i,
     pages: ["specification/getting-started/", "documentation/core-concepts/"],
   },
 ];
@@ -156,7 +158,10 @@ export function tokenize(text: string): string[] {
 /** Light English stemmer: plurals, -ing/-ed/-ly, trailing e, doubled consonants. */
 function stem(word: string): string {
   if (word.length <= 3) return word;
-  let w = word.replace(/ies$/, "y").replace(/(ss)es$/, "$1").replace(/([^s])s$/, "$1");
+  let w = word
+    .replace(/ies$/, "y")
+    .replace(/(ss)es$/, "$1")
+    .replace(/([^s])s$/, "$1");
   if (w.length > 4) {
     w = w.replace(/(ing|ed|ly)$/, "");
     // Collapse a doubled consonant left by -ing/-ed (shopping -> shop) and
@@ -198,7 +203,7 @@ export class DocsIndex {
       headingsByPage.set(pageUrl, hs);
       // Headings and page titles are strong signals: weight them by repetition.
       const tokens = tokenize(
-        `${chunk.page} ${chunk.page} ${chunk.heading} ${chunk.heading} ${chunk.heading} ${chunk.text}`,
+        `${chunk.page} ${chunk.page} ${chunk.heading} ${chunk.heading} ${chunk.heading} ${chunk.text}`
       );
       this.lengths[i] = tokens.length;
       total += tokens.length;
@@ -224,7 +229,8 @@ export class DocsIndex {
       const tf = new Map<string, number>();
       for (const t of tokenize(text)) tf.set(t, (tf.get(t) ?? 0) + 1);
       this.pageTerms.set(pageUrl, tf);
-      for (const t of tf.keys()) this.pageDf.set(t, (this.pageDf.get(t) ?? 0) + 1);
+      for (const t of tf.keys())
+        this.pageDf.set(t, (this.pageDf.get(t) ?? 0) + 1);
     }
   }
 
@@ -238,7 +244,8 @@ export class DocsIndex {
       const f = tf.get(term);
       if (!f) continue;
       const df = this.pageDf.get(term) ?? 0;
-      score += Math.log(1 + (n - df + 0.5) / (df + 0.5)) * ((f * 2.2) / (f + 1.2));
+      score +=
+        Math.log(1 + (n - df + 0.5) / (df + 0.5)) * ((f * 2.2) / (f + 1.2));
     }
     return score;
   }
@@ -257,7 +264,10 @@ export class DocsIndex {
     const terms = [...new Set(tokenize(query))];
     if (!terms.length) return 0;
     const known = terms.filter(
-      (t) => this.df.has(t) || QUERY_SYNONYMS[t] !== undefined || QUERY_SYNONYMS[`${t}s`] !== undefined,
+      (t) =>
+        this.df.has(t) ||
+        QUERY_SYNONYMS[t] !== undefined ||
+        QUERY_SYNONYMS[`${t}s`] !== undefined
     ).length;
     return known / terms.length;
   }
@@ -266,12 +276,17 @@ export class DocsIndex {
    * BM25 ranking. `boostUrlPrefix` nudges sections from the page the visitor is
    * currently reading, which disambiguates follow-ups like "what does this field mean".
    */
-  search(query: string, k: number, opts: { exclude?: Set<string>; boostUrlPrefix?: string } = {}): Hit[] {
+  search(
+    query: string,
+    k: number,
+    opts: { exclude?: Set<string>; boostUrlPrefix?: string } = {}
+  ): Hit[] {
     const terms = tokenize(expandQuery(query));
     if (!terms.length) return [];
     const termSet = new Set(terms);
     const pageScores = new Map<string, number>();
-    for (const page of this.pages) pageScores.set(page.url, this.pageScore(page.url, termSet));
+    for (const page of this.pages)
+      pageScores.set(page.url, this.pageScore(page.url, termSet));
     const k1 = 1.4;
     const b = 0.75;
     const n = this.chunks.length;
@@ -283,7 +298,10 @@ export class DocsIndex {
       const idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));
       for (const [doc, tf] of list) {
         const norm = tf + k1 * (1 - b + (b * this.lengths[doc]) / this.avgLen);
-        scores.set(doc, (scores.get(doc) ?? 0) + idf * ((tf * (k1 + 1)) / norm));
+        scores.set(
+          doc,
+          (scores.get(doc) ?? 0) + idf * ((tf * (k1 + 1)) / norm)
+        );
       }
     }
     // Pages that match strongly as a whole contribute their lead section even
@@ -306,8 +324,10 @@ export class DocsIndex {
       if (opts.exclude?.has(chunk.id)) continue;
       const pageUrl = chunk.url.split("#")[0];
       let score = raw + 1.5 * (pageScores.get(pageUrl) ?? 0);
-      if (opts.boostUrlPrefix && chunk.url.startsWith(opts.boostUrlPrefix)) score *= 1.15;
-      for (const d of PAGE_DEMOTIONS) if (pageUrl.endsWith(d.suffix)) score *= d.factor;
+      if (opts.boostUrlPrefix && chunk.url.startsWith(opts.boostUrlPrefix))
+        score *= 1.15;
+      for (const d of PAGE_DEMOTIONS)
+        if (pageUrl.endsWith(d.suffix)) score *= d.factor;
       hits.push({ chunk, score });
     }
     hits.sort((a, b) => b.score - a.score);
@@ -317,12 +337,19 @@ export class DocsIndex {
       for (const pin of INTENT_PINS) {
         if (!pin.intent.test(query)) continue;
         for (const suffix of [...pin.pages].reverse()) {
-          const pageUrl = [...this.leads.keys()].find((u) => u.endsWith(suffix));
+          const pageUrl = [...this.leads.keys()].find((u) =>
+            u.endsWith(suffix)
+          );
           const lead = pageUrl ? this.leads.get(pageUrl) : undefined;
           if (!lead || opts.exclude?.has(lead.id)) continue;
           // Pin the page's lead section plus its best-matching section.
-          const best = hits.find((h) => h.chunk.url.startsWith(pageUrl ?? "") && h.chunk.id !== lead.id);
-          for (const pinned of [best?.chunk, lead].filter((c): c is Chunk => Boolean(c))) {
+          const best = hits.find(
+            (h) =>
+              h.chunk.url.startsWith(pageUrl ?? "") && h.chunk.id !== lead.id
+          );
+          for (const pinned of [best?.chunk, lead].filter((c): c is Chunk =>
+            Boolean(c)
+          )) {
             const existing = hits.findIndex((h) => h.chunk.id === pinned.id);
             if (existing >= 0) hits.splice(existing, 1);
             hits.unshift({ chunk: pinned, score: Number.POSITIVE_INFINITY });
@@ -351,7 +378,10 @@ export class DocsIndex {
  * was fetched from (`baseUrls[i]`), which is where those pages are actually
  * served; the `base_url` recorded inside the file is only a fallback.
  */
-export function buildIndex(raws: RawIndex[], baseUrls: (string | undefined)[] = []): DocsIndex {
+export function buildIndex(
+  raws: RawIndex[],
+  baseUrls: (string | undefined)[] = []
+): DocsIndex {
   const chunks: Chunk[] = [];
   const pages: PageEntry[] = [];
   const seen = new Set<string>();
@@ -380,14 +410,16 @@ export async function loadIndex(urls: string[]): Promise<DocsIndex> {
   if (cached && Date.now() - cached.loadedAt < RELOAD_MS) return cached.index;
   const raws = await Promise.all(
     urls.map(async (url) => {
-      const res = await fetch(url, { cf: { cacheTtl: 600, cacheEverything: true } } as RequestInit);
+      const res = await fetch(url, {
+        cf: { cacheTtl: 600, cacheEverything: true },
+      } as RequestInit);
       if (!res.ok) throw new Error(`index fetch failed: ${url} ${res.status}`);
       return (await res.json()) as RawIndex;
-    }),
+    })
   );
   const index = buildIndex(
     raws,
-    urls.map((u) => u.slice(0, u.lastIndexOf("/") + 1)),
+    urls.map((u) => u.slice(0, u.lastIndexOf("/") + 1))
   );
   cached = { index, loadedAt: Date.now() };
   return index;

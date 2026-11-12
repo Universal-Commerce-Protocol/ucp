@@ -47,12 +47,17 @@ test("search ranks the matching capability first and prefixes URLs", () => {
   const index = buildIndex([raw]);
   const hits = index.search("fulfillment status values for an order", 3);
   assert.equal(hits[0].chunk.id, "c3");
-  assert.equal(hits[0].chunk.url, "https://ucp.dev/latest/specification/shopping/order/#status");
+  assert.equal(
+    hits[0].chunk.url,
+    "https://ucp.dev/latest/specification/shopping/order/#status"
+  );
 });
 
 test("buildIndex prefers the fetch location over the recorded base_url", () => {
   const index = buildIndex([raw], ["https://ucp.dev/draft/"]);
-  assert.ok(index.chunks[0].url.startsWith("https://ucp.dev/draft/specification/"));
+  assert.ok(
+    index.chunks[0].url.startsWith("https://ucp.dev/draft/specification/")
+  );
 });
 
 test("identifier queries hit the right page", () => {
@@ -72,13 +77,20 @@ test("exclude removes already-provided chunks", () => {
 });
 
 test("normalizeQuestion collapses trivial variants", () => {
-  assert.equal(normalizeQuestion("  What is UCP?? "), normalizeQuestion("what is ucp"));
+  assert.equal(
+    normalizeQuestion("  What is UCP?? "),
+    normalizeQuestion("what is ucp")
+  );
 });
 
 test("vocabularyCoverage separates docs questions from unrelated ones", () => {
   const index = buildIndex([raw]);
-  assert.ok(index.vocabularyCoverage("how does checkout work for the merchant") >= 0.6);
-  assert.ok(index.vocabularyCoverage("write me a poem about autumn leaves") < 0.6);
+  assert.ok(
+    index.vocabularyCoverage("how does checkout work for the merchant") >= 0.6
+  );
+  assert.ok(
+    index.vocabularyCoverage("write me a poem about autumn leaves") < 0.6
+  );
 });
 
 test("expandQuery maps everyday words to UCP vocabulary", () => {
@@ -91,8 +103,16 @@ test("onboarding questions pin the getting-started page first", () => {
   const onboarding = {
     ...raw,
     pages: [
-      { url: "specification/getting-started/", title: "Getting Started", summary: "Build a basic UCP server." },
-      { url: "specification/shopping/checkout/", title: "Checkout Capability", summary: "" },
+      {
+        url: "specification/getting-started/",
+        title: "Getting Started",
+        summary: "Build a basic UCP server.",
+      },
+      {
+        url: "specification/shopping/checkout/",
+        title: "Checkout Capability",
+        summary: "",
+      },
     ],
     chunks: [
       ...raw.chunks,
@@ -115,7 +135,10 @@ test("onboarding questions pin the getting-started page first", () => {
     ],
   };
   const index = buildIndex([onboarding]);
-  const hits = index.search("How do I implement UCP on my self-hosted ecommerce store?", 4);
+  const hits = index.search(
+    "How do I implement UCP on my self-hosted ecommerce store?",
+    4
+  );
   assert.equal(hits[0].chunk.id, "gs1");
   // A specific question is not pinned.
   const specific = index.search("order fulfillment status values", 3);

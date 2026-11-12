@@ -25,7 +25,7 @@
   let config;
   try {
     config = JSON.parse(configEl.textContent);
-  } catch (_e) {
+  } catch {
     return;
   }
   if (!config?.endpoint) return;
@@ -56,14 +56,14 @@
       const raw = sessionStorage.getItem(STORAGE_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
-    } catch (_e) {
+    } catch {
       return [];
     }
   }
   function saveThread() {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(thread.slice(-MAX_STORED_MESSAGES)));
-    } catch (_e) {
+    } catch {
       /* storage unavailable: conversation simply does not persist */
     }
   }
@@ -102,7 +102,7 @@
     maxlength: "600",
     "aria-label": "Your question",
   });
-  const sendBtn = el("button", { type: "submit" });
+  const sendBtn = el("button", { type: "submit", class: "ask-ai-send" });
   sendBtn.textContent = "Ask";
   form.appendChild(input);
   form.appendChild(sendBtn);
@@ -156,7 +156,7 @@
     openBtn.setAttribute("aria-expanded", open ? "true" : "false");
     try {
       sessionStorage.setItem(OPEN_KEY, open ? "1" : "0");
-    } catch (_e) {
+    } catch {
       /* ignore */
     }
     if (open) {
@@ -183,7 +183,7 @@
       const list = el("ul", { class: "ask-ai-examples" });
       for (const s of EXAMPLES) {
         const li = el("li");
-        const b = el("button", { type: "button" });
+        const b = el("button", { type: "button", class: "ask-ai-example" });
         b.textContent = s;
         b.addEventListener("click", () => ask(s));
         li.appendChild(b);
@@ -197,7 +197,7 @@
   }
 
   function renderMessage(m) {
-    const node = el("div", { class: `ask-ai-msg ask-ai-msg--${m.role}` });
+    const node = el("div", { class: `ask-ai-msg ask-ai-msg-${m.role}` });
     if (m.role === "user") {
       node.textContent = m.content;
     } else {
@@ -221,7 +221,7 @@
       ["Yes", true],
       ["No", false],
     ]) {
-      const b = el("button", { type: "button" });
+      const b = el("button", { type: "button", class: "ask-ai-feedback-btn" });
       b.textContent = label;
       b.addEventListener("click", () => {
         m.helpful = value;
@@ -391,7 +391,7 @@
       let host = "";
       try {
         host = new URL(href).host;
-      } catch (_e) {
+      } catch {
         return label;
       }
       if (!LINK_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) return label;
@@ -486,7 +486,7 @@
 
   try {
     if (sessionStorage.getItem(OPEN_KEY) === "1" && thread.length) setOpen(true);
-  } catch (_e) {
+  } catch {
     /* ignore */
   }
 })();

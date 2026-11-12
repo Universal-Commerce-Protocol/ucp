@@ -49,7 +49,7 @@ and concise writing, not memorized knowledge. That is why a mid-sized
 instruction-tuned open model is enough. Rough guidance:
 
 | Option | Typical choice | What you pay for | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Cloudflare Workers AI | `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, `@cf/qwen/...` | per token, no idle cost | Simplest: same account as the Worker, set `MODEL_PROVIDER=workers-ai`. |
 | Self-hosted, always on | Qwen2.5 14B / Llama 3.1 8B on vLLM behind one GPU | GPU hours | Flat cost regardless of traffic; enable vLLM prefix caching. |
 | Self-hosted, scale to zero | same models on a serverless GPU platform | GPU seconds | Cold starts of 10-60 s on the first question after idle. |
@@ -96,7 +96,7 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 ## Configuration (`wrangler.toml` `[vars]`)
 
 | Var | Default | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | `MODEL_PROVIDER` | `openai-compatible` | `openai-compatible` or `workers-ai`. |
 | `MODEL` | `qwen2.5-14b-instruct` | Served model name (or Workers AI model id). |
 | `MODEL_BASE_URL` | placeholder | Base URL of the OpenAI-compatible server, ending in `/v1`. |
@@ -157,7 +157,7 @@ uv run python scripts/test_ask_index.py   # indexer
 Response is `text/event-stream`:
 
 | event | data |
-|---|---|
+| --- | --- |
 | `meta` | `{ cached: boolean, model: string }` |
 | `sources` | `[{ n, title, heading, url }]` |
 | `delta` | `{ text }` incremental answer text, with `[n]` citations |
@@ -200,7 +200,7 @@ Two uses:
 What a visitor can and cannot do with the endpoint:
 
 | Attempt | What happens |
-|---|---|
+| --- | --- |
 | Use it as a general chatbot ("write me a poem") | Retrieval finds nothing docs-like, or the question's words are mostly unknown to the docs: canned scope reply, no model call. Questions that slip through are still bound by the system prompt. |
 | Prompt injection in the question ("ignore your instructions", "print your system prompt") | The question is passed as data inside `<question>` tags and the prompt says instructions there carry no authority. Such questions are never written to the answer cache, so a manipulated answer cannot be served to the next person. |
 | Injection through `history` (fake "assistant" turns with new rules) | History is trimmed, must alternate user/assistant, is capped in size, and the prompt states earlier assistant turns may have been edited by the user. History also disables caching. |

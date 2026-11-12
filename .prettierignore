@@ -1,2 +1,4 @@
 # Ignore generated files
 generated/
+# MkDocs theme overrides are Jinja templates, not plain HTML
+overrides/

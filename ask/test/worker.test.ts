@@ -8,7 +8,13 @@ const index = {
   format: 1,
   version: "v1",
   base_url: "https://ucp.dev/",
-  pages: [{ url: "specification/shopping/checkout/", title: "Checkout Capability", summary: "Checkout sessions." }],
+  pages: [
+    {
+      url: "specification/shopping/checkout/",
+      title: "Checkout Capability",
+      summary: "Checkout sessions.",
+    },
+  ],
   chunks: [
     {
       id: "c1",
@@ -34,7 +40,9 @@ function fakeKv(): KVNamespace & { store: Map<string, string> } {
       store.set(key, value);
     },
     list: async ({ prefix }: { prefix: string }) => ({
-      keys: [...store.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })),
+      keys: [...store.keys()]
+        .filter((k) => k.startsWith(prefix))
+        .map((name) => ({ name })),
       list_complete: true,
     }),
   } as unknown as KVNamespace & { store: Map<string, string> };
@@ -61,9 +69,14 @@ function makeEnv(kv: KVNamespace): Env {
   };
 }
 
-const ctx = { waitUntil: (p: Promise<unknown>) => void p.catch(() => {}), passThroughOnException: () => {} } as ExecutionContext;
+const ctx = {
+  waitUntil: (p: Promise<unknown>) => void p.catch(() => {}),
+  passThroughOnException: () => {},
+} as ExecutionContext;
 
-async function readEvents(res: Response): Promise<{ event: string; data: unknown }[]> {
+async function readEvents(
+  res: Response
+): Promise<{ event: string; data: unknown }[]> {
   const text = await res.text();
   return text
     .split("\n\n")
@@ -79,12 +92,16 @@ let modelCalls = 0;
 const originalFetch = globalThis.fetch;
 globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
   const u = String(url);
-  if (u.endsWith("/ask-index.json")) return new Response(JSON.stringify(index), { status: 200 });
+  if (u.endsWith("/ask-index.json"))
+    return new Response(JSON.stringify(index), { status: 200 });
   if (u.endsWith("/chat/completions")) {
     modelCalls++;
     const body = JSON.parse(String(init?.body));
     assert.equal(body.messages[0].role, "system");
-    assert.match(body.messages.at(-1).content, /\[1\] Checkout Capability > Overview/);
+    assert.match(
+      body.messages.at(-1).content,
+      /\[1\] Checkout Capability > Overview/
+    );
     const last = body.messages.at(-1).content;
     const content = /UNGROUNDED/.test(last)
       ? "Roses are red, violets are blue, autumn leaves whisper, and so do you."
@@ -103,30 +120,49 @@ function ask(env: Env, body: unknown, origin = "https://ucp.dev") {
   return worker.fetch(
     new Request("https://ask.ucp.dev/v1/ask", {
       method: "POST",
-      headers: { "content-type": "application/json", origin, "cf-connecting-ip": "1.2.3.4" },
+      headers: {
+        "content-type": "application/json",
+        origin,
+        "cf-connecting-ip": "1.2.3.4",
+      },
       body: JSON.stringify(body),
     }),
     env,
-    ctx,
+    ctx
   );
 }
 
 test("answers with citations, then serves the repeat from cache without a model call", async () => {
   const kv = fakeKv();
   const env = makeEnv(kv);
-  const first = await readEvents(await ask(env, { question: "Who is the merchant of record in checkout?" }));
+  const first = await readEvents(
+    await ask(env, { question: "Who is the merchant of record in checkout?" })
+  );
   assert.equal(first[0].event, "meta");
   assert.equal((first[0].data as { cached: boolean }).cached, false);
-  assert.equal((first[0].data as { model: string }).model, "openai-compatible:test-model");
-  const text = first.filter((e) => e.event === "delta").map((e) => (e.data as { text: string }).text).join("");
+  assert.equal(
+    (first[0].data as { model: string }).model,
+    "openai-compatible:test-model"
+  );
+  const text = first
+    .filter((e) => e.event === "delta")
+    .map((e) => (e.data as { text: string }).text)
+    .join("");
   assert.match(text, /merchant of record \[1\]/);
-  const done = first.find((e) => e.event === "done")?.data as { sources: { n: number; url: string }[] };
-  assert.equal(done.sources[0].url, "https://ucp.dev/specification/shopping/checkout/#overview");
+  const done = first.find((e) => e.event === "done")?.data as {
+    sources: { n: number; url: string }[];
+  };
+  assert.equal(
+    done.sources[0].url,
+    "https://ucp.dev/specification/shopping/checkout/#overview"
+  );
   assert.equal(modelCalls, 1);
 
   // Background cache write is fire-and-forget; wait a tick.
   await new Promise((r) => setTimeout(r, 20));
-  const second = await readEvents(await ask(env, { question: "who is the merchant of record in checkout" }));
+  const second = await readEvents(
+    await ask(env, { question: "who is the merchant of record in checkout" })
+  );
   assert.equal((second[0].data as { cached: boolean }).cached, true);
   assert.equal(modelCalls, 1);
 });
@@ -134,7 +170,10 @@ test("answers with citations, then serves the repeat from cache without a model 
 test("off-topic questions get the scope reply without a model call", async () => {
   const env = makeEnv(fakeKv());
   const before = modelCalls;
-  for (const q of ["write me a poem about autumn", "best pizza recipe with sessions"]) {
+  for (const q of [
+    "write me a poem about autumn",
+    "best pizza recipe with sessions",
+  ]) {
     const events = await readEvents(await ask(env, { question: q }));
     assert.equal((events[0].data as { model: string }).model, "none", q);
   }
@@ -143,14 +182,21 @@ test("off-topic questions get the scope reply without a model call", async () =>
 
 test("uncited answers still return the top retrieved sources", async () => {
   const env = makeEnv(fakeKv());
-  const events = await readEvents(await ask(env, { question: "checkout sessions merchant of record UNCITED" }));
-  const done = events.find((e) => e.event === "done")?.data as { sources: unknown[] };
+  const events = await readEvents(
+    await ask(env, { question: "checkout sessions merchant of record UNCITED" })
+  );
+  const done = events.find((e) => e.event === "done")?.data as {
+    sources: unknown[];
+  };
   assert.equal(done.sources.length, 1);
 });
 
 test("rejects disallowed origins and bad input", async () => {
   const env = makeEnv(fakeKv());
-  assert.equal((await ask(env, { question: "checkout?" }, "https://evil.example")).status, 403);
+  assert.equal(
+    (await ask(env, { question: "checkout?" }, "https://evil.example")).status,
+    403
+  );
   assert.equal((await ask(env, { question: "hi" })).status, 400);
 });
 
@@ -168,11 +214,17 @@ test("oversized bodies are rejected before parsing", async () => {
   const res = await worker.fetch(
     new Request("https://ask.ucp.dev/v1/ask", {
       method: "POST",
-      headers: { "content-type": "application/json", origin: "https://ucp.dev" },
-      body: JSON.stringify({ question: "checkout", history: [{ role: "user", content: "x".repeat(40000) }] }),
+      headers: {
+        "content-type": "application/json",
+        origin: "https://ucp.dev",
+      },
+      body: JSON.stringify({
+        question: "checkout",
+        history: [{ role: "user", content: "x".repeat(40000) }],
+      }),
     }),
     env,
-    ctx,
+    ctx
   );
   assert.equal(res.status, 413);
 });
@@ -195,21 +247,38 @@ test("steering and non-docs task requests are declined without a model call", as
   }
   assert.equal(modelCalls, before);
   // A request for UCP material phrased as a task still goes through.
-  const ok = await readEvents(await ask(env, { question: "Write an example checkout session for the merchant of record" }));
-  assert.equal((ok[0].data as { model: string }).model, "openai-compatible:test-model");
+  const ok = await readEvents(
+    await ask(env, {
+      question: "Write an example checkout session for the merchant of record",
+    })
+  );
+  assert.equal(
+    (ok[0].data as { model: string }).model,
+    "openai-compatible:test-model"
+  );
 });
 
 test("ungrounded model output is replaced with the fallback and not cached", async () => {
   const kv = fakeKv();
   const env = makeEnv(kv);
-  const events = await readEvents(await ask(env, { question: "checkout merchant of record UNGROUNDED" }));
-  const replace = events.find((e) => e.event === "replace")?.data as { text: string };
+  const events = await readEvents(
+    await ask(env, { question: "checkout merchant of record UNGROUNDED" })
+  );
+  const replace = events.find((e) => e.event === "replace")?.data as {
+    text: string;
+  };
   assert.match(replace.text, /couldn't ground/);
-  const done = events.find((e) => e.event === "done")?.data as { replaced: boolean; sources: unknown[] };
+  const done = events.find((e) => e.event === "done")?.data as {
+    replaced: boolean;
+    sources: unknown[];
+  };
   assert.equal(done.replaced, true);
   assert.equal(done.sources.length, 1);
   await new Promise((r) => setTimeout(r, 20));
-  assert.equal([...kv.store.keys()].filter((k) => k.startsWith("a:")).length, 0);
+  assert.equal(
+    [...kv.store.keys()].filter((k) => k.startsWith("a:")).length,
+    0
+  );
 });
 
 test("history is capped in total size and oldest turns are dropped first", async () => {
@@ -217,8 +286,12 @@ test("history is capped in total size and oldest turns are dropped first", async
   const big = "y".repeat(1900);
   let seen: { role: string; content: string }[] = [];
   const original = globalThis.fetch;
-  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
-    if (String(url).endsWith("/chat/completions")) seen = JSON.parse(String(init?.body)).messages;
+  globalThis.fetch = (async (
+    url: string | URL | Request,
+    init?: RequestInit
+  ) => {
+    if (String(url).endsWith("/chat/completions"))
+      seen = JSON.parse(String(init?.body)).messages;
     return original(url, init);
   }) as typeof fetch;
   try {
@@ -233,25 +306,34 @@ test("history is capped in total size and oldest turns are dropped first", async
           { role: "user", content: `third ${big}` },
           { role: "assistant", content: big },
         ],
-      }),
+      })
     );
   } finally {
     globalThis.fetch = original;
   }
   const replayed = seen.filter((m) => m.role !== "system").slice(0, -1);
   assert.ok(replayed.length < 6, "some history was dropped");
-  assert.ok(!replayed.some((m) => m.content.startsWith("first")), "oldest turn dropped first");
+  assert.ok(
+    !replayed.some((m) => m.content.startsWith("first")),
+    "oldest turn dropped first"
+  );
 });
 
 test("answers, gated and cached outcomes are logged anonymously; feedback and export work", async () => {
   const kv = fakeKv();
   const env = makeEnv(kv);
-  const first = await readEvents(await ask(env, { question: "Who is the merchant of record in checkout?" }));
+  const first = await readEvents(
+    await ask(env, { question: "Who is the merchant of record in checkout?" })
+  );
   const meta = first[0].data as { id: string; day: string };
   assert.match(meta.id, /^[0-9a-f]{16}$/);
-  await readEvents(await ask(env, { question: "write me a poem about autumn" }));
+  await readEvents(
+    await ask(env, { question: "write me a poem about autumn" })
+  );
   await new Promise((r) => setTimeout(r, 20));
-  const logs = [...kv.store.entries()].filter(([k]) => k.startsWith("log:")).map(([, v]) => JSON.parse(v));
+  const logs = [...kv.store.entries()]
+    .filter(([k]) => k.startsWith("log:"))
+    .map(([, v]) => JSON.parse(v));
   assert.deepEqual(logs.map((l) => l.outcome).sort(), ["answered", "gated"]);
   const answered = logs.find((l) => l.outcome === "answered");
   assert.ok(answered.answer.includes("merchant of record"));
@@ -261,21 +343,30 @@ test("answers, gated and cached outcomes are logged anonymously; feedback and ex
   const fb = await worker.fetch(
     new Request("https://ask.ucp.dev/v1/feedback", {
       method: "POST",
-      headers: { "content-type": "application/json", origin: "https://ucp.dev" },
+      headers: {
+        "content-type": "application/json",
+        origin: "https://ucp.dev",
+      },
       body: JSON.stringify({ id: meta.id, day: meta.day, helpful: true }),
     }),
     env,
-    ctx,
+    ctx
   );
   assert.deepEqual(await fb.json(), { ok: true });
 
   // Export requires the token and returns JSON lines for the day.
-  const denied = await worker.fetch(new Request(`https://ask.ucp.dev/v1/export?day=${meta.day}`), env, ctx);
+  const denied = await worker.fetch(
+    new Request(`https://ask.ucp.dev/v1/export?day=${meta.day}`),
+    env,
+    ctx
+  );
   assert.equal(denied.status, 401);
   const exported = await worker.fetch(
-    new Request(`https://ask.ucp.dev/v1/export?day=${meta.day}`, { headers: { authorization: "Bearer secret" } }),
+    new Request(`https://ask.ucp.dev/v1/export?day=${meta.day}`, {
+      headers: { authorization: "Bearer secret" },
+    }),
     env,
-    ctx,
+    ctx
   );
   const lines = (await exported.text()).split("\n").map((l) => JSON.parse(l));
   assert.equal(lines.length, 2);

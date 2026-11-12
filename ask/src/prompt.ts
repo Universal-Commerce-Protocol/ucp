@@ -27,19 +27,26 @@ export function buildSystem(index: DocsIndex): string {
 function pageMap(pages: PageEntry[]): string {
   const sorted = [...pages].sort((a, b) => a.url.localeCompare(b.url));
   return sorted
-    .map((p) => `${p.title} | ${p.url} | ${p.summary.replace(/\s+/g, " ").slice(0, 110)}`)
+    .map(
+      (p) =>
+        `${p.title} | ${p.url} | ${p.summary.replace(/\s+/g, " ").slice(0, 110)}`
+    )
     .join("\n");
 }
 
 export function formatExcerpts(chunks: Chunk[]): string {
-  return chunks.map((c, i) => `[${i + 1}] ${c.page} > ${c.heading}\nURL: ${c.url}\n${c.text}`).join("\n\n");
+  return chunks
+    .map(
+      (c, i) => `[${i + 1}] ${c.page} > ${c.heading}\nURL: ${c.url}\n${c.text}`
+    )
+    .join("\n\n");
 }
 
 export function buildMessages(
   index: DocsIndex,
   history: ChatMessage[],
   question: string,
-  chunks: Chunk[],
+  chunks: Chunk[]
 ): ChatMessage[] {
   return [
     { role: "system", content: buildSystem(index) },
