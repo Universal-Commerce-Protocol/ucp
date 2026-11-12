@@ -44,6 +44,77 @@ const STOPWORDS = new Set(
   ).split(" "),
 );
 
+/**
+ * Everyday words people use for UCP concepts, mapped to the terms the docs use.
+ * Applied to queries only, so "my ecommerce store" also matches "business".
+ */
+const QUERY_SYNONYMS: Record<string, string[]> = {
+  ecommerce: ["commerce", "business", "checkout"],
+  "e-commerce": ["commerce", "business", "checkout"],
+  store: ["business"],
+  shop: ["business"],
+  merchant: ["business"],
+  retailer: ["business"],
+  seller: ["business"],
+  brand: ["business"],
+  website: ["business", "server"],
+  backend: ["server"],
+  agent: ["platform"],
+  assistant: ["platform"],
+  chatbot: ["platform"],
+  app: ["platform"],
+  integrate: ["implement", "server"],
+  integration: ["implement", "server"],
+  build: ["implement", "server"],
+  adopt: ["implement"],
+  onboard: ["implement", "start"],
+  setup: ["start", "setup"],
+  install: ["setup", "start"],
+  begin: ["start"],
+  tutorial: ["start", "guide"],
+  example: ["example", "guide"],
+  pay: ["payment"],
+  card: ["payment", "instrument"],
+  wallet: ["payment", "instrument"],
+  login: ["identity", "linking"],
+  oauth: ["identity", "linking"],
+  auth: ["authentication", "identity"],
+  sign: ["signature"],
+  webhook: ["event", "order"],
+  shipping: ["fulfillment"],
+  delivery: ["fulfillment"],
+  coupon: ["discount"],
+  promo: ["discount"],
+  hotel: ["lodging", "booking"],
+  restaurant: ["food"],
+};
+
+/** Expand a query with UCP vocabulary. Expansions are appended, never replace. */
+export function expandQuery(query: string): string {
+  const extra: string[] = [];
+  for (const raw of query.toLowerCase().split(/[^a-z0-9-]+/)) {
+    const word = raw.replace(/s$/, "");
+    const syn = QUERY_SYNONYMS[raw] ?? QUERY_SYNONYMS[word];
+    if (syn) extra.push(...syn);
+  }
+  return extra.length ? `${query} ${extra.join(" ")}` : query;
+}
+
+/**
+ * Broad "how do I start" questions are better served by the onboarding pages
+ * than by whichever section happens to share the most keywords. When a query
+ * matches the intent and names no specific capability, the lead section of
+ * each pinned page is included in the results.
+ */
+const INTENT_PINS: { intent: RegExp; pages: string[] }[] = [
+  {
+    intent: /\b(implement|get(ting)? started|start|integrate|integration|build|adopt|set ?up|onboard|begin|tutorial|quick ?start|how do i (use|support))/i,
+    pages: ["specification/getting-started/", "documentation/core-concepts/"],
+  },
+];
+const SPECIFIC_TERMS =
+  /\b(cart|catalog|order|booking|lodging|food|tip|fulfil|discount|loyalty|consent|return|permalink|location|identity|signature|mandate|3ds|tokenization|tokenizer|ap2|mcp|a2a|embedded|rest|schema|extension|version)/i;
+
 /** Lower-case, split on punctuation, light stemming; dotted identifiers keep both forms. */
 export function tokenize(text: string): string[] {
   const out: string[] = [];
@@ -83,6 +154,11 @@ export class DocsIndex {
   private readonly lengths: number[];
   private readonly avgLen: number;
   private readonly byId = new Map<string, Chunk>();
+  /** First chunk of each page, keyed by page URL (without anchor). */
+  private readonly leads = new Map<string, Chunk>();
+  /** Page-level document frequencies / postings over title + headings + summary. */
+  private readonly pageTerms = new Map<string, Map<string, number>>();
+  private readonly pageDf = new Map<string, number>();
 
   constructor(chunks: Chunk[], pages: PageEntry[], version: string) {
     this.chunks = chunks;
@@ -90,8 +166,14 @@ export class DocsIndex {
     this.version = version;
     this.lengths = new Array(chunks.length);
     let total = 0;
+    const headingsByPage = new Map<string, string[]>();
     chunks.forEach((chunk, i) => {
       this.byId.set(chunk.id, chunk);
+      const pageUrl = chunk.url.split("#")[0];
+      if (!this.leads.has(pageUrl)) this.leads.set(pageUrl, chunk);
+      const hs = headingsByPage.get(pageUrl) ?? [];
+      hs.push(chunk.heading);
+      headingsByPage.set(pageUrl, hs);
       // Headings and page titles are strong signals: weight them by repetition.
       const tokens = tokenize(
         `${chunk.page} ${chunk.page} ${chunk.heading} ${chunk.heading} ${chunk.heading} ${chunk.text}`,
@@ -111,6 +193,32 @@ export class DocsIndex {
       }
     });
     this.avgLen = chunks.length ? total / chunks.length : 1;
+
+    // Page-level term statistics: a page whose title and headings match the
+    // query is a strong signal even when no single section scores highly.
+    for (const page of pages) {
+      const pageUrl = page.url;
+      const text = `${page.title} ${page.title} ${page.title} ${(headingsByPage.get(pageUrl) ?? []).join(" ")} ${page.summary}`;
+      const tf = new Map<string, number>();
+      for (const t of tokenize(text)) tf.set(t, (tf.get(t) ?? 0) + 1);
+      this.pageTerms.set(pageUrl, tf);
+      for (const t of tf.keys()) this.pageDf.set(t, (this.pageDf.get(t) ?? 0) + 1);
+    }
+  }
+
+  /** BM25-style score of a page's title/headings/summary against query terms. */
+  private pageScore(pageUrl: string, terms: Set<string>): number {
+    const tf = this.pageTerms.get(pageUrl);
+    if (!tf) return 0;
+    const n = this.pages.length || 1;
+    let score = 0;
+    for (const term of terms) {
+      const f = tf.get(term);
+      if (!f) continue;
+      const df = this.pageDf.get(term) ?? 0;
+      score += Math.log(1 + (n - df + 0.5) / (df + 0.5)) * ((f * 2.2) / (f + 1.2));
+    }
+    return score;
   }
 
   get(id: string): Chunk | undefined {
@@ -135,8 +243,11 @@ export class DocsIndex {
    * currently reading, which disambiguates follow-ups like "what does this field mean".
    */
   search(query: string, k: number, opts: { exclude?: Set<string>; boostUrlPrefix?: string } = {}): Hit[] {
-    const terms = tokenize(query);
+    const terms = tokenize(expandQuery(query));
     if (!terms.length) return [];
+    const termSet = new Set(terms);
+    const pageScores = new Map<string, number>();
+    for (const page of this.pages) pageScores.set(page.url, this.pageScore(page.url, termSet));
     const k1 = 1.4;
     const b = 0.75;
     const n = this.chunks.length;
@@ -151,15 +262,49 @@ export class DocsIndex {
         scores.set(doc, (scores.get(doc) ?? 0) + idf * ((tf * (k1 + 1)) / norm));
       }
     }
+    // Pages that match strongly as a whole contribute their lead section even
+    // if no single section of theirs scored on its own.
+    const strongPages = [...pageScores.entries()]
+      .filter(([, s]) => s > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2);
+    for (const [pageUrl] of strongPages) {
+      const lead = this.leads.get(pageUrl);
+      if (lead) {
+        const idx = this.chunks.indexOf(lead);
+        if (!scores.has(idx)) scores.set(idx, 0);
+      }
+    }
+
     const hits: Hit[] = [];
     for (const [doc, raw] of scores) {
       const chunk = this.chunks[doc];
       if (opts.exclude?.has(chunk.id)) continue;
-      let score = raw;
+      const pageUrl = chunk.url.split("#")[0];
+      let score = raw + 0.6 * (pageScores.get(pageUrl) ?? 0);
       if (opts.boostUrlPrefix && chunk.url.startsWith(opts.boostUrlPrefix)) score *= 1.15;
       hits.push({ chunk, score });
     }
     hits.sort((a, b) => b.score - a.score);
+
+    // Intent pins: onboarding questions always see the getting-started material.
+    if (!SPECIFIC_TERMS.test(query)) {
+      for (const pin of INTENT_PINS) {
+        if (!pin.intent.test(query)) continue;
+        for (const suffix of [...pin.pages].reverse()) {
+          const pageUrl = [...this.leads.keys()].find((u) => u.endsWith(suffix));
+          const lead = pageUrl ? this.leads.get(pageUrl) : undefined;
+          if (!lead || opts.exclude?.has(lead.id)) continue;
+          // Pin the page's lead section plus its best-matching section.
+          const best = hits.find((h) => h.chunk.url.startsWith(pageUrl ?? "") && h.chunk.id !== lead.id);
+          for (const pinned of [best?.chunk, lead].filter((c): c is Chunk => Boolean(c))) {
+            const existing = hits.findIndex((h) => h.chunk.id === pinned.id);
+            if (existing >= 0) hits.splice(existing, 1);
+            hits.unshift({ chunk: pinned, score: Number.POSITIVE_INFINITY });
+          }
+        }
+      }
+    }
     // Diversify: at most two sections per page in the top results.
     const perPage = new Map<string, number>();
     const picked: Hit[] = [];

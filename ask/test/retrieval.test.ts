@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildIndex, tokenize } from "../src/retrieval";
+import { buildIndex, expandQuery, tokenize } from "../src/retrieval";
 import { normalizeQuestion } from "../src/limits";
 
 const raw = {
@@ -79,4 +79,45 @@ test("vocabularyCoverage separates docs questions from unrelated ones", () => {
   const index = buildIndex([raw]);
   assert.ok(index.vocabularyCoverage("how does checkout work for the merchant") >= 0.6);
   assert.ok(index.vocabularyCoverage("write me a poem about autumn leaves") < 0.6);
+});
+
+test("expandQuery maps everyday words to UCP vocabulary", () => {
+  const q = expandQuery("How do I integrate my ecommerce store?");
+  assert.match(q, /business/);
+  assert.match(q, /implement/);
+});
+
+test("onboarding questions pin the getting-started page first", () => {
+  const onboarding = {
+    ...raw,
+    pages: [
+      { url: "specification/getting-started/", title: "Getting Started", summary: "Build a basic UCP server." },
+      { url: "specification/shopping/checkout/", title: "Checkout Capability", summary: "" },
+    ],
+    chunks: [
+      ...raw.chunks,
+      {
+        id: "gs1",
+        url: "specification/getting-started/#getting-started-with-ucp",
+        page: "Getting Started",
+        heading: "Getting Started with UCP",
+        text: "This guide walks you through building a basic UCP server.",
+        words: 10,
+      },
+      {
+        id: "gs2",
+        url: "specification/getting-started/#implementing-the-server",
+        page: "Getting Started",
+        heading: "Implementing the Server",
+        text: "The server needs to handle create checkout and get checkout.",
+        words: 10,
+      },
+    ],
+  };
+  const index = buildIndex([onboarding]);
+  const hits = index.search("How do I implement UCP on my self-hosted ecommerce store?", 4);
+  assert.equal(hits[0].chunk.id, "gs1");
+  // A specific question is not pinned.
+  const specific = index.search("order fulfillment status values", 3);
+  assert.notEqual(specific[0]?.chunk.id, "gs1");
 });
