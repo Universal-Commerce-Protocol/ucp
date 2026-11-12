@@ -402,3 +402,32 @@ test("the answer cache is scoped to the model", async () => {
   );
   assert.equal((events[0].data as { cached: boolean }).cached, false);
 });
+
+test("questions about an unlisted company's adoption get the company reply, not a model call", async () => {
+  const env = makeEnv(fakeKv());
+  const before = modelCalls;
+  for (const q of [
+    "does Tesla use UCP?",
+    "Is Costco on UCP",
+    "Has Nike adopted UCP yet?",
+  ]) {
+    const events = await readEvents(await ask(env, { question: q }));
+    const text = events
+      .filter((e) => e.event === "delta")
+      .map((e) => (e.data as { text: string }).text)
+      .join("");
+    assert.match(text, /check with the company directly/, q);
+  }
+  assert.equal(modelCalls, before);
+  // Spec questions shaped like "does X support UCP ..." still reach the model.
+  const spec = await readEvents(
+    await ask(env, {
+      question:
+        "Does the checkout session support UCP for the merchant of record?",
+    })
+  );
+  assert.equal(
+    (spec[0].data as { model: string }).model,
+    "chat-completions:test-model"
+  );
+});

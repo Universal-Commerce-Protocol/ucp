@@ -183,6 +183,13 @@ export class DocsIndex {
   private readonly byId = new Map<string, Chunk>();
   /** First chunk of each page, keyed by page URL (without anchor). */
   private readonly leads = new Map<string, Chunk>();
+  /**
+   * Organization names from the "co-developed" and "endorsed" lists, mapped
+   * to the section that names them. Several are ordinary words ("Target",
+   * "Block", "Gap"), so a question about the company would otherwise be
+   * read as a question about the technical term.
+   */
+  private readonly orgs = new Map<string, Chunk>();
   /** Page-level document frequencies / postings over title + headings + summary. */
   private readonly pageTerms = new Map<string, Map<string, number>>();
   private readonly pageDf = new Map<string, number>();
@@ -198,6 +205,15 @@ export class DocsIndex {
       this.byId.set(chunk.id, chunk);
       const pageUrl = chunk.url.split("#")[0];
       if (!this.leads.has(pageUrl)) this.leads.set(pageUrl, chunk);
+      if (/co-developed|endorsed|partners|members/i.test(chunk.heading)) {
+        for (const line of chunk.text.split("\n")) {
+          const name = line.trim();
+          // A partner list is one short name per line.
+          if (name && name.length <= 30 && name.split(/\s+/).length <= 3) {
+            this.orgs.set(name.toLowerCase(), chunk);
+          }
+        }
+      }
       const hs = headingsByPage.get(pageUrl) ?? [];
       hs.push(chunk.heading);
       headingsByPage.set(pageUrl, hs);
@@ -252,6 +268,17 @@ export class DocsIndex {
 
   get(id: string): Chunk | undefined {
     return this.byId.get(id);
+  }
+
+  /** Organizations named in the query, with the section that lists them. */
+  organizationsIn(query: string): { name: string; chunk: Chunk }[] {
+    const q = ` ${query.toLowerCase().replace(/[^a-z0-9.&' ]+/g, " ")} `;
+    const found: { name: string; chunk: Chunk }[] = [];
+    for (const [name, chunk] of this.orgs) {
+      if (q.includes(` ${name} `) || q.includes(` ${name}'s `))
+        found.push({ name, chunk });
+    }
+    return found;
   }
 
   /**
@@ -331,6 +358,14 @@ export class DocsIndex {
       hits.push({ chunk, score });
     }
     hits.sort((a, b) => b.score - a.score);
+
+    // A question naming a partner organization always sees the list it is on.
+    for (const { chunk } of this.organizationsIn(query)) {
+      if (opts.exclude?.has(chunk.id)) continue;
+      const existing = hits.findIndex((h) => h.chunk.id === chunk.id);
+      if (existing >= 0) hits.splice(existing, 1);
+      hits.unshift({ chunk, score: Number.POSITIVE_INFINITY });
+    }
 
     // Intent pins: onboarding questions always see the getting-started material.
     if (!SPECIFIC_TERMS.test(query)) {

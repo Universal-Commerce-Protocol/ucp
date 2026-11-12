@@ -24,7 +24,7 @@ import {
   today,
   writeLog,
 } from "./log";
-import { buildMessages, OFF_TOPIC_REPLY } from "./prompt";
+import { buildMessages, COMPANY_REPLY, OFF_TOPIC_REPLY, RULES } from "./prompt";
 import {
   type ChatMessage,
   createProvider,
@@ -103,6 +103,14 @@ const TASK_PATTERN =
   /^(please\s+)?(translate|traduce|write|compose|generate|create|draft|summari[sz]e|rewrite|paraphrase|tell me|give me|make)\b[^.?!]{0,80}\b(poem|limerick|haiku|story|song|essay|joke|rap|lyrics|tweet|email|letter|blog|script|code|program|python|javascript|typescript|java|rust|golang|scraper|scrape|bot|french|spanish|german|english|chinese|japanese|language|summary of (this|the following))\b/i;
 const UCP_NOUNS =
   /\b(ucp|checkout|cart|catalog|order|booking|lodging|profile|capability|capabilities|extension|payment|handler|mandate|signature|transport|rest|mcp|a2a|embedded|schema|payload|request|response|endpoint|identity|linking|fulfil|discount|tip|well-known)\b/i;
+// "Does <company> use / support / accept UCP?" The docs cannot answer that
+// for any company. Named partners go to the model with the partner list;
+// everyone else gets a fixed reply instead of the generic scope message.
+const ADOPTION_PATTERN =
+  // cspell:disable-next-line
+  /^(does|do|is|are|has|have|did|will|can)\b.{1,60}\b(use|uses|using|used|support|supports|supported|adopt|adopts|adopted|implement|implements|implemented|accept|accepts|integrate|integrates|integrated|on|part of|member of|behind|work with|works with)\b.{0,30}\bucp\b/i;
+const SPEC_NOUNS =
+  /\b(checkout|cart|catalog|order|booking|lodging|profile|capability|capabilities|extension|extensions|payment|handler|mandate|signature|signatures|transport|rest|mcp|a2a|embedded|schema|payload|request|response|endpoint|identity|linking|fulfillment|discount|tip|platform|platforms|business|businesses|agent|agents|spec|protocol)\b/i;
 // An answer must largely reuse the vocabulary of the excerpts it was given;
 // a limerick, a translation or unrelated code will not.
 const MIN_ANSWER_GROUNDING = 0.45;
@@ -208,12 +216,15 @@ export default {
     );
 
     // 1. Repeated single-turn question: replay the cached answer, no model call.
-    // Keyed by index version and model, so a redeploy or a model change
+    // Keyed by index version, model and instructions, so a redeploy, a model
+    // change or a prompt change
     // never replays answers produced from other text or by another model.
     const cacheKey = history.length
       ? null
       : `a:${index.version}:${(
-          await sha256Hex(`${env.MODEL}\n${normalizeQuestion(question)}`)
+          await sha256Hex(
+            `${env.MODEL}\n${RULES}\n${normalizeQuestion(question)}`
+          )
         ).slice(0, 32)}`;
     const started = Date.now();
     const log: LogEntry = {
@@ -253,6 +264,20 @@ export default {
         topK
       );
     }
+    if (
+      !history.length &&
+      ADOPTION_PATTERN.test(question) &&
+      !SPEC_NOUNS.test(question) &&
+      index.organizationsIn(question).length === 0
+    ) {
+      logOutcome(env, ctx, { ...log, outcome: "gated" });
+      return streamCached(
+        { answer: COMPANY_REPLY, sources: [], model: "none" },
+        cors,
+        log
+      );
+    }
+
     // Questions whose vocabulary is mostly foreign to the docs are answered
     // with the scope message without spending a model call. Follow-ups are
     // exempt because they are often short ("and for MCP?").

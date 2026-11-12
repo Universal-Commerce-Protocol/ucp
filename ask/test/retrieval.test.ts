@@ -144,3 +144,35 @@ test("onboarding questions pin the getting-started page first", () => {
   const specific = index.search("order fulfillment status values", 3);
   assert.notEqual(specific[0]?.chunk.id, "gs1");
 });
+
+test("a question naming a partner company pins the partner list", () => {
+  const withPartners = {
+    ...raw,
+    chunks: [
+      ...raw.chunks,
+      {
+        id: "p1",
+        url: "#co-developed-by-industry-leaders",
+        page: "Universal Commerce Protocol",
+        heading: "Co-developed by industry leaders",
+        text: "UCP is built by the industry.\nGoogle\nShopify\nTarget\nWalmart",
+        words: 10,
+      },
+      {
+        id: "t1",
+        url: "documentation/schema-authoring/#annotation",
+        page: "Schema Authoring",
+        heading: "The annotation contract",
+        text: "The target attribute is a JSONPath that selects the target node. target target target.",
+        words: 14,
+      },
+    ],
+  };
+  const index = buildIndex([withPartners]);
+  assert.equal(index.search("does target use ucp", 3)[0].chunk.id, "p1");
+  assert.deepEqual(
+    index.organizationsIn("Is Shopify's checkout on UCP?").map((o) => o.name),
+    ["shopify"]
+  );
+  assert.deepEqual(index.organizationsIn("what is the checkout status"), []);
+});
