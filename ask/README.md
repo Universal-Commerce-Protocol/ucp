@@ -246,7 +246,7 @@ npm run eval -- https://<host>/v1/ask --min 0.9
 
 It prints each failure and the pass rate and exits non-zero below the
 minimum. Run it before changing the model, the instructions or retrieval.
-Against the review deployment it currently passes 99 of 100.
+Against the review deployment it currently passes 100 of 100.
 
 ## Question log, feedback and export (the path to a fine-tuned model)
 
