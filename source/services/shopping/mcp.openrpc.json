@@ -49,6 +49,12 @@
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
+      "subscription_list_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription.json#/$defs/list_subscriptions_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -393,6 +399,27 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "#/components/schemas/subscription_get_result"}
+      }
+    },
+    {
+      "name": "list_subscriptions",
+      "summary": "List subscriptions",
+      "description": "List the subscriptions the caller may access, optionally narrowed by filters. Returns full subscription entities with cursor-based pagination.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "subscription",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription.json#/$defs/list_subscriptions_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_list_result"}
       }
     }
   ]

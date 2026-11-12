@@ -27,7 +27,8 @@ enter that agreement at checkout and records it on the Order line it was
 bought on. This capability gives the agreement an identity of its own and lets
 a Platform read its current state: what recurs and on which terms, the Order
 that started it, the Orders placed under it, and the orders the Business plans
-to place.
+to place. A Platform reads one subscription by its `id`, or lists the
+subscriptions it may access.
 
 The capability is read-only. It defines no operation that creates or changes a
 subscription; the buyer manages a subscription with the Business, at the
@@ -76,7 +77,9 @@ be inferred from the checkout or the Order.
 
 A Business creates a subscription when it chooses to, which can be after the
 Order that starts it exists. A completed checkout or an Order therefore carries
-no subscription `id`.
+no subscription `id`; [List Subscriptions](#list-subscriptions) with
+`filters.order_id` returns the subscriptions an Order started, once they
+exist.
 
 ### Status
 
@@ -316,6 +319,122 @@ the Business's own.
 ]
 ```
 
+### A buyer's subscriptions
+
+With buyer authorization and no filter, the list holds the buyer's
+subscriptions, whichever channel started them: here the coffee subscription
+started by Order `ord_8f3e2a` and the tea subscription the Business set up
+outside a checkout. One policy states the terms both share.
+
+<!-- ucp:example schema=shopping/subscription op=list_subscriptions direction=request -->
+```json
+{
+  "pagination": { "limit": 10 }
+}
+```
+
+<!-- ucp:example schema=shopping/subscription op=list_subscriptions -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.subscription": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "subscriptions": [
+    {
+      "id": "sub_8f2k1",
+      "label": "House Blend, every month",
+      "status": "active",
+      "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
+      "currency": "USD",
+      "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+      "line_items": [ ... ],
+      "orders": [
+        { "id": "ord_9c41d7", "permalink_url": "https://business.example.com/orders/9c41d7" },
+        { "id": "ord_8f3e2a", "permalink_url": "https://business.example.com/orders/8f3e2a" }
+      ],
+      "upcoming_orders": [
+        { "expected_at": "2026-12-02T00:00:00Z" }
+      ]
+    },
+    {
+      "id": "sub_2m7qx",
+      "status": "active",
+      "permalink_url": "https://business.example.com/account/subscriptions/sub_2m7qx",
+      "currency": "USD",
+      "line_items": [ ... ],
+      "upcoming_orders": [
+        { "expected_at": "2026-12-01T00:00:00Z" }
+      ]
+    }
+  ],
+  "pagination": { "has_next_page": false },
+  "policies": [
+    {
+      "type": "dev.ucp.shopping.policy.subscription",
+      "description": { "plain": "Renews automatically until you cancel. Cancel anytime from your account at business.example.com/account; no notice period or minimum commitment." },
+      "applies_to": ["$.subscriptions[0]", "$.subscriptions[1]"],
+      "url": "https://business.example.com/subscription-terms"
+    }
+  ]
+}
+```
+
+### The subscriptions an Order belongs to
+
+A Platform that completed a checkout asks which subscriptions the resulting
+Order started. The same request naming `ord_9c41d7`, the recurring Order,
+returns the same subscription to a caller with buyer authorization.
+
+<!-- ucp:example schema=shopping/subscription op=list_subscriptions direction=request -->
+```json
+{
+  "filters": { "order_id": "ord_8f3e2a" }
+}
+```
+
+<!-- ucp:example schema=shopping/subscription op=list_subscriptions -->
+```json
+{
+  "ucp": { ... },
+  "subscriptions": [
+    {
+      "id": "sub_8f2k1",
+      "label": "House Blend, every month",
+      "status": "active",
+      "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
+      "currency": "USD",
+      "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+      "line_items": [ ... ],
+      "orders": [ ... ],
+      "upcoming_orders": [ ... ]
+    }
+  ],
+  "pagination": { "has_next_page": false }
+}
+```
+
+### An Order with no subscription yet
+
+The Order started no subscription, or the Business has not created it yet.
+The list is empty and the response is not an error.
+
+<!-- ucp:example schema=shopping/subscription op=list_subscriptions -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.subscription": [{"version": "{{ ucp_version }}"}]
+    }
+  },
+  "subscriptions": [],
+  "pagination": { "has_next_page": false }
+}
+```
+
 ## Scopes
 
 The Subscription capability defines the following well-known scope for
@@ -323,7 +442,7 @@ user-authenticated access:
 
 | Scope | Description |
 | :--- | :--- |
-| `dev.ucp.shopping.subscription:read` | Read access to the user's subscriptions — Get Subscription on resources owned by the authenticated user. |
+| `dev.ucp.shopping.subscription:read` | Read access to the user's subscriptions — Get Subscription and List Subscriptions on resources owned by the authenticated user. |
 
 Scope declaration, derivation, and rules for extending this set with
 custom scopes are defined in [Identity Linking — Scopes](../../common/identity-linking/index.md#scopes).
@@ -342,6 +461,7 @@ conversational and operational use cases.
 | Operation | Method | Endpoint | Description |
 | :--- | :--- | :--- | :--- |
 | [Get Subscription](#get-subscription) | `GET` | `/subscriptions/{id}` | Platform retrieves current subscription state. |
+| [List Subscriptions](#list-subscriptions) | `POST` | `/subscriptions/list` | Platform lists the subscriptions it may access. |
 
 For transport-specific details, see [REST Binding](rest.md) and
 [MCP Binding](mcp.md).
@@ -436,6 +556,68 @@ that includes a `messages` array describing the outcome:
 }
 ```
 
+### List Subscriptions
+
+Returns the subscriptions the caller may access, each as the full
+current-state snapshot [Get Subscription](#get-subscription) returns, with the
+policies and messages that apply to them. `applies_to` and `path` are relative
+to the response root, for example `$.subscriptions[0]`.
+
+#### Request
+
+{{ extension_schema_fields('subscription.json#/$defs/list_subscriptions_request', 'shopping/subscription') }}
+
+#### Response
+
+{{ extension_schema_fields('subscription.json#/$defs/list_subscriptions_response', 'shopping/subscription') }}
+
+#### Subscription Filters
+
+{{ schema_fields('types/subscription_filters', 'shopping/subscription') }}
+
+`filters.order_id` narrows the list to the subscriptions an Order belongs to:
+the ones it started (their `origin.order_id`) and the ones it was placed under
+as a recurring Order (an entry in their `orders`).
+
+An empty `subscriptions` array is a successful response. With
+`filters.order_id` it means the Order belongs to no subscription the caller
+may access, or to none yet: a Business can create a subscription after the
+Order that starts it exists.
+
+#### Pagination
+
+Results use the shared cursor-based pagination (see
+[Pagination](../catalog/search.md#pagination)): `pagination.limit` is a
+requested page size, cursors are opaque, and a response whose
+`pagination.has_next_page` is `true` carries the `cursor` for the next page.
+
+#### Authorization {: #list-subscriptions-authorization }
+
+The Business authenticates the request as for
+[Get Subscription](#authorization). The authentication method determines
+which subscriptions are listed:
+
+| Authentication | Listed Subscriptions |
+| :------------- | :------------------- |
+| Platform credentials | Subscriptions started by the Order named in `filters.order_id`, when the Platform originated that Order |
+| Buyer authorization | Subscriptions owned by the buyer, subject to the granted OAuth scopes |
+
+**Platform credentials** - Businesses **MAY** answer a request without buyer
+authorization only when its `filters.order_id` names an Order the Platform
+originated; the list holds the subscriptions that Order started. Any other
+request needs buyer authorization, and the Business responds with
+`identity_required` as
+[Identity Linking — Error Handling](../../common/identity-linking/index.md#identity_required)
+defines.
+
+**Buyer authorization** - with the `dev.ucp.shopping.subscription:read` scope,
+the list holds the buyer's subscriptions regardless of which Platform, if any,
+originated the Order that started them. `filters.order_id` narrows it to the
+subscriptions that Order belongs to.
+
+The additional access policies, data availability constraints, and redaction
+described for [Get Subscription](#authorization) apply.
+
 ### Guidelines {: #operations-guidelines }
 
 **Platform:**
@@ -461,8 +643,6 @@ that includes a `messages` array describing the outcome:
   defines no operation that creates one.
 * **Changing a subscription.** Cancelling, pausing, resuming, skipping an
   order, and changing what recurs, how often, or where it is delivered.
-* **Listing subscriptions.** A subscription is read by its `id`; this
-  capability defines no operation that finds a buyer's subscriptions.
 * **Events.** This capability defines no webhook or event; a Platform reads
   current state with Get Subscription.
 * **Payment.** Which instrument pays the recurring orders, changing it, and

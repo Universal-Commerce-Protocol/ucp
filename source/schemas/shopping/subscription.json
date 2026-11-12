@@ -35,6 +35,55 @@
           "description": "Warnings or informational messages about the subscription (e.g., a payment that needs the buyer's attention)."
         }
       }
+    },
+    "list_subscriptions_request": {
+      "type": "object",
+      "description": "Request body for listing subscriptions. Every field is optional; an empty object lists every subscription the caller may access.",
+      "properties": {
+        "filters": {
+          "$ref": "types/subscription_filters.json",
+          "description": "Filter criteria to narrow the listed subscriptions. All specified filters combine with AND logic."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "list_subscriptions_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "subscriptions"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_subscription_schema"
+        },
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "types/subscription.json"
+          },
+          "description": "The subscriptions the caller may access that match the filters, each as a current-state snapshot. Empty when there is none."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/response"
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/policy.json"
+          },
+          "description": "Policies that apply to the listed subscriptions' line items, including the `dev.ucp.shopping.policy.subscription` policies stating the terms their recurring orders are placed under. `applies_to` targets are relative to the response root."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/message.json"
+          },
+          "description": "Warnings or informational messages about the listed subscriptions."
+        }
+      }
     }
   }
 }

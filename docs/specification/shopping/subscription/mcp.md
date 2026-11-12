@@ -92,6 +92,7 @@ UCP Capabilities map 1:1 to MCP Tools.
 | Tool | Operation | Description |
 | :---- | :---- | :---- |
 | `get_subscription` | [Get Subscription](index.md#get-subscription) | Get the current state of a subscription. |
+| `list_subscriptions` | [List Subscriptions](index.md#list-subscriptions) | List the subscriptions the caller may access. |
 
 ### `get_subscription`
 
@@ -209,6 +210,91 @@ the current-state snapshot of a subscription.
     }
     ```
 
+### `list_subscriptions`
+
+Maps to the [List Subscriptions](index.md#list-subscriptions) operation.
+Returns the subscriptions the caller may access.
+
+#### Input Schema {: #list-subscriptions-input-schema }
+
+* `meta` (Object, required): Request metadata with `ucp-agent.profile`.
+* `subscription` (Object, required): The list request, with optional `filters`
+  and `pagination`.
+
+{{ extension_schema_fields('subscription.json#/$defs/list_subscriptions_request', 'shopping/subscription') }}
+
+#### Output Schema {: #list-subscriptions-output-schema }
+
+{{ extension_schema_fields('subscription.json#/$defs/list_subscriptions_response', 'shopping/subscription') }}
+
+#### Example {: #list-subscriptions-example }
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/subscription op=list_subscriptions direction=request extract=$.params.arguments.subscription -->
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "method": "tools/call",
+      "params": {
+        "name": "list_subscriptions",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/.well-known/ucp"
+            }
+          },
+          "subscription": {
+            "filters": { "order_id": "ord_8f3e2a" },
+            "pagination": { "limit": 10 }
+          }
+        }
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/subscription op=list_subscriptions direction=response extract=$.result.structuredContent -->
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "structuredContent": {
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.shopping.subscription": [{"version": "{{ ucp_version }}"}]
+            }
+          },
+          "subscriptions": [
+            {
+              "id": "sub_8f2k1",
+              "label": "House Blend, every month",
+              "status": "active",
+              "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
+              "currency": "USD",
+              "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+              "line_items": [ ... ],
+              "orders": [ ... ],
+              "upcoming_orders": [ ... ]
+            }
+          ],
+          "pagination": { "has_next_page": false },
+          "policies": [ ... ]
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"ucp\":{…},…}"
+          }
+        ]
+      }
+    }
+    ```
+
 ## Error Handling
 
 When the Business cannot return a subscription, the response includes a
@@ -228,8 +314,8 @@ Platforms implementing the MCP binding:
 
 Businesses implementing the MCP binding:
 
-* **MUST** implement the `get_subscription` tool per the
-  [OpenRPC schema](site:services/shopping/mcp.openrpc.json)
+* **MUST** implement the `get_subscription` and `list_subscriptions` tools per
+  the [OpenRPC schema](site:services/shopping/mcp.openrpc.json)
 
 See [Subscription Capability - Guidelines](index.md#operations-guidelines) for
 capability-level requirements that apply across all transports.

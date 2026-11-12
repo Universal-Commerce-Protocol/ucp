@@ -65,9 +65,10 @@ profile.
 
 ### Content Types
 
+* **Request**: `application/json`
 * **Response**: `application/json`
 
-All response bodies **MUST** be valid JSON as specified in
+All request and response bodies **MUST** be valid JSON as specified in
 [RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }.
 
 ### Transport Security
@@ -79,6 +80,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 | Operation | Method | Endpoint | Description |
 | :---- | :---- | :---- | :---- |
 | [Get Subscription](#get-subscription) | `GET` | `/subscriptions/{id}` | Get the current state of a subscription. |
+| [List Subscriptions](#list-subscriptions) | `POST` | `/subscriptions/list` | List the subscriptions the caller may access. |
 
 ### Get Subscription
 
@@ -164,9 +166,101 @@ Returns the current-state snapshot of a subscription.
     }
     ```
 
+### List Subscriptions
+
+Returns the subscriptions the caller may access. See
+[List Subscriptions](index.md#list-subscriptions) for filters, pagination,
+and authorization.
+
+#### Input Schema {: #list-subscriptions-input-schema }
+
+{{ extension_schema_fields('subscription.json#/$defs/list_subscriptions_request', 'shopping/subscription') }}
+
+#### Output Schema {: #list-subscriptions-output-schema }
+
+{{ extension_schema_fields('subscription.json#/$defs/list_subscriptions_response', 'shopping/subscription') }}
+
+#### Example {: #list-subscriptions-example }
+
+=== "Request"
+
+    <!-- ucp:example schema=shopping/subscription op=list_subscriptions direction=request -->
+    ```json
+    POST /subscriptions/list HTTP/1.1
+    UCP-Agent: profile="https://platform.example/.well-known/ucp"
+    Content-Type: application/json
+
+    {
+      "filters": { "order_id": "ord_8f3e2a" },
+      "pagination": { "limit": 10 }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=shopping/subscription op=list_subscriptions -->
+    ```json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.shopping.subscription": [{"version": "{{ ucp_version }}"}]
+        }
+      },
+      "subscriptions": [
+        {
+          "id": "sub_8f2k1",
+          "label": "House Blend, every month",
+          "status": "active",
+          "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
+          "currency": "USD",
+          "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+          "line_items": [ ... ],
+          "orders": [ ... ],
+          "upcoming_orders": [ ... ]
+        }
+      ],
+      "pagination": { "has_next_page": false },
+      "policies": [ ... ]
+    }
+    ```
+
+=== "Identity Required"
+
+    <!-- ucp:example schema=common/types/error_response op=read -->
+    ```json
+    HTTP/1.1 401 Unauthorized
+    WWW-Authenticate: Bearer realm="https://business.example.com", resource_metadata="https://business.example.com/.well-known/oauth-protected-resource"
+    Content-Type: application/json
+
+    {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "status": "error",
+        "capabilities": {
+          "dev.ucp.shopping.subscription": [{"version": "{{ ucp_version }}"}]
+        }
+      },
+      "messages": [
+        {
+          "type": "error",
+          "code": "identity_required",
+          "severity": "requires_buyer_review",
+          "content": "Buyer authorization is required to list subscriptions."
+        }
+      ]
+    }
+    ```
+
 ## HTTP Headers
 
-{{ header_fields('get_subscription', 'shopping/rest.openapi.json') }}
+The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.
+
+{{ header_fields('list_subscriptions', 'shopping/rest.openapi.json') }}
 
 ### Specific Header Requirements
 

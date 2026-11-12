@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription_filters.json",
+  "title": "Subscription Filters",
+  "description": "Filter criteria to narrow listed subscriptions. All specified filters combine with AND logic.",
+  "type": "object",
+  "properties": {
+    "order_id": {
+      "type": "string",
+      "description": "ID of an Order. Narrows the result to the subscriptions that Order belongs to: the ones it started, and the ones it was placed under as a recurring Order."
+    }
+  },
+  "additionalProperties": true
+}

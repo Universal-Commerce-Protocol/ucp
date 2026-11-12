@@ -586,8 +586,8 @@ plugins:
               Read access to subscriptions via the Subscription Capability,
               detailing the subscription entity (identity, status, recurring
               line items and the terms in effect, the Orders placed under it,
-              upcoming orders), the Get Subscription operation, scopes, and
-              authorization.
+              upcoming orders), the Get Subscription and List Subscriptions
+              operations, scopes, and authorization.
           - specification/shopping/subscription/rest.md: >-
               HTTP REST transport binding for the Subscription Capability,
               detailing endpoints, HTTP headers, payload schemas, and error
