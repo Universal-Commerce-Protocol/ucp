@@ -52,26 +52,46 @@
   }
 
   /* --------------------------------------------------------------- markup */
-  const fab = el("button", { class: "ask-ai-fab", type: "button", "aria-label": "Ask AI about the UCP documentation" });
-  fab.innerHTML = `${SPARK}<span>Ask AI</span>`;
+  const SEND =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l1.4 1.4L11 7.8V20h2V7.8l5.6 5.6L20 12l-8-8-8 8z"/></svg>';
+
+  // Header entry point, placed next to search like other developer docs sites.
+  const fab = el("button", {
+    class: "ask-ai-header-btn",
+    type: "button",
+    "aria-label": "Ask AI about the UCP documentation",
+    "aria-expanded": "false",
+    title: "Ask AI (press . to open)",
+  });
+  fab.innerHTML = `${SPARK}<span>Ask AI</span><kbd>.</kbd>`;
+  const headerInner = document.querySelector(".md-header__inner");
+  const search = headerInner ? headerInner.querySelector(".md-search") : null;
+  if (headerInner) headerInner.insertBefore(fab, search ? search.nextSibling : null);
+  else document.body.appendChild(fab);
 
   const panel = el("section", { class: "ask-ai-panel", role: "dialog", "aria-label": "Ask AI", hidden: "" });
   const header = el("div", { class: "ask-ai-header" });
+  header.innerHTML = SPARK;
   const title = el("strong");
-  title.textContent = "Ask AI about UCP";
+  title.textContent = "Ask AI";
   const clearBtn = el("button", { type: "button", title: "Start a new conversation" });
   clearBtn.textContent = "New chat";
-  const closeBtn = el("button", { type: "button", "aria-label": "Close" });
-  closeBtn.textContent = "✕";
+  const closeBtn = el("button", { type: "button", class: "ask-ai-close", "aria-label": "Close" });
+  closeBtn.textContent = "\u2715";
   header.appendChild(title);
   header.appendChild(clearBtn);
   header.appendChild(closeBtn);
 
   const messages = el("div", { class: "ask-ai-messages", "aria-live": "polite" });
   const form = el("form", { class: "ask-ai-form" });
-  const input = el("textarea", { rows: "1", placeholder: "Ask about capabilities, payloads, transports…", maxlength: "600", "aria-label": "Your question" });
-  const sendBtn = el("button", { type: "submit" });
-  sendBtn.textContent = "Ask";
+  const input = el("textarea", {
+    rows: "1",
+    placeholder: "Ask about UCP\u2026",
+    maxlength: "600",
+    "aria-label": "Your question",
+  });
+  const sendBtn = el("button", { type: "submit", "aria-label": "Send" });
+  sendBtn.innerHTML = SEND;
   form.appendChild(input);
   form.appendChild(sendBtn);
   const footer = el("div", { class: "ask-ai-footer" });
@@ -81,7 +101,6 @@
   panel.appendChild(messages);
   panel.appendChild(form);
   panel.appendChild(footer);
-  document.body.appendChild(fab);
   document.body.appendChild(panel);
 
   /* -------------------------------------------------------------- behavior */
@@ -94,7 +113,16 @@
     renderThread();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !panel.hidden) setOpen(false);
+    if (e.key === "Escape" && !panel.hidden) {
+      setOpen(false);
+      return;
+    }
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target?.tagName) || "") || (e.target?.isContentEditable);
+    if (e.key === "." && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && panel.hidden) {
+      e.preventDefault();
+      setOpen(true);
+      input.focus();
+    }
   });
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -114,7 +142,7 @@
 
   function setOpen(open) {
     panel.hidden = !open;
-    fab.hidden = open;
+    fab.setAttribute("aria-expanded", open ? "true" : "false");
     try { sessionStorage.setItem(OPEN_KEY, open ? "1" : "0"); } catch (_e) { /* ignore */ }
     if (open) { renderThread(); scrollToEnd(); }
   }
@@ -126,8 +154,9 @@
   function renderThread() {
     messages.innerHTML = "";
     if (!thread.length) {
-      const intro = el("div", { class: "ask-ai-msg ask-ai-msg--assistant" });
-      intro.innerHTML = "<p>Ask anything about the Universal Commerce Protocol. Answers cite the documentation sections they come from.</p>";
+      const intro = el("div", { class: "ask-ai-intro" });
+      intro.innerHTML =
+        "<h3>How can I help?</h3><p>Ask anything about the Universal Commerce Protocol. Answers cite the documentation sections they come from.</p>";
       messages.appendChild(intro);
       const sug = el("div", { class: "ask-ai-suggestions" });
       SUGGESTIONS.forEach((s) => {
@@ -155,15 +184,26 @@
 
   function renderSources(sources) {
     const wrap = el("div", { class: "ask-ai-sources" });
-    wrap.appendChild(document.createTextNode("Sources"));
+    const label = el("span");
+    label.textContent = "Sources";
+    wrap.appendChild(label);
     const ol = el("ol");
-    sources.forEach((s) => {
-      const li = el("li", { value: String(s.n) });
+    for (const s of sources) {
+      const li = el("li");
       const a = el("a", { href: s.url, target: "_blank", rel: "noopener" });
-      a.textContent = s.title + (s.heading && s.heading !== s.title ? ` › ${s.heading}` : "");
+      const n = el("b");
+      n.textContent = String(s.n);
+      const t = document.createTextNode(s.title);
+      a.appendChild(n);
+      a.appendChild(t);
+      if (s.heading && s.heading !== s.title) {
+        const h = el("small");
+        h.textContent = `\u203a ${s.heading}`;
+        a.appendChild(h);
+      }
       li.appendChild(a);
       ol.appendChild(li);
-    });
+    }
     wrap.appendChild(ol);
     return wrap;
   }
@@ -229,7 +269,6 @@
         node.replaceWith(e);
         controller = null;
         sendBtn.disabled = false;
-        sendBtn.textContent = "Ask";
         saveThread();
       });
 
@@ -239,7 +278,6 @@
       if (reply.sources.length) node.appendChild(renderSources(reply.sources));
       controller = null;
       sendBtn.disabled = false;
-      sendBtn.textContent = "Ask";
       saveThread();
       scrollToEnd();
     }
