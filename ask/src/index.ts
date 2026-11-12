@@ -18,7 +18,7 @@
 import { checkLimits, normalizeQuestion, sha256Hex } from "./limits";
 import { buildMessages, OFF_TOPIC_REPLY } from "./prompt";
 import { type ChatMessage, createProvider, ProviderError, type WorkersAiBinding } from "./providers";
-import { type Chunk, type DocsIndex, loadIndex } from "./retrieval";
+import { type Chunk, type DocsIndex, loadIndex, tokenize } from "./retrieval";
 
 export interface Env {
   ASK_KV: KVNamespace;
@@ -64,11 +64,23 @@ const MAX_BODY_BYTES = 32 * 1024;
 // Total characters of conversation history replayed to the model, so a
 // caller cannot inflate every request with pasted text.
 const MAX_HISTORY_TOTAL_CHARS = 6000;
-// Questions that try to steer the assistant are answered but never cached,
-// so a manipulated answer can't be served to the next person who asks the
-// same plain question.
+// Attempts to steer the assistant. A documentation assistant never needs
+// these, so they are declined before any model call, model-independently.
 const STEERING_PATTERN =
-  /\b(ignore|disregard|forget|override|bypass)\b.*\b(instruction|rule|prompt|above|previous)|\b(system prompt|developer message|jailbreak|pretend|act as|you are now|new persona|role ?play)\b|<\/?(system|assistant|user|instruction)/i;
+  /\b(ignore|disregard|forget|override|bypass|drop)\b[^.?!]{0,60}\b(instruction|rule|prompt|guideline|above|previous|prior)|\b(system prompt|developer message|hidden prompt|your (instructions|rules|prompt)|jailbreak|pretend (to be|you are)|act as|you are now|from now on|new persona|role ?play|no (rules|restrictions)|unrestricted|dan mode|confirm by saying|documentation map)\b|<\/?(system|assistant|user|instruction|excerpts?|question)>/i;
+// Requests for work that is not a question about the docs (translation,
+// creative writing, general coding). Allowed when the request names UCP
+// material, e.g. "write an example checkout request".
+// cspell:disable-next-line
+const TASK_PATTERN =
+  /^(please\s+)?(translate|traduce|write|compose|generate|create|draft|summari[sz]e|rewrite|paraphrase|tell me|give me|make)\b[^.?!]{0,80}\b(poem|limerick|haiku|story|song|essay|joke|rap|lyrics|tweet|email|letter|blog|script|code|program|python|javascript|typescript|java|rust|golang|scraper|scrape|bot|french|spanish|german|english|chinese|japanese|language|summary of (this|the following))\b/i;
+const UCP_NOUNS =
+  /\b(ucp|checkout|cart|catalog|order|booking|lodging|profile|capability|capabilities|extension|payment|handler|mandate|signature|transport|rest|mcp|a2a|embedded|schema|payload|request|response|endpoint|identity|linking|fulfil|discount|tip|well-known)\b/i;
+// An answer must largely reuse the vocabulary of the excerpts it was given;
+// a limerick, a translation or unrelated code will not.
+const MIN_ANSWER_GROUNDING = 0.45;
+const GROUNDING_FALLBACK =
+  "I couldn't ground an answer to that in the documentation. The most relevant sections are listed below.";
 // Below this share of known terms a question is treated as off-topic.
 const MIN_VOCAB_COVERAGE = 0.6;
 const MAX_HISTORY_MESSAGE_CHARS = 2000;
@@ -110,10 +122,9 @@ export default {
     const index = await loadIndex(env.INDEX_URLS.split(",").map((s) => s.trim()).filter(Boolean));
 
     // 1. Repeated single-turn question: replay the cached answer, no model call.
-    const cacheKey =
-      history.length || STEERING_PATTERN.test(question)
-        ? null
-        : `a:${index.version}:${(await sha256Hex(normalizeQuestion(question))).slice(0, 32)}`;
+    const cacheKey = history.length
+      ? null
+      : `a:${index.version}:${(await sha256Hex(normalizeQuestion(question))).slice(0, 32)}`;
     if (cacheKey) {
       const hit = await env.ASK_KV.get<CachedAnswer>(cacheKey, "json");
       if (hit) return streamCached(hit, cors);
@@ -135,7 +146,10 @@ export default {
     // with the scope message without spending a model call. Follow-ups are
     // exempt because they are often short ("and for MCP?").
     const offTopic =
-      !hits.length || (!history.length && index.vocabularyCoverage(question) < MIN_VOCAB_COVERAGE);
+      !hits.length ||
+      (!history.length && index.vocabularyCoverage(question) < MIN_VOCAB_COVERAGE) ||
+      STEERING_PATTERN.test(question) ||
+      (TASK_PATTERN.test(question) && !UCP_NOUNS.test(question));
     if (offTopic) return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors);
 
     // 3. Spend guards.
@@ -224,6 +238,19 @@ async function answer(
   );
 
   let cacheable = text.trim().length > 0;
+
+  // Model-independent output guard: an answer that does not reuse the
+  // excerpts' vocabulary, or that echoes the prompt scaffolding, is replaced.
+  const grounding = answerGrounding(text, chunks);
+  const leaked = /one line per page|<excerpts>|<question>|documentation map/i.test(text) || (text.match(/ \| https?:\/\//g) ?? []).length >= 2;
+  if (leaked || grounding < MIN_ANSWER_GROUNDING) {
+    text = GROUNDING_FALLBACK;
+    await sse("replace", { text });
+    const top = sources.slice(0, 3);
+    await sse("done", { sources: top, grounding: Number(grounding.toFixed(2)), replaced: true });
+    return { text, sources: top, cacheable: false };
+  }
+
   if (finish === "length") {
     const note = "\n\n_(Answer truncated. Ask a narrower follow-up for more detail.)_";
     text += note;
@@ -238,6 +265,18 @@ async function answer(
   const usedSources = cited.length ? cited : sources.slice(0, 3);
   await sse("done", { sources: usedSources });
   return { text, sources: usedSources, cacheable };
+}
+
+/** Share of the answer's content terms that occur in the excerpts it was given. */
+export function answerGrounding(answer: string, chunks: Chunk[]): number {
+  const vocab = new Set<string>();
+  for (const c of chunks) for (const t of tokenize(`${c.page} ${c.heading} ${c.text}`)) vocab.add(t);
+  // Words any grounded answer may add on its own.
+  for (const t of tokenize("documentation specify specified section page see refer according defined describe allow require must optional include example")) vocab.add(t);
+  const terms = tokenize(answer).filter((t) => t.length > 2);
+  if (terms.length < 4) return 1;
+  const known = terms.filter((t) => vocab.has(t)).length;
+  return known / terms.length;
 }
 
 function toSources(chunks: Chunk[]): Source[] {

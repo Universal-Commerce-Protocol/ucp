@@ -33,6 +33,7 @@ from ask_index import Chunk, chunk_html, page_h1, write_index  # noqa: E402
 
 log = logging.getLogger("mkdocs.hooks.ask_index")
 
+_VERTICALS = {"Shopping", "Lodging", "Food", "Common", "Payment"}
 _chunks: list[Chunk] = []
 _pages: list[dict[str, str]] = []
 
@@ -50,6 +51,15 @@ def on_page_content(html, page, config, files):
   # Prefer the page's own H1 over the (often generic) nav title such as
   # "Overview" or "REST", both for retrieval and for the sources list.
   title = page_h1(html) or page.title or page.file.name
+  # Several verticals reuse the same H1 ("Checkout Capability" exists for
+  # Shopping and Food). Prefix the vertical from the nav so sources and
+  # retrieval can tell them apart.
+  vertical = next(
+    (a.title for a in getattr(page, "ancestors", []) if a.title in _VERTICALS),
+    None,
+  )
+  if vertical and vertical.lower() not in title.lower():
+    title = f"{vertical} {title}"
   page_chunks = chunk_html(html, page.url, title)
   if page_chunks:
     _chunks.extend(page_chunks)

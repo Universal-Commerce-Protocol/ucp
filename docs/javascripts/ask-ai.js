@@ -274,6 +274,9 @@
             reply.content += data.text || "";
             node.innerHTML = renderMarkdown(reply.content, allSources);
             scrollToEnd();
+          } else if (event === "replace") {
+            reply.content = data.text || "";
+            node.innerHTML = renderMarkdown(reply.content, allSources);
           } else if (event === "done") {
             reply.sources = data.sources || [];
           } else if (event === "error") {
