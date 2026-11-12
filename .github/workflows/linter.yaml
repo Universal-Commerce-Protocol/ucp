@@ -69,7 +69,7 @@ jobs:
           # own npm scripts, so super-linter's Node-oriented ESLint rules do
           # not apply to it.
           FILTER_REGEX_EXCLUDE: >-
-            ^(\\.github/|\\.vscode/|ask/(src|test)/).*|CODE_OF_CONDUCT.md|CHANGELOG.md
+            .*/(\.github|\.vscode)/.*|.*/ask/(src|test)/.*|.*/(CODE_OF_CONDUCT|CHANGELOG)\.md
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_PYTHON_BLACK: false
           VALIDATE_PYTHON_FLAKE8: false

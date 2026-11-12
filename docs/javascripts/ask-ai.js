@@ -17,18 +17,16 @@
 /*
  * "Ask AI about UCP". Dependency-free. Talks to the Worker in ask/ over
  * Server-Sent Events and renders a constrained subset of Markdown.
- * Config comes from <script id="ask-ai-config"> rendered by overrides/main.html.
+ * Config comes from the #ask-ai-config element rendered by overrides/main.html.
  */
 (() => {
   const configEl = document.getElementById("ask-ai-config");
   if (!configEl) return;
-  let config;
-  try {
-    config = JSON.parse(configEl.textContent);
-  } catch {
-    return;
-  }
-  if (!config?.endpoint) return;
+  const config = {
+    endpoint: configEl.dataset.endpoint || "",
+    version: configEl.dataset.version || "",
+  };
+  if (!config.endpoint) return;
 
   const LABEL = "Ask AI about UCP";
   // Links in answers are rendered only when they point at the docs or the
@@ -62,7 +60,10 @@
   }
   function saveThread() {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(thread.slice(-MAX_STORED_MESSAGES)));
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(thread.slice(-MAX_STORED_MESSAGES))
+      );
     } catch {
       /* storage unavailable: conversation simply does not persist */
     }
@@ -79,22 +80,35 @@
   openBtn.innerHTML = `${ICON_CHAT}<span>${LABEL}</span>`;
   const headerInner = document.querySelector(".md-header__inner");
   const search = headerInner ? headerInner.querySelector(".md-search") : null;
-  if (headerInner) headerInner.insertBefore(openBtn, search ? search.nextSibling : null);
+  if (headerInner)
+    headerInner.insertBefore(openBtn, search ? search.nextSibling : null);
   else document.body.appendChild(openBtn);
 
-  const panel = el("section", { class: "ask-ai-panel", role: "dialog", "aria-label": LABEL, hidden: "" });
+  const panel = el("section", {
+    class: "ask-ai-panel",
+    role: "dialog",
+    "aria-label": LABEL,
+    hidden: "",
+  });
   const header = el("div", { class: "ask-ai-header" });
   const title = el("strong");
   title.textContent = LABEL;
   const clearBtn = el("button", { type: "button", class: "ask-ai-new" });
   clearBtn.textContent = "New conversation";
-  const closeBtn = el("button", { type: "button", class: "ask-ai-close", "aria-label": "Close" });
+  const closeBtn = el("button", {
+    type: "button",
+    class: "ask-ai-close",
+    "aria-label": "Close",
+  });
   closeBtn.innerHTML = ICON_CLOSE;
   header.appendChild(title);
   header.appendChild(clearBtn);
   header.appendChild(closeBtn);
 
-  const messages = el("div", { class: "ask-ai-messages", "aria-live": "polite" });
+  const messages = el("div", {
+    class: "ask-ai-messages",
+    "aria-live": "polite",
+  });
   const form = el("form", { class: "ask-ai-form" });
   const input = el("textarea", {
     rows: "1",
@@ -138,7 +152,9 @@
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", { cancelable: true }));
+      form.requestSubmit
+        ? form.requestSubmit()
+        : form.dispatchEvent(new Event("submit", { cancelable: true }));
     }
   });
   input.addEventListener("input", autosize);
@@ -273,7 +289,13 @@
       .map((m) => ({ role: m.role, content: m.content }));
 
     thread.push({ role: "user", content: question });
-    const reply = { role: "assistant", content: "", sources: [], id: null, day: null };
+    const reply = {
+      role: "assistant",
+      content: "",
+      sources: [],
+      id: null,
+      day: null,
+    };
     thread.push(reply);
     renderThread();
     const node = messages.lastElementChild;
@@ -287,7 +309,11 @@
     fetch(config.endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: question, history: history, page: location.href.split("#")[0] }),
+      body: JSON.stringify({
+        question: question,
+        history: history,
+        page: location.href.split("#")[0],
+      }),
       signal: controller.signal,
     })
       .then((res) => {
@@ -357,7 +383,9 @@
     let buffer = "";
     function pump() {
       return reader.read().then((r) => {
-        buffer += decoder.decode(r.value || new Uint8Array(), { stream: !r.done });
+        buffer += decoder.decode(r.value || new Uint8Array(), {
+          stream: !r.done,
+        });
         let idx = buffer.indexOf("\n\n");
         while (idx >= 0) {
           const frame = buffer.slice(0, idx);
@@ -379,7 +407,11 @@
 
   /* ------------------------------------------------------------ markdown */
   function escapeHtml(s) {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function inline(text, sources) {
@@ -387,16 +419,20 @@
     out = out.replace(/`([^`]+)`/g, (_, code) => `<code>${code}</code>`);
     out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     out = out.replace(/(^|[\s(])_([^_]+)_(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>");
-    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_whole, label, href) => {
-      let host = "";
-      try {
-        host = new URL(href).host;
-      } catch {
-        return label;
+    out = out.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+      (_whole, label, href) => {
+        let host = "";
+        try {
+          host = new URL(href).host;
+        } catch {
+          return label;
+        }
+        if (!LINK_HOSTS.some((h) => host === h || host.endsWith(`.${h}`)))
+          return label;
+        return `<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
       }
-      if (!LINK_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) return label;
-      return `<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
-    });
+    );
     out = out.replace(/\[(\d+)\]/g, (_m, n) => {
       let src = null;
       for (const s of sources) if (String(s.n) === n) src = s;
@@ -418,7 +454,8 @@
       if (/^```/.test(line)) {
         const code = [];
         i++;
-        while (i < lines.length && !/^```/.test(lines[i])) code.push(lines[i++]);
+        while (i < lines.length && !/^```/.test(lines[i]))
+          code.push(lines[i++]);
         i++;
         html += `<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`;
         continue;
@@ -429,7 +466,11 @@
         while (i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i])) {
           items.push(lines[i].replace(/^\s*([-*]|\d+\.)\s+/, ""));
           i++;
-          while (i < lines.length && /^\s{2,}\S/.test(lines[i]) && !/^\s*([-*]|\d+\.)\s+/.test(lines[i])) {
+          while (
+            i < lines.length &&
+            /^\s{2,}\S/.test(lines[i]) &&
+            !/^\s*([-*]|\d+\.)\s+/.test(lines[i])
+          ) {
             items[items.length - 1] += ` ${lines[i].trim()}`;
             i++;
           }
@@ -447,7 +488,11 @@
         continue;
       }
       const para = [];
-      while (i < lines.length && lines[i].trim() && !/^```|^\s*([-*]|\d+\.)\s+|^#{1,6}\s/.test(lines[i]))
+      while (
+        i < lines.length &&
+        lines[i].trim() &&
+        !/^```|^\s*([-*]|\d+\.)\s+|^#{1,6}\s/.test(lines[i])
+      )
         para.push(lines[i++]);
       html += `<p>${inline(para.join(" "), sources)}</p>`;
     }
@@ -458,7 +503,11 @@
   const searchInput = document.querySelector(".md-search__input");
   const searchOutput = document.querySelector(".md-search__output");
   if (searchInput && searchOutput) {
-    const cta = el("button", { class: "ask-ai-search-cta", type: "button", hidden: "" });
+    const cta = el("button", {
+      class: "ask-ai-search-cta",
+      type: "button",
+      hidden: "",
+    });
     cta.addEventListener("click", () => {
       const q = searchInput.value.trim();
       const toggle = document.querySelector("[data-md-toggle=search]");
@@ -480,12 +529,14 @@
   /* --------------------------------------------------------------- utils */
   function el(tag, attrs) {
     const node = document.createElement(tag);
-    if (attrs) for (const k of Object.keys(attrs)) node.setAttribute(k, attrs[k]);
+    if (attrs)
+      for (const k of Object.keys(attrs)) node.setAttribute(k, attrs[k]);
     return node;
   }
 
   try {
-    if (sessionStorage.getItem(OPEN_KEY) === "1" && thread.length) setOpen(true);
+    if (sessionStorage.getItem(OPEN_KEY) === "1" && thread.length)
+      setOpen(true);
   } catch {
     /* ignore */
   }

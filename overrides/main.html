@@ -1,6 +1,7 @@
 {#
-  Theme override: passes the "Ask AI" configuration to docs/javascripts/ask-ai.js.
-  The widget itself is created by that script so this template stays minimal.
+  Theme override: passes the "Ask AI about UCP" configuration to
+  docs/javascripts/ask-ai.js through data attributes. The widget itself is
+  created by that script so this template stays minimal.
   Set extra.ask_ai.endpoint in mkdocs.yml (or ASK_AI_ENDPOINT) to enable it.
 #}
 {% extends "base.html" %}
@@ -8,11 +9,10 @@
 {% block config %}
   {{ super() }}
   {% if config.extra.ask_ai and config.extra.ask_ai.endpoint %}
-  <script id="ask-ai-config" type="application/json">
-    {{ {
-      "endpoint": config.extra.ask_ai.endpoint,
-      "version": config.extra.ucp_version
-    } | tojson }}
-  </script>
+  <div
+    id="ask-ai-config"
+    data-endpoint="{{ config.extra.ask_ai.endpoint }}"
+    data-version="{{ config.extra.ucp_version }}"
+    hidden></div>
   {% endif %}
 {% endblock %}
