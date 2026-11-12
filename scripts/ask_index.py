@@ -100,6 +100,7 @@ class _TextExtractor(HTMLParser):
     self._heading_text: list[str] = []
     self._cell_text: list[str] = []
     self._in_cell = False
+    self._in_row = False
     self._in_pre = False
     self._buf: list[str] = []
 
@@ -129,6 +130,10 @@ class _TextExtractor(HTMLParser):
       self._heading = (tag, attr.get("id") or "")
       self._heading_text = []
       return
+    if tag == "tr":
+      self._flush()
+      self._in_row = True
+      return
     if tag in ("td", "th"):
       self._in_cell = True
       self._cell_text = []
@@ -157,6 +162,7 @@ class _TextExtractor(HTMLParser):
       return
     if tag == "tr":
       self._flush()
+      self._in_row = False
       return
     if tag == "pre":
       self._flush()
@@ -172,6 +178,9 @@ class _TextExtractor(HTMLParser):
       self._heading_text.append(data)
     elif self._in_cell:
       self._cell_text.append(data)
+    elif self._in_row and not data.strip():
+      # Whitespace between cells would break a row over several lines.
+      return
     else:
       self._buf.append(data)
 

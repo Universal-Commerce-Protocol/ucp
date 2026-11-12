@@ -85,6 +85,15 @@ class ChunkHtmlTest(unittest.TestCase):
       self.assertLessEqual(chunk.words, MAX_CHUNK_WORDS)
     self.assertEqual(chunks[1].heading, "Big (part 2)")
 
+  def test_table_rows_stay_on_one_line(self):
+    """Whitespace between cells does not split a row across lines."""
+    html = (
+      '<h2 id="f">Fields</h2><table><tbody>\n<tr>\n<td>line_items</td>\n'
+      "<td>Array</td>\n<td>Required</td>\n</tr>\n</tbody></table>"
+    )
+    chunks = chunk_html(html, "x/", "X")
+    self.assertIn("line_items | Array | Required |", chunks[0].text)
+
   def test_ids_are_stable(self):
     """Chunk ids are deterministic for identical input."""
     a = chunk_html(PAGE, "shopping/checkout/", "Checkout Capability")
