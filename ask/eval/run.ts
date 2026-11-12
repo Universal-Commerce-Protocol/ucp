@@ -73,8 +73,27 @@ async function ask(
 
 let passed = 0;
 const failures: string[] = [];
-for (const c of cases) {
-  const r = await ask(c.q);
+/** One retry: a dropped connection should not sink a 100-question run. */
+async function askWithRetry(q: string) {
+  try {
+    return await ask(q);
+  } catch {
+    try {
+      return await ask(q);
+    } catch (err) {
+      return {
+        kind: `network_error: ${String(err)}`,
+        sources: [],
+        text: "",
+        status: 0,
+      };
+    }
+  }
+}
+
+for (const [i, c] of cases.entries()) {
+  const r = await askWithRetry(c.q);
+  if ((i + 1) % 10 === 0) console.log(`  ${i + 1}/${cases.length} asked`);
   const kindOk = r.kind === c.kind;
   const sourceOk =
     !c.source || r.sources.some((u) => u.includes(c.source as string));
