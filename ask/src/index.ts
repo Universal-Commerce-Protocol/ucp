@@ -71,8 +71,8 @@ const STEERING_PATTERN =
 // Requests for work that is not a question about the docs (translation,
 // creative writing, general coding). Allowed when the request names UCP
 // material, e.g. "write an example checkout request".
-// cspell:disable-next-line
 const TASK_PATTERN =
+  // cspell:disable-next-line
   /^(please\s+)?(translate|traduce|write|compose|generate|create|draft|summari[sz]e|rewrite|paraphrase|tell me|give me|make)\b[^.?!]{0,80}\b(poem|limerick|haiku|story|song|essay|joke|rap|lyrics|tweet|email|letter|blog|script|code|program|python|javascript|typescript|java|rust|golang|scraper|scrape|bot|french|spanish|german|english|chinese|japanese|language|summary of (this|the following))\b/i;
 const UCP_NOUNS =
   /\b(ucp|checkout|cart|catalog|order|booking|lodging|profile|capability|capabilities|extension|payment|handler|mandate|signature|transport|rest|mcp|a2a|embedded|schema|payload|request|response|endpoint|identity|linking|fulfil|discount|tip|well-known)\b/i;
