@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription_line_item.json",
+  "title": "Subscription Line Item",
+  "description": "A line item that recurs under a subscription: the item, its quantity, and the purchase option stating the terms currently in effect.",
+  "type": "object",
+  "required": [
+    "id",
+    "item",
+    "quantity",
+    "purchase_option"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Line item identifier, unique within the subscription. It identifies the subscription line, not an Order line."
+    },
+    "item": {
+      "$ref": "item.json",
+      "description": "The item that recurs, including identity, price, and sale basis. Its `price` is the unit price recurring orders are currently placed at."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Quantity placed in each recurring order, as an integer step count of the item's `quantity_unit`. When `item.quantity_unit` is absent, it counts whole items."
+    },
+    "purchase_option": {
+      "allOf": [
+        {
+          "$ref": "purchase_option.json"
+        },
+        {
+          "required": [
+            "schedules"
+          ]
+        }
+      ],
+      "description": "The purchase option the line recurs on, stating the terms currently in effect. Its `price` is the line's `item.price`; its `schedules` state the recurring orders for the line at its quantity, starting with the schedule in effect. Its `id` need not resolve through the catalog."
+    }
+  }
+}

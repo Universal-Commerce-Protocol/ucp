@@ -114,6 +114,12 @@ The `ucp` object included in order responses or events.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'reference') }}
 
+### Subscription Response Metadata {: #ucp-response-subscription-schema }
+
+The `ucp` object included in subscription responses.
+
+{{ extension_schema_fields('ucp.json#/$defs/response_subscription_schema', 'reference') }}
+
 ### Location Response Metadata {: #ucp-response-location-schema }
 
 The `ucp` object included in location responses.

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/upcoming_order.json",
+  "title": "Upcoming Order",
+  "description": "A recurring order the Business plans to place under a subscription: when it expects to place it and, where it can state it, what the order costs.",
+  "type": "object",
+  "required": [
+    "expected_at"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "expected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 date-time when the Business expects to place the order. Indicative; the Business determines actual order dates."
+    },
+    "totals": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/total.json"
+      },
+      "minItems": 1,
+      "description": "Breakdown of the order as the Business expects to place it, with exactly one `total` entry. Before taxes, fulfillment, and fees unless the Business can state them.",
+      "contains": {
+        "properties": {
+          "type": {
+            "const": "total"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  }
+}

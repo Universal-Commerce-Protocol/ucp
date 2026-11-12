@@ -89,6 +89,11 @@ nav:
               - Transports:
                   - REST: specification/shopping/order/rest.md
                   - MCP: specification/shopping/order/mcp.md
+          - Subscription Capability:
+              - Overview: specification/shopping/subscription/index.md
+              - Transports:
+                  - REST: specification/shopping/subscription/rest.md
+                  - MCP: specification/shopping/subscription/mcp.md
           - Extensions:
               - Fulfillment: specification/shopping/extensions/fulfillment.md
               - Discounts: specification/shopping/extensions/discount.md
@@ -576,6 +581,21 @@ plugins:
               Model Context Protocol (MCP) transport binding for the Order
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
+        Subscription Capability:
+          - specification/shopping/subscription/index.md: >-
+              Read access to subscriptions via the Subscription Capability,
+              detailing the subscription entity (identity, status, recurring
+              line items and the terms in effect, the Orders placed under it,
+              upcoming orders), the Get Subscription operation, scopes, and
+              authorization.
+          - specification/shopping/subscription/rest.md: >-
+              HTTP REST transport binding for the Subscription Capability,
+              detailing endpoints, HTTP headers, payload schemas, and error
+              structures.
+          - specification/shopping/subscription/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the
+              Subscription Capability, detailing the JSON-RPC tool interface
+              and parameters for fetching subscription states.
         Shopping Extensions:
           - specification/shopping/extensions/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,

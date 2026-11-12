@@ -153,6 +153,7 @@ up-to-date list.
 | `dev.ucp.shopping.catalog.search` | Search across a business catalog |
 | `dev.ucp.shopping.catalog.lookup` | Retrieve a specific product by ID |
 | `dev.ucp.shopping.order` | Order lifecycle events |
+| `dev.ucp.shopping.subscription` | Read access to subscriptions |
 | `dev.ucp.shopping.permalink` | Shareable links to pre-populated carts and products |
 | `dev.ucp.common.identity_linking` | OAuth-based account linking |
 | `dev.ucp.common.location.search` | Search for physical stores and pickup locations |

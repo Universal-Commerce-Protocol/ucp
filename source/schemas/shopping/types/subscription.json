@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/subscription.json",
+  "title": "Subscription",
+  "description": "An agreement between a buyer and a Business under which the Business places recurring orders for the buyer. A current-state snapshot: the line items that recur and the terms in effect, the Order that started it, the Orders placed under it, and the orders the Business plans to place.",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "permalink_url",
+    "currency",
+    "line_items"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque identifier the Business assigns to the subscription. Stable for the life of the subscription and never reused."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for identifying the subscription. MUST only be provided by the business."
+    },
+    "status": {
+      "type": "string",
+      "description": "Current state of the subscription. Well-known values: `active` (the Business places recurring orders as scheduled), `paused` (no recurring order is placed until the subscription resumes), `canceled` (the buyer or the Business ended the subscription; no further recurring order is placed), `ended` (the subscription ran to its stated end; no further recurring order is placed). Platforms MUST tolerate unknown values.",
+      "examples": [
+        "active",
+        "paused",
+        "canceled",
+        "ended"
+      ]
+    },
+    "permalink_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Permalink to the subscription on the Business's site, where the buyer manages it."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code of every amount on the subscription."
+    },
+    "origin": {
+      "type": "object",
+      "description": "The Order that started the subscription. Present when an Order started it and the Business can identify that Order.",
+      "required": [
+        "order_id"
+      ],
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "ID of the Order that started the subscription."
+        },
+        "line_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "IDs of the Order line items the subscription was started from."
+        }
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "$ref": "subscription_line_item.json"
+      },
+      "minItems": 1,
+      "description": "The line items the Business places recurring orders for together under this subscription, each with the terms currently in effect."
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "$ref": "order_confirmation.json"
+      },
+      "description": "References to the Orders that belong to the subscription, most recent first: the Order that started it, when there is one, and each recurring Order the Business has placed under it. A Business MAY list only the most recent. Absent or empty when no Order exists yet."
+    },
+    "upcoming_orders": {
+      "type": "array",
+      "items": {
+        "$ref": "upcoming_order.json"
+      },
+      "description": "The recurring orders the Business plans to place, next one first. They are not Orders yet and carry no `id`. Absent or empty when none is planned."
+    }
+  }
+}
