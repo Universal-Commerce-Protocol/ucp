@@ -25,10 +25,9 @@ const flag = (name: string) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 if (!endpoint) {
-  console.error(
+  throw new Error(
     "usage: npm run eval -- https://<host>/v1/ask [--min 0.9] [--only <kind>]"
   );
-  process.exit(2);
 }
 const min = Number(flag("--min") ?? 0.9);
 const only = flag("--only");
@@ -94,4 +93,4 @@ if (failures.length) console.log(`Failures:\n${failures.join("\n")}\n`);
 console.log(
   `${passed}/${cases.length} passed (${(rate * 100).toFixed(1)}%), minimum ${(min * 100).toFixed(0)}%`
 );
-process.exit(rate >= min ? 0 : 1);
+process.exitCode = rate >= min ? 0 : 1;
