@@ -1,289 +1,254 @@
-/* "Ask AI" assistant: header entry point + right-hand drawer.
-   Visual language follows custom.css: Google Sans, #202124 text, #5f6368
-   secondary, #1a73e8 accent, #f8f9fa surfaces, #dadce0 borders, pill buttons,
-   16px-radius cards. Material theme variables are used as dark-mode fallbacks. */
+/**
+ * Copyright 2026 UCP Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-:root {
-  --ask-ink: #202124;
-  --ask-ink-2: #5f6368;
-  --ask-line: #dadce0;
-  --ask-surface: #f8f9fa;
-  --ask-bg: #fff;
-  --ask-accent: #1a73e8;
-  --ask-accent-soft: #e8f0fe;
-  --ask-font: "Google Sans", "Roboto", system-ui, sans-serif;
-  --ask-radius: 16px;
-}
-[data-md-color-scheme="slate"] {
-  --ask-ink: var(--md-default-fg-color);
-  --ask-ink-2: var(--md-default-fg-color--light);
-  --ask-line: var(--md-default-fg-color--lightest);
-  --ask-surface: var(--md-code-bg-color);
-  --ask-bg: var(--md-default-bg-color);
-  --ask-accent: #8ab4f8;
-  --ask-accent-soft: rgb(138 180 248 / 15%);
-}
+/* "Ask AI about UCP": header entry point and right-hand panel.
+   Every value below mirrors custom.css so the panel reads as part of the site:
+   - text #202124, secondary #5f6368 / #3c4043, headings weight 450
+   - links #1a73e8 underlined, external-link icon from the global rule
+   - pill buttons: 1px solid #000, radius 50px, weight 500, hover #e9ecef
+   - surfaces #f8f9fa, borders #dadce0 / #e0e0e0, cards radius 16px
+   - code: Roboto Mono on #f8f9fa with 1px #dadce0, radius 12px
+   - search field: rgb(0 0 0 / 5%) with radius 4px */
 
-/* ------------------------------------------------------------ header pill */
+/* --- Header button (same recipe as .promo-button, sized for the header) --- */
 .ask-ai-header-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   height: 1.8rem;
-  margin: 0 0.4rem 0 0.2rem;
-  padding: 0 0.8rem 0 0.65rem;
-  border: 1px solid var(--ask-line);
+  margin: 0 0.6rem 0 0.2rem;
+  padding: 0 0.9rem;
+  border: 1px solid #000;
   border-radius: 50px;
-  background: var(--ask-bg);
-  color: var(--ask-ink);
-  font-family: var(--ask-font);
+  background: transparent;
+  color: #000;
+  font-family: inherit;
   font-size: 0.7rem;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.2s ease-in-out;
 }
 .ask-ai-header-btn:hover,
-.ask-ai-header-btn[aria-expanded="true"] { background: var(--ask-surface); border-color: var(--ask-ink-2); }
-.ask-ai-header-btn svg { width: 0.9rem; height: 0.9rem; fill: var(--ask-accent); flex: none; }
-.ask-ai-header-btn kbd {
-  margin-left: 0.2rem;
-  padding: 0.05rem 0.3rem;
-  border: 1px solid var(--ask-line);
-  border-radius: 4px;
-  background: var(--ask-surface);
-  color: var(--ask-ink-2);
-  font: 0.55rem/1.3 var(--ask-font);
-}
-@media screen and (max-width: 59.9375em) {
-  .ask-ai-header-btn { width: 1.8rem; padding: 0; justify-content: center; }
-  .ask-ai-header-btn span, .ask-ai-header-btn kbd { display: none; }
+.ask-ai-header-btn[aria-expanded="true"] { background-color: #e9ecef; }
+.ask-ai-header-btn svg { display: none; width: 1.2rem; height: 1.2rem; fill: currentcolor; }
+@media screen and (max-width: 76.1875em) {
+  .ask-ai-header-btn { width: 2.4rem; height: 2.4rem; margin: 0; padding: 0; border: 0; justify-content: center; color: #5f6368; }
+  .ask-ai-header-btn:hover, .ask-ai-header-btn[aria-expanded="true"] { background: transparent; color: #202124; }
+  .ask-ai-header-btn span { display: none; }
+  .ask-ai-header-btn svg { display: block; }
 }
 
-/* ------------------------------------------------------------------ drawer */
+/* --- Panel --- */
 .ask-ai-panel {
   position: fixed;
   inset: 0 0 0 auto;
   z-index: 60;
   display: flex;
   flex-direction: column;
-  width: min(27rem, 100vw);
-  background: var(--ask-bg);
-  color: var(--ask-ink);
-  border-left: 1px solid var(--ask-line);
+  width: min(28rem, 100vw);
+  background: #fff;
+  color: #202124;
+  border-left: 1px solid rgb(0 0 0 / 10%);
   box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
-  font-family: var(--ask-font);
-  font-size: 0.72rem;
-  line-height: 1.55;
-  transform: translateX(0);
-  transition: transform 0.22s ease;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  transition: transform 0.2s ease-in-out;
 }
 .ask-ai-panel[hidden] { display: flex; transform: translateX(105%); visibility: hidden; }
 
 .ask-ai-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid var(--ask-line);
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
 }
-.ask-ai-header svg { width: 1rem; height: 1rem; fill: var(--ask-accent); }
-.ask-ai-header strong { flex: 1; font-size: 0.85rem; font-weight: 500; }
+.ask-ai-header strong { flex: 1; font-size: 0.9rem; font-weight: 450; }
 .ask-ai-header button {
-  height: 1.6rem;
-  padding: 0 0.7rem;
-  border: 1px solid var(--ask-line);
-  border-radius: 50px;
+  padding: 0;
+  border: 0;
   background: transparent;
-  color: var(--ask-ink);
-  font: 500 0.65rem/1 var(--ask-font);
+  color: #5f6368;
+  font: inherit;
+  font-size: 0.7rem;
   cursor: pointer;
 }
-.ask-ai-header button:hover { background: var(--ask-surface); }
-.ask-ai-header .ask-ai-close { width: 1.6rem; padding: 0; border: 0; font-size: 0.9rem; color: var(--ask-ink-2); }
+.ask-ai-header button:hover { color: #202124; }
+.ask-ai-header .ask-ai-new { text-decoration: underline; }
+.ask-ai-header .ask-ai-close svg { display: block; width: 1.1rem; height: 1.1rem; fill: currentcolor; }
 
 .ask-ai-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  scroll-behavior: smooth;
+  gap: 1.1rem;
 }
-.ask-ai-intro h3 { margin: 0 0 0.3rem; font: 400 1.1rem/1.3 var(--ask-font); color: var(--ask-ink); }
-.ask-ai-intro p { margin: 0 0 0.8rem; color: var(--ask-ink-2); }
 
-.ask-ai-msg { max-width: 100%; }
+/* Intro state: plain prose plus a short list of example questions. */
+.ask-ai-intro p { margin: 0 0 1.2rem; color: #3c4043; }
+.ask-ai-eyebrow {
+  margin: 0 0 0.6rem;
+  text-transform: uppercase;
+  color: #5f6368;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+.ask-ai-examples { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.ask-ai-examples button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1a73e8;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ask-ai-examples button:hover { color: #174ea6; }
+
 .ask-ai-msg--user {
-  align-self: flex-end;
-  max-width: 85%;
-  padding: 0.5rem 0.85rem;
-  border-radius: 18px 18px 4px 18px;
-  background: var(--ask-ink);
-  color: var(--ask-bg);
+  padding: 0.7rem 1rem;
+  border-radius: 16px;
+  background: #f8f9fa;
+  font-weight: 500;
   white-space: pre-wrap;
 }
-.ask-ai-msg--assistant { align-self: stretch; }
-.ask-ai-msg--assistant p { margin: 0 0 0.55em; }
+.ask-ai-msg--assistant p { margin: 0 0 0.6em; }
 .ask-ai-msg--assistant p:last-child { margin-bottom: 0; }
-.ask-ai-msg--assistant ul, .ask-ai-msg--assistant ol { margin: 0.2em 0 0.55em 1.2em; padding: 0; }
-.ask-ai-msg--assistant li { margin: 0.15em 0; }
+.ask-ai-msg--assistant ul, .ask-ai-msg--assistant ol { margin: 0.3em 0 0.6em 1.2em; padding: 0; }
+.ask-ai-msg--assistant li { margin: 0.2em 0; }
+.ask-ai-msg--assistant strong { font-weight: 500; }
+.ask-ai-msg--assistant a { color: #1a73e8; text-decoration: underline; }
 .ask-ai-msg--assistant code {
   font-family: "Roboto Mono", monospace;
   font-size: 0.85em;
-  padding: 0.05em 0.3em;
+  padding: 0.1em 0.3em;
   border-radius: 4px;
-  background: var(--ask-surface);
-  color: var(--ask-ink);
+  background: #f8f9fa;
+  color: #202124;
 }
 .ask-ai-msg--assistant pre {
-  margin: 0.5em 0;
-  padding: 0.7em 0.8em;
+  margin: 0.6em 0;
+  padding: 12px;
   overflow-x: auto;
-  border: 1px solid var(--ask-line);
+  border: 1px solid #dadce0;
   border-radius: 12px;
-  background: var(--ask-surface);
+  background: #f8f9fa;
 }
-.ask-ai-msg--assistant pre code { padding: 0; background: transparent; font-size: 0.65rem; }
-.ask-ai-msg--assistant a { color: var(--ask-accent); }
-.ask-ai-cite {
-  display: inline-block;
-  min-width: 1.2em;
-  margin: 0 0.1em;
-  padding: 0 0.35em;
-  border-radius: 50px;
-  background: var(--ask-accent-soft);
-  color: var(--ask-accent) !important;
-  font-size: 0.72em;
-  font-weight: 500;
-  line-height: 1.6;
-  text-align: center;
-  text-decoration: none !important;
-  vertical-align: 0.15em;
-}
-.ask-ai-cite:hover { background: var(--ask-accent); color: #fff !important; }
+.ask-ai-msg--assistant pre code { padding: 0; background: transparent; font-size: 0.65rem; line-height: 1.5; }
+
+/* Inline citations: numbered superscript links, not chips. */
+.ask-ai-msg--assistant sup { font-size: 0.7em; line-height: 0; vertical-align: super; }
+.ask-ai-cite { color: #1a73e8 !important; text-decoration: none !important; font-weight: 500; padding: 0 0.1em; }
+.ask-ai-cite:hover { text-decoration: underline !important; }
 .ask-ai-cite::after { content: none !important; }
 
-.ask-ai-sources { margin-top: 0.7rem; }
-.ask-ai-sources > span { display: block; margin-bottom: 0.3rem; font-size: 0.6rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ask-ink-2); }
-.ask-ai-sources ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
-.ask-ai-sources li a {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--ask-line);
-  border-radius: 12px;
-  color: var(--ask-ink);
-  text-decoration: none;
-  font-size: 0.66rem;
-}
-.ask-ai-sources li a:hover { background: var(--ask-surface); }
-.ask-ai-sources li a::after { content: none !important; }
-.ask-ai-sources li b { color: var(--ask-accent); font-weight: 500; }
-.ask-ai-sources li small { color: var(--ask-ink-2); }
+.ask-ai-sources { margin-top: 1rem; }
+.ask-ai-sources ol { margin: 0; padding: 0 0 0 1.2em; color: #5f6368; font-size: 0.7rem; }
+.ask-ai-sources li { margin: 0.25em 0; }
+.ask-ai-sources a { color: #1a73e8; text-decoration: underline; }
+.ask-ai-sources small { color: #5f6368; font-size: inherit; }
 
 .ask-ai-pending::after {
   content: "";
   display: inline-block;
-  width: 0.5em;
+  width: 0.45em;
   height: 1em;
-  margin-left: 0.15em;
+  margin-left: 0.1em;
   vertical-align: text-bottom;
-  background: var(--ask-ink-2);
+  background: #5f6368;
   animation: ask-ai-blink 1s steps(2) infinite;
 }
 @keyframes ask-ai-blink { to { opacity: 0; } }
 
 .ask-ai-error {
-  padding: 0.5rem 0.8rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid #dadce0;
   border-radius: 12px;
-  background: #fce8e6;
-  color: #c5221f;
+  background: #f8f9fa;
+  color: #3c4043;
 }
-[data-md-color-scheme="slate"] .ask-ai-error { background: rgb(242 139 130 / 15%); color: #f28b82; }
 
-.ask-ai-suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.ask-ai-suggestions button {
-  padding: 0.4rem 0.8rem;
-  border: 1px solid var(--ask-line);
-  border-radius: 50px;
-  background: transparent;
-  color: var(--ask-ink);
-  font: 500 0.66rem/1.2 var(--ask-font);
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-.ask-ai-suggestions button:hover { background: var(--ask-surface); border-color: var(--ask-ink-2); }
-
+/* Composer: the site's search-field surface plus its pill button. */
 .ask-ai-form {
   display: flex;
   align-items: flex-end;
-  gap: 0.4rem;
-  margin: 0 1rem;
-  padding: 0.35rem 0.35rem 0.35rem 1rem;
-  border: 1px solid var(--ask-line);
-  border-radius: 28px;
-  background: var(--ask-surface);
+  gap: 0.6rem;
+  padding: 0 1.2rem;
 }
-.ask-ai-form:focus-within { border-color: var(--ask-ink-2); background: var(--ask-bg); }
 .ask-ai-form textarea {
   flex: 1;
-  min-height: 1.9rem;
-  max-height: 6rem;
-  padding: 0.45rem 0;
+  min-height: 2.2rem;
+  max-height: 7rem;
+  padding: 0.55rem 0.8rem;
   border: 0;
-  background: transparent;
-  color: var(--ask-ink);
-  font: 0.72rem/1.4 var(--ask-font);
+  border-radius: 4px;
+  background: rgb(0 0 0 / 5%);
+  color: #202124;
+  font: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
   resize: none;
-  outline: none;
 }
-.ask-ai-form textarea::placeholder { color: var(--ask-ink-2); }
+.ask-ai-form textarea:focus { outline: 2px solid #202124; outline-offset: -2px; background: #fff; }
+.ask-ai-form textarea::placeholder { color: #5f6368; }
 .ask-ai-form button {
-  flex: none;
-  width: 1.9rem;
-  height: 1.9rem;
-  border: 0;
-  border-radius: 50%;
-  background: var(--ask-ink);
-  color: var(--ask-bg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  height: 2.2rem;
+  padding: 0 1.2rem;
+  border: 1px solid #000;
+  border-radius: 50px;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: background-color 0.2s ease-in-out;
 }
-.ask-ai-form button svg { width: 0.9rem; height: 0.9rem; fill: currentColor; }
-.ask-ai-form button:disabled { opacity: 0.35; cursor: default; }
+.ask-ai-form button:hover { background-color: #e9ecef; }
+.ask-ai-form button:disabled { opacity: 0.4; cursor: default; background: transparent; }
 
 .ask-ai-footer {
-  padding: 0.5rem 1.2rem 0.9rem;
-  font-size: 0.58rem;
-  color: var(--ask-ink-2);
-  text-align: center;
+  padding: 0.6rem 1.2rem 1rem;
+  color: #5f6368;
+  font-size: 0.6rem;
 }
 
-/* Call-to-action injected into the Material search dialog. */
+/* Row added to the search dialog. */
 .ask-ai-search-cta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: block;
   width: 100%;
-  padding: 0.65rem 0.9rem;
+  padding: 0.7rem 0.9rem;
   border: 0;
-  border-bottom: 1px solid var(--ask-line);
-  background: var(--ask-bg);
-  color: var(--ask-ink);
-  font: 0.7rem/1.3 var(--ask-font);
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
+  background: #fff;
+  color: #202124;
+  font: inherit;
+  font-size: 0.7rem;
   text-align: left;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.ask-ai-search-cta:hover { background: var(--ask-surface); }
-.ask-ai-search-cta svg { width: 0.9rem; height: 0.9rem; fill: var(--ask-accent); flex: none; }
-.ask-ai-search-cta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ask-ai-search-cta:hover { background: #f8f9fa; }
+.ask-ai-search-cta b { font-weight: 500; }
 
 @media print { .ask-ai-header-btn, .ask-ai-panel { display: none !important; } }

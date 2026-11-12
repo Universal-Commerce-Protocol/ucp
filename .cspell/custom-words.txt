@@ -227,3 +227,10 @@ qwen
 SGLang
 vLLM
 LoRA
+GGUF
+gguf
+huggingface
+chatml
+ollama
+uncited
+UNCITED

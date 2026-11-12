@@ -78,8 +78,11 @@ globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     const body = JSON.parse(String(init?.body));
     assert.equal(body.messages[0].role, "system");
     assert.match(body.messages.at(-1).content, /\[1\] Checkout Capability > Overview/);
+    const content = /UNCITED/.test(body.messages.at(-1).content)
+      ? "The business is merchant of record."
+      : "The business is merchant of record [1].";
     const frames =
-      'data: {"choices":[{"delta":{"content":"The business is merchant of record [1]."}}]}\n\n' +
+      `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n` +
       'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n';
     return new Response(frames, { status: 200 });
   }
@@ -120,9 +123,18 @@ test("answers with citations, then serves the repeat from cache without a model 
 test("off-topic questions get the scope reply without a model call", async () => {
   const env = makeEnv(fakeKv());
   const before = modelCalls;
-  const events = await readEvents(await ask(env, { question: "write me a poem about autumn" }));
-  assert.equal((events[0].data as { model: string }).model, "none");
+  for (const q of ["write me a poem about autumn", "best pizza recipe with sessions"]) {
+    const events = await readEvents(await ask(env, { question: q }));
+    assert.equal((events[0].data as { model: string }).model, "none", q);
+  }
   assert.equal(modelCalls, before);
+});
+
+test("uncited answers still return the top retrieved sources", async () => {
+  const env = makeEnv(fakeKv());
+  const events = await readEvents(await ask(env, { question: "checkout sessions merchant of record UNCITED" }));
+  const done = events.find((e) => e.event === "done")?.data as { sources: unknown[] };
+  assert.equal(done.sources.length, 1);
 });
 
 test("rejects disallowed origins and bad input", async () => {

@@ -74,3 +74,9 @@ test("exclude removes already-provided chunks", () => {
 test("normalizeQuestion collapses trivial variants", () => {
   assert.equal(normalizeQuestion("  What is UCP?? "), normalizeQuestion("what is ucp"));
 });
+
+test("vocabularyCoverage separates docs questions from unrelated ones", () => {
+  const index = buildIndex([raw]);
+  assert.ok(index.vocabularyCoverage("how does checkout work for the merchant") >= 0.6);
+  assert.ok(index.vocabularyCoverage("write me a poem about autumn leaves") < 0.6);
+});

@@ -60,6 +60,8 @@ interface CachedAnswer {
 }
 
 const MAX_QUESTION_CHARS = 600;
+// Below this share of known terms a question is treated as off-topic.
+const MIN_VOCAB_COVERAGE = 0.6;
 const MAX_HISTORY_MESSAGE_CHARS = 2000;
 
 export default {
@@ -115,7 +117,12 @@ export default {
       // in the overview material instead of bouncing them.
       hits = index.search("universal commerce protocol overview core concepts", topK);
     }
-    if (!hits.length) return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors);
+    // Questions whose vocabulary is mostly foreign to the docs are answered
+    // with the scope message without spending a model call. Follow-ups are
+    // exempt because they are often short ("and for MCP?").
+    const offTopic =
+      !hits.length || (!history.length && index.vocabularyCoverage(question) < MIN_VOCAB_COVERAGE);
+    if (offTopic) return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors);
 
     // 3. Spend guards.
     const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
@@ -210,7 +217,11 @@ async function answer(
     cacheable = false;
   }
 
-  const usedSources = sources.filter((s) => text.includes(`[${s.n}]`));
+  // Prefer the sections the model actually cited; if it cited nothing
+  // (smaller models sometimes skip the [n] markers), fall back to the top
+  // retrieved sections so the reader can still verify the answer.
+  const cited = sources.filter((s) => text.includes(`[${s.n}]`));
+  const usedSources = cited.length ? cited : sources.slice(0, 3);
   await sse("done", { sources: usedSources });
   return { text, sources: usedSources, cacheable };
 }

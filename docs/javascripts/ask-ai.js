@@ -1,12 +1,25 @@
-/*
- * "Ask AI" widget for ucp.dev. Dependency-free. Talks to the Worker in ask/
- * over Server-Sent Events and renders a constrained subset of Markdown.
+/**
+ * Copyright 2026 UCP Authors
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * "Ask AI about UCP". Dependency-free. Talks to the Worker in ask/ over
+ * Server-Sent Events and renders a constrained subset of Markdown.
  * Config comes from <script id="ask-ai-config"> rendered by overrides/main.html.
  */
 (() => {
-  
-
   const configEl = document.getElementById("ask-ai-config");
   if (!configEl) return;
   let config;
@@ -17,18 +30,19 @@
   }
   if (!config?.endpoint) return;
 
+  const LABEL = "Ask AI about UCP";
   const STORAGE_KEY = "ucp-ask-ai-thread";
   const OPEN_KEY = "ucp-ask-ai-open";
   const MAX_STORED_MESSAGES = 12;
-  const SUGGESTIONS = [
-    "What is UCP and who is it for?",
-    "How does a checkout session work end to end?",
-    "What is the difference between REST and MCP transports?",
-    "How do payment handlers work?",
-    "How do I get started implementing UCP?",
+  const EXAMPLES = [
+    "How does a platform discover which capabilities a business supports?",
+    "What happens between creating and completing a checkout?",
+    "How do payment handlers fit into a checkout?",
   ];
-  const SPARK =
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9L12 2zm7 11l.9 2.6 2.6.9-2.6.9L19 20l-.9-2.6-2.6-.9 2.6-.9L19 13zM5 14l.7 2 2 .7-2 .7L5 19.5l-.7-2.1-2-.7 2-.7L5 14z"/></svg>';
+  const ICON_CHAT =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>';
+  const ICON_CLOSE =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6z"/></svg>';
 
   /* ------------------------------------------------------------------ state */
   let thread = loadThread(); // [{role, content, sources?}]
@@ -52,32 +66,27 @@
   }
 
   /* --------------------------------------------------------------- markup */
-  const SEND =
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l1.4 1.4L11 7.8V20h2V7.8l5.6 5.6L20 12l-8-8-8 8z"/></svg>';
-
-  // Header entry point, placed next to search like other developer docs sites.
-  const fab = el("button", {
+  const openBtn = el("button", {
     class: "ask-ai-header-btn",
     type: "button",
-    "aria-label": "Ask AI about the UCP documentation",
+    "aria-label": LABEL,
     "aria-expanded": "false",
-    title: "Ask AI (press . to open)",
+    title: LABEL,
   });
-  fab.innerHTML = `${SPARK}<span>Ask AI</span><kbd>.</kbd>`;
+  openBtn.innerHTML = `${ICON_CHAT}<span>${LABEL}</span>`;
   const headerInner = document.querySelector(".md-header__inner");
   const search = headerInner ? headerInner.querySelector(".md-search") : null;
-  if (headerInner) headerInner.insertBefore(fab, search ? search.nextSibling : null);
-  else document.body.appendChild(fab);
+  if (headerInner) headerInner.insertBefore(openBtn, search ? search.nextSibling : null);
+  else document.body.appendChild(openBtn);
 
-  const panel = el("section", { class: "ask-ai-panel", role: "dialog", "aria-label": "Ask AI", hidden: "" });
+  const panel = el("section", { class: "ask-ai-panel", role: "dialog", "aria-label": LABEL, hidden: "" });
   const header = el("div", { class: "ask-ai-header" });
-  header.innerHTML = SPARK;
   const title = el("strong");
-  title.textContent = "Ask AI";
-  const clearBtn = el("button", { type: "button", title: "Start a new conversation" });
-  clearBtn.textContent = "New chat";
+  title.textContent = LABEL;
+  const clearBtn = el("button", { type: "button", class: "ask-ai-new" });
+  clearBtn.textContent = "New conversation";
   const closeBtn = el("button", { type: "button", class: "ask-ai-close", "aria-label": "Close" });
-  closeBtn.textContent = "\u2715";
+  closeBtn.innerHTML = ICON_CLOSE;
   header.appendChild(title);
   header.appendChild(clearBtn);
   header.appendChild(closeBtn);
@@ -86,16 +95,16 @@
   const form = el("form", { class: "ask-ai-form" });
   const input = el("textarea", {
     rows: "1",
-    placeholder: "Ask about UCP\u2026",
+    placeholder: "Ask a question about UCP",
     maxlength: "600",
     "aria-label": "Your question",
   });
-  const sendBtn = el("button", { type: "submit", "aria-label": "Send" });
-  sendBtn.innerHTML = SEND;
+  const sendBtn = el("button", { type: "submit" });
+  sendBtn.textContent = "Ask";
   form.appendChild(input);
   form.appendChild(sendBtn);
   const footer = el("div", { class: "ask-ai-footer" });
-  footer.textContent = `Answers are generated from the ${config.version || "current"} documentation and can be wrong. Check the linked sections.`;
+  footer.textContent = `Generated from the ${config.version || "current"} documentation. Answers can be wrong; check the linked sections.`;
 
   panel.appendChild(header);
   panel.appendChild(messages);
@@ -104,25 +113,24 @@
   document.body.appendChild(panel);
 
   /* -------------------------------------------------------------- behavior */
-  fab.addEventListener("click", () => { setOpen(true); input.focus(); });
-  closeBtn.addEventListener("click", () => { setOpen(false); });
+  openBtn.addEventListener("click", () => {
+    if (!panel.hidden) {
+      setOpen(false);
+      return;
+    }
+    setOpen(true);
+    input.focus();
+  });
+  closeBtn.addEventListener("click", () => setOpen(false));
   clearBtn.addEventListener("click", () => {
     if (controller) controller.abort();
     thread = [];
     saveThread();
     renderThread();
+    input.focus();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !panel.hidden) {
-      setOpen(false);
-      return;
-    }
-    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target?.tagName) || "") || (e.target?.isContentEditable);
-    if (e.key === "." && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && panel.hidden) {
-      e.preventDefault();
-      setOpen(true);
-      input.focus();
-    }
+    if (e.key === "Escape" && !panel.hidden) setOpen(false);
   });
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -142,33 +150,47 @@
 
   function setOpen(open) {
     panel.hidden = !open;
-    fab.setAttribute("aria-expanded", open ? "true" : "false");
-    try { sessionStorage.setItem(OPEN_KEY, open ? "1" : "0"); } catch (_e) { /* ignore */ }
-    if (open) { renderThread(); scrollToEnd(); }
+    openBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    try {
+      sessionStorage.setItem(OPEN_KEY, open ? "1" : "0");
+    } catch (_e) {
+      /* ignore */
+    }
+    if (open) {
+      renderThread();
+      scrollToEnd();
+    }
   }
   function autosize() {
     input.style.height = "auto";
-    input.style.height = `${Math.min(input.scrollHeight, 96)}px`;
+    input.style.height = `${Math.min(input.scrollHeight, 112)}px`;
   }
 
   function renderThread() {
     messages.innerHTML = "";
     if (!thread.length) {
       const intro = el("div", { class: "ask-ai-intro" });
-      intro.innerHTML =
-        "<h3>How can I help?</h3><p>Ask anything about the Universal Commerce Protocol. Answers cite the documentation sections they come from.</p>";
-      messages.appendChild(intro);
-      const sug = el("div", { class: "ask-ai-suggestions" });
-      SUGGESTIONS.forEach((s) => {
+      const p = el("p");
+      p.textContent =
+        "Answers are generated from the UCP documentation and link to the sections they are based on.";
+      intro.appendChild(p);
+      const eyebrow = el("div", { class: "ask-ai-eyebrow" });
+      eyebrow.textContent = "Try asking";
+      intro.appendChild(eyebrow);
+      const list = el("ul", { class: "ask-ai-examples" });
+      for (const s of EXAMPLES) {
+        const li = el("li");
         const b = el("button", { type: "button" });
         b.textContent = s;
-        b.addEventListener("click", () => { ask(s); });
-        sug.appendChild(b);
-      });
-      messages.appendChild(sug);
+        b.addEventListener("click", () => ask(s));
+        li.appendChild(b);
+        list.appendChild(li);
+      }
+      intro.appendChild(list);
+      messages.appendChild(intro);
       return;
     }
-    thread.forEach((m) => { messages.appendChild(renderMessage(m)); });
+    for (const m of thread) messages.appendChild(renderMessage(m));
   }
 
   function renderMessage(m) {
@@ -184,31 +206,29 @@
 
   function renderSources(sources) {
     const wrap = el("div", { class: "ask-ai-sources" });
-    const label = el("span");
-    label.textContent = "Sources";
-    wrap.appendChild(label);
+    const eyebrow = el("div", { class: "ask-ai-eyebrow" });
+    eyebrow.textContent = "Sources";
+    wrap.appendChild(eyebrow);
     const ol = el("ol");
     for (const s of sources) {
-      const li = el("li");
+      const li = el("li", { value: String(s.n) });
       const a = el("a", { href: s.url, target: "_blank", rel: "noopener" });
-      const n = el("b");
-      n.textContent = String(s.n);
-      const t = document.createTextNode(s.title);
-      a.appendChild(n);
-      a.appendChild(t);
+      a.textContent = s.title;
+      li.appendChild(a);
       if (s.heading && s.heading !== s.title) {
         const h = el("small");
-        h.textContent = `\u203a ${s.heading}`;
-        a.appendChild(h);
+        h.textContent = ` › ${s.heading}`;
+        li.appendChild(h);
       }
-      li.appendChild(a);
       ol.appendChild(li);
     }
     wrap.appendChild(ol);
     return wrap;
   }
 
-  function scrollToEnd() { messages.scrollTop = messages.scrollHeight; }
+  function scrollToEnd() {
+    messages.scrollTop = messages.scrollHeight;
+  }
 
   /* ------------------------------------------------------------------ ask */
   function ask(question) {
@@ -225,7 +245,6 @@
     node.classList.add("ask-ai-pending");
     scrollToEnd();
     sendBtn.disabled = true;
-    sendBtn.textContent = "…";
 
     controller = new AbortController();
     let allSources = [];
@@ -238,9 +257,12 @@
     })
       .then((res) => {
         if (!res.ok) {
-          return res.json().catch(() => ({})).then((body) => {
-            throw new Error(body.error || (`Request failed (${res.status})`));
-          });
+          return res
+            .json()
+            .catch(() => ({}))
+            .then((body) => {
+              throw new Error(body.error || `Request failed (${res.status})`);
+            });
         }
         return readSSE(res.body, (event, data) => {
           if (event === "sources") {
@@ -261,11 +283,14 @@
         finish();
       })
       .catch((err) => {
-        if (err && err.name === "AbortError") { finish(); return; }
+        if (err?.name === "AbortError") {
+          finish();
+          return;
+        }
         thread.pop(); // drop the empty assistant turn
         node.classList.remove("ask-ai-pending");
         const e = el("div", { class: "ask-ai-error" });
-        e.textContent = (err?.message) || "Something went wrong.";
+        e.textContent = err?.message || "Something went wrong.";
         node.replaceWith(e);
         controller = null;
         sendBtn.disabled = false;
@@ -320,12 +345,15 @@
     out = out.replace(/`([^`]+)`/g, (_, code) => `<code>${code}</code>`);
     out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     out = out.replace(/(^|[\s(])_([^_]+)_(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>");
-    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, label, href) => `<a href="${href}" target="_blank" rel="noopener">${label}</a>`);
+    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, label, href) => {
+      return `<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
+    });
     out = out.replace(/\[(\d+)\]/g, (_m, n) => {
       let src = null;
-      for (let i = 0; i < sources.length; i++) if (String(sources[i].n) === n) src = sources[i];
+      for (const s of sources) if (String(s.n) === n) src = s;
       if (!src) return "";
-      return `<a class="ask-ai-cite" href="${escapeHtml(src.url)}" target="_blank" rel="noopener" title="${escapeHtml(`${src.title} › ${src.heading}`)}">${n}</a>`;
+      const label = escapeHtml(`${src.title} › ${src.heading}`);
+      return `<sup><a class="ask-ai-cite" href="${escapeHtml(src.url)}" target="_blank" rel="noopener" title="${label}">${n}</a></sup>`;
     });
     return out;
   }
@@ -357,7 +385,7 @@
             i++;
           }
         }
-        html += (ordered ? "<ol>" : "<ul>") + items.map((t) => `<li>${inline(t, sources)}</li>`).join("") + (ordered ? "</ol>" : "</ul>");
+        html += `${ordered ? "<ol>" : "<ul>"}${items.map((t) => `<li>${inline(t, sources)}</li>`).join("")}${ordered ? "</ol>" : "</ul>"}`;
         continue;
       }
       if (/^#{1,6}\s/.test(line)) {
@@ -365,9 +393,13 @@
         i++;
         continue;
       }
-      if (!line.trim()) { i++; continue; }
+      if (!line.trim()) {
+        i++;
+        continue;
+      }
       const para = [];
-      while (i < lines.length && lines[i].trim() && !/^```|^\s*([-*]|\d+\.)\s+|^#{1,6}\s/.test(lines[i])) para.push(lines[i++]);
+      while (i < lines.length && lines[i].trim() && !/^```|^\s*([-*]|\d+\.)\s+|^#{1,6}\s/.test(lines[i]))
+        para.push(lines[i++]);
       html += `<p>${inline(para.join(" "), sources)}</p>`;
     }
     return html;
@@ -378,7 +410,6 @@
   const searchOutput = document.querySelector(".md-search__output");
   if (searchInput && searchOutput) {
     const cta = el("button", { class: "ask-ai-search-cta", type: "button", hidden: "" });
-    cta.innerHTML = `${SPARK}<span></span>`;
     cta.addEventListener("click", () => {
       const q = searchInput.value.trim();
       const toggle = document.querySelector("[data-md-toggle=search]");
@@ -389,18 +420,24 @@
     searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim();
       cta.hidden = q.length < 3;
-      cta.querySelector("span").textContent = `Ask AI: “${q}”`;
+      cta.innerHTML = "";
+      const b = el("b");
+      b.textContent = `${LABEL}: `;
+      cta.appendChild(b);
+      cta.appendChild(document.createTextNode(`“${q}”`));
     });
   }
 
   /* --------------------------------------------------------------- utils */
   function el(tag, attrs) {
     const node = document.createElement(tag);
-    if (attrs) Object.keys(attrs).forEach((k) => { node.setAttribute(k, attrs[k]); });
+    if (attrs) for (const k of Object.keys(attrs)) node.setAttribute(k, attrs[k]);
     return node;
   }
 
   try {
     if (sessionStorage.getItem(OPEN_KEY) === "1" && thread.length) setOpen(true);
-  } catch (_e) { /* ignore */ }
+  } catch (_e) {
+    /* ignore */
+  }
 })();

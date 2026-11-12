@@ -111,6 +111,26 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 | `INDEX_URLS` | root + latest | Which `ask-index.json` files to load. |
 | `ALLOWED_ORIGINS` | `https://ucp.dev` | Browser origins allowed to call the API. |
 
+## Trying it without any API key
+
+Any OpenAI-compatible local server works. The smallest setup is llama.cpp's
+Python server with an open GGUF model; a 3B model answers on a laptop CPU in
+under a minute per question and is enough to see the whole pipeline work
+(retrieval, citations, cache hits, off-topic gate). Use a 7B-14B+ instruct
+model for real quality.
+
+```bash
+python3 -m venv llm && ./llm/bin/pip install "llama-cpp-python[server]" huggingface_hub
+./llm/bin/python -c "from huggingface_hub import hf_hub_download as d; \
+  d('Qwen/Qwen2.5-3B-Instruct-GGUF','qwen2.5-3b-instruct-q4_k_m.gguf',local_dir='weights')"
+./llm/bin/python -m llama_cpp.server --model weights/qwen2.5-3b-instruct-q4_k_m.gguf \
+  --model_alias local --n_ctx 8192 --chat_format chatml --port 8080
+```
+
+Then run the Worker with `MODEL_BASE_URL=http://127.0.0.1:8080/v1 MODEL=local`
+(see Local development below). Ollama (`ollama serve`, base URL
+`http://localhost:11434/v1`) works the same way.
+
 ## Local development
 
 ```bash

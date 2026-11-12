@@ -118,6 +118,19 @@ export class DocsIndex {
   }
 
   /**
+   * Share of a query's content terms that occur anywhere in the docs. A low
+   * value means the question is about something the documentation never
+   * mentions (e.g. "write a poem about autumn"), even if one or two common
+   * words happen to match a section.
+   */
+  vocabularyCoverage(query: string): number {
+    const terms = [...new Set(tokenize(query))];
+    if (!terms.length) return 0;
+    const known = terms.filter((t) => this.df.has(t)).length;
+    return known / terms.length;
+  }
+
+  /**
    * BM25 ranking. `boostUrlPrefix` nudges sections from the page the visitor is
    * currently reading, which disambiguates follow-ups like "what does this field mean".
    */
