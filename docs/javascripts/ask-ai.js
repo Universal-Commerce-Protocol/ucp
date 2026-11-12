@@ -40,8 +40,9 @@
     "What happens between creating and completing a checkout?",
     "How do payment handlers fit into a checkout?",
   ];
-  const ICON_CHAT =
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>';
+  // Four-point sparkle, the mark documentation sites use for AI entry points.
+  const ICON_SPARKLE =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3c.4 4.6 2.4 6.6 7 7-4.6.4-6.6 2.4-7 7-.4-4.6-2.4-6.6-7-7 4.6-.4 6.6-2.4 7-7zm8.5 10c.2 2.3 1.2 3.3 3.5 3.5-2.3.2-3.3 1.2-3.5 3.5-.2-2.3-1.2-3.3-3.5-3.5 2.3-.2 3.3-1.2 3.5-3.5z"/></svg>';
   const ICON_CLOSE =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6z"/></svg>';
 
@@ -77,7 +78,7 @@
     "aria-expanded": "false",
     title: LABEL,
   });
-  openBtn.innerHTML = `${ICON_CHAT}<span>${LABEL}</span>`;
+  openBtn.innerHTML = `${ICON_SPARKLE}<span>${LABEL}</span>`;
   const headerInner = document.querySelector(".md-header__inner");
   const search = headerInner ? headerInner.querySelector(".md-search") : null;
   if (headerInner)

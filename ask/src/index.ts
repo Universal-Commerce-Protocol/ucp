@@ -24,7 +24,14 @@ import {
   today,
   writeLog,
 } from "./log";
-import { buildMessages, COMPANY_REPLY, OFF_TOPIC_REPLY, RULES } from "./prompt";
+import {
+  buildMessages,
+  COMPANY_REPLY,
+  listedCompanyReply,
+  OFF_TOPIC_REPLY,
+  PROMPT_VERSION,
+  RULES,
+} from "./prompt";
 import {
   type ChatMessage,
   createProvider,
@@ -223,7 +230,7 @@ export default {
       ? null
       : `a:${index.version}:${(
           await sha256Hex(
-            `${env.MODEL}\n${RULES}\n${cacheSignature(question, tokenize(question))}`
+            `${env.MODEL}\n${PROMPT_VERSION}\n${RULES}\n${cacheSignature(question, tokenize(question))}`
           )
         ).slice(0, 32)}`;
     const started = Date.now();
@@ -264,6 +271,41 @@ export default {
         topK
       );
     }
+    // "Does Shopify use / support / integrate UCP?" about a company on our
+    // lists: always the same honest answer, so it is a fixed reply rather
+    // than something the model can drift on. First-person and how-to
+    // questions ("how do I set it up on Shopify") go to the model instead.
+    const namedOrgs = index.organizationsIn(question);
+    if (
+      !history.length &&
+      namedOrgs.length > 0 &&
+      /^(does|do|is|are|has|have|did|will|can|would)\b/i.test(question) &&
+      !/\b(i|we|my|our|me|us)\b|\bhow\b/i.test(question)
+    ) {
+      const org = namedOrgs[0];
+      logOutcome(env, ctx, {
+        ...log,
+        outcome: "gated",
+        sources: [org.chunk.url],
+      });
+      return streamCached(
+        {
+          answer: listedCompanyReply(org.display, org.chunk.heading),
+          sources: [
+            {
+              n: 1,
+              title: org.chunk.page,
+              heading: org.chunk.heading,
+              url: org.chunk.url,
+            },
+          ],
+          model: "none",
+        },
+        cors,
+        log
+      );
+    }
+
     if (
       !history.length &&
       ADOPTION_PATTERN.test(question) &&

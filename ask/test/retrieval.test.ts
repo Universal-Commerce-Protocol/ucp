@@ -226,3 +226,41 @@ test("business questions pin the overview material written for businesses", () =
     !index.search("checkout status values", 3).some((h) => h.chunk.id === "b1")
   );
 });
+
+test("how-to questions naming a platform retrieve the getting-started guide", () => {
+  const data = {
+    ...raw,
+    pages: [
+      {
+        url: "specification/getting-started/",
+        title: "Getting Started with UCP",
+        summary: "Build a basic UCP server.",
+      },
+    ],
+    chunks: [
+      ...raw.chunks,
+      {
+        id: "gs",
+        url: "specification/getting-started/#getting-started-with-ucp",
+        page: "Getting Started with UCP",
+        heading: "Getting Started with UCP",
+        text: "This guide walks you through building a basic UCP server.",
+        words: 10,
+      },
+      {
+        id: "pl",
+        url: "#co-developed-by-industry-leaders",
+        page: "Universal Commerce Protocol",
+        heading: "Co-developed by industry leaders",
+        text: "Built by the industry.\nGoogle\nShopify\nTarget",
+        words: 6,
+      },
+    ],
+  };
+  const index = buildIndex([data]);
+  const ids = index
+    .search("how can i do it inside shopify", 4)
+    .map((h) => h.chunk.id);
+  assert.ok(ids.includes("gs"), "getting started is retrieved");
+  assert.ok(ids.includes("pl"), "partner list is retrieved");
+});

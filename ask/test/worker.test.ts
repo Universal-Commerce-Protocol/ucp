@@ -17,6 +17,14 @@ const index = {
   ],
   chunks: [
     {
+      id: "pl",
+      url: "#co-developed-by-industry-leaders",
+      page: "Universal Commerce Protocol",
+      heading: "Co-developed by industry leaders",
+      text: "Built by the industry.\nGoogle\nShopify\nTarget",
+      words: 6,
+    },
+    {
       id: "c1",
       url: "specification/shopping/checkout/#overview",
       page: "Checkout Capability",
@@ -445,4 +453,31 @@ test("a reworded question is served from the cache without a model call", async 
   );
   assert.equal((events[0].data as { cached: boolean }).cached, true);
   assert.equal(modelCalls, before);
+});
+
+test("adoption questions about a listed company get the fixed reply; how-to questions reach the model", async () => {
+  const env = makeEnv(fakeKv());
+  const before = modelCalls;
+  for (const q of [
+    "does shopify integrate",
+    "Does Target use UCP?",
+    "is Shopify on UCP",
+  ]) {
+    const events = await readEvents(await ask(env, { question: q }));
+    const text = events
+      .filter((e) => e.event === "delta")
+      .map((e) => (e.data as { text: string }).text)
+      .join("");
+    assert.match(text, /technology stack/, q);
+    assert.match(text, /co-developed UCP \[1\]/, q);
+    assert.doesNotMatch(text, /well-known/, q);
+  }
+  assert.equal(modelCalls, before);
+  const how = await readEvents(
+    await ask(env, { question: "how can i do checkout inside shopify" })
+  );
+  assert.equal(
+    (how[0].data as { model: string }).model,
+    "chat-completions:test-model"
+  );
 });

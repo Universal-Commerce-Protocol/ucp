@@ -147,6 +147,8 @@ function dedupe(hits: Hit[]): Hit[] {
   return out;
 }
 
+export const INSTRUCTION_PATTERN =
+  /\bhow (can|do|would|should|could) (i|we|you|one)\b|\bhow to\b|\b(set ?up|enable|install|configure|turn on|do (it|this|that))\b|\b(i|we|my|our)\b/i;
 const SPECIFIC_TERMS =
   /\b(cart|catalog|order|booking|lodging|food|tip|fulfil|discount|loyalty|consent|return|permalink|location|identity|signature|mandate|3ds|tokenization|tokenizer|ap2|mcp|a2a|embedded|rest|schema|extension|version)/i;
 
@@ -205,7 +207,7 @@ export class DocsIndex {
    * "Block", "Gap"), so a question about the company would otherwise be
    * read as a question about the technical term.
    */
-  private readonly orgs = new Map<string, Chunk>();
+  private readonly orgs = new Map<string, { display: string; chunk: Chunk }>();
   /** Page-level document frequencies / postings over title + headings + summary. */
   private readonly pageTerms = new Map<string, Map<string, number>>();
   private readonly pageDf = new Map<string, number>();
@@ -226,7 +228,7 @@ export class DocsIndex {
           const name = line.trim();
           // A partner list is one short name per line.
           if (name && name.length <= 30 && name.split(/\s+/).length <= 3) {
-            this.orgs.set(name.toLowerCase(), chunk);
+            this.orgs.set(name.toLowerCase(), { display: name, chunk });
           }
         }
       }
@@ -287,12 +289,15 @@ export class DocsIndex {
   }
 
   /** Organizations named in the query, with the section that lists them. */
-  organizationsIn(query: string): { name: string; chunk: Chunk }[] {
+  organizationsIn(
+    query: string
+  ): { name: string; display: string; chunk: Chunk }[] {
     const q = ` ${query.toLowerCase().replace(/[^a-z0-9.&' ]+/g, " ")} `;
-    const found: { name: string; chunk: Chunk }[] = [];
-    for (const [name, chunk] of this.orgs) {
-      if (q.includes(` ${name} `) || q.includes(` ${name}'s `))
-        found.push({ name, chunk });
+    const found: { name: string; display: string; chunk: Chunk }[] = [];
+    for (const [name, entry] of this.orgs) {
+      if (q.includes(` ${name} `) || q.includes(` ${name}'s `)) {
+        found.push({ name, display: entry.display, chunk: entry.chunk });
+      }
     }
     return found;
   }
@@ -400,9 +405,15 @@ export class DocsIndex {
     }
 
     // Intent pins: onboarding questions always see the getting-started material.
-    if (!SPECIFIC_TERMS.test(query)) {
+    // "How can I do it inside Shopify" names a platform and asks how: that is
+    // an onboarding question even though it has none of the usual keywords.
+    const instructionOnPlatform =
+      INSTRUCTION_PATTERN.test(query) && this.organizationsIn(query).length > 0;
+    if (instructionOnPlatform || !SPECIFIC_TERMS.test(query)) {
       for (const pin of INTENT_PINS) {
-        if (!pin.intent.test(query)) continue;
+        const onboarding = pin.pages[0] === "specification/getting-started/";
+        if (!pin.intent.test(query) && !(onboarding && instructionOnPlatform))
+          continue;
         for (const suffix of [...pin.pages].reverse()) {
           const pageUrl = [...this.leads.keys()].find((u) =>
             u.endsWith(suffix)
