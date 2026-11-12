@@ -214,6 +214,40 @@ assistant is exercised against the real pages. Set `INDEX_URLS` to the
 relative paths (`/ask-index.json,/latest/ask-index.json`); same-origin
 requests are accepted without listing the host in `ALLOWED_ORIGINS`.
 
+## Search by meaning (optional)
+
+Keyword search misses a section when the question uses different words
+("wants their money back" versus "refund" and "adjustment"). If an
+embeddings file is present, the Worker also embeds the question and merges
+the two rankings, so such sections are found.
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=... CLOUDFLARE_API_TOKEN=... \
+  npm run embeddings -- ask-embeddings.json site/ask-index.json latest/ask-index.json
+```
+
+Serve `ask-embeddings.json` next to the index and set `EMBEDDINGS_URL` and
+`EMBED_MODEL` (default model: Google's EmbeddingGemma on Workers AI). The
+file is about 1.5 MB for the current docs. Each new question then costs one
+small embedding call. Without the file, retrieval is keyword only and
+nothing else changes. Rebuild the file when the docs change; sections
+without an embedding are still found by keyword.
+
+## Evaluation
+
+`eval/questions.json` holds 100 questions with the kind of reply each must
+produce (an answer, the off-topic reply, the company reply, the
+English-only reply) and, for answers, a page that must be among the
+sources.
+
+```bash
+npm run eval -- https://<host>/v1/ask --min 0.9
+```
+
+It prints each failure and the pass rate and exits non-zero below the
+minimum. Run it before changing the model, the instructions or retrieval.
+Against the review deployment it currently passes 99 of 100.
+
 ## Question log, feedback and export (the path to a fine-tuned model)
 
 Every question is logged anonymously to KV (`LOG_ANSWERS = "on"`): outcome

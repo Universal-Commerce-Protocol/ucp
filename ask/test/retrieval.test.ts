@@ -295,3 +295,19 @@ test("non-English questions are detected, English ones are not", () => {
   }
 });
 // cspell:enable
+
+test("blended search finds a section that shares no words with the question", () => {
+  const index = buildIndex([raw]);
+  // Toy 2-d embeddings: c3 (order fulfillment) points along +x, others along +y.
+  const ids = ["c1", "c2", "c3"];
+  const data = Int8Array.from([0, 127, 0, 127, 127, 0]);
+  index.setEmbeddings(ids, 2, data);
+  // "checkout" matches c1 and c2 by keyword only; the query vector points at c3.
+  const keyword = index.search("checkout", 3).map((h) => h.chunk.id);
+  assert.ok(!keyword.includes("c3"));
+  const blended = index
+    .search("checkout", 3, { queryVector: [1, 0] })
+    .map((h) => h.chunk.id);
+  assert.ok(blended.includes("c3"), "the semantic match is included");
+  assert.ok(blended.includes("c1"), "keyword matches are kept");
+});

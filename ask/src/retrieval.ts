@@ -83,6 +83,11 @@ const QUERY_SYNONYMS: Record<string, string[]> = {
   oauth: ["identity", "linking"],
   auth: ["authentication", "identity"],
   sign: ["signature"],
+  prove: ["signature", "verify", "signing"],
+  authentic: ["signature", "verify", "signing"],
+  genuine: ["signature", "verify", "signing"],
+  tampered: ["signature", "verify", "digest"],
+  spoof: ["signature", "verify", "signing"],
   webhook: ["event", "order"],
   shipping: ["fulfillment"],
   delivery: ["fulfillment"],
@@ -284,6 +289,45 @@ export class DocsIndex {
     return score;
   }
 
+  /** Unit-length chunk embeddings, quantized to int8, one row per chunk. */
+  private vectors: Int8Array | null = null;
+  private vectorDim = 0;
+  /** Row in `vectors` for each chunk index, or -1 when it has no embedding. */
+  private vectorRow: Int32Array | null = null;
+
+  /** Attach embeddings produced by scripts/build-embeddings.ts. */
+  setEmbeddings(ids: string[], dim: number, data: Int8Array): void {
+    const rowById = new Map(ids.map((id, i) => [id, i]));
+    this.vectorRow = Int32Array.from(
+      this.chunks,
+      (c) => rowById.get(c.id) ?? -1
+    );
+    this.vectors = data;
+    this.vectorDim = dim;
+  }
+
+  get hasEmbeddings(): boolean {
+    return this.vectors !== null;
+  }
+
+  /** Chunk indices ranked by cosine similarity to a query embedding. */
+  private semanticTop(query: number[], n: number): number[] {
+    if (!this.vectors || !this.vectorRow || query.length !== this.vectorDim)
+      return [];
+    const scored: { doc: number; score: number }[] = [];
+    for (let doc = 0; doc < this.chunks.length; doc++) {
+      const row = this.vectorRow[doc];
+      if (row < 0) continue;
+      const base = row * this.vectorDim;
+      let dot = 0;
+      for (let j = 0; j < this.vectorDim; j++)
+        dot += query[j] * this.vectors[base + j];
+      scored.push({ doc, score: dot });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, n).map((x) => x.doc);
+  }
+
   get(id: string): Chunk | undefined {
     return this.byId.get(id);
   }
@@ -330,6 +374,12 @@ export class DocsIndex {
     opts: {
       exclude?: Set<string>;
       boostUrlPrefix?: string;
+      /**
+       * Embedding of the query. When given and the index has embeddings,
+       * keyword and meaning-based rankings are merged, so a section can be
+       * found even when it shares no words with the question.
+       */
+      queryVector?: number[];
       /** Set by question triage; falls back to keyword detection when absent. */
       intent?: "business" | "howto";
     } = {}
@@ -384,6 +434,25 @@ export class DocsIndex {
       hits.push({ chunk, score });
     }
     hits.sort((a, b) => b.score - a.score);
+
+    // Reciprocal rank fusion of the keyword ranking with the semantic one.
+    if (opts.queryVector && this.hasEmbeddings && hits.length) {
+      const fused = new Map<string, { chunk: Chunk; score: number }>();
+      const add = (chunk: Chunk, rank: number) => {
+        if (opts.exclude?.has(chunk.id)) return;
+        const entry = fused.get(chunk.id) ?? { chunk, score: 0 };
+        entry.score += 1 / (60 + rank);
+        fused.set(chunk.id, entry);
+      };
+      hits.slice(0, 40).forEach((h, rank) => {
+        add(h.chunk, rank);
+      });
+      this.semanticTop(opts.queryVector, 40).forEach((doc, rank) => {
+        add(this.chunks[doc], rank);
+      });
+      hits.length = 0;
+      hits.push(...[...fused.values()].sort((a, b) => b.score - a.score));
+    }
 
     // A question naming a partner organization always sees the list it is on.
     for (const { chunk } of this.organizationsIn(query)) {
@@ -494,6 +563,14 @@ const RELOAD_MS = 10 * 60 * 1000;
  * Load (and memoize per isolate) the merged index. The Cache API keeps the
  * fetch cheap across isolates; the in-memory copy makes it free within one.
  */
+/** Output of scripts/build-embeddings.ts. `data` is base64 of int8 rows. */
+export interface EmbeddingsFile {
+  model: string;
+  dim: number;
+  ids: string[];
+  data: string;
+}
+
 /** Anything with a fetch(): global fetch or a Worker's static-assets binding. */
 export interface IndexFetcher {
   fetch(input: string | Request, init?: RequestInit): Promise<Response>;
@@ -503,7 +580,8 @@ export async function loadIndex(
   urls: string[],
   fetcherFor: (url: string) => IndexFetcher = () => ({
     fetch: (i, init) => fetch(i, init),
-  })
+  }),
+  embeddingsUrl?: string
 ): Promise<DocsIndex> {
   if (cached && Date.now() - cached.loadedAt < RELOAD_MS) return cached.index;
   const raws = await Promise.all(
@@ -519,6 +597,23 @@ export async function loadIndex(
     raws,
     urls.map((u) => u.slice(0, u.lastIndexOf("/") + 1))
   );
+  if (embeddingsUrl) {
+    // Embeddings are optional: without them retrieval is keyword only.
+    try {
+      const res = await fetcherFor(embeddingsUrl).fetch(embeddingsUrl, {
+        cf: { cacheTtl: 600, cacheEverything: true },
+      } as RequestInit);
+      if (res.ok) {
+        const file = (await res.json()) as EmbeddingsFile;
+        const bytes = Uint8Array.from(atob(file.data), (ch) =>
+          ch.charCodeAt(0)
+        );
+        index.setEmbeddings(file.ids, file.dim, new Int8Array(bytes.buffer));
+      }
+    } catch {
+      /* keyword search still works */
+    }
+  }
   cached = { index, loadedAt: Date.now() };
   return index;
 }

@@ -59,6 +59,10 @@ export interface Env {
   MODEL_BASE_URL?: string;
   MODEL_API_KEY?: string;
   MODEL_EXTRA_PARAMS?: string;
+  /** Embeddings file from scripts/build-embeddings.ts, relative or absolute. Optional. */
+  EMBEDDINGS_URL?: string;
+  /** Workers AI embedding model used for queries; must match the file. */
+  EMBED_MODEL?: string;
   TEMPERATURE: string;
   MAX_OUTPUT_TOKENS: string;
   INDEX_URLS: string;
@@ -205,11 +209,18 @@ export default {
       .map((s) => s.trim())
       .filter(Boolean)
       .map((u) => (u.startsWith("/") ? `${self}${u}` : u));
-    const index = await loadIndex(indexUrls, (u) =>
+    const pickFetcher = (u: string) =>
       env.ASSETS && u.startsWith(`${self}/`)
         ? env.ASSETS
-        : { fetch: (i, init) => fetch(i, init) }
-    );
+        : {
+            fetch: (i: string | Request, init?: RequestInit) => fetch(i, init),
+          };
+    const embeddingsUrl = env.EMBEDDINGS_URL
+      ? env.EMBEDDINGS_URL.startsWith("/")
+        ? `${self}${env.EMBEDDINGS_URL}`
+        : env.EMBEDDINGS_URL
+      : undefined;
+    const index = await loadIndex(indexUrls, pickFetcher, embeddingsUrl);
 
     // 1. Repeated single-turn question: replay the cached answer, no model call.
     // Keyed by index version, model and instructions, so a redeploy, a model
@@ -266,8 +277,14 @@ export default {
       ? `${lastUserTurn(history)} ${question}`
       : question;
     const topK = Number(env.TOP_K || 8);
+    const queryVector = await embedQuery(
+      env,
+      index.hasEmbeddings,
+      retrievalQuery
+    );
     let hits = index.search(retrievalQuery, topK, {
       boostUrlPrefix: page ? page.split("#")[0] : undefined,
+      queryVector,
     });
     if (!hits.length && /\b(ucp|protocol|commerce)\b/i.test(retrievalQuery)) {
       // "What is UCP?" style questions have no distinctive terms; ground them
@@ -412,6 +429,7 @@ export default {
         const routed = index.search(retrievalQuery, topK, {
           boostUrlPrefix: page ? page.split("#")[0] : undefined,
           intent: kind,
+          queryVector,
         });
         if (routed.length) hits = routed;
       }
@@ -477,6 +495,30 @@ export default {
     return new Response(readable, { headers: { ...cors, ...SSE_HEADERS } });
   },
 } satisfies ExportedHandler<Env>;
+
+/**
+ * Embed the question for meaning-based retrieval. Returns undefined when
+ * embeddings are not configured or the call fails, in which case retrieval
+ * falls back to keywords alone.
+ */
+async function embedQuery(
+  env: Env,
+  enabled: boolean,
+  text: string
+): Promise<number[] | undefined> {
+  if (!enabled || !env.AI || !env.EMBED_MODEL) return undefined;
+  try {
+    const out = (await env.AI.run(env.EMBED_MODEL, {
+      text: [`task: search result | query: ${text}`],
+    })) as { data?: number[][] };
+    const v = out.data?.[0];
+    if (!v) return undefined;
+    const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
+    return v.map((x) => x / norm);
+  } catch {
+    return undefined;
+  }
+}
 
 function logEnabled(env: Env): boolean {
   return (env.LOG_ANSWERS ?? "on").toLowerCase() === "on";

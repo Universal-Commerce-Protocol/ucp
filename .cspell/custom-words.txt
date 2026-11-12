@@ -241,3 +241,4 @@ howto
 offtopic
 costco
 nike
+embeddinggemma
