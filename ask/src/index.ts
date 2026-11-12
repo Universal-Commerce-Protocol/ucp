@@ -579,7 +579,7 @@ function corsHeaders(
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };
-  if (origin && isAllowedOrigin(origin, env))
+  if (origin && isAllowedOrigin(origin, env, self))
     headers["Access-Control-Allow-Origin"] = origin;
   return headers;
 }
