@@ -248,6 +248,10 @@ is an open string with three well-known values:
 | `refurbished` | Restored to working order by the manufacturer, the Business, or a third party. |
 | `used` | Previously owned or used, and not refurbished. |
 
+`condition` describes the item as sold, not its state when returned. It does
+not establish return eligibility, which is governed by the applicable
+[return policy](../extensions/return-policy.md#eligibility).
+
 Condition is set per variant because variants of one product can differ (for
 example, a new and a refurbished edition of the same phone). Businesses
 **SHOULD** set `condition` on every variant that is not `new`. When
