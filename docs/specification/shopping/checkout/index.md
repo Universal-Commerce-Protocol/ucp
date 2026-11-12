@@ -1337,7 +1337,10 @@ Invariants of `totals[]`:
 * Amounts are signed integers — negative values are subtractive (e.g.,
   discounts), positive values are additive. The sign IS the direction.
 * Exactly one `type: "subtotal"` MUST be present.
-* Exactly one `type: "total"` MUST be present.
+* Exactly one `type: "total"` MUST be present. Its `amount` MUST be greater
+  than or equal to zero — it is the amount the buyer pays. Zero is valid
+  (fully discounted or fully credit-covered). Businesses SHOULD cap discounts
+  and credits so they do not drive this amount below zero.
 
 #### Verification
 
@@ -1370,7 +1373,8 @@ When `display_text` is provided, platforms MUST use it. When omitted on a
 well-known type, platforms SHOULD use the default label above. The sign
 convention for well-known types is schema-enforced: subtractive types
 (discount, items_discount) MUST have negative amounts; additive types
-(subtotal, fulfillment, tax, fee) MUST have non-negative amounts.
+(subtotal, fulfillment, tax, fee) MUST have non-negative amounts; `total`
+MUST be greater than or equal to zero.
 
 The `type` field is an open string — businesses MAY use values beyond the
 well-known set. Unknown types MUST include `display_text` (schema-enforced)
@@ -1448,6 +1452,17 @@ when provided.
   { "type": "tax",            "display_text": "Tax",            "amount": 680 },
   { "type": "account_credit", "display_text": "Account Credit", "amount": -2500 },
   { "type": "total",          "display_text": "Amount Due",     "amount": 6680 }
+]
+```
+
+**Fully discounted checkout — total of zero:**
+
+<!-- ucp:example schema=shopping/checkout target=$.totals op=read -->
+```json
+[
+  { "type": "subtotal", "display_text": "Subtotal", "amount": 2500 },
+  { "type": "discount", "display_text": "100% off", "amount": -2500 },
+  { "type": "total",    "display_text": "Total",    "amount": 0 }
 ]
 ```
 

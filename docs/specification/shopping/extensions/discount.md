@@ -321,6 +321,8 @@ The `discounts.applied` array shows **what** was applied. The `totals[]` and
 **Amount convention:** Discount amounts in `discounts.applied` are positive
 integers (the value of the discount). Discount entries in `totals[]` are
 negative (the effect on the receipt) — the sign is schema-enforced.
+Businesses SHOULD cap applied discounts so `totals[type=total]` does not go
+below zero.
 
 ## Examples
 
