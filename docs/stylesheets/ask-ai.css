@@ -166,6 +166,19 @@
 .ask-ai-sources a { color: #1a73e8; text-decoration: underline; }
 .ask-ai-sources small { color: #5f6368; font-size: inherit; }
 
+.ask-ai-feedback { margin-top: 0.8rem; color: #5f6368; font-size: 0.65rem; }
+.ask-ai-feedback button {
+  margin-left: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1a73e8;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ask-ai-feedback button:hover { color: #174ea6; }
+
 .ask-ai-pending::after {
   content: "";
   display: inline-block;

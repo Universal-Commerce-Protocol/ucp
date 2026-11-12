@@ -16,6 +16,7 @@
  */
 
 import { checkLimits, normalizeQuestion, sha256Hex } from "./limits";
+import { exportDay, type LogEntry, newLogId, recordFeedback, today, writeLog } from "./log";
 import { buildMessages, OFF_TOPIC_REPLY } from "./prompt";
 import { type ChatMessage, createProvider, ProviderError, type WorkersAiBinding } from "./providers";
 import { type Chunk, type DocsIndex, loadIndex, tokenize } from "./retrieval";
@@ -36,6 +37,11 @@ export interface Env {
   PER_IP_HOURLY_LIMIT: string;
   DAILY_REQUEST_BUDGET: string;
   ANSWER_CACHE_TTL: string;
+  /** "on" to keep an anonymous question/answer log (see log.ts), anything else disables it. */
+  LOG_ANSWERS?: string;
+  LOG_TTL_DAYS?: string;
+  /** Bearer secret for GET /v1/export. */
+  EXPORT_TOKEN?: string;
 }
 
 type HistoryMessage = ChatMessage & { role: "user" | "assistant" };
@@ -99,6 +105,24 @@ export default {
     if (url.pathname === "/v1/health") {
       return json({ ok: true, model: env.MODEL }, 200, cors);
     }
+    if (url.pathname === "/v1/export" && request.method === "GET") {
+      const auth = request.headers.get("authorization") ?? "";
+      if (!env.EXPORT_TOKEN || auth !== `Bearer ${env.EXPORT_TOKEN}`) return json({ error: "unauthorized" }, 401, cors);
+      const body = await exportDay(env.ASK_KV, url.searchParams.get("day") ?? today());
+      return new Response(body, { headers: { ...cors, "Content-Type": "application/x-ndjson" } });
+    }
+    if (url.pathname === "/v1/feedback" && request.method === "POST") {
+      if (origin && !isAllowedOrigin(origin, env)) return json({ error: "origin not allowed" }, 403, cors);
+      if (!logEnabled(env)) return json({ ok: false }, 200, cors);
+      let fb: { id?: string; day?: string; helpful?: boolean };
+      try {
+        fb = (await request.json()) as typeof fb;
+      } catch {
+        return json({ error: "invalid JSON" }, 400, cors);
+      }
+      const ok = await recordFeedback(env.ASK_KV, String(fb.day ?? ""), String(fb.id ?? ""), fb.helpful === true, logTtl(env));
+      return json({ ok }, 200, cors);
+    }
     if (url.pathname !== "/v1/ask" || request.method !== "POST") {
       return json({ error: "not found" }, 404, cors);
     }
@@ -129,9 +153,14 @@ export default {
     const cacheKey = history.length
       ? null
       : `a:${index.version}:${(await sha256Hex(normalizeQuestion(question))).slice(0, 32)}`;
+    const started = Date.now();
+    const log: LogEntry = { id: newLogId(), day: today(), outcome: "answered", question, historyTurns: history.length, sources: [] };
     if (cacheKey) {
       const hit = await env.ASK_KV.get<CachedAnswer>(cacheKey, "json");
-      if (hit) return streamCached(hit, cors);
+      if (hit) {
+        logOutcome(env, ctx, { ...log, outcome: "cached", sources: hit.sources.map((s) => s.url) });
+        return streamCached(hit, cors, log);
+      }
     }
 
     // 2. Retrieval first: an empty result means nothing in the docs matches, so
@@ -155,7 +184,11 @@ export default {
       STEERING_PATTERN.test(question) ||
       CREATIVE_PATTERN.test(question) ||
       (TASK_PATTERN.test(question) && !UCP_NOUNS.test(question));
-    if (offTopic) return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors);
+    if (offTopic) {
+      logOutcome(env, ctx, { ...log, outcome: "gated" });
+      return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors, log);
+    }
+    log.sources = hits.map((h) => h.chunk.url);
 
     // 3. Spend guards.
     const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
@@ -193,7 +226,15 @@ export default {
     ctx.waitUntil(
       (async () => {
         try {
-          const result = await answer(provider, env, index, question, history, hits.map((h) => h.chunk), sse);
+          const result = await answer(provider, env, index, question, history, hits.map((h) => h.chunk), sse, log);
+          logOutcome(env, ctx, {
+            ...log,
+            outcome: result.replaced ? "replaced" : "answered",
+            answer: result.text,
+            model: provider.name,
+            grounding: result.grounding,
+            latencyMs: Date.now() - started,
+          });
           if (cacheKey && result.cacheable) {
             await env.ASK_KV.put(
               cacheKey,
@@ -202,6 +243,7 @@ export default {
             );
           }
         } catch (err) {
+          logOutcome(env, ctx, { ...log, outcome: "error", latencyMs: Date.now() - started });
           await sse("error", { message: describeError(err) });
         } finally {
           await writer.close();
@@ -213,10 +255,23 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
+function logEnabled(env: Env): boolean {
+  return (env.LOG_ANSWERS ?? "on").toLowerCase() === "on";
+}
+function logTtl(env: Env): number {
+  return Number(env.LOG_TTL_DAYS || 30);
+}
+function logOutcome(env: Env, ctx: ExecutionContext, entry: LogEntry): void {
+  if (!logEnabled(env)) return;
+  ctx.waitUntil(writeLog(env.ASK_KV, entry, logTtl(env)).catch(() => {}));
+}
+
 interface AnswerResult {
   text: string;
   sources: Source[];
   cacheable: boolean;
+  replaced: boolean;
+  grounding: number;
 }
 
 async function answer(
@@ -227,9 +282,10 @@ async function answer(
   history: HistoryMessage[],
   chunks: Chunk[],
   sse: (event: string, data: unknown) => Promise<void>,
+  log: LogEntry,
 ): Promise<AnswerResult> {
   const sources = toSources(chunks);
-  await sse("meta", { cached: false, model: provider.name });
+  await sse("meta", { cached: false, model: provider.name, id: log.id, day: log.day });
   await sse("sources", sources);
 
   let text = "";
@@ -253,7 +309,7 @@ async function answer(
     await sse("replace", { text });
     const top = sources.slice(0, 3);
     await sse("done", { sources: top, grounding: Number(grounding.toFixed(2)), replaced: true });
-    return { text, sources: top, cacheable: false };
+    return { text, sources: top, cacheable: false, replaced: true, grounding };
   }
 
   if (finish === "length") {
@@ -269,7 +325,7 @@ async function answer(
   const cited = sources.filter((s) => text.includes(`[${s.n}]`));
   const usedSources = cited.length ? cited : sources.slice(0, 3);
   await sse("done", { sources: usedSources });
-  return { text, sources: usedSources, cacheable };
+  return { text, sources: usedSources, cacheable, replaced: false, grounding };
 }
 
 /** Share of the answer's content terms that occur in the excerpts it was given. */
@@ -288,10 +344,10 @@ function toSources(chunks: Chunk[]): Source[] {
   return chunks.map((c, i) => ({ n: i + 1, title: c.page, heading: c.heading, url: c.url }));
 }
 
-function streamCached(hit: CachedAnswer, cors: Record<string, string>): Response {
+function streamCached(hit: CachedAnswer, cors: Record<string, string>, log?: LogEntry): Response {
   const enc = new TextEncoder();
   const parts = [
-    `event: meta\ndata: ${JSON.stringify({ cached: true, model: hit.model })}\n\n`,
+    `event: meta\ndata: ${JSON.stringify({ cached: true, model: hit.model, id: log?.id, day: log?.day })}\n\n`,
     `event: sources\ndata: ${JSON.stringify(hit.sources)}\n\n`,
     `event: delta\ndata: ${JSON.stringify({ text: hit.answer })}\n\n`,
     `event: done\ndata: ${JSON.stringify({ sources: hit.sources })}\n\n`,

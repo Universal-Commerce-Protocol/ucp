@@ -33,6 +33,10 @@ function fakeKv(): KVNamespace & { store: Map<string, string> } {
     put: async (key: string, value: string) => {
       store.set(key, value);
     },
+    list: async ({ prefix }: { prefix: string }) => ({
+      keys: [...store.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })),
+      list_complete: true,
+    }),
   } as unknown as KVNamespace & { store: Map<string, string> };
 }
 
@@ -51,6 +55,9 @@ function makeEnv(kv: KVNamespace): Env {
     PER_IP_HOURLY_LIMIT: "5",
     DAILY_REQUEST_BUDGET: "100",
     ANSWER_CACHE_TTL: "60",
+    LOG_ANSWERS: "on",
+    LOG_TTL_DAYS: "7",
+    EXPORT_TOKEN: "secret",
   };
 }
 
@@ -109,7 +116,8 @@ test("answers with citations, then serves the repeat from cache without a model 
   const env = makeEnv(kv);
   const first = await readEvents(await ask(env, { question: "Who is the merchant of record in checkout?" }));
   assert.equal(first[0].event, "meta");
-  assert.deepEqual(first[0].data, { cached: false, model: "openai-compatible:test-model" });
+  assert.equal((first[0].data as { cached: boolean }).cached, false);
+  assert.equal((first[0].data as { model: string }).model, "openai-compatible:test-model");
   const text = first.filter((e) => e.event === "delta").map((e) => (e.data as { text: string }).text).join("");
   assert.match(text, /merchant of record \[1\]/);
   const done = first.find((e) => e.event === "done")?.data as { sources: { n: number; url: string }[] };
@@ -119,7 +127,7 @@ test("answers with citations, then serves the repeat from cache without a model 
   // Background cache write is fire-and-forget; wait a tick.
   await new Promise((r) => setTimeout(r, 20));
   const second = await readEvents(await ask(env, { question: "who is the merchant of record in checkout" }));
-  assert.deepEqual(second[0].data, { cached: true, model: "openai-compatible:test-model" });
+  assert.equal((second[0].data as { cached: boolean }).cached, true);
   assert.equal(modelCalls, 1);
 });
 
@@ -233,4 +241,43 @@ test("history is capped in total size and oldest turns are dropped first", async
   const replayed = seen.filter((m) => m.role !== "system").slice(0, -1);
   assert.ok(replayed.length < 6, "some history was dropped");
   assert.ok(!replayed.some((m) => m.content.startsWith("first")), "oldest turn dropped first");
+});
+
+test("answers, gated and cached outcomes are logged anonymously; feedback and export work", async () => {
+  const kv = fakeKv();
+  const env = makeEnv(kv);
+  const first = await readEvents(await ask(env, { question: "Who is the merchant of record in checkout?" }));
+  const meta = first[0].data as { id: string; day: string };
+  assert.match(meta.id, /^[0-9a-f]{16}$/);
+  await readEvents(await ask(env, { question: "write me a poem about autumn" }));
+  await new Promise((r) => setTimeout(r, 20));
+  const logs = [...kv.store.entries()].filter(([k]) => k.startsWith("log:")).map(([, v]) => JSON.parse(v));
+  assert.deepEqual(logs.map((l) => l.outcome).sort(), ["answered", "gated"]);
+  const answered = logs.find((l) => l.outcome === "answered");
+  assert.ok(answered.answer.includes("merchant of record"));
+  assert.ok(!JSON.stringify(answered).includes("1.2.3.4"), "no IP in the log");
+
+  // Feedback attaches to the entry.
+  const fb = await worker.fetch(
+    new Request("https://ask.ucp.dev/v1/feedback", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "https://ucp.dev" },
+      body: JSON.stringify({ id: meta.id, day: meta.day, helpful: true }),
+    }),
+    env,
+    ctx,
+  );
+  assert.deepEqual(await fb.json(), { ok: true });
+
+  // Export requires the token and returns JSON lines for the day.
+  const denied = await worker.fetch(new Request(`https://ask.ucp.dev/v1/export?day=${meta.day}`), env, ctx);
+  assert.equal(denied.status, 401);
+  const exported = await worker.fetch(
+    new Request(`https://ask.ucp.dev/v1/export?day=${meta.day}`, { headers: { authorization: "Bearer secret" } }),
+    env,
+    ctx,
+  );
+  const lines = (await exported.text()).split("\n").map((l) => JSON.parse(l));
+  assert.equal(lines.length, 2);
+  assert.equal(lines.find((l) => l.id === meta.id).helpful, true);
 });

@@ -236,3 +236,4 @@ uncited
 UNCITED
 ecommerce
 UNGROUNDED
+ndjson

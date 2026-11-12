@@ -166,6 +166,35 @@ Response is `text/event-stream`:
 
 Errors before streaming starts are plain JSON with HTTP 4xx/5xx; 429 carries `Retry-After`.
 
+## Question log, feedback and export (the path to a fine-tuned model)
+
+Every question is logged anonymously to KV (`LOG_ANSWERS = "on"`): outcome
+(`answered`, `cached`, `gated`, `replaced`, `error`), the question, the
+section URLs retrieved, the answer, the grounding score and latency. No IP,
+user agent or identifier is stored, and entries expire after `LOG_TTL_DAYS`.
+The widget asks "Was this helpful?" after each answer; the rating is written
+onto the same entry.
+
+Export a day as JSON Lines:
+
+```bash
+wrangler secret put EXPORT_TOKEN
+curl -H "Authorization: Bearer $EXPORT_TOKEN" "https://ask.ucp.dev/v1/export?day=2026-11-12" > 2026-11-12.jsonl
+```
+
+Two uses:
+
+1. **Docs gaps.** `gated` and `replaced` entries, and answers rated not
+   helpful, are a ranked list of what readers ask that the docs do not answer
+   well.
+2. **Fine-tuning data.** Helpful-rated `answered` entries, together with the
+   excerpts that produced them, are supervised fine-tuning examples in the
+   exact prompt format the Worker uses. After a few hundred reviewed examples
+   a LoRA fine-tune of the base model teaches UCP vocabulary, the citation
+   format and concise answers. Facts keep coming from retrieval, so a spec
+   release does not require retraining. Evaluate the fine-tune against the
+   base model on held-out questions before switching `MODEL`.
+
 ## Abuse resistance
 
 What a visitor can and cannot do with the endpoint:

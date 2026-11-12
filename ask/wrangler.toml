@@ -47,3 +47,9 @@ PER_IP_HOURLY_LIMIT = "40"
 DAILY_REQUEST_BUDGET = "5000"
 # How long a cached answer to an identical question is reused (seconds).
 ANSWER_CACHE_TTL = "604800"
+# Anonymous question/answer log for docs-gap analysis and future fine-tuning
+# (no IPs or identifiers; see src/log.ts). "off" disables. Export a day with
+# GET /v1/export?day=YYYY-MM-DD and the EXPORT_TOKEN secret
+# (`wrangler secret put EXPORT_TOKEN`).
+LOG_ANSWERS = "on"
+LOG_TTL_DAYS = "90"

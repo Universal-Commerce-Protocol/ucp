@@ -203,8 +203,40 @@
     } else {
       node.innerHTML = renderMarkdown(m.content, m.sources || []);
       if (m.sources?.length) node.appendChild(renderSources(m.sources));
+      if (m.id) node.appendChild(renderFeedback(m));
     }
     return node;
+  }
+
+  /* "Was this helpful?" The rating is stored with the anonymous log entry
+     and is what a future fine-tune would train on. */
+  function renderFeedback(m) {
+    const wrap = el("div", { class: "ask-ai-feedback" });
+    if (m.helpful === true || m.helpful === false) {
+      wrap.textContent = "Thanks for the feedback.";
+      return wrap;
+    }
+    wrap.appendChild(document.createTextNode("Was this helpful? "));
+    for (const [label, value] of [
+      ["Yes", true],
+      ["No", false],
+    ]) {
+      const b = el("button", { type: "button" });
+      b.textContent = label;
+      b.addEventListener("click", () => {
+        m.helpful = value;
+        saveThread();
+        wrap.replaceWith(renderFeedback(m));
+        fetch(config.endpoint.replace(/\/v1\/ask$/, "/v1/feedback"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: m.id, day: m.day, helpful: value }),
+          keepalive: true,
+        }).catch(() => {});
+      });
+      wrap.appendChild(b);
+    }
+    return wrap;
   }
 
   function renderSources(sources) {
@@ -241,7 +273,7 @@
       .map((m) => ({ role: m.role, content: m.content }));
 
     thread.push({ role: "user", content: question });
-    const reply = { role: "assistant", content: "", sources: [] };
+    const reply = { role: "assistant", content: "", sources: [], id: null, day: null };
     thread.push(reply);
     renderThread();
     const node = messages.lastElementChild;
@@ -268,7 +300,10 @@
             });
         }
         return readSSE(res.body, (event, data) => {
-          if (event === "sources") {
+          if (event === "meta") {
+            reply.id = data.id || null;
+            reply.day = data.day || null;
+          } else if (event === "sources") {
             allSources = data;
           } else if (event === "delta") {
             reply.content += data.text || "";
@@ -307,6 +342,7 @@
       node.classList.remove("ask-ai-pending");
       node.innerHTML = renderMarkdown(reply.content, reply.sources);
       if (reply.sources.length) node.appendChild(renderSources(reply.sources));
+      if (reply.id) node.appendChild(renderFeedback(reply));
       controller = null;
       sendBtn.disabled = false;
       saveThread();
