@@ -31,6 +31,9 @@
   if (!config?.endpoint) return;
 
   const LABEL = "Ask AI about UCP";
+  // Links in answers are rendered only when they point at the docs or the
+  // project's GitHub; anything else stays plain text.
+  const LINK_HOSTS = [location.host, "ucp.dev", "github.com"];
   const STORAGE_KEY = "ucp-ask-ai-thread";
   const OPEN_KEY = "ucp-ask-ai-open";
   const MAX_STORED_MESSAGES = 12;
@@ -345,7 +348,14 @@
     out = out.replace(/`([^`]+)`/g, (_, code) => `<code>${code}</code>`);
     out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     out = out.replace(/(^|[\s(])_([^_]+)_(?=[\s).,;:!?]|$)/g, "$1<em>$2</em>");
-    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, label, href) => {
+    out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_whole, label, href) => {
+      let host = "";
+      try {
+        host = new URL(href).host;
+      } catch (_e) {
+        return label;
+      }
+      if (!LINK_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) return label;
       return `<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
     });
     out = out.replace(/\[(\d+)\]/g, (_m, n) => {

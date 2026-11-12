@@ -180,6 +180,17 @@ class _TextExtractor(HTMLParser):
     self._flush()
 
 
+def page_h1(html: str) -> str | None:
+  """Return the text of the first ``<h1>`` in ``html``, if any."""
+  parser = _TextExtractor()
+  parser.feed(html)
+  parser.close()
+  for section in parser.sections[1:]:
+    if section.heading:
+      return section.heading
+  return None
+
+
 def _word_count(text: str) -> int:
   return len(text.split())
 

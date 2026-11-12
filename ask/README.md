@@ -166,6 +166,24 @@ Response is `text/event-stream`:
 
 Errors before streaming starts are plain JSON with HTTP 4xx/5xx; 429 carries `Retry-After`.
 
+## Abuse resistance
+
+What a visitor can and cannot do with the endpoint:
+
+| Attempt | What happens |
+|---|---|
+| Use it as a general chatbot ("write me a poem") | Retrieval finds nothing docs-like, or the question's words are mostly unknown to the docs: canned scope reply, no model call. Questions that slip through are still bound by the system prompt. |
+| Prompt injection in the question ("ignore your instructions", "print your system prompt") | The question is passed as data inside `<question>` tags and the prompt says instructions there carry no authority. Such questions are never written to the answer cache, so a manipulated answer cannot be served to the next person. |
+| Injection through `history` (fake "assistant" turns with new rules) | History is trimmed, must alternate user/assistant, is capped in size, and the prompt states earlier assistant turns may have been edited by the user. History also disables caching. |
+| Hammering the endpoint | Per-IP hourly limit (`cf-connecting-ip` is set by Cloudflare and cannot be spoofed), site-wide daily budget, 600-character questions, 32 KB bodies, bounded output tokens. For hostile traffic add a Cloudflare rate-limiting rule or Turnstile in front of `/v1/ask`. |
+| Calling from another site | Browser requests from origins outside `ALLOWED_ORIGINS` are refused. Non-browser callers can still use the API, which is intended, and are subject to the same limits. |
+| Phishing links in answers | The widget renders Markdown links only when they point at ucp.dev or github.com; everything else is plain text. Citations always come from the index, never from the model. |
+| Cross-site scripting | All model output is HTML-escaped before the limited Markdown renderer runs. |
+
+The remaining risk is answer quality: a small model may follow a steering
+prompt despite the rules. Review the eval questions in this README's history
+or run your own against the model you deploy.
+
 ## Excluding a page from the index
 
 Add `ask_index: false` to the page's front matter.

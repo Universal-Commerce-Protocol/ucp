@@ -29,7 +29,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent / "scripts"))
 
-from ask_index import Chunk, chunk_html, write_index  # noqa: E402
+from ask_index import Chunk, chunk_html, page_h1, write_index  # noqa: E402
 
 log = logging.getLogger("mkdocs.hooks.ask_index")
 
@@ -47,7 +47,9 @@ def on_page_content(html, page, config, files):
   """Chunk the rendered page body (after macros and snippets ran)."""
   if page.meta.get("ask_index") is False:
     return html
-  title = page.title or page.file.name
+  # Prefer the page's own H1 over the (often generic) nav title such as
+  # "Overview" or "REST", both for retrieval and for the sources list.
+  title = page_h1(html) or page.title or page.file.name
   page_chunks = chunk_html(html, page.url, title)
   if page_chunks:
     _chunks.extend(page_chunks)

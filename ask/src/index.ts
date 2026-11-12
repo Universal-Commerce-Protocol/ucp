@@ -60,6 +60,15 @@ interface CachedAnswer {
 }
 
 const MAX_QUESTION_CHARS = 600;
+const MAX_BODY_BYTES = 32 * 1024;
+// Total characters of conversation history replayed to the model, so a
+// caller cannot inflate every request with pasted text.
+const MAX_HISTORY_TOTAL_CHARS = 6000;
+// Questions that try to steer the assistant are answered but never cached,
+// so a manipulated answer can't be served to the next person who asks the
+// same plain question.
+const STEERING_PATTERN =
+  /\b(ignore|disregard|forget|override|bypass)\b.*\b(instruction|rule|prompt|above|previous)|\b(system prompt|developer message|jailbreak|pretend|act as|you are now|new persona|role ?play)\b|<\/?(system|assistant|user|instruction)/i;
 // Below this share of known terms a question is treated as off-topic.
 const MIN_VOCAB_COVERAGE = 0.6;
 const MAX_HISTORY_MESSAGE_CHARS = 2000;
@@ -81,9 +90,13 @@ export default {
       return json({ error: "origin not allowed" }, 403, cors);
     }
 
+    const declared = Number(request.headers.get("content-length") ?? 0);
+    if (declared > MAX_BODY_BYTES) return json({ error: "request too large" }, 413, cors);
     let body: AskRequest;
     try {
-      body = (await request.json()) as AskRequest;
+      const raw = await request.text();
+      if (raw.length > MAX_BODY_BYTES) return json({ error: "request too large" }, 413, cors);
+      body = JSON.parse(raw) as AskRequest;
     } catch {
       return json({ error: "invalid JSON" }, 400, cors);
     }
@@ -97,9 +110,10 @@ export default {
     const index = await loadIndex(env.INDEX_URLS.split(",").map((s) => s.trim()).filter(Boolean));
 
     // 1. Repeated single-turn question: replay the cached answer, no model call.
-    const cacheKey = history.length
-      ? null
-      : `a:${index.version}:${(await sha256Hex(normalizeQuestion(question))).slice(0, 32)}`;
+    const cacheKey =
+      history.length || STEERING_PATTERN.test(question)
+        ? null
+        : `a:${index.version}:${(await sha256Hex(normalizeQuestion(question))).slice(0, 32)}`;
     if (cacheKey) {
       const hit = await env.ASK_KV.get<CachedAnswer>(cacheKey, "json");
       if (hit) return streamCached(hit, cors);
@@ -260,6 +274,12 @@ function sanitizeHistory(history: HistoryMessage[] | undefined, maxTurns: number
     }
   }
   if (out.length && out[out.length - 1].role !== "assistant") out.pop();
+  // Cap total replayed characters, dropping the oldest turns first.
+  let total = out.reduce((n, m) => n + m.content.length, 0);
+  while (out.length > 2 && total > MAX_HISTORY_TOTAL_CHARS) {
+    total -= out[0].content.length + out[1].content.length;
+    out.splice(0, 2);
+  }
   return out;
 }
 

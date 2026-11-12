@@ -40,7 +40,10 @@ const STOPWORDS = new Set(
   (
     "a an and are as at be by can could do does for from has have how i if in is it its of on or " +
     "that the this to was what when where which who why will with you your does do should would " +
-    "about into than then there these those we our they their me my ucp"
+    "about into than then there these those we our they their me my " +
+    // question filler that carries no topical signal
+    "work works working use using used need needs want add get make like way mean means help " +
+    "know tell explain show give also please any some one someone something"
   ).split(" "),
 );
 
@@ -87,7 +90,17 @@ const QUERY_SYNONYMS: Record<string, string[]> = {
   promo: ["discount"],
   hotel: ["lodging", "booking"],
   restaurant: ["food"],
+  behind: ["developed", "partners", "leaders"],
+  backed: ["developed", "partners", "leaders"],
+  partners: ["developed", "partners", "leaders"],
+  members: ["developed", "partners", "leaders"],
 };
+
+/** Pages that rarely hold the best answer to a how-to question. */
+const PAGE_DEMOTIONS: { suffix: string; factor: number }[] = [
+  { suffix: "documentation/announcements/", factor: 0.5 },
+  { suffix: "documentation/roadmap/", factor: 0.8 },
+];
 
 /** Expand a query with UCP vocabulary. Expansions are appended, never replace. */
 export function expandQuery(query: string): string {
@@ -107,6 +120,10 @@ export function expandQuery(query: string): string {
  * each pinned page is included in the results.
  */
 const INTENT_PINS: { intent: RegExp; pages: string[] }[] = [
+  {
+    intent: /\b(what('s| is| are)|explain|describe|about|overview of|introduction to|intro to)\b.*\b(ucp|universal commerce protocol|the protocol)\b|^(ucp|universal commerce protocol)\??$/i,
+    pages: ["documentation/core-concepts/", "specification/overview/"],
+  },
   {
     intent: /\b(implement|get(ting)? started|start|integrate|integration|build|adopt|set ?up|onboard|begin|tutorial|quick ?start|how do i (use|support))/i,
     pages: ["specification/getting-started/", "documentation/core-concepts/"],
@@ -136,13 +153,18 @@ export function tokenize(text: string): string[] {
   return out;
 }
 
+/** Light English stemmer: plurals, -ing/-ed/-ly, trailing e, doubled consonants. */
 function stem(word: string): string {
-  if (word.length <= 4) return word;
-  return word
-    .replace(/(ies)$/, "y")
-    .replace(/(ss)es$/, "$1")
-    .replace(/(ing|ed|ly)$/, "")
-    .replace(/(s)$/, "");
+  if (word.length <= 3) return word;
+  let w = word.replace(/ies$/, "y").replace(/(ss)es$/, "$1").replace(/([^s])s$/, "$1");
+  if (w.length > 4) {
+    w = w.replace(/(ing|ed|ly)$/, "");
+    // Collapse a doubled consonant left by -ing/-ed (shopping -> shop) and
+    // drop a trailing e so "contribute" and "contributing" share a stem.
+    w = w.replace(/([^aeiou])\1$/, "$1"); // cspell:disable-line
+    if (w.length > 4) w = w.replace(/e$/, "");
+  }
+  return w;
 }
 
 export class DocsIndex {
@@ -234,7 +256,9 @@ export class DocsIndex {
   vocabularyCoverage(query: string): number {
     const terms = [...new Set(tokenize(query))];
     if (!terms.length) return 0;
-    const known = terms.filter((t) => this.df.has(t)).length;
+    const known = terms.filter(
+      (t) => this.df.has(t) || QUERY_SYNONYMS[t] !== undefined || QUERY_SYNONYMS[`${t}s`] !== undefined,
+    ).length;
     return known / terms.length;
   }
 
@@ -281,8 +305,9 @@ export class DocsIndex {
       const chunk = this.chunks[doc];
       if (opts.exclude?.has(chunk.id)) continue;
       const pageUrl = chunk.url.split("#")[0];
-      let score = raw + 0.6 * (pageScores.get(pageUrl) ?? 0);
+      let score = raw + 1.5 * (pageScores.get(pageUrl) ?? 0);
       if (opts.boostUrlPrefix && chunk.url.startsWith(opts.boostUrlPrefix)) score *= 1.15;
+      for (const d of PAGE_DEMOTIONS) if (pageUrl.endsWith(d.suffix)) score *= d.factor;
       hits.push({ chunk, score });
     }
     hits.sort((a, b) => b.score - a.score);
