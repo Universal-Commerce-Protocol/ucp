@@ -7,6 +7,22 @@ OpenAI chat-completions protocol (vLLM, Ollama, TGI, llama.cpp, SGLang, LM
 Studio, a fine-tuned model you host) or an open model on Cloudflare Workers AI.
 No third-party LLM API is required.
 
+## What it looks like
+
+Header entry point beside search, on the live site:
+
+![Ask AI about UCP button in the ucp.dev header](docs/home.png)
+
+An answer with numbered citations and the sections it came from (Llama 3.3 70B on Workers AI, real output):
+
+![Answer drawer open next to the Checkout Capability page](docs/drawer-answer.png)
+
+A follow-up in the same conversation, and the phone layout:
+
+![Follow-up question](docs/drawer-followup.png)
+
+![Phone layout](docs/phone-answer.png)
+
 ## How it works
 
 ```text
@@ -165,6 +181,36 @@ Response is `text/event-stream`:
 | `error` | `{ message }` |
 
 Errors before streaming starts are plain JSON with HTTP 4xx/5xx; 429 carries `Retry-After`.
+
+## Model comparison
+
+The same pipeline was run against three open models on the same questions.
+Retrieval, prompt and guards were identical; only the model changed.
+
+| Model | Where it ran | Grounding and accuracy | Citations | Notes |
+| --- | --- | --- | --- | --- |
+| Qwen 2.5 3B Instruct | local CPU, llama.cpp | Correct on direct questions; on broad ones mixed in unrelated sections and padded with generic advice | Often omitted | Proves the pipeline; below the bar for visitors |
+| Qwen 2.5 14B Instruct | local CPU, llama.cpp | Correct and in the docs' own order on all three test questions, including the broad "implement UCP on my store" | Present but sparse (one marker where two or three sections were used) | Several minutes per answer on 4 CPU cores; seconds on a GPU |
+| Llama 3.3 70B Instruct (fp8) | Cloudflare Workers AI | Correct, concise, connected sections across pages | Consistent, including multi-source markers | Used for the review deployment; streams in a few seconds |
+
+Sample answers (14B, local): asked how to implement UCP on a self-hosted
+store it listed the prerequisites, the create and get checkout-session
+endpoints, publishing the profile with capabilities and payment handlers,
+the SDKs, and pointed at the Getting Started guide. Asked whether an agent can
+buy without the user confirming, it answered no and explained the AP2 mandate
+flow with the consent step, citing both pages. The 3B model, on the first
+question, had instead described card tokenization and PCI scope.
+
+## Review deployment pattern
+
+For a review before touching production, the Worker can serve the live
+documentation itself: a thin wrapper proxies `ucp.dev` pages, injects the
+widget's stylesheet, script and config element with `HTMLRewriter`, serves
+`ask-index.json` and the widget files from KV, and hands `/v1/*` to the
+Worker in this directory. Nothing in the production site changes, and the
+assistant is exercised against the real pages. Set `INDEX_URLS` to the
+relative paths (`/ask-index.json,/latest/ask-index.json`); same-origin
+requests are accepted without listing the host in `ALLOWED_ORIGINS`.
 
 ## Question log, feedback and export (the path to a fine-tuned model)
 

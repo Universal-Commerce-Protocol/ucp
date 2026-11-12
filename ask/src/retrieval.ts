@@ -406,11 +406,21 @@ const RELOAD_MS = 10 * 60 * 1000;
  * Load (and memoize per isolate) the merged index. The Cache API keeps the
  * fetch cheap across isolates; the in-memory copy makes it free within one.
  */
-export async function loadIndex(urls: string[]): Promise<DocsIndex> {
+/** Anything with a fetch(): global fetch or a Worker's static-assets binding. */
+export interface IndexFetcher {
+  fetch(input: string | Request, init?: RequestInit): Promise<Response>;
+}
+
+export async function loadIndex(
+  urls: string[],
+  fetcherFor: (url: string) => IndexFetcher = () => ({
+    fetch: (i, init) => fetch(i, init),
+  })
+): Promise<DocsIndex> {
   if (cached && Date.now() - cached.loadedAt < RELOAD_MS) return cached.index;
   const raws = await Promise.all(
     urls.map(async (url) => {
-      const res = await fetch(url, {
+      const res = await fetcherFor(url).fetch(url, {
         cf: { cacheTtl: 600, cacheEverything: true },
       } as RequestInit);
       if (!res.ok) throw new Error(`index fetch failed: ${url} ${res.status}`);

@@ -36,6 +36,10 @@ import { type Chunk, type DocsIndex, loadIndex, tokenize } from "./retrieval";
 export interface Env {
   ASK_KV: KVNamespace;
   AI?: WorkersAiBinding;
+  /** Static-assets binding when the docs are served from this same Worker. */
+  ASSETS?: {
+    fetch(input: string | Request, init?: RequestInit): Promise<Response>;
+  };
   MODEL_PROVIDER: string;
   MODEL: string;
   MODEL_BASE_URL?: string;
@@ -115,7 +119,7 @@ export default {
   ): Promise<Response> {
     const url = new URL(request.url);
     const origin = request.headers.get("Origin");
-    const cors = corsHeaders(origin, env);
+    const cors = corsHeaders(origin, env, url.origin);
 
     if (request.method === "OPTIONS")
       return new Response(null, { status: 204, headers: cors });
@@ -156,7 +160,7 @@ export default {
     if (url.pathname !== "/v1/ask" || request.method !== "POST") {
       return json({ error: "not found" }, 404, cors);
     }
-    if (origin && !isAllowedOrigin(origin, env)) {
+    if (origin && !isAllowedOrigin(origin, env, url.origin)) {
       return json({ error: "origin not allowed" }, 403, cors);
     }
 
@@ -187,10 +191,19 @@ export default {
     const page =
       typeof body.page === "string" ? body.page.slice(0, 300) : undefined;
 
-    const index = await loadIndex(
-      env.INDEX_URLS.split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
+    // INDEX_URLS may be absolute (https://ucp.dev/ask-index.json) or, when the
+    // docs are served by this Worker, relative (/ask-index.json): relative
+    // ones resolve against this request's origin and are read through the
+    // assets binding so the Worker never has to call itself over the network.
+    const self = url.origin;
+    const indexUrls = env.INDEX_URLS.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((u) => (u.startsWith("/") ? `${self}${u}` : u));
+    const index = await loadIndex(indexUrls, (u) =>
+      env.ASSETS && u.startsWith(`${self}/`)
+        ? env.ASSETS
+        : { fetch: (i, init) => fetch(i, init) }
     );
 
     // 1. Repeated single-turn question: replay the cached answer, no model call.
@@ -538,14 +551,19 @@ const SSE_HEADERS = {
   "X-Accel-Buffering": "no",
 };
 
-function isAllowedOrigin(origin: string, env: Env): boolean {
+function isAllowedOrigin(origin: string, env: Env, self?: string): boolean {
+  if (self && origin === self) return true; // docs served by this same Worker
   return env.ALLOWED_ORIGINS.split(",")
     .map((s) => s.trim())
     .filter(Boolean)
     .includes(origin);
 }
 
-function corsHeaders(origin: string | null, env: Env): Record<string, string> {
+function corsHeaders(
+  origin: string | null,
+  env: Env,
+  self?: string
+): Record<string, string> {
   const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",

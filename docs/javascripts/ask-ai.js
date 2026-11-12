@@ -433,12 +433,20 @@
         return `<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
       }
     );
-    out = out.replace(/\[(\d+)\]/g, (_m, n) => {
-      let src = null;
-      for (const s of sources) if (String(s.n) === n) src = s;
-      if (!src) return "";
-      const label = escapeHtml(`${src.title} › ${src.heading}`);
-      return `<sup><a class="ask-ai-cite" href="${escapeHtml(src.url)}" target="_blank" rel="noopener" title="${label}">${n}</a></sup>`;
+    // Citations: [2], [1, 3] or [1,3] become numbered superscript links.
+    out = out.replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, (_m, list) => {
+      const links = list
+        .split(",")
+        .map((n) => n.trim())
+        .map((n) => {
+          let src = null;
+          for (const s of sources) if (String(s.n) === n) src = s;
+          if (!src) return "";
+          const label = escapeHtml(`${src.title} \u203a ${src.heading}`);
+          return `<a class="ask-ai-cite" href="${escapeHtml(src.url)}" target="_blank" rel="noopener" title="${label}">${n}</a>`;
+        })
+        .filter(Boolean);
+      return links.length ? `<sup>${links.join(" ")}</sup>` : "";
     });
     return out;
   }
