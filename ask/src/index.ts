@@ -5,45 +5,40 @@
  *   -> text/event-stream with events: meta, sources, delta, done, error
  * GET  /v1/health
  *
- * Cost model per answered question (see README.md for the table):
+ * Cost model per answered question (see README.md):
  *   - retrieval: free (BM25 in the Worker)
  *   - repeated question: free (answer served from KV, no model call)
- *   - otherwise one streamed Messages call with a cached system prefix,
- *     ~6 short excerpts, a capped output, and at most one extra tool round.
+ *   - otherwise one streamed chat completion against your own model with a
+ *     stable system prefix, ~8 short excerpts and a capped output.
+ *
+ * The model is pluggable (src/providers.ts): any OpenAI-compatible server
+ * (vLLM, Ollama, TGI, llama.cpp, ...) or Cloudflare Workers AI.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
 import { checkLimits, normalizeQuestion, sha256Hex } from "./limits";
-import {
-  buildSystem,
-  buildUserTurn,
-  formatExcerpts,
-  OFF_TOPIC_REPLY,
-  SEARCH_TOOL,
-  SEARCH_TOOL_NAME,
-} from "./prompt";
+import { buildMessages, OFF_TOPIC_REPLY } from "./prompt";
+import { type ChatMessage, createProvider, ProviderError, type WorkersAiBinding } from "./providers";
 import { type Chunk, type DocsIndex, loadIndex } from "./retrieval";
 
 export interface Env {
-  ANTHROPIC_API_KEY: string;
   ASK_KV: KVNamespace;
+  AI?: WorkersAiBinding;
+  MODEL_PROVIDER: string;
   MODEL: string;
-  EFFORT: string;
+  MODEL_BASE_URL?: string;
+  MODEL_API_KEY?: string;
+  TEMPERATURE: string;
   MAX_OUTPUT_TOKENS: string;
   INDEX_URLS: string;
   ALLOWED_ORIGINS: string;
   TOP_K: string;
-  TOOL_TOP_K: string;
   MAX_HISTORY_TURNS: string;
   PER_IP_HOURLY_LIMIT: string;
   DAILY_REQUEST_BUDGET: string;
   ANSWER_CACHE_TTL: string;
 }
 
-interface HistoryMessage {
-  role: "user" | "assistant";
-  content: string;
-}
+type HistoryMessage = ChatMessage & { role: "user" | "assistant" };
 
 interface AskRequest {
   question: string;
@@ -111,13 +106,14 @@ export default {
     // 2. Retrieval first: an empty result means nothing in the docs matches, so
     //    answer with the canned scope message and skip the model entirely.
     const retrievalQuery = history.length ? `${lastUserTurn(history)} ${question}` : question;
-    let hits = index.search(retrievalQuery, Number(env.TOP_K || 6), {
+    const topK = Number(env.TOP_K || 8);
+    let hits = index.search(retrievalQuery, topK, {
       boostUrlPrefix: page ? page.split("#")[0] : undefined,
     });
     if (!hits.length && /\b(ucp|protocol|commerce)\b/i.test(retrievalQuery)) {
       // "What is UCP?" style questions have no distinctive terms; ground them
       // in the overview material instead of bouncing them.
-      hits = index.search("universal commerce protocol overview core concepts", Number(env.TOP_K || 6));
+      hits = index.search("universal commerce protocol overview core concepts", topK);
     }
     if (!hits.length) return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors);
 
@@ -143,7 +139,12 @@ export default {
     }
 
     // 4. Model call, streamed.
-    const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 1, timeout: 60_000 });
+    let provider: ReturnType<typeof createProvider>;
+    try {
+      provider = createProvider(env);
+    } catch (err) {
+      return json({ error: describeError(err) }, 500, cors);
+    }
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const sse = (event: string, data: unknown) =>
@@ -152,11 +153,11 @@ export default {
     ctx.waitUntil(
       (async () => {
         try {
-          const result = await answer(client, env, index, question, history, hits.map((h) => h.chunk), sse);
+          const result = await answer(provider, env, index, question, history, hits.map((h) => h.chunk), sse);
           if (cacheKey && result.cacheable) {
             await env.ASK_KV.put(
               cacheKey,
-              JSON.stringify({ answer: result.text, sources: result.sources, model: env.MODEL } satisfies CachedAnswer),
+              JSON.stringify({ answer: result.text, sources: result.sources, model: provider.name } satisfies CachedAnswer),
               { expirationTtl: Number(env.ANSWER_CACHE_TTL || 604800) },
             );
           }
@@ -179,7 +180,7 @@ interface AnswerResult {
 }
 
 async function answer(
-  client: Anthropic,
+  provider: ReturnType<typeof createProvider>,
   env: Env,
   index: DocsIndex,
   question: string,
@@ -187,84 +188,31 @@ async function answer(
   chunks: Chunk[],
   sse: (event: string, data: unknown) => Promise<void>,
 ): Promise<AnswerResult> {
-  const provided: Chunk[] = [...chunks];
-  const sources = toSources(provided);
-  await sse("meta", { cached: false, model: env.MODEL });
+  const sources = toSources(chunks);
+  await sse("meta", { cached: false, model: provider.name });
   await sse("sources", sources);
 
-  // Stable prefix: tools then system. Both are identical for every request
-  // until the docs are redeployed, so the 1h cache entry is shared site-wide.
-  const system: Anthropic.TextBlockParam[] = [
-    { type: "text", text: buildSystem(index), cache_control: { type: "ephemeral", ttl: "1h" } },
-  ];
-  const messages: Anthropic.MessageParam[] = [
-    ...history.map((m) => ({ role: m.role, content: m.content })),
-    { role: "user", content: buildUserTurn(question, provided) },
-  ];
-
   let text = "";
-  let cacheable = true;
-  const maxRounds = 2; // initial answer + at most one search_docs round
-
-  for (let round = 0; round < maxRounds; round++) {
-    const stream = client.messages.stream({
-      model: env.MODEL,
-      max_tokens: Number(env.MAX_OUTPUT_TOKENS || 900),
-      system,
-      tools: [SEARCH_TOOL],
-      // After the single allowed search, forbid further tool calls.
-      ...(round === maxRounds - 1 ? { tool_choice: { type: "none" as const } } : {}),
-      output_config: { effort: env.EFFORT as "low" | "medium" | "high" },
-      messages,
-    });
-    stream.on("text", (delta) => {
+  const finish = await provider.stream(
+    buildMessages(index, history, question, chunks),
+    (delta) => {
       text += delta;
       void sse("delta", { text: delta });
-    });
-    const message = await stream.finalMessage();
+    },
+    { maxTokens: Number(env.MAX_OUTPUT_TOKENS || 700), temperature: Number(env.TEMPERATURE || 0.2) },
+  );
 
-    if (message.stop_reason === "refusal") {
-      const note = "\n\nI can't help with that request.";
-      text += note;
-      await sse("delta", { text: note });
-      cacheable = false;
-      break;
-    }
-    if (message.stop_reason === "max_tokens") {
-      const note = "\n\n_(Answer truncated. Ask a narrower follow-up for more detail.)_";
-      text += note;
-      await sse("delta", { text: note });
-      cacheable = false;
-      break;
-    }
-    if (message.stop_reason !== "tool_use") break;
-
-    const toolUses = message.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-    messages.push({ role: "assistant", content: message.content });
-    const results: Anthropic.ToolResultBlockParam[] = [];
-    for (const use of toolUses) {
-      let content = "No additional sections found.";
-      if (use.name === SEARCH_TOOL_NAME) {
-        const query = String((use.input as { query?: unknown }).query ?? "");
-        const extra = index
-          .search(query, Number(env.TOOL_TOP_K || 4), { exclude: new Set(provided.map((c) => c.id)) })
-          .map((h) => h.chunk);
-        if (extra.length) {
-          content = formatExcerpts(extra, provided.length + 1);
-          provided.push(...extra);
-        }
-      }
-      results.push({ type: "tool_result", tool_use_id: use.id, content });
-    }
-    messages.push({ role: "user", content: results });
-    sources.splice(0, sources.length, ...toSources(provided));
-    await sse("sources", sources);
-    await sse("delta", { text: "" });
+  let cacheable = text.trim().length > 0;
+  if (finish === "length") {
+    const note = "\n\n_(Answer truncated. Ask a narrower follow-up for more detail.)_";
+    text += note;
+    await sse("delta", { text: note });
+    cacheable = false;
   }
 
   const usedSources = sources.filter((s) => text.includes(`[${s.n}]`));
   await sse("done", { sources: usedSources });
-  return { text, sources: usedSources, cacheable: cacheable && text.trim().length > 0 };
+  return { text, sources: usedSources, cacheable };
 }
 
 function toSources(chunks: Chunk[]): Source[] {
@@ -310,12 +258,12 @@ function lastUserTurn(history: HistoryMessage[]): string {
 }
 
 function describeError(err: unknown): string {
-  if (err instanceof Anthropic.RateLimitError || err instanceof Anthropic.OverloadedError) {
-    return "The assistant is busy right now. Please try again in a minute.";
+  if (err instanceof ProviderError) {
+    if (err.status === 429 || err.status === 503) return "The assistant is busy right now. Please try again in a minute.";
+    if (err.status && err.status >= 500) return "The model server hit an error. Please try again.";
+    return err.message;
   }
-  if (err instanceof Anthropic.AuthenticationError) return "The assistant is misconfigured (authentication).";
-  if (err instanceof Anthropic.APIConnectionError) return "The assistant could not reach its model provider.";
-  if (err instanceof Anthropic.APIError) return `The assistant hit an upstream error (${err.status ?? "unknown"}).`;
+  if (err instanceof TypeError) return "The assistant could not reach its model server.";
   return "Something went wrong while answering.";
 }
 

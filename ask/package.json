@@ -2,7 +2,7 @@
   "name": "ucp-ask-ai",
   "version": "0.1.0",
   "private": true,
-  "description": "Ask AI backend for ucp.dev: retrieval over the docs index plus a cost-capped Claude call, deployed as a Cloudflare Worker.",
+  "description": "Ask AI backend for ucp.dev: retrieval over the docs index plus a cost-capped call to your own model, deployed as a Cloudflare Worker.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
@@ -10,9 +10,6 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.ts"
-  },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^1.8.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261110.1",

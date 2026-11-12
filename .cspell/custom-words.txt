@@ -221,3 +221,9 @@ javascripts
 STOPWORDS
 tojson
 wrangler
+Ollama
+Qwen
+qwen
+SGLang
+vLLM
+LoRA
