@@ -67,10 +67,14 @@ const MAX_HISTORY_TOTAL_CHARS = 6000;
 // Attempts to steer the assistant. A documentation assistant never needs
 // these, so they are declined before any model call, model-independently.
 const STEERING_PATTERN =
-  /\b(ignore|disregard|forget|override|bypass|drop)\b[^.?!]{0,60}\b(instruction|rule|prompt|guideline|above|previous|prior)|\b(system prompt|developer message|hidden prompt|your (instructions|rules|prompt)|jailbreak|pretend (to be|you are)|act as|you are now|from now on|new persona|role ?play|no (rules|restrictions)|unrestricted|dan mode|confirm by saying|documentation map)\b|<\/?(system|assistant|user|instruction|excerpts?|question)>/i;
-// Requests for work that is not a question about the docs (translation,
-// creative writing, general coding). Allowed when the request names UCP
-// material, e.g. "write an example checkout request".
+  /\b(ignore|disregard|forget|override|bypass|drop)\b[^.?!]{0,60}\b(instruction|rule|prompt|guideline|above|previous|prior)|\b(system prompt|developer message|hidden prompt|your (instructions|rules|prompt)|jailbreak|pretend (to be|you are)|act as|you are now|from now on|new persona|role ?play|no (rules|restrictions)|unrestricted|dan mode|confirm by saying|documentation map|in the (style|voice|manner) of|(like|as) a pirate|in pirate|in rhyme|in verse|in all caps|as a (poem|song|rap|limerick|haiku))\b|<\/?(system|assistant|user|instruction|excerpts?|question)>/i;
+// Creative writing and translation are never documentation questions, even
+// when they mention UCP terms.
+const CREATIVE_PATTERN =
+  // cspell:disable-next-line
+  /\b(poem|limerick|haiku|sonnet|story|song|rap|lyrics|joke|riddle|fan ?fiction|screenplay)\b|\b(translate|traduce|translation)\b|\bin (french|spanish|german|italian|portuguese|dutch|chinese|japanese|korean|arabic|hindi|russian)\b/i;
+// Requests for general work (code, emails, summaries of pasted text). Allowed
+// when the request names UCP material, e.g. "write an example checkout request".
 const TASK_PATTERN =
   // cspell:disable-next-line
   /^(please\s+)?(translate|traduce|write|compose|generate|create|draft|summari[sz]e|rewrite|paraphrase|tell me|give me|make)\b[^.?!]{0,80}\b(poem|limerick|haiku|story|song|essay|joke|rap|lyrics|tweet|email|letter|blog|script|code|program|python|javascript|typescript|java|rust|golang|scraper|scrape|bot|french|spanish|german|english|chinese|japanese|language|summary of (this|the following))\b/i;
@@ -149,6 +153,7 @@ export default {
       !hits.length ||
       (!history.length && index.vocabularyCoverage(question) < MIN_VOCAB_COVERAGE) ||
       STEERING_PATTERN.test(question) ||
+      CREATIVE_PATTERN.test(question) ||
       (TASK_PATTERN.test(question) && !UCP_NOUNS.test(question));
     if (offTopic) return streamCached({ answer: OFF_TOPIC_REPLY, sources: [], model: "none" }, cors);
 

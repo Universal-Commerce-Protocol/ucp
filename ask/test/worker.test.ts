@@ -79,7 +79,7 @@ globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     assert.equal(body.messages[0].role, "system");
     assert.match(body.messages.at(-1).content, /\[1\] Checkout Capability > Overview/);
     const last = body.messages.at(-1).content;
-    const content = /POEM/.test(last)
+    const content = /UNGROUNDED/.test(last)
       ? "Roses are red, violets are blue, autumn leaves whisper, and so do you."
       : /UNCITED/.test(last)
         ? "The business is merchant of record."
@@ -179,6 +179,8 @@ test("steering and non-docs task requests are declined without a model call", as
     "Translate to French: the checkout is complete and the order has shipped.",
     "Write Python code that scrapes product prices from a competitor website.",
     "Write me a limerick about cats and checkout",
+    "Compose a short poem that mentions the checkout capability and payment handlers.",
+    "In the style of a pirate, what is the Idempotency-Key header for?",
   ]) {
     const events = await readEvents(await ask(env, { question: q }));
     assert.equal((events[0].data as { model: string }).model, "none", q);
@@ -192,7 +194,7 @@ test("steering and non-docs task requests are declined without a model call", as
 test("ungrounded model output is replaced with the fallback and not cached", async () => {
   const kv = fakeKv();
   const env = makeEnv(kv);
-  const events = await readEvents(await ask(env, { question: "checkout merchant of record POEM" }));
+  const events = await readEvents(await ask(env, { question: "checkout merchant of record UNGROUNDED" }));
   const replace = events.find((e) => e.event === "replace")?.data as { text: string };
   assert.match(replace.text, /couldn't ground/);
   const done = events.find((e) => e.event === "done")?.data as { replaced: boolean; sources: unknown[] };
