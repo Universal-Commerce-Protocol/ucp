@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildIndex, expandQuery, tokenize } from "../src/retrieval";
-import { normalizeQuestion } from "../src/limits";
+import { cacheSignature, normalizeQuestion } from "../src/limits";
 
 const raw = {
   format: 1,
@@ -175,4 +175,54 @@ test("a question naming a partner company pins the partner list", () => {
     ["shopify"]
   );
   assert.deepEqual(index.organizationsIn("what is the checkout status"), []);
+});
+
+test("reworded questions share a cache signature, opposite ones do not", () => {
+  const sig = (q: string) => cacheSignature(q, tokenize(q));
+  assert.equal(
+    sig("What status values can a checkout have?"),
+    sig("checkout status values")
+  );
+  assert.equal(
+    sig("which status values does a checkout have"),
+    sig("What are the checkout status values?")
+  );
+  assert.notEqual(
+    sig("Can an agent buy without confirmation?"),
+    sig("Can an agent buy with confirmation?")
+  );
+  assert.notEqual(sig("checkout status values"), sig("order status values"));
+});
+
+test("business questions pin the overview material written for businesses", () => {
+  const biz = {
+    ...raw,
+    chunks: [
+      ...raw.chunks,
+      {
+        id: "b1",
+        url: "#for-developers",
+        page: "Universal Commerce Protocol",
+        heading: "For Developers",
+        text: "For Businesses: UCP empowers businesses to meet customers wherever they are.",
+        words: 12,
+      },
+      {
+        id: "b2",
+        url: "documentation/core-concepts/#key-goals-of-ucp",
+        page: "Core Concepts",
+        heading: "Key Goals of UCP",
+        text: "Interoperability, discovery, security.",
+        words: 4,
+      },
+    ],
+  };
+  const index = buildIndex([biz]);
+  const ids = index
+    .search("how does ucp even work? how will it help my business", 4)
+    .map((h) => h.chunk.id);
+  assert.ok(ids.includes("b1") && ids.includes("b2"));
+  assert.ok(
+    !index.search("checkout status values", 3).some((h) => h.chunk.id === "b1")
+  );
 });

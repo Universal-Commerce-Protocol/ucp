@@ -15,7 +15,7 @@
  * (vLLM, Ollama, TGI, llama.cpp, ...) or Cloudflare Workers AI.
  */
 
-import { checkLimits, normalizeQuestion, sha256Hex } from "./limits";
+import { cacheSignature, checkLimits, sha256Hex } from "./limits";
 import {
   exportDay,
   type LogEntry,
@@ -223,7 +223,7 @@ export default {
       ? null
       : `a:${index.version}:${(
           await sha256Hex(
-            `${env.MODEL}\n${RULES}\n${normalizeQuestion(question)}`
+            `${env.MODEL}\n${RULES}\n${cacheSignature(question, tokenize(question))}`
           )
         ).slice(0, 32)}`;
     const started = Date.now();

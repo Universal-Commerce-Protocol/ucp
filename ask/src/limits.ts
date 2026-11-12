@@ -68,3 +68,26 @@ export function normalizeQuestion(question: string): string {
     .replace(/[?!.\s]+$/g, "")
     .trim();
 }
+
+/**
+ * Cache key text for a question. Reduces the question to its sorted set of
+ * content terms (stemmed, filler words dropped), so different wordings such as
+ * "What status values can a checkout have?", "checkout status values" and
+ * "which statuses does a checkout have" share one cached answer and only
+ * the first of them costs a model call. Words that flip the meaning are
+ * kept, so "can" and "cannot" questions never share an entry. Falls back
+ * to the normalized text when nothing is left.
+ */
+export function cacheSignature(question: string, tokens: string[]): string {
+  const normalized = normalizeQuestion(question);
+  const polarity =
+    /\b(not|no|never|without|cannot|can't|isn't|doesn't|don't|won't|except|unless)\b/.test(
+      normalized
+    )
+      ? "neg"
+      : "pos";
+  const terms = [...new Set(tokens)].sort();
+  return terms.length >= 2
+    ? `${polarity}|${terms.join(" ")}`
+    : `${polarity}|${normalized}`;
+}

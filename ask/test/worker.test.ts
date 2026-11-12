@@ -431,3 +431,18 @@ test("questions about an unlisted company's adoption get the company reply, not 
     "chat-completions:test-model"
   );
 });
+
+test("a reworded question is served from the cache without a model call", async () => {
+  const kv = fakeKv();
+  const env = makeEnv(kv);
+  await readEvents(
+    await ask(env, { question: "Who is the merchant of record in checkout?" })
+  );
+  await new Promise((r) => setTimeout(r, 20));
+  const before = modelCalls;
+  const events = await readEvents(
+    await ask(env, { question: "checkout merchant of record?" })
+  );
+  assert.equal((events[0].data as { cached: boolean }).cached, true);
+  assert.equal(modelCalls, before);
+});

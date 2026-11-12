@@ -7,7 +7,7 @@
  *    HTTP protocol: vLLM, Ollama, TGI, llama.cpp server, LM Studio, SGLang, or a
  *    hosted open-model API. This is what a self-hosted or fine-tuned model
  *    will expose.
- *  - "workers-ai": Cloudflare Workers AI (open models such as Llama, Qwen,
+ *  - "workers-ai": Cloudflare Workers AI (open models such as Gemma, Llama,
  *    Mistral, Gemma) through the `AI` binding; no GPU to run.
  */
 

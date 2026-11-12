@@ -28,7 +28,7 @@ binding = "AI"
 #   "workers-ai":        an open model hosted by Cloudflare through the AI binding,
 #                        e.g. MODEL = "@cf/google/gemma-4-26b-a4b-it".
 MODEL_PROVIDER = "chat-completions"
-MODEL = "qwen2.5-14b-instruct"
+MODEL = "gemma-4-26b-a4b-it"
 MODEL_BASE_URL = "https://REPLACE_WITH_YOUR_MODEL_SERVER/v1"
 # Optional JSON merged into every model request. Reasoning models should have
 # their thinking phase switched off so the output budget goes to the answer:

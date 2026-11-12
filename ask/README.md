@@ -46,8 +46,9 @@ docs build (MkDocs)            Cloudflare Worker (this directory)             yo
    cold start and keeps it for ten minutes. Dotted identifiers such as
    `dev.ucp.shopping.checkout` are indexed whole and in parts, and sections from
    the page the visitor is on get a small boost.
-3. **No model call when it is not needed.** Identical single-turn questions are
-   served from a KV answer cache (keyed by the index version, so a redeploy
+3. **No model call when it is not needed.** Repeated single-turn questions,
+   including different wordings that reduce to the same set of content terms,
+   are served from a KV answer cache (keyed by the index version, so a redeploy
    invalidates them). Questions with zero overlap with the docs get a canned
    scope reply.
 4. **One tightly scoped model call.** The system prompt (rules + a one-line map
@@ -67,7 +68,7 @@ instruction-tuned open model is enough. Rough guidance:
 | Option | Typical choice | What you pay for | Notes |
 | --- | --- | --- | --- |
 | Cloudflare Workers AI | `@cf/google/gemma-4-26b-a4b-it` | per token, no idle cost | Simplest: same account as the Worker, set `MODEL_PROVIDER=workers-ai`. |
-| Self-hosted, always on | Gemma or Qwen 14B class model on vLLM behind one GPU | GPU hours | Flat cost regardless of traffic; enable vLLM prefix caching. |
+| Self-hosted, always on | Gemma on vLLM behind one GPU (for example on Cloud Run or GKE) | GPU hours | Flat cost regardless of traffic; enable vLLM prefix caching. |
 | Self-hosted, scale to zero | same models on a serverless GPU platform | GPU seconds | Cold starts of 10-60 s on the first question after idle. |
 | Fine-tuned | LoRA on top of one of the above, trained on UCP Q&A pairs | one-off training | Improves tone and formatting; does **not** replace retrieval for facts, which go stale with every spec release. Start without it and collect real questions first. |
 
@@ -114,7 +115,7 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 | Var | Default | Purpose |
 | --- | --- | --- |
 | `MODEL_PROVIDER` | `chat-completions` | `chat-completions` or `workers-ai`. |
-| `MODEL` | `qwen2.5-14b-instruct` | Served model name (or Workers AI model id). |
+| `MODEL` | `gemma-4-26b-a4b-it` | Served model name (or Workers AI model id). |
 | `MODEL_BASE_URL` | placeholder | Base URL of the chat-completions server, ending in `/v1`. |
 | `MODEL_API_KEY` | secret, optional | Bearer token for the model server. |
 | `MODEL_EXTRA_PARAMS` | unset | JSON merged into every model request, e.g. `{"chat_template_kwargs":{"enable_thinking":false}}` to switch off the thinking phase of a reasoning model so the output budget goes to the answer. |
@@ -131,7 +132,7 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 ## Trying it without any API key
 
 Any local server with a chat-completions endpoint works. The smallest setup is llama.cpp's
-Python server with an open GGUF model; a 3B model answers on a laptop CPU in
+Python server with a GGUF build of an open model such as Gemma; a 3B model answers on a laptop CPU in
 under a minute per question and is enough to see the whole pipeline work
 (retrieval, citations, cache hits, off-topic gate). Use a 7B-14B+ instruct
 model for real quality.
@@ -139,8 +140,8 @@ model for real quality.
 ```bash
 python3 -m venv llm && ./llm/bin/pip install "llama-cpp-python[server]" huggingface_hub
 ./llm/bin/python -c "from huggingface_hub import hf_hub_download as d; \
-  d('Qwen/Qwen2.5-3B-Instruct-GGUF','qwen2.5-3b-instruct-q4_k_m.gguf',local_dir='weights')"
-./llm/bin/python -m llama_cpp.server --model weights/qwen2.5-3b-instruct-q4_k_m.gguf \
+  d('<org>/<gemma-gguf-repo>','<file>.gguf',local_dir='weights')"
+./llm/bin/python -m llama_cpp.server --model weights/<file>.gguf \
   --model_alias local --n_ctx 8192 --chat_format chatml --port 8080
 ```
 
@@ -190,8 +191,8 @@ Retrieval, prompt and guards were identical; only the model changed.
 
 | Model | Where it ran | Grounding and accuracy | Citations | Notes |
 | --- | --- | --- | --- | --- |
-| Qwen 2.5 3B Instruct | local CPU, llama.cpp | Correct on direct questions; on broad ones mixed in unrelated sections and padded with generic advice | Often omitted | Proves the pipeline; below the bar for visitors |
-| Qwen 2.5 14B Instruct | local CPU, llama.cpp | Correct and in the docs' own order on all three test questions, including the broad "implement UCP on my store" | Present but sparse (one marker where two or three sections were used) | Several minutes per answer on 4 CPU cores; seconds on a GPU |
+| 3B open-weight instruct model | local CPU, llama.cpp | Correct on direct questions; on broad ones mixed in unrelated sections and padded with generic advice | Often omitted | Proves the pipeline; below the bar for visitors |
+| 14B open-weight instruct model | local CPU, llama.cpp | Correct and in the docs' own order on all three test questions, including the broad "implement UCP on my store" | Present but sparse (one marker where two or three sections were used) | Several minutes per answer on 4 CPU cores; seconds on a GPU |
 | Gemma 4 26B | Cloudflare Workers AI | Correct and specific: quotes endpoint paths, field names and statuses from the excerpts and connects sections across pages | Consistent, including several sources on one sentence | Used for the review deployment; streams in a few seconds. Needs its thinking phase switched off (see `MODEL_EXTRA_PARAMS`) |
 
 Sample answers (14B, local): asked how to implement UCP on a self-hosted

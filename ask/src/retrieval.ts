@@ -131,6 +131,22 @@ const INTENT_PINS: { intent: RegExp; pages: string[] }[] = [
     pages: ["specification/getting-started/", "documentation/core-concepts/"],
   },
 ];
+const BUSINESS_INTENT =
+  /\b(my|our|a|small|your) (business|company|store|shop|brand|startup|team)\b|\b(benefit|benefits|advantage|advantages|value|roi|revenue|sales|conversion|customers|worth it|why (should|would|use|adopt|does)|business case|use case|who is (it|ucp) for|how (does|do) (ucp|it|this) (even )?(work|help)|what (does|can) ucp do|why ucp)\b/i;
+const BUSINESS_HEADINGS =
+  /^(for developers|for businesses|key goals of ucp|core concepts|get started today|see it in action|universal ?commerce ?protocol|co-developed by industry leaders|roles & participants)$/i;
+
+function dedupe(hits: Hit[]): Hit[] {
+  const seen = new Set<string>();
+  const out: Hit[] = [];
+  for (const h of hits) {
+    if (seen.has(h.chunk.id)) continue;
+    seen.add(h.chunk.id);
+    out.push(h);
+  }
+  return out;
+}
+
 const SPECIFIC_TERMS =
   /\b(cart|catalog|order|booking|lodging|food|tip|fulfil|discount|loyalty|consent|return|permalink|location|identity|signature|mandate|3ds|tokenization|tokenizer|ap2|mcp|a2a|embedded|rest|schema|extension|version)/i;
 
@@ -365,6 +381,22 @@ export class DocsIndex {
       const existing = hits.findIndex((h) => h.chunk.id === chunk.id);
       if (existing >= 0) hits.splice(existing, 1);
       hits.unshift({ chunk, score: Number.POSITIVE_INFINITY });
+    }
+
+    // Business-level questions ("how does UCP work", "how will it help my
+    // business", "why should we adopt it") are answered from the overview
+    // material written for that audience, not from whichever spec section
+    // shares a keyword.
+    if (BUSINESS_INTENT.test(query)) {
+      const wanted = this.chunks.filter(
+        (c) => BUSINESS_HEADINGS.test(c.heading) && !opts.exclude?.has(c.id)
+      );
+      for (const chunk of wanted.slice(0, 5).reverse()) {
+        const existing = hits.findIndex((h) => h.chunk.id === chunk.id);
+        if (existing >= 0) hits.splice(existing, 1);
+        hits.unshift({ chunk, score: Number.POSITIVE_INFINITY });
+      }
+      return dedupe(hits).slice(0, k);
     }
 
     // Intent pins: onboarding questions always see the getting-started material.
