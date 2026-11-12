@@ -1,3 +1,4 @@
+import { platformNote } from "./platforms";
 import type { ChatMessage } from "./providers";
 import type { Chunk, DocsIndex, PageEntry } from "./retrieval";
 
@@ -53,10 +54,17 @@ export function buildMessages(
   question: string,
   chunks: Chunk[]
 ): ChatMessage[] {
-  const orgs = index.organizationsIn(question).map((o) => o.name);
-  const note = orgs.length
-    ? `\n\nNote: this is an implementation question about getting UCP working on ${orgs.join(", ")}, a company the documentation lists as involved in UCP. Answer it as the "implementation on a platform" case: open with the one sentence about platform-specific steps, then the general path. Do not include a disclaimer about the company's technology stack.`
-    : "";
+  const orgs = index.organizationsIn(question);
+  let note = "";
+  if (orgs.length) {
+    const names = orgs.map((o) => o.display).join(", ");
+    const known = orgs
+      .map((o) => platformNote(o.display)?.setup)
+      .filter(Boolean);
+    note = known.length
+      ? `\n\nNote: this is a question about getting UCP working on ${names}. Open your answer with this guidance, in these words or very close to them: "${known.join(" ")}" After that, add at most two sentences on what UCP gives a business, drawn from the excerpts. Do not list implementation steps such as publishing a profile or exposing endpoints, because the platform handles those.`
+      : `\n\nNote: this is an implementation question about getting UCP working on ${names}, a company the documentation lists as involved in UCP. Answer it as the "implementation on a platform" case: open with the one sentence about platform-specific steps, then the general path. Do not include a disclaimer about the company's technology stack.`;
+  }
   return [
     { role: "system", content: buildSystem(index) },
     ...history,
@@ -68,7 +76,7 @@ export function buildMessages(
 }
 
 /** Bump when buildMessages changes in a way that should invalidate cached answers. */
-export const PROMPT_VERSION = "3";
+export const PROMPT_VERSION = "4";
 
 /** Fixed reply to "does <listed company> use / support / integrate UCP". */
 export function listedCompanyReply(
@@ -78,6 +86,11 @@ export function listedCompanyReply(
   const role = /endorsed/i.test(listHeading)
     ? "one of the companies that endorse UCP"
     : "one of the companies that co-developed UCP";
+  const note = platformNote(display);
+  if (note) {
+    // The platform has published how UCP works for its merchants.
+    return `${note.adoption}\n\n${display} is also ${role} [1].\n\nIf you have questions about UCP itself or how it works, I'm happy to help.`;
+  }
   return `I don't have information about ${display}'s technology stack or whether it uses UCP. For that, you'd need to check with ${display} directly.\n\nWhat the documentation does say is that ${display} is ${role} [1].\n\nIf you have questions about UCP itself or how to implement it, I'm happy to help.`;
 }
 

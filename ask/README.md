@@ -233,6 +233,15 @@ small embedding call. Without the file, retrieval is keyword only and
 nothing else changes. Rebuild the file when the docs change; sections
 without an embedding are still found by keyword.
 
+## Platform notes
+
+The UCP documentation does not cover platform-specific setup. Where a
+platform has published how UCP works for its merchants, a short note in
+`src/platforms.ts` is used for questions about that platform. Each note is
+a statement about another company shown to visitors as fact, so keep it
+conservative and review it when the platform's guidance changes. Platforms
+without a note get the standard "check with the company" reply.
+
 ## Evaluation
 
 `eval/questions.json` holds 100 questions with the kind of reply each must

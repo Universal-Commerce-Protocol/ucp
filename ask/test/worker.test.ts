@@ -475,11 +475,7 @@ test("a reworded question is served from the cache without a model call", async 
 test("adoption questions about a listed company get the fixed reply; how-to questions reach the model", async () => {
   const env = makeEnv(fakeKv());
   const before = modelCalls;
-  for (const q of [
-    "does shopify integrate",
-    "Does Target use UCP?",
-    "is Shopify on UCP",
-  ]) {
+  for (const q of ["Does Target use UCP?", "does google use ucp"]) {
     const events = await readEvents(await ask(env, { question: q }));
     const text = events
       .filter((e) => e.event === "delta")
@@ -570,4 +566,45 @@ test("a triage failure falls back to answering from the docs", async () => {
   } finally {
     globalThis.fetch = original;
   }
+});
+
+test("a platform with a published note gets that note, not the generic company reply", async () => {
+  const env = makeEnv(fakeKv());
+  const before = modelCalls;
+  for (const q of ["does shopify integrate", "is Shopify on UCP"]) {
+    const events = await readEvents(await ask(env, { question: q }));
+    const text = events
+      .filter((e) => e.event === "delta")
+      .map((e) => (e.data as { text: string }).text)
+      .join("");
+    assert.match(text, /Shopify stores are integrated with UCP by default/, q);
+    assert.match(text, /check your admin/, q);
+    assert.doesNotMatch(text, /don't have information/, q);
+  }
+  assert.equal(modelCalls, before);
+});
+
+test("a how-to question about a platform with a note passes the note to the model", async () => {
+  const env = makeEnv(fakeKv());
+  let userTurn = "";
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (
+    url: string | URL | Request,
+    init?: RequestInit
+  ) => {
+    if (String(url).endsWith("/chat/completions")) {
+      const body = JSON.parse(String(init?.body));
+      if (!String(body.messages[0].content).startsWith("Classify"))
+        userTurn = String(body.messages.at(-1).content);
+    }
+    return original(url, init);
+  }) as typeof fetch;
+  try {
+    await readEvents(
+      await ask(env, { question: "how can i do checkout inside shopify" })
+    );
+  } finally {
+    globalThis.fetch = original;
+  }
+  assert.match(userTurn, /Shopify stores are integrated with UCP by default/);
 });
