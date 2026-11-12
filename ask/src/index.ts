@@ -15,7 +15,12 @@
  * (vLLM, Ollama, TGI, llama.cpp, ...) or Cloudflare Workers AI.
  */
 
-import { cacheSignature, checkLimits, sha256Hex } from "./limits";
+import {
+  cacheSignature,
+  checkLimits,
+  isClearlyNotEnglish,
+  sha256Hex,
+} from "./limits";
 import {
   exportDay,
   type LogEntry,
@@ -27,6 +32,7 @@ import {
 import {
   buildMessages,
   COMPANY_REPLY,
+  ENGLISH_ONLY_REPLY,
   listedCompanyReply,
   OFF_TOPIC_REPLY,
   PROMPT_VERSION,
@@ -242,6 +248,18 @@ export default {
       historyTurns: history.length,
       sources: [],
     };
+    // The docs and the retrieval are English only. A question in another
+    // language may well be on topic, so say that plainly instead of the
+    // off-topic message.
+    if (isClearlyNotEnglish(question)) {
+      logOutcome(env, ctx, { ...log, outcome: "gated" });
+      return streamCached(
+        { answer: ENGLISH_ONLY_REPLY, sources: [], model: "none" },
+        cors,
+        log
+      );
+    }
+
     if (cacheKey) {
       const hit = await env.ASK_KV.get<CachedAnswer>(cacheKey, "json");
       if (hit) {

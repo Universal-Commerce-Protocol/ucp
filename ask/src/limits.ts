@@ -91,3 +91,42 @@ export function cacheSignature(question: string, tokens: string[]): string {
     ? `${polarity}|${terms.join(" ")}`
     : `${polarity}|${normalized}`;
 }
+
+// cspell:disable
+const FOREIGN_WORDS = new Set(
+  // Very common function words in Spanish, French, German, Portuguese,
+  // Italian, Dutch, Turkish and Indonesian that are not also English words.
+  (
+    "el la los las una unos qué como cómo para por con del está puedo quiero necesito hacer " +
+    "le les des une est avec pour dans que qui comment puis veux faire sur " +
+    "der die das und ist nicht wie kann ich mit für ein eine auf wird " +
+    "o os uma não é com em posso fazer você " +
+    "il gli che non sono posso voglio fare della " +
+    "het een niet hoe kan ik voor " +
+    "bir ve nasıl için bu " +
+    "yang dan bagaimana untuk saya"
+  ).split(" ")
+);
+// cspell:enable
+const ENGLISH_WORDS = new Set(
+  "the is are does do how what why when where which can could should would with for and of to in on it this that my i we you".split(
+    " "
+  )
+);
+
+/**
+ * True when a question is clearly not written in English: mostly a
+ * non-Latin script, or Latin script with several foreign function words and
+ * no English ones. Deliberately conservative, since product names, code and
+ * the odd borrowed word must not trip it.
+ */
+export function isClearlyNotEnglish(question: string): boolean {
+  const letters = question.match(/\p{L}/gu) ?? [];
+  if (letters.length < 4) return false;
+  const nonLatin = letters.filter((c) => !/\p{Script=Latin}/u.test(c)).length;
+  if (nonLatin / letters.length >= 0.3) return true;
+  const words = question.toLowerCase().match(/\p{L}+/gu) ?? [];
+  const foreign = words.filter((w) => FOREIGN_WORDS.has(w)).length;
+  const english = words.filter((w) => ENGLISH_WORDS.has(w)).length;
+  return foreign >= 2 && english === 0;
+}

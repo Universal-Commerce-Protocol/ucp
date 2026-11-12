@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildIndex, expandQuery, tokenize } from "../src/retrieval";
-import { cacheSignature, normalizeQuestion } from "../src/limits";
+import {
+  cacheSignature,
+  isClearlyNotEnglish,
+  normalizeQuestion,
+} from "../src/limits";
 
 const raw = {
   format: 1,
@@ -264,3 +268,30 @@ test("how-to questions naming a platform retrieve the getting-started guide", ()
   assert.ok(ids.includes("gs"), "getting started is retrieved");
   assert.ok(ids.includes("pl"), "partner list is retrieved");
 });
+
+// cspell:disable
+test("non-English questions are detected, English ones are not", () => {
+  for (const q of [
+    "¿Cómo puedo implementar UCP en mi tienda?",
+    "Comment faire un checkout avec UCP ?",
+    "Wie kann ich UCP mit meinem Shop nutzen?",
+    "UCPのチェックアウトはどのように動作しますか",
+    "Как работает оформление заказа в UCP?",
+    "كيف يعمل UCP",
+    "Como posso fazer o checkout com UCP?",
+  ]) {
+    assert.equal(isClearlyNotEnglish(q), true, q);
+  }
+  for (const q of [
+    "What status values can a checkout have?",
+    "does target use ucp",
+    "dev.ucp.shopping.checkout",
+    "checkout status values",
+    "Is Carrefour or El Corte Inglés part of UCP?",
+    "hw do i start w/ ucp",
+    "How do I handle the 3DS challenge für Zahlungen?",
+  ]) {
+    assert.equal(isClearlyNotEnglish(q), false, q);
+  }
+});
+// cspell:enable

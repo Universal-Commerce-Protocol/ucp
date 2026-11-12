@@ -81,6 +81,9 @@ export function listedCompanyReply(
   return `I don't have information about ${display}'s technology stack or whether it uses UCP. For that, you'd need to check with ${display} directly.\n\nWhat the documentation does say is that ${display} is ${role} [1].\n\nIf you have questions about UCP itself or how to implement it, I'm happy to help.`;
 }
 
+export const ENGLISH_ONLY_REPLY =
+  "I can only answer in English for now. If you ask your question in English, I'm happy to help with anything about UCP.";
+
 export const COMPANY_REPLY =
   "I don't have information about a specific company's technology stack or whether it uses UCP. For that, you'd need to check with the company directly.\n\nThe documentation does list the companies that co-developed and endorse the standard on the home page. If you have questions about UCP itself or how to implement it, I'm happy to help.";
 

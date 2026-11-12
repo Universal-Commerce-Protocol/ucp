@@ -481,3 +481,19 @@ test("adoption questions about a listed company get the fixed reply; how-to ques
     "chat-completions:test-model"
   );
 });
+
+// cspell:disable
+test("a question in another language gets the English-only line without a model call", async () => {
+  const env = makeEnv(fakeKv());
+  const before = modelCalls;
+  const events = await readEvents(
+    await ask(env, { question: "¿Cómo puedo implementar el checkout con UCP?" })
+  );
+  const text = events
+    .filter((e) => e.event === "delta")
+    .map((e) => (e.data as { text: string }).text)
+    .join("");
+  assert.match(text, /only answer in English for now/);
+  assert.equal(modelCalls, before);
+});
+// cspell:enable
