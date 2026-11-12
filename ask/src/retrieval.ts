@@ -327,7 +327,12 @@ export class DocsIndex {
   search(
     query: string,
     k: number,
-    opts: { exclude?: Set<string>; boostUrlPrefix?: string } = {}
+    opts: {
+      exclude?: Set<string>;
+      boostUrlPrefix?: string;
+      /** Set by question triage; falls back to keyword detection when absent. */
+      intent?: "business" | "howto";
+    } = {}
   ): Hit[] {
     const terms = tokenize(expandQuery(query));
     if (!terms.length) return [];
@@ -392,7 +397,10 @@ export class DocsIndex {
     // business", "why should we adopt it") are answered from the overview
     // material written for that audience, not from whichever spec section
     // shares a keyword.
-    if (BUSINESS_INTENT.test(query)) {
+    if (
+      opts.intent === "business" ||
+      (!opts.intent && BUSINESS_INTENT.test(query))
+    ) {
       const wanted = this.chunks.filter(
         (c) => BUSINESS_HEADINGS.test(c.heading) && !opts.exclude?.has(c.id)
       );
@@ -408,7 +416,9 @@ export class DocsIndex {
     // "How can I do it inside Shopify" names a platform and asks how: that is
     // an onboarding question even though it has none of the usual keywords.
     const instructionOnPlatform =
-      INSTRUCTION_PATTERN.test(query) && this.organizationsIn(query).length > 0;
+      opts.intent === "howto" ||
+      (INSTRUCTION_PATTERN.test(query) &&
+        this.organizationsIn(query).length > 0);
     if (instructionOnPlatform || !SPECIFIC_TERMS.test(query)) {
       for (const pin of INTENT_PINS) {
         const onboarding = pin.pages[0] === "specification/getting-started/";

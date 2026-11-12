@@ -96,15 +96,32 @@ async function readEvents(
     });
 }
 
-let modelCalls = 0;
+let modelCalls = 0; // answer generations
+let triageCalls = 0;
 const originalFetch = globalThis.fetch;
 globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
   const u = String(url);
   if (u.endsWith("/ask-index.json"))
     return new Response(JSON.stringify(index), { status: 200 });
   if (u.endsWith("/chat/completions")) {
-    modelCalls++;
     const body = JSON.parse(String(init?.body));
+    // Triage calls: answer with a label, as the real model would.
+    if (String(body.messages[0].content).startsWith("Classify")) {
+      triageCalls++;
+      const q = String(body.messages.at(-1).content);
+      const label = /poem|limerick|pizza|autumn|translate|scrape|joke/i.test(q)
+        ? "offtopic"
+        : /tesla|costco|nike/i.test(q)
+          ? "company"
+          : /help my business/i.test(q)
+            ? "business"
+            : "docs";
+      return new Response(
+        `data: ${JSON.stringify({ choices: [{ delta: { content: label }, finish_reason: "stop" }] })}\n\ndata: [DONE]\n\n`,
+        { status: 200 }
+      );
+    }
+    modelCalls++;
     assert.equal(body.messages[0].role, "system");
     assert.match(
       body.messages.at(-1).content,
@@ -497,3 +514,60 @@ test("a question in another language gets the English-only line without a model 
   assert.equal(modelCalls, before);
 });
 // cspell:enable
+
+test("triage routes off-topic and unlisted-company questions to fixed replies and caches them", async () => {
+  const kv = fakeKv();
+  const env = makeEnv(kv);
+  const answersBefore = modelCalls;
+  const off = await readEvents(
+    await ask(env, { question: "tell me a joke about sessions and checkout" })
+  );
+  assert.equal((off[0].data as { kind: string }).kind, "off_topic");
+  const co = await readEvents(
+    await ask(env, {
+      question: "what payment stack does Nike run for checkout",
+    })
+  );
+  assert.equal((co[0].data as { kind: string }).kind, "company");
+  assert.equal(modelCalls, answersBefore, "no answer was generated");
+  await new Promise((r) => setTimeout(r, 20));
+  const triageBefore = triageCalls;
+  const again = await readEvents(
+    await ask(env, { question: "tell me a joke about sessions and checkout" })
+  );
+  assert.equal((again[0].data as { cached: boolean }).cached, true);
+  assert.equal(
+    triageCalls,
+    triageBefore,
+    "a repeat costs no triage call either"
+  );
+});
+
+test("a triage failure falls back to answering from the docs", async () => {
+  const env = makeEnv(fakeKv());
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (
+    url: string | URL | Request,
+    init?: RequestInit
+  ) => {
+    if (
+      String(url).endsWith("/chat/completions") &&
+      String(JSON.parse(String(init?.body)).messages[0].content).startsWith(
+        "Classify"
+      )
+    ) {
+      return new Response("boom", { status: 500 });
+    }
+    return original(url, init);
+  }) as typeof fetch;
+  try {
+    const events = await readEvents(
+      await ask(env, {
+        question: "checkout sessions for the merchant of record",
+      })
+    );
+    assert.equal((events[0].data as { kind: string }).kind, "answer");
+  } finally {
+    globalThis.fetch = original;
+  }
+});

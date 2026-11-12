@@ -29,6 +29,7 @@ import {
   today,
   writeLog,
 } from "./log";
+import { classify } from "./classify";
 import {
   buildMessages,
   COMPANY_REPLY,
@@ -89,7 +90,11 @@ interface Source {
   url: string;
 }
 
+/** What a reply is, reported in the `meta` event so callers and the eval can tell replies apart. */
+type ReplyKind = "answer" | "off_topic" | "company" | "english_only";
+
 interface CachedAnswer {
+  kind?: ReplyKind;
   answer: string;
   sources: Source[];
   model: string;
@@ -104,33 +109,11 @@ const MAX_HISTORY_TOTAL_CHARS = 6000;
 // these, so they are declined before any model call, model-independently.
 const STEERING_PATTERN =
   /\b(ignore|disregard|forget|override|bypass|drop)\b[^.?!]{0,60}\b(instruction|rule|prompt|guideline|above|previous|prior)|\b(system prompt|developer message|hidden prompt|your (instructions|rules|prompt)|jailbreak|pretend (to be|you are)|act as|you are now|from now on|new persona|role ?play|no (rules|restrictions)|unrestricted|dan mode|confirm by saying|documentation map|in the (style|voice|manner) of|(like|as) a pirate|in pirate|in rhyme|in verse|in all caps|as a (poem|song|rap|limerick|haiku))\b|<\/?(system|assistant|user|instruction|excerpts?|question)>/i;
-// Creative writing and translation are never documentation questions, even
-// when they mention UCP terms.
-const CREATIVE_PATTERN =
-  // cspell:disable-next-line
-  /\b(poem|limerick|haiku|sonnet|story|song|rap|lyrics|joke|riddle|fan ?fiction|screenplay)\b|\b(translate|traduce|translation)\b|\bin (french|spanish|german|italian|portuguese|dutch|chinese|japanese|korean|arabic|hindi|russian)\b/i;
-// Requests for general work (code, emails, summaries of pasted text). Allowed
-// when the request names UCP material, e.g. "write an example checkout request".
-const TASK_PATTERN =
-  // cspell:disable-next-line
-  /^(please\s+)?(translate|traduce|write|compose|generate|create|draft|summari[sz]e|rewrite|paraphrase|tell me|give me|make)\b[^.?!]{0,80}\b(poem|limerick|haiku|story|song|essay|joke|rap|lyrics|tweet|email|letter|blog|script|code|program|python|javascript|typescript|java|rust|golang|scraper|scrape|bot|french|spanish|german|english|chinese|japanese|language|summary of (this|the following))\b/i;
-const UCP_NOUNS =
-  /\b(ucp|checkout|cart|catalog|order|booking|lodging|profile|capability|capabilities|extension|payment|handler|mandate|signature|transport|rest|mcp|a2a|embedded|schema|payload|request|response|endpoint|identity|linking|fulfil|discount|tip|well-known)\b/i;
-// "Does <company> use / support / accept UCP?" The docs cannot answer that
-// for any company. Named partners go to the model with the partner list;
-// everyone else gets a fixed reply instead of the generic scope message.
-const ADOPTION_PATTERN =
-  // cspell:disable-next-line
-  /^(does|do|is|are|has|have|did|will|can)\b.{1,60}\b(use|uses|using|used|support|supports|supported|adopt|adopts|adopted|implement|implements|implemented|accept|accepts|integrate|integrates|integrated|on|part of|member of|behind|work with|works with)\b.{0,30}\bucp\b/i;
-const SPEC_NOUNS =
-  /\b(checkout|cart|catalog|order|booking|lodging|profile|capability|capabilities|extension|extensions|payment|handler|mandate|signature|signatures|transport|rest|mcp|a2a|embedded|schema|payload|request|response|endpoint|identity|linking|fulfillment|discount|tip|platform|platforms|business|businesses|agent|agents|spec|protocol)\b/i;
 // An answer must largely reuse the vocabulary of the excerpts it was given;
 // a limerick, a translation or unrelated code will not.
 const MIN_ANSWER_GROUNDING = 0.45;
 const GROUNDING_FALLBACK =
   "I couldn't ground an answer to that in the documentation. The most relevant sections are listed below.";
-// Below this share of known terms a question is treated as off-topic.
-const MIN_VOCAB_COVERAGE = 0.6;
 const MAX_HISTORY_MESSAGE_CHARS = 2000;
 
 export default {
@@ -254,7 +237,12 @@ export default {
     if (isClearlyNotEnglish(question)) {
       logOutcome(env, ctx, { ...log, outcome: "gated" });
       return streamCached(
-        { answer: ENGLISH_ONLY_REPLY, sources: [], model: "none" },
+        {
+          kind: "english_only",
+          answer: ENGLISH_ONLY_REPLY,
+          sources: [],
+          model: "none",
+        },
         cors,
         log
       );
@@ -308,6 +296,7 @@ export default {
       });
       return streamCached(
         {
+          kind: "company",
           answer: listedCompanyReply(org.display, org.chunk.heading),
           sources: [
             {
@@ -324,41 +313,23 @@ export default {
       );
     }
 
-    if (
-      !history.length &&
-      ADOPTION_PATTERN.test(question) &&
-      !SPEC_NOUNS.test(question) &&
-      index.organizationsIn(question).length === 0
-    ) {
+    // Free, unambiguous declines: nothing in the docs matches, or the text is
+    // an obvious attempt to steer the assistant.
+    if (!hits.length || STEERING_PATTERN.test(question)) {
       logOutcome(env, ctx, { ...log, outcome: "gated" });
       return streamCached(
-        { answer: COMPANY_REPLY, sources: [], model: "none" },
+        {
+          kind: "off_topic",
+          answer: OFF_TOPIC_REPLY,
+          sources: [],
+          model: "none",
+        },
         cors,
         log
       );
     }
 
-    // Questions whose vocabulary is mostly foreign to the docs are answered
-    // with the scope message without spending a model call. Follow-ups are
-    // exempt because they are often short ("and for MCP?").
-    const offTopic =
-      !hits.length ||
-      (!history.length &&
-        index.vocabularyCoverage(question) < MIN_VOCAB_COVERAGE) ||
-      STEERING_PATTERN.test(question) ||
-      CREATIVE_PATTERN.test(question) ||
-      (TASK_PATTERN.test(question) && !UCP_NOUNS.test(question));
-    if (offTopic) {
-      logOutcome(env, ctx, { ...log, outcome: "gated" });
-      return streamCached(
-        { answer: OFF_TOPIC_REPLY, sources: [], model: "none" },
-        cors,
-        log
-      );
-    }
-    log.sources = hits.map((h) => h.chunk.url);
-
-    // 3. Spend guards.
+    // 3. Spend guards. Everything below may call the model.
     const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
     const limit = await checkLimits(
       env.ASK_KV,
@@ -379,13 +350,75 @@ export default {
       );
     }
 
-    // 4. Model call, streamed.
     let provider: ReturnType<typeof createProvider>;
     try {
       provider = createProvider(env);
     } catch (err) {
       return json({ error: describeError(err) }, 500, cors);
     }
+
+    // 4. Triage: one short model call decides what kind of question this is.
+    //    Follow-ups skip it; they are short and depend on the conversation.
+    if (!history.length) {
+      const kind = await classify(provider, question);
+      let fixed: CachedAnswer | null = null;
+      if (kind === "offtopic") {
+        fixed = {
+          kind: "off_topic",
+          answer: OFF_TOPIC_REPLY,
+          sources: [],
+          model: "none",
+        };
+      } else if (kind === "company") {
+        const org = namedOrgs[0];
+        fixed = org
+          ? {
+              kind: "company",
+              answer: listedCompanyReply(org.display, org.chunk.heading),
+              sources: [
+                {
+                  n: 1,
+                  title: org.chunk.page,
+                  heading: org.chunk.heading,
+                  url: org.chunk.url,
+                },
+              ],
+              model: "none",
+            }
+          : {
+              kind: "company",
+              answer: COMPANY_REPLY,
+              sources: [],
+              model: "none",
+            };
+      }
+      if (fixed) {
+        logOutcome(env, ctx, {
+          ...log,
+          outcome: "gated",
+          sources: fixed.sources.map((s) => s.url),
+        });
+        // Cache the decision too, so a repeat costs nothing at all.
+        if (cacheKey) {
+          ctx.waitUntil(
+            env.ASK_KV.put(cacheKey, JSON.stringify(fixed), {
+              expirationTtl: Number(env.ANSWER_CACHE_TTL || 604800),
+            }).catch(() => {})
+          );
+        }
+        return streamCached(fixed, cors, log);
+      }
+      if (kind === "business" || kind === "howto") {
+        const routed = index.search(retrievalQuery, topK, {
+          boostUrlPrefix: page ? page.split("#")[0] : undefined,
+          intent: kind,
+        });
+        if (routed.length) hits = routed;
+      }
+    }
+    log.sources = hits.map((h) => h.chunk.url);
+
+    // 5. Answer, streamed.
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const sse = (event: string, data: unknown) =>
@@ -420,6 +453,7 @@ export default {
             await env.ASK_KV.put(
               cacheKey,
               JSON.stringify({
+                kind: "answer",
                 answer: result.text,
                 sources: result.sources,
                 model: provider.name,
@@ -476,6 +510,7 @@ async function answer(
   const sources = toSources(chunks);
   await sse("meta", {
     cached: false,
+    kind: "answer",
     model: provider.name,
     id: log.id,
     day: log.day,
@@ -568,7 +603,13 @@ function streamCached(
 ): Response {
   const enc = new TextEncoder();
   const parts = [
-    `event: meta\ndata: ${JSON.stringify({ cached: true, model: hit.model, id: log?.id, day: log?.day })}\n\n`,
+    `event: meta\ndata: ${JSON.stringify({
+      cached: true,
+      kind: hit.kind ?? "answer",
+      model: hit.model,
+      id: log?.id,
+      day: log?.day,
+    })}\n\n`,
     `event: sources\ndata: ${JSON.stringify(hit.sources)}\n\n`,
     `event: delta\ndata: ${JSON.stringify({ text: hit.answer })}\n\n`,
     `event: done\ndata: ${JSON.stringify({ sources: hit.sources })}\n\n`,

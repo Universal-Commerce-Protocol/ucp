@@ -9,7 +9,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "eval": "node --import tsx eval/run.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261110.1",
