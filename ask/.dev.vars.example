@@ -1,0 +1,4 @@
+ANTHROPIC_API_KEY=sk-ant-...
+# Optional local overrides
+# INDEX_URLS=http://localhost:8000/ask-index.json
+# ALLOWED_ORIGINS=http://localhost:8000

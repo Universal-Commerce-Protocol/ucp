@@ -154,10 +154,18 @@ copyright: >-
 # Custom CSS
 extra_css:
   - stylesheets/custom.css
+  - stylesheets/ask-ai.css
+
+extra_javascript:
+  - javascripts/ask-ai.js
 
 #Global Constants
 extra:
   ucp_version: "draft"
+  # "Ask AI" assistant (see ask/README.md). Leave endpoint empty to hide the
+  # widget. Can be overridden per environment with ASK_AI_ENDPOINT.
+  ask_ai:
+    endpoint: !ENV [ASK_AI_ENDPOINT, "https://ask.ucp.dev/v1/ask"]
   ucp_url: https://ucp.dev
   analytics:
     provider: google
@@ -177,6 +185,7 @@ extra:
 
 # Configuration
 theme:
+  custom_dir: overrides
   logo: assets/UCP-small.svg
   favicon: assets/favicon.png
   name: material
@@ -264,6 +273,7 @@ markdown_extensions:
 # Custom hooks
 hooks:
   - hooks.py
+  - ask_index_hook.py
 
 # Plugins
 plugins:

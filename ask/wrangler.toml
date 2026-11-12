@@ -1,0 +1,39 @@
+# Cloudflare Worker config for the ucp.dev "Ask AI" backend.
+# Deploy: `npm run deploy` (see README.md). Secrets: `wrangler secret put ANTHROPIC_API_KEY`.
+name = "ucp-ask-ai"
+main = "src/index.ts"
+compatibility_date = "2025-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Custom domain the widget talks to (configured in mkdocs.yml extra.ask_ai.endpoint).
+routes = [{ pattern = "ask.ucp.dev", custom_domain = true }]
+
+# KV holds the answer cache, per-IP counters and the daily budget counter.
+# Create with: wrangler kv namespace create ASK_KV   (then paste the id here)
+[[kv_namespaces]]
+binding = "ASK_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+# Model for answer generation. claude-sonnet-5-5 is the default cost/quality
+# point for docs Q&A; set to claude-opus-5-5 for maximum answer quality or
+# claude-haiku-5-5 for the lowest possible spend. Effort is the main spend lever.
+MODEL = "claude-sonnet-5-5"
+EFFORT = "low"
+# Hard ceiling on generated tokens per answer. Prompt asks for <= ~250 words.
+MAX_OUTPUT_TOKENS = "900"
+# Comma-separated list of ask-index.json files written by the docs build.
+INDEX_URLS = "https://ucp.dev/ask-index.json,https://ucp.dev/latest/ask-index.json"
+# Browser origins allowed to call the API.
+ALLOWED_ORIGINS = "https://ucp.dev"
+# Retrieval: how many sections go into the prompt up front, and the cap for the
+# one follow-up search the model may make.
+TOP_K = "6"
+TOOL_TOP_K = "4"
+# Conversation memory sent back to the model (user+assistant pairs).
+MAX_HISTORY_TURNS = "3"
+# Abuse / spend guards.
+PER_IP_HOURLY_LIMIT = "40"
+DAILY_REQUEST_BUDGET = "5000"
+# How long a cached answer to an identical question is reused (seconds).
+ANSWER_CACHE_TTL = "604800"
