@@ -3,9 +3,9 @@
 A small Cloudflare Worker that powers the "Ask AI" button on the documentation
 site. It answers questions about UCP from the documentation itself, cites the
 sections it used, and runs against **your own model**: anything that speaks the
-chat-completions HTTP protocol (vLLM, Ollama, TGI, llama.cpp, SGLang, LM
-Studio, a fine-tuned model you host) or an open model on Cloudflare Workers AI.
-No third-party LLM API is required.
+chat-completions HTTP protocol (vLLM, Ollama, TGI, llama.cpp, SGLang, LM Studio,
+a fine-tuned model you host) or an open model on Cloudflare Workers AI. No
+third-party LLM API is required.
 
 ## What it looks like
 
@@ -13,7 +13,8 @@ Header entry point beside search, on the live site:
 
 ![Ask AI about UCP button in the ucp.dev header](docs/home.png)
 
-An answer with numbered citations and the sections it came from (Gemma 4 on Workers AI, real output):
+An answer with numbered citations and the sections it came from (Gemma 4 on
+Workers AI, real output):
 
 ![Answer drawer open next to the Checkout Capability page](docs/drawer-answer.png)
 
@@ -37,9 +38,9 @@ docs build (MkDocs)            Cloudflare Worker (this directory)             yo
 ```
 
 1. **Index at build time, not query time.** `ask_index_hook.py` splits every
-   rendered page into heading-level sections and writes `ask-index.json` next
-   to the site. The root build and each spec version write their own file, so
-   the Worker loads `https://ucp.dev/ask-index.json` and
+   rendered page into heading-level sections and writes `ask-index.json` next to
+   the site. The root build and each spec version write their own file, so the
+   Worker loads `https://ucp.dev/ask-index.json` and
    `https://ucp.dev/latest/ask-index.json` and always reflects what is deployed.
    No embedding model, no vector database, nothing to re-run on deploy.
 2. **Retrieval is free.** The Worker builds a BM25 inverted index in memory at
@@ -61,23 +62,24 @@ docs build (MkDocs)            Cloudflare Worker (this directory)             yo
 
 ### Choosing and running the model
 
-The facts come from retrieval, so the model's job is reading comprehension
-and concise writing, not memorized knowledge. That is why a mid-sized
+The facts come from retrieval, so the model's job is reading comprehension and
+concise writing, not memorized knowledge. That is why a mid-sized
 instruction-tuned open model is enough. Rough guidance:
 
-| Option | Typical choice | What you pay for | Notes |
-| --- | --- | --- | --- |
-| Cloudflare Workers AI | `@cf/google/gemma-4-26b-a4b-it` | per token, no idle cost | Simplest: same account as the Worker, set `MODEL_PROVIDER=workers-ai`. |
-| Self-hosted, always on | Gemma on vLLM behind one GPU (for example on Cloud Run or GKE) | GPU hours | Flat cost regardless of traffic; enable vLLM prefix caching. |
-| Self-hosted, scale to zero | same models on a serverless GPU platform | GPU seconds | Cold starts of 10-60 s on the first question after idle. |
-| Fine-tuned | LoRA on top of one of the above, trained on UCP Q&A pairs | one-off training | Improves tone and formatting; does **not** replace retrieval for facts, which go stale with every spec release. Start without it and collect real questions first. |
+| Option                     | Typical choice                                                 | What you pay for        | Notes                                                                                                                                                              |
+| -------------------------- | -------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cloudflare Workers AI      | `@cf/google/gemma-4-26b-a4b-it`                                | per token, no idle cost | Simplest: same account as the Worker, set `MODEL_PROVIDER=workers-ai`.                                                                                             |
+| Self-hosted, always on     | Gemma on vLLM behind one GPU (for example on Cloud Run or GKE) | GPU hours               | Flat cost regardless of traffic; enable vLLM prefix caching.                                                                                                       |
+| Self-hosted, scale to zero | same models on a serverless GPU platform                       | GPU seconds             | Cold starts of 10-60 s on the first question after idle.                                                                                                           |
+| Fine-tuned                 | LoRA on top of one of the above, trained on UCP Q&A pairs      | one-off training        | Improves tone and formatting; does **not** replace retrieval for facts, which go stale with every spec release. Start without it and collect real questions first. |
 
 A request is roughly 7K input tokens and 300 output tokens. At the per-token
 rates open models are offered at, that is a fraction of a cent; on a dedicated
-GPU it is simply throughput. The daily budget and answer cache keep both bounded.
+GPU it is simply throughput. The daily budget and answer cache keep both
+bounded.
 
-Training a model from scratch is not a sensible path for this use case: it
-costs orders of magnitude more than any option above and would still need the
+Training a model from scratch is not a sensible path for this use case: it costs
+orders of magnitude more than any option above and would still need the
 retrieval layer to answer accurately about the current specification.
 
 ## Deploy
@@ -112,30 +114,30 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 
 ## Configuration (`wrangler.toml` `[vars]`)
 
-| Var | Default | Purpose |
-| --- | --- | --- |
-| `MODEL_PROVIDER` | `chat-completions` | `chat-completions` or `workers-ai`. |
-| `MODEL` | `gemma-4-26b-a4b-it` | Served model name (or Workers AI model id). |
-| `MODEL_BASE_URL` | placeholder | Base URL of the chat-completions server, ending in `/v1`. |
-| `MODEL_API_KEY` | secret, optional | Bearer token for the model server. |
-| `MODEL_EXTRA_PARAMS` | unset | JSON merged into every model request, e.g. `{"chat_template_kwargs":{"enable_thinking":false}}` to switch off the thinking phase of a reasoning model so the output budget goes to the answer. |
-| `TEMPERATURE` | `0.2` | Sampling temperature. |
-| `MAX_OUTPUT_TOKENS` | `700` | Hard cap per answer. |
-| `TOP_K` | `8` | Excerpts in the prompt. |
-| `MAX_HISTORY_TURNS` | `3` | Conversation pairs replayed to the model. |
-| `PER_IP_HOURLY_LIMIT` | `40` | Soft per-visitor limit. |
-| `DAILY_REQUEST_BUDGET` | `5000` | Soft site-wide daily cap on model calls. |
-| `ANSWER_CACHE_TTL` | `604800` | Seconds to keep a cached answer (also dropped on redeploy). |
-| `INDEX_URLS` | root + latest | Which `ask-index.json` files to load. |
-| `ALLOWED_ORIGINS` | `https://ucp.dev` | Browser origins allowed to call the API. |
+| Var                    | Default              | Purpose                                                                                                                                                                                        |
+| ---------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODEL_PROVIDER`       | `chat-completions`   | `chat-completions` or `workers-ai`.                                                                                                                                                            |
+| `MODEL`                | `gemma-4-26b-a4b-it` | Served model name (or Workers AI model id).                                                                                                                                                    |
+| `MODEL_BASE_URL`       | placeholder          | Base URL of the chat-completions server, ending in `/v1`.                                                                                                                                      |
+| `MODEL_API_KEY`        | secret, optional     | Bearer token for the model server.                                                                                                                                                             |
+| `MODEL_EXTRA_PARAMS`   | unset                | JSON merged into every model request, e.g. `{"chat_template_kwargs":{"enable_thinking":false}}` to switch off the thinking phase of a reasoning model so the output budget goes to the answer. |
+| `TEMPERATURE`          | `0.2`                | Sampling temperature.                                                                                                                                                                          |
+| `MAX_OUTPUT_TOKENS`    | `700`                | Hard cap per answer.                                                                                                                                                                           |
+| `TOP_K`                | `8`                  | Excerpts in the prompt.                                                                                                                                                                        |
+| `MAX_HISTORY_TURNS`    | `3`                  | Conversation pairs replayed to the model.                                                                                                                                                      |
+| `PER_IP_HOURLY_LIMIT`  | `40`                 | Soft per-visitor limit.                                                                                                                                                                        |
+| `DAILY_REQUEST_BUDGET` | `5000`               | Soft site-wide daily cap on model calls.                                                                                                                                                       |
+| `ANSWER_CACHE_TTL`     | `604800`             | Seconds to keep a cached answer (also dropped on redeploy).                                                                                                                                    |
+| `INDEX_URLS`           | root + latest        | Which `ask-index.json` files to load.                                                                                                                                                          |
+| `ALLOWED_ORIGINS`      | `https://ucp.dev`    | Browser origins allowed to call the API.                                                                                                                                                       |
 
 ## Trying it without any API key
 
-Any local server with a chat-completions endpoint works. The smallest setup is llama.cpp's
-Python server with a GGUF build of an open model such as Gemma; a 3B model answers on a laptop CPU in
-under a minute per question and is enough to see the whole pipeline work
-(retrieval, citations, cache hits, off-topic gate). Use a 7B-14B+ instruct
-model for real quality.
+Any local server with a chat-completions endpoint works. The smallest setup is
+llama.cpp's Python server with a GGUF build of an open model such as Gemma; a 3B
+model answers on a laptop CPU in under a minute per question and is enough to
+see the whole pipeline work (retrieval, citations, cache hits, off-topic gate).
+Use a 7B-14B+ instruct model for real quality.
 
 ```bash
 python3 -m venv llm && ./llm/bin/pip install "llama-cpp-python[server]" huggingface_hub
@@ -170,56 +172,58 @@ uv run python scripts/test_ask_index.py   # indexer
 
 ## API
 
-`POST /v1/ask` with JSON `{ "question": string, "history"?: [{ "role": "user" | "assistant", "content": string }], "page"?: string }`.
+`POST /v1/ask` with JSON
+`{ "question": string, "history"?: [{ "role": "user" | "assistant", "content": string }], "page"?: string }`.
 
 Response is `text/event-stream`:
 
-| event | data |
-| --- | --- |
-| `meta` | `{ cached: boolean, model: string }` |
-| `sources` | `[{ n, title, heading, url }]` |
-| `delta` | `{ text }` incremental answer text, with `[n]` citations |
-| `done` | `{ sources }` only the sources actually cited |
-| `error` | `{ message }` |
+| event     | data                                                     |
+| --------- | -------------------------------------------------------- |
+| `meta`    | `{ cached: boolean, model: string }`                     |
+| `sources` | `[{ n, title, heading, url }]`                           |
+| `delta`   | `{ text }` incremental answer text, with `[n]` citations |
+| `done`    | `{ sources }` only the sources actually cited            |
+| `error`   | `{ message }`                                            |
 
-Errors before streaming starts are plain JSON with HTTP 4xx/5xx; 429 carries `Retry-After`.
+Errors before streaming starts are plain JSON with HTTP 4xx/5xx; 429 carries
+`Retry-After`.
 
 ## Model comparison
 
-The same pipeline was run against three open-weight models on the same questions.
-Retrieval, prompt and guards were identical; only the model changed.
+The same pipeline was run against three open-weight models on the same
+questions. Retrieval, prompt and guards were identical; only the model changed.
 
-| Model | Where it ran | Grounding and accuracy | Citations | Notes |
-| --- | --- | --- | --- | --- |
-| 3B open-weight instruct model | local CPU, llama.cpp | Correct on direct questions; on broad ones mixed in unrelated sections and padded with generic advice | Often omitted | Proves the pipeline; below the bar for visitors |
-| 14B open-weight instruct model | local CPU, llama.cpp | Correct and in the docs' own order on all three test questions, including the broad "implement UCP on my store" | Present but sparse (one marker where two or three sections were used) | Several minutes per answer on 4 CPU cores; seconds on a GPU |
-| Gemma 4 26B | Cloudflare Workers AI | Correct and specific: quotes endpoint paths, field names and statuses from the excerpts and connects sections across pages | Consistent, including several sources on one sentence | Used for the review deployment; streams in a few seconds. Needs its thinking phase switched off (see `MODEL_EXTRA_PARAMS`) |
+| Model                          | Where it ran          | Grounding and accuracy                                                                                                     | Citations                                                             | Notes                                                                                                                      |
+| ------------------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 3B open-weight instruct model  | local CPU, llama.cpp  | Correct on direct questions; on broad ones mixed in unrelated sections and padded with generic advice                      | Often omitted                                                         | Proves the pipeline; below the bar for visitors                                                                            |
+| 14B open-weight instruct model | local CPU, llama.cpp  | Correct and in the docs' own order on all three test questions, including the broad "implement UCP on my store"            | Present but sparse (one marker where two or three sections were used) | Several minutes per answer on 4 CPU cores; seconds on a GPU                                                                |
+| Gemma 4 26B                    | Cloudflare Workers AI | Correct and specific: quotes endpoint paths, field names and statuses from the excerpts and connects sections across pages | Consistent, including several sources on one sentence                 | Used for the review deployment; streams in a few seconds. Needs its thinking phase switched off (see `MODEL_EXTRA_PARAMS`) |
 
-Sample answers (14B, local): asked how to implement UCP on a self-hosted
-store it listed the prerequisites, the create and get checkout-session
-endpoints, publishing the profile with capabilities and payment handlers,
-the SDKs, and pointed at the Getting Started guide. Asked whether an agent can
-buy without the user confirming, it answered no and explained the AP2 mandate
-flow with the consent step, citing both pages. The 3B model, on the first
-question, had instead described card tokenization and PCI scope.
+Sample answers (14B, local): asked how to implement UCP on a self-hosted store
+it listed the prerequisites, the create and get checkout-session endpoints,
+publishing the profile with capabilities and payment handlers, the SDKs, and
+pointed at the Getting Started guide. Asked whether an agent can buy without the
+user confirming, it answered no and explained the AP2 mandate flow with the
+consent step, citing both pages. The 3B model, on the first question, had
+instead described card tokenization and PCI scope.
 
 ## Review deployment pattern
 
 For a review before touching production, the Worker can serve the live
 documentation itself: a thin wrapper proxies `ucp.dev` pages, injects the
 widget's stylesheet, script and config element with `HTMLRewriter`, serves
-`ask-index.json` and the widget files from KV, and hands `/v1/*` to the
-Worker in this directory. Nothing in the production site changes, and the
-assistant is exercised against the real pages. Set `INDEX_URLS` to the
-relative paths (`/ask-index.json,/latest/ask-index.json`); same-origin
-requests are accepted without listing the host in `ALLOWED_ORIGINS`.
+`ask-index.json` and the widget files from KV, and hands `/v1/*` to the Worker
+in this directory. Nothing in the production site changes, and the assistant is
+exercised against the real pages. Set `INDEX_URLS` to the relative paths
+(`/ask-index.json,/latest/ask-index.json`); same-origin requests are accepted
+without listing the host in `ALLOWED_ORIGINS`.
 
 ## Search by meaning (optional)
 
-Keyword search misses a section when the question uses different words
-("wants their money back" versus "refund" and "adjustment"). If an
-embeddings file is present, the Worker also embeds the question and merges
-the two rankings, so such sections are found.
+Keyword search misses a section when the question uses different words ("wants
+their money back" versus "refund" and "adjustment"). If an embeddings file is
+present, the Worker also embeds the question and merges the two rankings, so
+such sections are found.
 
 ```bash
 CLOUDFLARE_ACCOUNT_ID=... CLOUDFLARE_API_TOKEN=... \
@@ -227,44 +231,43 @@ CLOUDFLARE_ACCOUNT_ID=... CLOUDFLARE_API_TOKEN=... \
 ```
 
 Serve `ask-embeddings.json` next to the index and set `EMBEDDINGS_URL` and
-`EMBED_MODEL` (default model: Google's EmbeddingGemma on Workers AI). The
-file is about 1.5 MB for the current docs. Each new question then costs one
-small embedding call. Without the file, retrieval is keyword only and
-nothing else changes. Rebuild the file when the docs change; sections
-without an embedding are still found by keyword.
+`EMBED_MODEL` (default model: Google's EmbeddingGemma on Workers AI). The file
+is about 1.5 MB for the current docs. Each new question then costs one small
+embedding call. Without the file, retrieval is keyword only and nothing else
+changes. Rebuild the file when the docs change; sections without an embedding
+are still found by keyword.
 
 ## Platform notes
 
-The UCP documentation does not cover platform-specific setup. Where a
-platform has published how UCP works for its merchants, a short note in
-`src/platforms.ts` is used for questions about that platform. Each note is
-a statement about another company shown to visitors as fact, so keep it
+The UCP documentation does not cover platform-specific setup. Where a platform
+has published how UCP works for its merchants, a short note in
+`src/platforms.ts` is used for questions about that platform. Each note is a
+statement about another company shown to visitors as fact, so keep it
 conservative and review it when the platform's guidance changes. Platforms
 without a note get the standard "check with the company" reply.
 
 ## Evaluation
 
 `eval/questions.json` holds 100 questions with the kind of reply each must
-produce (an answer, the off-topic reply, the company reply, the
-English-only reply) and, for answers, a page that must be among the
-sources.
+produce (an answer, the off-topic reply, the company reply, the English-only
+reply) and, for answers, a page that must be among the sources.
 
 ```bash
 npm run eval -- https://<host>/v1/ask --min 0.9
 ```
 
-It prints each failure and the pass rate and exits non-zero below the
-minimum. Run it before changing the model, the instructions or retrieval.
-Against the review deployment it currently passes 100 of 100.
+It prints each failure and the pass rate and exits non-zero below the minimum.
+Run it before changing the model, the instructions or retrieval. Against the
+review deployment it currently passes 100 of 100.
 
 ## Question log, feedback and export (the path to a fine-tuned model)
 
 Every question is logged anonymously to KV (`LOG_ANSWERS = "on"`): outcome
-(`answered`, `cached`, `gated`, `replaced`, `error`), the question, the
-section URLs retrieved, the answer, the grounding score and latency. No IP,
-user agent or identifier is stored, and entries expire after `LOG_TTL_DAYS`.
-The widget asks "Was this helpful?" after each answer; the rating is written
-onto the same entry.
+(`answered`, `cached`, `gated`, `replaced`, `error`), the question, the section
+URLs retrieved, the answer, the grounding score and latency. No IP, user agent
+or identifier is stored, and entries expire after `LOG_TTL_DAYS`. The widget
+asks "Was this helpful?" after each answer; the rating is written onto the same
+entry.
 
 Export a day as JSON Lines:
 
@@ -275,34 +278,33 @@ curl -H "Authorization: Bearer $EXPORT_TOKEN" "https://ask.ucp.dev/v1/export?day
 
 Two uses:
 
-1. **Docs gaps.** `gated` and `replaced` entries, and answers rated not
-   helpful, are a ranked list of what readers ask that the docs do not answer
-   well.
+1. **Docs gaps.** `gated` and `replaced` entries, and answers rated not helpful,
+   are a ranked list of what readers ask that the docs do not answer well.
 2. **Fine-tuning data.** Helpful-rated `answered` entries, together with the
-   excerpts that produced them, are supervised fine-tuning examples in the
-   exact prompt format the Worker uses. After a few hundred reviewed examples
-   a LoRA fine-tune of the base model teaches UCP vocabulary, the citation
-   format and concise answers. Facts keep coming from retrieval, so a spec
-   release does not require retraining. Evaluate the fine-tune against the
-   base model on held-out questions before switching `MODEL`.
+   excerpts that produced them, are supervised fine-tuning examples in the exact
+   prompt format the Worker uses. After a few hundred reviewed examples a LoRA
+   fine-tune of the base model teaches UCP vocabulary, the citation format and
+   concise answers. Facts keep coming from retrieval, so a spec release does not
+   require retraining. Evaluate the fine-tune against the base model on held-out
+   questions before switching `MODEL`.
 
 ## Abuse resistance
 
 What a visitor can and cannot do with the endpoint:
 
-| Attempt | What happens |
-| --- | --- |
-| Use it as a general chatbot ("write me a poem") | Retrieval finds nothing docs-like, or the question's words are mostly unknown to the docs: canned scope reply, no model call. Questions that slip through are still bound by the system prompt. |
-| Prompt injection in the question ("ignore your instructions", "print your system prompt") | The question is passed as data inside `<question>` tags and the prompt says instructions there carry no authority. Such questions are never written to the answer cache, so a manipulated answer cannot be served to the next person. |
-| Injection through `history` (fake "assistant" turns with new rules) | History is trimmed, must alternate user/assistant, is capped in size, and the prompt states earlier assistant turns may have been edited by the user. History also disables caching. |
-| Hammering the endpoint | Per-IP hourly limit (`cf-connecting-ip` is set by Cloudflare and cannot be spoofed), site-wide daily budget, 600-character questions, 32 KB bodies, bounded output tokens. For hostile traffic add a Cloudflare rate-limiting rule or Turnstile in front of `/v1/ask`. |
-| Calling from another site | Browser requests from origins outside `ALLOWED_ORIGINS` are refused. Non-browser callers can still use the API, which is intended, and are subject to the same limits. |
-| Phishing links in answers | The widget renders Markdown links only when they point at ucp.dev or github.com; everything else is plain text. Citations always come from the index, never from the model. |
-| Cross-site scripting | All model output is HTML-escaped before the limited Markdown renderer runs. |
+| Attempt                                                                                   | What happens                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Use it as a general chatbot ("write me a poem")                                           | Retrieval finds nothing docs-like, or the question's words are mostly unknown to the docs: canned scope reply, no model call. Questions that slip through are still bound by the system prompt.                                                                        |
+| Prompt injection in the question ("ignore your instructions", "print your system prompt") | The question is passed as data inside `<question>` tags and the prompt says instructions there carry no authority. Such questions are never written to the answer cache, so a manipulated answer cannot be served to the next person.                                  |
+| Injection through `history` (fake "assistant" turns with new rules)                       | History is trimmed, must alternate user/assistant, is capped in size, and the prompt states earlier assistant turns may have been edited by the user. History also disables caching.                                                                                   |
+| Hammering the endpoint                                                                    | Per-IP hourly limit (`cf-connecting-ip` is set by Cloudflare and cannot be spoofed), site-wide daily budget, 600-character questions, 32 KB bodies, bounded output tokens. For hostile traffic add a Cloudflare rate-limiting rule or Turnstile in front of `/v1/ask`. |
+| Calling from another site                                                                 | Browser requests from origins outside `ALLOWED_ORIGINS` are refused. Non-browser callers can still use the API, which is intended, and are subject to the same limits.                                                                                                 |
+| Phishing links in answers                                                                 | The widget renders Markdown links only when they point at ucp.dev or github.com; everything else is plain text. Citations always come from the index, never from the model.                                                                                            |
+| Cross-site scripting                                                                      | All model output is HTML-escaped before the limited Markdown renderer runs.                                                                                                                                                                                            |
 
-The remaining risk is answer quality: a small model may follow a steering
-prompt despite the rules. Review the eval questions in this README's history
-or run your own against the model you deploy.
+The remaining risk is answer quality: a small model may follow a steering prompt
+despite the rules. Review the eval questions in this README's history or run
+your own against the model you deploy.
 
 ## Excluding a page from the index
 
