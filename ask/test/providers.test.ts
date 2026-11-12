@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   createProvider,
-  OpenAICompatibleProvider,
+  ChatCompletionsProvider,
   sseData,
   WorkersAiProvider,
 } from "../src/providers";
@@ -27,7 +27,7 @@ test("sseData yields each data payload even when frames are split across reads",
   assert.deepEqual(got, ['{"a":1}', '{"b":2}', "[DONE]"]);
 });
 
-test("OpenAI-compatible provider streams deltas and reports length finish", async () => {
+test("chat-completions provider streams deltas and reports length finish", async () => {
   const originalFetch = globalThis.fetch;
   const captured: {
     url: string;
@@ -51,7 +51,7 @@ test("OpenAI-compatible provider streams deltas and reports length finish", asyn
     return new Response(streamOf(frames), { status: 200 });
   }) as typeof fetch;
   try {
-    const provider = new OpenAICompatibleProvider(
+    const provider = new ChatCompletionsProvider(
       "http://model.local/v1/",
       "my-model",
       "k"
@@ -97,9 +97,30 @@ test("Workers AI provider parses the binding's SSE stream", async () => {
   assert.equal(finish, "stop");
 });
 
+test("Workers AI provider also understands chat-completions style frames", async () => {
+  const ai = {
+    run: async () =>
+      streamOf(
+        'data: {"choices":[{"delta":{"content":"Gem"}}]}\n\ndata: {"choices":[{"delta":{"content":"ma"},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'
+      ),
+  };
+  const provider = new WorkersAiProvider(ai, "@cf/google/gemma");
+  let text = "";
+  const finish = await provider.stream(
+    [{ role: "user", content: "hi" }],
+    (d) => (text += d),
+    {
+      maxTokens: 10,
+      temperature: 0,
+    }
+  );
+  assert.equal(text, "Gemma");
+  assert.equal(finish, "stop");
+});
+
 test("createProvider validates configuration", () => {
   assert.throws(
-    () => createProvider({ MODEL: "m", MODEL_PROVIDER: "openai-compatible" }),
+    () => createProvider({ MODEL: "m", MODEL_PROVIDER: "chat-completions" }),
     /MODEL_BASE_URL/
   );
   assert.throws(
@@ -112,6 +133,36 @@ test("createProvider validates configuration", () => {
   );
   assert.equal(
     createProvider({ MODEL: "m", MODEL_BASE_URL: "http://x/v1" }).name,
-    "openai-compatible:m"
+    "chat-completions:m"
+  );
+});
+
+test("MODEL_EXTRA_PARAMS is merged into the model request", async () => {
+  let seen: Record<string, unknown> = {};
+  const ai = {
+    run: async (_m: string, input: Record<string, unknown>) => {
+      seen = input;
+      return { response: "ok" };
+    },
+  };
+  const provider = createProvider({
+    MODEL: "m",
+    MODEL_PROVIDER: "workers-ai",
+    AI: ai,
+    MODEL_EXTRA_PARAMS: '{"chat_template_kwargs":{"enable_thinking":false}}',
+  });
+  await provider.stream([{ role: "user", content: "hi" }], () => {}, {
+    maxTokens: 5,
+    temperature: 0,
+  });
+  assert.deepEqual(seen.chat_template_kwargs, { enable_thinking: false });
+  assert.throws(
+    () =>
+      createProvider({
+        MODEL: "m",
+        MODEL_BASE_URL: "http://x/v1",
+        MODEL_EXTRA_PARAMS: "{",
+      }),
+    /valid JSON/
   );
 });

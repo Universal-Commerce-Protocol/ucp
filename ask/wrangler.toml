@@ -20,16 +20,19 @@ binding = "AI"
 
 [vars]
 # Where answers come from. Two options:
-#   "openai-compatible": your own model behind vLLM / Ollama / TGI / llama.cpp /
+#   "chat-completions": your own model behind vLLM / Ollama / TGI / llama.cpp /
 #                        SGLang / LM Studio (anything speaking /v1/chat/completions).
 #                        Set MODEL_BASE_URL (e.g. https://llm.internal.example/v1)
 #                        and MODEL to the served model name. If the server needs a
 #                        key: `wrangler secret put MODEL_API_KEY`.
 #   "workers-ai":        an open model hosted by Cloudflare through the AI binding,
-#                        e.g. MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast".
-MODEL_PROVIDER = "openai-compatible"
+#                        e.g. MODEL = "@cf/google/gemma-4-26b-a4b-it".
+MODEL_PROVIDER = "chat-completions"
 MODEL = "qwen2.5-14b-instruct"
 MODEL_BASE_URL = "https://REPLACE_WITH_YOUR_MODEL_SERVER/v1"
+# Optional JSON merged into every model request. Reasoning models should have
+# their thinking phase switched off so the output budget goes to the answer:
+# MODEL_EXTRA_PARAMS = '{"chat_template_kwargs":{"enable_thinking":false}}'
 # Low temperature: this is factual Q&A over excerpts.
 TEMPERATURE = "0.2"
 # Hard ceiling on generated tokens per answer. Prompt asks for <= ~200 words.

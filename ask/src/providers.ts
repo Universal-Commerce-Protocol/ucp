@@ -3,8 +3,8 @@
  * chat completion for a list of messages. Two adapters cover self-hosted and
  * Cloudflare-hosted open-weight models:
  *
- *  - "openai-compatible": any server speaking the OpenAI chat-completions
- *    protocol: vLLM, Ollama, TGI, llama.cpp server, LM Studio, SGLang, or a
+ *  - "chat-completions": any server speaking the standard chat-completions
+ *    HTTP protocol: vLLM, Ollama, TGI, llama.cpp server, LM Studio, SGLang, or a
  *    hosted open-model API. This is what a self-hosted or fine-tuned model
  *    will expose.
  *  - "workers-ai": Cloudflare Workers AI (open models such as Llama, Qwen,
@@ -47,16 +47,17 @@ export class ProviderError extends Error {
   }
 }
 
-/* ------------------------------------------------------------ OpenAI-compatible */
+/* ------------------------------------------------------------ chat-completions */
 
-export class OpenAICompatibleProvider implements ModelProvider {
+export class ChatCompletionsProvider implements ModelProvider {
   readonly name: string;
   constructor(
     private readonly baseUrl: string,
     private readonly model: string,
-    private readonly apiKey?: string
+    private readonly apiKey?: string,
+    private readonly extra: Record<string, unknown> = {}
   ) {
-    this.name = `openai-compatible:${model}`;
+    this.name = `chat-completions:${model}`;
   }
 
   async stream(
@@ -75,6 +76,7 @@ export class OpenAICompatibleProvider implements ModelProvider {
         headers,
         signal: opts.signal,
         body: JSON.stringify({
+          ...this.extra,
           model: this.model,
           messages,
           stream: true,
@@ -119,7 +121,8 @@ export class WorkersAiProvider implements ModelProvider {
   readonly name: string;
   constructor(
     private readonly ai: WorkersAiBinding,
-    private readonly model: string
+    private readonly model: string,
+    private readonly extra: Record<string, unknown> = {}
   ) {
     this.name = `workers-ai:${model}`;
   }
@@ -130,6 +133,7 @@ export class WorkersAiProvider implements ModelProvider {
     opts: GenerateOptions
   ): Promise<FinishReason> {
     const out = await this.ai.run(this.model, {
+      ...this.extra,
       messages,
       stream: true,
       max_tokens: opts.maxTokens,
@@ -137,24 +141,50 @@ export class WorkersAiProvider implements ModelProvider {
     });
     if (!(out instanceof ReadableStream)) {
       // Some models ignore `stream`; fall back to the whole response.
-      const text = (out as { response?: string })?.response ?? "";
+      const text = extractText(out);
       if (text) onDelta(text);
       return "unknown";
     }
     let finish: FinishReason = "unknown";
     for await (const data of sseData(out)) {
       if (data === "[DONE]") break;
-      let json: { response?: string; usage?: unknown };
+      let json: unknown;
       try {
         json = JSON.parse(data);
       } catch {
         continue;
       }
-      if (json.response) onDelta(json.response);
-      if (json.usage) finish = "stop";
+      const text = extractText(json);
+      if (text) onDelta(text);
+      const j = json as {
+        usage?: unknown;
+        choices?: { finish_reason?: string | null }[];
+      };
+      if (j.usage) finish = "stop";
+      const reason = j.choices?.[0]?.finish_reason;
+      if (reason) finish = reason === "length" ? "length" : "stop";
     }
     return finish;
   }
+}
+
+/**
+ * Workers AI models answer in one of two shapes: `{ response }` (Llama-style)
+ * or `{ choices: [{ delta: { content } }] }` / `{ choices: [{ message }] }`
+ * (chat-completions style, used by newer models such as Gemma).
+ */
+function extractText(payload: unknown): string {
+  if (!payload || typeof payload !== "object") return "";
+  const p = payload as {
+    response?: unknown;
+    choices?: {
+      delta?: { content?: string | null };
+      message?: { content?: string | null };
+    }[];
+  };
+  if (typeof p.response === "string") return p.response;
+  const choice = p.choices?.[0];
+  return choice?.delta?.content ?? choice?.message?.content ?? "";
 }
 
 /* ------------------------------------------------------------------- factory */
@@ -164,27 +194,45 @@ export interface ProviderEnv {
   MODEL: string;
   MODEL_BASE_URL?: string;
   MODEL_API_KEY?: string;
+  /**
+   * Optional JSON object merged into every model request, for model-specific
+   * switches such as {"chat_template_kwargs":{"enable_thinking":false}} on
+   * reasoning models, so the token budget goes to the answer.
+   */
+  MODEL_EXTRA_PARAMS?: string;
   AI?: WorkersAiBinding;
 }
 
+function extraParams(env: ProviderEnv): Record<string, unknown> {
+  if (!env.MODEL_EXTRA_PARAMS) return {};
+  try {
+    const parsed = JSON.parse(env.MODEL_EXTRA_PARAMS);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    throw new ProviderError("MODEL_EXTRA_PARAMS is not valid JSON");
+  }
+}
+
 export function createProvider(env: ProviderEnv): ModelProvider {
-  const kind = (env.MODEL_PROVIDER ?? "openai-compatible").toLowerCase();
+  const extra = extraParams(env);
+  const kind = (env.MODEL_PROVIDER ?? "chat-completions").toLowerCase();
   if (kind === "workers-ai") {
     if (!env.AI)
       throw new ProviderError(
         "MODEL_PROVIDER=workers-ai requires the AI binding in wrangler.toml"
       );
-    return new WorkersAiProvider(env.AI, env.MODEL);
+    return new WorkersAiProvider(env.AI, env.MODEL, extra);
   }
-  if (kind === "openai-compatible") {
+  if (kind === "chat-completions") {
     if (!env.MODEL_BASE_URL)
       throw new ProviderError(
-        "MODEL_BASE_URL is required for the openai-compatible provider"
+        "MODEL_BASE_URL is required for the chat-completions provider"
       );
-    return new OpenAICompatibleProvider(
+    return new ChatCompletionsProvider(
       env.MODEL_BASE_URL,
       env.MODEL,
-      env.MODEL_API_KEY
+      env.MODEL_API_KEY,
+      extra
     );
   }
   throw new ProviderError(`unknown MODEL_PROVIDER: ${kind}`);

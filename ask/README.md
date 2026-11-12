@@ -3,7 +3,7 @@
 A small Cloudflare Worker that powers the "Ask AI" button on the documentation
 site. It answers questions about UCP from the documentation itself, cites the
 sections it used, and runs against **your own model**: anything that speaks the
-OpenAI chat-completions protocol (vLLM, Ollama, TGI, llama.cpp, SGLang, LM
+chat-completions HTTP protocol (vLLM, Ollama, TGI, llama.cpp, SGLang, LM
 Studio, a fine-tuned model you host) or an open model on Cloudflare Workers AI.
 No third-party LLM API is required.
 
@@ -13,7 +13,7 @@ Header entry point beside search, on the live site:
 
 ![Ask AI about UCP button in the ucp.dev header](docs/home.png)
 
-An answer with numbered citations and the sections it came from (Llama 3.3 70B on Workers AI, real output):
+An answer with numbered citations and the sections it came from (Gemma 4 on Workers AI, real output):
 
 ![Answer drawer open next to the Checkout Capability page](docs/drawer-answer.png)
 
@@ -66,8 +66,8 @@ instruction-tuned open model is enough. Rough guidance:
 
 | Option | Typical choice | What you pay for | Notes |
 | --- | --- | --- | --- |
-| Cloudflare Workers AI | `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, `@cf/qwen/...` | per token, no idle cost | Simplest: same account as the Worker, set `MODEL_PROVIDER=workers-ai`. |
-| Self-hosted, always on | Qwen2.5 14B / Llama 3.1 8B on vLLM behind one GPU | GPU hours | Flat cost regardless of traffic; enable vLLM prefix caching. |
+| Cloudflare Workers AI | `@cf/google/gemma-4-26b-a4b-it` | per token, no idle cost | Simplest: same account as the Worker, set `MODEL_PROVIDER=workers-ai`. |
+| Self-hosted, always on | Gemma or Qwen 14B class model on vLLM behind one GPU | GPU hours | Flat cost regardless of traffic; enable vLLM prefix caching. |
 | Self-hosted, scale to zero | same models on a serverless GPU platform | GPU seconds | Cold starts of 10-60 s on the first question after idle. |
 | Fine-tuned | LoRA on top of one of the above, trained on UCP Q&A pairs | one-off training | Improves tone and formatting; does **not** replace retrieval for facts, which go stale with every spec release. Start without it and collect real questions first. |
 
@@ -90,9 +90,9 @@ npm install
 npx wrangler login
 npx wrangler kv namespace create ASK_KV        # paste the id into wrangler.toml
 # Pick ONE provider in wrangler.toml [vars]:
-#   MODEL_PROVIDER="openai-compatible", MODEL_BASE_URL="https://.../v1", MODEL="<served name>"
+#   MODEL_PROVIDER="chat-completions", MODEL_BASE_URL="https://.../v1", MODEL="<served name>"
 #   (if the server needs a key:  npx wrangler secret put MODEL_API_KEY)
-#   MODEL_PROVIDER="workers-ai",        MODEL="@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+#   MODEL_PROVIDER="workers-ai",        MODEL="@cf/google/gemma-4-26b-a4b-it"
 npm run deploy
 ```
 
@@ -113,10 +113,11 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 
 | Var | Default | Purpose |
 | --- | --- | --- |
-| `MODEL_PROVIDER` | `openai-compatible` | `openai-compatible` or `workers-ai`. |
+| `MODEL_PROVIDER` | `chat-completions` | `chat-completions` or `workers-ai`. |
 | `MODEL` | `qwen2.5-14b-instruct` | Served model name (or Workers AI model id). |
-| `MODEL_BASE_URL` | placeholder | Base URL of the OpenAI-compatible server, ending in `/v1`. |
+| `MODEL_BASE_URL` | placeholder | Base URL of the chat-completions server, ending in `/v1`. |
 | `MODEL_API_KEY` | secret, optional | Bearer token for the model server. |
+| `MODEL_EXTRA_PARAMS` | unset | JSON merged into every model request, e.g. `{"chat_template_kwargs":{"enable_thinking":false}}` to switch off the thinking phase of a reasoning model so the output budget goes to the answer. |
 | `TEMPERATURE` | `0.2` | Sampling temperature. |
 | `MAX_OUTPUT_TOKENS` | `700` | Hard cap per answer. |
 | `TOP_K` | `8` | Excerpts in the prompt. |
@@ -129,7 +130,7 @@ curl -N https://ask.ucp.dev/v1/ask -H 'content-type: application/json' \
 
 ## Trying it without any API key
 
-Any OpenAI-compatible local server works. The smallest setup is llama.cpp's
+Any local server with a chat-completions endpoint works. The smallest setup is llama.cpp's
 Python server with an open GGUF model; a 3B model answers on a laptop CPU in
 under a minute per question and is enough to see the whole pipeline work
 (retrieval, citations, cache hits, off-topic gate). Use a 7B-14B+ instruct
@@ -184,14 +185,14 @@ Errors before streaming starts are plain JSON with HTTP 4xx/5xx; 429 carries `Re
 
 ## Model comparison
 
-The same pipeline was run against three open models on the same questions.
+The same pipeline was run against three open-weight models on the same questions.
 Retrieval, prompt and guards were identical; only the model changed.
 
 | Model | Where it ran | Grounding and accuracy | Citations | Notes |
 | --- | --- | --- | --- | --- |
 | Qwen 2.5 3B Instruct | local CPU, llama.cpp | Correct on direct questions; on broad ones mixed in unrelated sections and padded with generic advice | Often omitted | Proves the pipeline; below the bar for visitors |
 | Qwen 2.5 14B Instruct | local CPU, llama.cpp | Correct and in the docs' own order on all three test questions, including the broad "implement UCP on my store" | Present but sparse (one marker where two or three sections were used) | Several minutes per answer on 4 CPU cores; seconds on a GPU |
-| Llama 3.3 70B Instruct (fp8) | Cloudflare Workers AI | Correct, concise, connected sections across pages | Consistent, including multi-source markers | Used for the review deployment; streams in a few seconds |
+| Gemma 4 26B | Cloudflare Workers AI | Correct and specific: quotes endpoint paths, field names and statuses from the excerpts and connects sections across pages | Consistent, including several sources on one sentence | Used for the review deployment; streams in a few seconds. Needs its thinking phase switched off (see `MODEL_EXTRA_PARAMS`) |
 
 Sample answers (14B, local): asked how to implement UCP on a self-hosted
 store it listed the prerequisites, the create and get checkout-session

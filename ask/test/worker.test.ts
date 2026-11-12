@@ -51,7 +51,7 @@ function fakeKv(): KVNamespace & { store: Map<string, string> } {
 function makeEnv(kv: KVNamespace): Env {
   return {
     ASK_KV: kv,
-    MODEL_PROVIDER: "openai-compatible",
+    MODEL_PROVIDER: "chat-completions",
     MODEL: "test-model",
     MODEL_BASE_URL: "http://model.local/v1",
     TEMPERATURE: "0",
@@ -105,9 +105,11 @@ globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     const last = body.messages.at(-1).content;
     const content = /UNGROUNDED/.test(last)
       ? "Roses are red, violets are blue, autumn leaves whisper, and so do you."
-      : /UNCITED/.test(last)
-        ? "The business is merchant of record."
-        : "The business is merchant of record [1].";
+      : /MULTI/.test(last)
+        ? "The business is merchant of record [1, 1]."
+        : /UNCITED/.test(last)
+          ? "The business is merchant of record."
+          : "The business is merchant of record [1].";
     const frames =
       `data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n` +
       'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n';
@@ -142,7 +144,7 @@ test("answers with citations, then serves the repeat from cache without a model 
   assert.equal((first[0].data as { cached: boolean }).cached, false);
   assert.equal(
     (first[0].data as { model: string }).model,
-    "openai-compatible:test-model"
+    "chat-completions:test-model"
   );
   const text = first
     .filter((e) => e.event === "delta")
@@ -254,7 +256,7 @@ test("steering and non-docs task requests are declined without a model call", as
   );
   assert.equal(
     (ok[0].data as { model: string }).model,
-    "openai-compatible:test-model"
+    "chat-completions:test-model"
   );
 });
 
@@ -371,4 +373,32 @@ test("answers, gated and cached outcomes are logged anonymously; feedback and ex
   const lines = (await exported.text()).split("\n").map((l) => JSON.parse(l));
   assert.equal(lines.length, 2);
   assert.equal(lines.find((l) => l.id === meta.id).helpful, true);
+});
+
+test("comma-separated citation lists count as citations", async () => {
+  const env = makeEnv(fakeKv());
+  const events = await readEvents(
+    await ask(env, { question: "checkout merchant of record MULTI" })
+  );
+  const done = events.find((e) => e.event === "done")?.data as {
+    sources: { n: number }[];
+  };
+  assert.deepEqual(
+    done.sources.map((s) => s.n),
+    [1]
+  );
+});
+
+test("the answer cache is scoped to the model", async () => {
+  const kv = fakeKv();
+  const env = makeEnv(kv);
+  await readEvents(
+    await ask(env, { question: "Who is the merchant of record in checkout?" })
+  );
+  await new Promise((r) => setTimeout(r, 20));
+  const other = { ...env, MODEL: "another-model" };
+  const events = await readEvents(
+    await ask(other, { question: "Who is the merchant of record in checkout?" })
+  );
+  assert.equal((events[0].data as { cached: boolean }).cached, false);
 });

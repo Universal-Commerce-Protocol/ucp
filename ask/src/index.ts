@@ -11,7 +11,7 @@
  *   - otherwise one streamed chat completion against your own model with a
  *     stable system prefix, ~8 short excerpts and a capped output.
  *
- * The model is pluggable (src/providers.ts): any OpenAI-compatible server
+ * The model is pluggable (src/providers.ts): any server that speaks the chat-completions HTTP protocol
  * (vLLM, Ollama, TGI, llama.cpp, ...) or Cloudflare Workers AI.
  */
 
@@ -44,6 +44,7 @@ export interface Env {
   MODEL: string;
   MODEL_BASE_URL?: string;
   MODEL_API_KEY?: string;
+  MODEL_EXTRA_PARAMS?: string;
   TEMPERATURE: string;
   MAX_OUTPUT_TOKENS: string;
   INDEX_URLS: string;
@@ -207,9 +208,13 @@ export default {
     );
 
     // 1. Repeated single-turn question: replay the cached answer, no model call.
+    // Keyed by index version and model, so a redeploy or a model change
+    // never replays answers produced from other text or by another model.
     const cacheKey = history.length
       ? null
-      : `a:${index.version}:${(await sha256Hex(normalizeQuestion(question))).slice(0, 32)}`;
+      : `a:${index.version}:${(
+          await sha256Hex(`${env.MODEL}\n${normalizeQuestion(question)}`)
+        ).slice(0, 32)}`;
     const started = Date.now();
     const log: LogEntry = {
       id: newLogId(),
@@ -436,7 +441,11 @@ async function answer(
   // Prefer the sections the model actually cited; if it cited nothing
   // (smaller models sometimes skip the [n] markers), fall back to the top
   // retrieved sections so the reader can still verify the answer.
-  const cited = sources.filter((s) => text.includes(`[${s.n}]`));
+  const citedNumbers = new Set<number>();
+  for (const match of text.matchAll(/\[(\d+(?:\s*,\s*\d+)*)\]/g)) {
+    for (const n of match[1].split(",")) citedNumbers.add(Number(n.trim()));
+  }
+  const cited = sources.filter((s) => citedNumbers.has(s.n));
   const usedSources = cited.length ? cited : sources.slice(0, 3);
   await sse("done", { sources: usedSources });
   return { text, sources: usedSources, cacheable, replaced: false, grounding };
