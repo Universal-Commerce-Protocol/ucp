@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ucp/schemas/app_switch.json",
+  "name": "com.example.app_switch",
+  "title": "App Switch Extension (sample, non-normative)",
+  "description": "Sample vendor extension declaring an Action type that asks the Platform to launch a deep link (app switch) and await the Buyer's return before observing Checkout again.",
+  "$defs": {
+    "return_request": {
+      "type": "object",
+      "properties": {
+        "com.example.app_switch": {
+          "type": "object",
+          "ucp_response": "omit",
+          "description": "Platform-supplied return target, sent on Update/Complete Checkout before the Action can be emitted.",
+          "required": [
+            "return_url"
+          ],
+          "properties": {
+            "return_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Platform-owned universal link / app link the external app returns the Buyer to."
+            }
+          }
+        }
+      }
+    },
+    "app_switch_actions": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "object",
+          "ucp_request": "omit",
+          "properties": {
+            "com.example.app_switch.launch": {
+              "type": "array",
+              "description": "Launch an external app via deep link and await return.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "config"
+                ],
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "required": [
+                      "url",
+                      "state",
+                      "return_url"
+                    ],
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Deep link to launch. SHOULD be an HTTPS universal link / app link; custom schemes only if Platform policy allows."
+                      },
+                      "fallback_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "HTTPS web surface used when the target app is not installed or the launch is refused."
+                      },
+                      "state": {
+                        "type": "string",
+                        "minLength": 16,
+                        "description": "Opaque single-use correlation value the external app echoes on return."
+                      },
+                      "return_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Echo of the Platform-supplied return_url the external app will open; Platform MUST verify it matches what it sent."
+                      },
+                      "app_hint": {
+                        "type": "object",
+                        "description": "Optional, display-only hints.",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "ios_bundle_id": {
+                            "type": "string"
+                          },
+                          "android_package": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "timeout_seconds": {
+                        "type": "integer",
+                        "minimum": 30,
+                        "maximum": 900,
+                        "description": "Outer await deadline, measured from launch, capped by Checkout expires_at."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dev.ucp.shopping.checkout": {
+      "allOf": [
+        {
+          "$ref": "https://ucp.dev/schemas/shopping/checkout.json"
+        },
+        {
+          "$ref": "#/$defs/return_request"
+        },
+        {
+          "$ref": "#/$defs/app_switch_actions"
+        }
+      ]
+    }
+  }
+}
