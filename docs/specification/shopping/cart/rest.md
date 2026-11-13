@@ -500,8 +500,10 @@ operations unless otherwise noted.
 See the [Core Specification](../../overview/index.md#error-handling) for the complete error
 code registry and transport binding examples.
 
-* **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
-    503) with JSON body containing `code` and `content`.
+* **Protocol errors**: Return the HTTP status code from the error code
+    registry. The body is optional; when present it is a
+    [Protocol Error](../../reference.md#protocol-error) (`code`, `content`,
+    optional `continue_url`).
 * **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes
