@@ -93,7 +93,7 @@ Booking follows a progressive session lifecycle:
   Platforms **MUST NOT** use persistent cross-merchant user tracking identifiers or
   expose personally identifiable information (PII) within `guest.id`. Businesses
   **MUST NOT** infer or link identity across distinct booking sessions based on `guest.id`.
-    * **Timing**: Platform **SHOULD NOT** send `guests[]` identity fields beyond `id` before the
+    * **Timing**: Platform **MAY** send `guests[]` identity fields beyond `id` before the
       booking reaches `ready_for_complete`, and **SHOULD** send only the fields the business
       requests via `messages[]`.
 * **Guest Pool & Stay Assignment Model**: Guest data is structured into a
@@ -440,7 +440,7 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   namespace for each entry in the root `guests[]` array (e.g., `"gst_01"`, `"gst_02"`).
 * **MUST** ensure every `guest_assignments[].guest_id` references a valid `id`
   present in the root `guests[]` pool.
-* **SHOULD NOT** send `guests[]` personal identity fields beyond `id` before the
+* **MAY** send `guests[]` personal identity fields beyond `id` before the
   booking reaches `ready_for_complete`, and **SHOULD** send only the fields the
   business requests via `messages[]`.
 * **MAY** engage an agent to facilitate the booking session (e.g. select stay,
