@@ -398,11 +398,9 @@ stateDiagram-v2
 * **`canceled`**: Checkout session is invalid or expired. Platform should
     start a new checkout session if needed. No Action remains outstanding.
 
-When a Checkout has no error Message and no outstanding Action, and the
-Business would accept Complete Checkout for it with no further Update Checkout,
-the Business **MUST** return `status: ready_for_complete`. The Business
-**MUST NOT** return `status: ready_for_complete` for a Checkout that needs an
-Update Checkout before the Business would accept Complete Checkout.
+The Business **MUST NOT** return `status: ready_for_complete` for a Checkout
+that needs an Update Checkout before the Business would accept Complete
+Checkout.
 
 ### Actions
 
