@@ -249,8 +249,12 @@ class Business:
     )
     return build.wire(response)
 
-  def asgi(self, extra_routes=()):
-    """Return the ASGI application serving discovery, REST and MCP."""
+  def app(self, extra_routes=()):
+    """Return the web application serving discovery, REST and MCP.
+
+    It is an ASGI application, the interface Python web servers such as
+    uvicorn run.
+    """
     return mcp.app(self, [*rest.routes(self), *extra_routes])
 
 
@@ -270,4 +274,4 @@ def serve():
     return JSONResponse(profiles[request.path_params["name"]])
 
   hosted = HttpRoute("/platform/{name}.json", platform_profile)
-  return Business(httpx2.AsyncClient(), base_url, local=True).asgi([hosted])
+  return Business(httpx2.AsyncClient(), base_url, local=True).app([hosted])

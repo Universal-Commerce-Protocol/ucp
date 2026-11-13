@@ -28,7 +28,6 @@ specification requires.
 import asyncio
 import copy
 import difflib
-import http
 import json
 import re
 import subprocess
@@ -158,7 +157,7 @@ async def world(transport: str, name: str, profile: str | None = None):
   """Start a fresh Business and connect one Platform to it."""
   network = Network()
   http_client = httpx2.AsyncClient(transport=network)
-  business = Business(http_client, BUSINESS, resolver=None).asgi()
+  business = Business(http_client, BUSINESS, resolver=None).app()
   network.hosts = {
     "business.example": httpx2.ASGITransport(app=business),
     "platform.example": httpx2.ASGITransport(app=platform_host()),
@@ -681,6 +680,20 @@ def _title(request: httpx2.Request, routes: dict) -> str:
   return f"{request.method} {path}"
 
 
+# Reason phrases as RFC 9110 names them. Python's own table renamed 422
+# between versions, and a transcript must not depend on the interpreter.
+REASONS = {
+  200: "OK",
+  201: "Created",
+  202: "Accepted",
+  400: "Bad Request",
+  404: "Not Found",
+  409: "Conflict",
+  422: "Unprocessable Content",
+  424: "Failed Dependency",
+}
+
+
 def render(title: str, intro: str, log, routes: dict, keep=None) -> str:
   """Render recorded exchanges as a Markdown transcript.
 
@@ -709,8 +722,7 @@ def render(title: str, intro: str, log, routes: dict, keep=None) -> str:
     if body is not None:
       out += ["Content-Type: application/json", "", pretty(body)]
     out += ["```", "", "```http"]
-    phrase = http.HTTPStatus(response.status_code).phrase
-    out += [f"HTTP/1.1 {response.status_code} {phrase}"]
+    out += [f"HTTP/1.1 {response.status_code} {REASONS[response.status_code]}"]
     if "cache-control" in response.headers:
       out += [f"Cache-Control: {response.headers['cache-control']}"]
     body = _tidy(response.content)
@@ -756,8 +768,8 @@ def transcripts(logs: dict, routes: dict) -> dict[str, str]:
     for run in ("rest-discount", "rest-core")
   )
   difference = difflib.unified_diff(
-    without.splitlines(keepends=True),
-    with_discount.splitlines(keepends=True),
+    without.splitlines(),
+    with_discount.splitlines(),
     "without the discount extension (platform/profiles/core.json)",
     "with the discount extension (platform/profiles/discount.json)",
   )

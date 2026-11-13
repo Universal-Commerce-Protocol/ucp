@@ -34,7 +34,7 @@ import mcp.types as types
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
 from mcp import MCPError
-from mcp.server.lowlevel import Server
+from mcp.server import Server
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.routing import Route
 

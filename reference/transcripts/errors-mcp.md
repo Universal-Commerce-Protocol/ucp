@@ -65,7 +65,7 @@ Content-Type: application/json
 ```
 
 ```http
-HTTP/1.1 422 Unprocessable Entity
+HTTP/1.1 422 Unprocessable Content
 Content-Type: application/json
 
 {
@@ -104,7 +104,7 @@ Content-Type: application/json
 ```
 
 ```http
-HTTP/1.1 422 Unprocessable Entity
+HTTP/1.1 422 Unprocessable Content
 Content-Type: application/json
 
 {
