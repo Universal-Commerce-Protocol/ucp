@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/offer.json",
+  "title": "Offer",
+  "description": "A purchasable offer for a variant, attributed to a specific seller. Present when a catalog aggregates offers from more than one Merchant of Record: the offer's `seller.domain` identifies the seller acting as Merchant of Record, and `item_id` is the item ID recognized by that seller's own checkout. When a variant carries no `offers`, the Business serving the catalog is the single seller and Merchant of Record, `variant.price` is authoritative, and `variant.id` is the item ID used at checkout.",
+  "type": "object",
+  "required": [
+    "seller",
+    "item_id",
+    "price"
+  ],
+  "properties": {
+    "seller": {
+      "type": "object",
+      "description": "The seller making this offer and acting as its Merchant of Record.",
+      "required": [
+        "domain"
+      ],
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "The seller's canonical host: a bare hostname without scheme, path, port, or trailing slash (for example, `shop.example.com`). Identifies the Merchant of Record for this offer and the host whose checkout resolves `item_id`. A Platform resolves this host to the seller's UCP profile at `/.well-known/ucp` and verifies its signing keys via authority binding."
+        },
+        "name": {
+          "type": "string",
+          "description": "Seller display name."
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "../../common/types/link.json"
+          },
+          "description": "Seller policy and information links."
+        }
+      }
+    },
+    "item_id": {
+      "type": "string",
+      "description": "Item ID for this offer, recognized by the seller's own checkout. Used as `item.id` in checkout when `offers` is present, in place of `variant.id`."
+    },
+    "price": {
+      "$ref": "../../common/types/price.json",
+      "description": "Authoritative current selling price for this offer, on the variant's sale basis (`variant.quantity_unit`). When `offers` is present, this — not `variant.price` — is the price the seller will honor at checkout."
+    },
+    "list_price": {
+      "$ref": "../../common/types/price.json",
+      "description": "List price before discounts for this offer (for strikethrough display)."
+    },
+    "unit_price": {
+      "$ref": "unit_price.json",
+      "description": "Price per standard unit of measurement for this offer, for shelf-style comparison display. MAY be omitted when unit pricing does not apply."
+    },
+    "availability": {
+      "$ref": "availability.json",
+      "description": "Availability of this offer for purchase."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical page URL for this offer on the seller's site."
+    },
+    "sku": {
+      "type": "string",
+      "description": "Seller-assigned identifier for inventory and fulfillment."
+    }
+  }
+}
