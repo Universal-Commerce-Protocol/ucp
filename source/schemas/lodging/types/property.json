@@ -11,6 +11,19 @@
     {
       "type": "object",
       "properties": {
+        "type": {
+          "type": "string",
+          "description": "Property family, as stated by the Business. Well-known values: `hotel` (hotels, resort hotels, suite or apartment hotels, motels), `hostel`, `short_term_rental` (furnished units let for short stays, such as holiday homes, apartments, villas), `campground` (camping grounds, recreational vehicle parks, trailer parks), `bed_and_breakfast`, `other`. Businesses MAY use additional values. Platforms MUST treat an unrecognized value as unclassified and MUST NOT infer the value from other fields.",
+          "examples": [
+            "hotel",
+            "hostel",
+            "short_term_rental",
+            "campground",
+            "bed_and_breakfast",
+            "other"
+          ],
+          "ucp_request": "omit"
+        },
         "media": {
           "type": "array",
           "items": {

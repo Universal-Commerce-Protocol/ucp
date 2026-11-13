@@ -29,6 +29,20 @@
       "description": "Detailed description of the accommodation type.",
       "ucp_request": "omit"
     },
+    "type": {
+      "type": "string",
+      "description": "Kind of rentable space, as stated by the Business. Well-known values: `room`, `suite`, `apartment`, `villa`, `cabin`, `pitch`, `bed`. Businesses MAY use additional values. Independent of `property.type`: a property of one family may offer spaces of several kinds. Platforms MUST treat an unrecognized value as unclassified and MUST NOT infer the value from other fields.",
+      "examples": [
+        "room",
+        "suite",
+        "apartment",
+        "villa",
+        "cabin",
+        "pitch",
+        "bed"
+      ],
+      "ucp_request": "omit"
+    },
     "capacity": {
       "$ref": "capacity.json",
       "description": "Capacity details of the accommodation type.",
