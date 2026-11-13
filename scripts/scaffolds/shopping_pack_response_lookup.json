@@ -1,0 +1,25 @@
+{
+  "ucp": {
+    "version": "2026-01-01"
+  },
+  "products": [
+    {
+      "id": "prod_scaffold",
+      "title": "Scaffold Product",
+      "description": { "plain": "Scaffold product." },
+      "price_range": {
+        "min": { "amount": 1000, "currency": "USD" },
+        "max": { "amount": 1000, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "var_scaffold",
+          "title": "Scaffold Variant",
+          "description": { "plain": "Scaffold variant." },
+          "price": { "amount": 1000, "currency": "USD" },
+          "inputs": [{ "id": "var_scaffold", "match": "exact" }]
+        }
+      ]
+    }
+  ]
+}
