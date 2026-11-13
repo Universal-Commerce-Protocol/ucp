@@ -23,7 +23,7 @@
   },
   "allOf": [
     {
-      "$ref": "payment_instrument.json"
+      "$ref": "payment_instrument.json#/$defs/base_payment_instrument"
     },
     {
       "type": "object",

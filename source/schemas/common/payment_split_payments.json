@@ -12,7 +12,7 @@
       "title": "Payment Instrument (Split Payments)",
       "description": "Payment instrument extended with an optional per-instrument amount for split payments.",
       "allOf": [
-        { "$ref": "types/payment_instrument.json" },
+        { "$ref": "types/payment_instrument.json#/$defs/selected_payment_instrument" },
         {
           "type": "object",
           "properties": {
