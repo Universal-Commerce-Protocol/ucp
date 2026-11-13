@@ -730,6 +730,88 @@
           }
         }
       }
+    },
+    "/subscriptions/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/subscription_id_path" }
+      ],
+      "get": {
+        "operationId": "get_subscription",
+        "summary": "Get Subscription",
+        "description": "Get the current state of a subscription. Returns the full subscription entity as a current-state snapshot.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription retrieved or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_get_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/list": {
+      "post": {
+        "operationId": "list_subscriptions",
+        "summary": "List Subscriptions",
+        "description": "List the subscriptions the caller may access, optionally narrowed by filters. Returns full subscription entities with cursor-based pagination.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/subscription_list_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscriptions listed or business outcome message",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/subscription_list_response" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {
@@ -801,6 +883,15 @@
         "in": "path",
         "required": true,
         "description": "The unique identifier of the order.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "subscription_id_path": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the subscription.",
         "schema": {
           "type": "string"
         }
@@ -1019,6 +1110,21 @@
       "catalog_get_product_response": {
         "oneOf": [
           { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "subscription_get_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription.json#/$defs/get_subscription_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "subscription_list_request": {
+        "$ref": "../../schemas/shopping/subscription.json#/$defs/list_subscriptions_request"
+      },
+      "subscription_list_response": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription.json#/$defs/list_subscriptions_response" },
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       }

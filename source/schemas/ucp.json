@@ -317,6 +317,23 @@
       ]
     },
 
+    "response_subscription_schema": {
+      "title": "UCP Subscription Response Schema",
+      "description": "UCP metadata for subscription responses. No payment handlers needed post-purchase.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
+    },
+
     "response_cart_schema": {
       "title": "UCP Cart Response Schema",
       "description": "UCP metadata for cart responses. No payment handlers needed pre-checkout.",

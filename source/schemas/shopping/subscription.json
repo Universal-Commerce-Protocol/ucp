@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/subscription.json",
+  "name": "dev.ucp.shopping.subscription",
+  "title": "Subscription Capability",
+  "description": "Read access to subscriptions: the agreements under which a Business places recurring orders for a buyer. Gives a subscription an identity and returns its current state. Defines no operation that changes a subscription.",
+  "type": "object",
+  "$defs": {
+    "get_subscription_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "subscription"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_subscription_schema"
+        },
+        "subscription": {
+          "$ref": "types/subscription.json",
+          "description": "The requested subscription, as a current-state snapshot."
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/policy.json"
+          },
+          "description": "Policies that apply to the subscription's line items, including the `dev.ucp.shopping.policy.subscription` policy stating the terms its recurring orders are placed under. `applies_to` targets are relative to the response root."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/message.json"
+          },
+          "description": "Warnings or informational messages about the subscription."
+        }
+      }
+    },
+    "list_subscriptions_request": {
+      "type": "object",
+      "description": "Request body for listing subscriptions. Every field is optional; an empty object lists every subscription the caller may access.",
+      "properties": {
+        "filters": {
+          "$ref": "types/subscription_filters.json",
+          "description": "Filter criteria to narrow the listed subscriptions. All specified filters combine with AND logic."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "list_subscriptions_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "subscriptions"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_subscription_schema"
+        },
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "types/subscription.json"
+          },
+          "description": "The subscriptions the caller may access that match the filters, each as a current-state snapshot. Empty when there is none."
+        },
+        "pagination": {
+          "$ref": "../common/types/pagination.json#/$defs/response"
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/policy.json"
+          },
+          "description": "Policies that apply to the listed subscriptions' line items, including the `dev.ucp.shopping.policy.subscription` policies stating the terms their recurring orders are placed under. `applies_to` targets are relative to the response root."
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "../common/types/message.json"
+          },
+          "description": "Warnings or informational messages about the listed subscriptions."
+        }
+      }
+    }
+  }
+}

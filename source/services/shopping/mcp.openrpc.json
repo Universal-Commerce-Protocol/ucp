@@ -43,6 +43,18 @@
           { "$ref": "../../schemas/common/types/error_response.json" }
         ]
       },
+      "subscription_get_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription.json#/$defs/get_subscription_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
+      "subscription_list_result": {
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/subscription.json#/$defs/list_subscriptions_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
+      },
       "meta": {
         "type": "object",
         "description": "Request metadata.",
@@ -366,6 +378,48 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "#/components/schemas/catalog_get_product_result"}
+      }
+    },
+    {
+      "name": "get_subscription",
+      "summary": "Get subscription",
+      "description": "Get the current state of a subscription. Returns the full subscription entity as a current-state snapshot.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "id",
+          "required": true,
+          "schema": {"type": "string", "description": "The unique identifier of the subscription."}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_get_result"}
+      }
+    },
+    {
+      "name": "list_subscriptions",
+      "summary": "List subscriptions",
+      "description": "List the subscriptions the caller may access, optionally narrowed by filters. Returns full subscription entities with cursor-based pagination.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "subscription",
+          "required": true,
+          "schema": {"$ref": "../../schemas/shopping/subscription.json#/$defs/list_subscriptions_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "#/components/schemas/subscription_list_result"}
       }
     }
   ]
