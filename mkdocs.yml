@@ -90,6 +90,7 @@ nav:
                   - REST: specification/shopping/order/rest.md
                   - MCP: specification/shopping/order/mcp.md
           - Extensions:
+              - Operator: specification/shopping/extensions/ask-operator.md
               - Fulfillment: specification/shopping/extensions/fulfillment.md
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
@@ -577,6 +578,9 @@ plugins:
               Capability, detailing the JSON-RPC tool interface and parameters
               for fetching order states.
         Shopping Extensions:
+          - specification/shopping/extensions/ask-operator.md: >-
+              Operator extension (dev.ucp.shopping.ask.operator), providing
+              access to a Business operator within an Ask conversation.
           - specification/shopping/extensions/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
