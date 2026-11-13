@@ -153,7 +153,11 @@ narrowing: the core product detail page interaction where a user progressively s
 
 * **`selected`**: Array of option selections (e.g., `[{"name": "Color", "label": "Red"}]`).
   Partial selections are valid; the client sends whatever the user has chosen so far.
-  Each option name MUST appear at most once.
+  Each option name MUST appear at most once. The Business MUST reject a
+  request that repeats an option name as invalid (HTTP 400 for REST,
+  JSON-RPC `-32602` for MCP), even if the repeated entries are identical.
+  This check runs before selection resolution and relaxation, and applies
+  when the identifier is a variant ID.
 * **`preferences`**: Option names in relaxation priority order (e.g.,
   `["Color", "Size"]`). When no variant matches all selections, the server drops
   options from the **end** of this list first, keeping higher-priority selections

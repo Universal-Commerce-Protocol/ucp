@@ -690,3 +690,5 @@ A conforming REST transport implementation **MUST**:
     pagination contract (see [Pagination](search.md#pagination)).
 4. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 5. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.
+6. Return HTTP 400 for `/catalog/product` requests whose `selected` repeats an option name
+    (see [Option Selection](lookup.md#option-selection)).
