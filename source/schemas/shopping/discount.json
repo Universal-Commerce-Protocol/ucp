@@ -79,6 +79,41 @@
         }
       }
     },
+    "available_discount": {
+      "type": "object",
+      "description": "A discount available for discovery in the current context.",
+      "required": [
+        "title",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable discount identifier."
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable promotion name (e.g., 'Summer Sale — 15% off')."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["automatic", "code"],
+          "description": "'automatic' — business applies when conditions are met, no code needed. 'code' — buyer must submit a code (the code itself is NOT exposed)."
+        },
+        "conditions": {
+          "type": "string",
+          "description": "Human-readable summary of conditions to qualify (e.g., 'Orders over $50')."
+        },
+        "applied": {
+          "type": "boolean",
+          "description": "Whether this discount is already applied to the current cart/checkout."
+        },
+        "remaining_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "How much more the buyer needs to spend to qualify, in ISO 4217 minor units. Useful for 'add $12 more for free shipping' prompts."
+        }
+      }
+    },
     "discounts_object": {
       "type": "object",
       "description": "Discount codes input and applied discounts output.",
@@ -96,6 +131,14 @@
             "$ref": "#/$defs/applied_discount"
           },
           "description": "Discounts successfully applied (code-based and automatic).",
+          "ucp_request": "omit"
+        },
+        "available": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/available_discount"
+          },
+          "description": "Discounts available for this cart or checkout context. Business-optional. Includes both automatic promotions and discoverable code-based offers.",
           "ucp_request": "omit"
         }
       }
