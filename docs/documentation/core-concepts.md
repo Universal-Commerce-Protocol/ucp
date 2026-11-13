@@ -224,6 +224,7 @@ A single service can be accessed via multiple transport bindings:
 | **MCP** | OpenRPC | AI agents via Model Context Protocol |
 | **A2A** | Agent Card | Agent-to-Agent protocol integrations |
 | **Embedded** | OpenRPC | Embedded integrations |
+| **WebMCP** | OpenRPC | Agents in the Buyer's browser calling tools the Business's page registers |
 
 A Business declares which transport bindings it supports within each service;
 Platforms pick whichever fits their context — an AI agent may prefer MCP, a

@@ -215,6 +215,7 @@ standard formats:
 
 - **REST**: OpenAPI 3.x (JSON format)
 - **MCP**: OpenRPC (JSON format)
+- **WebMCP**: OpenRPC (JSON format), as tools registered by the Business's page
 - **A2A**: Agent Card Specification
 - **EP(embedded)**: OpenRPC (JSON format)
 
@@ -1001,6 +1002,14 @@ metadata:
 ```
 
 ### Negotiation Protocol
+
+!!! note "WebMCP"
+    Over [WebMCP](../webmcp.md) there is no Platform profile to negotiate
+    against. The Business negotiated the Buyer-facing session when it served
+    the page, and the capabilities and extensions in force are the ones that
+    page offers. The Platform discovers that contract rather than selecting
+    it, from the `ucp` object every response already carries (Business
+    Requirement 4 below).
 
 #### Platform Requirements
 
@@ -2282,6 +2291,16 @@ receive events as the user interacts with the interface and delegate key user
 actions.
 
 Initiation comes through a `continue_url` that is returned by the business.
+
+### WebMCP
+
+A Business **MAY** register UCP operations as
+[WebMCP](https://github.com/webmachinelearning/webmcp) tools on its own pages,
+so that an agent in the Buyer's browser can call them inside the Buyer's
+session. The page that registers the tools is the endpoint and holds the
+session: requests carry no `meta` and no resource identifiers, and the
+capabilities in force are those the Business offered when it served the page.
+See [WebMCP Transport](../webmcp.md).
 
 ## Standard Capabilities
 

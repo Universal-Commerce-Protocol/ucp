@@ -69,6 +69,7 @@ nav:
                   - MCP: specification/shopping/checkout/mcp.md
                   - A2A: specification/shopping/checkout/a2a.md
                   - Embedded: specification/shopping/checkout/embedded.md
+                  - WebMCP: specification/shopping/checkout/webmcp.md
           - Cart Capability:
               - Overview: specification/shopping/cart/index.md
               - Transports:
@@ -98,6 +99,7 @@ nav:
                   specification/shopping/extensions/return-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
+              - UI Actions: specification/shopping/extensions/ui.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -140,6 +142,7 @@ nav:
                       specification/payment/examples/encrypted-credential-payment-handler.md
       - Signatures: specification/signatures.md
       - Embedded Protocol: specification/embedded-protocol.md
+      - WebMCP Transport: specification/webmcp.md
       - Reference: specification/reference.md
 
 repo_name: UCP on GitHub # Override repo name to be shorter on site header.
@@ -501,6 +504,14 @@ plugins:
               Agent2Agent Protocol (A2A) binding for Checkout Capability,
               detailing transport discovery, agent card profile advertisement,
               and message negotiation flows.
+          - specification/webmcp.md: >-
+              Core WebMCP transport, defining how a business page registers
+              UCP operations as WebMCP tools for in-browser agents, with
+              requests without meta or resource identifiers, and responses
+              and errors without a JSON-RPC envelope.
+          - specification/shopping/checkout/webmcp.md: >-
+              WebMCP binding for Checkout Capability, listing the checkout
+              tools a page registers and their input and output shapes.
           - specification/embedded-protocol.md: >-
               Core Embedded Protocol (EP) transport binding, defining message
               formats, handshake patterns, communication channels, security

@@ -14,7 +14,7 @@
           "properties": {
             "transport": {
               "type": "string",
-              "enum": ["rest", "mcp", "a2a", "embedded"],
+              "enum": ["rest", "mcp", "a2a", "embedded", "webmcp"],
               "description": "Transport protocol for this service binding."
             },
             "endpoint": {
@@ -29,7 +29,7 @@
 
     "platform_schema": {
       "title": "Service (Platform Schema)",
-      "description": "Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST, MCP, and embedded additionally require `schema`.",
+      "description": "Full service declaration for platform-level discovery. All transports require `version`, `spec`, and `transport`. REST, MCP, and embedded additionally require `schema`. WebMCP also requires `schema`, and has no `endpoint`: the page that registers the tools serves them.",
       "allOf": [
         { "$ref": "#/$defs/base" },
         { "required": ["spec"] },
@@ -48,6 +48,10 @@
             },
             {
               "properties": { "transport": { "const": "embedded" } },
+              "required": ["schema"]
+            },
+            {
+              "properties": { "transport": { "const": "webmcp" } },
               "required": ["schema"]
             }
           ]
@@ -79,6 +83,9 @@
                 "transport": { "const": "embedded" },
                 "config": { "$ref": "transports/embedded_config.json" }
               }
+            },
+            {
+              "properties": { "transport": { "const": "webmcp" } }
             }
           ]
         }
@@ -106,6 +113,9 @@
                 "transport": { "const": "embedded" },
                 "config": { "$ref": "transports/embedded_config.json" }
               }
+            },
+            {
+              "properties": { "transport": { "const": "webmcp" } }
             }
           ]
         }

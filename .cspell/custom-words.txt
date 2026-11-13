@@ -214,3 +214,10 @@ mpegurl
 usdz
 vnd
 webm
+webmcp
+webmcp
+webmachinelearning
+toolchange
+navigatesuccess
+currententrychange
+navigations
