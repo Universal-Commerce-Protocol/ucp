@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/ask_operator.json",
+  "name": "dev.ucp.shopping.ask.operator",
+  "title": "Operator Extension",
+  "description": "Extends Common Ask with access to a Business operator within an Ask conversation, preserving conversation continuity and identifying reply authorship. Operators can carry out separately authorized Buyer-requested work while automated Q&A remains read-only.",
+  "$defs": {
+    "participant_type": {
+      "type": "string",
+      "description": "Participant kind. Well-known values: `agent` (automated), `human` (a person). Receivers must tolerate unknown values without treating them as human authorship or operator support.",
+      "examples": ["agent", "human"]
+    },
+    "request_author": {
+      "title": "Query Author",
+      "description": "Query origin asserted by the Platform, not authentication or authority. When absent, the author is `agent`.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/participant_type",
+          "description": "Query authorship. Use `human` only for the Buyer's own words; summaries, paraphrases, and translations are `agent`."
+        }
+      }
+    },
+    "escalation": {
+      "title": "Escalation Request",
+      "description": "Requests help from a Business operator, not permission to act. An empty object requests escalation. Omit when fetching the latest conversation state.",
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "Reason for requesting help, in the Buyer's words where possible."
+        }
+      }
+    },
+    "context": {
+      "title": "Operator Context",
+      "description": "Ask context with optional, provisional Platform-provided hints. Absence means unknown or not provided; the Business may ignore hints. Hints are not consent or authority.",
+      "allOf": [
+        { "$ref": "../common/types/context.json" },
+        {
+          "type": "object",
+          "properties": {
+            "user_available": {
+              "type": "boolean",
+              "description": "Whether the Buyer is currently available for conversation, as observed by the Platform."
+            },
+            "time_zone": {
+              "type": "string",
+              "description": "Buyer's IANA time zone identifier, supplied by the Platform.",
+              "examples": ["America/Toronto", "Europe/Paris"]
+            }
+          }
+        }
+      ]
+    },
+    "conversation": {
+      "title": "Operator Conversation",
+      "description": "Business-issued conversation. Answer readiness, current handler, and answer authorship are independent. Operator support can return to automated Q&A and be requested again on the same id.",
+      "allOf": [
+        { "$ref": "../common/ask.json#/$defs/conversation" },
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "ucp_request": "omit",
+              "description": "Response answer readiness. Well-known values: `open` (no answer pending), `answer_in_progress` (preparing an answer, including accepted requests still waiting for an operator). Absence means `open`. Unknown values halt automatic progression.",
+              "examples": ["open", "answer_in_progress"]
+            },
+            "responder": {
+              "$ref": "#/$defs/participant_type",
+              "ucp_request": "omit",
+              "description": "Current conversation handler: `agent` for automated Q&A, including accepted requests still waiting for an operator; `human` only once a Business operator takes over. Absence means `agent`. Independent of answer readiness and the current answer's author; unknown values never imply operator support."
+            }
+          }
+        }
+      ]
+    },
+    "answer_author": {
+      "title": "Answer Author",
+      "description": "Origin of the current answer, not authentication or authority. When absent, the author is `agent`.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/participant_type",
+          "description": "Answer authorship. Use `human` only for human-authored text; automated pending text is `agent` even while an operator handles the conversation. Unknown values never imply human authorship."
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional author display label, limited to what the Business exposes through its own Buyer-facing channels. Not proof of identity."
+        }
+      }
+    },
+    "answer": {
+      "title": "Operator Answer",
+      "description": "Current Ask answer with independent authorship. Every successful Operator response, including pending and automated replies, requires non-empty plain text. Answer text is not an execution receipt.",
+      "allOf": [
+        { "$ref": "../common/ask.json#/$defs/ask_response/properties/answer" },
+        {
+          "type": "object",
+          "required": ["plain"],
+          "properties": {
+            "plain": {
+              "minLength": 1,
+              "description": "Non-empty plain-text answer."
+            },
+            "author": {
+              "$ref": "#/$defs/answer_author",
+              "description": "Origin of this answer, independent of the current responder. Absence means `agent`."
+            }
+          }
+        }
+      ]
+    },
+    "ask_request": {
+      "title": "Operator Request",
+      "description": "Ask submission with required `query`. A non-empty query submits a new turn regardless of the current responder, including while an answer is pending. To fetch the latest conversation state, send an empty query with an existing Business-issued conversation and no escalation; this adds no turn, consumes no answer, repeats no handoff, and causes no commerce action. An empty query with `escalate` is an escalation request. Protected requests require current authorization.",
+      "allOf": [
+        { "$ref": "../common/ask.json#/$defs/ask_request" },
+        {
+          "type": "object",
+          "properties": {
+            "author": {
+              "$ref": "#/$defs/request_author",
+              "description": "Query origin asserted by the Platform. Absence means `agent`."
+            },
+            "escalate": {
+              "$ref": "#/$defs/escalation",
+              "description": "Requests operator support; an empty object is sufficient. Not permission to act."
+            },
+            "context": {
+              "$ref": "#/$defs/context",
+              "description": "Ask context with optional availability and time-zone hints."
+            },
+            "conversation": {
+              "$ref": "#/$defs/conversation",
+              "description": "Provide a Business-issued conversation to continue it; omit to start a new one."
+            }
+          }
+        }
+      ]
+    },
+    "ask_response": {
+      "title": "Operator Response",
+      "description": "Current conversation state and answer from the Business. Every successful response requires a conversation with id and a non-empty plain answer. Operators release support with `open / agent` on the same id, independently of the current answer's author. Invalid responses do not advance state or prove success; structured capabilities remain authoritative over untrusted answer text.",
+      "allOf": [
+        { "$ref": "../common/ask.json#/$defs/ask_response" },
+        {
+          "type": "object",
+          "required": ["conversation"],
+          "properties": {
+            "conversation": {
+              "$ref": "#/$defs/conversation",
+              "description": "Required Business-issued conversation with id. Stop state retrieval at expires_at when supplied; stopping observation does not cancel separately authorized work."
+            },
+            "answer": {
+              "$ref": "#/$defs/answer",
+              "description": "Current answer with non-empty plain text and independent authorship."
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.common.ask": {
+      "title": "Ask with Operator",
+      "description": "Common Ask composed with Operator's separate request and response shapes, inheriting the parent operations and bindings.",
+      "allOf": [
+        { "$ref": "../common/ask.json" }
+      ],
+      "$defs": {
+        "ask_request": { "$ref": "#/$defs/ask_request" },
+        "ask_response": { "$ref": "#/$defs/ask_response" }
+      }
+    }
+  }
+}
