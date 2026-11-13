@@ -117,6 +117,28 @@ underlying contract.
 Businesses MAY surface a snapshot of the policies that applied at checkout on
 the order. See [Policies](../../overview/index.md#policies) for the underlying contract.
 
+### Discounts
+
+Businesses MAY surface a snapshot of the checkout's `discounts.applied` on the
+order, so the order records which code or automatic discount produced each
+discount in `totals`. Read-only on the order. Entries use the checkout
+[applied discount](../extensions/discount.md) shape, and relate to `totals`
+as they do on checkout. Example `order.discounts`:
+
+<!-- ucp:example schema=shopping/order target=$.discounts -->
+```json
+{
+  "applied": [
+    {
+      "code": "SAVE10",
+      "title": "10% Off Running Shoes",
+      "amount": 300,
+      "allocations": [{ "path": "$.line_items[0]", "amount": 300 }]
+    }
+  ]
+}
+```
+
 ### Adjustments
 
 **Adjustments** are post-order events that exist independently of
