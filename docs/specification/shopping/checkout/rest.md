@@ -237,6 +237,12 @@ supplied resource replaces the existing Checkout session state. The Platform
 new Update Checkout request in that state, it **MUST** leave the Checkout
 unchanged and return the current Checkout with a recoverable error Message.
 
+`platform_reference` is not defined on the update request, so the full
+replacement does not clear it: the Business **MUST** retain the value
+established at Create Checkout, **MUST** ignore a resent value, and **MUST NOT**
+reject the request because of it. See
+[Platform Reference](index.md#platform-reference).
+
 #### Update Buyer Info
 
 All fields in `buyer` are optional, allowing the Platform to progressively build
