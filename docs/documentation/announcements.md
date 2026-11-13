@@ -4,11 +4,22 @@ Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we pos
 
 ______________________________________________________________________
 
+## November 12, 2026: UCP Food: Checkout Capability Draft Spec Release
+
+We are thrilled to announce that the initial draft version of the Food Checkout capability (`dev.ucp.food.checkout`), along with the Fulfillment (`dev.ucp.food.fulfillment`) and Tip (`dev.ucp.food.tip`) extensions, has been merged into the Universal Commerce Protocol repository, marking the formal expansion of UCP into the Food domain.
+
+Developed by the Food Technical Council (DoorDash, Google, Square, Toast, and Uber Eats), this capability establishes the foundational data contracts, state lifecycle, and REST and MCP transport bindings for prepared food and beverage orders across restaurants, cafes, bakeries, food trucks, and more. It standardizes single-establishment order scoping, structured dish customization, adjustable tips, and order-wide delivery or pickup fulfillment (ASAP or scheduled), while menu authority, kitchen state, pricing, and Merchant of Record responsibilities stay with the business.
+
+Explore the [UCP Food Checkout Documentation](https://ucp.dev/draft/specification/food/checkout/), and read the full announcement in [GitHub Discussion #1077](https://github.com/Universal-Commerce-Protocol/ucp/discussions/1077).
+
+______________________________________________________________________
+
 ## September 25, 2026: UCP Lodging: Booking Capability Draft Spec Release
 
 We are excited to announce that the initial draft version of the Lodging Booking capability (`dev.ucp.lodging.booking`) has been merged into the Universal Commerce Protocol repository, marking the formal expansion of UCP into the Lodging domain. Developed by the Lodging Technical Council (Amadeus, Booking.com, Expedia, Google, Hilton, Marriott, and Trip.com) and open-source contributors, this capability unlocks foundational hotel reservation flows including real-time pricing and availability checks, guest registration, complex payment schedules, and cross-vertical primitive interoperability.
 
 Explore the [UCP Lodging Documentation](https://ucp.dev/draft/specification/lodging/booking/), and read the full announcement in [GitHub Discussion #864](https://github.com/Universal-Commerce-Protocol/ucp/discussions/864).
+
 ______________________________________________________________________
 
 ## September 2, 2026: Payments Technical Council (Payments TC) Formed
