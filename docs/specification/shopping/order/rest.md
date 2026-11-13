@@ -233,6 +233,13 @@ Returns the current-state snapshot of an order.
 
 {{ header_requirements('ucp_agent') }}
 
+* **UCP-Order-Token**: Optional. Carries an order credential issued at
+    checkout completion (see [Order Access](index.md#order-access)). Omit when
+    the request is authorized by platform credentials or a user identity token.
+    When the request is signed, the signature **MUST** cover `ucp-order-token`.
+    Responses to a request carrying this header **MUST** set
+    `Cache-Control: no-store`.
+
 ## Message Signing
 
 Request and response signatures follow the
