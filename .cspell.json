@@ -12,7 +12,8 @@
     "**/*.svg",
     ".gitignore",
     ".pre-commit-config.yaml",
-    "**/*.css"
+    "**/*.css",
+    "ask/eval/questions.json"
   ],
   "ignoreRegExpList": [
     "src\\s*=\\s*(\"[^\"]*\"|'[^']*')",
