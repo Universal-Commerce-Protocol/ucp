@@ -40,14 +40,14 @@
       "type": "string",
       "description": "ISO 4217 currency code of every amount on the subscription."
     },
-    "origin": {
+    "initial_order": {
       "type": "object",
       "description": "The Order that started the subscription. Present when an Order started it and the Business can identify that Order.",
       "required": [
-        "order_id"
+        "id"
       ],
       "properties": {
-        "order_id": {
+        "id": {
           "type": "string",
           "description": "ID of the Order that started the subscription."
         },

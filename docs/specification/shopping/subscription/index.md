@@ -54,9 +54,9 @@ A subscription has three main components:
 
 **Orders** — what the agreement has produced, and what comes next:
 
-* `origin` — the Order that started the subscription
-* `orders` — the Orders that belong to it: the origin Order and each recurring
-  Order placed since
+* `initial_order` — the Order that started the subscription
+* `orders` — the Orders that belong to it: the initial Order and each
+  recurring Order placed since
 * `upcoming_orders` — the recurring orders the Business plans to place; they
   are not Orders yet
 
@@ -123,15 +123,15 @@ Three fields relate a subscription to orders:
 
 | Field | States |
 | :--- | :--- |
-| `origin` | The Order, and its line items, that started the subscription. |
+| `initial_order` | The Order, and its line items, that started the subscription. |
 | `orders` | The Orders that belong to the subscription. |
 | `upcoming_orders` | The recurring orders the Business plans to place. They are not Orders yet. |
 
-**Origin.** `origin.order_id` names the Order that started the subscription,
-and `origin.line_item_ids` the Order line items it was started from, each of
-which carries the `purchase_option` agreed to at checkout. `origin` is absent
-when no Order started the subscription, or when the Business cannot identify
-it.
+**Initial Order.** `initial_order.id` names the Order that started the
+subscription, and `initial_order.line_item_ids` the Order line items it was
+started from, each of which carries the `purchase_option` agreed to at
+checkout. `initial_order` is absent when no Order started the subscription, or
+when the Business cannot identify it.
 
 **Orders.** A recurring order is an Order in its own right. `orders` lists the
 Orders that belong to the subscription, most recent first: each recurring
@@ -169,9 +169,9 @@ follows.
 ### Messages
 
 A Business uses `messages[]` to tell the buyer what the subscription entity
-does not state, for example that a payment needs the buyer's attention. Such a
-message says what the buyer needs to know and directs the buyer to
-`permalink_url` to act on it. This capability defines no message codes.
+does not state. Such a message says what the buyer needs to know and directs
+the buyer to `permalink_url` to act on it. This capability defines no message
+codes.
 
 ## Schema
 
@@ -210,7 +210,7 @@ the next one.
     "status": "active",
     "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
     "currency": "USD",
-    "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+    "initial_order": { "id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
     "line_items": [
       {
         "id": "sli_1",
@@ -263,8 +263,8 @@ the next one.
 ### A subscription with no Order yet
 
 A subscription the Business set up outside a checkout, whose first order has
-not been placed. No Order started it, so `origin` is absent; no Order belongs
-to it yet, so `orders` is absent; `upcoming_orders` states the first.
+not been placed. No Order started it, so `initial_order` is absent; no Order
+belongs to it yet, so `orders` is absent; `upcoming_orders` states the first.
 
 <!-- ucp:example schema=shopping/subscription op=get_subscription target=$.subscription -->
 ```json
@@ -301,24 +301,6 @@ to it yet, so `orders` is absent; `upcoming_orders` states the first.
 }
 ```
 
-### A payment that needs attention
-
-The payment for a recurring order did not go through. The Business says so in
-`messages[]` and directs the buyer to the subscription's page; the `code` is
-the Business's own.
-
-<!-- ucp:example schema=shopping/subscription op=get_subscription target=$.messages -->
-```json
-[
-  {
-    "type": "warning",
-    "code": "payment_needs_attention",
-    "path": "$.subscription",
-    "content": "We could not collect payment for your December 2 order. Update your payment method at business.example.com/account/subscriptions/sub_8f2k1 to keep your subscription active."
-  }
-]
-```
-
 ### A buyer's subscriptions
 
 With buyer authorization and no filter, the list holds the buyer's
@@ -349,7 +331,7 @@ outside a checkout. One policy states the terms both share.
       "status": "active",
       "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
       "currency": "USD",
-      "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+      "initial_order": { "id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
       "line_items": [ ... ],
       "orders": [
         { "id": "ord_9c41d7", "permalink_url": "https://business.example.com/orders/9c41d7" },
@@ -406,7 +388,7 @@ returns the same subscription to a caller with buyer authorization.
       "status": "active",
       "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
       "currency": "USD",
-      "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+      "initial_order": { "id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
       "line_items": [ ... ],
       "orders": [ ... ],
       "upcoming_orders": [ ... ]
@@ -488,7 +470,7 @@ caller:
 | Buyer authorization | Subscriptions owned by the buyer, subject to the granted OAuth scopes |
 
 **Platform credentials** (API key, signatures, OAuth client credentials) -
-Businesses **MAY** allow access to subscriptions whose `origin.order_id` names
+Businesses **MAY** allow access to subscriptions whose `initial_order.id` names
 an Order the Platform originated. The Platform completed the checkout in which
 the buyer agreed to the recurring orders, and is retrieving the latest state
 of an agreement it already has context for.
@@ -576,7 +558,7 @@ to the response root, for example `$.subscriptions[0]`.
 {{ schema_fields('types/subscription_filters', 'shopping/subscription') }}
 
 `filters.order_id` narrows the list to the subscriptions an Order belongs to:
-the ones it started (their `origin.order_id`) and the ones it was placed under
+the ones it started (their `initial_order.id`) and the ones it was placed under
 as a recurring Order (an entry in their `orders`).
 
 An empty `subscriptions` array is a successful response. With

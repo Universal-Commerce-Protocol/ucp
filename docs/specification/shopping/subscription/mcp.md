@@ -153,7 +153,7 @@ the current-state snapshot of a subscription.
             "status": "active",
             "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
             "currency": "USD",
-            "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+            "initial_order": { "id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
             "line_items": [ ... ],
             "orders": [
               { "id": "ord_9c41d7", "permalink_url": "https://business.example.com/orders/9c41d7" },
@@ -276,7 +276,7 @@ Returns the subscriptions the caller may access.
               "status": "active",
               "permalink_url": "https://business.example.com/account/subscriptions/sub_8f2k1",
               "currency": "USD",
-              "origin": { "order_id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
+              "initial_order": { "id": "ord_8f3e2a", "line_item_ids": ["li_1"] },
               "line_items": [ ... ],
               "orders": [ ... ],
               "upcoming_orders": [ ... ]
