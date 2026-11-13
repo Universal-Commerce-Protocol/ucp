@@ -366,6 +366,94 @@ def test_method_tables_name_ucp_field(macros: dict) -> None:
   )
 
 
+def test_webhook_body_resolves_as_response(macros: dict) -> None:
+  """A webhook body is Business-authored, so it resolves as a response.
+
+  `ucp_request`/`ucp_response` describe who authors a field, not which HTTP
+  message carries it. OpenAPI `paths` are Platform-to-Business requests;
+  `webhooks` are Business-to-Platform deliveries. The same entity, with one
+  `ucp_request: omit` field, must drop that field under `paths` and keep it
+  under `webhooks`. Checked on a synthetic entity so the result does not
+  depend on which real schemas currently carry request annotations.
+  """
+  main = sys.modules["main"]
+  entity = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.test/entity.json",
+    "title": "Synthetic Entity",
+    "type": "object",
+    "required": ["id", "total"],
+    "properties": {
+      "id": {"type": "string", "description": "Identifier."},
+      "total": {
+        "type": "integer",
+        "description": "Business-computed.",
+        "ucp_request": "omit",
+      },
+    },
+  }
+
+  def _post(operation_id: str) -> dict:
+    return {
+      "post": {
+        "operationId": operation_id,
+        "requestBody": {
+          "content": {"application/json": {"schema": {"$ref": "entity.json"}}}
+        },
+        "responses": {"200": {"description": "ok"}},
+      }
+    }
+
+  spec = {
+    "openapi": "3.1.0",
+    "info": {"title": "synthetic", "version": "1"},
+    "paths": {"/x": _post("path_op")},
+    "webhooks": {"event": _post("hook_op")},
+  }
+  original = main.OPENAPI_DIR
+  with tempfile.TemporaryDirectory() as tmp:
+    Path(tmp, "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+    Path(tmp, "entity.json").write_text(json.dumps(entity), encoding="utf-8")
+    main.OPENAPI_DIR = Path(tmp)
+    try:
+      path_table = macros["method_fields"](
+        "path_op", "spec.json", "reference", "request"
+      )
+      hook_table = macros["method_fields"](
+        "hook_op", "spec.json", "reference", "request"
+      )
+    finally:
+      main.OPENAPI_DIR = original
+
+  _check(
+    "path_body_omits_request_omitted_field",
+    _type_cell(path_table, "total") is None,
+    f"got {path_table!r}",
+  )
+  _check_eq(
+    "webhook_body_keeps_request_omitted_field",
+    _type_cell(hook_table, "total"),
+    "integer",
+  )
+
+  # The real Order webhook carries the full snapshot: every top-level Order
+  # field renders in its Inputs table, including the ones that are response
+  # only on Cart and Checkout.
+  order_hook = macros["method_fields"](
+    "order_event_webhook", "shopping/rest.openapi.json", "shopping/order"
+  )
+  missing = [
+    f
+    for f in ("currency", "totals", "policies", "attribution")
+    if _type_cell(order_hook, f) is None
+  ]
+  _check(
+    "order_event_webhook_inputs_list_full_snapshot",
+    not missing,
+    f"missing rows: {missing}",
+  )
+
+
 def _strip_non_root_ids(node: object, *, is_root: bool = True) -> object:
   """Simulate ucp-schema 2.0.0 --bundle stripping non-root `$id`s."""
   if isinstance(node, dict):
@@ -1785,6 +1873,7 @@ def main() -> int:
   test_bundled_whole_file_and_inherited_refs_link_reference_section(macros)
   test_restore_fragment_refs_without_nested_ids()
   test_method_tables_name_ucp_field(macros)
+  test_webhook_body_resolves_as_response(macros)
   test_loyalty_catalog_lookup_one_of_all_of_renders_prose(macros)
   test_recursive_schema_and_all_of_constraint_branch(macros)
   test_fragment_ref_real_anchor_vs_title_fallback(macros)

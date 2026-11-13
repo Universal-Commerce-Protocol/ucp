@@ -888,19 +888,37 @@ def _load_openapi(file_name: str) -> dict[str, Any]:
 
 def _find_operation(
   data: dict, operation_id: str, include_webhooks: bool
-) -> tuple[dict | None, list]:
-  """Find an operation by id; return it with its path-level parameters."""
-  sections = [data.get("paths", {})]
+) -> tuple[dict | None, list, bool]:
+  """Find an operation by id.
+
+  Returns the operation, its path-level parameters, and whether it was
+  declared under `webhooks` rather than `paths`.
+  """
+  sections = [(data.get("paths", {}), False)]
   if include_webhooks:
-    sections.append(data.get("webhooks", {}))  # OpenAPI 3.1+
-  for section in sections:
+    sections.append((data.get("webhooks", {}), True))  # OpenAPI 3.1+
+  for section, is_webhook in sections:
     for path_item in section.values():
       for op_data in path_item.values():
         if isinstance(op_data, dict) and (
           op_data.get("operationId") == operation_id
         ):
-          return op_data, path_item.get("parameters", [])
-  return None, []
+          return op_data, path_item.get("parameters", []), is_webhook
+  return None, [], False
+
+
+def _operation_directions(is_webhook: bool) -> tuple[str, str]:
+  """Resolution directions for an operation's body and its response.
+
+  `ucp_request`/`ucp_response` describe which party authors a field, not
+  which HTTP message carries it. OpenAPI `paths` are requests the client
+  (the Platform) sends to the provider (the Business), so their body is
+  resolved as a request and their response as a response. OpenAPI
+  `webhooks` are requests the provider sends to the client: the body is
+  Business-authored and resolves as a response, and the acknowledgment
+  resolves as a request. Section headings keep their transport meaning.
+  """
+  return ("response", "request") if is_webhook else ("request", "response")
 
 
 def _security_header_rows(data: dict, operation: dict) -> list[dict]:
@@ -2949,13 +2967,14 @@ def define_env(env):
       ) from e
 
     # 1. Find the Operation Object by ID (search paths first, then webhooks).
-    operation, path_parameters = _find_operation(
+    operation, path_parameters, is_webhook = _find_operation(
       data, operation_id, include_webhooks=True
     )
     if not operation:
       raise ValueError(
         f"Operation ID `{operation_id}` not found{get_error_context()}."
       )
+    body_io_type, ack_io_type = _operation_directions(is_webhook)
 
     # 2. Extract Request Schema.
     req_content = operation.get("requestBody", {}).get("content", {})
@@ -3041,7 +3060,7 @@ def define_env(env):
         combined_schema = param_schema or req_schema
 
       if combined_schema:
-        req_ctx = dataclasses.replace(base_ctx, io_type="request")
+        req_ctx = dataclasses.replace(base_ctx, io_type=body_io_type)
         output += "**Inputs**\n\n"
         output += (
           _render_table_from_schema(
@@ -3060,7 +3079,7 @@ def define_env(env):
       if res_schema:
         if io_type is None:
           output += "**Output**\n\n"
-        res_ctx = dataclasses.replace(base_ctx, io_type="response")
+        res_ctx = dataclasses.replace(base_ctx, io_type=ack_io_type)
         output += (
           _render_table_from_schema(
             res_schema,
@@ -3127,7 +3146,7 @@ def define_env(env):
       ) from e
 
     # 1. Find the Operation Object by ID.
-    operation, path_parameters = _find_operation(
+    operation, path_parameters, _ = _find_operation(
       data, operation_id, include_webhooks=False
     )
     if not operation:
