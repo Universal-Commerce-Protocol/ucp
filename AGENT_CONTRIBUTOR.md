@@ -12,6 +12,7 @@ You are an AI agent contributing directly to this repository (`Universal-Commerc
 Adhere strictly to the following parameters when editing the repository:
 
 * **Schema Source of Truth:** Edit JSON schemas only inside the `source/` directory (see `docs/documentation/schema-authoring.md`). Always preserve `ucp_*` annotations.
+* **Schema Transitions (Breaking Changes & Deprecations):** Rather than changing field visibility (`required`, `optional`, `omit`) or removing a field directly, stage breaking field changes and deprecations inside `ucp_request` / `ucp_response` using a [`transition` annotation](https://github.com/Universal-Commerce-Protocol/ucp-schema#schema-transitions) (`{"transition": {"from": "<current>", "to": "<target>", "description": "<reason>"}}`).
 * **PR Titles & Commit Messages:** Follow Conventional Commits (e.g., `feat: add transaction extension`, `docs: update guide`). Use `!` for breaking changes (e.g., `feat!: update profile schema`).
 * **Documentation Navigation:** Sync any MkDocs navigation additions (`mkdocs.yml` `nav`) with `plugins.llmstxt.sections` so new pages remain discoverable via `llms.txt`.
 * **JSON Examples:** Annotate every fenced `json` code block in `docs/**/*.md` with `<!-- ucp:example schema=... -->` or `<!-- ucp:example skip reason="..." -->`.
