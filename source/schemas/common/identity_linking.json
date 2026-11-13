@@ -47,6 +47,10 @@
                 "format": "uri",
                 "description": "Base URL for authorization server metadata discovery. Platforms resolve metadata via RFC 8414 (/.well-known/oauth-authorization-server) with OIDC fallback (/.well-known/openid-configuration) on 404."
               },
+              "client_id": {
+                "type": "string",
+                "description": "Optional OAuth 2.0 client identifier (or Client ID Metadata Document HTTPS URI per draft-ietf-oauth-client-id-metadata-document) that identifies the business as a relying party at this identity provider. Used by platforms as the 'audience' parameter in RFC 8693 token exchange when the identity provider indexes relying party registrations, user consent, or pairwise subject identifiers by client_id rather than by the business's authorization server issuer URI."
+              },
               "required_claims": {
                 "type": "array",
                 "items": { "type": "string" },
