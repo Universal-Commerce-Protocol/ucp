@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/correspondence.json",
+  "title": "Correspondence",
+  "description": "States which earlier record this one continues, and whether the values carried across that boundary agree with it. A transaction is a chain of records that should match: what was offered, what was ordered, what was quoted, what was charged, what settled, what was delivered. Most failures are a disagreement between two adjacent links — a quote that moved before checkout, a total that grew between checkout and capture, a retry that produced a second payment. Detecting that class of failure requires no model and no risk assessment; it requires both records to exist and to be matchable, which today they frequently are not. This object records the link so the comparison can be made, by either party or by a third party resolving a dispute later. It is descriptive: it reports a comparison, asserts nothing about who is responsible, and MUST NOT be read as an allegation.",
+  "type": "object",
+  "properties": {
+    "derived_from": {
+      "type": "object",
+      "description": "The record this one continues. Omit where there is no prior record, which is itself informative: the first link in a chain has nothing to agree with.",
+      "properties": {
+        "record_type": {
+          "type": "string",
+          "description": "Kind of record. Open string; the well-known values follow the order of a transaction.",
+          "examples": [
+            "instruction",
+            "offer",
+            "cart",
+            "checkout",
+            "authorization",
+            "capture",
+            "settlement",
+            "fulfillment",
+            "adjustment"
+          ]
+        },
+        "record_id": {
+          "type": "string",
+          "description": "Identifier of that record, as issued by the party that produced it."
+        },
+        "issued_by": {
+          "type": "string",
+          "description": "Role that produced the prior record, using the well-known role values (`principal`, `platform`, `business`, `payment_service_provider`, and so on). Two records can share an identifier across parties; this disambiguates which one is meant."
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp at which the prior record was observed by the party recording this correspondence, which may differ from when it was issued. The gap is where stale quotes live."
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "agrees",
+        "diverges",
+        "unverifiable"
+      ],
+      "description": "Result of comparing this record against the one it was derived from. `agrees` means every compared value matched. `diverges` means at least one did not, whether or not that divergence is a problem: a legitimately added shipping fee diverges. `unverifiable` means the comparison could not be made, most often because the prior record was not available to the party recording this one. `unverifiable` is the honest and frequently correct answer, and a reader MUST NOT treat it as equivalent to `agrees`."
+    },
+    "compared": {
+      "type": "array",
+      "description": "The values compared across the boundary. Present when a comparison was made. Recording both figures lets a third party recompute the result rather than trust it; recording which fields were compared bounds what the result covers, since a correspondence reporting `agrees` over a field list that omits the total says less than it appears to.",
+      "items": {
+        "type": "object",
+        "required": [
+          "field"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Path to the compared field in this record, expressed as a JSON Pointer (RFC 6901) — for example `/totals/grand_total`."
+          },
+          "value": {
+            "type": "string",
+            "description": "Value in this record, as a string to avoid the precision loss that comparing monetary amounts as numbers invites."
+          },
+          "prior_value": {
+            "type": "string",
+            "description": "Corresponding value in the record this one was derived from."
+          },
+          "agrees": {
+            "type": "boolean",
+            "description": "Whether these two values matched under the comparison the recording party applied. Present per field so a divergence can be located rather than only reported."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "divergence": {
+      "type": "object",
+      "description": "Detail of the disagreement, present when `status` is `diverges`. A divergence is not by itself a fault; an expected one is recorded the same way as an unexpected one, and a reader can only tell them apart by looking.",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "What disagreed, using the same well-known values as an adjustment's cause, so a divergence observed at a boundary and a cause determined afterwards can be joined. Open string.",
+          "examples": [
+            "amount_divergence",
+            "duplicate_execution",
+            "intent_mismatch",
+            "authority_exceeded",
+            "fulfillment_mismatch",
+            "terms_not_honored",
+            "availability_failure",
+            "undetermined"
+          ]
+        },
+        "expected": {
+          "type": "boolean",
+          "description": "Whether the recording party considers this divergence an ordinary part of the transaction — tax and shipping added at checkout, a partial capture, an agreed substitution. An unexpected divergence is the one worth attention. This is the recording party's judgment and is not binding on anyone else."
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "higher",
+            "lower",
+            "not_applicable"
+          ],
+          "description": "For a quantitative divergence, whether this record's value exceeded or fell short of the prior one. Recorded per correspondence because the distribution of directions across many transactions carries information a single transaction cannot: honest deviation is expected to scatter both ways."
+        },
+        "delta": {
+          "type": "string",
+          "description": "Signed difference for a quantitative divergence, as a string in the units of the compared field."
+        }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Stable key identifying the logical action this record represents, so that a repeat of it can be recognized as the same action rather than a new one. Where actions are retried automatically and settlement failures are common, an honest retry and a duplicate execution are otherwise indistinguishable after the fact."
+    },
+    "recorded_by": {
+      "type": "string",
+      "description": "Role that performed the comparison and recorded this result, using the well-known role values. Each party sees a different slice of the chain, so the same boundary may be recorded differently by two of them, and neither is necessarily wrong."
+    }
+  },
+  "additionalProperties": false
+}
