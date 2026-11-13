@@ -54,7 +54,7 @@ like loyalty points MUST convert each instrument's contribution to the
 checkout currency.
 
 Instruments are submitted in **allocation priority order** — the first
-instrument gets first claim on the checkout total, the second gets next
+instrument gets first claim on the [first charge](#later-charges), the second gets next
 claim, and so on. The business MAY process payment authorizations in
 any order for operational reasons (e.g., gift cards before open-loop
 cards to minimize reversal costs); array order governs amount
@@ -102,6 +102,24 @@ an assignment of each submitted instrument to exactly one group such that
 The business MAY use any algorithm to find such an assignment;
 if any valid assignment exists, the combination matches.
 
+#### Schedule type
+
+A group MAY carry `schedule_type`, in the vocabulary of a [payment
+schedule](terms.md#timing-class)'s `type`. An instrument of a type listed in
+such a group MUST NOT be charged against a schedule of any other type, and a
+business MUST reject a submission whose allocation would do so. `immediate` is
+the only value with defined meaning: a type listed in an `immediate` group can
+be charged at completion only. A group without `schedule_type` carries no such
+restriction.
+
+This is how a business offers an instrument it can charge only at completion
+— a gift card without a balance hold, a voucher — on a checkout where part of
+the payment is due later. The platform MAY state an `amount` on it, within
+what is due at completion. Submitted without one, it contributes up to the
+remaining first charge, as any open-amount instrument does, and is never
+charged after completion; the rest of the payment falls to the other
+instruments.
+
 #### Example Configuration
 
 A business that supports (a) a card with up to 2 redeemables, (b) up to 5
@@ -142,6 +160,50 @@ Reading each combination:
 2. **Gift cards only**: 1 to 5 gift cards with no other instrument types.
 3. **Two cards**: Exactly 2 credit/debit cards.
 
+#### Per-checkout combinations
+
+The combinations a business accepts can depend on the checkout: a selected
+[payment term](terms.md) that defers part of the payment changes which
+instruments the business accepts, and an extension may require an instrument
+the business can charge after completion.
+As a payment handler's response configuration is resolved for the checkout, a
+business MAY return the split payments capability in a checkout response's
+`ucp.capabilities` with a `config` whose `allowed_combinations` are resolved
+for that checkout. When present, they are authoritative for that checkout in
+place of the profile's, and admit only combinations the profile's also admits:
+the profile remains the upper bound, and a checkout can only narrow it. The
+platform MUST re-read them on every response.
+
+A deposit-and-balance stay, for example, resolves to "up to two gift cards
+toward today's deposit, and exactly one card":
+
+<!-- ucp:example schema=shopping/checkout extract=$.ucp target=$.ucp -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.shopping.checkout": [{ "version": "{{ ucp_version }}" }],
+      "dev.ucp.common.payment.split_payments": [
+        {
+          "version": "{{ ucp_version }}",
+          "config": {
+            "allowed_combinations": [
+              [
+                { "types": ["gift_card"], "max": 2, "schedule_type": "immediate" },
+                { "types": ["card"], "min": 1, "max": 1 }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "payment_handlers": { ... }
+  }
+}
+```
+
 ## Using Split Payments
 
 ### Instrument Processing Model
@@ -151,11 +213,34 @@ Reading each combination:
 2. The business MUST derive a contribution for each instrument, in
    array order:
    * **Specified-amount**: the business MUST authorize for the stated
-     `amount`.
+     `amount`, toward the first charge (see [Later charges](#later-charges)).
    * **Open-amount**: the business determines the
      contribution — typically the instrument's full available balance,
-     up to the remaining checkout total after all prior contributions.
+     up to the remaining first charge after all prior contributions.
      A zero available balance is a valid $0 contribution, not a failure.
+3. Where an extension defines charges after the first, the business
+   funds them as [Later charges](#later-charges) defines.
+
+### Later charges
+
+The **first charge** is what the checkout collects first: the checkout
+total, or, where a [payment term](terms.md) is selected, its first payment.
+An extension can define charges that come after it — a payment term's second or third
+schedules, or recurring orders that follow a purchase. The rules below apply
+only where such a later charge exists; otherwise nothing here applies.
+
+* A stated `amount` applies to the **first charge only**, and the sum of
+  stated amounts MUST NOT exceed it. A stated amount never reaches a later
+  charge. On a checkout whose total is 0 — a free trial period before a
+  subscription's first recurring order — the first charge is 0, so no
+  stated amount above 0 is valid: the recurring orders are later charges and
+  are paid as the next rule states.
+* Later charges are paid by the instruments submitted **without** an
+  `amount` and not assigned to an [`immediate` group](#schedule-type), in
+  array order, allocated as the first charge is: each takes up to what
+  remains of the charge. A submission with no such instrument, where a later
+  charge exists, MUST be rejected with `payment_failed` and `path` set to
+  `$.payment.instruments`.
 
 ### Error Handling
 
@@ -217,17 +302,23 @@ Error conditions:
 * If any instrument cannot be processed (invalid credentials, fraud flag,
   hard decline, expired, insufficient funds), the business MUST return an error. For
   open-amount instruments, a zero available balance is not a failure.
-* If the checkout total cannot be reached after applying all submitted
+* If the first charge cannot be reached after applying all submitted
   instruments, the business MUST return an error.
-* If the sum of all specified `amount` values exceeds the
-  checkout total, the business MUST return an error.
-* If the submitted instruments did not match any valid `allowed_combinations`, the business MUST return an error.
+* If the sum of all specified `amount` values exceeds the first charge —
+  the checkout total, or the selected payment term's first payment — the
+  business MUST return an error.
+* If a later charge exists and no submitted instrument can pay it (see
+  [Later charges](#later-charges)), the business MUST return an error.
+* If the submitted instruments did not match any valid `allowed_combinations`
+  — those resolved for the checkout where the business returns them, the
+  profile's otherwise — the business MUST return an error.
 
 ### Response: Actual Charges
 
 On the checkout response, the business MUST set `amount` on every
 instrument that was authorized or charged, reflecting the actual
-contribution. For open-amount instruments (submitted without `amount`),
+contribution to the [first charge](#later-charges). For open-amount
+instruments (submitted without `amount`),
 the business MUST derive and report the actual contribution. The
 business MUST omit `amount` on all other instruments (e.g., a
 provisional authorization that was voided when a later instrument
@@ -434,6 +525,141 @@ credit card covers the remaining $45.
 The first gift card had a $25 balance (charged in full). The second gift
 card had a $0 balance — this is not an error, it simply contributes
 nothing. The credit card covers the remaining $75.
+
+### Deposit Now, Balance Later: Gift Card Today, Card at Check-in
+
+> "Put my gift card toward tonight's deposit; the card pays the rest at
+> check-in."
+
+A $100 stay under a [payment term](terms.md) of $25 due at completion and
+$75 due at check-in. The business resolved the combinations for this checkout
+as shown under [Per-checkout combinations](#per-checkout-combinations): gift
+cards in an `immediate` group, exactly one card.
+
+**Inbound:**
+
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gc_1",
+        "handler_id": "handler_gc",
+        "type": "gift_card",
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
+        "amount": 2500
+      },
+      {
+        "id": "pi_card_1",
+        "handler_id": "handler_card",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
+      }
+    ]
+  }
+}
+```
+
+**Outbound (completed checkout):**
+
+<!-- ucp:example schema=shopping/checkout extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_gc_1",
+        "handler_id": "handler_gc",
+        "type": "gift_card",
+        "credential": { "type": "gift_card", "token": "gc_abc123" },
+        "amount": 2500
+      },
+      {
+        "id": "pi_card_1",
+        "handler_id": "handler_card",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "amount": 0
+      }
+    ]
+  }
+}
+```
+
+The gift card pays the $25 due at completion and is never charged again.
+The card contributes nothing today and is charged the $75 balance at
+check-in. Had the platform stated `"amount": 5000` on the gift card, the
+business would have rejected the submission (see [Schedule
+type](#schedule-type)). Submitted without an `amount`, the gift card would
+have contributed up to its balance toward the $25, and still never been
+charged at check-in.
+
+### Deposit Now, Balance Later: Two Cards
+
+> "Put the deposit on this card; the other card covers the balance."
+
+A $75 order under a [payment term](terms.md) of $25 due at completion and
+$50 due on October 16. Both instruments are cards the business can charge on
+either date, so neither is in an `immediate` group; the combination admits
+two cards.
+
+**Inbound:**
+
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_card_1",
+        "handler_id": "handler_card",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "amount": 2500
+      },
+      {
+        "id": "pi_card_2",
+        "handler_id": "handler_card",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_mc_yyyy" }
+      }
+    ]
+  }
+}
+```
+
+**Outbound (completed checkout):**
+
+<!-- ucp:example schema=shopping/checkout extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_card_1",
+        "handler_id": "handler_card",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "amount": 2500
+      },
+      {
+        "id": "pi_card_2",
+        "handler_id": "handler_card",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_mc_yyyy" },
+        "amount": 0
+      }
+    ]
+  }
+}
+```
+
+The first card's stated amount pays the $25 due at completion. The balance
+is a later charge, paid by the instruments submitted without an amount: the
+second card, charged $50 on October 16. Had the platform stated `"amount": 3000` on the first
+card, the business would have rejected the submission: a stated amount
+applies to the first charge only, and $30 exceeds the $25 due at completion.
 
 ### Partial Failure with Recovery
 
