@@ -11,7 +11,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Option name (e.g., 'Size', 'Color')."
+      "description": "Option name as displayed to the buyer, in the response language (e.g., 'Size', 'Color', 'Colour')."
+    },
+    "key": {
+      "type": "string",
+      "description": "Stable, language-independent identifier for what this option varies, so Platforms can recognize the same option across Businesses and languages. Well-known values: `color`, `size`, `gender`, `age_group`, `material`, `pattern`. Platforms MUST tolerate unknown values. Unique within a product's `options`."
     },
     "values": {
       "type": "array",
