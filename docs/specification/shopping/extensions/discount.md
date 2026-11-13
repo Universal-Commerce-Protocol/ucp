@@ -313,7 +313,10 @@ with allocations to shipping/fees, contribute to `discount`.
 | Order-level discount | `totals[type=discount]`                    |
 
 **Invariant:** `totals[type=items_discount].amount` equals
-`sum(line_items[].totals[type=items_discount].amount)`.
+`sum(line_items[].totals[type=items_discount].amount)`, summed over lines without
+`parent_id` only — line items carrying `parent_id` are a breakdown of their parent
+and MUST NOT be counted (see
+[Nested Line Items](../checkout/index.md#nested-line-items)).
 
 The `discounts.applied` array shows **what** was applied. The `totals[]` and
 `line_items[].totals[]` show **where** and **how much**.

@@ -37,7 +37,7 @@
     },
     "parent_id": {
       "type": "string",
-      "description": "Parent line item identifier for any nested structures.",
+      "description": "Identifier of the parent line item this entry is a component of — parent and components together form a bundle. Component totals are a breakdown of the parent's totals, never additive; aggregate totals count lines without parent_id only. Businesses are authoritative for component structure and line items carrying this field are ignored in requests.",
       "ucp_request": {
         "create": "omit",
         "update": "optional"
