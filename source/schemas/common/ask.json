@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/ask.json",
+  "name": "dev.ucp.common.ask",
+  "title": "Ask",
+  "description": "Natural-language Q&A with a Business. A Platform, on behalf of the Buyer, asks a free-form question about the Business's resources, policies, and services and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured commerce capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and Business-specific facts and knowledge not exposed by other capabilities. Optionally pass identifiers to ground the answer in Business resources across commerce domains.",
+  "type": "object",
+  "$defs": {
+    "conversation": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Opaque, business-issued conversation identifier."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp after which the conversation context may be discarded. Optional."
+        }
+      }
+    },
+    "ask_request": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Natural-language question."
+        },
+        "conversation": {
+          "$ref": "#/$defs/conversation",
+          "description": "Provide a conversation to continue it on a follow-up; omit to start a new one."
+        },
+        "ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional identifiers that ground the question in any Business resource. A Business SHOULD accept its own Global IDs (GIDs) and MAY accept recognized secondary identifiers such as SKU, handle, or URL. GIDs self-describe to the Business; a Platform may send them as opaque grounding references. Examples include a product, location, cart, order, or booking."
+        },
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
+        }
+      }
+    },
+    "ask_response": {
+      "type": "object",
+      "required": ["ucp", "answer"],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_ask_schema"
+        },
+        "answer": {
+          "allOf": [
+            { "$ref": "types/description.json" },
+            {
+              "type": "object",
+              "required": ["plain"]
+            }
+          ],
+          "description": "Answer provided by the Business. Plain text is required; Markdown and HTML are optional alternative encodings."
+        },
+        "conversation": {
+          "$ref": "#/$defs/conversation",
+          "description": "Business-issued conversation for multi-turn continuation. When returned, the business SHOULD retain its history until `expires_at` (or per its own policy) so a follow-up with the same `id` builds on it. An unresolved `id` starts a new conversation and is noted in `messages`."
+        },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "types/link.json" },
+          "description": "Optional links and references related to the answer. When a link refers to an addressable UCP resource, the Business SHOULD include its GID in the link's `id`."
+        },
+        "messages": {
+          "type": "array",
+          "items": { "$ref": "types/message.json" },
+          "description": "Errors, warnings, or informational messages about the answer or its grounding."
+        }
+      }
+    }
+  }
+}

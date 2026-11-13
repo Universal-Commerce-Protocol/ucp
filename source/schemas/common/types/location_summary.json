@@ -21,6 +21,14 @@
       "$ref": "postal_address.json",
       "description": "Physical address of the location.",
       "ucp_request": "omit"
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "media.json"
+      },
+      "description": "Location media assets (e.g., images, logos, hero banners). First item is the featured media for presentation.",
+      "ucp_request": "omit"
     }
   }
 }

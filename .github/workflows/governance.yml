@@ -1,32 +1,56 @@
+#   Copyright 2026 UCP Authors
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
 ---
 name: PR Governance
 
-on:
+# pull_request_target is required so the validator can read team memberships via
+# ORG_READ_TOKEN on PRs from forks and post the Governance / Approvals commit
+# status, while workflow_run re-evaluates when a review is submitted. No
+# PR-authored code is checked out or executed: the reusable workflow only reads
+# PR metadata via the GitHub API.
+on: # zizmor: ignore[dangerous-triggers]
   pull_request_target:
-    types: [
-      opened, 
-      synchronize, 
-      reopened, 
-      ready_for_review, 
-      review_requested, 
-      review_request_removed, 
-      assigned, 
-      unassigned
-    ]
+    branches:
+      - main
+      - "release/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - review_requested
+      - review_request_removed
+      - assigned
+      - unassigned
   workflow_run:
     workflows: ["PR Review Listener"]
     types: [completed]
+
+permissions: {}
 
 jobs:
   governance:
     name: Reviews
     permissions:
-      statuses: write
-      contents: read
-      pull-requests: read
-    # Use the reusable workflow defined in the central governance repository
-    # zizmor: ignore[ref-confusion]
-    uses: Universal-Commerce-Protocol/.github/.github/workflows/reusable-governance.yml@main
+      statuses: write # Post the Governance / Approvals commit status
+    # Reusable workflow from the central governance repository, hash-pinned per
+    # the org's unpinned-uses policy. This pins only the orchestration: the
+    # workflow checks out Universal-Commerce-Protocol/.github at ref: main, so
+    # the rules file and validator scripts are always read from its default
+    # branch. Governance rule changes apply without bumping this pin.
+    uses: Universal-Commerce-Protocol/.github/.github/workflows/reusable-governance.yml@97682ca4ad40b4321d60bb58c869e12f19a8bcae # main
     with:
       pr-number: ${{ github.event.pull_request.number }}
       commit-sha: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha }}

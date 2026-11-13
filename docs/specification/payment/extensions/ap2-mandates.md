@@ -174,7 +174,7 @@ Businesses **MUST** embed their signature in the checkout response body under
   "totals": [ ... ],
   "links": [ ... ],
   "ap2": {
-    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
+    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..signature"
   }
 }
 ```
@@ -306,7 +306,7 @@ with `ap2.merchant_authorization` embedded in the response body.
   ],
   "links": [ ... ],
   "ap2": {
-    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..<signature>"
+    "merchant_authorization": "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUifQ..signature"
   }
 }
 ```
@@ -397,7 +397,7 @@ request:
     ]
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9..." // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.payload.signature" // The User-Signed SD-JWT+kb / platform provider signed SD-JWT / delegated SD-JWT-KB
   }
 }
 ```

@@ -968,7 +968,7 @@ capability negotiation.
 in the UCP-Agent header:
 
 ```text
-POST /checkout HTTP/1.1
+POST /checkout-sessions HTTP/1.1
 UCP-Agent: profile="https://agent.example/profiles/shopping-agent.json"
 Content-Type: application/json
 
@@ -1463,7 +1463,9 @@ must be reliably hosted. An unreliable or misconfigured endpoint may prevent
 the other party from processing requests.
 
 1. Published artifacts **MUST** be served over HTTPS.
-2. Profile endpoints **MUST NOT** use redirects (3xx).
+2. Profile endpoints **MUST NOT** redirect to another URL (`301`, `302`,
+   `303`, `307`, `308`). Answering a conditional request with
+   `304 Not Modified` is not a redirect and is allowed.
 3. Published artifacts **MUST** include a `Cache-Control` header with
    `public` and `max-age` of at least 60 seconds, and **MUST NOT** be
    served with `private`, `no-store`, or `no-cache` directives.
@@ -1511,7 +1513,10 @@ These rules apply to any URL dereferenced during identity resolution —
 the profile, and any `jwks_uri` or CIMD document a verifier follows:
 
 1. Implementations **MUST** reject URLs not served over HTTPS.
-2. Implementations **MUST NOT** follow redirects (3xx).
+2. Implementations **MUST NOT** follow redirects to another URL (`301`,
+   `302`, `303`, `307`, `308`). A `304 Not Modified` received in response
+   to a conditional request is not a redirect; implementations should
+   keep using their cached copy.
 3. Implementations **SHOULD** enforce connect and response timeouts.
 4. Implementations **SHOULD** cache profiles with a minimum TTL floor
    of 60 seconds, regardless of the origin's `Cache-Control` headers.
@@ -1659,9 +1664,9 @@ below processes a single signature.
    request target (`@method`, `@authority`, `@path`; `@query` when a
    query string is present), the body when present (`content-digest`,
    `content-type`), and each of these request headers when present:
-   `ucp-agent`, `signature-agent`, `idempotency-key` (a closed set — a
-   header added to UCP later is gate-required only if its defining
-   section says so). If any
+   `ucp-agent`, `signature-agent`, `idempotency-key`, `webhook-id`,
+   `webhook-timestamp` (a closed set — a header added to UCP later is
+   gate-required only if its defining section says so). If any
    such component is absent from the signature's covered set, **skip**
    this signature — a target, body, or header the signature does not
    cover is treated as unsigned. This prevents a signature satisfying only
@@ -2077,7 +2082,7 @@ POST /checkout-sessions/{id}/complete
     "com.example.risk_score": 0.95
   },
   "ap2": {
-    "checkout_mandate": "eyJhbGciOiJ..." // Signed proof of checkout terms
+    "checkout_mandate": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.payload.signature" // Signed proof of checkout terms
   }
 }
 ```
@@ -2284,6 +2289,7 @@ UCP defines a set of standard capabilities:
 
 | Capability Name      | ID (URI)                                                              | Description                                                                                                  |
 | :------------------- | :-------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| **Ask**              | [schemas/common/ask.json](site:schemas/common/ask.json)               | Answers natural-language questions about a business's resources, policies, and services; read-only.          |
 | **Cart**.            | [schemas/shopping/cart.json](site:schemas/shopping/cart.json)         | Enables basket building before purchase intent is established.                                               |
 | **Checkout**         | [schemas/shopping/checkout.json](site:schemas/shopping/checkout.json) | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
 | **Identity Linking** | -                                                                     | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
@@ -2435,6 +2441,39 @@ comparison.
 Request assertions, mismatch handling, response echo, off-increment request
 handling, pricing, and lifecycle behavior are defined by the capability that
 uses the shared representation.
+
+## List price
+
+`list_price` is a **reference price**: a benchmark a Business offers so Buyers
+can judge the value of `price`, typically shown as a strikethrough. It is
+denominated like `price`: the same currency, per one whole `quantity_unit.unit`,
+or per `each` when `quantity_unit` is absent.
+
+UCP does not specify what a reference price is measured against. That is the
+Business's choice, within what applicable law allows, and jurisdictions
+differ. Bases in use include the price typically charged over a preceding
+period, the lowest price in a recent window (for example, the preceding 30
+days), a price openly offered for a substantial period, and the
+manufacturer's suggested retail price. Some jurisdictions prescribe or
+restrict which may be used, and the Business is generally expected to be
+able to substantiate the comparison. It is the Business's responsibility to
+determine whether to send a `list_price`, and which, for the Buyer's context
+(when known). Because `list_price` carries no basis label and typically reads
+as a price reduction, a Business omits it where its basis (such as a suggested
+retail price) cannot lawfully be shown that way. Platforms do not resolve what
+basis is appropriate; presenting `list_price` is optional, and a Platform that
+presents it uses the value received.
+
+`price` is the item's unit selling price (before any discounts in `totals`). The
+gap between `list_price` and `price` is a comparison, not a deduction: a
+Business **MUST NOT** also report it as a discount (for example, in `totals` or
+`discounts.applied`), and a Platform **MUST NOT** derive an amount owed from
+`list_price`. `totals` remain authoritative.
+
+A Platform **SHOULD NOT** present a saving (a strikethrough, percentage, or
+"save" amount) unless `list_price` is greater than `price`. A `list_price` at or
+below `price` is valid, for example a manufacturer's suggested retail price on
+goods sold at a premium.
 
 ## Request Constraints
 
@@ -3085,6 +3124,7 @@ A Business publishes well-known and custom policies. Every policy carries a
 | :-- | :-- |
 | `dev.ucp.shopping.policy.return` | Return terms. |
 | `dev.ucp.shopping.policy.warranty` | Warranty terms. |
+| `dev.ucp.shopping.policy.subscription` | Terms for the recurring orders that follow a purchase. See the [Purchase Options Extension](../shopping/extensions/purchase-options.md#subscription-policy). |
 | `dev.ucp.lodging.policy.cancellation` | Cancellation terms for lodging reservations. |
 
 A Business **MAY** define custom types in its own domain (e.g.,
