@@ -398,6 +398,10 @@ stateDiagram-v2
 * **`canceled`**: Checkout session is invalid or expired. Platform should
     start a new checkout session if needed. No Action remains outstanding.
 
+The Business **MUST NOT** return `status: ready_for_complete` for a Checkout
+that needs an Update Checkout before the Business would accept Complete
+Checkout.
+
 ### Actions
 
 When an active extension has outstanding work for the checkout, the Business
