@@ -119,6 +119,7 @@ midsole
 millilitre
 misparsed
 mkdocs
+modelcontextprotocol
 mtok
 openapi
 openrpc
