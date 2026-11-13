@@ -800,3 +800,10 @@ A conforming MCP transport implementation **MUST**:
 7. Support cursor-based pagination for Search according to the shared
     pagination contract (see [Pagination](search.md#pagination)).
 8. Return `-32602` (Invalid params) for requests exceeding batch size limits.
+9. Return `-32602` (Invalid params) for search requests whose `purpose` value
+    is not supported (see
+    [Unsupported Purpose](search.md#purpose-and-reference-identifiers)).
+10. Return a result with `ucp.status: "error"` and a recoverable
+    `ambiguous_reference` message for `swap` requests whose reference resolves
+    to more than one product or variant (see
+    [Supported Identifiers](search.md#purpose-and-reference-identifiers)).
