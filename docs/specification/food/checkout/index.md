@@ -254,7 +254,8 @@ Checkout uses the shared [Total](#total) structure and follows the
 rendering contract, verification rule, repeating types, and `lines[]` sub-line
 invariant defined in [Checkout — Total](../../shopping/checkout/index.md#totals).
 Amounts are signed: discounts are negative, charges are non-negative, and all
-non-total entries sum to the single `total` entry.
+non-total entries sum to the single `total` entry. The `total` entry amount
+MUST be greater than or equal to zero.
 
 * **Line items (`subtotal`, `items_discount`)**: `subtotal` is the sum of
   `line_items[].totals[type=subtotal]` (dish plus modification prices). Dish-level
