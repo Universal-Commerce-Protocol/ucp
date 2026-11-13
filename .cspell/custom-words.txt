@@ -214,3 +214,6 @@ mpegurl
 usdz
 vnd
 webm
+disclosable
+rrggbb
+srgb
