@@ -668,6 +668,10 @@ Business outcomes use the standard HTTP 200 status with messages in the response
 
 {{ extension_schema_fields('ucp.json#/$defs/response_catalog_schema', 'shopping/catalog/rest') }}
 
+### Like Item {: #like-item }
+
+{{ extension_schema_fields('catalog_search.json#/$defs/like_item', 'shopping/catalog/rest') }}
+
 ### Detail Product {: #detail-product }
 
 {{ extension_schema_fields('catalog_lookup.json#/$defs/detail_product', 'shopping/catalog/rest') }}
