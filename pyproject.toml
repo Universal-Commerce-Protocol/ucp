@@ -24,6 +24,12 @@ dev = [
     "pyyaml>=6.0.3",
     "yamllint==1.35.1",
 ]
+# The reference implementation in reference/. Kept out of `dev` so a docs-only
+# build does not install a web server and an MCP SDK.
+reference = [
+    "datamodel-code-generator[http]>=0.50.0",
+    "mcp>=2.3.0",
+]
 
 [[tool.uv.index]]
 url = "https://pypi.org/simple"
