@@ -57,7 +57,9 @@
                 "schema": { "$ref": "#/components/schemas/location_search_response" }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     },
@@ -101,7 +103,9 @@
                 "schema": { "$ref": "#/components/schemas/location_lookup_response" }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     },
@@ -146,7 +150,9 @@
                 "schema": { "$ref": "#/components/schemas/ask_response" }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     }
@@ -271,6 +277,16 @@
           "type": "string"
         },
         "description": "Supported content-codings (compression)."
+      }
+    },
+    "responses": {
+      "protocol_error": {
+        "description": "Protocol error. The body is optional; when present it is a protocol error object. See Error Handling in the core specification for the status code registry.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../../schemas/common/types/protocol_error.json" }
+          }
+        }
       }
     },
     "headers": {
