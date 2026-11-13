@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/payer.json",
+  "title": "Payer",
+  "description": "The party funding a payment instrument. The payer MAY differ from the checkout's buyer, for example when a third party pays for someone else's order or a business pays for an individual's order. When omitted, the payer is the buyer.",
+  "type": "object",
+  "properties": {
+    "identification": {
+      "$ref": "legal_identification.json",
+      "description": "The payer's legal or tax identification (taxpayer document), required by some payment methods and jurisdictions, such as Pix and boleto in Brazil. A platform SHOULD send it only when the selected handler or jurisdiction requires it."
+    }
+  },
+  "additionalProperties": true
+}
