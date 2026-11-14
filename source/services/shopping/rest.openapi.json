@@ -565,7 +565,7 @@
       "post": {
         "operationId": "search_catalog",
         "summary": "Search Catalog",
-        "description": "Search for products in the business's catalog.",
+        "description": "Search for products using query text, filters, relational discovery (`purpose` with optional `reference_ids` for similarity, recommendations, and swaps), and pagination.",
         "parameters": [
           { "$ref": "#/components/parameters/authorization" },
           { "$ref": "#/components/parameters/x_api_key" },

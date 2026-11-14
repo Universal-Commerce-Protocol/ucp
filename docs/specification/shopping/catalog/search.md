@@ -19,8 +19,8 @@
 * **Capability Name:** `dev.ucp.shopping.catalog.search`
 
 Performs a search against the business's product catalog. Supports free-text
-queries, relational discovery (recommendations and swaps), filtering by
-category and price, and pagination.
+queries, relational discovery (similarity, recommendations, and swaps),
+filtering by category and price, and pagination.
 
 ## Operation
 
@@ -39,12 +39,12 @@ category and price, and pagination.
 ## Search Inputs
 
 A valid search request **MUST** include at least one of: a `query` string,
-one or more `filters`, a non-`search` `purpose` (with or without
-`reference_ids`), or an extension-defined input. When `purpose` is `search`
-(or omitted) and `query` is omitted, a filter-based request represents a browse
-operation where the Business returns products matching the provided filters
-without text-relevance ranking. Extensions **MAY** define additional inputs
-(e.g., visual similarity).
+one or more `filters`, a non-`search` `purpose` (with `reference_ids`, or
+without `reference_ids` for contextual `recommendation`), or an
+extension-defined input. When `purpose` is `search` (or omitted) and `query` is
+omitted, a filter-based request represents a browse operation where the
+Business returns products matching the provided filters without text-relevance
+ranking. Extensions **MAY** define additional inputs (e.g., visual similarity).
 
 A Business **MUST** validate that incoming requests contain at least one
 recognized input and **SHOULD** reject empty or invalid requests with an
@@ -59,6 +59,8 @@ catalog discovery:
 
 * **`search`** (default when `purpose` is omitted): Standard free-text search
     or filter-based browse.
+* **`similarity`**: Returns items that resemble the anchor products or variants
+    in `reference_ids` ("more like this").
 * **`recommendation`**: Returns complementary, related, or personalized items
     anchored to `reference_ids`, or derived from `context` alone when the
     Business supports contextual recommendations.
@@ -67,14 +69,20 @@ catalog discovery:
 
 #### Supported Purposes
 
-Support for `recommendation` and `swap` varies by Business, so a Business
-advertises the non-default `purpose` values it supports in its catalog search
-capability `config.purposes`. Each key is a supported value; an empty object
-means the value is supported with no additional policy. `search` is always
-supported and need not be listed. When `config` or `purposes` is absent or
-empty, only `search` is supported.
+Support for `similarity`, `recommendation`, and `swap` varies by Business, so a
+Business advertises the non-default `purpose` values it supports in its catalog
+search capability `config.purposes`. Each key is a supported value; an empty
+object means the value is supported with no additional policy. `search` is
+always supported and need not be listed. When `config` or `purposes` is absent
+or empty, only `search` is supported.
 
 {{ extension_schema_fields('catalog_search.json#/$defs/business_config', 'shopping/catalog') }}
+
+Each entry in `config.purposes` uses `purpose_policy` (or a purpose-specific
+subtype) and **MAY** specify `max_reference_ids` to advertise the maximum
+number of `reference_ids` entries processed per request:
+
+{{ extension_schema_fields('catalog_search.json#/$defs/purpose_policy', 'shopping/catalog') }}
 
 Many Businesses recommend items related to an anchor (for example, "frequently
 bought together") but cannot generate recommendations from `context` alone. The
@@ -84,8 +92,8 @@ for requests that omit `reference_ids`.
 
 {{ extension_schema_fields('catalog_search.json#/$defs/recommendation_policy', 'shopping/catalog') }}
 
-A Business that supports anchored and contextual recommendations, but not
-swaps, declares:
+A Business that supports similarity (up to 5 anchors) and anchored or
+contextual recommendations (up to 10 anchors), but not swaps, declares:
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
@@ -97,7 +105,11 @@ swaps, declares:
       "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json",
       "config": {
         "purposes": {
-          "recommendation": { "supports_contextual": true }
+          "similarity": { "max_reference_ids": 5 },
+          "recommendation": {
+            "supports_contextual": true,
+            "max_reference_ids": 10
+          }
         }
       }
     }
@@ -106,13 +118,15 @@ swaps, declares:
 ```
 
 A Platform **MUST NOT** send a non-default `purpose` value that the Business
-does not advertise, and **MUST NOT** send a `recommendation` request without
-`reference_ids` unless the Business advertises `supports_contextual: true`.
-`search` is always supported, whether explicit or implied by omission, subject
-to the [Search Inputs](#search-inputs) requirements. A Platform reads
-`config.purposes` from the Business profile it already fetches for capability
-negotiation, so it can decide before calling whether to offer
-recommendations, contextual recommendations, or swaps.
+does not advertise, **SHOULD NOT** send more `reference_ids` entries than the
+advertised `max_reference_ids` for that purpose, and **MUST NOT** send a
+`recommendation` request without `reference_ids` unless the Business advertises
+`supports_contextual: true`. `search` is always supported, whether explicit or
+implied by omission, subject to the [Search Inputs](#search-inputs)
+requirements. A Platform reads `config.purposes` from the Business profile it
+already fetches for capability negotiation, so it can decide before calling
+whether to offer similarity, recommendations, contextual recommendations, or
+swaps.
 
 The following rules apply:
 
@@ -121,72 +135,88 @@ The following rules apply:
     `reference_ids` does not apply, and the Business **MUST** ignore it if
     present. When `purpose` is `swap`, `reference_ids` **MUST** contain exactly
     one identifier; a Platform that needs substitutes for several items sends
-    one request per item. When `purpose` is `recommendation` and the Business
-    does not advertise `supports_contextual: true`, `reference_ids` **MUST**
-    contain at least one identifier. A Business **MUST** reject requests that
-    violate these pairing rules rather than returning an empty or general
-    result. For `recommendation`, multiple `reference_ids` jointly describe one
-    anchor set: the Business returns candidates related to that set as a
-    whole, results need not relate to every anchor, and the response does not
-    correlate results to individual anchors.
+    one request per item. When `purpose` is `similarity`, the request **MUST**
+    include at least one `reference_ids` entry or an extension-defined anchor
+    input. When `purpose` is `recommendation` and the Business does not
+    advertise `supports_contextual: true`, the request **MUST** include at
+    least one `reference_ids` entry or an extension-defined anchor input. A
+    Business **MUST** reject requests that violate these pairing rules rather
+    than returning an empty or general result. For `similarity` and
+    `recommendation`, multiple `reference_ids` jointly describe one anchor set:
+    the Business returns candidates related to that set as a whole, results
+    need not relate to every anchor, and the response does not correlate
+    results to individual anchors.
 2. **Supported Identifiers**: A Business **MUST** support lookup of
     `reference_ids` by product ID and variant ID, and **MAY** additionally
     support the secondary identifiers permitted by
-    [Catalog Lookup](lookup.md#supported-identifiers). For `recommendation`,
-    when one identifier resolves to several products or variants (for example,
-    a shared SKU), each is an anchor and each is excluded under Self-Exclusion.
-    For `swap`, the reference **MUST** resolve to one product or variant; a
-    product ID is one anchor even when the product has several variants. When
-    a `swap` reference resolves to more than one product or variant, the
-    Business **MUST NOT** choose one and **MUST** return an error response
-    (`ucp.status: "error"`) with an `ambiguous_reference` error message whose
-    `severity` is `recoverable`, whose `path` points at the reference (e.g.,
-    `$.reference_ids[0]`), and whose `content` names the matching identifiers,
-    so the Platform can resend with one of them (see
+    [Catalog Lookup](lookup.md#supported-identifiers). For `similarity` and
+    `recommendation`, when one identifier resolves to several products or
+    variants (for example, a shared SKU), each is an anchor and each is
+    excluded under Self-Exclusion. For `swap`, the reference **MUST** resolve
+    to one product or variant; a product ID is one anchor even when the product
+    has several variants. When a `swap` reference resolves to more than one
+    product or variant, the Business **MUST NOT** choose one and **MUST**
+    return an empty `products` array with an `ambiguous_reference` error
+    message whose `severity` is `recoverable`, whose `path` points at the
+    reference (e.g., `$.reference_ids[0]`), and whose `content` names the
+    matching identifiers, so the Platform can resend with one of them (see
     [Example: Ambiguous Swap Reference](#example-ambiguous-swap-reference)).
     Ambiguity depends on the Business's catalog data, so it is a business
     outcome like Catalog Lookup's `not_found`, not a request error. When a
-    specific variant is known (e.g., swapping an unavailable cart item), a
-    Platform **SHOULD** supply the variant ID so the Business can consider
-    variant-level attributes (such as options, price, and `quantity_unit`);
-    a Platform swapping a cart line **SHOULD** use that line's product or
-    variant ID. When
-    `reference_ids` is provided, the Business evaluates the request using the
-    identifiers that resolve (and **MAY** include informational `not_found`
-    messages for unresolved identifiers); if none resolve, the Business
-    **MUST** return an empty `products` array rather than falling back to a
-    general browse. This applies to `recommendation` even when `context` alone
-    could drive results; a Platform that wants contextual recommendations
-    omits `reference_ids`, which it does only when the Business advertises
+    specific variant is known (e.g., swapping an unavailable cart item or
+    finding items similar to a selected colorway), a Platform **SHOULD** supply
+    the variant ID so the Business can consider variant-level attributes (such
+    as options, price, and `quantity_unit`); a Platform swapping a cart line
+    **SHOULD** use that line's product or variant ID. When `reference_ids` is
+    provided, the Business evaluates the request using the identifiers that
+    resolve (and **SHOULD** include informational `not_found` messages for
+    unresolved identifiers); if none resolve, the Business **MUST** return an
+    empty `products` array rather than falling back to a general browse. This
+    applies to `recommendation` even when `context` alone could drive results;
+    a Platform that wants contextual recommendations omits `reference_ids`,
+    which it does only when the Business advertises
     `supports_contextual: true`.
 3. **Self-Exclusion**: The Business **MUST** exclude any product or variant
     listed in `reference_ids` from the response. When a variant ID is supplied,
-    the Business **MUST** exclude its parent product for `recommendation`, and
-    **SHOULD** exclude its parent product for `swap` unless returning a
-    distinct substitute variant of that product. A distinct substitute variant
-    is a different variant of the same product (for example, Size 10 Wide for
-    Size 10). Excluding a variant means it **MUST NOT** appear in the product's
-    `variants[]` (so it is never the featured `variants[0]`); a product left
-    with no returnable variants is omitted. Product-level fields follow the
-    same treatment as when `filters` exclude variants.
-4. **Combination with Query and Filters**: A request **MAY** combine
-    `reference_ids` with `query` (e.g., a guided swap where the buyer specifies
-    a preference) and `filters`. Supplied `filters` narrow the returned
-    candidates (with the `AND` semantics of [Search Filters](#search-filters));
-    they do not constrain resolution of `reference_ids`. For `swap`,
-    `reference_ids` identifies the item being replaced: its attributes guide
-    relevance but are not matching constraints, so a Platform **MUST NOT**
-    assume that a candidate preserves attributes such as pack size,
-    `quantity_unit`, or compatibility solely because the request used `swap`.
-    Hard constraints come only from supported `filters` and negotiated
-    extensions, under their documented semantics. Substitution policy for a
-    category remains with the Business, and Checkout remains authoritative (see
+    the Business **MUST** exclude its parent product for `similarity` and
+    `recommendation`, and **SHOULD** exclude its parent product for `swap`
+    unless returning a distinct substitute variant of that product. A distinct
+    substitute variant is a different variant of the same product (for example,
+    Size 10 Wide for Size 10). Excluding a variant means it **MUST NOT** appear
+    in the product's `variants[]` (so it is never the featured `variants[0]`);
+    a product left with no returnable variants is omitted. Product-level fields
+    follow the same treatment as when `filters` exclude variants.
+4. **Anchor Limit**: A Business **MAY** limit the number of `reference_ids` it
+    processes for `similarity` and `recommendation` and **SHOULD** advertise
+    that limit as `max_reference_ids`. When a request exceeds the Business's
+    limit, the Business **MUST** process the first identifiers in request order
+    up to its limit and include an informational `batch_limit_applied` message
+    (`path` set to `$.reference_ids`) stating the limit and how many
+    identifiers were not processed. Unprocessed trailing identifiers **MUST
+    NOT** be reported as `not_found`.
+5. **Combination with Query and Filters**: A request **MAY** combine
+    `reference_ids` with `query` (e.g., a guided swap or similarity query where
+    the buyer specifies a preference) and `filters`. Supplied `filters` narrow
+    the returned candidates (with the `AND` semantics of
+    [Search Filters](#search-filters)); they do not constrain resolution of
+    `reference_ids`. For `swap`, `reference_ids` identifies the item being
+    replaced: its attributes guide relevance but are not matching constraints,
+    so a Platform **MUST NOT** assume that a candidate preserves attributes
+    such as pack size, `quantity_unit`, or compatibility solely because the
+    request used `swap`. Hard constraints come only from supported `filters`
+    and negotiated extensions, under their documented semantics. Substitution
+    policy for a category remains with the Business, and Checkout remains
+    authoritative (see
     [Relationship to Checkout](index.md#relationship-to-checkout)).
-5. **Unsupported Purpose**: A Business that receives a `purpose` value it
+6. **Unsupported Purpose**: A Business that receives a `purpose` value it
     does not support (for example, from a Platform acting on a stale profile)
     **MUST** reject the request using the binding's invalid-request mechanism
     (HTTP 400 `unsupported_purpose` for REST, JSON-RPC `-32602` for MCP). It
     **MUST NOT** ignore `purpose` and fall back to a general browse.
+7. **Buyer Identity**: Results for `similarity`, `recommendation`, and `swap`
+    reflect the Business's judgment about the anchors and are valid without
+    buyer identity. A Business **MAY** personalize results when `context` or
+    buyer authentication is present.
 
 #### Example: Guided Product Swap
 
@@ -244,22 +274,22 @@ empty:
 #### Example: Ambiguous Swap Reference
 
 A swap that names a shared SKU (`TEE-BLK`) matching two variants has no single
-item to replace. Rather than guessing, the Business returns an error response
-naming the matching variant IDs, and the Platform sends the swap again with the
-variant ID from the cart line:
+item to replace. Rather than guessing, the Business returns an empty `products`
+array with a recoverable error message naming the matching variant IDs, and the
+Platform sends the swap again with the variant ID from the cart line:
 
-<!-- ucp:example schema=common/types/error_response op=read -->
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
-    "status": "error",
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [
         {"version": "{{ ucp_version }}"}
       ]
     }
   },
+  "products": [],
   "messages": [
     {
       "type": "error",
@@ -269,6 +299,27 @@ variant ID from the cart line:
       "severity": "recoverable"
     }
   ]
+}
+```
+
+#### Example: Product Similarity
+
+Finds items that resemble the referenced variant (`prod_abc123_size10`), guided
+by `query`, while excluding its parent product (`prod_abc123`):
+
+<!-- ucp:example schema=shopping/catalog_search op=search direction=request -->
+```json
+{
+  "purpose": "similarity",
+  "reference_ids": ["prod_abc123_size10"],
+  "query": "waterproof",
+  "context": {
+    "address_country": "US",
+    "currency": "USD"
+  },
+  "pagination": {
+    "limit": 10
+  }
 }
 ```
 
