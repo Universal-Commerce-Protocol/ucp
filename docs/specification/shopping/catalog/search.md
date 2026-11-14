@@ -41,8 +41,9 @@ A valid search request MUST include at least one of: a `query` string,
 one or more `filters`, or an extension-defined input. When `query` is
 omitted, the request represents a browse operation — the business returns
 products matching the provided filters without text-relevance ranking.
-Extensions MAY define additional inputs (e.g., visual similarity,
-product references).
+Extensions MAY define additional inputs (e.g., visual similarity, or the
+product references defined by the
+[Catalog Recommendations](../extensions/recommendations.md) extension).
 
 Implementations MUST validate that incoming requests contain at least one
 recognized input and SHOULD reject empty or invalid requests with an
