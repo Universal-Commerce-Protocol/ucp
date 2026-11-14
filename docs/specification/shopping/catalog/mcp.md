@@ -430,7 +430,17 @@ response MAY include informational messages indicating which identifiers were no
             "min": { "amount": 12000, "currency": "USD" },
             "max": { "amount": 12000, "currency": "USD" }
           },
-          "variants": [ ... ]
+          "variants": [
+            {
+              "id": "var_abc123_m",
+              "title": "Medium",
+              "description": { "plain": "Medium." },
+              "price": { "amount": 12000, "currency": "USD" },
+              "inputs": [
+                { "id": "prod_abc123", "match": "featured" }
+              ]
+            }
+          ]
         }
       ],
       "messages": [

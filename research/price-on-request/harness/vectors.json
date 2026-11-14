@@ -1,0 +1,422 @@
+{
+  "_comment": "Pinned upstream schema against experimental proposal: 44 original vectors + 8 anonymous-privacy vectors + 8 synthetic mixed free/unresolved vectors (60 total). No AirShelf seller records. Baseline/proposed statuses check structure; notably inaccurate-range fixture is schema-valid but behaviorally nonconformant.",
+  "vectors": [
+    {
+      "baseline": "valid",
+      "file": "priced_variant_basic.json",
+      "kind": "variant",
+      "note": "minimal priced variant; no regression",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "priced_variant_full.json",
+      "kind": "variant",
+      "note": "transcribed from docs rest.md Blue Runner Pro search example",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "priced_variant_free.json",
+      "kind": "variant",
+      "note": "amount:0 keeps its released 'free' meaning",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "priced_product.json",
+      "kind": "product",
+      "note": "all-priced product keeps price_range required",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "onrequest_variant_quote_required.json",
+      "kind": "variant",
+      "note": "the gap: baseline rejects with 'price' required",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "onrequest_variant_contract_only.json",
+      "kind": "variant",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "onrequest_variant_buyer_specific_noprice.json",
+      "kind": "variant",
+      "note": "anonymous caller sees buyer_specific without price",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "onrequest_variant_buyer_specific_priced.json",
+      "kind": "variant",
+      "note": "UPDATED 2026-10-05: this is now the PROPOSED NORMATIVE representation of a resolved buyer_specific response (point 3 of maintainer feedback), not merely one of two unresolved interpretations — mode MUST remain buyer_specific when a price is present. Old validators see a normal priced variant (forward-safe).",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "onrequest_product_mixed_norange.json",
+      "kind": "product",
+      "note": "mixed product may omit price_range",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "onrequest_product_all_norange.json",
+      "kind": "product",
+      "note": "all-on-request product omits price_range",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "conflict_variant_price_and_quote_required.json",
+      "kind": "variant",
+      "note": "old validators cannot see the conflict (pricing ignored); new schema rejects it",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "accidental_priceless_variant.json",
+      "kind": "variant",
+      "note": "explicit-on-request vs accidentally-missing stay distinguishable",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "valid",
+      "file": "bogus_mode_variant.json",
+      "kind": "variant",
+      "note": "mode is an open vocabulary (point 1 of maintainer feedback) — unknown mode 'negotiable' with a numeric price validates under proposed. Baseline's closed-enum behavior is unaffected (baseline ignores pricing entirely via additionalProperties, so it was already valid). Unaffected by the 2026-10-05 contract_only reversal.",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "onrequest_product_all_with_range.json",
+      "kind": "product",
+      "note": "fabricated range over zero priced variants rejected by both",
+      "proposed": "invalid"
+    },
+    {
+      "file": "onrequest_variant_quote_required_with_list_price.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "list_price is a legitimate reference on an unpriced variant"
+    },
+    {
+      "file": "onrequest_variant_quote_required_with_unit_price.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "unit_price is a per-unit selling price: banned with no-price modes"
+    },
+    {
+      "file": "onrequest_variant_buyer_specific_noprice_with_unit_price.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "unit_price requires price to be present"
+    },
+    {
+      "file": "onrequest_variant_buyer_specific_priced_with_unit_price.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "priced buyer_specific variant may carry unit_price"
+    },
+    {
+      "file": "onrequest_product_mixed_list_price_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "baseline rejects the priceless variant; proposed permits list_price_range on mixed products"
+    },
+    {
+      "file": "onrequest_product_all_norange_with_list_price_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "baseline rejects priceless variants; proposed rejects the list_price_range"
+    },
+    {
+      "file": "malformed_pricing_null_with_price.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "invalid",
+      "note": "Worker-C: pricing:null is an open extra under baseline; proposed requires an object — narrows"
+    },
+    {
+      "file": "malformed_pricing_bare_string.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Worker-C: the bare-string shorthand sketched in #877 is rejected by both (baseline: price required; proposed: pricing must be an object)"
+    },
+    {
+      "file": "malformed_pricing_empty_object_with_price.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "invalid",
+      "note": "Worker-C: pricing:{} is an open extra under baseline; proposed requires mode — narrows"
+    },
+    {
+      "file": "pricing_public_with_vendor_extension.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "Worker-C: unknown fields inside pricing stay open under proposed (only mode is a closed enum)"
+    },
+    {
+      "file": "pricing_mode_array_with_price.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "invalid",
+      "note": "Worker-C: a mode is present but pricing is not an object (it's an array); baseline ignores it, proposed rejects the shape because pricing itself must be an object with a string mode — this narrowing is about the malformed OBJECT SHAPE, unrelated to the open-vocabulary change to mode's value space (point 1 of maintainer feedback only removed the enum constraint on the mode value, not the type:object/required:mode constraints on pricing itself) — narrows"
+    },
+    {
+      "file": "unknown_mode_negotiated_with_price.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "mode is an open vocabulary — unknown mode 'negotiated' alongside a numeric price validates under proposed (safe-fallback behavior for unrecognized modes is a consumer/behavioral requirement, not a schema rejection). Unaffected by the 2026-10-05 contract_only reversal — this fixture does not involve contract_only."
+    },
+    {
+      "file": "unit_price_without_price_no_marker.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Worker-C: unit_price requires price under both (proposed keeps the cross-cutting rule even with no marker)"
+    },
+    {
+      "file": "pricing_public_without_price.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Worker-C: mode public keeps the released price-requiredness (baseline: top-level required; proposed: conditional rule)"
+    },
+    {
+      "file": "unknown_mode_future_noprice.json",
+      "kind": "variant",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "unknown future-looking mode 'auction_pending', no price. Baseline rejects (price is unconditionally required); proposed is valid via safe fallback — no rule constrains an unrecognized mode. (= unknown_mode_without_price vector.)"
+    },
+    {
+      "file": "onrequest_variant_contract_only_priced.json",
+      "kind": "variant",
+      "baseline": "valid",
+      "proposed": "invalid",
+      "note": "REVERSED 2026-10-05 (flip from the prior round): contract_only WITH a numeric price. Baseline accepts (pricing is an ignored additionalProperties extra, and price is present so the unconditional price-requiredness is satisfied). Proposed is now INVALID: contract_only was resolved as a genuinely unpriced state (the unresolved response to an un-entitled caller); an entitled caller's resolved price transitions to buyer_specific + price instead, per the selected working design. The prior round's relaxation (which made this VALID as an open-question data shape) is reverted — rule 1's 'forbid price' condition is restored to cover both quote_required and contract_only (= contract_only_with_price vector)."
+    },
+    {
+      "baseline": "valid",
+      "file": "public_with_price.json",
+      "kind": "variant",
+      "note": "ADDED 2026-10-05 (point 2): public/general-price stranger. Anonymous caller sees the ordinary public catalog price.",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "contract_only_without_price.json",
+      "kind": "variant",
+      "note": "ADDED 2026-10-05 (point 2): contract-gated stranger. Baseline rejects (price unconditionally required); proposed valid — contract_only is a genuinely unpriced state.",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "buyer_specific_with_price_and_quote_step.json",
+      "kind": "variant",
+      "note": "ADDED 2026-10-05 (point 3): NDA deployment case — buyer_specific + price + next_step:request_quote. A buyer may have a real catalog price and still be able to request a negotiated quote; next_step does not imply price must be absent and does not participate in the conditional price rules.",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "public_with_price_and_quote_step.json",
+      "kind": "variant",
+      "note": "ADDED 2026-10-05 (point 4): orthogonality case — public + price + next_step:request_quote. A public price exists; the Business also accepts quote requests. Tests that the model is orthogonal rather than accidentally special-casing NDA pricing.",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "quote_required_with_price_and_quote_step.json",
+      "kind": "variant",
+      "note": "ADDED 2026-10-05 (point 5): MUST stay invalid — price is UCP's ordinary selling price; quote_required says no such usable price has been resolved. Baseline accepts (marker ignored, price present); proposed rejects via rule 1 (quote_required forbids price), unaffected by next_step.",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "valid",
+      "file": "onrequest_product_unknown_mode_mixed.json",
+      "kind": "product",
+      "note": "ADDED 2026-10-05 (point 9): mixed product with one variant carrying a numeric price alongside an unrecognized pricing mode. Schema-valid shape (data shape only) -- the CONSUMER'S range computation safety for the unknown-mode variant is a behavioral rule documented in product.json prose/DESIGN.md, not something jsonschema can check.",
+      "proposed": "valid"
+    },
+    {
+      "file": "onrequest_product_scenario_a_public_to_buyer_specific_anonymous.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "ADDED 2026-10-05 (feedback point 5, Scenario A, anonymous state): ordinary public catalog price, no pricing object. Valid under both; narrative pair with the resolved-state fixture below."
+    },
+    {
+      "file": "onrequest_product_scenario_a_public_to_buyer_specific_resolved.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "ADDED 2026-10-05 (feedback point 5, Scenario A, resolved state): recognized buyer's negotiated price, mode buyer_specific retained alongside price (point 3's proposed normative behavior). Valid under both (baseline ignores pricing, price is present so price-requiredness is satisfied)."
+    },
+    {
+      "file": "onrequest_product_scenario_b_contract_only_anonymous.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "ADDED 2026-10-05 (feedback point 5, Scenario B, anonymous state): no anonymous price exists; contract_only with no price, price_range correctly omitted. Baseline rejects (price and price_range are both unconditionally required); proposed valid."
+    },
+    {
+      "file": "onrequest_product_scenario_b_buyer_specific_resolved.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "ADDED 2026-10-05 (feedback point 5, Scenario B, resolved state): the prototype's cleanest representation transitions contract_only -> buyer_specific + price on resolution; whether the resolved response should instead retain contract_only + price is an OPEN design question (not decided by this fixture). Valid under both."
+    },
+    {
+      "file": "onrequest_product_mixed_withrange.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "ADDED 2026-10-05 (feedback point 9/10): mixed product (A=$100, B=quote_required no price, C=$150) WITH a present price_range computed only over priced variants -> $100-$150, never zero-filled. Baseline rejects (variant B lacks the unconditionally-required price); proposed valid. Complements onrequest_product_mixed_norange.json, which tests the omit-range case rather than the compute-over-priced-subset case."
+    },
+    {
+      "file": "onrequest_product_buyer_specific_range.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "ADDED 2026-10-05 (feedback point 4/9/10): buyer_specific priced variants (A=$80, B=$110) producing a caller-specific price_range of $80-$110. Valid under both schemas (baseline ignores pricing; all variants carry price so price-requiredness/price_range-requiredness are satisfied) — flagged here because this price_range is subject to the SAME cache-isolation requirement as the underlying buyer-specific prices (point 4): a Platform MUST NOT reuse it for a different caller. This is a behavioral/cache requirement, not something the schema validation itself can check."
+    },
+    {
+      "file": "all_unknown_priced_no_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid"
+    },
+    {
+      "file": "all_unknown_priced_range.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_unpriced_variant.json",
+      "kind": "variant",
+      "note": "undisclosed protects NDA price-list membership; no price and no identity-linking promise",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "valid",
+      "file": "neutral_with_price.json",
+      "kind": "variant",
+      "note": "even a numeric amount alongside undisclosed is invalid; old clients can ignore the mode",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_with_reason.json",
+      "kind": "variant",
+      "note": "reason cannot leak membership or pricing path",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_with_nextstep.json",
+      "kind": "variant",
+      "note": "next_step cannot disclose quote-only versus price-list status",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_with_list_price.json",
+      "kind": "variant",
+      "note": "reference price cannot leak via a neutral response",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_unpriced_product.json",
+      "kind": "product",
+      "note": "two hidden variants have identical pricing mode; no price_range",
+      "proposed": "valid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_product_invalid_range.json",
+      "kind": "product",
+      "note": "no aggregate price when all variants are neutral",
+      "proposed": "invalid"
+    },
+    {
+      "baseline": "invalid",
+      "file": "neutral_mixed_partial_range_product.json",
+      "kind": "product",
+      "note": "mixed anonymous catalog: public-only range with a neutral variant",
+      "proposed": "valid"
+    },
+    {
+      "file": "free_neutral_partial_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Public free plan and undisclosed offer; optional partial price_range 0–0 cannot mean hidden item is free."
+    },
+    {
+      "file": "free_neutral_without_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Mixed public-free and undisclosed variants permit omitted product price_range."
+    },
+    {
+      "file": "free_quote_partial_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Real zero amount and quote_required missing amount are distinct; range contains only public free offer."
+    },
+    {
+      "file": "free_buyer_specific_priced_range.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "valid",
+      "note": "For an authorized, negotiated consumer the priced buyer_specific offer and free public offer yield full range 0–50000; old-client disclosure remains unsafe."
+    },
+    {
+      "file": "free_neutral_hidden_list_price.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Rejected: undisclosed cannot reveal a private list/reference price even beside a public free offer."
+    },
+    {
+      "file": "free_neutral_missing_public_price.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "invalid",
+      "note": "Rejected: public/free requires explicit price.amount=0; missing public price is not free."
+    },
+    {
+      "file": "free_neutral_inaccurate_range.json",
+      "kind": "product",
+      "baseline": "invalid",
+      "proposed": "valid",
+      "note": "Structural limit only: JSON Schema cannot verify range arithmetic. Consumer MUST recompute the effective range as 0–0; this is not a semantically conformant producer output."
+    },
+    {
+      "file": "free_neutral_hidden_zero_price.json",
+      "kind": "product",
+      "baseline": "valid",
+      "proposed": "invalid",
+      "note": "Rejected by revised schema: price.amount=0 is forbidden on an undisclosed variant, even when a separate public free variant exists."
+    }
+  ]
+}

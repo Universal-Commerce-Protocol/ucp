@@ -1,0 +1,1 @@
+{"description":{"plain":"pricing is an array carrying a mode object; a mode is present but pricing is not an object."},"id":"var_arraymarker","price":{"amount":2500,"currency":"USD"},"pricing":[{"mode":"public"}],"title":"Array Marker"}

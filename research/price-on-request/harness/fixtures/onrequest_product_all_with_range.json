@@ -1,0 +1,1 @@
+{"description":{"plain":"All variants on-request yet a range is fabricated."},"id":"prod_bad_range","price_range":{"max":{"amount":200,"currency":"USD"},"min":{"amount":100,"currency":"USD"}},"title":"Bad Range","variants":[{"description":{"plain":"Quoted."},"id":"var_q1","pricing":{"mode":"quote_required"},"title":"Q1"}]}

@@ -1,0 +1,47 @@
+{
+  "id": "mixed-zero-leaking-hidden",
+  "title": "Synthetic mixed public and unresolved offers",
+  "description": {
+    "plain": "Regression for genuine public zero and non-zero unresolved prices"
+  },
+  "variants": [
+    {
+      "id": "free-plan",
+      "title": "Public free plan",
+      "description": {
+        "plain": "Synthetic fixture only; not seller data"
+      },
+      "pricing": {
+        "mode": "public"
+      },
+      "price": {
+        "amount": 0,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "nda-hidden",
+      "title": "Restricted offer",
+      "description": {
+        "plain": "Synthetic fixture only; not seller data"
+      },
+      "pricing": {
+        "mode": "undisclosed"
+      },
+      "price": {
+        "amount": 0,
+        "currency": "USD"
+      }
+    }
+  ],
+  "price_range": {
+    "min": {
+      "amount": 0,
+      "currency": "USD"
+    },
+    "max": {
+      "amount": 0,
+      "currency": "USD"
+    }
+  }
+}

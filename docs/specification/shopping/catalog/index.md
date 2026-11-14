@@ -241,6 +241,183 @@ item they present as featured.
 
 {{ schema_fields('types/variant', 'shopping/catalog') }}
 
+#### Pricing state
+
+!!! note "Proposed — requires a TC-approved Enhancement Proposal"
+    The pricing-state model in this section is a **prototype** responding to
+    UCP issue #877 ("price on request"). It is not part of the released
+    specification: core schema changes require an Enhancement Proposal and
+    Technical Council approval before implementation.
+
+A variant's `pricing` object is a **response-scoped disclosure statement**,
+not a permanent SKU characteristic or a buyer authorization. The Business
+chooses a response appropriate for the caller; the Platform must enforce its
+own authenticated entitlement and agreed pricing-profile support.
+
+| `pricing.mode` | Meaning | Selling `price` |
+|---|---|---|
+| absent / `public` | Ordinary public advertised selling price. | REQUIRED |
+| `buyer_specific` | Price disclosure is restricted to an entitled caller, even if the same list price is shared by many entitled buyers. | MAY be absent while unresolved; MAY be present only in an appropriately restricted response |
+| `quote_required` | The caller is permitted to know that a quotation is required. | FORBIDDEN |
+| `contract_only` | Commercial pricing requires an applicable contract or negotiated terms, rather than an ordinary listed price available following a disclosure-only gate. | FORBIDDEN |
+| `undisclosed` | **Disclosure-neutral**: the Business is not revealing whether a listed price becomes available after entitlement, or whether a quotation is needed. | FORBIDDEN |
+
+The additional `undisclosed` mode addresses the privacy finding reported by
+AirShelf in [#969](https://github.com/Universal-Commerce-Protocol/ucp/issues/969#issuecomment-6599693166).
+For example, if an anonymous caller must not learn which products appear on
+an NDA-gated price list, the Business should return `undisclosed` for both
+price-list and quote-only products. It **MUST NOT** attach `price`,
+`unit_price`, `list_price`, `pricing.reason`, or
+`pricing.next_step` to an `undisclosed` variant (schema enforced).
+It must also avoid leaking that distinction through other descriptions,
+metadata, availability, message codes, result ordering, filters, or aggregates
+(not schema-enforced). The neutral state does **not** promise that signing in
+or accepting an NDA will produce a price.
+
+A **disclosure-only NDA** protecting a seller's common price list is not a
+commercial negotiated-price contract. After a buyer is entitled to see that
+list, `buyer_specific` plus `price` is the candidate response; to an
+anonymous caller who is allowed to know list membership,
+`buyer_specific` without price is permissible. Where list membership is
+private, use `undisclosed` instead. Reserve `contract_only` for an
+unresolved *commercial pricing contract* (not the mere existence of an NDA).
+A seller that cannot safely distinguish these without revealing policy must
+choose a neutral response; JSON Schema cannot decide its disclosure policy.
+
+For a synthetic single-SKU NDA case, the anonymous Catalog Product record
+when membership is private is:
+
+<!-- ucp:example schema=shopping/types/product op=read -->
+```json
+{
+  "id": "prod-nda",
+  "title": "Subscription",
+  "description": { "plain": "Enterprise software" },
+  "variants": [
+    {
+      "id": "v-nda",
+      "title": "Subscription",
+      "description": { "plain": "Enterprise software" },
+      "pricing": { "mode": "undisclosed" }
+    }
+  ]
+}
+```
+
+The *same* variant in a Product record returned to a fully entitled caller,
+**only after** authentication and pricing-profile support are established,
+may be:
+
+<!-- ucp:example schema=shopping/types/product op=read -->
+```json
+{
+  "id": "prod-nda",
+  "title": "Subscription",
+  "description": { "plain": "Enterprise software" },
+  "price_range": {
+    "min": { "amount": 100000, "currency": "USD" },
+    "max": { "amount": 100000, "currency": "USD" }
+  },
+  "variants": [
+    {
+      "id": "v-nda",
+      "title": "Subscription",
+      "description": { "plain": "Enterprise software" },
+      "pricing": { "mode": "buyer_specific" },
+      "price": { "amount": 100000, "currency": "USD" }
+    }
+  ]
+}
+```
+
+A Product may have a genuinely public **free** variant (`price.amount = 0`) next
+to an `undisclosed` variant that has no selling price in the anonymous
+response. If the Business intends to advertise the free offer through UCP,
+it should not suppress that public zero merely to make all variants look
+unpriced. The public zero is a real eligible price; the neutral variant
+is **not** free. When this Product includes a partial `price_range`,
+`min` and `max` are both zero **only for the publicly priced subset**.
+The range may instead be omitted because not every variant is priced.
+Neither representation claims that the undisclosed offer is free or that
+the Product's overall commercial options are limited to zero.
+
+A generic "Sign-in is available" affordance can remain disclosure-neutral
+if it is offered consistently across products regardless of NDA price-list
+membership and does not imply that signing in reveals an amount or annual
+pricing. Do not emit a product-specific `price_on_request` message for
+an `undisclosed` variant: it leaks whether quoting is necessary.
+Such presentation and message consistency are **behavioral privacy
+requirements**, not invariants JSON Schema can verify. This proposal
+introduces no portable sign-in message code or pricing-outcome promise.
+
+A different SKU in the anonymous response can also use `undisclosed`,
+yet transition to `quote_required` once the caller is entitled. Thus the
+anonymous mode does not expose the seller's private price-list membership.
+
+**Legacy and restricted-price safety:** a priced `buyer_specific` record
+can pass the old Variant schema because older validators ignore the unknown
+`pricing` property. Validation therefore does not prevent an old Platform
+from treating that price, `unit_price`, or `price_range` as public.
+Before returning any restricted price or derived aggregate, the Business
+**MUST** independently establish caller entitlement and explicit support
+for the revised pricing semantics. A disclosure message or
+`pricing.mode` alone is not evidence of client understanding. If either
+requirement is absent, fail closed: omit restricted prices from that
+consumer's response, return only genuinely public data where safe, or use
+an existing supported denial/negotiation path. **Do not** send a malformed
+public-price record in an attempt to disguise it; the exact UCP capability
+negotiation and migration signal remain a TC decision. Platforms **MUST**
+suppress buyer-specific prices and aggregates without their own verified
+authorization and profile negotiation, and must partition caches by the
+authenticated buyer, entitlement revision, capabilities and freshness.
+Transport caches and logs must not redistribute restricted price data.
+
+`mode` remains an open vocabulary. Unknown modes remain structurally
+valid, but an unaware Platform **MUST NOT** display their amounts,
+filter/sort numerically on them, or treat a missing amount as zero.
+`next_step: "request_quote"` is only a prototype availability hint; it
+does not establish a quote endpoint, and must not be used on an
+`undisclosed` record. Likewise, an automatic `price_on_request` message
+can leak whether a hidden item requires a quote and must not accompany a
+privacy-neutral response. `list_price` is a reference figure, not the
+selling price, and `unit_price` requires a selling `price`.
+
+How a product becomes purchasable is outside this proposal. Identity
+linking, quote formation (#929/#930), and accepted-term handoff (#845)
+remain separate interfaces and governance decisions. The proposal does
+not guarantee end-to-end seller/platform interoperability or protect
+information against every side channel.
+
+<!-- ucp:example schema=shopping/catalog_lookup op=get_product -->
+```json
+{
+  "ucp": { "version": "{{ ucp_version }}" },
+  "product": {
+    "id": "prod_industrial_printer",
+    "title": "Industrial Printer",
+    "description": { "plain": "High-volume printer, available in standard and custom-enterprise configurations." },
+    "price_range": {
+      "min": { "amount": 1000000, "currency": "USD" },
+      "max": { "amount": 1000000, "currency": "USD" }
+    },
+    "variants": [
+      {
+        "id": "var_industrial_printer_standard",
+        "title": "Standard configuration",
+        "description": { "plain": "Stocked configuration with a published price." },
+        "price": { "amount": 1000000, "currency": "USD" }
+      },
+      {
+        "id": "var_industrial_printer_custom",
+        "title": "Custom enterprise configuration",
+        "description": { "plain": "Built-to-order configuration priced on quoted terms." },
+        "pricing": { "mode": "quote_required", "next_step": "request_quote" }
+      }
+    ]
+  }
+}
+```
+
 ### Price
 
 {{ schema_fields('types/price', 'shopping/catalog') }}
@@ -248,6 +425,23 @@ item they present as featured.
 ### Price Range
 
 {{ schema_fields('types/price_range', 'shopping/catalog') }}
+
+When every variant has an ordinary/public or resolved buyer-specific selling
+price, `price_range` remains required. If a variant has no price or uses an
+unrecognized mode, `price_range` **MAY** be omitted. When present it **MUST**
+aggregate only eligible selling prices for this response, without zero-filling
+missing amounts; a partial range describes the priced subset, not every
+variant. When no eligible price exists, no usable selling range exists.
+
+A Platform that does not understand a mode **MUST** suppress or recompute a
+received range rather than assume that every included amount is usable.
+JSON Schema validates structure, not arithmetic or a consumer's understanding
+of extension modes. The schema forbids either range when no variant carries
+a numeric price; behavioral rules additionally govern numeric but unusable
+unknown-mode amounts. `list_price_range` remains a reference-price range,
+never a substitute for a selling price, and follows the same context isolation.
+Product-based feed representations inherit these rules; this does not claim
+that a proposed feed capability has been adopted.
 
 ### Media
 

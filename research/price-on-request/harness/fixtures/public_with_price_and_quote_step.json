@@ -1,0 +1,1 @@
+{"description":{"plain":"Orthogonality case: a public price exists and the Business also accepts quote requests. request_quote does not imply the public price is unusable."},"id":"var_sec_suite","price":{"amount":49900,"currency":"USD"},"pricing":{"mode":"public","next_step":"request_quote"},"title":"Security Suite"}

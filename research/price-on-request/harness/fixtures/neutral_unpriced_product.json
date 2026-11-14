@@ -1,0 +1,29 @@
+{
+  "id": "prod-hidden-list",
+  "title": "Seller catalog listing",
+  "description": {
+    "plain": "Two synthetic variants; list membership intentionally hidden"
+  },
+  "variants": [
+    {
+      "id": "var-on-nda-list",
+      "title": "Redacted B2B item",
+      "description": {
+        "plain": "Synthetic regression example; not customer data"
+      },
+      "pricing": {
+        "mode": "undisclosed"
+      }
+    },
+    {
+      "id": "var-quote-only",
+      "title": "Redacted B2B item",
+      "description": {
+        "plain": "Synthetic regression example; not customer data"
+      },
+      "pricing": {
+        "mode": "undisclosed"
+      }
+    }
+  ]
+}
