@@ -469,6 +469,8 @@ difficult to read.
 }
 ```
 
+See [Auditing open enumerations](#auditing-open-enumerations) for running the local script that checks `"examples"` coverage on open-string fields and surfaces warnings for non-standard values in spec examples.
+
 ### Closed Enumerations
 
 Use strict `enum` or `const` only for permanently fixed domains or when unknown values are inherently unsupported.
@@ -1028,6 +1030,18 @@ skips and identifying unannotated blocks. `--file` accepts one or more paths
 for incremental validation. Blocks are validated concurrently by default
 (`--jobs`, default `min(8, CPU count)`); pass `--jobs 1` for serial execution.
 Reporting order and exit codes are identical either way.
+
+#### Auditing open enumerations
+
+To check `source/schemas/` for open-string fields whose descriptions list well-known values without declaring an `"examples"` array — and to warn on non-standard open-string values in documentation `json` examples — run the pure stdlib audit script:
+
+```bash
+python3 scripts/audit_open_enums.py
+python3 scripts/audit_open_enums.py --json
+python3 scripts/audit_open_enums.py --strict
+```
+
+By default, `audit_open_enums.py` is non-blocking (exits `0`); pass `--strict` to exit `1` when missing `"examples"` or non-standard doc value warnings are detected, or `--json` for machine-readable output. Reverse-domain identifiers (e.g., `dev.ucp.*`) and elision placeholders (`"..."`) are excluded automatically.
 
 #### What runs automatically
 

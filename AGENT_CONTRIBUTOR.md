@@ -31,11 +31,12 @@ Validate your changes locally using these commands before considering a task com
 ### Schema Validation & Resolution
 
 * **Lint Schemas:** `ucp-schema lint source/` (checks syntax, broken references, and annotation structures).
+* **Audit Open Enumerations:** `uv run python scripts/audit_open_enums.py` (checks open-string fields missing `examples` in `source/schemas/` and warns on non-standard open-string values in `docs/`; pass `--strict` or `--json` as needed).
 * **Resolve Annotations:** `ucp-schema resolve source/schemas/<domain>/<schema_name>.json --op <operation> (--request|--response) [--bundle] --pretty` (compiles a schema for a specific direction/operation, resolving `ucp_*` annotations; add `--bundle` to inline referenced child schemas).
 * **Validate Payloads:** `ucp-schema validate --schema source/schemas/<domain>/<schema_name>.json --op <operation> [--request|--response] <path_to_payload.json>` (validates a sample payload against a schema).
 * **Run Pre-Commit Checks:** `pre-commit run --all-files`
 * **Execute Local Super-Linter:** `./scripts/super_linter_local.py` (requires `docker` or `podman`).
-* **Run Script Unit Tests:** `uv run python scripts/test_validate_examples.py`, `uv run python scripts/test_schema_tables.py`, and `uv run python scripts/test_check_links.py` (when modifying `main.py` or `scripts/`).
+* **Run Script Unit Tests:** `uv run python scripts/test_validate_examples.py`, `uv run python scripts/test_schema_tables.py`, `uv run python scripts/test_check_links.py`, and `uv run python scripts/test_audit_open_enums.py` (when modifying `main.py` or `scripts/`).
 
 ### Documentation (MkDocs)
 
