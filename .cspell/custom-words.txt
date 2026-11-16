@@ -204,6 +204,7 @@ foodborne
 Palo
 resends
 subpages
+waitlist
 # rich media formats (video / 3D model source types)
 glb
 gltf
