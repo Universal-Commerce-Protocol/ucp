@@ -10,6 +10,7 @@
     "free_shipping",
     "not_found",
     "unsupported_reference",
-    "ambiguous_reference"
+    "ambiguous_reference",
+    "unsupported_combination"
   ]
 }

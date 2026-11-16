@@ -94,7 +94,7 @@
                 "$ref": "#/$defs/reference"
               },
               "minItems": 1,
-              "description": "Anchors for the request. Under `search` (the default) they are ranking inputs fused with `query`, and nothing is excluded. Under any other relation they are the subject: results bear that relation to them and catalog anchors are never returned. Each reference carries one anchor kind; which kinds a Business accepts for a relation is advertised in `config.relations.<relation>.references`."
+              "description": "Anchors for the request. Under `search` (the default) they are ranking inputs combined with `query` when the Business supports the combination (otherwise it reports the input it did not use with an informational `unsupported_combination` message), and nothing is excluded. Under any other relation they are the subject: results bear that relation to them and catalog anchors are never returned. Each reference carries one anchor kind; which kinds a Business accepts for a relation is advertised in `config.relations.<relation>.references`."
             }
           },
           "allOf": [

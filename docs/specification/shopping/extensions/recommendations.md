@@ -122,7 +122,7 @@ relation.
 
 | `purpose` | Returns | `references` |
 | :-- | :-- | :-- |
-| `search` (default) | Text or filter results, as in [Catalog Search](../catalog/search.md) | Ranking inputs fused with `query`; nothing excluded |
+| `search` (default) | Text or filter results, as in [Catalog Search](../catalog/search.md) | Ranking inputs, combined with `query` where supported; nothing excluded |
 | `similar` | Alternatives that resemble the anchors ("more like this") | One or more; one joint anchor set |
 | `complementary` | Items that go with the anchors (cross-sell, basket completion) | One or more; one joint anchor set |
 | `substitute` | A replacement for one specific item, for the same need | The item being replaced; one per request unless the Business advertises more |
@@ -156,8 +156,9 @@ declaration carries over unchanged.
     `config.relations.substitute.references.id.max` references (default 1); a
     Platform that needs a correlated replacement per item sends one request
     per item. When `purpose` is `search` (or omitted), `references` are
-    ranking inputs fused with `query` and `filters`, nothing is excluded, and
-    the request follows the
+    ranking inputs combined with `query` when the Business supports the
+    combination (see Ignored Inputs), nothing is excluded, and the request
+    follows the
     [Search Inputs](../catalog/search.md#search-inputs) requirements. A
     Business **MUST** reject a request that violates these rules using the
     binding's invalid-request mechanism, never with an empty or general result.
@@ -203,7 +204,14 @@ declaration carries over unchanged.
     `batch_limit_applied` message stating the limit and how many references
     were not processed. References that were not processed **MUST NOT** be
     reported as `not_found`.
-8. **Query and Filters**: `query` and `filters` apply as defined by
+8. **Ignored Inputs**: A Business that cannot combine the ranking inputs a
+    request supplies (`query` and `references`) **MAY** process a subset of
+    them. It **MUST** process at least one, **MUST NOT** silently ignore any,
+    and **MUST** include an informational `unsupported_combination` message,
+    with `path` pointing at each input it did not use (for example `$.query`
+    or `$.references[1]`). A Platform **MUST NOT** assume an input influenced
+    the results unless no such message names it.
+9. **Query and Filters**: `query` and `filters` apply as defined by
     [Catalog Search](../catalog/search.md#search-inputs). `filters` narrow
     the candidates and do not constrain the resolution of `references`: an
     item that fails the request's filters still anchors it. For
@@ -213,14 +221,14 @@ declaration carries over unchanged.
     used `substitute`. Hard constraints come only from supported `filters`
     and negotiated extensions. Checkout remains authoritative (see
     [Relationship to Checkout](../catalog/index.md#relationship-to-checkout)).
-9. **Unsupported Purpose**: A Business **MUST NOT** ignore `purpose`. A
+10. **Unsupported Purpose**: A Business **MUST NOT** ignore `purpose`. A
     Business that receives a value it has not advertised (for example, from a
     Platform acting on a stale profile) **MUST** return `ucp.status: "error"`
     with an `error` message whose `code` is `unsupported_purpose`, whose
     `severity` is `recoverable`, and whose `content` names the relations it
     supports, together with an empty `products` array; it **MUST NOT** answer
     with a general search.
-10. **Buyer Identity**: Results reflect the Business's judgment about the
+11. **Buyer Identity**: Results reflect the Business's judgment about the
     anchors and are valid without buyer identity. A Business **MAY**
     personalize results for a buyer-authenticated request.
 
@@ -493,6 +501,70 @@ both outcomes:
       "type": "info",
       "code": "not_found",
       "content": "prod_retired_001"
+    }
+  ]
+}
+```
+
+### Inputs the Business Did Not Combine
+
+A Business that accepts image references and text but ranks them separately
+keeps the image and says so:
+
+<!-- cspell:ignore ABAQAAAQABAAD -->
+<!-- ucp:example schema=shopping/catalog_recommendations def=recommendations_search_request op=search direction=request -->
+```json
+{
+  "query": "waterproof",
+  "references": [
+    {
+      "image": {
+        "content_type": "image/jpeg",
+        "data": "/9j/4AAQSkZJRgABAQAAAQABAAD..."
+      }
+    }
+  ],
+  "filters": { "price": { "max": 10000 } }
+}
+```
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [{ "version": "{{ ucp_version }}" }],
+      "dev.ucp.shopping.catalog.recommendations": [{ "version": "{{ ucp_version }}" }]
+    }
+  },
+  "products": [
+    {
+      "id": "prod_jacket",
+      "title": "Trail Jacket",
+      "description": { "plain": "Packable waterproof shell." },
+      "price_range": {
+        "min": { "amount": 8900, "currency": "USD" },
+        "max": { "amount": 8900, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "prod_jacket_olive_m",
+          "title": "Olive / M",
+          "description": { "plain": "Olive / M" },
+          "price": { "amount": 8900, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "pagination": { "has_next_page": false },
+  "messages": [
+    {
+      "type": "info",
+      "code": "unsupported_combination",
+      "path": "$.query",
+      "content": "query is not combined with image references; results reflect the image only."
     }
   ]
 }
