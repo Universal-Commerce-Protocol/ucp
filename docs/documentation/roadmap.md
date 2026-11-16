@@ -60,7 +60,7 @@ We are scaling UCP across a broader range of industries, focusing on industries 
 
 New specifications are being developed with industry leaders across key industries including:
 
-* **Food:** New UCP capabilities and schema to enable restaurant and menu discovery across the wide array of modification options, dish selection to checkout with tipping and delivery notes.
+* **Food:** New UCP capabilities and schema to enable restaurant and menu discovery across the wide array of modification options, dish selection to checkout with ability to link loyalty accounts and apply discounts.
 * **Lodging:** New UCP capabilities and schema beyond Booking, supporting hotel discovery, room selection with various rate options, loyalty, and discounts.
 
 ## Build with us
@@ -70,4 +70,4 @@ developers, and payment providers to join us in refining these specifications.
 Your feedback on our early builds helps us shape the standards that will power
 the next generation of global commerce.
 
-[Become a UCP contributor](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file){ target="_blank" }
+[Become a UCP contributor](contributing.md)

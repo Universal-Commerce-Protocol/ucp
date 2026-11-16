@@ -23,14 +23,16 @@ on:
       - ".github/workflows/linter.yaml"
       - ".github/linters/**"
       - ".pre-commit-config.yaml"
+      - ".prettierignore"
+      - ".prettierrc"
+      - ".stylelintrc.json"
       - "pyproject.toml"
-      - "package.json"
-      - "package-lock.json"
       - "biome.json"
       - "scripts/**"
       - "source/**"
       - "docs/**"
       - "*.py"
+      - "*.md"
 
 permissions:
   contents: read      # Required to checkout the code
@@ -49,11 +51,12 @@ jobs:
           persist-credentials: false
 
       - name: Lint Code Base
-        uses: super-linter/super-linter/slim@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
+        uses: super-linter/super-linter/slim@2da136927bd4a73596db63044b504547c62cb854 # v9.0.0
         env:
           DEFAULT_BRANCH: ${{ github.base_ref }}
           MULTI_STATUS: false
           ENABLE_GITHUB_PULL_REQUEST_SUMMARY_COMMENT: false
+          CSS_FILE_NAME: ../../.stylelintrc.json
           MARKDOWN_CONFIG_FILE: ".markdownlint.json"
           PYTHON_RUFF_CONFIG_FILE: ../../pyproject.toml
           PYTHON_RUFF_FORMAT_CONFIG_FILE: ../../pyproject.toml
