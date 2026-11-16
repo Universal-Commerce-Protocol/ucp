@@ -161,9 +161,8 @@ lists every value it supports in `config.relations`.
     A reference whose kind the Business has not advertised for that relation
     is dropped, and the Business **SHOULD** include an informational
     `unsupported_reference` message whose `path` points at it.
-4. **Resolution**: A Business **MUST** resolve an `id` by product ID and
-    variant ID, and **MAY** additionally resolve the secondary identifiers
-    permitted by [Catalog Lookup](../catalog/lookup.md#supported-identifiers).
+4. **Resolution**: An `id` resolves as defined by Catalog Lookup's
+    [Supported Identifiers](../catalog/lookup.md#supported-identifiers).
     An `id` that does not resolve is dropped, and the Business **SHOULD**
     include an informational `not_found` message naming it. When no reference
     remains after dropping unresolved and unrecognized references, the
@@ -181,13 +180,13 @@ lists every value it supports in `config.relations`.
     this extension. When no reference remains, the empty result of the
     Resolution rule applies. A Platform replacing a cart line **SHOULD** use
     that line's product or variant ID.
-6. **Exclusion**: Catalog anchors are never returned, on any page of the
-    result set. A product anchor excludes the whole product. A variant anchor
-    excludes that variant; other variants of its product **MAY** be returned,
-    except for `complementary`, where the Business **MUST** also exclude the
-    product of every catalog anchor. An excluded variant **MUST NOT** appear
-    in `variants[]`, and a product left with no returnable variants is
-    omitted.
+6. **Exclusion**: Under `similar`, `complementary`, and `substitute`,
+    references are the subject and catalog anchors are never returned, on any
+    page of the result set; under `search` nothing is excluded. A product ID
+    excludes the product. A variant ID excludes that variant, and other
+    variants of its product **MAY** be returned, except under
+    `complementary`, where it excludes the product. See
+    [Exclusion](#exclusion) for the table and mechanics.
 7. **Anchor Limit**: A Business advertises, per relation and per kind, the
     maximum references it processes as `max` (default 1). When a request
     carries more references of a kind, the Business processes the first
@@ -195,18 +194,15 @@ lists every value it supports in `config.relations`.
     `batch_limit_applied` message stating the limit and how many references
     were not processed. References that were not processed **MUST NOT** be
     reported as `not_found`.
-8. **Query and Filters**: A request **MAY** combine `references` with
-    `query`, which guides ranking (for example, a substitute that is also
-    waterproof), and with `filters`. Supplied `filters` narrow the returned
-    candidates with the `AND` semantics of
-    [Search Filters](../catalog/search.md#search-filters); they do not
-    constrain resolution of `references`, so an unavailable item still
-    anchors a request whose filters it fails. For `substitute`, the anchor's
-    attributes guide relevance but are not matching constraints: a Platform
-    **MUST NOT** assume a result preserves pack size, `quantity_unit`, or
-    compatibility solely because the request used `substitute`. Hard
-    constraints come only from supported `filters` and negotiated extensions.
-    Checkout remains authoritative (see
+8. **Query and Filters**: `query` and `filters` apply as defined by
+    [Catalog Search](../catalog/search.md#search-inputs). `filters` narrow
+    the candidates and do not constrain the resolution of `references`: an
+    item that fails the request's filters still anchors it. For
+    `substitute`, the anchor's attributes guide relevance but are not
+    matching constraints: a Platform **MUST NOT** assume a result preserves
+    pack size, `quantity_unit`, or compatibility solely because the request
+    used `substitute`. Hard constraints come only from supported `filters`
+    and negotiated extensions. Checkout remains authoritative (see
     [Relationship to Checkout](../catalog/index.md#relationship-to-checkout)).
 9. **Unsupported Purpose**: A Business **MUST NOT** ignore `purpose`. A
     Business that receives a value it has not advertised (for example, from a
@@ -218,6 +214,19 @@ lists every value it supports in `config.relations`.
 10. **Buyer Identity**: Results reflect the Business's judgment about the
     anchors and are valid without buyer identity. A Business **MAY**
     personalize results for a buyer-authenticated request.
+
+### Exclusion
+
+| Reference | `similar`, `substitute` | `complementary` |
+| :-- | :-- | :-- |
+| product ID | the product | the product |
+| variant ID | that variant; other variants of its product **MAY** be returned | the product |
+
+Exclusion follows what the relation is about: a purchasable unit, whose
+siblings can resemble or replace it, or a product, whose siblings cannot
+complement it. An excluded variant is removed from `variants[]` as under
+[Filters](../catalog/lookup.md#filters); a product left with no returnable
+variants is omitted.
 
 ## Composition
 
