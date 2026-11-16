@@ -30,11 +30,13 @@ the answer guarantees.
 
 This extension adds two fields to the Catalog Search request:
 
-* `purpose`: the retrieval purpose (`similar`, `complementary`, or
-    `substitute`; `search` is the default).
-* `references`: the anchors for the request. Each reference names a product
-    or variant by `id`; other extensions can define additional kinds of
-    anchor.
+* `purpose`: the relation the results bear to the references (`similar`,
+    `complementary`, or `substitute`; `search` is the default).
+* `references`: the anchors for the request. Each reference carries one
+    anchor kind; this extension defines `id`, a product or variant in the
+    Business's catalog, and a Business advertises which kinds it accepts for
+    each relation. Under `search`, references are ranking inputs; under the
+    other relations they are the subject the results relate to.
 
 Responses are ordinary Catalog Search responses. Every returned item is a
 `products[]` entry, so other extensions that enrich Catalog Search results
@@ -47,10 +49,10 @@ without further composition.
 
 ## Discovery
 
-Support for each purpose varies by Business: recommendations often run on a
+Support for each relation varies by Business: recommendations often run on a
 separate merchandising service, and substitution is common in grocery,
 pharmacy, and B2B catalogs. A Business declares the extension and lists the
-purposes it supports in `config.purposes`:
+relations it supports in `config.relations`:
 
 <!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
@@ -65,8 +67,10 @@ purposes it supports in `config.purposes`:
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/recommendations",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_recommendations.json",
           "config": {
-            "purposes": {
-              "complementary": { "max_references": 20 },
+            "relations": {
+              "search": { "references": { "id": { "max": 1 } } },
+              "similar": { "references": { "id": { "max": 2 } } },
+              "complementary": { "references": { "id": { "max": 20 } } },
               "substitute": {}
             }
           }
@@ -77,21 +81,34 @@ purposes it supports in `config.purposes`:
 }
 ```
 
+A Business lists the relations it answers. Under each, `references` lists the
+anchor kinds it accepts and how many of each it processes per request; when
+`references` is absent, the relation accepts `id`, one per request. A kind
+that is not listed is not accepted, so a Platform never sends a reference
+speculatively. Listing `search` advertises the kinds plain search accepts as
+ranking inputs; when it is absent, plain search accepts none. A Business that
+supports none of them does not declare the extension.
+
 A Platform that supports the extension declares it in its own profile without
 `config`. The extension is active only when both parties declare it and Catalog
 Search is in the negotiated intersection (see
 [Intersection Algorithm](../../overview/index.md#intersection-algorithm)).
-A Platform reads `config.purposes` from the profile it already fetches, so it
-knows before calling which purposes it can offer.
+A Platform reads `config.relations` from the profile it already fetches, so it
+knows before calling which relations it can offer.
 
 ### Configuration
 
 {{ extension_schema_fields('catalog_recommendations.json#/$defs/business_config', 'shopping/extensions/recommendations') }}
 
-Each entry in `config.purposes` is a purpose policy. An empty object means the
-purpose is supported with no advertised limits.
+Each entry in `config.relations` is a relation policy. An empty object means the
+relation is supported with no advertised limits.
 
-{{ extension_schema_fields('catalog_recommendations.json#/$defs/purpose_policy', 'shopping/extensions/recommendations') }}
+{{ extension_schema_fields('catalog_recommendations.json#/$defs/relation_policy', 'shopping/extensions/recommendations') }}
+
+Each entry in `references` is the policy for one anchor kind under that
+relation.
+
+{{ extension_schema_fields('catalog_recommendations.json#/$defs/reference_kind_policy', 'shopping/extensions/recommendations') }}
 
 ## Schema
 
@@ -101,93 +118,132 @@ purpose is supported with no advertised limits.
 
 {{ extension_schema_fields('catalog_recommendations.json#/$defs/reference', 'shopping/extensions/recommendations') }}
 
-## Purposes
+## Relations
 
 | `purpose` | Returns | `references` |
 | :-- | :-- | :-- |
-| `search` (default) | Text or filter results, as in [Catalog Search](../catalog/search.md) | Ignored |
+| `search` (default) | Text or filter results, as in [Catalog Search](../catalog/search.md) | Ranking inputs, combined with `query` where supported; nothing excluded |
 | `similar` | Alternatives that resemble the anchors ("more like this") | One or more; one joint anchor set |
 | `complementary` | Items that go with the anchors (cross-sell, basket completion) | One or more; one joint anchor set |
-| `substitute` | A replacement for one specific item, for the same need | Exactly one |
+| `substitute` | A replacement for one specific item, for the same need | The item being replaced; one per request unless the Business advertises more |
+
+A request names the relation it wants in `purpose`; a Business advertises the
+relations it answers in `config.relations`.
 
 The vocabulary is open. A Business **MAY** support additional values, and
-lists every value it supports in `config.purposes`.
+lists every value it supports in `config.relations`.
+
+A relation is defined by what its results are to the references,
+independently of the operation that requests it. This version requests
+relations on Catalog Search, where the results are a ranked, paginated list.
+A later version **MAY** request the same relations on Catalog Lookup and Get
+Product, returning related items alongside the products those operations
+resolve, with the same values and the same `config.relations`; a Business's
+declaration carries over unchanged.
 
 ## Rules
 
 1. **Negotiation**: A Platform **MUST NOT** send a `purpose` other than
     `search` unless this extension is active and the value is a key of
-    `config.purposes`.
-2. **Pairing**: When `purpose` is `similar` or `complementary`, `references`
-    **MUST** contain at least one reference; multiple references jointly
-    describe one anchor set, results relate to that set as a whole, and the
-    response does not correlate results to individual anchors. When `purpose`
-    is `substitute`, `references` **MUST** contain exactly one reference, and
-    it **MUST** carry an `id`; a Platform that needs substitutes for several
-    items sends one request per item. When `purpose` is `search` (or omitted),
-    the Business **MUST** ignore `references`, and the request follows the
+    `config.relations`. A Platform **MUST NOT** send a reference of a kind the
+    Business has not advertised for that relation, nor more references of a
+    kind than its `max`.
+2. **Pairing**: When `purpose` is `similar`, `complementary`, or
+    `substitute`, `references` **MUST** contain at least one reference;
+    results bear the relation to the references as a set, and the response
+    does not correlate results to individual references. For `substitute`,
+    the Business processes up to
+    `config.relations.substitute.references.id.max` references (default 1); a
+    Platform that needs a correlated replacement per item sends one request
+    per item. When `purpose` is `search` (or omitted), `references` are
+    ranking inputs combined with `query` when the Business supports the
+    combination (see Ignored Inputs), nothing is excluded, and the request
+    follows the
     [Search Inputs](../catalog/search.md#search-inputs) requirements. A
     Business **MUST** reject a request that violates these rules using the
     binding's invalid-request mechanism, never with an empty or general result.
 3. **Anchor Kinds**: Each reference carries exactly one anchor kind. This
     extension defines `id`, which names a product or variant in the Business's
-    catalog. Other extensions **MAY** define additional anchor kinds as
-    additional reference properties, together with their own discovery and
-    rules. A Business that does not recognize a reference's anchor kind drops
-    that reference and **SHOULD** include an informational
+    catalog. Other extensions define further kinds as additional reference
+    properties and **SHOULD** name them with reverse-domain keys, so that
+    independently authored kinds cannot collide. A Business advertises the
+    kinds it accepts, per relation, in `config.relations.<relation>.references`.
+    A reference whose kind the Business has not advertised for that relation
+    is dropped, and the Business **SHOULD** include an informational
     `unsupported_reference` message whose `path` points at it.
-4. **Resolution**: A Business **MUST** resolve an `id` by product ID and
-    variant ID, and **MAY** additionally resolve the secondary identifiers
-    permitted by [Catalog Lookup](../catalog/lookup.md#supported-identifiers).
+4. **Resolution**: An `id` resolves as defined by Catalog Lookup's
+    [Supported Identifiers](../catalog/lookup.md#supported-identifiers).
     An `id` that does not resolve is dropped, and the Business **SHOULD**
     include an informational `not_found` message naming it. When no reference
     remains after dropping unresolved and unrecognized references, the
     Business **MUST** return an empty `products` array, regardless of `query`
     or `filters`; it **MUST NOT** fall back to a general search or browse.
-5. **Substitute Target**: For `substitute`, the `id` **MUST** resolve to
-    exactly one product or variant; a product ID is one anchor even when the
-    product has several variants. When it resolves to more than one, the
-    Business **MUST NOT** choose one and **MUST** return an error response
-    (`ucp.status: "error"`) with an `ambiguous_reference` error message whose
-    `severity` is `recoverable`, whose `path` points at the `id`, and whose
-    `content` names the matching identifiers. Ambiguity depends on the
-    Business's catalog data, so it is a business outcome, not a request error.
-    A Platform replacing a cart line **SHOULD** use that line's product or
-    variant ID.
-6. **Exclusion**: Catalog anchors are never returned, on any page of the
-    result set. A product anchor excludes the whole product. A variant anchor
-    excludes that variant; other variants of its product **MAY** be returned,
-    except for `complementary`, where the Business **MUST** also exclude the
-    product of every catalog anchor. An excluded variant **MUST NOT** appear
-    in `variants[]`, and a product left with no returnable variants is
-    omitted.
-7. **Anchor Limit**: A Business **MAY** limit the number of references it
-    processes and **SHOULD** advertise the limit as `max_references`. When a
-    request exceeds its limit, the Business processes the first distinct
-    references in request order up to the limit and includes an informational
+5. **Substitute Target**: For `substitute`, a reference whose `id` resolves
+    to more than one product or variant has no single item to replace (a
+    product ID is one anchor even when the product has several variants). The
+    Business **MUST NOT** choose one. It drops the reference as it would an
+    unresolved one and **SHOULD** include an informational
+    `ambiguous_reference` message whose `path` points at the reference and
+    whose `content` names the matching identifiers, so the Platform can resend
+    with one of them; as [Catalog Lookup](../catalog/lookup.md) already treats
+    an identifier matching several products as a successful outcome, so does
+    this extension. When no reference remains, the empty result of the
+    Resolution rule applies. A Platform replacing a cart line **SHOULD** use
+    that line's product or variant ID.
+6. **Exclusion**: Under `similar`, `complementary`, and `substitute`,
+    references are the subject and catalog anchors are never returned, on any
+    page of the result set; under `search` nothing is excluded. A product ID
+    excludes the product. A variant ID excludes that variant, and other
+    variants of its product **MAY** be returned, except under
+    `complementary`, where it excludes the product. See
+    [Exclusion](#exclusion) for the table and mechanics.
+7. **Anchor Limit**: A Business advertises, per relation and per kind, the
+    maximum references it processes as `max` (default 1). When a request
+    carries more references of a kind, the Business processes the first
+    `max` of that kind in request order and includes an informational
     `batch_limit_applied` message stating the limit and how many references
     were not processed. References that were not processed **MUST NOT** be
     reported as `not_found`.
-8. **Query and Filters**: A request **MAY** combine `references` with
-    `query`, which guides ranking (for example, a substitute that is also
-    waterproof), and with `filters`. Supplied `filters` narrow the returned
-    candidates with the `AND` semantics of
-    [Search Filters](../catalog/search.md#search-filters); they do not
-    constrain resolution of `references`, so an unavailable item still
-    anchors a request whose filters it fails. For `substitute`, the anchor's
-    attributes guide relevance but are not matching constraints: a Platform
-    **MUST NOT** assume a result preserves pack size, `quantity_unit`, or
-    compatibility solely because the request used `substitute`. Hard
-    constraints come only from supported `filters` and negotiated extensions.
-    Checkout remains authoritative (see
+8. **Ignored Inputs**: A Business that cannot combine the ranking inputs a
+    request supplies (`query` and `references`) **MAY** process a subset of
+    them. It **MUST** process at least one, **MUST NOT** silently ignore any,
+    and **MUST** include an informational `unsupported_combination` message,
+    with `path` pointing at each input it did not use (for example `$.query`
+    or `$.references[1]`). A Platform **MUST NOT** assume an input influenced
+    the results unless no such message names it.
+9. **Query and Filters**: `query` and `filters` apply as defined by
+    [Catalog Search](../catalog/search.md#search-inputs). `filters` narrow
+    the candidates and do not constrain the resolution of `references`: an
+    item that fails the request's filters still anchors it. For
+    `substitute`, the anchor's attributes guide relevance but are not
+    matching constraints: a Platform **MUST NOT** assume a result preserves
+    pack size, `quantity_unit`, or compatibility solely because the request
+    used `substitute`. Hard constraints come only from supported `filters`
+    and negotiated extensions. Checkout remains authoritative (see
     [Relationship to Checkout](../catalog/index.md#relationship-to-checkout)).
-9. **Unsupported Purpose**: A Business **MUST NOT** ignore `purpose`. A
-    Business that receives a value it does not support (for example, from a
-    Platform acting on a stale profile) **MUST** reject the request using the
-    binding's invalid-request mechanism with the code `unsupported_purpose`.
-10. **Buyer Identity**: Results reflect the Business's judgment about the
+10. **Unsupported Purpose**: A Business **MUST NOT** ignore `purpose`. A
+    Business that receives a value it has not advertised (for example, from a
+    Platform acting on a stale profile) **MUST** return `ucp.status: "error"`
+    with an `error` message whose `code` is `unsupported_purpose`, whose
+    `severity` is `recoverable`, and whose `content` names the relations it
+    supports, together with an empty `products` array; it **MUST NOT** answer
+    with a general search.
+11. **Buyer Identity**: Results reflect the Business's judgment about the
     anchors and are valid without buyer identity. A Business **MAY**
     personalize results for a buyer-authenticated request.
+
+### Exclusion
+
+| Reference | `similar`, `substitute` | `complementary` |
+| :-- | :-- | :-- |
+| product ID | the product | the product |
+| variant ID | that variant; other variants of its product **MAY** be returned | the product |
+
+Exclusion follows what the relation is about: a purchasable unit, whose
+siblings can resemble or replace it, or a product, whose siblings cannot
+complement it. An excluded variant is removed from `variants[]` as under
+[Filters](../catalog/lookup.md#filters); a product left with no returnable
+variants is omitted.
 
 ## Composition
 
@@ -196,27 +252,6 @@ This extension composes onto the Catalog Search request only. Results are
 Search results applies to them. With the [Fulfillment](fulfillment.md)
 extension active, `filters.fulfills_to` and `filters.methods` narrow the
 candidates, and each returned variant carries its `fulfillment` methods.
-
-## Transport Bindings
-
-A conforming REST binding **MUST**:
-
-1. Return HTTP 400 with the `unsupported_purpose` error for a search request
-    whose `purpose` the Business does not support.
-2. Return HTTP 400 for a search request that violates the Pairing rule.
-3. Return HTTP 200 with `ucp.status: "error"` and a recoverable
-    `ambiguous_reference` message when a `substitute` reference's `id`
-    resolves to more than one product or variant.
-
-A conforming MCP binding **MUST**:
-
-1. Return `-32602` (Invalid params) for a search request whose `purpose` the
-    Business does not support, with `unsupported_purpose` in `error.data.code`.
-2. Return `-32602` (Invalid params) for a search request that violates the
-    Pairing rule.
-3. Return a result with `ucp.status: "error"` and a recoverable
-    `ambiguous_reference` message when a `substitute` reference's `id`
-    resolves to more than one product or variant.
 
 ## Examples
 
@@ -336,29 +371,39 @@ active, each result carries its pickup availability:
 ### Ambiguous Substitute Reference
 
 A substitute request names a shared SKU (`TEE-BLK`) that matches two variants.
-Rather than guess, the Business returns an error naming the matches, and the
+Rather than guess, the Business drops the reference and names the matches; the
 Platform resends with the variant ID from the cart line:
 
-<!-- ucp:example schema=common/types/error_response op=read -->
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
-    "status": "error",
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{ "version": "{{ ucp_version }}" }],
       "dev.ucp.shopping.catalog.recommendations": [{ "version": "{{ ucp_version }}" }]
     }
   },
+  "products": [],
+  "pagination": { "has_next_page": false },
   "messages": [
     {
-      "type": "error",
+      "type": "info",
       "code": "ambiguous_reference",
       "path": "$.references[0].id",
-      "content": "TEE-BLK matches prod_tee_black_m and prod_tee_black_l; resend with one of these IDs.",
-      "severity": "recoverable"
+      "content": "TEE-BLK matches prod_tee_black_m and prod_tee_black_l; resend with one of these IDs."
     }
   ]
+}
+```
+
+The Platform resends with the variant ID from the cart line:
+
+<!-- ucp:example schema=shopping/catalog_recommendations def=recommendations_search_request op=search direction=request -->
+```json
+{
+  "purpose": "substitute",
+  "references": [{ "id": "prod_tee_black_m" }]
 }
 ```
 
@@ -410,8 +455,9 @@ Alternatives that resemble a product, within a lower price range:
 
 ### Anchor Limit and Unresolved Anchors
 
-A Business advertising `max_references: 20` receives 24 references, one
-of which is unknown. It processes the first 20 and reports both outcomes:
+A Business advertising `references.id.max: 20` for `complementary` receives
+24 references, one of which is unknown. It processes the first 20 and reports
+both outcomes:
 
 <!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
@@ -460,6 +506,70 @@ of which is unknown. It processes the first 20 and reports both outcomes:
 }
 ```
 
+### Inputs the Business Did Not Combine
+
+A Business that accepts image references and text but ranks them separately
+keeps the image and says so:
+
+<!-- cspell:ignore ABAQAAAQABAAD -->
+<!-- ucp:example schema=shopping/catalog_recommendations def=recommendations_search_request op=search direction=request -->
+```json
+{
+  "query": "waterproof",
+  "references": [
+    {
+      "image": {
+        "content_type": "image/jpeg",
+        "data": "/9j/4AAQSkZJRgABAQAAAQABAAD..."
+      }
+    }
+  ],
+  "filters": { "price": { "max": 10000 } }
+}
+```
+
+<!-- ucp:example schema=shopping/catalog_search op=search -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [{ "version": "{{ ucp_version }}" }],
+      "dev.ucp.shopping.catalog.recommendations": [{ "version": "{{ ucp_version }}" }]
+    }
+  },
+  "products": [
+    {
+      "id": "prod_jacket",
+      "title": "Trail Jacket",
+      "description": { "plain": "Packable waterproof shell." },
+      "price_range": {
+        "min": { "amount": 8900, "currency": "USD" },
+        "max": { "amount": 8900, "currency": "USD" }
+      },
+      "variants": [
+        {
+          "id": "prod_jacket_olive_m",
+          "title": "Olive / M",
+          "description": { "plain": "Olive / M" },
+          "price": { "amount": 8900, "currency": "USD" },
+          "availability": { "available": true }
+        }
+      ]
+    }
+  ],
+  "pagination": { "has_next_page": false },
+  "messages": [
+    {
+      "type": "info",
+      "code": "unsupported_combination",
+      "path": "$.query",
+      "content": "query is not combined with image references; results reflect the image only."
+    }
+  ]
+}
+```
+
 ### MCP Tool Call
 
 <!-- ucp:example schema=shopping/catalog_recommendations def=recommendations_search_request op=search direction=request extract=$.params.arguments.catalog -->
@@ -492,10 +602,13 @@ This extension does not define:
 
 * Recommendations without anchors (for example, recommendations derived from
     `context` alone). A Business can offer them under an additional `purpose`
-    value it lists in `config.purposes`.
-* Related items returned inline with Catalog Lookup or Get Product results.
-* Anchor kinds other than `id`, such as inline images or items outside the
-    Business's catalog. Other extensions can define them as additional
-    reference properties (see the Anchor Kinds rule).
+    value it lists in `config.relations`.
+* Related items returned by Catalog Lookup or Get Product. The relations and
+    their configuration are defined to carry over to those operations (see
+    [Relations](#relations)); the request and response shapes there are not
+    defined here.
+* Anchor kinds other than `id`. The mechanism for adding and advertising a
+    kind is defined above; the kinds themselves (for example an inline image)
+    are defined by the extensions that introduce them.
 * Substitution preferences that a Buyer sets on a cart, checkout, or order
     line.

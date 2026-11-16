@@ -3,24 +3,49 @@
   "$id": "https://ucp.dev/schemas/shopping/catalog_recommendations.json",
   "name": "dev.ucp.shopping.catalog.recommendations",
   "title": "Catalog Recommendations",
-  "description": "Extends Catalog Search with anchored retrieval purposes: items similar to, complementary to, or substitutes for the anchors the Platform names in `references`. Responses reuse the Catalog Search response unchanged.",
+  "description": "Extends Catalog Search with anchored relations: items similar to, complementary to, or substitutes for the anchors the Platform names in `references`. Responses reuse the Catalog Search response unchanged.",
   "$defs": {
-    "purpose_policy": {
+    "relation_policy": {
       "type": "object",
-      "title": "Purpose Policy",
-      "description": "Policy for one supported `purpose` value. An empty object means the value is supported with no advertised limits.",
+      "title": "Relation Policy",
+      "description": "Policy for one supported relation, keyed by the value a Platform sends in `purpose`. An empty object means the value is supported with no advertised limits.",
       "properties": {
-        "max_references": {
+        "references": {
+          "type": "object",
+          "description": "Anchor kinds this Business accepts for this relation, keyed by kind, each with its limits. Absent means `id` with `max` 1. A kind that is absent is not accepted; a reference of an unlisted kind is dropped with an informational `unsupported_reference` message. Kinds listed together MAY appear together in one request, each bounded by its own `max`.",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/reference_kind_policy"
+            }
+          },
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/reference_kind_policy"
+          }
+        }
+      }
+    },
+    "reference_kind_policy": {
+      "type": "object",
+      "title": "Reference Kind Policy",
+      "description": "Limits for one anchor kind under one relation. Extensions that define a kind MAY add kind-specific fields (for example accepted media types and a byte limit for an inline image).",
+      "properties": {
+        "max": {
           "type": "integer",
           "minimum": 1,
-          "description": "Maximum distinct `references` the Business processes for this purpose. When a request carries more, the Business processes the first `max_references` distinct references in request order and includes an informational `batch_limit_applied` message. Does not apply to `substitute`, which always takes exactly one."
+          "default": 1,
+          "description": "Maximum references of this kind the Business processes per request. When a request carries more, the Business processes the first `max` in request order and includes an informational `batch_limit_applied` message."
         }
       }
     },
     "reference": {
       "type": "object",
       "title": "Reference",
-      "description": "One anchor for the request. Carries exactly one anchor kind. This extension defines `id`; other extensions MAY define additional anchor kinds as additional properties. A Business that does not recognize a reference's anchor kind drops it and SHOULD include an informational `unsupported_reference` message.",
+      "description": "One anchor for the request. Carries exactly one anchor kind. This extension defines `id`. Other extensions define further kinds as additional properties and SHOULD name them with reverse-domain keys; a Business advertises the kinds it accepts per relation in `config.relations`. A reference whose kind the Business does not accept is dropped with an informational `unsupported_reference` message.",
+      "minProperties": 1,
       "properties": {
         "id": {
           "type": "string",
@@ -32,25 +57,26 @@
     "business_config": {
       "type": "object",
       "title": "Business Catalog Recommendations Config",
-      "description": "Purposes this Business supports.",
-      "required": ["purposes"],
+      "description": "Relations this Business supports.",
+      "required": ["relations"],
       "properties": {
-        "purposes": {
+        "relations": {
           "type": "object",
-          "description": "Supported `purpose` values, keyed by value (e.g., `similar`, `complementary`, `substitute`). A Platform MUST NOT send a `purpose` value other than `search` that is absent from this map. `search` is always supported by Catalog Search and is not listed.",
+          "description": "Supported relations, keyed by the value a Platform sends in `purpose` (e.g., `search`, `similar`, `complementary`, `substitute`). A Platform MUST NOT send a `purpose` value other than `search` that is absent from this map. `search` is always supported; listing it advertises which anchor kinds plain search accepts as ranking inputs (absent: none).",
+          "minProperties": 1,
           "propertyNames": {
             "type": "string",
             "minLength": 1
           },
           "additionalProperties": {
-            "$ref": "#/$defs/purpose_policy"
+            "$ref": "#/$defs/relation_policy"
           }
         }
       }
     },
     "recommendations_search_request": {
       "title": "Catalog Search Request with Recommendations",
-      "description": "Catalog search request extended with an anchored retrieval purpose.",
+      "description": "Catalog search request extended with a purpose naming a relation to the referenced items.",
       "allOf": [
         { "$ref": "catalog_search.json#/$defs/search_request" },
         {
@@ -59,7 +85,7 @@
             "purpose": {
               "type": "string",
               "minLength": 1,
-              "description": "Retrieval purpose. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.purposes`. A Business MUST NOT ignore `purpose`; it rejects a value it does not support (error code `unsupported_purpose`).",
+              "description": "Relation the results bear to the references. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.relations`. A Business MUST NOT ignore `purpose`; a value it has not advertised yields an `unsupported_purpose` error message, never a general search.",
               "examples": ["search", "similar", "complementary", "substitute"]
             },
             "references": {
@@ -68,8 +94,7 @@
                 "$ref": "#/$defs/reference"
               },
               "minItems": 1,
-              "uniqueItems": true,
-              "description": "Anchors for the request. Anchors are never returned. Ignored when `purpose` is `search` or omitted."
+              "description": "Anchors for the request. Under `search` (the default) they are ranking inputs combined with `query` when the Business supports the combination (otherwise it reports the input it did not use with an informational `unsupported_combination` message), and nothing is excluded. Under any other relation they are the subject: results bear that relation to them and catalog anchors are never returned. Each reference carries one anchor kind; which kinds a Business accepts for a relation is advertised in `config.relations.<relation>.references`."
             }
           },
           "allOf": [
@@ -110,11 +135,7 @@
                 "required": ["references"],
                 "properties": {
                   "references": {
-                    "maxItems": 1,
-                    "items": {
-                      "required": ["id"]
-                    },
-                    "description": "Exactly one catalog item being replaced, named by `id`. It MUST resolve to one product or variant; otherwise the Business returns an `ambiguous_reference` error. Its attributes guide relevance and are not matching constraints."
+                    "description": "The item being replaced, named by `id` (the default accepted kind). The Business processes up to `config.relations.substitute.references.id.max` references (default 1); when several are processed, the response does not say which result replaces which. An `id` that resolves to more than one product or variant is dropped with an informational `ambiguous_reference` message. The item's attributes guide relevance and are not matching constraints."
                   }
                 }
               }
@@ -141,7 +162,7 @@
       },
       "business_schema": {
         "title": "Catalog Recommendations (Business)",
-        "description": "Business declaration for catalog recommendations. Businesses list the purposes they support in `config.purposes`.",
+        "description": "Business declaration for catalog recommendations. Businesses list the relations they support in `config.relations`.",
         "allOf": [
           { "$ref": "../capability.json#/$defs/business_schema" },
           {

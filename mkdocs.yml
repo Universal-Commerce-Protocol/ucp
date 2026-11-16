@@ -613,8 +613,8 @@ plugins:
               Catalog Recommendations Extension, adding purpose and
               references to catalog search so a platform can ask for items
               similar to, complementary to, or substitutes for products or
-              variants it already knows. Businesses list supported purposes
-              in config.purposes; results reuse the catalog search response.
+              variants it already knows. Businesses list supported relations
+              in config.relations; results reuse the catalog search response.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
