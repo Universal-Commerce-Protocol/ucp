@@ -59,7 +59,7 @@
             "purpose": {
               "type": "string",
               "minLength": 1,
-              "description": "Relation the results bear to the references. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.relations`. A Business MUST NOT ignore `purpose`; it rejects a value it does not support (error code `unsupported_purpose`).",
+              "description": "Relation the results bear to the references. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.relations`. A Business MUST NOT ignore `purpose`; a value it has not advertised yields an `unsupported_purpose` error message, never a general search.",
               "examples": ["search", "similar", "complementary", "substitute"]
             },
             "references": {
@@ -114,7 +114,7 @@
                     "items": {
                       "required": ["id"]
                     },
-                    "description": "Exactly one catalog item being replaced, named by `id`. It MUST resolve to one product or variant; otherwise the Business returns an `ambiguous_reference` error. Its attributes guide relevance and are not matching constraints."
+                    "description": "Exactly one catalog item being replaced, named by `id`. An `id` that resolves to more than one product or variant is dropped with an informational `ambiguous_reference` message. Its attributes guide relevance and are not matching constraints."
                   }
                 }
               }

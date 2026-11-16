@@ -147,16 +147,18 @@ lists every value it supports in `config.relations`.
     remains after dropping unresolved and unrecognized references, the
     Business **MUST** return an empty `products` array, regardless of `query`
     or `filters`; it **MUST NOT** fall back to a general search or browse.
-5. **Substitute Target**: For `substitute`, the `id` **MUST** resolve to
-    exactly one product or variant; a product ID is one anchor even when the
-    product has several variants. When it resolves to more than one, the
-    Business **MUST NOT** choose one and **MUST** return an error response
-    (`ucp.status: "error"`) with an `ambiguous_reference` error message whose
-    `severity` is `recoverable`, whose `path` points at the `id`, and whose
-    `content` names the matching identifiers. Ambiguity depends on the
-    Business's catalog data, so it is a business outcome, not a request error.
-    A Platform replacing a cart line **SHOULD** use that line's product or
-    variant ID.
+5. **Substitute Target**: For `substitute`, a reference whose `id` resolves
+    to more than one product or variant has no single item to replace (a
+    product ID is one anchor even when the product has several variants). The
+    Business **MUST NOT** choose one. It drops the reference as it would an
+    unresolved one and **SHOULD** include an informational
+    `ambiguous_reference` message whose `path` points at the reference and
+    whose `content` names the matching identifiers, so the Platform can resend
+    with one of them; as [Catalog Lookup](../catalog/lookup.md) already treats
+    an identifier matching several products as a successful outcome, so does
+    this extension. When no reference remains, the empty result of the
+    Resolution rule applies. A Platform replacing a cart line **SHOULD** use
+    that line's product or variant ID.
 6. **Exclusion**: Catalog anchors are never returned, on any page of the
     result set. A product anchor excludes the whole product. A variant anchor
     excludes that variant; other variants of its product **MAY** be returned,
@@ -185,9 +187,12 @@ lists every value it supports in `config.relations`.
     Checkout remains authoritative (see
     [Relationship to Checkout](../catalog/index.md#relationship-to-checkout)).
 9. **Unsupported Purpose**: A Business **MUST NOT** ignore `purpose`. A
-    Business that receives a value it does not support (for example, from a
-    Platform acting on a stale profile) **MUST** reject the request using the
-    binding's invalid-request mechanism with the code `unsupported_purpose`.
+    Business that receives a value it has not advertised (for example, from a
+    Platform acting on a stale profile) **MUST** return `ucp.status: "error"`
+    with an `error` message whose `code` is `unsupported_purpose`, whose
+    `severity` is `recoverable`, and whose `content` names the relations it
+    supports, together with an empty `products` array; it **MUST NOT** answer
+    with a general search.
 10. **Buyer Identity**: Results reflect the Business's judgment about the
     anchors and are valid without buyer identity. A Business **MAY**
     personalize results for a buyer-authenticated request.
@@ -199,27 +204,6 @@ This extension composes onto the Catalog Search request only. Results are
 Search results applies to them. With the [Fulfillment](fulfillment.md)
 extension active, `filters.fulfills_to` and `filters.methods` narrow the
 candidates, and each returned variant carries its `fulfillment` methods.
-
-## Transport Bindings
-
-A conforming REST binding **MUST**:
-
-1. Return HTTP 400 with the `unsupported_purpose` error for a search request
-    whose `purpose` the Business does not support.
-2. Return HTTP 400 for a search request that violates the Pairing rule.
-3. Return HTTP 200 with `ucp.status: "error"` and a recoverable
-    `ambiguous_reference` message when a `substitute` reference's `id`
-    resolves to more than one product or variant.
-
-A conforming MCP binding **MUST**:
-
-1. Return `-32602` (Invalid params) for a search request whose `purpose` the
-    Business does not support, with `unsupported_purpose` in `error.data.code`.
-2. Return `-32602` (Invalid params) for a search request that violates the
-    Pairing rule.
-3. Return a result with `ucp.status: "error"` and a recoverable
-    `ambiguous_reference` message when a `substitute` reference's `id`
-    resolves to more than one product or variant.
 
 ## Examples
 
@@ -339,29 +323,39 @@ active, each result carries its pickup availability:
 ### Ambiguous Substitute Reference
 
 A substitute request names a shared SKU (`TEE-BLK`) that matches two variants.
-Rather than guess, the Business returns an error naming the matches, and the
+Rather than guess, the Business drops the reference and names the matches; the
 Platform resends with the variant ID from the cart line:
 
-<!-- ucp:example schema=common/types/error_response op=read -->
+<!-- ucp:example schema=shopping/catalog_search op=search -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
-    "status": "error",
     "capabilities": {
       "dev.ucp.shopping.catalog.search": [{ "version": "{{ ucp_version }}" }],
       "dev.ucp.shopping.catalog.recommendations": [{ "version": "{{ ucp_version }}" }]
     }
   },
+  "products": [],
+  "pagination": { "has_next_page": false },
   "messages": [
     {
-      "type": "error",
+      "type": "info",
       "code": "ambiguous_reference",
       "path": "$.references[0].id",
-      "content": "TEE-BLK matches prod_tee_black_m and prod_tee_black_l; resend with one of these IDs.",
-      "severity": "recoverable"
+      "content": "TEE-BLK matches prod_tee_black_m and prod_tee_black_l; resend with one of these IDs."
     }
   ]
+}
+```
+
+The Platform resends with the variant ID from the cart line:
+
+<!-- ucp:example schema=shopping/catalog_recommendations def=recommendations_search_request op=search direction=request -->
+```json
+{
+  "purpose": "substitute",
+  "references": [{ "id": "prod_tee_black_m" }]
 }
 ```
 

@@ -14,6 +14,6 @@
     "identity_required",
     "insufficient_scope",
     "purchase_option_unavailable",
-    "ambiguous_reference"
+    "unsupported_purpose"
   ]
 }

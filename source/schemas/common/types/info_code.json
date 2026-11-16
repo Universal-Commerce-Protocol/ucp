@@ -9,6 +9,7 @@
     "signal",
     "free_shipping",
     "not_found",
-    "unsupported_reference"
+    "unsupported_reference",
+    "ambiguous_reference"
   ]
 }
