@@ -76,10 +76,15 @@ A business that supports (a) a card with up to 2 redeemables, (b) up to 5 gift c
 
 ```json
 {
-  "capabilities": [{
+  "capabilities": {
     "dev.ucp.common.payment.split_payments": [
       {
         "version": "draft",
+        "spec": "https://ucp.dev/draft/specification/payment/extensions/split-payments",
+        "schema": "https://ucp.dev/draft/schemas/common/payment_split_payments.json",
+        "extends": [
+          "dev.ucp.shopping.checkout"
+        ],
         "config": {
           "allowed_combinations": [
             [
@@ -96,7 +101,7 @@ A business that supports (a) a card with up to 2 redeemables, (b) up to 5 gift c
         }
       }
     ]
-  }]
+  }
 }
 ```
 
