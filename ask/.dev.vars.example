@@ -1,0 +1,6 @@
+# Secrets / local overrides for `wrangler dev`
+# MODEL_API_KEY=...            # only if your model server requires one
+# MODEL_BASE_URL=http://localhost:11434/v1   # e.g. Ollama
+# MODEL=gemma3:12b
+# INDEX_URLS=http://localhost:8000/ask-index.json
+# ALLOWED_ORIGINS=http://localhost:8000

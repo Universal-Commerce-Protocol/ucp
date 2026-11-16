@@ -64,8 +64,12 @@ jobs:
           LOG_LEVEL: INFO
           SHELLCHECK_OPTS: -e SC1091 -e 2086
           VALIDATE_ALL_CODEBASE: false
+          # ask/ is a standalone Cloudflare Worker package (web platform APIs,
+          # not Node); it is type-checked, linted with Biome and tested by its
+          # own npm scripts, so super-linter's Node-oriented ESLint rules do
+          # not apply to it.
           FILTER_REGEX_EXCLUDE: >-
-            ^(\\.github/|\\.vscode/).*|CODE_OF_CONDUCT.md|CHANGELOG.md
+            .*/(\.github|\.vscode)/.*|.*/ask/(src|test)/.*|.*/(CODE_OF_CONDUCT|CHANGELOG)\.md
           VALIDATE_BIOME_FORMAT: false
           VALIDATE_PYTHON_BLACK: false
           VALIDATE_PYTHON_FLAKE8: false
