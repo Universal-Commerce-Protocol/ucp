@@ -4,6 +4,26 @@ Welcome to the Universal Commerce Protocol (UCP) announcements page. Here we pos
 
 ______________________________________________________________________
 
+## November 13, 2026: Nominations Open for the B2B Procurement Technical Council (B2B Procurement TC)
+
+The UCP Governing Council has approved the [B2B Procurement Tech Council Charter Proposal](https://github.com/Universal-Commerce-Protocol/ucp/issues/947), and nominations for the founding B2B Procurement Technical Council (B2B Procurement TC) are now open. The B2B Procurement TC will define and maintain UCP capabilities for end-to-end enterprise and business-to-business procurement journeys, including procurement-aware discovery, buyer eligibility and business pricing, requisition and approval workflows, purchase orders, and post-purchase fulfillment, invoicing, and reconciliation.
+
+Organizations with B2B procurement or supplier-side commerce expertise are encouraged to apply by **November 27, 2026 (11:59 PM PT)** using the [UCP B2B Procurement TC Application Form](https://docs.google.com/forms/d/e/1FAIpQLSeUOwvptrmAI6IUj6KZ1eL0bheKZQK4FjIxPSglpp7VcQa1gQ/viewform?usp=header). Membership is tentatively scheduled to be announced on December 11, 2026.
+
+For more details, read the full announcement in the [GitHub Discussion #1094](https://github.com/Universal-Commerce-Protocol/ucp/discussions/1094).
+
+______________________________________________________________________
+
+## November 13, 2026: Nominations Open for the Local Services Technical Council (Local Services TC)
+
+The UCP Governing Council has approved the [Local Services Tech Council Charter Proposal](https://github.com/Universal-Commerce-Protocol/ucp/issues/922), and nominations for the founding Local Services Technical Council (Local Services TC) are now open. The Local Services TC will define and maintain UCP capabilities for end-to-end journeys for time-based local services, including service catalog discovery, real-time availability, and post-booking lifecycles (reschedule, cancellation, no-show, and waitlist) across appointments, group sessions, and reservations.
+
+Organizations with local services domain expertise are encouraged to apply by **November 27, 2026 (11:59 PM PT)** using the [UCP Local Services TC Application Form](https://docs.google.com/forms/d/e/1FAIpQLSdSfd1EszUzu5D2AcmElQGo-KXzaP2vyEz40M2WOn6H3OsBLA/viewform?usp=header). Membership is tentatively scheduled to be announced on December 11, 2026.
+
+For more details, read the full announcement in the [GitHub Discussion #1093](https://github.com/Universal-Commerce-Protocol/ucp/discussions/1093).
+
+______________________________________________________________________
+
 ## November 12, 2026: UCP Food: Checkout Capability Draft Spec Release
 
 We are thrilled to announce that the initial draft version of the Food Checkout capability (`dev.ucp.food.checkout`), along with the Fulfillment (`dev.ucp.food.fulfillment`) and Tip (`dev.ucp.food.tip`) extensions, has been merged into the Universal Commerce Protocol repository, marking the formal expansion of UCP into the Food domain.
