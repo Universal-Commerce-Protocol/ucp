@@ -30,8 +30,8 @@ the answer guarantees.
 
 This extension adds two fields to the Catalog Search request:
 
-* `purpose`: the retrieval purpose (`similar`, `complementary`, or
-    `substitute`; `search` is the default).
+* `purpose`: the relation the results bear to the references (`similar`,
+    `complementary`, or `substitute`; `search` is the default).
 * `references`: the anchors for the request. Each reference names a product
     or variant by `id`; other extensions can define additional kinds of
     anchor.
@@ -47,10 +47,10 @@ without further composition.
 
 ## Discovery
 
-Support for each purpose varies by Business: recommendations often run on a
+Support for each relation varies by Business: recommendations often run on a
 separate merchandising service, and substitution is common in grocery,
 pharmacy, and B2B catalogs. A Business declares the extension and lists the
-purposes it supports in `config.purposes`:
+relations it supports in `config.relations`:
 
 <!-- ucp:example schema=profile def=business_schema extract=$.ucp.capabilities target=$.ucp.capabilities -->
 ```json
@@ -65,7 +65,7 @@ purposes it supports in `config.purposes`:
           "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/recommendations",
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_recommendations.json",
           "config": {
-            "purposes": {
+            "relations": {
               "complementary": { "max_references": 20 },
               "substitute": {}
             }
@@ -81,17 +81,17 @@ A Platform that supports the extension declares it in its own profile without
 `config`. The extension is active only when both parties declare it and Catalog
 Search is in the negotiated intersection (see
 [Intersection Algorithm](../../overview/index.md#intersection-algorithm)).
-A Platform reads `config.purposes` from the profile it already fetches, so it
-knows before calling which purposes it can offer.
+A Platform reads `config.relations` from the profile it already fetches, so it
+knows before calling which relations it can offer.
 
 ### Configuration
 
 {{ extension_schema_fields('catalog_recommendations.json#/$defs/business_config', 'shopping/extensions/recommendations') }}
 
-Each entry in `config.purposes` is a purpose policy. An empty object means the
-purpose is supported with no advertised limits.
+Each entry in `config.relations` is a relation policy. An empty object means the
+relation is supported with no advertised limits.
 
-{{ extension_schema_fields('catalog_recommendations.json#/$defs/purpose_policy', 'shopping/extensions/recommendations') }}
+{{ extension_schema_fields('catalog_recommendations.json#/$defs/relation_policy', 'shopping/extensions/recommendations') }}
 
 ## Schema
 
@@ -101,7 +101,7 @@ purpose is supported with no advertised limits.
 
 {{ extension_schema_fields('catalog_recommendations.json#/$defs/reference', 'shopping/extensions/recommendations') }}
 
-## Purposes
+## Relations
 
 | `purpose` | Returns | `references` |
 | :-- | :-- | :-- |
@@ -110,14 +110,17 @@ purpose is supported with no advertised limits.
 | `complementary` | Items that go with the anchors (cross-sell, basket completion) | One or more; one joint anchor set |
 | `substitute` | A replacement for one specific item, for the same need | Exactly one |
 
+A request names the relation it wants in `purpose`; a Business advertises the
+relations it answers in `config.relations`.
+
 The vocabulary is open. A Business **MAY** support additional values, and
-lists every value it supports in `config.purposes`.
+lists every value it supports in `config.relations`.
 
 ## Rules
 
 1. **Negotiation**: A Platform **MUST NOT** send a `purpose` other than
     `search` unless this extension is active and the value is a key of
-    `config.purposes`.
+    `config.relations`.
 2. **Pairing**: When `purpose` is `similar` or `complementary`, `references`
     **MUST** contain at least one reference; multiple references jointly
     describe one anchor set, results relate to that set as a whole, and the
@@ -492,7 +495,7 @@ This extension does not define:
 
 * Recommendations without anchors (for example, recommendations derived from
     `context` alone). A Business can offer them under an additional `purpose`
-    value it lists in `config.purposes`.
+    value it lists in `config.relations`.
 * Related items returned inline with Catalog Lookup or Get Product results.
 * Anchor kinds other than `id`, such as inline images or items outside the
     Business's catalog. Other extensions can define them as additional

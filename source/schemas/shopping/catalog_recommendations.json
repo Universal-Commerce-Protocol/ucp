@@ -3,12 +3,12 @@
   "$id": "https://ucp.dev/schemas/shopping/catalog_recommendations.json",
   "name": "dev.ucp.shopping.catalog.recommendations",
   "title": "Catalog Recommendations",
-  "description": "Extends Catalog Search with anchored retrieval purposes: items similar to, complementary to, or substitutes for the anchors the Platform names in `references`. Responses reuse the Catalog Search response unchanged.",
+  "description": "Extends Catalog Search with anchored relations: items similar to, complementary to, or substitutes for the anchors the Platform names in `references`. Responses reuse the Catalog Search response unchanged.",
   "$defs": {
-    "purpose_policy": {
+    "relation_policy": {
       "type": "object",
-      "title": "Purpose Policy",
-      "description": "Policy for one supported `purpose` value. An empty object means the value is supported with no advertised limits.",
+      "title": "Relation Policy",
+      "description": "Policy for one supported relation, keyed by the value a Platform sends in `purpose`. An empty object means the value is supported with no advertised limits.",
       "properties": {
         "max_references": {
           "type": "integer",
@@ -32,25 +32,25 @@
     "business_config": {
       "type": "object",
       "title": "Business Catalog Recommendations Config",
-      "description": "Purposes this Business supports.",
-      "required": ["purposes"],
+      "description": "Relations this Business supports.",
+      "required": ["relations"],
       "properties": {
-        "purposes": {
+        "relations": {
           "type": "object",
-          "description": "Supported `purpose` values, keyed by value (e.g., `similar`, `complementary`, `substitute`). A Platform MUST NOT send a `purpose` value other than `search` that is absent from this map. `search` is always supported by Catalog Search and is not listed.",
+          "description": "Supported relations, keyed by the value a Platform sends in `purpose` (e.g., `similar`, `complementary`, `substitute`). A Platform MUST NOT send a `purpose` value other than `search` that is absent from this map. `search` is always supported by Catalog Search and is not listed.",
           "propertyNames": {
             "type": "string",
             "minLength": 1
           },
           "additionalProperties": {
-            "$ref": "#/$defs/purpose_policy"
+            "$ref": "#/$defs/relation_policy"
           }
         }
       }
     },
     "recommendations_search_request": {
       "title": "Catalog Search Request with Recommendations",
-      "description": "Catalog search request extended with an anchored retrieval purpose.",
+      "description": "Catalog search request extended with a purpose naming a relation to the referenced items.",
       "allOf": [
         { "$ref": "catalog_search.json#/$defs/search_request" },
         {
@@ -59,7 +59,7 @@
             "purpose": {
               "type": "string",
               "minLength": 1,
-              "description": "Retrieval purpose. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.purposes`. A Business MUST NOT ignore `purpose`; it rejects a value it does not support (error code `unsupported_purpose`).",
+              "description": "Relation the results bear to the references. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.relations`. A Business MUST NOT ignore `purpose`; it rejects a value it does not support (error code `unsupported_purpose`).",
               "examples": ["search", "similar", "complementary", "substitute"]
             },
             "references": {
@@ -141,7 +141,7 @@
       },
       "business_schema": {
         "title": "Catalog Recommendations (Business)",
-        "description": "Business declaration for catalog recommendations. Businesses list the purposes they support in `config.purposes`.",
+        "description": "Business declaration for catalog recommendations. Businesses list the relations they support in `config.relations`.",
         "allOf": [
           { "$ref": "../capability.json#/$defs/business_schema" },
           {
