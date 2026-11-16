@@ -63,6 +63,7 @@
         "relations": {
           "type": "object",
           "description": "Supported relations, keyed by the value a Platform sends in `purpose` (e.g., `search`, `similar`, `complementary`, `substitute`). A Platform MUST NOT send a `purpose` value other than `search` that is absent from this map. `search` is always supported; listing it advertises which anchor kinds plain search accepts as ranking inputs (absent: none).",
+          "minProperties": 1,
           "propertyNames": {
             "type": "string",
             "minLength": 1

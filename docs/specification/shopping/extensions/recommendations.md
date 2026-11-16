@@ -86,7 +86,8 @@ anchor kinds it accepts and how many of each it processes per request; when
 `references` is absent, the relation accepts `id`, one per request. A kind
 that is not listed is not accepted, so a Platform never sends a reference
 speculatively. Listing `search` advertises the kinds plain search accepts as
-ranking inputs; when it is absent, plain search accepts none.
+ranking inputs; when it is absent, plain search accepts none. A Business that
+supports none of them does not declare the extension.
 
 A Platform that supports the extension declares it in its own profile without
 `config`. The extension is active only when both parties declare it and Catalog
@@ -131,6 +132,14 @@ relations it answers in `config.relations`.
 
 The vocabulary is open. A Business **MAY** support additional values, and
 lists every value it supports in `config.relations`.
+
+A relation is defined by what its results are to the references,
+independently of the operation that requests it. This version requests
+relations on Catalog Search, where the results are a ranked, paginated list.
+A later version **MAY** request the same relations on Catalog Lookup and Get
+Product, returning related items alongside the products those operations
+resolve, with the same values and the same `config.relations`; a Business's
+declaration carries over unchanged.
 
 ## Rules
 
@@ -522,7 +531,10 @@ This extension does not define:
 * Recommendations without anchors (for example, recommendations derived from
     `context` alone). A Business can offer them under an additional `purpose`
     value it lists in `config.relations`.
-* Related items returned inline with Catalog Lookup or Get Product results.
+* Related items returned by Catalog Lookup or Get Product. The relations and
+    their configuration are defined to carry over to those operations (see
+    [Relations](#relations)); the request and response shapes there are not
+    defined here.
 * Anchor kinds other than `id`. The mechanism for adding and advertising a
     kind is defined above; the kinds themselves (for example an inline image)
     are defined by the extensions that introduce them.
