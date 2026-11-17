@@ -206,6 +206,7 @@ surface to the buyer:
       "code": "payment_failed",
       "path": "$.payment.instruments[1]",
       "severity": "recoverable",
+      "retry_hint": "use_different_instrument",
       "content": "Card declined — insufficient funds."
     }
   ]
