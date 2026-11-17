@@ -693,9 +693,7 @@ See the [Core Specification](../../overview/index.md#error-handling) for the com
 code registry and transport binding examples.
 
 * **Protocol errors**: Return the HTTP status code from the error code
-    registry. The body is optional; when present it is a
-    [Protocol Error](../../reference.md#protocol-error) (`code`, `content`,
-    optional `continue_url`).
+    registry ([Protocol Error](../../reference.md#protocol-error) schema).
 * **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
 #### Business Outcomes

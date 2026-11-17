@@ -1117,11 +1117,6 @@ For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC
 `Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503
 responses.
 
-A REST protocol error **MAY** omit the body. When present, the body **MUST**
-be a [Protocol Error](../reference.md#protocol-error) (`code`, `content`,
-optional `continue_url`). The [Error Response](../reference.md#error-response)
-envelope (`ucp`, `messages`) is only for business outcomes on HTTP 200 and 201.
-
 The Embedded Protocol uses the same JSON-RPC error codes for peer-to-peer
 communication between host and embedded context. Server-specific scenarios
 (rate limiting, idempotency) do not apply to the embedded transport. See
@@ -1211,7 +1206,8 @@ task through the standard web interface.
     ```
 
     Protocol errors use standard HTTP status codes and headers. Response bodies
-    are optional; when present they are a Protocol Error.
+    are optional; when present they **MUST** be a
+    [Protocol Error](../reference.md#protocol-error).
 
 === "MCP"
 
