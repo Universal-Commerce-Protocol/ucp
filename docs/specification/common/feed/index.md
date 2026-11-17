@@ -348,11 +348,11 @@ list at the Business's declared `config.endpoint` (see
 [Access and Provenance](#access-and-provenance)), not from `digest`.
 
 `ucp` uses the same envelope shape as a UCP response. On a manifest it
-declares the UCP version and the capabilities and extensions whose schemas the
-records conform to; it does not record a negotiation, because a manifest is a
-static document, not an operation response. The Business **MUST** declare
+declares the UCP version and the capabilities and extensions that govern the
+snapshot and its records; it does not record a negotiation, because a manifest
+is a static document, not an operation response. The Business **MUST** declare
 `dev.ucp.common.feed` in `ucp.capabilities`, together with every capability
-and extension whose schemas the records conform to, and **MUST** include
+and extension that governs the snapshot and its records, and **MUST** include
 `extends` on every extension entry, as in its profile. A Platform **MUST NOT**
 consume a manifest that does not declare `dev.ucp.common.feed`; the manifest's
 own shape is defined by that capability, so without the declaration there is
@@ -585,9 +585,9 @@ capability; Buyer-level authentication is out of scope.
 
 ### Extensions
 
-Record shape extends as operation responses do: an extension declared in the
-manifest's `ucp.capabilities` adds typed fields to records, exactly as it does
-for the responses of the capability that defines them.
+An extension of the feed's record type declared in the manifest's
+`ucp.capabilities` **MAY** enrich records, in accordance with the record-type
+specification and using record schemas where defined.
 
 An extension **MAY** define additional manifest fields, composing onto the
 manifest. Feed list entries are shared by every feed in the list and take no

@@ -176,7 +176,7 @@
       "properties": {
         "ucp": {
           "$ref": "../ucp.json#/$defs/response_feed_schema",
-          "description": "Declares the UCP version and the capabilities, including extensions, whose schemas the records in this snapshot conform to. Same envelope as a UCP response.",
+          "description": "Declares the UCP version and the capabilities, including extensions, that govern this snapshot and its records. Same envelope as a UCP response.",
           "ucp_request": "omit"
         },
         "id": {
