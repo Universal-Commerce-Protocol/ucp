@@ -16,14 +16,14 @@
 
 # Operator Extension
 
-* **Extension Name:** `dev.ucp.shopping.ask.operator`
+* **Extension Name:** `dev.ucp.common.ask.operator`
 * **Extends:** `dev.ucp.common.ask`
-* **Schema:** [Operator](site:schemas/shopping/ask_operator.json)
+* **Schema:** [Operator](site:schemas/common/ask_operator.json)
 
 ## Overview
 
 Operator extends the Universal Commerce Protocol (UCP) Common
-[Ask capability](../../common/ask/index.md) with operator support for Shopping.
+[Ask capability](../ask/index.md) with operator support.
 An operator can answer questions and carry out separately authorized
 Buyer-requested work through the Business's own support workflow,
 under Business authorization and Buyer consent controls. Automated
@@ -151,11 +151,11 @@ The Business advertises Operator as an extension of Common Ask:
         "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/ask/",
         "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/ask.json"
       }],
-      "dev.ucp.shopping.ask.operator": [{
+      "dev.ucp.common.ask.operator": [{
         "version": "{{ ucp_version }}",
         "extends": "dev.ucp.common.ask",
-        "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/extensions/ask-operator/",
-        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/ask_operator.json"
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/extensions/ask-operator/",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/ask_operator.json"
       }]
     }
   }
@@ -164,32 +164,32 @@ The Business advertises Operator as an extension of Common Ask:
 
 The Platform and Business negotiate Operator alongside `dev.ucp.common.ask`.
 When active, Operator composes its request and response definitions with
-Common Ask and uses [Ask's existing bindings](../../common/ask/index.md#transport-bindings).
+Common Ask and uses [Ask's existing bindings](../ask/index.md#transport-bindings).
 
 ## Schema
 
 ### Request
 
-{{ extension_schema_fields('ask_operator.json#/$defs/ask_request', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/ask_request', 'common/extensions/ask-operator') }}
 
 ### Query Author
 
-{{ extension_schema_fields('ask_operator.json#/$defs/request_author', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/request_author', 'common/extensions/ask-operator') }}
 
 ### Escalation Request
 
-{{ extension_schema_fields('ask_operator.json#/$defs/escalation', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/escalation', 'common/extensions/ask-operator') }}
 
 ### Operator Context
 
 `time_zone` uses an Internet Assigned Numbers Authority (IANA) time zone
 identifier.
 
-{{ extension_schema_fields('ask_operator.json#/$defs/context', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/context', 'common/extensions/ask-operator') }}
 
 ### Response
 
-{{ extension_schema_fields('ask_operator.json#/$defs/ask_response', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/ask_response', 'common/extensions/ask-operator') }}
 
 ### Operator Conversation
 
@@ -197,18 +197,18 @@ identifier.
 open strings. Unknown values follow [Error model](#error-model), not absence
 defaults.
 
-{{ extension_schema_fields('ask_operator.json#/$defs/conversation', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/conversation', 'common/extensions/ask-operator') }}
 
 ### Operator Answer
 
 Markdown and HTML remain optional alternative encodings of the same plain-text
 answer, not separate replies.
 
-{{ extension_schema_fields('ask_operator.json#/$defs/answer', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/answer', 'common/extensions/ask-operator') }}
 
 ### Answer Author
 
-{{ extension_schema_fields('ask_operator.json#/$defs/answer_author', 'shopping/extensions/ask-operator') }}
+{{ extension_schema_fields('ask_operator.json#/$defs/answer_author', 'common/extensions/ask-operator') }}
 
 ## Fetching the latest conversation state
 
@@ -219,7 +219,7 @@ reply inline. Acceptance alone does not mean an operator is handling the
 conversation. A ready reply need not end operator support.
 
 Submission and escalation retries inherit
-[Ask's idempotency recommendation](../../common/ask/index.md#conversation).
+[Ask's idempotency recommendation](../ask/index.md#conversation).
 If a key is supplied when fetching state, reusing it for successive
 observations may return cached state rather than a newer observation.
 Ask's expiry and unresolved-conversation rules still apply; expiry is not
@@ -257,17 +257,17 @@ values, the receiving Business or Platform **MUST NOT** treat them as human
 authorship or operator support; it **MAY** label them unknown. Unknown string
 values are not schema-invalid.
 
-Common Ask's [`operation_not_performed`](../../common/ask/index.md#well-known-codes)
+Common Ask's [`operation_not_performed`](../ask/index.md#well-known-codes)
 means that no corresponding action occurred. The Business **MUST NOT** emit it
 for completed operator work. Neither its absence nor escalation acceptance
 proves completion. Malformed requests, authentication failures, rate limits, and
-service failures follow [Ask's existing error handling](../../common/ask/index.md#transport-bindings),
+service failures follow [Ask's existing error handling](../ask/index.md#transport-bindings),
 not the handoff info codes above.
 
 ## Security Considerations
 
-[Ask security](../../common/ask/index.md#security-considerations) and
-[Identity Linking](../../common/identity-linking/index.md) apply. The Business
+[Ask security](../ask/index.md#security-considerations) and
+[Identity Linking](../identity-linking/index.md) apply. The Business
 **MUST** authorize every protected request, including state retrieval, using
 the credential presented with that request before using or disclosing retained
 history. A conversation identifier carries context, not authority. The Business
@@ -302,7 +302,7 @@ not authorize contact or further disclosure.
 The Business **MUST NOT** disclose more operator display-name information than
 it exposes through its own Buyer-facing channels; the Platform rejects detected
 violations under [Error model](#error-model). Retention follows
-[Ask's conversation policy](../../common/ask/index.md#conversation) and
+[Ask's conversation policy](../ask/index.md#conversation) and
 applicable privacy obligations, not an assumption of indefinite storage.
 
 ## Examples
@@ -311,7 +311,7 @@ applicable privacy obligations, not an assumption of indefinite storage.
 
 The Buyer asks for help exchanging damaged shoes:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_request op=create direction=request -->
+<!-- ucp:example schema=common/ask_operator def=ask_request op=create direction=request -->
 ```json
 {
   "query": "My shoes arrived damaged. Can a person help me exchange them?",
@@ -324,14 +324,14 @@ The Buyer asks for help exchanging damaged shoes:
 The Business accepts the request into the operator queue. Automated Q&A remains
 the current handler until an operator takes over; the pending answer is automated:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_response op=read direction=response -->
+<!-- ucp:example schema=common/ask_operator def=ask_response op=read direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.common.ask": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.ask.operator": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.ask.operator": [{"version": "{{ ucp_version }}"}]
     }
   },
   "answer": {
@@ -356,7 +356,7 @@ the current handler until an operator takes over; the pending answer is automate
 
 The Platform uses the Business-issued conversation without adding a turn:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_request op=create direction=request -->
+<!-- ucp:example schema=common/ask_operator def=ask_request op=create direction=request -->
 ```json
 {
   "query": "",
@@ -369,14 +369,14 @@ An operator has taken over and replied; operator support remains active. The
 operator performed the reported work under separate authorization and consent
 controls; the text is not authoritative execution evidence:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_response op=read direction=response -->
+<!-- ucp:example schema=common/ask_operator def=ask_response op=read direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.common.ask": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.ask.operator": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.ask.operator": [{"version": "{{ ucp_version }}"}]
     }
   },
   "answer": {
@@ -393,14 +393,14 @@ A later observation shows that the operator has finished. The Business retains
 the same identifier, context, and current human-authored answer. The next
 substantive query returns to automated Q&A:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_response op=read direction=response -->
+<!-- ucp:example schema=common/ask_operator def=ask_response op=read direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.common.ask": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.ask.operator": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.ask.operator": [{"version": "{{ ucp_version }}"}]
     }
   },
   "answer": {
@@ -416,7 +416,7 @@ substantive query returns to automated Q&A:
 An empty `escalate` object requests an operator again on the same conversation.
 Even with an empty query, this is an escalation request, not state retrieval:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_request op=create direction=request -->
+<!-- ucp:example schema=common/ask_operator def=ask_request op=create direction=request -->
 ```json
 {
   "query": "",
@@ -428,14 +428,14 @@ Even with an empty query, this is an escalation request, not state retrieval:
 The Business accepts the request into the operator queue again, retaining the
 conversation context. Automated Q&A remains the current handler while waiting:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_response op=read direction=response -->
+<!-- ucp:example schema=common/ask_operator def=ask_response op=read direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.common.ask": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.ask.operator": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.ask.operator": [{"version": "{{ ucp_version }}"}]
     }
   },
   "answer": {
@@ -457,14 +457,14 @@ If operator support cannot continue, the Business returns to automated Q&A with
 an actionable alternative. A declined initial handoff also uses
 `open / agent` and `escalation_unavailable`:
 
-<!-- ucp:example schema=shopping/ask_operator def=ask_response op=read direction=response -->
+<!-- ucp:example schema=common/ask_operator def=ask_response op=read direction=response -->
 ```json
 {
   "ucp": {
     "version": "{{ ucp_version }}",
     "capabilities": {
       "dev.ucp.common.ask": [{"version": "{{ ucp_version }}"}],
-      "dev.ucp.shopping.ask.operator": [{"version": "{{ ucp_version }}"}]
+      "dev.ucp.common.ask.operator": [{"version": "{{ ucp_version }}"}]
     }
   },
   "answer": {
@@ -491,10 +491,10 @@ operator-work boundary.
 
 ## References
 
-Normative dependencies are [Common Ask](../../common/ask/index.md), its
-[bindings](../../common/ask/index.md#transport-bindings),
-[Identity Linking](../../common/identity-linking/index.md), the
-[Operator schema](site:schemas/shopping/ask_operator.json), and BCP 14
+Normative dependencies are [Common Ask](../ask/index.md), its
+[bindings](../ask/index.md#transport-bindings),
+[Identity Linking](../identity-linking/index.md), the
+[Operator schema](site:schemas/common/ask_operator.json), and BCP 14
 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and
 [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174)).
-[Ask in Shopping](../ask/index.md) provides informative context.
+[Ask in Shopping](../../shopping/ask/index.md) provides informative context.
