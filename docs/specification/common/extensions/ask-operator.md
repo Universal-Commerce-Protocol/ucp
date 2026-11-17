@@ -94,9 +94,8 @@ pending.
   under Ask's bindings. Stopping observation does not cancel separately
   authorized Business work.
 * The Platform **MUST NOT** present pending text as a completed substantive
-  reply, automated text as human-authored, or the current answer's author as
-  necessarily the current handler. It **MUST NOT** infer operator takeover
-  from escalation acceptance alone. It **MUST** surface handoff outcomes and
+  reply or the current answer's author as necessarily the current handler. It
+  **MUST NOT** infer operator takeover from escalation acceptance alone. It **MUST** surface handoff outcomes and
   their actionable Buyer-facing content, and reject invalid responses as
   described in [Error model](#error-model).
 
@@ -130,11 +129,12 @@ pending.
   The next substantive turn returns to automated Q&A, and later escalation
   remains possible. The Platform keeps answer authorship separate from this
   change of responder and rejects unexpected identifier replacement.
-* The Business **MUST** set `answer.author.type: human` for every human-authored
-  reply and **MUST NOT** claim human authorship for automated text, including
-  pending text while an operator handles the conversation. The Platform uses
-  answer attribution, not the responder, to identify who wrote the answer;
-  detected violations follow [Error model](#error-model).
+* The Business **MUST** apply
+  [Common Ask answer authorship](../ask/index.md#answer-author) to every reply:
+  an operator-written reply is `human`, and automated pending text is `agent`
+  even while an operator handles the conversation. The Platform uses answer
+  attribution, not the responder, to identify who wrote the answer; detected
+  violations follow [Error model](#error-model).
 
 ## Discovery
 
@@ -202,13 +202,10 @@ defaults.
 ### Operator Answer
 
 Markdown and HTML remain optional alternative encodings of the same plain-text
-answer, not separate replies.
+answer, not separate replies. `author` is inherited from
+[Common Ask](../ask/index.md#answer-author).
 
 {{ extension_schema_fields('ask_operator.json#/$defs/answer', 'common/extensions/ask-operator') }}
-
-### Answer Author
-
-{{ extension_schema_fields('ask_operator.json#/$defs/answer_author', 'common/extensions/ask-operator') }}
 
 ## Fetching the latest conversation state
 

@@ -5,11 +5,6 @@
   "title": "Operator Extension",
   "description": "Extends Common Ask with access to a Business operator within an Ask conversation, preserving conversation continuity and identifying reply authorship. Operators can carry out separately authorized Buyer-requested work while automated Q&A remains read-only.",
   "$defs": {
-    "participant_type": {
-      "type": "string",
-      "description": "Participant kind. Well-known values: `agent` (automated), `human` (a person). Receivers must tolerate unknown values without treating them as human authorship or operator support.",
-      "examples": ["agent", "human"]
-    },
     "request_author": {
       "title": "Query Author",
       "description": "Query origin asserted by the Platform, not authentication or authority. When absent, the author is `agent`.",
@@ -17,7 +12,7 @@
       "required": ["type"],
       "properties": {
         "type": {
-          "$ref": "#/$defs/participant_type",
+          "$ref": "ask.json#/$defs/participant_type",
           "description": "Query authorship. Use `human` only for the Buyer's own words; summaries, paraphrases, and translations are `agent`."
         }
       }
@@ -69,29 +64,13 @@
               "examples": ["open", "answer_in_progress"]
             },
             "responder": {
-              "$ref": "#/$defs/participant_type",
+              "$ref": "ask.json#/$defs/participant_type",
               "ucp_request": "omit",
               "description": "Current conversation handler: `agent` for automated Q&A, including accepted requests still waiting for an operator; `human` only once a Business operator takes over. Absence means `agent`. Independent of answer readiness and the current answer's author; unknown values never imply operator support."
             }
           }
         }
       ]
-    },
-    "answer_author": {
-      "title": "Answer Author",
-      "description": "Origin of the current answer, not authentication or authority. When absent, the author is `agent`.",
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "$ref": "#/$defs/participant_type",
-          "description": "Answer authorship. Use `human` only for human-authored text; automated pending text is `agent` even while an operator handles the conversation. Unknown values never imply human authorship."
-        },
-        "name": {
-          "type": "string",
-          "description": "Optional author display label, limited to what the Business exposes through its own Buyer-facing channels. Not proof of identity."
-        }
-      }
     },
     "answer": {
       "title": "Operator Answer",
@@ -105,10 +84,6 @@
             "plain": {
               "minLength": 1,
               "description": "Non-empty plain-text answer."
-            },
-            "author": {
-              "$ref": "#/$defs/answer_author",
-              "description": "Origin of this answer, independent of the current responder. Absence means `agent`."
             }
           }
         }

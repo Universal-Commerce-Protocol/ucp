@@ -217,6 +217,34 @@ To keep answers useful and trustworthy, a Business **SHOULD**:
 
 {{ extension_schema_fields('ask.json#/$defs/ask_response/properties/answer', 'common/ask') }}
 
+### Answer Author
+
+`answer.author` identifies who wrote the text of the current `answer`. Omitting `author` means `agent`; a Platform **MUST** treat an `answer` without `author` as agent-authored.
+
+{{ extension_schema_fields('ask.json#/$defs/answer_author', 'common/ask') }}
+
+A Business **MUST** set `author.type: human` for human-authored text and **MUST NOT** claim human authorship for automated text. Authorship identifies text origin, not the current conversation handler; a Platform **MUST NOT** infer live human participation from it. Attribution, including `name`, is not proof of identity or authority and does not make an `answer` authoritative (see [Answer](#answer)).
+
+For example, a Business returns a pre-approved shipping response written by a person:
+
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.ask": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "answer": {
+    "plain": "Orders placed before 2 p.m. Eastern on a business day ship the same day.",
+    "author": {"type": "human", "name": "Support Team"}
+  }
+}
+```
+
 ## Context
 
 Market and localization context for the question — country, language, intent,
