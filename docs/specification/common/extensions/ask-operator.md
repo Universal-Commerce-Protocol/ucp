@@ -369,6 +369,9 @@ An operator has taken over and replied; operator support remains active. The
 operator performed the reported work under separate authorization and consent
 controls; the text is not authoritative execution evidence:
 
+Inherited [Ask links](../ask/index.md#links) identify related resources or pages
+as pointers, not execution evidence.
+
 <!-- ucp:example schema=common/ask_operator def=ask_response op=read direction=response -->
 ```json
 {
@@ -383,7 +386,13 @@ controls; the text is not authoritative execution evidence:
     "plain": "I've arranged the exchange you authorized for the damaged shoes. The return label is on its way to your email.",
     "author": {"type": "human", "name": "Alex"}
   },
-  "conversation": {"id": "cnv_8f3Kd2", "status": "open", "responder": "human"}
+  "conversation": {"id": "cnv_8f3Kd2", "status": "open", "responder": "human"},
+  "links": [{
+    "type": "order",
+    "url": "https://business.example/orders/ord_123",
+    "id": "gid://business.example/Order/ord_123",
+    "title": "Order associated with the exchange"
+  }]
 }
 ```
 
@@ -407,7 +416,13 @@ substantive query returns to automated Q&A:
     "plain": "I've arranged the exchange you authorized for the damaged shoes. The return label is on its way to your email.",
     "author": {"type": "human", "name": "Alex"}
   },
-  "conversation": {"id": "cnv_8f3Kd2", "status": "open", "responder": "agent"}
+  "conversation": {"id": "cnv_8f3Kd2", "status": "open", "responder": "agent"},
+  "links": [{
+    "type": "order",
+    "url": "https://business.example/orders/ord_123",
+    "id": "gid://business.example/Order/ord_123",
+    "title": "Order associated with the exchange"
+  }]
 }
 ```
 
