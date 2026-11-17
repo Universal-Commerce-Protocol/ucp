@@ -137,12 +137,14 @@ purchase success.
 
 A catalog feed is resolved for one market. Its `context` **SHOULD** carry
 `address_country`, `language`, and `currency`; `CA`/`en-CA`/`CAD` and
-`CA`/`fr-CA`/`CAD` are two feeds. A Business that materializes sub-national
-markets **MAY** scope a feed further with `address_region` or `postal_code`. A
-catalog feed **SHOULD NOT** be scoped by members that describe a Buyer rather
-than a market (`location`, `eligibility`, `intent`, `payment`); a Platform
-obtains those Buyer-specific resolutions and the authoritative serving-time
-price and availability from Catalog Search or Catalog Lookup when advertised.
+`CA`/`fr-CA`/`CAD` are two feeds. A supplemental feed's `context` **SHOULD**
+be empty, or carry `address_country`, `language`, and `currency`. A Business
+that materializes sub-national markets **MAY** scope a feed further with
+`address_region` or `postal_code`. A catalog feed **SHOULD NOT** be scoped by
+members that describe a Buyer rather than a market (`location`,
+`eligibility`, `intent`, `payment`); a Platform obtains those Buyer-specific
+resolutions and the authoritative serving-time price and availability from
+Catalog Search or Catalog Lookup when advertised.
 
 ## Filters
 
@@ -481,3 +483,67 @@ ignored; a base Product with no supplemental record carries no
 could have declared the extension on the base manifest and carried the fields
 inline; the supplemental form suits fields that are heavy, managed on a
 different cadence, or provisioned to a subset of callers.
+
+### Example: One Supplemental Feed over Several Base Feeds
+
+A Business sells in the United States and the United Kingdom from two
+standalone feeds. Titles, descriptions, and prices differ between the two
+markets; product media does not. Rather than repeat the media in both feeds,
+the Business publishes it once, as a supplemental feed that names both base
+feeds and carries an empty `context`:
+
+<!-- ucp:example schema=common/feed op=list def=feed_list -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.feed": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "feeds": [
+    {
+      "id": "us-en-usd",
+      "context": {
+        "address_country": "US",
+        "language": "en-US",
+        "currency": "USD"
+      },
+      "format": "dev.ucp.shopping.catalog.parquet",
+      "interval": "P1D",
+      "generated_at": "2026-09-22T06:00:00Z",
+      "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
+    },
+    {
+      "id": "gb-en-gbp",
+      "context": {
+        "address_country": "GB",
+        "language": "en-GB",
+        "currency": "GBP"
+      },
+      "format": "dev.ucp.shopping.catalog.parquet",
+      "interval": "P1D",
+      "generated_at": "2026-09-22T06:05:00Z",
+      "manifest": "https://merchant.example.com/feeds/gb-en-gbp/20260922T060500Z/manifest.json"
+    },
+    {
+      "id": "shared-media",
+      "extends": ["us-en-usd", "gb-en-gbp"],
+      "context": {},
+      "format": "dev.ucp.shopping.catalog.jsonl",
+      "interval": "P7D",
+      "generated_at": "2026-09-21T02:00:00Z",
+      "manifest": "https://merchant.example.com/feeds/shared-media/20260921T020000Z/manifest.json"
+    }
+  ]
+}
+```
+
+Each supplemental record carries a Product's `id` and its `media`. The empty
+`context` fits both base feeds, so a Platform applies the records to each
+feed in place, and neither feed's market changes. `media` is not an
+identified list, so a record's `media` replaces the base Product's whole. A
+record for a Product that only one base feed carries is ignored for the
+other.

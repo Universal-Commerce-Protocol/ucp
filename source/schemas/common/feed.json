@@ -112,7 +112,7 @@
         },
         "context": {
           "$ref": "types/context.json",
-          "description": "The conditions under which every record in the feed was resolved, each member single-valued. The capability that defines the feed's records states which members its feeds use and what each means. For a supplemental feed, the context of the composed result: the base feed with this feed applied.",
+          "description": "The conditions under which every record in the feed was resolved, each member single-valued. The capability that defines the feed's records states which members its feeds use and what each means. For a supplemental feed, its market override: the members it carries replace the base feed's in the feed it yields; empty when it overrides nothing.",
           "ucp_request": "omit"
         },
         "format": {
@@ -143,8 +143,19 @@
           "ucp_request": "omit"
         },
         "extends": {
-          "type": "string",
-          "description": "`id` of the base feed this supplemental feed extends: another entry in this feed list that itself carries no `extends`. Present only for a supplemental feed, whose records are applied to the base records with the same `id`. Absent for a feed that stands alone.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "`id` of each base feed this supplemental feed extends: one or more other entries in this feed list, each of which itself carries no `extends`. Use an array to extend more than one base feed. Present only for a supplemental feed, whose records are applied to the base records with the same `id`. Absent for a feed that stands alone.",
           "ucp_request": "omit"
         }
       }
@@ -183,12 +194,23 @@
         },
         "context": {
           "$ref": "types/context.json",
-          "description": "Equals the feed list entry's `context`; the manifest is authoritative. The conditions under which every record in the feed was resolved, each member single-valued. The capability that defines the feed's records states which members its feeds use and what each means. For a supplemental feed, the context of the composed result: the base feed with this feed applied.",
+          "description": "Equals the feed list entry's `context`; the manifest is authoritative. The conditions under which every record in the feed was resolved, each member single-valued. The capability that defines the feed's records states which members its feeds use and what each means. For a supplemental feed, its market override: the members it carries replace the base feed's in the feed it yields; empty when it overrides nothing.",
           "ucp_request": "omit"
         },
         "extends": {
-          "type": "string",
-          "description": "Equals the feed list entry's `extends`: the `id` of the base feed this supplemental feed extends, an entry that itself carries no `extends`. Present only for a supplemental feed, whose records are applied to the base records with the same `id`.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Equals the feed list entry's `extends`: the `id` of each base feed this supplemental feed extends, one or more entries that each carry no `extends`. Use an array to extend more than one base feed. Present only for a supplemental feed, whose records are applied to the base records with the same `id`.",
           "ucp_request": "omit"
         },
         "generated_at": {
