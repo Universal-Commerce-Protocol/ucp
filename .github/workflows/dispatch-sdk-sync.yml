@@ -37,6 +37,15 @@ on:
         default: "main"
         type: string
 
+concurrency:
+  group: >-
+    dispatch-sdk-sync-${{
+    inputs.ucp_ref ||
+    (github.event_name == 'create' && github.event.ref) ||
+    github.ref_name
+    }}
+  cancel-in-progress: false
+
 jobs:
   dispatch-sdk-sync:
     name: Dispatch SDK Schema Sync
@@ -113,8 +122,8 @@ jobs:
           else
             REL_DATE="${UCP_REF#release/}"
             EPOCH="${REL_DATE//-/}"
-            if [ "$EPOCH" -lt 20261001 ]; then
-              echo "Skipping legacy release branch $UCP_REF ($EPOCH < 20261001)."
+            if [ "$EPOCH" -lt 20260825 ]; then
+              echo "Skipping legacy branch $UCP_REF ($EPOCH < 20260825)."
               echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
@@ -122,6 +131,7 @@ jobs:
           fi
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            # Optional local test override hook for git ls-remote; unset in CI.
             if [ -n "${UCP_REMOTE_URL:-}" ]; then
               LS_OUT="$(git ls-remote --exit-code "$UCP_REMOTE_URL" "refs/heads/${UCP_REF}")"
             else
@@ -172,11 +182,16 @@ jobs:
                 ucp_sha: $ucp_sha
               }
             }')"
+          failed=0
           for repo in python-sdk js-sdk; do
             echo "Dispatching ucp-schemas-updated to ${repo} (${UCP_REF}@${UCP_SHA})"
-            printf '%s\n' "$PAYLOAD" | gh api \
+            if ! printf '%s\n' "$PAYLOAD" | gh api \
               --method POST \
               -H "Accept: application/vnd.github+json" \
               "repos/Universal-Commerce-Protocol/${repo}/dispatches" \
-              --input -
+              --input -; then
+              echo "::error::Failed to dispatch ucp-schemas-updated to ${repo}."
+              failed=1
+            fi
           done
+          [ "$failed" -eq 0 ]

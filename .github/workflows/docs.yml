@@ -67,7 +67,10 @@ jobs:
         id: source_files_changed
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
-          files: source/**
+          files: |
+            source/**
+            .github/workflows/docs.yml
+            .github/actions/**
 
       - name: Lint source schemas
         if: steps.source_files_changed.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
@@ -103,6 +106,7 @@ jobs:
             ucp-schema lint "$TMP_VERTICAL/$vertical"
             ucp-schema generate-types \
               --schema-dir "$TMP_VERTICAL" \
+              --pretty=false \
               --output /dev/null
           done
           if [ "$found_vertical" -eq 0 ]; then
