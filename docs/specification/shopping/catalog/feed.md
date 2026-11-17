@@ -18,10 +18,10 @@
 
 * **Capability Name:** `dev.ucp.shopping.catalog.feed`
 
-A catalog feed is a materialized catalog: the same Product records a Platform
-would receive from [Catalog Search](search.md), published in bulk as files so
-the Platform can index, embed, and rank them offline, then call Catalog Search
-and [Catalog Lookup](lookup.md) at serving time for the authoritative price and
+A catalog feed is a materialized catalog: the Products a Platform would find
+through [Catalog Search](search.md), published in bulk as files so the Platform
+can index, embed, and rank them offline, then call Catalog Search and
+[Catalog Lookup](lookup.md) at serving time for the authoritative price and
 availability. The feed and the live catalog are complementary: the feed is
 point-in-time, the live operations are authoritative.
 
@@ -96,7 +96,9 @@ extension does not need to declare a record schema. Record enrichment
 preserves the shape and identity of Product and its nested Variants.
 Applicability to Catalog Feed does not automatically make added fields
 applicable to live Search or Lookup; those capabilities need explicit
-bindings. Extensions for non-Product record types extend Common directly.
+bindings. A feed record and a Search result for the same Product can therefore
+carry different extension fields. Extensions for non-Product record types
+extend Common directly.
 
 Catalog Feed defines two representation profiles:
 
