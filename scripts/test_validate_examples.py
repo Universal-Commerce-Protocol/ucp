@@ -41,11 +41,17 @@ import validate_examples as v  # noqa: E402
 # -----------------------------------------------------------
 
 _RESULTS: list[tuple[str, bool, str]] = []
+_SKIPPED: list[tuple[str, str]] = []
 
 
 def _check(name: str, condition: bool, detail: str = "") -> None:
   """Record a test result."""
   _RESULTS.append((name, condition, detail))
+
+
+def _skip(name: str, reason: str) -> None:
+  """Record a test that did not run; it neither passes nor fails."""
+  _SKIPPED.append((name, reason))
 
 
 def _report() -> int:
@@ -56,7 +62,9 @@ def _report() -> int:
     status = "PASS" if ok else "FAIL"
     suffix = f" \u2014 {detail}" if detail and not ok else ""
     print(f"  {status}  {name}{suffix}")
-  print(f"\n{passed} passed, {len(failed)} failed")
+  for name, reason in _SKIPPED:
+    print(f"  SKIP  {name} \u2014 {reason}")
+  print(f"\n{passed} passed, {len(failed)} failed, {len(_SKIPPED)} skipped")
   return 0 if not failed else 1
 
 
@@ -1094,11 +1102,7 @@ def test_checkout_item_source() -> None:
 def test_totals_grand_total_non_negative() -> None:
   """Buyer-pays grand total must be >= 0; adjustments stay signed."""
   if not _has_ucp_schema():
-    _check(
-      "totals_grand_total_non_negative",
-      False,
-      "SKIPPED: ucp-schema binary not on PATH",
-    )
+    _skip("totals_grand_total_non_negative", "ucp-schema binary not on PATH")
     return
 
   checkout = v.load_scaffold(
