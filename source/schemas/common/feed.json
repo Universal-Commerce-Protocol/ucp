@@ -120,7 +120,8 @@
           "description": "Copy of the referenced manifest's namespaced format identifier. Allows Platforms to skip unsupported formats before fetching the manifest.",
           "examples": [
             "dev.ucp.shopping.catalog.jsonl",
-            "dev.ucp.shopping.catalog.parquet"
+            "dev.ucp.shopping.catalog.parquet",
+            "com.example.provider.feed.tsv"
           ],
           "ucp_request": "omit"
         },
@@ -188,7 +189,8 @@
           "description": "Namespaced identifier for the snapshot's record layout, serialization, and compression, defined by an extension declared in `ucp.capabilities`. Applies to every file; record conformance is declared separately by `ucp.capabilities`.",
           "examples": [
             "dev.ucp.shopping.catalog.jsonl",
-            "dev.ucp.shopping.catalog.parquet"
+            "dev.ucp.shopping.catalog.parquet",
+            "com.example.provider.feed.tsv"
           ],
           "ucp_request": "omit"
         },

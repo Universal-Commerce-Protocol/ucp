@@ -19,12 +19,12 @@
 * **Capability Name:** `dev.ucp.common.feed`
 
 A feed is a point-in-time publication of records—each representing one logical
-data item—delivered in bulk as files. Records normally use a UCP-defined shape
-from a service or capability, so a Platform can discover them in bulk, then
-call corresponding live operations for authoritative serving-time values. A
-Business **MAY** publish feeds using a custom record shape through a record-type
-extension negotiated with the Platform, and **MAY** publish feeds without
-corresponding live operations.
+data item—delivered in bulk as files. A record-type extension defines the
+record shape: one that a UCP service or capability defines, so a Platform can
+discover records in bulk and then call the corresponding live operations for
+authoritative serving-time values, or one that an independent specification
+defines. A Business **MAY** publish feeds of either kind, and **MAY** publish
+feeds without corresponding live operations.
 
 Common Feed adds one endpoint declaration, a feed list, and a manifest; it
 defines no record model. The manifest's `ucp.capabilities` declares the record
@@ -366,7 +366,7 @@ no version to validate the document against.
 * An entry that extends the record type adds fields to records. A Platform
   **MAY** ignore fields from one it does not recognize.
 
-For every record type, including custom record types, the Business **MUST**
+For every record type, including independent record types, the Business **MUST**
 use stable entity identifiers that it can resolve in related operations. The
 record-type specification defines which identifiers corresponding operations
 accept and what they identify. Where those operations are advertised, the
