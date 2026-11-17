@@ -121,9 +121,8 @@ the order. See [Policies](../../overview/index.md#policies) for the underlying c
 
 Businesses MAY surface a snapshot of the checkout's `discounts.applied` on the
 order, so the order records which code or automatic discount produced each
-discount in `totals`. Read-only on the order. Entries use the checkout
-[applied discount](../extensions/discount.md) shape, and relate to `totals`
-as they do on checkout. Example `order.discounts`:
+discount in `totals`. Entries use the checkout
+[applied discount](../extensions/discount.md) shape. Example `order.discounts`:
 
 <!-- ucp:example schema=shopping/order target=$.discounts -->
 ```json
