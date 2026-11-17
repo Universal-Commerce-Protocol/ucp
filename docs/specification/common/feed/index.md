@@ -467,10 +467,15 @@ A manifest is a complete materialization of the feed for its `context` as of
 `generated_at`. A Platform that applies a snapshot **MUST** replace its prior
 copy of that feed with it. A Platform **MUST NOT** apply a snapshot whose
 `generated_at` is earlier than that of the snapshot it holds for the same feed.
-Absence of a record from the latest complete snapshot means the record is not
-offered in this feed's `context`. Absence carries no reason: unpublished, sold
-out, filtered, and deleted are indistinguishable. Absence in one feed says
-nothing about other feeds.
+Absence of a record from a snapshot means the record is not offered in this
+feed's `context`. Absence carries no reason: unpublished, sold out, filtered,
+and deleted are indistinguishable. Absence in one feed says nothing about other
+feeds.
+
+A supplemental feed's snapshot is complete in the same way. It carries every
+record the feed supplements, each with every member it sets, not the changes
+since its previous snapshot. A record absent from it is no longer supplemented,
+and the base record stands.
 
 ### Consistency and Immutability
 
@@ -618,7 +623,7 @@ supplemental feed for the Business **MUST** use the Business's identifiers in
 the base is ignored, so a supplement keyed by any other identifier joins
 nothing.
 
-A supplemental record carries only the members it changes. Each member it
+A supplemental record carries only the members it sets. Each member it
 carries replaces the base record's member of the same name, whole, or adds it
 where the base has none: a supplement that carries `price` carries the complete
 price, `amount` and `currency`. A member set to `null` removes the base member.

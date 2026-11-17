@@ -152,8 +152,8 @@ This capability adds `filters` to the manifest: row-inclusion predicates the
 Business applied when generating the snapshot, using the same names and
 semantics as [Search Filters](search.md#search-filters). Absent means no filter
 was applied. A catalog snapshot is complete for its `context` and its
-`filters`: absence of a record from the latest complete snapshot means the
-record is not offered in this context or does not satisfy the feed's `filters`.
+`filters`: absence of a record from the snapshot means the record is not
+offered in this context or does not satisfy the feed's `filters`.
 The manifest below materializes the Business's Canadian French catalog
 restricted to footwear. It declares both `dev.ucp.common.feed` and
 `dev.ucp.shopping.catalog.feed`, and the latter is what defines `filters`:
