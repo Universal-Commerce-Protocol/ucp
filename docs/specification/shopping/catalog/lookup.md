@@ -133,7 +133,8 @@ media, options) and a **subset of variants matching
   match the same effective selections. When the request includes `selected`
   options that conflict with the variant's own options, the variant's
   options take precedence — the variant ID fully determines the selection
-  state and `selected` is ignored.
+  state and `selected` is ignored after request validation, including the
+  duplicate-option-name check.
 
 ### Response Shape
 
@@ -153,11 +154,10 @@ narrowing: the core product detail page interaction where a user progressively s
 
 * **`selected`**: Array of option selections (e.g., `[{"name": "Color", "label": "Red"}]`).
   Partial selections are valid; the client sends whatever the user has chosen so far.
-  Each option name MUST appear at most once. The Business MUST reject a
-  request that repeats an option name as invalid (HTTP 400 for REST,
-  JSON-RPC `-32602` for MCP), even if the repeated entries are identical.
-  This check runs before selection resolution and relaxation, and applies
-  when the identifier is a variant ID.
+  Each option name MUST appear at most once; the Business MUST reject a
+  request that repeats one, even with identical entries, as invalid (HTTP
+  400 for REST, JSON-RPC `-32602` for MCP) before resolving or relaxing the
+  selection.
 * **`preferences`**: Option names in relaxation priority order (e.g.,
   `["Color", "Size"]`). When no variant matches all selections, the server drops
   options from the **end** of this list first, keeping higher-priority selections
