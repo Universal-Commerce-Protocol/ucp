@@ -1373,8 +1373,7 @@ When `display_text` is provided, platforms MUST use it. When omitted on a
 well-known type, platforms SHOULD use the default label above. The sign
 convention for well-known types is schema-enforced: subtractive types
 (discount, items_discount) MUST have negative amounts; additive types
-(subtotal, fulfillment, tax, fee) MUST have non-negative amounts; `total`
-MUST be greater than or equal to zero.
+(subtotal, fulfillment, tax, fee) MUST have non-negative amounts.
 
 The `type` field is an open string — businesses MAY use values beyond the
 well-known set. Unknown types MUST include `display_text` (schema-enforced)
