@@ -631,23 +631,26 @@ One kind of member works differently: an *identified list*, such as a Product's
 `variants`. An identified list is not replaced. Each supplemental element
 updates the base element with the same `id` using these rules; it cannot
 insert or delete an element. Unmentioned base elements stay unchanged, and
-unmatched supplemental elements are ignored. Because members are replaced
-whole, an incomplete member, such as a `price` without `currency`, produces a
-composed record that fails validation and is handled as [Malformed
+unmatched supplemental elements are ignored. Every other list is replaced
+whole, like any other member: a supplement that carries a Product's
+`categories` carries the complete list. Because members are replaced whole, an
+incomplete member, such as a `price` without `currency`, produces a composed
+record that fails validation and is handled as [Malformed
 Records](#malformed-records), rather than one that silently keeps the base
 currency.
 
 !!! note "Design note"
-    Supplemental feeds override as well as add because the product feeds
-    Platforms consume today work that way: a supplemental feed replaces
-    attributes of the record with the same identifier, and a regional feed
-    replaces price and availability per region. A supplement applies at the
-    record level rather than at a path within it, because a path that selects
-    the join level reaches one level per feed: a supplement that changes
-    variant prices could not also correct the Product's `price_range`. A list
-    keyed by identifier merges element by element rather than being replaced,
-    because a record-level replacement of `variants` could not change one
-    variant without restating them all.
+    Supplemental feeds override and add members on records the base feed
+    already carries. They never add records. The product feeds Platforms
+    consume today work that way: a supplemental feed replaces attributes of
+    the record with the same identifier, and a regional feed replaces price
+    and availability per region. A supplement applies at the record level
+    rather than at a path within it, because a path that selects the join
+    level reaches one level per feed: a supplement that changes variant prices
+    could not also correct the Product's `price_range`. A list keyed by
+    identifier merges element by element rather than being replaced, because a
+    record-level replacement of `variants` could not change one variant
+    without restating them all.
 
     Members replace whole rather than merging member by member so that the
     schema catches a partial member: a `price` without `currency` fails
