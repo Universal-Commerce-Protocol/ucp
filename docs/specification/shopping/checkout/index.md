@@ -625,6 +625,21 @@ messages or deferring to checkout completion.
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
 
+For a `payment_failed` error, a business **MAY** add the optional
+`retry_hint` field to say which recovery the platform should attempt for
+the instrument selected by `path`. Well-known values are
+`retry_same_instrument` (resubmitting the same instrument may succeed),
+`use_different_instrument` (collect a different instrument instead of
+resubmitting this one), and `do_not_retry` (do not retry this payment
+attempt). `severity` does not carry this distinction: a transient issuer
+outage and insufficient funds are both `recoverable` on the same `path`,
+but the first is retried with the same instrument and the second is not.
+Platforms **MUST** tolerate and ignore unknown `retry_hint` values. When
+`retry_hint` is absent, no recovery guidance is given and existing
+behavior applies. The hint is action-shaped only: it carries no issuer,
+network, or processor reason codes, and payment handlers may refine it
+within their own specifications.
+
 #### The `path` Field
 
 The optional `path` field on a message anchors it to a specific component of the
