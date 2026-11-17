@@ -3599,8 +3599,6 @@ every request:
     it, the business **MUST** return a `capabilities_incompatible`
     error (see [Error Handling](#error-handling)). A capability absent
     from the platform profile does not by itself bar the operation.
-    Independent of negotiation, a business **MAY** refuse an operation
-    under its own policy.
 4. Businesses **MUST** include the negotiated protocol version in
     every response.
 
