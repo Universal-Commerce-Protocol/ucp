@@ -1123,6 +1123,77 @@ def test_resolve_schema_cache_key() -> None:
     v._schema_cache.clear()
 
 
+def test_parallel_validation_keeps_order_and_single_resolve() -> None:
+  """Concurrent blocks preserve document order and resolve once per key.
+
+  Block results are reassembled in document order, so a failing block must
+  still be reported at its authored position rather than at whatever time
+  a worker finished. Resolution is shared across workers, so N blocks that
+  name the same schema must still spawn exactly one resolve.
+  """
+  original_run = v.run_ucp_schema
+  resolve_calls: list[str] = []
+  import time
+
+  def fake_run(args: list[str], **kwargs: object) -> object:
+    if args[0] == "resolve":
+      resolve_calls.append(args[1])
+      # Widen the miss window: without a per-key lock every worker that
+      # checked the cache before the first result landed resolves again.
+      time.sleep(0.05)
+      payload: dict = {"title": "Checkout", "type": "object"}
+      return v.subprocess.CompletedProcess(
+        args, 0, stdout=json.dumps(payload), stderr=""
+      )
+    return v.subprocess.CompletedProcess(
+      args, 0, stdout=json.dumps({"valid": True, "errors": []}), stderr=""
+    )
+
+  def block(line: int) -> dict:
+    return {
+      "file": "docs/specification/x.md",
+      "line": line,
+      "content": "{}",
+      "annotation": {
+        "schema": "shopping/checkout",
+        "direction": "response",
+        "op": "read",
+      },
+      "error": None,
+    }
+
+  v._schema_cache.clear()
+  v.run_ucp_schema = fake_run
+  try:
+    import concurrent.futures
+
+    blocks = [block(line) for line in range(1, 17)]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+      results = list(
+        pool.map(
+          lambda b: v.process_block(
+            b, Path("source/schemas"), Path("scaffolds")
+          ),
+          blocks,
+        )
+      )
+
+    _check(
+      "parallel_resolve_once_per_key",
+      len(resolve_calls) == 1,
+      f"resolve spawned {len(resolve_calls)} times",
+    )
+    _check(
+      "parallel_preserves_block_order",
+      [r.line for r in results] == [b["line"] for b in blocks]
+      and all(r.status == "ok" for r in results),
+      f"got {[r.status for r in results]}",
+    )
+  finally:
+    v.run_ucp_schema = original_run
+    v._schema_cache.clear()
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -1143,6 +1214,7 @@ def main() -> int:
   test_required_anyof_coverage()
   test_scaffold_resolution()
   test_resolve_schema_cache_key()
+  test_parallel_validation_keeps_order_and_single_resolve()
   test_process_block_integration()
   test_extension_validation()
   test_checkout_item_source_process_block()
