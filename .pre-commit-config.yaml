@@ -101,6 +101,10 @@ repos:
   - repo: https://github.com/thibaudcolas/pre-commit-stylelint
     rev: v17.15.0
     hooks:
+      # Rules in .stylelintrc.json are copied directly from
+      # stylelint-config-standard@40.0.0 and recommended@18.0.0.
+      # Do not replace them with "extends": without a root node_modules
+      # folder, Stylelint cannot find shared config packages on fresh clones.
       - id: stylelint
         args: ["--fix"]
   # CSS: Prettier (Formatting)
