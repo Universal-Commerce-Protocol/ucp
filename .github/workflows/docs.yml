@@ -103,6 +103,7 @@ jobs:
                 cp -R "source/schemas/$shared" "$TMP_VERTICAL/$shared"
               fi
             done
+            # Catch broken or cross-vertical $refs inside staged vertical.
             ucp-schema lint "$TMP_VERTICAL/$vertical"
             ucp-schema generate-types \
               --schema-dir "$TMP_VERTICAL" \
