@@ -47,11 +47,10 @@
     },
     "retry_hint": {
       "type": "string",
-      "description": "Optional recovery guidance for a failed payment attempt, meaningful only when 'code' is 'payment_failed' and 'path' selects the failed payment instrument. Well-known values: 'retry_same_instrument' (resubmitting the same instrument may succeed, for example after a transient issuer or network failure), 'use_different_instrument' (do not resubmit the same instrument; collect a different instrument), 'do_not_retry' (do not retry this payment attempt). Clients MUST tolerate and ignore unknown values. When absent, no recovery guidance is given and existing behavior applies. This field is action-shaped only: it carries no issuer, network, or processor reason codes.",
+      "description": "Optional recovery guidance for a failed payment attempt, meaningful only when 'code' is 'payment_failed' and 'path' selects the failed payment instrument. Well-known values: 'retry_same_instrument' (resubmitting the same instrument may succeed, for example after a transient issuer or network failure), 'try_different_instrument' (do not resubmit the same instrument; collect a different instrument). Clients MUST tolerate and ignore unknown values. When absent, no recovery guidance is given and existing behavior applies. This field is action-shaped only: it carries no issuer, network, or processor reason codes.",
       "examples": [
         "retry_same_instrument",
-        "use_different_instrument",
-        "do_not_retry"
+        "try_different_instrument"
       ]
     }
   }
