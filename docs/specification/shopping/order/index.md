@@ -87,13 +87,21 @@ Fulfillment tracks how items are delivered to the buyer.
 * What items are grouped together
 * Where they're going (`destination`)
 * How they're being delivered (`method_type`)
-* When they'll arrive (`description`, `fulfillable_on`)
+* When they'll arrive (`description`, `earliest_fulfillment_time`, `latest_fulfillment_time`) and when fulfillment can begin (`fulfillable_on`)
 
 Expectations can be split, merged, or adjusted post-order. For example:
 
 * Group everything by delivery date: "what is coming when"
 * Use a single expectation with a wide date range for flexibility
 * The goal is **setting buyer expectations** - for the best buyer experience
+
+**Fulfillment option.** Businesses **MAY** surface on an expectation a snapshot
+of the originating Checkout's selected
+[`fulfillment_option`](../extensions/fulfillment.md#fulfillment-option) for its
+items. This is the option as it stood at Checkout, not updated as the delivery
+promise changes; a Business that did not retain it, or whose expectation's
+items were not selected under a single option, omits it. Order `totals` remain
+authoritative.
 
 #### Fulfillment Events
 

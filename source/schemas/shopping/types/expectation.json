@@ -50,6 +50,20 @@
     "fulfillable_on": {
       "type": "string",
       "description": "When this expectation can be fulfilled: 'now' or ISO 8601 timestamp for future date (backorder, pre-order)."
+    },
+    "earliest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Earliest time of the current ready or arrival window (RFC 3339)."
+    },
+    "latest_fulfillment_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Latest time of the current ready or arrival window (RFC 3339)."
+    },
+    "fulfillment_option": {
+      "$ref": "fulfillment_option.json",
+      "description": "Snapshot of the fulfillment option selected for these items at Checkout, as it stood at Checkout. Not updated as the delivery promise changes, and its `id` need not still resolve. Order `totals` remain authoritative."
     }
   }
 }
