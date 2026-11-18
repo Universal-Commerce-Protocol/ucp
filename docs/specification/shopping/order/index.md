@@ -87,7 +87,8 @@ Fulfillment tracks how items are delivered to the buyer.
 * What items are grouped together
 * Where they're going (`destination`)
 * How they're being delivered (`method_type`)
-* When they'll arrive (`description`, `earliest_fulfillment_time`, `latest_fulfillment_time`) and when fulfillment can begin (`fulfillable_on`)
+* When they'll arrive (`description`, `earliest_fulfillment_time`, `latest_fulfillment_time`)
+* When fulfillment can begin (`fulfillable_on`)
 
 Expectations can be split, merged, or adjusted post-order. For example:
 
@@ -96,12 +97,12 @@ Expectations can be split, merged, or adjusted post-order. For example:
 * The goal is **setting buyer expectations** - for the best buyer experience
 
 **Fulfillment option.** Businesses **MAY** surface on an expectation a snapshot
-of the originating Checkout's selected
-[`fulfillment_option`](../extensions/fulfillment.md#fulfillment-option) for its
-items. This is the option as it stood at Checkout, not updated as the delivery
-promise changes; a Business that did not retain it, or whose expectation's
-items were not selected under a single option, omits it. Order `totals` remain
-authoritative.
+of the [fulfillment option](../extensions/fulfillment.md#fulfillment-option)
+selected for its items at Checkout (`fulfillment_option`). A Business that did
+not retain it, or whose expectation's items were not selected under a single
+option, omits it. The snapshot is not updated; `earliest_fulfillment_time` and
+`latest_fulfillment_time` start from its window and change with the promise.
+Order `totals` remain authoritative.
 
 #### Fulfillment Events
 

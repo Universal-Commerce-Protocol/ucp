@@ -54,16 +54,16 @@
     "earliest_fulfillment_time": {
       "type": "string",
       "format": "date-time",
-      "description": "Earliest time of the current ready or arrival window (RFC 3339)."
+      "description": "Earliest time of the ready or arrival window (RFC 3339). Initially the selected Checkout option's `earliest_fulfillment_time`; updated if the promise changes."
     },
     "latest_fulfillment_time": {
       "type": "string",
       "format": "date-time",
-      "description": "Latest time of the current ready or arrival window (RFC 3339)."
+      "description": "Latest time of the ready or arrival window (RFC 3339). Initially the selected Checkout option's `latest_fulfillment_time`; updated if the promise changes."
     },
     "fulfillment_option": {
       "$ref": "fulfillment_option.json",
-      "description": "Snapshot of the fulfillment option selected for these items at Checkout, as it stood at Checkout. Not updated as the delivery promise changes, and its `id` need not still resolve. Order `totals` remain authoritative."
+      "description": "Snapshot of the fulfillment option selected for these items at Checkout; not updated if the promise changes, and its `id` need not still resolve. Order `totals` remain authoritative."
     }
   }
 }
