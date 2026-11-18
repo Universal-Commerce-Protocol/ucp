@@ -687,6 +687,11 @@ names the base and fits. A supplemental feed fits a feed when each member its
 in feed-list order; where two set the same member, the later feed's value
 stands.
 
+These rules define each resulting feed, not how a Platform stores it: a
+Platform can keep one copy of a base feed and group its supplemental feeds by
+the feed they go into, or materialize each feed separately. Either way, each
+feed reflects only the supplemental feeds that fit it.
+
 For example, three supplemental feeds extend a base feed whose `context` is
 `US`/`en-US`/`USD`:
 
