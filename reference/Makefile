@@ -4,7 +4,7 @@ RUN = cd .. && uv run --frozen --group reference
 
 .PHONY: generate check update serve shop
 
-# Routes and types from the profiles. Needs the pinned ucp-schema; see README.
+# Routes and types from the profiles. Needs ucp-schema 2.0.0+; see README.
 generate:
 	$(RUN) python -m reference.build
 

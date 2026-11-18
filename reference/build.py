@@ -150,12 +150,10 @@ def _localize(node, published: str, local: str):
 INSTALL = """\
 {problem}
 
-The generate-types and generate-openapi commands are in the ucp-schema
-revision this repository pins. Install it with:
+The generate-types and generate-openapi commands need ucp-schema 2.0.0
+or newer. Install the latest release with:
 
-    cargo install --locked \\
-      --git https://github.com/Universal-Commerce-Protocol/ucp-schema \\
-      --rev {revision}
+    cargo install --locked ucp-schema
 
 That replaces the ucp-schema on your PATH. To keep the one you have, add
 `--root <dir>` to the command and set UCP_SCHEMA_BIN=<dir>/bin/ucp-schema.
@@ -175,8 +173,7 @@ def ucp_schema() -> str:
       if binary
       else "ucp-schema is not installed."
     )
-    revision = (REPO / ".ucp-schema-rev").read_text().strip()
-    sys.exit(INSTALL.format(problem=problem, revision=revision))
+    sys.exit(INSTALL.format(problem=problem))
   return binary
 
 

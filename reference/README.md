@@ -189,13 +189,11 @@ The other transcripts show the whole exchange:
 ## Run it
 
 You need [uv](https://docs.astral.sh/uv/) and a Rust toolchain. From
-`reference/`, install the revision of `ucp-schema` this repository is pinned
-to, then run the check:
+`reference/`, install the latest release of `ucp-schema`, then run the check.
+Version 2.0.0 or newer is needed for `generate-openapi` and `generate-types`:
 
 ```sh
-cargo install --locked \
-  --git https://github.com/Universal-Commerce-Protocol/ucp-schema \
-  --rev "$(cat ../.ucp-schema-rev)"
+cargo install --locked ucp-schema
 
 make check
 ```

@@ -31,7 +31,6 @@ on:
     paths:
       - ".github/actions/**"
       - ".github/workflows/docs.yml"
-      - ".ucp-schema-rev"
       - "pyproject.toml"
       - "uv.lock"
       - "mkdocs.yml"
