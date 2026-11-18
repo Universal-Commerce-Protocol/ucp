@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/accommodation_type.json",
+  "title": "Accommodation Type",
+  "description": "Category or specification of the rentable physical space (e.g., room, apartment, villa, campsite pitch).",
+  "type": "object",
+  "required": [
+    "id",
+    "title"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the accommodation type.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the accommodation type.",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the accommodation type.",
+      "ucp_request": "omit"
+    },
+    "capacity": {
+      "$ref": "capacity.json",
+      "description": "Capacity details of the accommodation type.",
+      "ucp_request": "omit"
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/media.json"
+      },
+      "description": "Accommodation type media (images, videos, 3D models). First item is the featured media for presentation.",
+      "ucp_request": "omit"
+    }
+  }
+}

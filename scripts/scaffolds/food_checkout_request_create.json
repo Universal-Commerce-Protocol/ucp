@@ -1,0 +1,11 @@
+{
+  "food_establishment": {
+    "id": "rest_scaffold"
+  },
+  "line_items": [
+    {
+      "dish": { "id": "dish_scaffold" },
+      "quantity": 1
+    }
+  ]
+}

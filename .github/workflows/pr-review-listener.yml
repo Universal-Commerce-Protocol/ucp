@@ -3,6 +3,8 @@ on:
   pull_request_review:
     types: [submitted, dismissed]
 
+permissions: {}
+
 jobs:
   signal:
     runs-on: ubuntu-latest
