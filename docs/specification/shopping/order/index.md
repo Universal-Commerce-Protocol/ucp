@@ -208,16 +208,16 @@ Any other value is freeform and carries no protocol-defined semantics;
 
 | Type | Semantics |
 | :--- | :--- |
-| `refund` | Money returned to the original payment method, whatever the cause. `line_items` **MAY** carry a negative `quantity` when items also come off the order. |
+| `refund` | Money returned to the original payment method, whatever the cause. |
 | `return` | Goods coming back from the buyer; `line_items` **SHOULD** carry the negative `quantity`. |
 | `credit` | Value issued to store credit, account balance, or gift card instead of the original payment method. |
 | `price_adjustment` | Reconciles what was charged against what was supplied. Carries the signed step delta on a measure sale basis ([catch-weight](#example-catch-weight-reconciliation)), or `quantity: 0` with the settled `measure` when only the price settles ([count-sold](#example-count-sold-measure-priced-settlement)). |
 | `dispute` | Payment dispute or chargeback, initiated by the buyer or their issuer rather than by the business. |
 | `cancellation` | Items will not be fulfilled; `line_items` **SHOULD** carry the negative `quantity` canceled. Applies to the unfulfilled remainder of a partially shipped order. |
 
-`refund` and `return` describe money movement and goods movement
-respectively; a business **MAY** record them as one entry or as separate
-entries.
+`refund` and `credit` describe money movement while `return` describes goods
+movement; a business **MAY** record a return together with its refund or
+credit as one entry or as separate entries.
 
 ## Example
 
