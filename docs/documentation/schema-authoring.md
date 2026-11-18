@@ -355,8 +355,8 @@ for strict validators, and removing one breaks existing producers.
 
 **Use `enum` only for provably closed sets** where new values would represent a
 fundamental protocol change (e.g., `checkout.status: open | completed | expired`).
-If the set might grow as new use cases emerge, use an open string with well-known
-values documented in the `description`.
+If the set might grow as new use cases emerge, keep the field open; see
+[Open Enumerations](#open-enumerations).
 
 ### Per-Value Field Semantics
 
@@ -452,20 +452,42 @@ branch — so a closed `enum`, `oneOf`, or `additionalProperties: false` is a on
 
 ### Open Enumerations
 
-If a field's list of values might expand in the future (e.g., adding a `"refunded"` status or a new payment method),
-**do not use `enum`**.
+If a field's list of values might expand in the future (e.g., adding a `"refunded"` status, a fulfillment stage, or a payment method), **do not use `enum`**. Readers must tolerate unknown values so businesses and extensions can introduce domain-specific values without waiting on a protocol revision.
 
-Instead, define a standard `string`, document the requirement to ignore unknown values in the `description`, and use
-`examples` to convey current expected values to code generators. Avoid complex "Open Set" validation patterns
-(e.g., combining `anyOf` with `const`), as they frequently confuse client-side code generators and make schemas
-difficult to read.
+When a field has well-known values that producers SHOULD use whenever the semantics match, **list each value as a `const` branch of an `anyOf`, ending with an unconstrained `{"type": "string"}` branch**:
 
 <!-- ucp:example skip reason="schema authoring example" -->
 ```json
 "cancellation_reason": {
   "type": "string",
-  "description": "Reason for order cancellation. Clients MUST tolerate and ignore unknown values.",
-  "examples": ["customer_requested", "inventory_shortage", "fraud_suspected"]
+  "description": "Reason for order cancellation. Producers SHOULD use a well-known value when semantics match; clients MUST tolerate unknown values.",
+  "anyOf": [
+    { "const": "customer_requested", "description": "The buyer requested cancellation before fulfillment completed." },
+    { "const": "inventory_shortage", "description": "The business could not fulfill the order due to unavailable stock." },
+    { "const": "fraud_suspected", "description": "The order failed fraud or risk screening." },
+    { "type": "string" }
+  ]
+}
+```
+
+Validation is identical to a plain string: the trailing branch accepts any value, so the `const` branches never reject anything. They exist for readers and tooling:
+
+- **Stronger normative signal**: Well-known values become first-class schema entries instead of prose buried in the field description or illustrative `examples`, encouraging producers to normalize onto standard values when semantics match.
+- **Standalone per-value descriptions**: Each value carries its own description, and can be marked `deprecated`, instead of sharing one long field description.
+- **Tooling input**: The `const` branches give tooling such as `ucp-schema` a definitive list for non-blocking warnings on unrecognized or misspelled values. `examples` cannot play this role because they are illustrative by definition.
+
+Keep `"type": "string"` on the field itself; without it, generated SDK types for an open discriminator lose their fallback for unknown values. End every union with the open string branch, including an extension's union composed onto a base field with `allOf`: open unions still compose to any string, whereas omitting the trailing branch closes the union and rejects the base's own values. Use `anyOf`, not `oneOf`: a well-known value matches both its own branch and the string branch, so `oneOf` rejects it.
+
+As a secondary benefit, some code generators emit the well-known values as literal types while still accepting any string. Where object-oriented targets handle `anyOf` poorly, `ucp-schema` could optionally lower this shape to a plain string.
+
+A plain `string` with documented tolerance and optional `examples` remains acceptable when the values need no individual definitions:
+
+<!-- ucp:example skip reason="schema authoring example" -->
+```json
+"package_type": {
+  "type": "string",
+  "description": "Packaging format used for the shipment. Clients MUST tolerate and ignore unknown values.",
+  "examples": ["box", "envelope", "pallet"]
 }
 ```
 
