@@ -156,6 +156,13 @@ semantics as [Search Filters](search.md#search-filters). Absent means no filter
 was applied. A catalog snapshot is complete for its `context` and its
 `filters`: absence of a record from the snapshot means the record is not
 offered in this context or does not satisfy the feed's `filters`.
+
+`filters` says which records a snapshot carries. A supplemental feed never
+adds or removes records, so on a supplemental manifest `filters` only
+describes the records it covers. A feed built from a base feed and its
+supplemental feeds has the base feed's `filters`; a `price` filter there was
+applied in the base feed's currency.
+
 The manifest below materializes the Business's Canadian French catalog
 restricted to footwear. It declares both `dev.ucp.common.feed` and
 `dev.ucp.shopping.catalog.feed`, and the latter is what defines `filters`:

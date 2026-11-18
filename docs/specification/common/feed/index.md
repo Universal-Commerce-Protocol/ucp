@@ -727,8 +727,11 @@ base's unless it has applied every market override that fits that `context`.
   supplemental feed cannot withhold a base record from a feed it goes into; a
   Business that offers a different set of records in a market publishes a
   standalone feed for it.
-* Base and supplemental feeds publish snapshots independently; no cross-feed
-  atomicity is defined.
+* Base and supplemental snapshots can be generated at different times, but
+  the feed list publishes them together. Each feed list response names one
+  snapshot of every feed. The Business **MUST** name only snapshots that
+  build correct feeds together, and a Platform **MUST** build a feed from
+  the snapshots named in one response.
 * A Business that wants the same supplement over several base feeds names
   them all in `extends`.
 * A Platform validates the composed record, not the supplemental record on its
