@@ -659,11 +659,8 @@ intended recovery:
 }
 ```
 
-A value outside the well-known vocabulary (shown here in a
-reverse-domain form a business might use for its own recovery; the
-vocabulary is open and no naming rule is specified) — a platform that
-does not recognize it ignores the hint and behaves as if none were
-given:
+A value outside the well-known vocabulary: a platform that does
+not recognize it ignores the hint.
 
 <!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
 ```json
