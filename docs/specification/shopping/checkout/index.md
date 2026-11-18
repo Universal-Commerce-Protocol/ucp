@@ -640,6 +640,47 @@ behavior applies. The hint is action-shaped only: it carries no issuer,
 network, or processor reason codes, and payment handlers may refine it
 within their own specifications.
 
+A transient failure, where resubmitting the same instrument is the
+intended recovery:
+
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[0]",
+      "severity": "recoverable",
+      "retry_hint": "retry_same_instrument",
+      "content": "Issuer temporarily unavailable."
+    }
+  ]
+}
+```
+
+A value outside the well-known vocabulary (shown here in a
+reverse-domain form a business might use for its own recovery; the
+vocabulary is open and no naming rule is specified) — a platform that
+does not recognize it ignores the hint and behaves as if none were
+given:
+
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[0]",
+      "severity": "recoverable",
+      "retry_hint": "com.example.custom_recovery",
+      "content": "Payment declined by issuer."
+    }
+  ]
+}
+```
+
 #### The `path` Field
 
 The optional `path` field on a message anchors it to a specific component of the
