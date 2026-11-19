@@ -13,6 +13,10 @@
       "type": "string",
       "description": "Stable, opaque session-scoped identifier for a guest in the Platform's namespace."
     },
+    "honorific_prefix": {
+      "type": "string",
+      "description": "Honorific prefix used to address the guest on the reservation and in correspondence. Well-known values: `mr`, `mrs`, `ms`, `mx`, `dr`. Platforms MAY send other values; a Business that does not recognize a value SHOULD address the guest by name only rather than reject the booking. Platforms MUST NOT infer this value from other fields."
+    },
     "first_name": {
       "type": "string",
       "description": "First name of the guest."
@@ -33,6 +37,11 @@
       "type": "integer",
       "description": "Age of the guest, used to enforce any age-restriction for check-in and accommodation occupancy.",
       "minimum": 0
+    },
+    "nationality": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "Nationality (citizenship) of the guest as an ISO 3166-1 alpha-2 country code. At booking this is a value declared by the booker, not an identity-document record or a guest registration filed at check-in. A Business SHOULD NOT require it at booking solely to meet a registration duty that applies on arrival."
     }
   }
 }

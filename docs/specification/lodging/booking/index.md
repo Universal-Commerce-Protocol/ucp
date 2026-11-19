@@ -475,7 +475,11 @@ Businesses **MUST** provide `continue_url` when returning `status` =
   `stays[].guest_assignments[]`, or in corporate or proxy bookings, a named primary guest
   alongside a `booker` providing the contact channel. Additional identity fields
   a Business needs (such as passport number, nationality, or date of birth)
-  **MUST** be negotiated per Business through `messages[]`.
+  **MUST** be negotiated per Business through `messages[]`. When the field is
+  defined on `booker` or `guest` (for example `honorific_prefix`,
+  `nationality`, or `booker.birthdate`), the Business **SHOULD** request it by
+  that name through a `messages[]` entry whose `path` targets it, rather than
+  under a Business-specific key.
 * **MUST** enforce physical `capacity` limits against the total assigned occupants and guest ages:
     * Guest age is evaluated in completed years as of the stay check-in date.
     * A guest whose age falls within a defined `child_age_ranges[].ages` bracket is classified as a child; any guest whose age falls in no child bracket is classified as an adult.
