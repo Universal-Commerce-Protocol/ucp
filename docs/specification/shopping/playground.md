@@ -426,7 +426,6 @@ const UcpData = {
         available_instruments: [{ type: "card" }],
         config: {
           environment: "testmode",
-          // Fictitious business profile used only by this simulated demo.
           business_profile: "profile_test_example"
         }
       }
@@ -584,7 +583,7 @@ const UcpData = {
 
   mock_instruments: {
     stripe_payments: {
-      "id": "card_1",
+      "id": "instr_stripe_d12bb703-f77e-4c64-9e38-b99a68f74297",
       "handler_id": "stripe_payments",
       "type": "card",
       "billing_address": {
