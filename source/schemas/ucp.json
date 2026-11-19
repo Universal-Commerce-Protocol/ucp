@@ -383,6 +383,23 @@
           }
         }
       ]
+    },
+
+    "response_incentives_schema": {
+      "title": "UCP Incentives Response Schema",
+      "description": "UCP metadata for incentives list responses.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

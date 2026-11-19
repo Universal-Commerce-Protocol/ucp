@@ -2,7 +2,7 @@
   "openrpc": "1.3.2",
   "info": {
     "title": "UCP Common Service",
-    "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Ask and Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
+    "description": "Canonical MCP/JSON-RPC interface for UCP Common services, including Ask, Location discovery, and Incentives. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines methods only. The endpoint URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=mcp].endpoint`. The server entry below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -108,6 +108,27 @@
       "result": {
         "name": "response",
         "schema": {"$ref": "../../schemas/common/ask.json#/$defs/ask_response"}
+      }
+    },
+    {
+      "name": "list_incentives",
+      "summary": "List the incentives a business is offering",
+      "description": "List the incentives the Business is currently offering in the request's context, without a product search or a session. Read-only; nothing is applied.",
+      "params": [
+        {
+          "name": "meta",
+          "required": true,
+          "schema": {"$ref": "#/components/schemas/meta"}
+        },
+        {
+          "name": "incentives",
+          "required": true,
+          "schema": {"$ref": "../../schemas/common/incentives_list.json#/$defs/list_request"}
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {"$ref": "../../schemas/common/incentives_list.json#/$defs/list_response"}
       }
     }
   ]

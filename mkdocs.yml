@@ -59,6 +59,11 @@ nav:
               - Transports:
                   - REST: specification/common/ask/rest.md
                   - MCP: specification/common/ask/mcp.md
+          - Incentives:
+              - Overview: specification/common/incentives/index.md
+              - Transports:
+                  - REST: specification/common/incentives/rest.md
+                  - MCP: specification/common/incentives/mcp.md
           - Extensions:
               - Loyalty: specification/common/extensions/loyalty.md
       - Shopping:
@@ -479,6 +484,24 @@ plugins:
               Capability on the Common service, mapping the `ask_business` tool
               to JSON-RPC with metadata validation rules and related-link
               conventions.
+        Incentives:
+          - specification/common/incentives/index.md: >-
+              Incentives (`dev.ucp.common.incentives` and
+              `dev.ucp.common.incentives.list`), a shared model for the offers
+              a business is running before they are applied: a typed discount
+              benefit (amount off, percent off, fixed price, free shipping,
+              free item), open conditions, JSONPath targeting, the offers a
+              cart or checkout is close to qualifying for, and a standalone
+              list operation. Response-only; application stays with the
+              Discount extension.
+          - specification/common/incentives/rest.md: >-
+              HTTP REST transport binding for the Incentives List Capability
+              on the Common service, detailing the `POST /incentives/list`
+              endpoint with request and response payloads.
+          - specification/common/incentives/mcp.md: >-
+              Model Context Protocol (MCP) transport binding for the
+              Incentives List Capability on the Common service, mapping the
+              `list_incentives` tool to JSON-RPC.
         Message Signatures:
           - specification/signatures.md: >-
               Implementation details for RFC 9421 HTTP Message Signatures and
