@@ -464,8 +464,9 @@ releases and refunds) are not covered by any mandate signature. Order receipts
 close that gap: for every such movement, the business issues a signed receipt
 that is bound to the closed Payment Mandate and hash-chained to the previous
 receipt. Any party holding the receipts (the platform, the user's agent, or a
-dispute reviewer) can verify offline that captures stayed within what the user
-authorized and that refunds never exceeded captures.
+dispute reviewer) can verify offline that the movements those receipts attest
+to stayed within what the user authorized and that refunds never exceeded
+captures. See [Limits](#limits) for what receipts alone cannot show.
 
 Order receipts are optional and additive. A business that does not declare
 `order_receipts` behaves exactly as before.
@@ -506,7 +507,11 @@ A business and a platform enable order receipts by declaring the
 
 Order receipts are required only when **both** profiles declare
 `order_receipts`. When they are, the business **MUST** issue a receipt for
-every event type listed in its own `order_receipts.events`.
+every event type listed in its own `order_receipts.events`. In the platform
+profile, `order_receipts.events` is informational: it states the event types
+the platform can process, and does not change which receipts the business
+issues. A platform verifies every receipt it receives, including types it did
+not list.
 
 ### Receipt Format
 
@@ -536,9 +541,9 @@ mandate.
   "order_id": "order_abc123",
   "checkout_id": "chk_abc123",
   "mandate_ref": "sha-256:zi0xDk16_GJw_QEKIHaUbkUFStkDJ6WjaKlf31sYfOk",
-  "iat": 1762740000,
+  "iat": 1794276000,
   "seq": 2,
-  "prev": "sha-256:zDe6xHjsAm38YFD4qeWDqJhcMiss3bjJ6BqDQVMCJtQ",
+  "prev": "sha-256:mbHrcoJUfBRlEA-bAgELvYEHwm9B8W-DshK4yuDHXgg",
   "event": {
     "type": "capture",
     "status": "succeeded",
@@ -577,6 +582,35 @@ Receipts form one chain per **`(iss, mandate_ref)`** pair, not per Order.
 `seq` starts at 1 and increases by exactly 1 within a chain. `totals` are
 running totals for that chain. For a single business with one Payment Mandate,
 an Order has exactly one chain.
+
+The signature covers the payload bytes as sent, and `prev` covers the compact
+JWS as sent. A business **SHOULD** emit the payload in JCS form, but verifiers
+**MUST NOT** require it: canonical form is never needed to verify a receipt or
+to compute `prev`.
+
+### Running Totals
+
+`totals.mandated` is the `payment_amount` of the Payment Mandate that
+`mandate_ref` covers. The other totals start at 0 and change only on
+`succeeded` events, as follows:
+
+| Event `type`               | Effect on totals         | Used for                                                        |
+| :------------------------- | :----------------------- | :-------------------------------------------------------------- |
+| `authorization`            | `authorized` += `amount` | An initial authorization or a re-authorization.                 |
+| `authorization_adjustment` | `authorized` += `amount` | An incremental increase to an existing authorization.           |
+| `release`                  | `authorized` -= `amount` | Releasing, voiding or expiring an uncaptured authorized amount. |
+| `capture`                  | `captured` += `amount`   | A capture, including each capture of a split shipment.          |
+| `capture_reversal`         | `captured` -= `amount`   | Voiding a capture before it settles.                            |
+| `refund`                   | `refunded` += `amount`   | Returning settled funds, whether as a refund or a reversal.     |
+
+A capture does not reduce `authorized`. Within a chain, `captured` ≤
+`authorized` ≤ `mandated` and `refunded` ≤ `captured` always hold for a
+compliant business.
+
+Each movement counts once. A later `succeeded` receipt with the same `type`
+and `event.ref.processing_entry_id` as an earlier `succeeded` receipt in the
+chain is a follow-up (for example, one that only adds `network_ref`) and does
+not change the totals again.
 
 ### Placement and Delivery
 
@@ -719,9 +753,9 @@ authorization followed by two split-shipment captures.
   ],
   "ap2": {
     "receipts": [
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUiLCJ0eXAiOiJ1Y3AtYXAyLXJlY2VpcHQrand0In0.eyJjaGVja291dF9pZCI6ImNoa19hYmMxMjMiLCJldmVudCI6eyJhbW91bnQiOjU0MDAsImN1cnJlbmN5IjoiVVNEIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTA5VDE0OjUzOjIwWiIsInN0YXR1cyI6InN1Y2NlZWRlZCIsInR5cGUiOiJhdXRob3JpemF0aW9uIn0sImlhdCI6MTc2MjcwMDAwMCwiaXNzIjoiaHR0cHM6Ly9idXNpbmVzcy5leGFtcGxlLmNvbS8ud2VsbC1rbm93bi91Y3AiLCJtYW5kYXRlX3JlZiI6InNoYS0yNTY6emkweERrMTZfR0p3X1FFS0lIYVVia1VGU3RrREo2V2phS2xmMzFzWWZPayIsIm9yZGVyX2lkIjoib3JkZXJfYWJjMTIzIiwicHJldiI6bnVsbCwic2VxIjoxLCJ0b3RhbHMiOnsiYXV0aG9yaXplZCI6NTQwMCwiY2FwdHVyZWQiOjAsIm1hbmRhdGVkIjo1NDAwLCJyZWZ1bmRlZCI6MH19.yqOks6JCSk1SGQjykZw6WiNzk0-PC0S3cwMWXxbuH3KGCvTAFFpkT9HuJPS-krPUsWyLhVPNO2Ftz9SuEaoHpQ",
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUiLCJ0eXAiOiJ1Y3AtYXAyLXJlY2VpcHQrand0In0.eyJjaGVja291dF9pZCI6ImNoa19hYmMxMjMiLCJldmVudCI6eyJhbW91bnQiOjMwMDAsImN1cnJlbmN5IjoiVVNEIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTEwVDAyOjAwOjAwWiIsInJlZiI6eyJwcm9jZXNzaW5nX2VudHJ5X2lkIjoiZW50XzIifSwic3RhdHVzIjoic3VjY2VlZGVkIiwidHlwZSI6ImNhcHR1cmUifSwiaWF0IjoxNzYyNzQwMDAwLCJpc3MiOiJodHRwczovL2J1c2luZXNzLmV4YW1wbGUuY29tLy53ZWxsLWtub3duL3VjcCIsIm1hbmRhdGVfcmVmIjoic2hhLTI1Njp6aTB4RGsxNl9HSndfUUVLSUhhVWJrVUZTdGtESjZXamFLbGYzMXNZZk9rIiwib3JkZXJfaWQiOiJvcmRlcl9hYmMxMjMiLCJwcmV2Ijoic2hhLTI1Njp6RGU2eEhqc0FtMzhZRkQ0cWVXRHFKaGNNaXNzM2JqSjZCcURRVk1DSnRRIiwic2VxIjoyLCJ0b3RhbHMiOnsiYXV0aG9yaXplZCI6NTQwMCwiY2FwdHVyZWQiOjMwMDAsIm1hbmRhdGVkIjo1NDAwLCJyZWZ1bmRlZCI6MH19.ZyT9V_cSIvPgIChIM9cF4xrc5_ROhG7J5E8LxCc95HfMIecZ4zRMfsj5638RrVDrcDybCHUFq3qXWftbRssvYg",
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUiLCJ0eXAiOiJ1Y3AtYXAyLXJlY2VpcHQrand0In0.eyJjaGVja291dF9pZCI6ImNoa19hYmMxMjMiLCJldmVudCI6eyJhbW91bnQiOjI0MDAsImN1cnJlbmN5IjoiVVNEIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTEyVDAyOjAwOjAwWiIsInJlZiI6eyJwcm9jZXNzaW5nX2VudHJ5X2lkIjoiZW50XzMifSwic3RhdHVzIjoic3VjY2VlZGVkIiwidHlwZSI6ImNhcHR1cmUifSwiaWF0IjoxNzYyOTEyODAwLCJpc3MiOiJodHRwczovL2J1c2luZXNzLmV4YW1wbGUuY29tLy53ZWxsLWtub3duL3VjcCIsIm1hbmRhdGVfcmVmIjoic2hhLTI1Njp6aTB4RGsxNl9HSndfUUVLSUhhVWJrVUZTdGtESjZXamFLbGYzMXNZZk9rIiwib3JkZXJfaWQiOiJvcmRlcl9hYmMxMjMiLCJwcmV2Ijoic2hhLTI1NjotTC1ZV3lkLVcxNmItR1ExM3l2bXZ4UTFmOThyMTltSzlZc3FEMlF4QkQ4Iiwic2VxIjozLCJ0b3RhbHMiOnsiYXV0aG9yaXplZCI6NTQwMCwiY2FwdHVyZWQiOjU0MDAsIm1hbmRhdGVkIjo1NDAwLCJyZWZ1bmRlZCI6MH19.aGDMlvYL7ZjzXiv6HVKJg-sbdNLIOWSr_nNa_-mUrDSjSVcFv56nB8q2FFR0fAU5OGgrkLnwNmxV18b-SK6TPA"
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUiLCJ0eXAiOiJ1Y3AtYXAyLXJlY2VpcHQrand0In0.eyJjaGVja291dF9pZCI6ImNoa19hYmMxMjMiLCJldmVudCI6eyJhbW91bnQiOjU0MDAsImN1cnJlbmN5IjoiVVNEIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTA5VDE0OjUzOjIwWiIsInN0YXR1cyI6InN1Y2NlZWRlZCIsInR5cGUiOiJhdXRob3JpemF0aW9uIn0sImlhdCI6MTc5NDIzNjAwMCwiaXNzIjoiaHR0cHM6Ly9idXNpbmVzcy5leGFtcGxlLmNvbS8ud2VsbC1rbm93bi91Y3AiLCJtYW5kYXRlX3JlZiI6InNoYS0yNTY6emkweERrMTZfR0p3X1FFS0lIYVVia1VGU3RrREo2V2phS2xmMzFzWWZPayIsIm9yZGVyX2lkIjoib3JkZXJfYWJjMTIzIiwicHJldiI6bnVsbCwic2VxIjoxLCJ0b3RhbHMiOnsiYXV0aG9yaXplZCI6NTQwMCwiY2FwdHVyZWQiOjAsIm1hbmRhdGVkIjo1NDAwLCJyZWZ1bmRlZCI6MH19.B1qq-ooaU-iv_gU4sxGg6OodmLq3kHhMyMnmI-rQTr9aziOACY7l1Vbkws7lSTm09IpVugB_QksMQiXUi6gvVQ",
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUiLCJ0eXAiOiJ1Y3AtYXAyLXJlY2VpcHQrand0In0.eyJjaGVja291dF9pZCI6ImNoa19hYmMxMjMiLCJldmVudCI6eyJhbW91bnQiOjMwMDAsImN1cnJlbmN5IjoiVVNEIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTEwVDAyOjAwOjAwWiIsInJlZiI6eyJwcm9jZXNzaW5nX2VudHJ5X2lkIjoiZW50XzIifSwic3RhdHVzIjoic3VjY2VlZGVkIiwidHlwZSI6ImNhcHR1cmUifSwiaWF0IjoxNzk0Mjc2MDAwLCJpc3MiOiJodHRwczovL2J1c2luZXNzLmV4YW1wbGUuY29tLy53ZWxsLWtub3duL3VjcCIsIm1hbmRhdGVfcmVmIjoic2hhLTI1Njp6aTB4RGsxNl9HSndfUUVLSUhhVWJrVUZTdGtESjZXamFLbGYzMXNZZk9rIiwib3JkZXJfaWQiOiJvcmRlcl9hYmMxMjMiLCJwcmV2Ijoic2hhLTI1NjptYkhyY29KVWZCUmxFQS1iQWdFTHZZRUh3bTlCOFctRHNoSzR5dURIWGdnIiwic2VxIjoyLCJ0b3RhbHMiOnsiYXV0aG9yaXplZCI6NTQwMCwiY2FwdHVyZWQiOjMwMDAsIm1hbmRhdGVkIjo1NDAwLCJyZWZ1bmRlZCI6MH19.kffxBLFlPYyfhAD_qXCpG2KIPDtmOfyRwBS9AlHUsHcmZlrFJ5YHBqPdT2fwLAzwdhFv2InssCj344UuHag1Wg",
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6Im1lcmNoYW50XzIwMjUiLCJ0eXAiOiJ1Y3AtYXAyLXJlY2VpcHQrand0In0.eyJjaGVja291dF9pZCI6ImNoa19hYmMxMjMiLCJldmVudCI6eyJhbW91bnQiOjI0MDAsImN1cnJlbmN5IjoiVVNEIiwib2NjdXJyZWRfYXQiOiIyMDI2LTExLTEyVDAyOjAwOjAwWiIsInJlZiI6eyJwcm9jZXNzaW5nX2VudHJ5X2lkIjoiZW50XzMifSwic3RhdHVzIjoic3VjY2VlZGVkIiwidHlwZSI6ImNhcHR1cmUifSwiaWF0IjoxNzk0NDQ4ODAwLCJpc3MiOiJodHRwczovL2J1c2luZXNzLmV4YW1wbGUuY29tLy53ZWxsLWtub3duL3VjcCIsIm1hbmRhdGVfcmVmIjoic2hhLTI1Njp6aTB4RGsxNl9HSndfUUVLSUhhVWJrVUZTdGtESjZXamFLbGYzMXNZZk9rIiwib3JkZXJfaWQiOiJvcmRlcl9hYmMxMjMiLCJwcmV2Ijoic2hhLTI1NjotNG9URC1FS1lfQ3lwTlM1TzhXRWhYRE5ZNkVGQkRwbDR3aUxXem9EMnFnIiwic2VxIjozLCJ0b3RhbHMiOnsiYXV0aG9yaXplZCI6NTQwMCwiY2FwdHVyZWQiOjU0MDAsIm1hbmRhdGVkIjo1NDAwLCJyZWZ1bmRlZCI6MH19.J-C66O6O4XjAD_TvtvS8endj_FfRIe_u3SysJ4U2NwX0zqQ0MlAy6FeGJZuSPUuCnY8twK9-9TjQdMT7ylL7Yw"
     ]
   }
 }
@@ -738,17 +772,27 @@ When order receipts are negotiated, the business:
     whose `ap2.merchant_authorization` the referenced Payment Mandate covers.
     In a marketplace that is merchant of record, that is the marketplace, not
     the individual seller.
-3. **MUST NOT** capture so that `captured` exceeds `mandated`. Any increase in
-    what the buyer pays beyond `mandated` (a tip, an overage, an order change,
-    or a re-authorization above the original amount) **MUST** be covered by a
-    new closed Payment Mandate from the platform. Movements that spend against
-    the new mandate form their own chain, keyed by its `mandate_ref`.
+3. **MUST NOT** authorize or capture so that `authorized` or `captured`
+    exceeds `mandated`. Any increase in what the buyer pays beyond `mandated`
+    (a tip, an overage, an order change, or a re-authorization above the
+    original amount) **MUST** be covered by a new closed Payment Mandate from
+    the platform. Movements that spend against the new mandate form their own
+    chain, keyed by its `mandate_ref`.
 4. **MUST NOT** refund so that `refunded` exceeds `captured`.
-5. **SHOULD** set `event.seller_id` on `capture`, `refund` and `release`
+5. **MUST** state `totals` that follow the [Running Totals](#running-totals)
+    rules.
+6. **MUST** issue at most one receipt per `seq` in a chain, and **MUST NOT**
+    re-issue a chain.
+7. **MUST**, on a follow-up receipt that only adds `network_ref` to a movement
+    already receipted as `succeeded`, carry that movement's
+    `event.ref.processing_entry_id`. A business that cannot supply a
+    `processing_entry_id` issues the movement as `pending` first and adds
+    `network_ref` on the `succeeded` receipt.
+8. **SHOULD** set `event.seller_id` on `capture`, `refund` and `release`
     events when seller attribution is active on the Order.
-6. **MUST** keep retired public keys resolvable by `kid` for at least the
+9. **MUST** keep retired public keys resolvable by `kid` for at least the
     dispute window of the payment method used.
-7. **MUST NOT** include card numbers, payment tokens or buyer personal data in
+10. **MUST NOT** include card numbers, payment tokens or buyer personal data in
     a receipt.
 
 ### Platform Verification
@@ -756,54 +800,94 @@ When order receipts are negotiated, the business:
 When order receipts are negotiated, the platform:
 
 1. **MUST** verify each receipt's signature against the `keys` of the business
-    named in `iss`, and **MUST** treat a receipt whose `iss` is not the business
-    that signed the checkout covered by `mandate_ref` as
-    `receipt_mandate_unknown`.
-2. **MUST** evaluate `seq` and `prev` continuity, `captured` ≤ `mandated` and
-    `refunded` ≤ `captured` per `(iss, mandate_ref)` chain.
-3. **SHOULD**, when `event.seller_id` is present, also check per seller that
+    named in `iss`. A receipt whose `typ` is not `ucp-ap2-receipt+jwt`, or
+    whose `kid` does not resolve in the `keys` of `iss`, is
+    `receipt_invalid_signature`.
+2. **MUST**, only for receipts whose signature verified, check that
+    `mandate_ref` is a Payment Mandate the platform submitted and that `iss`
+    is the business that signed the checkout it covers. A receipt that fails
+    is `receipt_mandate_unknown`.
+3. **MUST** exclude a receipt that fails rule 1 or 2 from its chain, so the
+    next receipt in that chain is reported as `receipt_sequence_gap`.
+4. **MUST** evaluate `seq` and `prev` continuity per `(iss, mandate_ref)`
+    chain. A second, different receipt for a `seq` the platform already holds
+    is `receipt_sequence_gap`; the platform keeps both.
+5. **MUST** recompute `authorized`, `captured` and `refunded` for each chain
+    from the `succeeded` events it holds, per
+    [Running Totals](#running-totals), and **MUST** check that
+    `totals.mandated` equals the `payment_amount` of the Payment Mandate that
+    `mandate_ref` covers. A receipt whose stated `totals` differ from these
+    values is `receipt_totals_mismatch`.
+6. **MUST** check, on the recomputed totals, that `authorized` and `captured`
+    do not exceed `mandated` (`receipt_exceeds_mandate`) and that `refunded`
+    does not exceed `captured` (`receipt_refund_exceeds_capture`).
+7. **SHOULD**, when `event.seller_id` is present, also check per seller that
     succeeded captures do not exceed that seller's attributed total and that
     refunds do not exceed that seller's captures. This is a **SHOULD** because
     a seller's chargeable amount can include Order-level shipping, tax or
     discounts that are not attributed to its line items.
-4. **SHOULD** reconcile each `refund` receipt that carries
-    `event.ref.adjustment_id` against that Order adjustment. A mismatch is a
-    commercial problem, not a cryptographic one: the receipt remains valid.
-5. **SHOULD**, on any failed check, alert the user or the agent's policy
-    engine, and **SHOULD** retain the receipt chain as dispute evidence.
+8. **SHOULD** reconcile refunds against Order adjustments. The platform
+    compares the sum of `event.amount` over the `succeeded` refund receipts
+    that cite an `event.ref.adjustment_id` with the magnitude of that
+    adjustment's `total` entry. `pending` and `failed` receipts are not
+    counted. A cited `adjustment_id` that matches no adjustment on the Order
+    is also `reconciliation_adjustment_mismatch`. A mismatch is a commercial
+    problem, not a cryptographic one: the receipts remain valid.
+9. **SHOULD**, on any failed check, alert the user or the agent's policy
+    engine, and **MUST** retain every receipt it received as dispute evidence.
+    See [Limits](#limits).
 
 Platforms record these outcomes rather than returning them as errors, because
 the money has already moved:
 
 {{ extension_schema_fields('payment_ap2_mandate.json#/$defs/receipt_verification_outcome', 'payment/extensions/ap2-mandates') }}
 
-| Outcome                              | Meaning                                                              |
-| :----------------------------------- | :------------------------------------------------------------------- |
-| `receipt_invalid_signature`          | The receipt signature cannot be verified.                            |
-| `receipt_sequence_gap`               | A `seq` is missing, repeated, or `prev` does not match.              |
-| `receipt_exceeds_mandate`            | `captured` exceeds `mandated` for the chain.                         |
-| `receipt_refund_exceeds_capture`     | `refunded` exceeds `captured` for the chain.                         |
-| `receipt_exceeds_seller_total`       | A seller's captures or refunds exceed what is attributed to it.      |
-| `receipt_mandate_unknown`            | `mandate_ref` is unknown, or `iss` is not the business it covers.    |
-| `reconciliation_adjustment_mismatch` | A valid refund receipt disagrees with the Order adjustment it cites. |
+| Outcome                              | Meaning                                                                                  |
+| :----------------------------------- | :--------------------------------------------------------------------------------------- |
+| `receipt_invalid_signature`          | The signature cannot be verified, `kid` does not resolve, or `typ` is wrong.             |
+| `receipt_sequence_gap`               | A `seq` is missing or repeated, or `prev` does not match.                                |
+| `receipt_totals_mismatch`            | Stated `totals` differ from the recomputed totals or the mandate's `payment_amount`.     |
+| `receipt_exceeds_mandate`            | `authorized` or `captured` exceeds `mandated` for the chain.                             |
+| `receipt_refund_exceeds_capture`     | `refunded` exceeds `captured` for the chain.                                             |
+| `receipt_exceeds_seller_total`       | A seller's captures exceed what is attributed to it, or its refunds exceed its captures. |
+| `receipt_mandate_unknown`            | `mandate_ref` is unknown, or `iss` is not the business it covers.                        |
+| `reconciliation_adjustment_mismatch` | Succeeded refunds disagree with the cited adjustment, or it does not exist.              |
+
+### Limits
+
+* **A missing tail is not detectable from the chain.** `seq` and `prev` show a
+    receipt missing from the middle of a chain, but not that the last receipt
+    a platform holds is the last one issued. A platform **SHOULD** compare the
+    chain with the payment state the Order reports and treat a movement the
+    Order reports without a receipt as `receipt_sequence_gap`.
+* **The business signs the whole chain.** It could sign a second, different
+    chain for the same `mandate_ref`. Only a party that kept the receipts it
+    was sent can show the difference, which is why platforms **MUST** retain
+    them.
 
 ### Edge Cases
 
 * **Split shipments:** multiple `capture` receipts against the same
     `mandate_ref`, with `captured` accumulating.
-* **Authorization expiry:** a new `authorization` receipt with the same
-    `mandate_ref`, allowed only up to `mandated` minus `captured` without a new
-    mandate.
+* **Authorization expiry:** a `release` receipt for the expired, uncaptured
+    amount, then a new `authorization` receipt with the same `mandate_ref`.
+    Without a new mandate, the new authorization is limited to `mandated`
+    minus `captured`, so `authorized` never exceeds `mandated`.
 * **Cancelled before capture:** a `release` receipt; `authorized` drops and
     `captured` stays at 0.
+* **Partial capture, remainder released:** a 3000 capture followed by a
+    `release` of the remaining 2400 leaves `authorized` at 3000 and `captured`
+    at 3000.
 * **Pending movements:** a movement may first be receipted as `pending`. A
     later receipt in the same chain for the same movement carries
     `status: succeeded`. Totals change only on the `succeeded` receipt.
 * **Late network references:** when a network reference (for example the
     Acquirer Reference Number of a refund) is assigned after the movement is
-    receipted, it appears on a follow-up receipt for the same `event.ref`.
-    `network_ref` is optional on every status: a refund processed as a
-    reversal of the original authorization may never have one.
+    receipted as `succeeded`, it appears on a follow-up receipt with the same
+    `type` and `event.ref.processing_entry_id`, which does not change the
+    totals. `network_ref` is optional on every status: a refund that the
+    processor settles as a reversal of the original transaction may never
+    have one. It is still receipted as a `refund`.
 * **Out-of-order processor callbacks:** `seq` reflects issuance order;
     `occurred_at` carries when the movement happened.
 * **Marketplace as merchant of record:** the marketplace issues every receipt
