@@ -141,7 +141,7 @@ occupancy taxes, or a remaining stay balance).
   duration (`stay_dates`, i.e., check-in to check-out), **NOT** a per-night figure.
 * **Itemized Subtotals and Nightly Breakdown (`lines`)**: The `lines` array under a total item
   provides supplementary, itemized clarity:
-    * `subtotal` total items **MAY** carry `lines` representing the per-night stay rate breakdown.
+    * `subtotal` total items **MAY** carry `lines` representing the per-night stay rate breakdown, one line per night from `start_date` through the day before `end_date`.
     * `tax` total items **MAY** carry `lines` delineating separate tax authorities (e.g., state
       sales tax vs. local occupancy or tourism tax).
     * `fee` total items **MAY** carry `lines` detailing mandatory charges (e.g., daily resort
@@ -907,7 +907,7 @@ Buyer location and market context hints.
 
 ### Date Interval
 
-Check-in (`start_date`) and check-out (`end_date`) date range for the stay.
+Check-in (`start_date`) and check-out (`end_date`) dates for the stay. `end_date` is the check-out date, not a night stayed.
 
 {{ schema_fields('types/date_interval', 'lodging/booking') }}
 

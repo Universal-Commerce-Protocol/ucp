@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/date_interval.json",
   "title": "Date Interval",
-  "description": "Represents a closed date range defined by start and end dates.",
+  "description": "Represents a date range defined by start and end dates. The field that uses the interval defines what the dates mean; for example, a lodging stay's `end_date` is the check-out date, not a night stayed.",
   "type": "object",
   "required": [
     "start_date",
