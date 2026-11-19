@@ -100,8 +100,8 @@ use their normal schema-defined values; the base buyer schema does not define
 separate selectable ids for email addresses or phone numbers. Fulfillment
 destination selection remains governed by the
 [Fulfillment](../../shopping/extensions/fulfillment.md) contract; identity
-linking alone does not authorize proactive disclosure of precise saved-address
-or contact fields before the platform selects a destination.
+linking alone does not authorize proactive disclosure of the precise address
+or recipient-contact fields of an unselected saved fulfillment destination.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is
 user-authenticated and authorized for the operation. They **MUST** only return
