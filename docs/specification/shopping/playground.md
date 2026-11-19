@@ -419,7 +419,7 @@ const UcpData = {
   business_payment_handlers: {
     "com.stripe.payments": [
       {
-        id: "stripe_payments",
+        id: "stripe_payments_1234",
         version: "2026-06-25",
         spec: "https://docs.stripe.com/agentic-commerce/protocols/ucp/stripe-payments-handler",
         schema: "https://ucp.stripe.com/payments/2026-06-25/schema.json",
@@ -483,7 +483,7 @@ const UcpData = {
   platform_payment_handlers: {
     "com.stripe.payments": [
       {
-        id: "stripe_payments",
+        id: "stripe_payments_1234",
         version: "2026-06-25",
         spec: "https://docs.stripe.com/agentic-commerce/protocols/ucp/stripe-payments-handler",
         schema: "https://ucp.stripe.com/payments/2026-06-25/schema.json",
@@ -583,8 +583,7 @@ const UcpData = {
 
   mock_instruments: {
     stripe_payments: {
-      "id": "instr_stripe_d12bb703-f77e-4c64-9e38-b99a68f74297",
-      "handler_id": "stripe_payments",
+      "handler_id": "stripe_payments_1234",
       "type": "card",
       "billing_address": {
         "street_address": "123 Main Street",
@@ -592,7 +591,8 @@ const UcpData = {
         "address_region": "SC",
         "postal_code": "29401",
         "address_country": "US"
-      }
+      },
+      "id": "instr_stripe_d12bb703-f77e-4c64-9e38-b99a68f74297"
     },
     shop_pay: {
       "handler_id": "shop_pay_1234",
