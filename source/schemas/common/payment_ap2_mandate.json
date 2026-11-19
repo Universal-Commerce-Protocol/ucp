@@ -77,7 +77,7 @@
             "release",
             "refund"
           ],
-          "description": "Kind of money movement."
+          "description": "Kind of money movement. `authorization` and `authorization_adjustment` add to `authorized`; `release` subtracts from it; `capture` adds to `captured`; `capture_reversal` subtracts from it; `refund` adds to `refunded`."
         },
         "status": {
           "type": "string",
@@ -109,7 +109,7 @@
         },
         "network_ref": {
           "type": "string",
-          "description": "Network or acquirer reference for the movement, e.g. the Acquirer Reference Number (ARN) of a refund. MAY first appear on a later receipt for the same movement, and MAY never be present, e.g. for a refund processed as a reversal."
+          "description": "Network or acquirer reference for the movement, e.g. the Acquirer Reference Number (ARN) of a refund. MAY first appear on a follow-up receipt with the same `type` and `ref.processing_entry_id`, which does not change the totals, and MAY never be present, e.g. for a refund the processor settles as a reversal."
         },
         "ref": {
           "type": "object",
@@ -121,7 +121,7 @@
             },
             "processing_entry_id": {
               "type": "string",
-              "description": "Identifier of the corresponding payment processing entry, when the business reports one."
+              "description": "Identifier of the corresponding payment processing entry. A later `succeeded` receipt with the same `type` and `processing_entry_id` is a follow-up and does not change the totals again."
             }
           }
         }
@@ -129,7 +129,7 @@
     },
     "receipt_totals": {
       "title": "Receipt Totals",
-      "description": "Running totals for the receipt's chain after this event, in minor units.",
+      "description": "Running totals for the receipt's chain after this event, in minor units. Platforms recompute these from the succeeded events they hold.",
       "type": "object",
       "required": [
         "mandated",
@@ -146,17 +146,17 @@
         "authorized": {
           "type": "integer",
           "minimum": 0,
-          "description": "Currently authorized amount."
+          "description": "Sum of succeeded `authorization` and `authorization_adjustment` amounts minus succeeded `release` amounts. Captures do not reduce it."
         },
         "captured": {
           "type": "integer",
           "minimum": 0,
-          "description": "Cumulative captured amount, net of capture reversals."
+          "description": "Sum of succeeded `capture` amounts minus succeeded `capture_reversal` amounts."
         },
         "refunded": {
           "type": "integer",
           "minimum": 0,
-          "description": "Cumulative refunded amount."
+          "description": "Sum of succeeded `refund` amounts."
         }
       }
     },
@@ -258,7 +258,7 @@
               "refund"
             ]
           },
-          "description": "Event types the business issues receipts for."
+          "description": "In the business profile, the event types the business issues receipts for. In the platform profile, informational: the event types the platform can process."
         }
       }
     },
@@ -388,6 +388,7 @@
       "enum": [
         "receipt_invalid_signature",
         "receipt_sequence_gap",
+        "receipt_totals_mismatch",
         "receipt_exceeds_mandate",
         "receipt_refund_exceeds_capture",
         "receipt_exceeds_seller_total",
