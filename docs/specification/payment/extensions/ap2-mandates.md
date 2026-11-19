@@ -227,6 +227,15 @@ Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform
 | **checkout_mandate** | `ap2.checkout_mandate`                    | Proof bound to checkout terms, protects business     |
 | **payment_mandate**  | `payment.instruments[*].credential.token` | Proof bound to payment authorization, protects funds |
 
+Deferral of payment capture does not by itself prevent a supported
+instrument from furnishing a Payment Mandate. The incompatibility concerns
+completion without any instrument that can furnish that mandate, not every
+fully deferred term; see
+[Payment Terms](terms.md#payment-instruments-and-eligibility)
+for selection-time compatibility. A Checkout Mandate alone does not authorize
+an eventual funds transfer, and a user's mandate signature does not by
+itself prove a financing provider accepted an arrangement.
+
 The checkout mandate **MUST** contain the full checkout response including the
 `ap2.merchant_authorization` field. This creates a nested cryptographic binding
 where the platform's signature covers the business's signature.
@@ -271,6 +280,23 @@ Once the `dev.ucp.common.payment.ap2_mandate` capability is negotiated, the sess
 is locked into the following flow. Both parties **MUST** follow these steps to
 ensure cryptographic integrity; any attempt to bypass these steps or submit
 a completion request without mandates **MUST** result in a session failure.
+
+If a Complete Checkout request is attempted with an incompatible fully deferred
+Payment Term that cannot provide the required Payment Mandate, this session
+failure **MUST** reject that completion and return the Checkout with
+`status: incomplete` and a recoverable error identifying the incompatible
+payment selection. It does not by itself cancel the session or relax the AP2
+security lock. The Platform **MAY** use Update Checkout to select a compatible
+term before a new completion request with the required mandates.
+
+**Instrument-free scope.** Under the current paired-mandate model,
+a reservation or order with no payment instrument determined at checkout
+cannot complete within an AP2-locked session. This proposed recovery rule
+does not create authorization for later collection or define a later
+Payment Mandate, trusted collection surface, or receipt linkage.
+Any separately negotiated non-AP2 checkout would be a different session,
+not a downgrade of the existing AP2-locked session. Whether instrument-free
+reservation flows belong in AP2 at all requires a Payments DTC scope decision.
 
 ### Step 1: Checkout Creation & Signing
 
@@ -414,6 +440,11 @@ Upon receiving the `complete` request, the business **MUST**:
 
 1. **Enforce Negotiation:** If AP2 was negotiated, reject the request with
     `mandate_required` error code if `ap2.checkout_mandate` is missing.
+2. **Enforce Payment Mandate:** The business **MUST NOT** complete without the
+    required Payment Mandate carried by a payment instrument. Where an
+    instrument is supplied, its mandate is verified by the Payment Handler /
+    PSP as described below. If no instrument can carry the required mandate,
+    apply the rejected-completion behavior above.
 
 **Mandate Verification (per AP2 spec):**
 
