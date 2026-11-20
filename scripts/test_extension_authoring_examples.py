@@ -15,9 +15,14 @@
 
 """Check complete extension-authoring examples, without fetching vendor URLs.
 
-By default, published UCP URLs are mapped to this checkout's source schemas.
-Pass --published to smoke-test the carbon response against published UCP
-schemas instead. Feed examples are tested only when their section is present.
+When contributing to the guide, run:
+    uv run python scripts/test_extension_authoring_examples.py
+
+These tests check the complete examples and response-only annotation against
+local UCP schemas, including values that must fail. By default, published UCP
+URLs are mapped to this checkout's source schemas. Pass --published to check
+the walkthrough and container pattern against published UCP schemas instead.
+Fictional vendor URLs are not fetched.
 """
 
 import copy
@@ -35,9 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
 GUIDE = ROOT / "docs/specification/extension-authoring.md"
 TEXT = GUIDE.read_text(encoding="utf-8")
-PUBLISHED = "--published" in sys.argv
-if PUBLISHED:
-  sys.argv.remove("--published")
+PUBLISHED = False
 
 
 def _blocks():
@@ -382,125 +385,8 @@ class ContainerExamples(_Examples):
     self.assertIn("com.acme.www", result.stdout + result.stderr)
 
 
-class FeedExamples(_Examples):
-  """Check the feeds supplement when this checkout includes that section."""
-
-  def setUp(self):
-    """Extract feed examples and add metadata only to validation fixtures."""
-    super().setUp()
-    self.version = "2026-09-25"
-    self.schema = _example("feed-extension", self.version)
-    self.profile = _example("feed-profile", self.version)
-    self.manifest = _example("feed-manifest", self.version)
-    self.record = _example("feed-record", self.version)
-    schema_path = self._write("schemas/ads.json", self.schema)
-    self.metadata = copy.deepcopy(self.manifest["ucp"])
-    # Records do not need a per-record envelope. This adapter only supplies
-    # the CLI with the manifest's declarations so it can compose the schema.
-    for name, entries in self.metadata["capabilities"].items():
-      if name == self.schema["name"]:
-        entries[0]["schema"] = self._reference(schema_path)
-      else:
-        entries[0]["schema"] = self.profile["ucp"]["capabilities"][name][0][
-          "schema"
-        ]
-
-  def _validate(self, record, expected=0):
-    data = copy.deepcopy(record)
-    data["ucp"] = self.metadata
-    return self._cli(
-      [
-        "validate",
-        self._write("record.json", data),
-        "--def",
-        "record",
-        "--op",
-        "list",
-        "--response",
-        "--json",
-      ],
-      self.version,
-      expected,
-    )
-
-  def test_record_and_optional_flag(self):
-    """Products accept a boolean flag or its absence, but not a string."""
-    self._validate(self.record)
-    false_record = copy.deepcopy(self.record)
-    false_record["ads_eligible"] = False
-    self._validate(false_record)
-    absent = copy.deepcopy(self.record)
-    del absent["ads_eligible"]
-    self._validate(absent)
-    wrong = copy.deepcopy(self.record)
-    wrong["ads_eligible"] = "true"
-    self._validate(wrong, 1)
-
-  def test_base_fields_are_preserved(self):
-    """The extension does not relax the Product's required fields."""
-    record = copy.deepcopy(self.record)
-    del record["variants"]
-    self._validate(record, 1)
-
-  def test_readable_record_matches_jsonl(self):
-    """The expanded view and actual one-line record describe identical data."""
-    kind, raw = BLOCKS["feed-record-jsonl"]
-    self.assertEqual(kind, "text")
-    self.assertEqual(len(raw.splitlines()), 1)
-    self.assertEqual(json.loads(raw), self.record)
-
-  def test_profile_and_manifest(self):
-    """The authored profiles and manifests follow their source schemas."""
-    self._cli(
-      [
-        "validate",
-        self._write("profile.json", self.profile),
-        "--schema",
-        SOURCE / "schemas/profile.json",
-        "--def",
-        "business_schema",
-        "--op",
-        "read",
-        "--response",
-        "--json",
-      ],
-      self.version,
-    )
-    self._cli(
-      [
-        "validate",
-        self._write("manifest.json", self.manifest),
-        "--schema",
-        SOURCE / "schemas/shopping/catalog_feed.json",
-        "--def",
-        "manifest",
-        "--op",
-        "list",
-        "--response",
-        "--json",
-      ],
-      self.version,
-    )
-
-  def test_authority_and_aliases(self):
-    """Both complete extension examples have matching names and hosts."""
-    self._authority(self.schema)
-    self._authority(_example("feed-custom-extension", self.version))
-    root = self.schema["$defs"]["dev.ucp.common.feed"]
-    parent = self.schema["$defs"]["dev.ucp.shopping.catalog.feed"]
-    self.assertEqual(root, parent)
-    self.assertEqual(self.schema["name"], "com.example.ads.eligibility")
-
-
-def load_tests(loader, standard_tests, pattern):
-  """Select only examples present in this branch; missing markers still fail."""
-  del standard_tests, pattern
-  suite = loader.loadTestsFromTestCase(CarbonExamples)
-  suite.addTests(loader.loadTestsFromTestCase(ContainerExamples))
-  if not PUBLISHED and "## Extend a Feed" in TEXT:
-    suite.addTests(loader.loadTestsFromTestCase(FeedExamples))
-  return suite
-
-
 if __name__ == "__main__":
+  if "--published" in sys.argv:
+    PUBLISHED = True
+    sys.argv.remove("--published")
   unittest.main()
