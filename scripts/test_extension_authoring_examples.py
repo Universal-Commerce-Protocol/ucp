@@ -16,7 +16,7 @@
 """Check complete extension-authoring examples, without fetching vendor URLs.
 
 By default, published UCP URLs are mapped to this checkout's source schemas.
-Pass --published to smoke-test the loyalty response against published UCP
+Pass --published to smoke-test the carbon response against published UCP
 schemas instead. Feed examples are tested only when their section is present.
 """
 
@@ -127,17 +127,17 @@ class _Examples(unittest.TestCase):
     )
 
 
-class LoyaltyExamples(_Examples):
-  """Keep the copyable loyalty walkthrough internally consistent."""
+class CarbonExamples(_Examples):
+  """Keep the copyable carbon-estimate walkthrough internally consistent."""
 
   def setUp(self):
     """Extract the complete schema, response and profile from the guide."""
     super().setUp()
-    self.schema = _example("loyalty-schema")
-    self.response = _example("loyalty-response")
-    self.profile = _example("loyalty-profile")
+    self.schema = _example("carbon-schema")
+    self.response = _example("carbon-response")
+    self.profile = _example("carbon-profile")
     self.version = self.response["ucp"]["version"]
-    schema_path = self._write("schemas/loyalty.json", self.schema)
+    schema_path = self._write("schemas/carbon.json", self.schema)
     extension = self.response["ucp"]["capabilities"][self.schema["name"]][0]
     extension["schema"] = self._reference(schema_path)
 
@@ -160,50 +160,54 @@ class LoyaltyExamples(_Examples):
     result = self._validate(self.response)
     self.assertTrue(json.loads(result.stdout)["valid"])
 
-  def test_negative_points(self):
-    """Negative points fail, proving that the extension's rules are applied."""
+  def test_negative_estimate(self):
+    """A negative estimate proves that the extension's rules are applied."""
     response = copy.deepcopy(self.response)
-    response["loyalty"]["points_earned"] = -1
+    response["acme_carbon_estimate"]["grams_co2e"] = -1
     self.assertFalse(json.loads(self._validate(response, 1).stdout)["valid"])
 
-  def test_wrong_points_type(self):
-    """Points are integers, not strings."""
+  def test_wrong_estimate_type(self):
+    """The estimate uses integer grams, not strings."""
     response = copy.deepcopy(self.response)
-    response["loyalty"]["points_earned"] = "120"
+    response["acme_carbon_estimate"]["grams_co2e"] = "120"
     self._validate(response, 1)
 
-  def test_points_required_when_loyalty_present(self):
-    """A loyalty object must include its computed points."""
+  def test_estimate_required_when_object_present(self):
+    """An estimate object must include its computed grams of CO2 equivalent."""
     response = copy.deepcopy(self.response)
-    response["loyalty"] = {"member_id": "example-member"}
+    response["acme_carbon_estimate"] = {"methodology": "example-method"}
     self._validate(response, 1)
 
   def test_request_and_response_views(self):
-    """Computed points belong in the response view, not the request view."""
+    """Computed estimates belong in the response view, not the request view."""
     path = self._write("response.json", self.response)
     request = self._cli(
       ["resolve", path, "--op", "create", "--request"],
       self.version,
     )
-    self.assertFalse(_property_defined(json.loads(request.stdout), "loyalty"))
+    self.assertFalse(
+      _property_defined(json.loads(request.stdout), "acme_carbon_estimate")
+    )
     response = self._cli(
       ["resolve", path, "--op", "read", "--response"],
       self.version,
     )
-    self.assertTrue(_property_defined(json.loads(response.stdout), "loyalty"))
+    self.assertTrue(
+      _property_defined(json.loads(response.stdout), "acme_carbon_estimate")
+    )
 
   def test_both_profile_roles(self):
-    """The example declarations work as both minimal profile variants."""
-    for definition in ("business_schema", "platform_schema"):
-      with self.subTest(definition=definition):
+    """Run the walkthrough's commands for both saved profile variants."""
+    for role in ("business", "platform"):
+      with self.subTest(role=role):
         self._cli(
           [
             "validate",
-            self._write("profile.json", self.profile),
+            self._write(f"{role}-profile.json", self.profile),
             "--schema",
-            SOURCE / "schemas/profile.json",
+            f"https://ucp.dev/{self.version}/schemas/profile.json",
             "--def",
-            definition,
+            f"{role}_schema",
             "--op",
             "read",
             "--response",
@@ -227,6 +231,41 @@ class LoyaltyExamples(_Examples):
     self.assertEqual(extension["schema"], self.schema["$id"])
     self.assertEqual(extension["version"], self.schema["version"])
     self.assertEqual(extension["extends"], "dev.ucp.shopping.checkout")
+    declared = self.response["ucp"]["capabilities"][self.schema["name"]][0]
+    self.assertEqual(declared["version"], extension["version"])
+    self.assertEqual(declared["extends"], extension["extends"])
+
+  def test_coexists_with_ucp_loyalty(self):
+    """UCP loyalty and the Acme estimate can compose on the same checkout."""
+    response = copy.deepcopy(self.response)
+    response["ucp"]["capabilities"]["dev.ucp.common.loyalty"] = [
+      {
+        "version": self.version,
+        "schema": f"https://ucp.dev/{self.version}/schemas/common/loyalty.json",
+        "extends": "dev.ucp.shopping.checkout",
+      }
+    ]
+    response["loyalty"] = {
+      "com.acme.rewards": {
+        "id": "member_123",
+        "name": "Acme Rewards",
+        "provisional": False,
+      }
+    }
+    self._validate(response)
+    bad_loyalty = copy.deepcopy(response)
+    del bad_loyalty["loyalty"]["com.acme.rewards"]["id"]
+    result = self._validate(bad_loyalty, 1)
+    self.assertIn("/loyalty/com.acme.rewards", result.stdout)
+    self.assertIn("required property", result.stdout)
+    response["acme_carbon_estimate"]["grams_co2e"] = -1
+    self._validate(response, 1)
+
+  def test_absent_estimate_is_valid(self):
+    """Supporting the extension does not require an estimate on every reply."""
+    response = copy.deepcopy(self.response)
+    del response["acme_carbon_estimate"]
+    self._validate(response)
 
 
 class FeedExamples(_Examples):
@@ -342,7 +381,7 @@ class FeedExamples(_Examples):
 def load_tests(loader, standard_tests, pattern):
   """Select only examples present in this branch; missing markers still fail."""
   del standard_tests, pattern
-  suite = loader.loadTestsFromTestCase(LoyaltyExamples)
+  suite = loader.loadTestsFromTestCase(CarbonExamples)
   if not PUBLISHED and "## Extend a Feed" in TEXT:
     suite.addTests(loader.loadTestsFromTestCase(FeedExamples))
   return suite

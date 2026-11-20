@@ -17,7 +17,7 @@
 # Extension Authoring Guide
 
 UCP already defines features such as checkout. Sometimes you need to share an
-extra piece of information, such as loyalty points earned on an order. This
+extra piece of information, such as a carbon estimate for an order. This
 guide shows how to add that field, publish its schema on your own website,
 and tell other UCP participants that you support it.
 
@@ -70,7 +70,7 @@ process (see [Contributing](/documentation/contributing/)).
 
 A complete extension has five parts:
 
-1. **A name** in a namespace you control, such as `com.acme.shopping.loyalty`.
+1. **A name** in a namespace you control, such as `com.acme.shopping.carbon`.
 2. **A schema** hosted on your domain that describes what the extension adds
    to each capability it extends.
 3. **A version** you control, plus the UCP versions it requires.
@@ -80,10 +80,16 @@ A complete extension has five parts:
 The walkthrough below builds those parts for one small extension. The later
 sections explain other patterns; you do not need to use every pattern at once.
 
-## Walkthrough: Add Loyalty Points to Checkout
+## Walkthrough: Add a Carbon Estimate to Checkout
 
-Acme calculates the points earned on a checkout. The Business returns those
-points; the Platform can display them, but does not send or calculate them.
+Acme estimates the order's carbon footprint in whole grams of CO2 equivalent.
+The Business returns the estimate; the Platform can display it, but does not
+send or calculate it. The optional `methodology` identifies Acme's calculation
+method. This is an estimate, not a certification.
+
+The field is named `acme_carbon_estimate` to distinguish it from UCP's fields
+and other vendors' additions. In particular, it does not reuse the existing
+`loyalty` field from `dev.ucp.common.loyalty`.
 
 This example uses the published UCP release `2026-08-25` and Acme's extension
 version `2026-09-01`. Keep the UCP version in the schema URLs and declarations
@@ -99,18 +105,18 @@ cargo install ucp-schema
 mkdir -p schemas
 ```
 
-Save the following complete file as `schemas/loyalty.json`:
+Save the following complete file as `schemas/carbon.json`:
 
-<!-- extension-authoring-example: loyalty-schema -->
+<!-- extension-authoring-example: carbon-schema -->
 <!-- ucp:example skip reason="third-party extension schema; checked by test_extension_authoring_examples.py" -->
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://acme.com/ucp/schemas/loyalty.json",
-  "name": "com.acme.shopping.loyalty",
+  "$id": "https://acme.com/ucp/schemas/carbon.json",
+  "name": "com.acme.shopping.carbon",
   "version": "2026-09-01",
-  "title": "Acme Loyalty",
-  "description": "Adds loyalty points earned on a checkout.",
+  "title": "Acme Carbon Estimate",
+  "description": "Adds Acme's carbon estimate for an order, in whole grams of CO2 equivalent.",
   "requires": {
     "protocol": { "min": "2026-08-25" },
     "capabilities": {
@@ -118,23 +124,23 @@ Save the following complete file as `schemas/loyalty.json`:
     }
   },
   "$defs": {
-    "loyalty": {
+    "acme_carbon_estimate": {
       "type": "object",
-      "required": ["points_earned"],
+      "required": ["grams_co2e"],
       "properties": {
-        "points_earned": { "type": "integer", "minimum": 0 },
-        "member_id": { "type": "string" }
+        "grams_co2e": { "type": "integer", "minimum": 0 },
+        "methodology": { "type": "string" }
       }
     },
     "dev.ucp.shopping.checkout": {
-      "title": "Checkout with Acme Loyalty",
+      "title": "Checkout with Acme Carbon Estimate",
       "allOf": [
         { "$ref": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json" },
         {
           "type": "object",
           "properties": {
-            "loyalty": {
-              "$ref": "#/$defs/loyalty",
+            "acme_carbon_estimate": {
+              "$ref": "#/$defs/acme_carbon_estimate",
               "ucp_request": "omit"
             }
           }
@@ -145,20 +151,20 @@ Save the following complete file as `schemas/loyalty.json`:
 }
 ```
 
-`$defs` holds named schema parts. Here, `loyalty` describes the new data and
+`$defs` holds named schema parts. Here, `acme_carbon_estimate` describes the new data and
 `dev.ucp.shopping.checkout` describes how it adds to checkout. `allOf` means
 the same payload must satisfy both the checkout schema and the added rules.
 It does not replace the checkout schema.
 
 `ucp_request: "omit"` keeps the Business-computed field out of the resolved
 request schema. The Business remains responsible for treating its own
-calculated points as authoritative, rather than trusting unsolicited input.
+calculated estimate as authoritative, rather than trusting unsolicited input.
 
 ### 2. Advertise Support on Both Sides
 
 Save this minimal Business profile as `business-profile.json`:
 
-<!-- extension-authoring-example: loyalty-profile -->
+<!-- extension-authoring-example: carbon-profile -->
 <!-- ucp:example schema=profile def=business_schema -->
 ```json
 {
@@ -173,11 +179,11 @@ Save this minimal Business profile as `business-profile.json`:
           "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
         }
       ],
-      "com.acme.shopping.loyalty": [
+      "com.acme.shopping.carbon": [
         {
           "version": "2026-09-01",
-          "spec": "https://acme.com/docs/ucp/loyalty",
-          "schema": "https://acme.com/ucp/schemas/loyalty.json",
+          "spec": "https://acme.com/docs/ucp/carbon",
+          "schema": "https://acme.com/ucp/schemas/carbon.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -192,15 +198,24 @@ save the same minimal declarations as `platform-profile.json`:
 
 ```bash
 cp business-profile.json platform-profile.json
+ucp-schema validate business-profile.json \
+  --schema https://ucp.dev/2026-08-25/schemas/profile.json \
+  --def business_schema --op read --response --json
+ucp-schema validate platform-profile.json \
+  --schema https://ucp.dev/2026-08-25/schemas/profile.json \
+  --def platform_schema --op read --response --json
 ```
+
+Both validations should report `"valid": true`. They check the profile's
+structure, not whether the fictional Acme URLs are already hosted.
 
 These files demonstrate capability agreement, not a complete checkout
 installation. Keep the service endpoints, signing keys, and payment handlers
 needed by your real deployment in its profiles.
 
-Both profiles list Acme Loyalty version `2026-09-01` and its checkout parent,
+Both profiles list Acme Carbon Estimate version `2026-09-01` and its checkout parent,
 so the extension can be selected. If one side does not list it, the parties
-can still use checkout without Acme Loyalty. See
+can still use checkout without Acme Carbon Estimate. See
 [Advertise and Negotiate](#advertise-and-negotiate) for version selection.
 
 ### 3. Validate a Complete Response
@@ -209,7 +224,7 @@ Save this complete example as `checkout-response.json`. The local schema path
 lets you test before hosting the Acme schema; the UCP base schema is fetched
 from its published URL.
 
-<!-- extension-authoring-example: loyalty-response -->
+<!-- extension-authoring-example: carbon-response -->
 <!-- ucp:example skip reason="local development payload; checked by test_extension_authoring_examples.py" -->
 ```json
 {
@@ -222,10 +237,10 @@ from its published URL.
           "schema": "https://ucp.dev/2026-08-25/schemas/shopping/checkout.json"
         }
       ],
-      "com.acme.shopping.loyalty": [
+      "com.acme.shopping.carbon": [
         {
           "version": "2026-09-01",
-          "schema": "schemas/loyalty.json",
+          "schema": "schemas/carbon.json",
           "extends": "dev.ucp.shopping.checkout"
         }
       ]
@@ -254,14 +269,14 @@ from its published URL.
     { "type": "terms_of_service", "url": "https://merchant.example.com/terms" },
     { "type": "privacy_policy", "url": "https://merchant.example.com/privacy" }
   ],
-  "loyalty": { "points_earned": 120 }
+  "acme_carbon_estimate": { "grams_co2e": 120 }
 }
 ```
 
 From the directory containing these files, run:
 
 ```bash
-ucp-schema lint schemas/loyalty.json
+ucp-schema lint schemas/carbon.json
 ucp-schema validate checkout-response.json --op read --response --json
 ```
 
@@ -272,33 +287,34 @@ shown in the profiles.
 
 ### 4. Check a Failing Case Too
 
-Make a second response with an invalid points value:
+Make a second response with an invalid estimate:
 
 ```bash
 python3 -c '
 import json
 from pathlib import Path
 response = json.loads(Path("checkout-response.json").read_text())
-response["loyalty"]["points_earned"] = -1
+response["acme_carbon_estimate"]["grams_co2e"] = -1
 Path("checkout-bad.json").write_text(json.dumps(response))
 '
 ucp-schema validate checkout-bad.json --op read --response --json
 ```
 
-This should fail because `points_earned` cannot be negative. The command
+This should fail because `grams_co2e` cannot be negative. The command
 returns exit code `1` and reports `"valid": false`. A passing case alone does
 not show that your extension's rules are being applied.
 
 ### 5. Publish the Files and Explain the Behavior
 
 Host the schema at the URL declared in the profiles and write the `spec` page.
-For this example, that page should explain when points are calculated, what
-`member_id` means, and what happens when the extension is unsupported. Use
-HTTPS without schema redirects and send cacheable response headers, as
-[Host and Document It](#host-and-document-it) describes.
+For this example, that page should explain when the estimate is calculated,
+what `methodology` identifies, and what happens when the extension is
+unsupported or the estimate is absent. The Platform must not treat an absent
+estimate as zero. Use HTTPS without schema redirects and send cacheable
+response headers, as [Host and Document It](#host-and-document-it) describes.
 
 The profiles advertise support; each checkout response declares the extension
-actually used. The response carries the points themselves.
+actually used. The response carries the estimate itself.
 
 ## Choose a Name
 
@@ -306,7 +322,7 @@ Extension names follow the same rules as every capability name (see
 [Namespace Governance](overview/index.md#namespace-governance)):
 
 - Use the format `{reverse-domain}.{service}.{capability}`, for example
-  `com.acme.shopping.loyalty`.
+  `com.acme.shopping.carbon`.
 - Use a domain you control. The `dev.ucp.*` namespace is reserved for the UCP
   governing body.
 - Choose a registrable domain you exclusively control, not a shared suffix
@@ -316,7 +332,7 @@ The schema host must match the domain represented by the name. This is called
 *authority binding*: the Platform checks the name and host before fetching the
 schema, and rejects the extension if they do not match (see
 [Authority Binding](overview/index.md#authority-binding)).
-For `com.acme.shopping.loyalty`, a schema served from `acme.com` matches; one
+For `com.acme.shopping.carbon`, a schema served from `acme.com` matches; one
 served from a shared CDN host such as `cdn.example.net` does not.
 
 ## Write the Schema
@@ -343,11 +359,11 @@ capability's full name. The entry composes onto the capability's schema with
 Because your schema is hosted on your domain, reference UCP base schemas by
 absolute URL, including the UCP release in the path:
 
-The [complete loyalty schema](#1-write-the-extension-schema) shows this pattern
+The [complete carbon schema](#1-write-the-extension-schema) shows this pattern
 with a published UCP URL. Use the release your extension supports; do not mix
 schema URLs from one release with capability declarations from another.
 
-Put the types your extension introduces (`loyalty` above) in their own `$defs`
+Put the types your extension introduces (`acme_carbon_estimate` above) in their own `$defs`
 entries and reference them from the composed entry, so they can be reused across
 parents.
 
@@ -362,8 +378,8 @@ For example, a field the Business computes and the Platform never sends:
 
 <!-- ucp:example skip reason="extension schema fragment" -->
 ```json
-"loyalty": {
-  "$ref": "#/$defs/loyalty",
+"acme_carbon_estimate": {
+  "$ref": "#/$defs/acme_carbon_estimate",
   "ucp_request": "omit"
 }
 ```
@@ -372,7 +388,7 @@ Or a field the Platform may send on create and update, but not on complete:
 
 <!-- ucp:example skip reason="extension schema fragment" -->
 ```json
-"loyalty_member_id": {
+"carbon_methodology": {
   "type": "string",
   "ucp_request": { "create": "optional", "update": "optional", "complete": "omit" }
 }
@@ -386,8 +402,8 @@ in the `ucp-schema` documentation for the full resolution rules.
 To extend several capabilities, declare each in `extends` and add a `$defs`
 entry for each (see
 [Multi-Parent Extensions](overview/index.md#multi-parent-extensions)).
-Each entry can add different fields; for example, a loyalty extension might
-show a points preview on cart and points earned on checkout:
+Each entry can add different fields; for example, a carbon-estimate extension
+might show a preview on cart and a revised estimate on checkout:
 
 <!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
 ```json
@@ -395,13 +411,13 @@ show a points preview on cart and points earned on checkout:
   "dev.ucp.shopping.cart": {
     "allOf": [
       { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json" },
-      { "type": "object", "properties": { "loyalty_preview": { "$ref": "#/$defs/loyalty" } } }
+      { "type": "object", "properties": { "carbon_preview": { "$ref": "#/$defs/acme_carbon_estimate" } } }
     ]
   },
   "dev.ucp.shopping.checkout": {
     "allOf": [
       { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json" },
-      { "type": "object", "properties": { "loyalty": { "$ref": "#/$defs/loyalty" } } }
+      { "type": "object", "properties": { "acme_carbon_estimate": { "$ref": "#/$defs/acme_carbon_estimate" } } }
     ]
   }
 }
@@ -433,7 +449,7 @@ compose each one onto the base shape:
           {
             "type": "object",
             "properties": {
-              "products": { "items": { "$ref": "#/$defs/product_with_loyalty" } }
+              "products": { "items": { "$ref": "#/$defs/product_with_carbon" } }
             }
           }
         ]
@@ -443,7 +459,7 @@ compose each one onto the base shape:
 }
 ```
 
-Here `product_with_loyalty` is your own `$defs` entry that composes onto the
+Here `product_with_carbon` is your own `$defs` entry that composes onto the
 UCP product type and adds your product fields. Mirror only the shapes you
 change. `ucp-schema` rejects a container entry that
 composes directly onto a response with `allOf`, without the nested shape names.
@@ -492,7 +508,7 @@ UCP fulfillment extension uses this pattern for its `config`:
 <!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
 ```json
 "$defs": {
-  "com.acme.shopping.loyalty": {
+  "com.acme.shopping.carbon": {
     "business_schema": {
       "allOf": [
         { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/capability.json#/$defs/business_schema" },
@@ -889,11 +905,11 @@ its parents:
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
 ```json
 {
-  "com.acme.shopping.loyalty": [
+  "com.acme.shopping.carbon": [
     {
       "version": "2026-09-01",
-      "spec": "https://acme.com/docs/ucp/loyalty",
-      "schema": "https://acme.com/ucp/schemas/loyalty.json",
+      "spec": "https://acme.com/docs/ucp/carbon",
+      "schema": "https://acme.com/ucp/schemas/carbon.json",
       "extends": "dev.ucp.shopping.checkout"
     }
   ]
@@ -917,7 +933,7 @@ that response's capability (see
 
 ## Test Locally
 
-The [walkthrough](#walkthrough-add-loyalty-points-to-checkout) gives complete
+The [walkthrough](#walkthrough-add-a-carbon-estimate-to-checkout) gives complete
 files for a passing response and a failing case. Repeat those checks whenever
 you change the schema, not only before the first publication.
 
@@ -929,7 +945,7 @@ ucp-schema resolve checkout-response.json --request --op create --pretty
 ```
 
 The resolved create-request schema should not define the Business-computed
-`loyalty` field. The annotations describe which fields belong in a message;
+`acme_carbon_estimate` field. The annotations describe which fields belong in a message;
 open-object validation can still permit unknown fields, so do not mistake
 annotation resolution for a rule that automatically rejects every extra input.
 
