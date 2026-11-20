@@ -434,6 +434,7 @@ verification.
 | `ucp-agent`       | Cond. `**`   | Profile URL (binds identity)                                 |
 | `signature-agent` | Cond. `***`  | WBA key source (when [WBA Interop](#wba-interop) opted into) |
 | `idempotency-key` | Cond. `****` | Idempotency header (state-changing)                          |
+| `if-match`        | Cond. `‡`    | Entity tag precondition (conditional writes)                 |
 | `content-digest`  | Cond. `†`    | Body digest (if body present)                                |
 | `content-type`    | Cond. `†`    | Content-Type (if body present)                               |
 
@@ -447,10 +448,13 @@ verification.
 
 * `†` Required if request has a body
 
+* `‡` Required if `If-Match` header is present (see
+[Checkout REST — Concurrency Control](checkout-rest.md#concurrency-control))
+
 **Signature Generation:**
 
 ```text
-sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key, kid):
+sign_rest_request(method, path, query, body_bytes, idempotency_key, if_match, private_key, kid):
     // 1. Compute body digest (if body present)
     if body_bytes:
         digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
@@ -461,6 +465,7 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
     if query: components.append("@query")
     if ucp_agent: components.append("ucp-agent")
     if idempotency_key: components.append("idempotency-key")
+    if if_match: components.append("if-match")
     if body: components.extend(["content-digest", "content-type"])
 
     // 3. Build signature base (RFC 9421)
@@ -471,6 +476,7 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, private_key,
         query=query,
         headers={
             "idempotency-key": idempotency_key,
+            "if-match": if_match,
             "content-digest": digest_header,
             "content-type": "application/json"
         },
@@ -543,10 +549,18 @@ Response signatures use `@status` instead of `@method`:
 | Component        | Required   | Description                       |
 | :--------------- | :--------- | :-------------------------------- |
 | `@status`        | Yes        | HTTP status code (200, 201, etc.) |
+| `etag`           | Cond. `**` | Entity tag (if `ETag` present)    |
 | `content-digest` | Cond. `*`  | Body digest (if body present)     |
 | `content-type`   | Cond. `*`  | Content-Type (if body present)    |
 
 * `*` Required if response has a body
+
+* `**` Required if `ETag` header is present (see
+[Checkout REST — Concurrency Control](checkout-rest.md#concurrency-control))
+
+A response without a body (e.g., a bodiless `412` or `429` protocol error)
+carries no `Content-Digest`; its signature covers `@status` plus any
+conditionally required headers that are present.
 
 **Complete Response Example:**
 
@@ -575,28 +589,37 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 Response signing mirrors request signing with `@status` replacing `@method`:
 
 ```text
-sign_rest_response(status, body_bytes, private_key, kid):
+sign_rest_response(status, body_bytes, etag, private_key, kid):
     // 1. Compute body digest (if body present)
     if body_bytes:
         digest = sha256(body_bytes)  // Hash raw bytes, no canonicalization
         digest_header = "sha-256=:" + base64(digest) + ":"
 
-    // 2. Build signature base (RFC 9421)
+    // 2. Build component list
+    components = ["@status"]
+    if etag: components.append("etag")
+    if body_bytes: components.extend(["content-digest", "content-type"])
+
+    // 3. Build signature base (RFC 9421)
     signature_base = build_signature_base(
-        components=["@status", "content-digest", "content-type"],
+        components=components,
         status=status,
-        headers={"content-digest": digest_header, "content-type": "application/json"},
+        headers={
+            "etag": etag,
+            "content-digest": digest_header,
+            "content-type": "application/json"
+        },
         created=current_timestamp(),
         keyid=kid
     )
 
-    // 3. Sign
+    // 4. Sign
     signature = sign(signature_base, private_key)  // ecdsa for EC, eddsa for OKP
 
-    // 4. Return headers
+    // 5. Return headers (Content-Digest only when a body is present)
     return {
         "Content-Digest": digest_header,
-        "Signature-Input": 'sig1=("@status" "content-digest" "content-type");created=...;keyid="..."',
+        "Signature-Input": format_signature_input(components, kid),
         "Signature": "sig1=:" + base64(signature) + ":"
     }
 ```
@@ -712,6 +735,7 @@ verify_rest_request(request):
     if request.query:                        required += ["@query"]
     if request.has_body:                     required += ["content-digest", "content-type"]
     if "Idempotency-Key" in request.headers: required += ["idempotency-key"]
+    if "If-Match" in request.headers:        required += ["if-match"]
     if "UCP-Agent" in request.headers:       required += ["ucp-agent"]
     if "Signature-Agent" in request.headers: required += ["signature-agent"]
     for component in required:
@@ -768,9 +792,11 @@ verify_rest_response(response, signer_profile_url):
         return skip_signature("algorithm_unsupported")
 
     // 2b. Enforce covered-component requirements for responses (all regimes).
-    // No method/idempotency to bind, but the body still MUST be covered.
+    // No method/idempotency to bind, but the body and the entity tag the
+    // platform will echo via If-Match still MUST be covered.
     required = ["@status"]
     if response.has_body: required += ["content-digest", "content-type"]
+    if "ETag" in response.headers: required += ["etag"]
     for component in required:
         if component not in components:
             return skip_signature("signature_invalid")

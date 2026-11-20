@@ -1005,7 +1005,7 @@
         "schema": {
           "type": "string"
         },
-        "description": "Entity tag of the checkout state this write is based on (RFC 9110 conditional request). On mismatch the business rejects the write with 412 Precondition Failed. See Checkout REST - Concurrency Control."
+        "description": "Entity tag of the checkout state this write is based on (RFC 9110 conditional request). On mismatch the business rejects the write with 412 Precondition Failed. When the request is signed, the signature MUST cover `if-match`. See Checkout REST - Concurrency Control."
       },
       "request_id": {
         "name": "Request-Id",
@@ -1118,12 +1118,12 @@
         "schema": {
           "type": "string"
         },
-        "description": "Strong entity tag for the returned checkout state (RFC 9110). Echo via If-Match on Update, Complete, and Cancel to write conditionally. See Checkout REST - Concurrency Control."
+        "description": "Strong entity tag for the returned checkout state (RFC 9110). Echo via If-Match on Update, Complete, and Cancel to write conditionally. When the response is signed, the signature MUST cover `etag`. See Checkout REST - Concurrency Control."
       }
     },
     "responses": {
       "error": {
-        "description": "Error. The body carries the standard UCP error envelope (`ucp.status: \"error\"` plus `messages`). See the transport specification's Status Codes section for which HTTP status codes apply to each failure class.",
+        "description": "Protocol error, signalled by the HTTP status code and standard headers (e.g., `Retry-After`, `WWW-Authenticate`). The response body is OPTIONAL and the response MAY be sent without one; when a body is present it uses the existing HTTP error format (`code` and `content`, optionally `continue_url`), not the UCP envelope. `Content-Digest` is present only when the response has a body. See the transport specification's Status Codes and Error Responses sections.",
         "headers": {
           "Signature": {
             "$ref": "#/components/headers/signature"
@@ -1138,13 +1138,13 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "../../schemas/common/types/error_response.json"
+              "$ref": "#/components/schemas/http_error"
             }
           }
         }
       },
       "precondition_failed": {
-        "description": "Precondition failed. The If-Match entity tag does not match the session's current state; no part of the write is applied. The platform re-reads the session, reconciles, and retries with the fresh tag. See Checkout REST - Concurrency Control.",
+        "description": "Precondition failed. The If-Match entity tag does not match the session's current state; no part of the write is applied. The platform re-reads the session, reconciles, and retries with the fresh tag. The response body is OPTIONAL; when present it uses the existing HTTP error format with `code: \"precondition_failed\"`. See Checkout REST - Concurrency Control.",
         "headers": {
           "Signature": {
             "$ref": "#/components/headers/signature"
@@ -1159,13 +1159,13 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "../../schemas/common/types/error_response.json"
+              "$ref": "#/components/schemas/http_error"
             }
           }
         }
       },
       "idempotency_conflict": {
-        "description": "Idempotency-Key conflict. The key was reused with a request body that does not match the original request; the operation is not executed. See Message Signatures - Replay Protection.",
+        "description": "Idempotency-Key conflict. The key was reused with a request body that does not match the original request; the operation is not executed. The response body is OPTIONAL; when present it uses the existing HTTP error format (`code` and `content`). See Message Signatures - Replay Protection.",
         "headers": {
           "Signature": {
             "$ref": "#/components/headers/signature"
@@ -1180,13 +1180,32 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "../../schemas/common/types/error_response.json"
+              "$ref": "#/components/schemas/http_error"
             }
           }
         }
       }
     },
     "schemas": {
+      "http_error": {
+        "type": "object",
+        "description": "Optional body of an HTTP protocol error response. Protocol errors are signalled by the HTTP status code and MAY carry no body at all. When a body is present it identifies the failure with `code` and `content`; businesses MAY include `continue_url` for buyer handoff. Business outcomes are not reported this way: they return HTTP 200 with the UCP envelope and `messages`.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code identifying the failure (e.g., `version_unsupported`, `signature_invalid`, `precondition_failed`)."
+          },
+          "content": {
+            "type": "string",
+            "description": "Human-readable description of the failure."
+          },
+          "continue_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL for buyer handoff or session recovery."
+          }
+        }
+      },
       "checkout": {
         "$ref": "../../schemas/shopping/checkout.json"
       },

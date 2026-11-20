@@ -539,8 +539,10 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 | 500 | Internal Server Error |
 
 The REST service definition (`rest.openapi.json`) declares these as
-`4XX`/`5XX` responses carrying the standard error envelope, so clients
-generated from the service definition receive a typed error shape.
+`4XX`/`5XX` responses. The declarations describe the existing format and do
+not change it: the response body is optional, a response without a body is
+valid, and a body, when present, carries `code` and `content` rather than the
+UCP envelope.
 
 ### Business Outcomes
 

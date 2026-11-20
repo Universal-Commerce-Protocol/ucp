@@ -1311,7 +1311,8 @@ operations unless otherwise noted.
     for the full payload-matching contract.
 * **ETag / If-Match**: Businesses that support conditional writes return an
     `ETag` on checkout responses; platforms echo it via `If-Match` on Update,
-    Complete, and Cancel. See [Concurrency Control](#concurrency-control).
+    Complete, and Cancel. When messages are signed, signatures **MUST**
+    cover these headers. See [Concurrency Control](#concurrency-control).
 
 ## Protocol Mechanics
 
@@ -1349,15 +1350,28 @@ standard HTTP conditional-request fields
 * Platforms **SHOULD** send the last observed tag in an `If-Match` request
     header on Update, Complete, and Cancel.
 * On a tag mismatch the business **MUST NOT** apply any part of the write
-    and **MUST** respond `412 Precondition Failed` with the standard error
-    envelope and `code: "precondition_failed"`. The error is `recoverable`:
-    the platform re-reads the session via Get Checkout, reconciles its
-    intended changes with the current state, and retries with the fresh tag.
+    and **MUST** respond `412 Precondition Failed`. This is a protocol
+    error like any other: the status code is the signal and the response
+    body is optional (see [Error Responses](#error-responses)). A business
+    that sends a body uses `code: "precondition_failed"`. The platform
+    recovers by re-reading the session via Get Checkout, reconciling its
+    intended changes with the current state, and retrying with the fresh tag.
 * Businesses that require serialized writes **MAY** reject unconditional
     writes with `428 Precondition Required`
     ([RFC 6585](https://www.rfc-editor.org/rfc/rfc6585){target="_blank"}).
     Platforms treat this like a mismatch: fetch the current state and its
     tag, then retry conditionally.
+
+**Signatures.** The entity tag decides whether a write is applied, so it is
+integrity-relevant in both directions. When
+[HTTP Message Signatures](signatures.md#rest-binding) are in use:
+
+* A request signature **MUST** cover `if-match` whenever the request
+    carries an `If-Match` header. A business **MUST NOT** evaluate the
+    precondition from an `If-Match` value the signature does not cover.
+* A response signature **MUST** cover `etag` whenever the response carries
+    an `ETag` header. A platform **MUST NOT** echo an entity tag taken from
+    a signed response whose signature does not cover it.
 
 `If-Match` composes with `Idempotency-Key`: idempotency deduplicates retries
 of one logical write, while the precondition orders distinct writes. A
@@ -1372,8 +1386,12 @@ retried request keeps both its original `Idempotency-Key` and its original
     ```json
     PUT /checkout-sessions/chk_1234567890 HTTP/1.1
     UCP-Agent: profile="https://platform.example/profile"
+    Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
     If-Match: "33a64df551425fcc"
     Content-Type: application/json
+    Content-Digest: sha-256=:X48E9q...:
+    Signature-Input: sig1=("@method" "@authority" "@path" "ucp-agent" "idempotency-key" "if-match" "content-digest" "content-type");keyid="platform-2026"
+    Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 
     {
       "buyer": {
@@ -1401,6 +1419,9 @@ retried request keeps both its original `Idempotency-Key` and its original
     HTTP/1.1 200 OK
     Content-Type: application/json
     ETag: "5c3e9f10b74d21aa"
+    Content-Digest: sha-256=:Y5fK8nLmPqRsT3vWxYzAbCdEfGhIjKlMnO...:
+    Signature-Input: sig1=("@status" "etag" "content-digest" "content-type");created=1738617601;keyid="merchant-2026"
+    Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 
     {
       "ucp": "...",
@@ -1416,23 +1437,23 @@ retried request keeps both its original `Idempotency-Key` and its original
 === "Response (rejected)"
 
     Another writer changed the session after this platform last read it.
-    Nothing was applied; the platform re-reads and retries.
+    Nothing was applied; the platform re-reads and retries. The status code
+    alone is sufficient, so the response may carry no body:
 
-    <!-- ucp:example schema=common/types/error_response op=read -->
-    ```json
+    ```http
+    HTTP/1.1 412 Precondition Failed
+    ```
+
+    A business that includes a body uses the same format as other protocol
+    errors:
+
+    ```http
     HTTP/1.1 412 Precondition Failed
     Content-Type: application/json
 
     {
-      "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-      "messages": [
-        {
-          "type": "error",
-          "code": "precondition_failed",
-          "severity": "recoverable",
-          "content": "Checkout changed since the supplied entity tag; re-read and retry."
-        }
-      ]
+      "code": "precondition_failed",
+      "content": "Checkout changed since the supplied entity tag; re-read and retry."
     }
     ```
 
@@ -1445,10 +1466,13 @@ code registry and transport binding examples.
     503) with JSON body containing `code` and `content`.
 * **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
 
-The REST service definition (`rest.openapi.json`) declares these as `4XX`/`5XX`
-responses, plus an explicit `409` on state-changing operations for
-idempotency-key conflicts, each carrying the standard error envelope, so
-clients generated from the service definition receive a typed error shape.
+The REST service definition (`rest.openapi.json`) declares protocol errors as
+`4XX`/`5XX` responses, plus an explicit `409` on state-changing operations for
+idempotency-key conflicts and `412` on conditional writes. The declarations
+describe the existing format and do not change it: the response body remains
+optional, a response without a body is valid, and a body, when present, carries
+`code` and `content` rather than the UCP envelope. Clients **MUST** act on the
+status code and **MUST NOT** depend on a body being present.
 
 #### Business Outcomes
 
