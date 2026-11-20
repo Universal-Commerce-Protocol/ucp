@@ -115,10 +115,9 @@ restriction.
 This is how a business offers an instrument it can charge only at completion
 — a gift card without a balance hold, a voucher — on a checkout where part of
 the payment is due later. The platform MAY state an `amount` on it, within
-what is due at completion. Submitted without one, it contributes up to the
-remaining first charge, as any open-amount instrument does, and is never
-charged after completion; the rest of the payment falls to the other
-instruments.
+what is due at completion. Submitted without one, it contributes up to what
+remains due at completion, and is never charged after completion; the rest
+of the payment falls to the other instruments.
 
 #### Example Configuration
 
