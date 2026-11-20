@@ -125,6 +125,9 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Run extension authoring example tests
+        run: uv run python scripts/test_extension_authoring_examples.py
+
       - name: Run schema table macro tests
         run: uv run python scripts/test_schema_tables.py
 
