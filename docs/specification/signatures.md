@@ -506,7 +506,7 @@ sign_rest_request(method, path, query, body_bytes, idempotency_key, webhook_id,
 **Signature Encoding:**
 
 * **ECDSA** signatures **MUST** use fixed-width raw `r||s` encoding per
-  RFC 9421 §3.3.1, **not** ASN.1/DER. The signature value is the
+  RFC 9421 §3.3.4 (P-256) and §3.3.5 (P-384), **not** ASN.1/DER. The signature value is the
   concatenation of `r` and `s` as fixed-length unsigned big-endian
   integers: 64 bytes for P-256 (32 + 32), 96 bytes for P-384 (48 + 48).
   Many crypto libraries (OpenSSL, Java, .NET) default to DER encoding and

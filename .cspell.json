@@ -11,8 +11,8 @@
     ".cspell.json",
     "**/*.svg",
     ".gitignore",
-    "package.json",
     ".pre-commit-config.yaml",
+    ".stylelintrc.json",
     "**/*.css"
   ],
   "ignoreRegExpList": [
