@@ -510,14 +510,14 @@ for the complete schema, profile, manifest, and record examples.
 
 Keep entries under both the immediate parent's name and the root capability's
 name in your schema's `$defs`, pointing at the same definition. The parent key
-satisfies the Overview's [Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern);
+satisfies the Overview's [Extension Schema Pattern](overview/index.md#extension-schema-pattern);
 the root key supplies the entry applied by its
-[Schema Resolution Convention](../specification/overview/index.md#schema-resolution-convention).
+[Schema Resolution Convention](overview/index.md#schema-resolution-convention).
 The two keys are aliases, not two different versions of your fields.
 
 `ucp-schema` 1.4.1 composes the root-keyed entry.
 [ucp-schema#100](https://github.com/Universal-Commerce-Protocol/ucp-schema/pull/100)
-proposes a fallback to an immediate-parent entry when exactly one active
+adds a fallback to an immediate-parent entry when exactly one active
 declared parent has an entry and no root entry is present. Tool support alone
 does not change the specification you target: remove a compatibility key only
 when both that specification and the tooling your consumers use support the
@@ -584,12 +584,12 @@ for what to cover.
 
 ## Extend a Feed
 
-[Feeds](../specification/common/feed/index.md) deliver records in bulk. Common
+[Feeds](common/feed/index.md) deliver records in bulk. Common
 Feed (`dev.ucp.common.feed`) is the root: it defines discovery, the feed list,
 and the manifest, but no record shape of its own. A record type extends it and
 defines what a record is. Catalog Feed (`dev.ucp.shopping.catalog.feed`) is the
 record type whose records are UCP Products with nested Variants (see
-[Records](../specification/shopping/catalog/feed.md#records)).
+[Records](shopping/catalog/feed.md#records)).
 
 There are two ways to extend feeds:
 
@@ -602,22 +602,23 @@ The examples below connect three different documents:
 
 - **Profile:** advertises the extensions a Business's feeds may carry and the
   Common Feed endpoint that serves its feed list.
-- **Manifest:** describes one immutable snapshot and declares the record type
-  and extensions its records conform to. It describes the files, not a live
-  request where two participants negotiate which features to use.
+- **Manifest:** describes one immutable snapshot and declares the capabilities
+  and extensions governing the snapshot and its records. It describes the
+  files, not a live request where two participants negotiate which features
+  to use.
 - **Record:** carries the domain data, such as a Product and its extension
   fields. Each record does not need its own `ucp` block: the manifest lists
   versions and extensions for the whole snapshot.
 
-The [feed list](../specification/common/feed/index.md#feed-list) connects the
+The [feed list](common/feed/index.md#feed-list) connects the
 profile's endpoint to the current manifest URL for each feed.
 
 ### Add Fields to Catalog Products
 
 An extension of Catalog Feed is an extension of an extension (see
 [Extend Another Extension](#extend-another-extension)). Its records stay UCP
-Products, with the same identity and Catalog Lookup resolution, and your fields
-are added to them.
+Products, with the same identity and Catalog Lookup resolution when Lookup is
+advertised. Your fields are added to them.
 
 Catalog Feed exposes two shapes under `$defs["dev.ucp.common.feed"]`: `record`
 (the Product) and `manifest`. Compose onto the one you extend. This extension,
@@ -800,14 +801,19 @@ A Platform that recognizes `com.example.ads.eligibility` processes the flag
 with those semantics. One that does not recognize the extension may ignore its
 fields and still consume the snapshot as ordinary Products, provided it
 supports the record type, format, and context (see
-[Manifest](../specification/common/feed/index.md#manifest)). Ignoring enrichment
+[Manifest](common/feed/index.md#manifest)). Ignoring enrichment
 does not turn it into ads permission: neither an absent nor an unrecognized
 flag supplies that permission. Normal catalog consumption can continue without
 treating the Product as authorized for ads by this extension.
 
 To deliver the field separately from the base catalog, for example on a
 different update schedule or to only some Platforms, publish it as a
-[supplemental feed](../specification/common/feed/index.md#supplemental-feeds).
+[supplemental feed](common/feed/index.md#supplemental-feeds).
+A supplement is a complete snapshot of its partial records, joined to the base
+on the Business's identifiers and validated after composition. Base and
+supplemental snapshots may be generated at different times, but a Platform
+composes only snapshots named in one feed-list response. See the specification
+for multi-base supplements and context overrides.
 
 ### Publish Your Own Record Type
 
@@ -816,14 +822,16 @@ Common Feed directly. Your specification defines what a record is and which
 identifiers related operations accept. The Business still **MUST** use stable
 identifiers that it can resolve in those operations; publishing a feed does
 not require advertising corresponding live operations (see
-[Manifest](../specification/common/feed/index.md#manifest)).
+[Manifest](common/feed/index.md#manifest)).
 
-A record type that changes the file layout, such as tab-separated rows, also
-defines its own `format` identifier (see
-[Formats](../specification/common/feed/index.md#formats)). Rows in a non-JSON
-format are governed by your specification rather than a JSON Schema. If you
-add no manifest fields, the schema needs only the Common Feed entry, which
-must still contain a nested `$defs`, even if it is empty:
+A record type that uses a different file layout, such as tab-separated rows,
+also defines its own `format` identifier (see
+[Formats](common/feed/index.md#formats)). The format defines
+layout, serialization, and compression; the record-type specification defines
+conformance, with a record schema where provided. A record schema is optional,
+regardless of serialization. This example adds neither a record schema nor
+manifest fields, so its schema needs only the Common Feed entry, which must
+still contain a nested `$defs`, even if it is empty:
 
 <!-- extension-authoring-example: feed-custom-extension -->
 <!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
@@ -849,8 +857,8 @@ must still contain a nested `$defs`, even if it is empty:
 
 The Business advertises this record type with `extends: "dev.ucp.common.feed"`;
 its manifest declares the record type and uses the format its specification
-defines. A record type with JSON records can instead define a `record` shape
-under that Common Feed entry, and Platforms validate records against it.
+defines. If you provide a record schema, define a `record` shape under that
+Common Feed entry; the format determines how serialized values map to it.
 Unlike optional enrichment of a recognized record type, a record type or
 format the Platform does not recognize prevents consumption of the snapshot.
 
