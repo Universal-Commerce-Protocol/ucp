@@ -28,6 +28,7 @@ on:
     branches:
       - main
       - "release/**"
+      - feat/feed
     paths:
       - ".github/actions/**"
       - ".github/workflows/docs.yml"
@@ -128,6 +129,9 @@ jobs:
       - name: Run extension authoring example tests
         run: uv run python scripts/test_extension_authoring_examples.py
 
+      - name: Run feed authoring example tests
+        run: uv run python scripts/test_feed_authoring_examples.py
+
       - name: Run schema table macro tests
         run: uv run python scripts/test_schema_tables.py
 
@@ -135,7 +139,10 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      github.event.pull_request.base.ref == 'main' ||
+      github.event.pull_request.base.ref == 'feat/feed'
     permissions:
       contents: read
       pages: read

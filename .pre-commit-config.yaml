@@ -58,6 +58,13 @@ repos:
         pass_filenames: false
         files: ^(docs/specification/extension-authoring\.md|scripts/test_extension_authoring_examples\.py)$
         stages: [pre-commit, pre-push]
+      - id: feed-authoring-examples
+        name: Feed authoring worked examples
+        entry: uv run --frozen python scripts/test_feed_authoring_examples.py
+        language: system
+        pass_filenames: false
+        files: ^(docs/specification/extension-authoring\.md|scripts/test_(extension|feed)_authoring_examples\.py|source/schemas/)
+        stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
         entry: uv run --frozen python scripts/test_check_links.py
