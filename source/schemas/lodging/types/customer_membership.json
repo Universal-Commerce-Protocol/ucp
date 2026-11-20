@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/customer_membership.json",
+  "title": "Customer Loyalty Membership",
+  "description": "Authenticated loyalty membership returned by customer retrieval. Extends `dev.ucp.common.loyalty#/$defs/loyalty_membership` with account-only fields (status, balances, progress, held benefits, partner links) that the transactional loyalty extension excludes. On read, `provisional` MUST be `false`. `rewards` and earning forecasts MAY be omitted or empty; use `balances` for stored value.",
+  "allOf": [
+    {
+      "$ref": "../../common/loyalty.json#/$defs/loyalty_membership"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Lifecycle state of this membership. Well-known values: `active`, `inactive`, `suspended`, `closed`. Unknown values MUST be tolerated. This domain is not a closed state machine; treat unrecognized values as inactive for benefit application.",
+          "examples": ["active", "inactive", "suspended", "closed"]
+        },
+        "primary": {
+          "type": "boolean",
+          "description": "True when this is the customer's preferred program for earning on lodging stays. At most one membership in the response SHOULD be primary."
+        },
+        "enrolled_on": {
+          "type": "string",
+          "format": "date",
+          "description": "Calendar date the customer enrolled in this program, in ISO 8601 `YYYY-MM-DD`."
+        },
+        "enrollment_channel": {
+          "type": "string",
+          "description": "Channel through which the customer enrolled. Well-known values: `web`, `mobile`, `property`, `call_center`, `partner`. Unknown values MUST be tolerated.",
+          "examples": ["web", "mobile", "property", "call_center", "partner"]
+        },
+        "balances": {
+          "type": "array",
+          "description": "Current redeemable balances for this membership. Each entry is one reward currency. Absent when the Business does not expose stored value through this capability. Redeemable balances are out of scope for `dev.ucp.common.loyalty`; they are in scope here because this capability is a user-authenticated account retrieval, not a checkout decoration.",
+          "items": {
+            "$ref": "#/$defs/membership_balance"
+          }
+        },
+        "progress": {
+          "$ref": "#/$defs/membership_progress",
+          "description": "Qualifying activity toward tier retention and the next tier. Omitted for programs with no tier ladder or when the Business does not expose progress."
+        },
+        "held_benefits": {
+          "type": "array",
+          "description": "Benefits currently allocated to this membership (awards, vouchers, choice benefits, complimentary nights) as distinct from catalog `tiers[].benefits`, which describe standing tier privileges. Omitted when none are allocated or when the Business does not expose them.",
+          "items": {
+            "$ref": "#/$defs/held_benefit"
+          }
+        },
+        "partner_memberships": {
+          "type": "array",
+          "description": "Linked partner programs (airlines, rail, car rental) associated with this membership for earning or recognition. Identifiers MUST be masked (`display_id`); raw partner account numbers MUST NOT be returned.",
+          "items": {
+            "$ref": "#/$defs/partner_membership"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "membership_balance": {
+      "type": "object",
+      "description": "A redeemable balance denominated in one loyalty reward currency.",
+      "required": ["currency", "amount"],
+      "properties": {
+        "currency": {
+          "$ref": "../../common/loyalty.json#/$defs/reward_currency",
+          "description": "Reward currency of this balance."
+        },
+        "amount": {
+          "$ref": "../../common/loyalty.json#/$defs/reward_amount",
+          "description": "Current balance in the minor unit of `currency`."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp after which unused value in this currency expires if no qualifying activity occurs. Omitted when the currency does not expire or expiration is unknown."
+        },
+        "expiration_exempt": {
+          "type": "boolean",
+          "description": "True when this membership is exempt from balance expiration (for example due to elite status or a published program rule)."
+        }
+      }
+    },
+    "membership_progress": {
+      "type": "object",
+      "description": "Progress toward retaining the current tier and reaching the next tier. Metric identifiers are an open vocabulary so hotel, nights, stays, and spend-based programs can coexist.",
+      "properties": {
+        "next_tier_id": {
+          "type": "string",
+          "description": "Identifier of the next tier the member is progressing toward. Resolves against `tiers[].id` when that tier is included, or is a Business-defined identifier when the next tier is not in `tiers`."
+        },
+        "current_tier_expires_on": {
+          "type": "string",
+          "format": "date",
+          "description": "Calendar date the current tier is scheduled to expire if renewal criteria are not met, in ISO 8601 `YYYY-MM-DD`."
+        },
+        "last_qualifying_activity_on": {
+          "type": "string",
+          "format": "date",
+          "description": "Calendar date of the most recent activity that counted toward qualification or expiration extension."
+        },
+        "metrics": {
+          "type": "array",
+          "description": "Qualifying counters. Well-known `id` values: `qualifying_nights_ytd`, `paid_nights_ytd`, `redemption_nights_ytd`, `nights_to_renew`, `nights_to_next_tier`, `lifetime_nights`. Unknown ids MUST be tolerated and MAY be displayed using `name`.",
+          "items": {
+            "$ref": "#/$defs/progress_metric"
+          }
+        }
+      }
+    },
+    "progress_metric": {
+      "type": "object",
+      "required": ["id", "value"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable metric identifier. Well-known values: `qualifying_nights_ytd`, `paid_nights_ytd`, `redemption_nights_ytd`, `nights_to_renew`, `nights_to_next_tier`, `lifetime_nights`.",
+          "examples": [
+            "qualifying_nights_ytd",
+            "nights_to_renew",
+            "lifetime_nights"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable metric label for display when the Platform does not recognize `id`."
+        },
+        "value": {
+          "type": "number",
+          "description": "Current metric value. Fractional values are permitted (some programs credit partial nights)."
+        },
+        "period": {
+          "type": "string",
+          "description": "Window the value covers. Well-known values: `calendar_year`, `membership_year`, `lifetime`, `rolling`. Omitted when the metric is a remaining-to-threshold counter (`nights_to_renew`, `nights_to_next_tier`).",
+          "examples": ["calendar_year", "lifetime"]
+        }
+      }
+    },
+    "held_benefit": {
+      "type": "object",
+      "description": "A benefit currently allocated to the member, as opposed to a standing privilege of the member's tier.",
+      "required": ["id", "description", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Opaque identifier of this allocated benefit instance."
+        },
+        "description": {
+          "type": "string",
+          "description": "Display-ready explanation of the benefit (e.g. 'Free Night Award', 'Late checkout')."
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle of this allocation. Well-known values: `active`, `selected`, `used`, `expired`, `cancelled`. Unknown values MUST be tolerated.",
+          "examples": ["active", "selected", "used", "expired"]
+        },
+        "kind": {
+          "type": "string",
+          "description": "Benefit class. Well-known values: `award`, `bonus`, `upgrade`, `choice`, `complimentary_night`. Unknown values MUST be tolerated.",
+          "examples": ["award", "upgrade", "choice"]
+        },
+        "currency": {
+          "$ref": "../../common/loyalty.json#/$defs/reward_currency",
+          "description": "Reward currency associated with this benefit when it has a point, mile, or night cost or residual value."
+        },
+        "amount": {
+          "$ref": "../../common/loyalty.json#/$defs/reward_amount",
+          "description": "Value of the benefit in the minor unit of `currency`, when applicable."
+        },
+        "starts_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this allocation becomes usable."
+        },
+        "ends_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when this allocation expires."
+        },
+        "earned_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp when the member earned this allocation."
+        },
+        "tier_benefit_id": {
+          "type": "string",
+          "description": "Optional `id` of the `membership_tier_benefit` this allocation fulfills. Resolves against `tiers[].benefits[].id` within the same membership."
+        }
+      }
+    },
+    "partner_membership": {
+      "type": "object",
+      "description": "A linked partner loyalty program. Raw partner account numbers MUST NOT be returned; use `display_id` after verification.",
+      "required": ["program_id", "name"],
+      "properties": {
+        "program_id": {
+          "$ref": "../../common/types/reverse_domain_name.json",
+          "description": "Reverse-domain identifier of the partner program (e.g. `com.aa.aadvantage`)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable partner program name."
+        },
+        "display_id": {
+          "type": "string",
+          "description": "Masked partner membership identifier for user recognition (e.g. `****5698`). MUST NOT be set unless the link has been verified."
+        },
+        "preferred": {
+          "type": "boolean",
+          "description": "True when this is the customer's preferred partner for earning when `preferences.earn.kind` is `partner`. When `preferences.earn.program_id` is present, the preferred entry SHOULD use the same `program_id`."
+        }
+      }
+    }
+  }
+}

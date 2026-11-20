@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/customer_contact.json",
+  "title": "Customer Contact",
+  "description": "Persisted contact channels for the authenticated customer.",
+  "type": "object",
+  "properties": {
+    "emails": {
+      "type": "array",
+      "description": "Email addresses on the customer profile.",
+      "items": {
+        "type": "object",
+        "required": ["address"],
+        "properties": {
+          "address": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address."
+          },
+          "type": {
+            "type": "string",
+            "description": "Intended use of this address. Well-known values: `personal`, `work`. Unknown values MUST be tolerated.",
+            "examples": ["personal", "work"]
+          },
+          "preferred": {
+            "type": "boolean",
+            "description": "True when this is the customer's preferred email."
+          }
+        }
+      }
+    },
+    "phones": {
+      "type": "array",
+      "description": "Phone numbers on the customer profile.",
+      "items": {
+        "type": "object",
+        "required": ["phone_number"],
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "description": "E.164 standard. Phone number of the customer."
+          },
+          "type": {
+            "type": "string",
+            "description": "Intended use of this number. Well-known values: `mobile`, `home`, `work`, `fax`. Unknown values MUST be tolerated.",
+            "examples": ["mobile", "home", "work", "fax"]
+          },
+          "preferred": {
+            "type": "boolean",
+            "description": "True when this is the customer's preferred phone."
+          }
+        }
+      }
+    },
+    "addresses": {
+      "type": "array",
+      "description": "Postal addresses on the customer profile.",
+      "items": {
+        "type": "object",
+        "required": ["address"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Intended use of this address. Well-known values: `home`, `work`. Unknown values MUST be tolerated.",
+            "examples": ["home", "work"]
+          },
+          "preferred": {
+            "type": "boolean",
+            "description": "True when this is the customer's preferred postal address."
+          },
+          "address": {
+            "$ref": "../../common/types/postal_address.json",
+            "description": "Structured postal address."
+          }
+        }
+      }
+    }
+  }
+}
