@@ -33,7 +33,7 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "source"
-GUIDE = ROOT / "docs/documentation/extension-authoring.md"
+GUIDE = ROOT / "docs/specification/extension-authoring.md"
 TEXT = GUIDE.read_text(encoding="utf-8")
 PUBLISHED = "--published" in sys.argv
 if PUBLISHED:

@@ -19,7 +19,7 @@
 This guide documents conventions for authoring UCP JSON schemas: metadata fields,
 the registry pattern, schema variants, and versioning. If you are publishing an
 extension under your own namespace rather than changing UCP itself, see the
-[Extension Authoring Guide](extension-authoring.md).
+[Extension Authoring Guide](../specification/extension-authoring.md).
 
 ## Schema Metadata Fields
 
