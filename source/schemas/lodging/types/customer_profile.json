@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/customer_profile.json",
+  "title": "Customer Profile",
+  "description": "Identity attributes of the authenticated lodging customer.",
+  "type": "object",
+  "required": ["first_name", "last_name"],
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "First name of the customer."
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Last name of the customer."
+    },
+    "language": {
+      "type": "string",
+      "description": "Preferred language for customer communications. Use IETF BCP 47 language tags (e.g. `en`, `en-US`, `fr-CA`)."
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company or organization associated with the customer for recognition. For legal contracting on a stay, use `booker.company` on a booking."
+    }
+  }
+}

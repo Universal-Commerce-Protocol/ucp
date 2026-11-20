@@ -1,0 +1,167 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.lodging.customer": [
+        {
+          "version": "2026-01-01"
+        }
+      ]
+    }
+  },
+  "id": "cust_8f3c2a91",
+  "status": "active",
+  "profile": {
+    "first_name": "Jordan",
+    "last_name": "Lee",
+    "language": "en-US",
+    "company_name": "Example Partners LLC"
+  },
+  "contacts": {
+    "emails": [
+      {
+        "address": "jordan.lee@example.com",
+        "type": "personal",
+        "preferred": true
+      }
+    ],
+    "phones": [
+      {
+        "phone_number": "+12025550183",
+        "type": "mobile",
+        "preferred": true
+      }
+    ],
+    "addresses": [
+      {
+        "type": "home",
+        "preferred": true,
+        "address": {
+          "street_address": "1200 19th Street NW",
+          "address_locality": "Washington",
+          "address_region": "DC",
+          "address_country": "US",
+          "postal_code": "20036"
+        }
+      }
+    ]
+  },
+  "preferences": {
+    "stay": [
+      {
+        "id": "king_bed",
+        "description": "King bed",
+        "category": "bed_type",
+        "priority": 1
+      },
+      {
+        "id": "high_floor",
+        "description": "High floor",
+        "category": "floor",
+        "priority": 2
+      },
+      {
+        "id": "non_smoking",
+        "description": "Non-smoking room",
+        "category": "smoking",
+        "priority": 3
+      }
+    ],
+    "earn": {
+      "kind": "partner",
+      "program_id": "com.aa.aadvantage"
+    }
+  },
+  "loyalty": {
+    "com.example.rewards": {
+      "id": "membership_501246278",
+      "display_id": "****6278",
+      "name": "Example Rewards",
+      "provisional": false,
+      "status": "active",
+      "primary": true,
+      "enrolled_on": "2019-07-22",
+      "enrollment_channel": "web",
+      "tiers": [
+        {
+          "id": "platinum",
+          "type": "current",
+          "name": "Platinum Elite",
+          "benefits": [
+            {
+              "id": "BEN_LATE_CHECKOUT",
+              "description": "4 PM late checkout when available"
+            }
+          ]
+        },
+        {
+          "id": "platinum",
+          "type": "lifetime",
+          "name": "Platinum Elite",
+          "benefits": [
+            {
+              "id": "BEN_LATE_CHECKOUT",
+              "description": "4 PM late checkout when available"
+            }
+          ]
+        }
+      ],
+      "balances": [
+        {
+          "currency": {
+            "name": "Points",
+            "code": "PTS",
+            "decimal_places": 0
+          },
+          "amount": 75000,
+          "expires_at": "2026-12-31T23:59:59Z",
+          "expiration_exempt": true
+        }
+      ],
+      "progress": {
+        "next_tier_id": "titanium",
+        "current_tier_expires_on": "2026-02-28",
+        "last_qualifying_activity_on": "2026-03-15",
+        "metrics": [
+          {
+            "id": "qualifying_nights_ytd",
+            "name": "Elite qualifying nights this year",
+            "value": 55,
+            "period": "calendar_year"
+          },
+          {
+            "id": "nights_to_renew",
+            "name": "Nights to renew current tier",
+            "value": 12
+          }
+        ]
+      },
+      "held_benefits": [
+        {
+          "id": "award_fna_2026_a",
+          "description": "Free Night Award",
+          "status": "active",
+          "kind": "award",
+          "currency": {
+            "name": "Points",
+            "code": "PTS",
+            "decimal_places": 0
+          },
+          "amount": 35000,
+          "starts_at": "2026-01-01T00:00:00Z",
+          "ends_at": "2026-12-31T23:59:59Z",
+          "earned_at": "2026-01-15T18:22:00Z"
+        }
+      ],
+      "partner_memberships": [
+        {
+          "program_id": "com.aa.aadvantage",
+          "name": "American Airlines AAdvantage",
+          "display_id": "****5698",
+          "preferred": true
+        }
+      ]
+    }
+  }
+}

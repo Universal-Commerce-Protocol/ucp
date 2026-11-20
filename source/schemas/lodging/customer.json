@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/customer.json",
+  "name": "dev.ucp.lodging.customer",
+  "title": "Customer",
+  "description": "User-authenticated retrieval of a lodging customer's profile and associated loyalty memberships. The customer is identified by the user identity token, not by a customer identifier in the request. This capability is independent of `dev.ucp.lodging.booking` and of the transactional `dev.ucp.common.loyalty` extension on catalog, cart, and checkout.",
+  "type": "object",
+  "$defs": {
+    "platform_schema": {
+      "allOf": [
+        {
+          "$ref": "../capability.json#/$defs/platform_schema"
+        }
+      ]
+    },
+    "business_schema": {
+      "allOf": [
+        {
+          "$ref": "../capability.json#/$defs/business_schema"
+        }
+      ]
+    },
+    "response_schema": {
+      "allOf": [
+        {
+          "$ref": "../capability.json#/$defs/response_schema"
+        }
+      ]
+    },
+    "include": {
+      "type": "string",
+      "description": "Named response group the Platform is requesting. Well-known values: `profile`, `contacts`, `preferences`, `loyalty`. Unknown values MUST be ignored without error.",
+      "examples": ["profile", "contacts", "preferences", "loyalty"]
+    },
+    "read_request": {
+      "type": "object",
+      "description": "Request body for customer retrieval. The authenticated user identity token identifies the customer. An empty object is a well-formed request and asks the Business for its default groups (`profile`, `contacts`, `loyalty`).",
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/include"
+          },
+          "uniqueItems": true,
+          "description": "Response groups to return. When present, the Business MUST NOT return groups that were not requested. When omitted, the Business SHOULD return `profile`, `contacts`, and `loyalty`, and MAY omit `preferences` until explicitly requested.",
+          "ucp_request": "optional"
+        },
+        "context": {
+          "$ref": "../common/types/context.json",
+          "ucp_request": "optional"
+        },
+        "signals": {
+          "$ref": "../common/types/signals.json",
+          "ucp_request": "optional"
+        }
+      }
+    },
+    "read_response": {
+      "type": "object",
+      "description": "Authenticated customer profile and loyalty memberships.",
+      "required": ["ucp", "id", "status"],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_customer_schema",
+          "ucp_request": "omit"
+        },
+        "id": {
+          "type": "string",
+          "description": "Opaque, business-scoped identifier for this customer.",
+          "ucp_request": "omit"
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle state of the customer profile. Well-known values: `active`, `inactive`, `suspended`, `closed`.",
+          "examples": ["active", "inactive", "suspended", "closed"],
+          "ucp_request": "omit"
+        },
+        "profile": {
+          "$ref": "types/customer_profile.json",
+          "ucp_request": "omit"
+        },
+        "contacts": {
+          "$ref": "types/customer_contact.json",
+          "ucp_request": "omit"
+        },
+        "preferences": {
+          "$ref": "types/customer_preference.json",
+          "ucp_request": "omit"
+        },
+        "loyalty": {
+          "type": "object",
+          "description": "Loyalty program memberships for the authenticated customer. Keys are reverse-domain program identifiers (canonical program id on read; same key format as the transactional `loyalty` map on cart and checkout). Values extend `loyalty_membership` with account fields (`balances`, `progress`, `held_benefits`, `partner_memberships`). Platforms MUST treat map keys as opaque program identifiers and MUST NOT infer credentials from nested `display_id` values.",
+          "propertyNames": {
+            "$ref": "../common/types/reverse_domain_name.json"
+          },
+          "additionalProperties": {
+            "$ref": "types/customer_membership.json"
+          },
+          "ucp_request": "omit"
+        }
+      }
+    }
+  }
+}

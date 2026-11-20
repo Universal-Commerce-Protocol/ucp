@@ -117,6 +117,11 @@
           "type": "string",
           "description": "The human-readable name of the tier (e.g., 'Platinum')."
         },
+        "type": {
+          "type": "string",
+          "description": "Status dimension when a program tracks parallel tier contexts for the same rank (for example current-year elite and lifetime status). Well-known values: `current`, `lifetime`. Unknown values MUST be tolerated.",
+          "examples": ["current", "lifetime"]
+        },
         "benefits": {
           "type": "array",
           "items": {
@@ -128,7 +133,7 @@
     },
     "loyalty_membership": {
       "type": "object",
-      "description": "Loyalty membership the business has accepted for the eligibility claim represented by the parent map key. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').",
+      "description": "Loyalty membership the business has accepted for the eligibility claim represented by the parent map key on catalog, cart, and checkout. On user-authenticated customer retrieval, the same shape is extended (via allOf) with account fields; map keys denote canonical program identifiers and `provisional` MUST be false. Programs that can be joined independently MUST be modeled as separate sibling entries under the loyalty map, distinguished by reverse-domain naming (e.g., 'com.example.rewards' and 'com.example.rewards.card').",
       "required": ["id", "name", "provisional"],
       "properties": {
         "id": {
