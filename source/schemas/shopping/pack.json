@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/pack.json",
+  "name": "dev.ucp.shopping.pack",
+  "title": "Pack Extension",
+  "description": "Extends Catalog Search and Lookup, including Get Product, with the declared content of the physical item a variant sells: net content, drained weight, and the count of identical inner units. Response-only; `quantity`, `quantity_unit`, `price` and `unit_price` keep their meaning.",
+  "$defs": {
+    "variant_pack": {
+      "title": "Variant Pack",
+      "description": "The pack field added to a catalog variant.",
+      "type": "object",
+      "properties": {
+        "pack": {
+          "$ref": "types/pack.json",
+          "description": "Declared content of the physical item this variant sells. Only on a variant whose sale basis is `each`. Absent when the Business states none.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "pack_variant": {
+      "description": "A catalog variant carrying pack content.",
+      "allOf": [
+        {
+          "$ref": "types/variant.json"
+        },
+        {
+          "$ref": "#/$defs/variant_pack"
+        }
+      ]
+    },
+    "pack_lookup_variant": {
+      "description": "A lookup variant (carrying input correlation) carrying pack content.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_variant"
+        },
+        {
+          "$ref": "#/$defs/variant_pack"
+        }
+      ]
+    },
+    "pack_product": {
+      "description": "A catalog product whose variants carry pack content. Used by search.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pack_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "pack_lookup_product": {
+      "description": "A lookup product whose variants carry pack content, preserving input correlation. Used by lookup.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pack_lookup_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "pack_detail_product": {
+      "description": "A get_product detail product whose variants carry pack content. Used by get_product.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/detail_product"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pack_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pack_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/pack_lookup_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "product": {
+              "$ref": "#/$defs/pack_detail_product"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with pack content (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with pack content (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    }
+  }
+}

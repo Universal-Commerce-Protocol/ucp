@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/pack.json",
+  "title": "Pack",
+  "description": "Declared content of the physical item a catalog variant sells. Measures are stated at one level: on `pack` for the whole item, or in `contained` for one of the identical inner units the item holds. An omitted member is not stated.",
+  "type": "object",
+  "properties": {
+    "net_content": {
+      "description": "GS1 `netContent` of the whole item: the declared amount of product, such as a mass, a volume or a count. Its integer `value` MUST be at least 1. Absent when `contained` is present.",
+      "allOf": [
+        {
+          "$ref": "../../common/types/measure.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "drained_weight": {
+      "description": "GS1 `drainedWeight` of the whole item: the declared weight of the product after its liquid is drained. Its `unit` MUST be a unit of mass and its integer `value` MUST be at least 1. Absent when `contained` is present.",
+      "allOf": [
+        {
+          "$ref": "../../common/types/measure.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "contained": {
+      "description": "The identical inner units the item holds, such as the cans in a case. Its measures describe one inner unit. Absent when the inner units differ or nest further.",
+      "type": "object",
+      "required": ["count"],
+      "properties": {
+        "count": {
+          "description": "Number of identical inner units in the item.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "net_content": {
+          "description": "GS1 `netContent` of one inner unit: the declared amount of product, such as a mass, a volume or a count. Its integer `value` MUST be at least 1.",
+          "allOf": [
+            {
+              "$ref": "../../common/types/measure.json"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "minimum": 1
+                }
+              }
+            }
+          ]
+        },
+        "drained_weight": {
+          "description": "GS1 `drainedWeight` of one inner unit: the declared weight of the product after its liquid is drained. Its `unit` MUST be a unit of mass and its integer `value` MUST be at least 1.",
+          "allOf": [
+            {
+              "$ref": "../../common/types/measure.json"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "minimum": 1
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "not": {
+        "required": ["contained", "net_content"]
+      }
+    },
+    {
+      "not": {
+        "required": ["contained", "drained_weight"]
+      }
+    }
+  ]
+}
