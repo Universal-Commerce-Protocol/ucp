@@ -268,6 +268,120 @@ class CarbonExamples(_Examples):
     self._validate(response)
 
 
+class ContainerExamples(_Examples):
+  """Exercise the displayed nested container pattern with failing payloads."""
+
+  def setUp(self):
+    """Complete the pattern fragment with reusable types and a Product."""
+    super().setUp()
+    self.version = "2026-08-25"
+    self.parent = "dev.ucp.shopping.catalog.search"
+    self.schema = _example("container-pattern", self.version)
+    self.schema.update(
+      {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://acme.com/ucp/schemas/catalog-carbon.json",
+        "name": "com.acme.shopping.carbon",
+        "version": "2026-09-01",
+      }
+    )
+    self.schema["$defs"]["acme_carbon_estimate"] = _example("carbon-schema")[
+      "$defs"
+    ]["acme_carbon_estimate"]
+    self.schema["$defs"]["product_with_carbon"] = {
+      "allOf": [
+        {
+          "$ref": f"https://ucp.dev/{self.version}/schemas/shopping/types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "acme_carbon_estimate": {
+              "$ref": "#/$defs/acme_carbon_estimate",
+              "ucp_request": "omit",
+            }
+          },
+        },
+      ]
+    }
+    path = self._write("schemas/catalog-carbon.json", self.schema)
+    self.response = {
+      "ucp": {
+        "version": self.version,
+        "capabilities": {
+          self.parent: [
+            {
+              "version": self.version,
+              "schema": f"https://ucp.dev/{self.version}/schemas/shopping/catalog_search.json",
+            }
+          ],
+          self.schema["name"]: [
+            {
+              "version": self.schema["version"],
+              "schema": self._reference(path),
+              "extends": self.parent,
+            }
+          ],
+        },
+      },
+      "products": [
+        {
+          "id": "P100",
+          "title": "Oxford Shirt",
+          "description": {"plain": "Cotton oxford shirt."},
+          "price_range": {
+            "min": {"amount": 4500, "currency": "USD"},
+            "max": {"amount": 4500, "currency": "USD"},
+          },
+          "variants": [
+            {
+              "id": "V100",
+              "title": "Medium",
+              "description": {"plain": "Medium"},
+              "price": {"amount": 4500, "currency": "USD"},
+            }
+          ],
+          "acme_carbon_estimate": {"grams_co2e": 120},
+        }
+      ],
+    }
+
+  def _validate(self, expected=0):
+    return self._cli(
+      [
+        "validate",
+        self._write("search-response.json", self.response),
+        "--op",
+        "search",
+        "--response",
+        "--json",
+      ],
+      self.version,
+      expected,
+    )
+
+  def test_nested_constraints_are_applied(self):
+    """The pattern accepts a valid Product and rejects a negative estimate."""
+    self._validate()
+    self.response["products"][0]["acme_carbon_estimate"]["grams_co2e"] = -1
+    result = self._validate(1)
+    self.assertFalse(json.loads(result.stdout)["valid"])
+    self.assertIn("grams_co2e", result.stdout)
+
+  def test_product_constraints_are_preserved(self):
+    """Adding an estimate does not relax the base Product's required fields."""
+    del self.response["products"][0]["variants"]
+    self._validate(1)
+
+  def test_www_host_is_rejected(self):
+    """A www URL does not bind to the apex-domain extension name."""
+    self.response["ucp"]["capabilities"][self.schema["name"]][0]["schema"] = (
+      "https://www.acme.com/ucp/schemas/catalog-carbon.json"
+    )
+    result = self._validate(2)
+    self.assertIn("com.acme.www", result.stdout + result.stderr)
+
+
 class FeedExamples(_Examples):
   """Check the feeds supplement when this checkout includes that section."""
 
@@ -382,6 +496,7 @@ def load_tests(loader, standard_tests, pattern):
   """Select only examples present in this branch; missing markers still fail."""
   del standard_tests, pattern
   suite = loader.loadTestsFromTestCase(CarbonExamples)
+  suite.addTests(loader.loadTestsFromTestCase(ContainerExamples))
   if not PUBLISHED and "## Extend a Feed" in TEXT:
     suite.addTests(loader.loadTestsFromTestCase(FeedExamples))
   return suite

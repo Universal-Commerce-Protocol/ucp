@@ -17,9 +17,9 @@
 # Extension Authoring Guide
 
 UCP already defines features such as checkout. Sometimes you need to share an
-extra piece of information, such as a carbon estimate for an order. This
-guide shows how to add that field, publish its schema on your own website,
-and tell other UCP participants that you support it.
+extra piece of information, such as a carbon estimate for an order. This guide
+shows how to add that field, publish its schema on your own website, and tell
+other UCP participants that you support it.
 
 Here are the terms used in this guide:
 
@@ -31,54 +31,22 @@ Here are the terms used in this guide:
 
 These roles describe who offers and who uses a feature, not a particular
 industry. For the protocol rules, see the
-[Specification Overview](overview/index.md). If you are
-changing UCP itself rather than publishing your own extension, see the
+[Specification Overview](overview/index.md). If you are changing UCP itself
+rather than publishing your own extension, see the
 [Schema Authoring Guide](/documentation/schema-authoring/).
 
-## Before You Start
-
-An extension adds to an existing capability. Consider the alternatives first:
+An extension is the right tool when you need to add typed fields to another
+capability's requests or responses, and both parties need to agree to support
+them. Consider the alternatives first:
 
 - **Profile configuration.** If you only need to tell the other party how you
   are set up, a capability's `config` may already cover it.
 - **Signals.** Environment data a Platform observes, for the Business's
   authorization and abuse prevention, belongs in
-  [signals](overview/index.md#signals), keyed in your own
-  namespace (for example, `com.example.device_id`), not in a new extension.
+  [signals](overview/index.md#signals), keyed in your own namespace (for
+  example, `com.example.device_id`), not in a new extension.
 - **A new capability.** If your feature is not about augmenting an existing
-  capability's payloads, it may be a capability of its own rather than an
-  extension.
-
-An extension is the right tool when you need to add typed fields to another
-capability's requests or responses, and both parties need to agree to support
-them.
-
-## Where Your Extension Lives
-
-You publish and maintain your extension yourself. Its schema and specification
-live on your own domain, under your own namespace; they are not added to the
-UCP repository, and you do not need UCP's approval to publish them (see
-[Namespace Governance](overview/index.md#namespace-governance)).
-
-If your extension proves useful to many Businesses and Platforms, it can become
-a candidate for the core protocol. UCP keeps the core light: new functionality
-starts self-hosted under a vendor namespace and is proposed for `dev.ucp.*`
-once it has broad, multi-party adoption, through the Enhancement Proposal
-process (see [Contributing](/documentation/contributing/)).
-
-## What You'll Build
-
-A complete extension has five parts:
-
-1. **A name** in a namespace you control, such as `com.acme.shopping.carbon`.
-2. **A schema** hosted on your domain that describes what the extension adds
-   to each capability it extends.
-3. **A version** you control, plus the UCP versions it requires.
-4. **A specification page** that explains the extension's behavior.
-5. **Profile entries** that advertise it, so it can be negotiated.
-
-The walkthrough below builds those parts for one small extension. The later
-sections explain other patterns; you do not need to use every pattern at once.
+  capability's payloads, it may be a capability of its own.
 
 ## Walkthrough: Add a Carbon Estimate to Checkout
 
@@ -151,10 +119,16 @@ Save the following complete file as `schemas/carbon.json`:
 }
 ```
 
-`$defs` holds named schema parts. Here, `acme_carbon_estimate` describes the new data and
-`dev.ucp.shopping.checkout` describes how it adds to checkout. `allOf` means
-the same payload must satisfy both the checkout schema and the added rules.
-It does not replace the checkout schema.
+The top-level metadata identifies the extension: `$id` is its canonical schema
+URL, `name` is its reverse-domain name, `version` is an ISO 8601 date you
+control, and `title` and `description` explain it to readers. `requires`
+declares the UCP protocol and capability versions it depends on (see
+[Version Your Extension](#version-your-extension)).
+
+`$defs` holds named schema parts. Here, `acme_carbon_estimate` describes the new
+data and `dev.ucp.shopping.checkout` describes how it adds to checkout. `allOf`
+means the same payload must satisfy both the checkout schema and the added
+rules. It does not replace the checkout schema.
 
 `ucp_request: "omit"` keeps the Business-computed field out of the resolved
 request schema. The Business remains responsible for treating its own
@@ -207,16 +181,27 @@ ucp-schema validate platform-profile.json \
 ```
 
 Both validations should report `"valid": true`. They check the profile's
-structure, not whether the fictional Acme URLs are already hosted.
+structure, not whether the fictional Acme URLs are already hosted. These files
+demonstrate capability agreement, not a complete checkout installation. Keep
+the service endpoints, signing keys, and payment handlers needed by your real
+deployment in its profiles.
 
-These files demonstrate capability agreement, not a complete checkout
-installation. Keep the service endpoints, signing keys, and payment handlers
-needed by your real deployment in its profiles.
+Both profiles list Acme Carbon Estimate version `2026-09-01` and its checkout
+parent, so the extension can be selected. If one side does not list it, the
+parties can still use checkout without Acme Carbon Estimate. Negotiation works
+as follows (see [Intersection Algorithm](overview/index.md#intersection-algorithm)):
 
-Both profiles list Acme Carbon Estimate version `2026-09-01` and its checkout parent,
-so the extension can be selected. If one side does not list it, the parties
-can still use checkout without Acme Carbon Estimate. See
-[Advertise and Negotiate](#advertise-and-negotiate) for version selection.
+1. The extension is kept only if both profiles list it with at least one
+   version in common; the latest shared version is selected.
+2. It is dropped if none of its parents is active, and dropping one extension
+   can in turn drop extensions of it.
+3. After schemas are fetched, it is dropped if the selected versions do not
+   satisfy its `requires`.
+
+Each response then declares the extension in `ucp.capabilities` when it extends
+that response's capability (see
+[Capability Declaration in Responses](overview/index.md#capability-declaration-in-responses)).
+The profile advertises support; the response declares what was actually used.
 
 ### 3. Validate a Complete Response
 
@@ -277,13 +262,18 @@ From the directory containing these files, run:
 
 ```bash
 ucp-schema lint schemas/carbon.json
+ucp-schema compose checkout-response.json --pretty
 ucp-schema validate checkout-response.json --op read --response --json
 ```
 
-The validation should succeed and report `"valid": true`. For local schema
-paths, the tool skips the name/host binding check; that shortcut is only for
-local development. A published declaration must use the matching HTTPS URL
-shown in the profiles.
+The validation should succeed and report `"valid": true`. `compose` lets you
+inspect the combined schema. For local schema paths, the tool skips the
+name/host binding check; that shortcut is only for local development. A
+published declaration must use the matching HTTPS URL shown in the profiles.
+
+The tool needs network access for published UCP schemas. To use local copies
+instead, configure `--schema-local-base` and `--schema-remote-base` when
+composing, resolving, or validating.
 
 ### 4. Check a Failing Case Too
 
@@ -300,21 +290,70 @@ Path("checkout-bad.json").write_text(json.dumps(response))
 ucp-schema validate checkout-bad.json --op read --response --json
 ```
 
-This should fail because `grams_co2e` cannot be negative. The command
-returns exit code `1` and reports `"valid": false`. A passing case alone does
-not show that your extension's rules are being applied.
+This should fail because `grams_co2e` cannot be negative. The command returns
+exit code `1` and reports `"valid": false`. A passing case alone does not show
+that your extension's rules are being applied. Repeat these checks whenever
+you change the schema, not only before its first publication.
+
+Also inspect the request view:
+
+```bash
+ucp-schema resolve checkout-response.json --request --op create --pretty
+```
+
+The resolved create-request schema should not define the Business-computed
+`acme_carbon_estimate` field. The annotations describe which fields belong in a
+message; open-object validation can still permit unknown fields, so do not
+mistake annotation resolution for a rule that automatically rejects every
+extra input.
 
 ### 5. Publish the Files and Explain the Behavior
 
-Host the schema at the URL declared in the profiles and write the `spec` page.
-For this example, that page should explain when the estimate is calculated,
-what `methodology` identifies, and what happens when the extension is
-unsupported or the estimate is absent. The Platform must not treat an absent
-estimate as zero. Use HTTPS without schema redirects and send cacheable
-response headers, as [Host and Document It](#host-and-document-it) describes.
+You publish and maintain your extension yourself, under your own namespace.
+Its schema and specification are not added to the UCP repository, and you do
+not need UCP's approval to publish them (see
+[Namespace Governance](overview/index.md#namespace-governance)).
 
-The profiles advertise support; each checkout response declares the extension
-actually used. The response carries the estimate itself.
+Host the schema at the URL declared in the profiles. Like a profile, it must
+be reliably hosted (see [Hosting](overview/index.md#hosting)):
+
+- Serve it over HTTPS from the host that binds to your name.
+- Do not redirect. Platforms do not follow redirects when fetching a `schema`
+  URL.
+- Send `Cache-Control` with `public` and a `max-age` of at least 60 seconds;
+  do not use `private`, `no-store`, or `no-cache` directives.
+- Preferably include an `ETag` or `Last-Modified` validator.
+
+Write the human-readable page at the `spec` URL in your profiles. It must be
+HTTPS but may be served from any host. For this example, explain when the
+estimate is calculated, what `methodology` identifies, and what happens when
+the extension is unsupported or the estimate is absent. The Platform must not
+treat an absent estimate as zero. If your extension extends more than one
+capability, also describe what happens to its state as a resource moves
+between them, for example when a cart becomes a checkout: what carries over,
+what is recomputed, and what is dropped.
+
+Then check the published copy. After replacing the fictional Acme name and
+domain with your own, point the extension's `schema` in
+`checkout-response.json` at its hosted URL instead of the local path and
+validate again:
+
+```bash
+ucp-schema validate checkout-response.json --op read --response --json
+curl --silent --show-error --dump-header - --output /dev/null \
+  https://acme.com/ucp/schemas/carbon.json
+```
+
+The hosted validation exercises the name/host check that local paths skip.
+Confirm that a fresh request to the URL answers `200` directly, without a
+redirect, and sends the cache headers above. Do not use `curl --location` to
+hide a redirect.
+
+If your extension proves useful to many Businesses and Platforms, it can
+become a candidate for the core protocol. UCP keeps the core light: new
+functionality starts self-hosted under a vendor namespace and is proposed for
+`dev.ucp.*` once it has broad, multi-party adoption, through the Enhancement
+Proposal process (see [Contributing](/documentation/contributing/)).
 
 ## Choose a Name
 
@@ -332,22 +371,12 @@ The schema host must match the domain represented by the name. This is called
 *authority binding*: the Platform checks the name and host before fetching the
 schema, and rejects the extension if they do not match (see
 [Authority Binding](overview/index.md#authority-binding)).
-For `com.acme.shopping.carbon`, a schema served from `acme.com` matches; one
-served from a shared CDN host such as `cdn.example.net` does not.
+For `com.acme.shopping.carbon`, a schema served from `acme.com` matches. One
+served from `www.acme.com` does not, because `www` is not part of the name, and
+an `acme.com` URL that redirects to `www` fails too, because Platforms do not
+follow redirects. A shared CDN host such as `cdn.example.net` does not match.
 
 ## Write the Schema
-
-### Metadata
-
-An extension schema is self-describing. At the top level, declare:
-
-| Field | Purpose |
-| --- | --- |
-| `$id` | Canonical URL of the schema, on the host that binds to your name |
-| `name` | The extension's reverse-domain name |
-| `version` | Your extension version, an ISO 8601 date you control |
-| `title`, `description` | Human-readable summary |
-| `requires` | The UCP protocol and capability versions the extension depends on (see [Versioning](#version-your-extension)) |
 
 ### Extend a Capability
 
@@ -357,15 +386,15 @@ capability's full name. The entry composes onto the capability's schema with
 [Extension Schema Pattern](overview/index.md#extension-schema-pattern)).
 
 Because your schema is hosted on your domain, reference UCP base schemas by
-absolute URL, including the UCP release in the path:
+absolute URL, including the UCP release in the path.
 
 The [complete carbon schema](#1-write-the-extension-schema) shows this pattern
 with a published UCP URL. Use the release your extension supports; do not mix
 schema URLs from one release with capability declarations from another.
 
-Put the types your extension introduces (`acme_carbon_estimate` above) in their own `$defs`
-entries and reference them from the composed entry, so they can be reused across
-parents.
+Put the types your extension introduces (`acme_carbon_estimate` above) in their
+own `$defs` entries and reference them from the composed entry, so they can be
+reused across parents.
 
 ### Control Request and Response Visibility
 
@@ -374,21 +403,13 @@ that only one side sends carry visibility annotations: `ucp_request` and
 `ucp_response`, with the values `omit`, `optional`, or `required`, either for
 every operation or per operation (`create`, `read`, `update`, `complete`).
 
-For example, a field the Business computes and the Platform never sends:
+The walkthrough uses `ucp_request: "omit"` for a Business-computed field. A
+Platform-supplied reference that is optional on create and update, but omitted
+on complete, could instead use:
 
 <!-- ucp:example skip reason="extension schema fragment" -->
 ```json
-"acme_carbon_estimate": {
-  "$ref": "#/$defs/acme_carbon_estimate",
-  "ucp_request": "omit"
-}
-```
-
-Or a field the Platform may send on create and update, but not on complete:
-
-<!-- ucp:example skip reason="extension schema fragment" -->
-```json
-"carbon_methodology": {
+"acme_reference": {
   "type": "string",
   "ucp_request": { "create": "optional", "update": "optional", "complete": "omit" }
 }
@@ -411,13 +432,13 @@ might show a preview on cart and a revised estimate on checkout:
   "dev.ucp.shopping.cart": {
     "allOf": [
       { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json" },
-      { "type": "object", "properties": { "carbon_preview": { "$ref": "#/$defs/acme_carbon_estimate" } } }
+      { "type": "object", "properties": { "acme_carbon_preview": { "$ref": "#/$defs/acme_carbon_estimate", "ucp_request": "omit" } } }
     ]
   },
   "dev.ucp.shopping.checkout": {
     "allOf": [
       { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json" },
-      { "type": "object", "properties": { "acme_carbon_estimate": { "$ref": "#/$defs/acme_carbon_estimate" } } }
+      { "type": "object", "properties": { "acme_carbon_estimate": { "$ref": "#/$defs/acme_carbon_estimate", "ucp_request": "omit" } } }
     ]
   }
 }
@@ -438,32 +459,36 @@ capability's schema is a container: each message body sits under `$defs`, named
 To extend a container, mirror its shape names under your `$defs` entry and
 compose each one onto the base shape:
 
-<!-- ucp:example skip reason="extension schema example; hosted outside ucp.dev" -->
+<!-- extension-authoring-example: container-pattern -->
+<!-- ucp:example skip reason="extension schema fragment; checked by test_extension_authoring_examples.py" -->
 ```json
-"$defs": {
-  "dev.ucp.shopping.catalog.search": {
-    "$defs": {
-      "search_response": {
-        "allOf": [
-          { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json#/$defs/search_response" },
-          {
-            "type": "object",
-            "properties": {
-              "products": { "items": { "$ref": "#/$defs/product_with_carbon" } }
+{
+  "$defs": {
+    "dev.ucp.shopping.catalog.search": {
+      "$defs": {
+        "search_response": {
+          "allOf": [
+            { "$ref": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json#/$defs/search_response" },
+            {
+              "type": "object",
+              "properties": {
+                "products": { "items": { "$ref": "#/$defs/product_with_carbon" } }
+              }
             }
-          }
-        ]
+          ]
+        }
       }
     }
   }
 }
 ```
 
-Here `product_with_carbon` is your own `$defs` entry that composes onto the
-UCP product type and adds your product fields. Mirror only the shapes you
-change. `ucp-schema` rejects a container entry that
-composes directly onto a response with `allOf`, without the nested shape names.
-See
+Here `product_with_carbon` is your own `$defs` entry that composes onto the UCP
+product type and adds your product fields. Mirror only the shapes you change,
+and pass the operation, such as `--op search`, when validating or resolving.
+Check the nesting with a failing case: in `ucp-schema` 1.4.1, a container entry
+that composes directly onto a response with `allOf`, without the nested shape
+names, is not applied even though lint and validation report no error. See
 [Container Capabilities](https://github.com/Universal-Commerce-Protocol/ucp-schema#container-capabilities)
 in the `ucp-schema` documentation.
 
@@ -485,7 +510,7 @@ UCP fulfillment extension uses this pattern for its `config`:
           "properties": {
             "config": {
               "type": "object",
-              "properties": { "program_name": { "type": "string" } }
+              "properties": { "methodology": { "type": "string" } }
             }
           }
         }
@@ -499,9 +524,8 @@ UCP fulfillment extension uses this pattern for its `config`:
 
 If your extension needs the Platform to carry out a step, such as a
 verification or a payment challenge, it can declare Action types (see
-[Actions](overview/index.md#actions)). Each Action type's key
-must be in your namespace, and your specification must define its full
-contract; see
+[Actions](overview/index.md#actions)). Each Action type's key must be in your
+namespace, and your specification must define its full contract; see
 [Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types)
 for what to cover.
 
@@ -548,102 +572,16 @@ Third-party extensions version independently of UCP (see
   the latest version both parties list (see
   [Capability Versions](overview/index.md#capability-versions)).
 
-## Host and Document It
-
-The schema, like a profile, must be reliably hosted (see
-[Hosting](overview/index.md#hosting)):
-
-- Serve it over HTTPS from the host that binds to your name.
-- Do not redirect. Platforms do not follow redirects when fetching a `schema`
-  URL.
-- Send `Cache-Control` with `public` and a `max-age` of at least 60 seconds,
-  and preferably an `ETag` or `Last-Modified` validator.
-
-The `spec` URL in your profile entries points to human-readable documentation.
-It must be HTTPS but may be served from any host. Describe there what your
-extension adds and how each party should behave, including what happens when
-the other party does not support it. If your extension extends more than one
-capability, also describe what happens to its state as a resource moves
-between them, for example when a cart becomes a checkout: what carries over,
-what is recomputed, and what is dropped.
-
-## Advertise and Negotiate
-
-An extension is active in a session only when both parties advertise it. A
-Business lists it in its profile under `capabilities`, with `extends` naming
-its parents:
-
-<!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
-```json
-{
-  "com.acme.shopping.carbon": [
-    {
-      "version": "2026-09-01",
-      "spec": "https://acme.com/docs/ucp/carbon",
-      "schema": "https://acme.com/ucp/schemas/carbon.json",
-      "extends": "dev.ucp.shopping.checkout"
-    }
-  ]
-}
-```
-
-A Platform that supports the extension lists it in its own profile the same
-way. Negotiation then works as follows (see
-[Intersection Algorithm](overview/index.md#intersection-algorithm)):
-
-1. The extension is kept only if both profiles list it with at least one
-   version in common; the latest shared version is selected.
-2. It is dropped if none of its parents is active, and dropping one extension
-   can in turn drop extensions of it.
-3. After schemas are fetched, it is dropped if the selected versions do not
-   satisfy its `requires`.
-
-Responses then declare the extension in `ucp.capabilities` whenever it extends
-that response's capability (see
-[Capability Declaration in Responses](overview/index.md#capability-declaration-in-responses)).
-
-## Test Locally
-
-The [walkthrough](#walkthrough-add-a-carbon-estimate-to-checkout) gives complete
-files for a passing response and a failing case. Repeat those checks whenever
-you change the schema, not only before the first publication.
-
-To inspect the schema the consumer will use, run:
-
-```bash
-ucp-schema compose checkout-response.json --pretty
-ucp-schema resolve checkout-response.json --request --op create --pretty
-```
-
-The resolved create-request schema should not define the Business-computed
-`acme_carbon_estimate` field. The annotations describe which fields belong in a message;
-open-object validation can still permit unknown fields, so do not mistake
-annotation resolution for a rule that automatically rejects every extra input.
-
-For a container capability, pass the operation, such as `--op search`, so the
-tool selects the right request or response schema. For local schemas that
-reference published UCP schemas, the tool needs network access or local copies
-configured with `--schema-local-base` and `--schema-remote-base`.
-
-When contributing to this guide, run its extracted-example tests too:
-
-```bash
-uv run python scripts/test_extension_authoring_examples.py
-```
-
-These tests check the full examples and the response-only annotation against
-local UCP schemas, including values that must fail. They do not fetch fictional
-vendor URLs.
-
 ## Checklist
 
 - [ ] Named in a reverse-domain namespace you control
 - [ ] Schema `$id` and hosting on a host that binds to that name
 - [ ] A `$defs` entry for each capability in `extends`, composed with `allOf`
 - [ ] UCP base schemas referenced by absolute, versioned URL
-- [ ] Container parents extended per shape
+- [ ] Container parents extended per shape, checked with a failing case
 - [ ] `version` and `requires` declared
 - [ ] Hosted over HTTPS, without redirects, with cacheable headers
+- [ ] Hosted schema validated after replacing local paths with its URL
 - [ ] A `spec` page describing behavior and fallbacks
-- [ ] Listed in Business and Platform profiles
+- [ ] Listed in Business and Platform profiles, with both profiles validated
 - [ ] Linted and validated with `ucp-schema`, including a failing case
