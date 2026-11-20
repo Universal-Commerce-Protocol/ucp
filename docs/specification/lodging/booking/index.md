@@ -85,6 +85,15 @@ Booking follows a progressive session lifecycle:
   a physical accommodation type (`accommodation_type`), a commercial rate contract
   (`rate_plan`), stay dates (`stay_dates`), occupancy requirements (`occupancy`), and guest
   assignments (`guest_assignments`).
+* **Property and Accommodation Classification (`property.type`,
+  `accommodation_type.type`)**: Optional, Business-stated classifications with
+  open vocabularies. `property.type` names the property family (`hotel`,
+  `hostel`, `short_term_rental`, `campground`, `bed_and_breakfast`, `other`);
+  `accommodation_type.type` names the kind of rentable space (`room`, `suite`,
+  `apartment`, `villa`, `cabin`, `pitch`, `bed`). The two are independent: an apartment hotel is a
+  `hotel` that may offer `apartment` spaces. UCP does not verify either value.
+  Platforms **MUST** treat an unrecognized value as unclassified and **MUST NOT**
+  infer a value from other fields.
 * **Platform-Generated Guest Identifiers (`guest.id`)**: Unlike business-scoped
   catalog, property, and stay identifiers, guest identifiers are generated, allocated, and
   managed by the Platform within the Platform's namespace. The Business treats
@@ -596,14 +605,16 @@ property-collected charges and flexible payment terms integration.
       "currency": "JPY",
       "property": {
         "id": "pp_ginza_hotel",
-        "name": "Ginza Grand Hotel"
+        "name": "Ginza Grand Hotel",
+        "type": "hotel"
       },
       "stays": [
         {
           "id": "stay_dlx_king_std",
           "accommodation_type": {
             "id": "at_dlx_king",
-            "title": "Deluxe King Room"
+            "title": "Deluxe King Room",
+            "type": "room"
           },
           "rate_plan": {
             "id": "rp_standard",
@@ -880,6 +891,26 @@ Step-up action directives required to progress the booking session (e.g., 3D Sec
 The physical establishment or geographic location where the lodging is situated (e.g., hotel, resort, villa estate, cabin park).
 
 {{ schema_fields('types/property_resp', 'lodging/booking') }}
+
+!!! note "Non-normative: `property.type` and regulatory classifications"
+    The well-known `property.type` values follow lines that regulation already
+    draws, so that a Platform can tell which family a property belongs to
+    without a jurisdiction-specific vocabulary in the schema. The table below is
+    informative only. It does not define obligations, and a Business remains
+    responsible for its own classification under applicable law.
+
+    | Value | EU statistical classification (NACE Rev. 2) | Regulation (EU) 2024/1028, Art. 3(1) | Italy, national identifier (CIN), Art. 13-ter DL 145/2023 |
+    | --- | --- | --- | --- |
+    | `hotel` | Group 55.1, hotels and similar accommodation | Excluded from "unit" | Assigned to hotel-type accommodation as defined by regional law |
+    | `hostel` | Hostels, as described in group 55.2 | Excluded from "unit" | Depends on the regional category |
+    | `short_term_rental` | Group 55.2, holiday and other short-stay accommodation (other than hostels) | Within the definition of "unit" | Assigned to residential units let for tourism or for short stays |
+    | `campground` | Group 55.3, camping grounds, recreational vehicle parks and trailer parks | Excluded from "unit" | Depends on the regional category |
+    | `bed_and_breakfast` | Not named in either group | Not among the listed exclusions; depends on how it is operated | Assigned; category depends on regional law |
+
+    `bed_and_breakfast` is a separate value because jurisdictions place it
+    differently: some exclude it from short-term rental rules together with
+    hotels, others treat it as a short-term rental. Other national categories
+    (for example farm stays) are intentionally not part of the vocabulary.
 
 ### Booking Confirmation
 
