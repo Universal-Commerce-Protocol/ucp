@@ -43,6 +43,11 @@ def _check(name: str, condition: bool, detail: str = "") -> None:
   _RESULTS.append((name, condition, detail))
 
 
+def _check_eq(name: str, got: object, want: object) -> None:
+  """Record an equality check with `got` and `want` in the failure detail."""
+  _check(name, got == want, f"got {got!r}, want {want!r}")
+
+
 def _report() -> int:
   """Print results and return exit code."""
   passed = sum(1 for _, ok, _ in _RESULTS if ok)
@@ -66,15 +71,15 @@ class _Env:
     return fn
 
 
-def _load_macros() -> dict:
+def _load_macros() -> tuple[dict, dict]:
   # main.py resolves schema paths relative to the repository root.
   os.chdir(REPO_ROOT)
   sys.path.insert(0, str(REPO_ROOT))
   import main
 
   env = _Env()
-  main.define_env(env)
-  return env.macros
+  internals = main.define_env(env)
+  return env.macros, internals
 
 
 def _type_cell(table: str, field: str) -> str | None:
@@ -564,7 +569,7 @@ def test_fragment_ref_real_anchor_vs_title_fallback(macros: dict) -> None:
       "Map[string, [Amenity](site:specification/common/location/rest/#amenity)]"
     )
     and _type_cell(get_prod, "product")
-    == "[Product](site:specification/reference/#product)"
+    == "[Product](site:specification/shopping/catalog/#product)"
     and restored["properties"]["anchored_frag"]["allOf"][0].get("$ref")
     == "../common/types/pagination.json#/$defs/request"
     and "$ref" not in restored["properties"]["unanchored_frag"]
@@ -905,12 +910,6 @@ def _parse_table_type_cells(md_text: str) -> dict[str, str]:
 def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
   """Every cross-file `$ref` field rendered in `docs/` is linked or named."""
   main = sys.modules["main"]
-  # Untitled, unanchored base `$defs` in service.json and payment_handler.json
-  # intentionally carry no standalone anchor or title in the specification.
-  allowlisted_refs = {
-    "service.json#/$defs/base",
-    "payment_handler.json#/$defs/base",
-  }
   macro_re = re.compile(
     r"\{\{\s*(schema_fields|extension_schema_fields|extension_fields|"
     r"method_fields|auto_generate_schema_reference)\(([^)]*)\)\s*\}\}"
@@ -971,9 +970,7 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
         continue
       checked_fields += 1
       item = items[idx] if idx < len(items) else "<missing>"
-      if item in ("`object`", "object", "any", "<missing>") and not (
-        set(field_refs) <= allowlisted_refs
-      ):
+      if item in ("`object`", "object", "any", "<missing>"):
         unexpected.append(f"{label}.oneOf[{idx}]={item!r} (refs={field_refs})")
 
   def check_table(
@@ -986,9 +983,7 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
         continue
       checked_fields += 1
       cell = trows[fname]
-      if (
-        _is_degraded_type_cell(cell) and not set(field_refs) <= allowlisted_refs
-      ):
+      if _is_degraded_type_cell(cell):
         unexpected.append(f"{label}.{fname}={cell!r} (refs={field_refs})")
 
   for md_path in sorted((REPO_ROOT / "docs").rglob("*.md")):
@@ -1099,10 +1094,13 @@ def test_corpus_cross_file_refs_are_linked_or_named(macros: dict) -> None:
           is_ext = "Extension" in sdata.get("title", "")
           if (is_ext and not inc_ext) or (not is_ext and not inc_cap):
             continue
+          # Qualify by path under source/schemas/ (e.g. `food/cart`): bare
+          # stems are ambiguous once verticals share filenames.
           ent = (
-            schema_file.stem
-            if sub_dir == "."
-            else f"{Path(sub_dir).as_posix()}/{schema_file.stem}"
+            schema_file.resolve()
+            .relative_to(main.SCHEMAS_DIR.resolve())
+            .with_suffix("")
+            .as_posix()
           )
           resolved_file = schema_file.resolve()
           raw_root = main._resolve_schema(resolved_file)
@@ -1368,6 +1366,401 @@ def test_declared_header_parameter_keeps_single_row(macros: dict) -> None:
   )
 
 
+def test_inline_object_subsection_extraction(macros: dict) -> None:
+  """Direct inline objects and arrays of inline objects render sub-sections."""
+  order_li = macros["schema_fields"]("types/order_line_item", "reference")
+  _check_eq(
+    "inline_object_order_line_item_quantity_link",
+    _type_cell(order_li, "quantity"),
+    "[Order Line Item Quantity](#order-line-item-quantity)",
+  )
+  _check(
+    "inline_object_order_line_item_quantity_heading",
+    "#### Order Line Item Quantity" in order_li,
+    f"missing heading in {order_li!r}",
+  )
+  for sub_field in ("original", "total", "fulfilled"):
+    _check_eq(
+      f"inline_object_order_line_item_quantity_{sub_field}",
+      _type_cell(order_li, sub_field),
+      "integer",
+    )
+
+  order = macros["schema_fields"]("order", "reference")
+  _check_eq(
+    "inline_object_order_fulfillment_link",
+    _type_cell(order, "fulfillment"),
+    "[Order Fulfillment](#order-fulfillment)",
+  )
+  _check(
+    "inline_object_order_fulfillment_heading",
+    "#### Order Fulfillment" in order,
+    f"missing heading in {order!r}",
+  )
+  _check_eq(
+    "inline_object_order_fulfillment_expectations",
+    _type_cell(order, "expectations"),
+    (
+      "Array[[Expectation]"
+      "(site:specification/reference/#shopping-types-expectation)]"
+    ),
+  )
+
+  variant = macros["schema_fields"]("types/variant", "reference")
+  _check_eq(
+    "inline_array_variant_barcodes_link",
+    _type_cell(variant, "barcodes"),
+    "Array[[Variant Barcodes](#variant-barcodes)]",
+  )
+  _check(
+    "inline_array_variant_barcodes_heading",
+    "#### Variant Barcodes" in variant,
+    f"missing heading in {variant!r}",
+  )
+  _check_eq(
+    "inline_object_variant_seller_link",
+    _type_cell(variant, "seller"),
+    "[Variant Seller](#variant-seller)",
+  )
+  _check(
+    "inline_object_variant_seller_heading",
+    "#### Variant Seller" in variant,
+    f"missing heading in {variant!r}",
+  )
+  _check_eq(
+    "inline_open_object_metadata_preserved",
+    _type_cell(variant, "metadata"),
+    "object",
+  )
+
+  # Plural array field names such as `statuses` and `aliases` preserve their
+  # field name without ad-hoc singularization mangling.
+  plurals = _render_synthetic_schema(
+    macros,
+    {
+      "type": "object",
+      "properties": {
+        "statuses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {"code": {"type": "string"}},
+          },
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {"handle": {"type": "string"}},
+          },
+        },
+      },
+    },
+  )
+  _check_eq(
+    "inline_array_statuses_title_unmangled",
+    _type_cell(plurals, "statuses"),
+    "Array[[Op Input Statuses](#op-input-statuses)]",
+  )
+  _check_eq(
+    "inline_array_aliases_title_unmangled",
+    _type_cell(plurals, "aliases"),
+    "Array[[Op Input Aliases](#op-input-aliases)]",
+  )
+
+
+def test_nested_inline_object_subsection_extraction(
+  macros: dict, internals: dict
+) -> None:
+  """Nested inline objects render qualified headings and never collide."""
+  capacity = macros["schema_fields"]("types/capacity", "reference")
+  _check_eq(
+    "nested_inline_capacity_child_age_ranges_link",
+    _type_cell(capacity, "child_age_ranges"),
+    "Array[[Capacity Child Age Ranges](#capacity-child-age-ranges)]",
+  )
+  _check(
+    "nested_inline_capacity_child_age_ranges_heading",
+    "#### Capacity Child Age Ranges" in capacity,
+    f"missing heading in {capacity!r}",
+  )
+  _check_eq(
+    "nested_inline_capacity_ages_link",
+    _type_cell(capacity, "ages"),
+    "[Capacity Child Age Ranges Ages](#capacity-child-age-ranges-ages)",
+  )
+  _check(
+    "nested_inline_capacity_ages_heading",
+    "#### Capacity Child Age Ranges Ages" in capacity,
+    f"missing heading in {capacity!r}",
+  )
+
+  pay_actions = macros["extension_schema_fields"](
+    "payment_authentication.json#/$defs/payment_actions", "reference"
+  )
+  _check_eq(
+    "nested_inline_payment_actions_link",
+    _type_cell(pay_actions, "actions"),
+    "[Payment Actions Actions](#payment-actions-actions)",
+  )
+  _check(
+    "nested_inline_payment_actions_deep_config_heading",
+    "#### Payment Actions Actions Device Data Collection Config" in pay_actions,
+    f"missing deep heading in {pay_actions!r}",
+  )
+
+  # Reusing the same field name (`config`) across nested depths or across a
+  # shared `inline_tables` accumulator must not collide.
+  reused_name_schema = {
+    "title": "Service",
+    "type": "object",
+    "properties": {
+      "config": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "type": "object",
+            "properties": {"timeout_ms": {"type": "integer"}},
+          }
+        },
+      }
+    },
+  }
+  rendered_reused = internals["_render_table_from_schema"](
+    reused_name_schema, "reference", parent_title="Service"
+  )
+  _check(
+    "nested_inline_reused_field_name_both_headings_present",
+    "#### Service Config\n" in rendered_reused
+    and "#### Service Config Config\n" in rendered_reused
+    and _type_cell(rendered_reused, "timeout_ms") == "integer",
+    f"got {rendered_reused!r}",
+  )
+
+  shared_acc: dict = {}
+  internals["_render_table_from_schema"](
+    {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {"a": {"type": "string"}},
+        }
+      },
+    },
+    "reference",
+    need_header=False,
+    parent_title="Outer",
+    inline_tables=shared_acc,
+  )
+  internals["_render_table_from_schema"](
+    {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {"b": {"type": "integer"}},
+        }
+      },
+    },
+    "reference",
+    need_header=False,
+    parent_title="Outer Config",
+    inline_tables=shared_acc,
+  )
+  _check_eq(
+    "nested_inline_shared_accumulator_distinct_keys",
+    len(shared_acc),
+    2,
+  )
+
+
+def test_inline_object_all_of_merge_precedence(macros: dict) -> None:
+  """`allOf` merges inline vs named types structurally without orphans."""
+  card_pi = macros["schema_fields"](
+    "types/card_payment_instrument", "reference"
+  )
+  _check_eq(
+    "all_of_inline_specializes_open_object_base",
+    _type_cell(card_pi, "display"),
+    "[Card Payment Instrument Display](#card-payment-instrument-display)",
+  )
+  _check(
+    "all_of_inline_specializes_open_object_heading",
+    "#### Card Payment Instrument Display" in card_pi,
+    f"missing heading in {card_pi!r}",
+  )
+
+  split_chk = macros["extension_schema_fields"](
+    "payment_split_payments.json#/$defs/dev.ucp.shopping.checkout", "reference"
+  )
+  _check_eq(
+    "all_of_cross_file_ref_preserved_over_inline_override",
+    _type_cell(split_chk, "payment"),
+    "[Payment](site:specification/reference/#payment)",
+  )
+  _check(
+    "all_of_suppressed_inline_override_emits_no_orphan_heading",
+    "#### Checkout with Split Payments Payment" not in split_chk,
+    f"unexpected orphan heading in {split_chk!r}",
+  )
+
+  # Unanchored titled base schema (no `(site:` link in rendered cell) must
+  # still win over a partial inline override, and a `$ref` specialization must
+  # prune an earlier branch's inline sub-section.
+  synthetic_all_of = _render_synthetic_schema(
+    macros,
+    {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "handler": {"title": "Payment Handler", "type": "object"},
+            "fulfillment": {
+              "type": "object",
+              "properties": {"legacy": {"type": "string"}},
+            },
+          },
+        },
+        {
+          "type": "object",
+          "properties": {
+            "handler": {
+              "type": "object",
+              "properties": {"id": {"type": "string"}},
+            },
+            "fulfillment": {"$ref": "types/locality.json"},
+          },
+        },
+      ]
+    },
+  )
+  _check_eq(
+    "all_of_unlinked_named_type_preserved_over_inline_override",
+    _type_cell(synthetic_all_of, "handler"),
+    "Payment Handler",
+  )
+  _check(
+    "all_of_unlinked_named_type_drops_inline_heading",
+    "#### Op Input Handler" not in synthetic_all_of,
+    f"unexpected heading in {synthetic_all_of!r}",
+  )
+  _check_eq(
+    "all_of_ref_specialization_replaces_inline_base",
+    _type_cell(synthetic_all_of, "fulfillment"),
+    "[Locality](site:specification/reference/#locality)",
+  )
+  _check(
+    "all_of_ref_specialization_prunes_inline_base_heading",
+    "#### Op Input Fulfillment" not in synthetic_all_of,
+    f"unexpected orphan heading in {synthetic_all_of!r}",
+  )
+
+
+def test_no_header_render_emits_no_dangling_inline_links(
+  internals: dict,
+) -> None:
+  """Standalone `need_header=False` calls do not emit broken `#` links."""
+  render_schema = internals["_render_table_from_schema"]
+  direct_rows = render_schema(
+    {
+      "type": "object",
+      "properties": {
+        "quantity": {
+          "type": "object",
+          "properties": {"total": {"type": "integer"}},
+        }
+      },
+    },
+    "reference",
+    need_header=False,
+    parent_title="Standalone",
+  )
+  _check_eq(
+    "no_header_direct_inline_stays_object",
+    _type_cell(direct_rows, "quantity"),
+    "object",
+  )
+  _check(
+    "no_header_direct_has_no_anchor_link",
+    "](#" not in direct_rows,
+    f"unexpected link in {direct_rows!r}",
+  )
+
+  composed_rows = render_schema(
+    {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {"id": {"type": "string"}},
+              },
+            }
+          },
+        }
+      ]
+    },
+    "reference",
+    need_header=False,
+    parent_title="Standalone",
+  )
+  _check_eq(
+    "no_header_composed_inline_stays_array_object",
+    _type_cell(composed_rows, "items"),
+    "Array[object]",
+  )
+  _check(
+    "no_header_composed_has_no_anchor_link",
+    "](#" not in composed_rows,
+    f"unexpected link in {composed_rows!r}",
+  )
+
+
+def test_base_def_inherits_root_title_except_ucp(macros: dict) -> None:
+  """Untitled `#/$defs/base` refs inherit root title, excluding `ucp.json`."""
+  for def_name in (
+    "response_order_schema",
+    "response_cart_schema",
+    "response_catalog_schema",
+    "response_location_schema",
+  ):
+    meta = macros["extension_schema_fields"](
+      f"ucp.json#/$defs/{def_name}", "reference"
+    )
+    _check_eq(
+      f"base_def_services_{def_name}",
+      _type_cell(meta, "services"),
+      "Map[string, Array[UCP Service]]",
+    )
+    _check_eq(
+      f"base_def_payment_handlers_{def_name}",
+      _type_cell(meta, "payment_handlers"),
+      "Map[string, Array[Payment Handler]]",
+    )
+
+  main_mod = sys.modules["main"]
+  ucp_root = {"title": "UCP Metadata"}
+  svc_root = {"title": "UCP Service"}
+  _check_eq(
+    "base_def_helper_attaches_entity_root_title",
+    main_mod._with_base_def_root_title(
+      {"type": "object"}, "service.json#/$defs/base", svc_root, "service.json"
+    ).get("title"),
+    "UCP Service",
+  )
+  _check_eq(
+    "base_def_helper_excludes_ucp_json",
+    main_mod._with_base_def_root_title(
+      {"type": "object"}, "#/$defs/base", ucp_root, "ucp.json"
+    ).get("title"),
+    None,
+  )
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -1383,7 +1776,7 @@ def main() -> int:
       "ucp-schema binary not on PATH (cargo install ucp-schema)",
     )
     return _report()
-  macros = _load_macros()
+  macros, internals = _load_macros()
   test_ucp_ref_links_reference_section(macros)
   test_bundled_ucp_def_links_reference_section(macros)
   test_ucp_def_without_anchor_is_named(macros)
@@ -1401,6 +1794,11 @@ def main() -> int:
   test_security_header_rows_follow_requirements()
   test_content_header_rows_follow_media_types()
   test_declared_header_parameter_keeps_single_row(macros)
+  test_inline_object_subsection_extraction(macros)
+  test_nested_inline_object_subsection_extraction(macros, internals)
+  test_inline_object_all_of_merge_precedence(macros)
+  test_no_header_render_emits_no_dangling_inline_links(internals)
+  test_base_def_inherits_root_title_except_ucp(macros)
   return _report()
 
 

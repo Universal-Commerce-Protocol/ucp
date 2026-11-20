@@ -71,6 +71,11 @@ and checkout and does not constrain what the Business records (a 0.25-lb
 ordering increment does not prevent recording an actual picked weight of
 1.90 lb).
 
+**List price.** Businesses **MAY** surface a snapshot of the originating
+Checkout's [`item.list_price`](../../overview/index.md#list-price) on Order
+lines. This is the value captured at Checkout, not recomputed from live
+Catalog; a Business that did not retain it omits it.
+
 ### Fulfillment
 
 Fulfillment tracks how items are delivered to the buyer.
