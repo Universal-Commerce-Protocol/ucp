@@ -31,9 +31,9 @@ Here are the terms used in this guide:
 
 These roles describe who offers and who uses a feature, not a particular
 industry. For the protocol rules, see the
-[Specification Overview](../specification/overview/index.md). If you are
+[Specification Overview](overview/index.md). If you are
 changing UCP itself rather than publishing your own extension, see the
-[Schema Authoring Guide](schema-authoring.md).
+[Schema Authoring Guide](/documentation/schema-authoring/).
 
 ## Before You Start
 
@@ -43,7 +43,7 @@ An extension adds to an existing capability. Consider the alternatives first:
   are set up, a capability's `config` may already cover it.
 - **Signals.** Environment data a Platform observes, for the Business's
   authorization and abuse prevention, belongs in
-  [signals](../specification/overview/index.md#signals), keyed in your own
+  [signals](overview/index.md#signals), keyed in your own
   namespace (for example, `com.example.device_id`), not in a new extension.
 - **A new capability.** If your feature is not about augmenting an existing
   capability's payloads, it may be a capability of its own rather than an
@@ -58,13 +58,13 @@ them.
 You publish and maintain your extension yourself. Its schema and specification
 live on your own domain, under your own namespace; they are not added to the
 UCP repository, and you do not need UCP's approval to publish them (see
-[Namespace Governance](../specification/overview/index.md#namespace-governance)).
+[Namespace Governance](overview/index.md#namespace-governance)).
 
 If your extension proves useful to many Businesses and Platforms, it can become
 a candidate for the core protocol. UCP keeps the core light: new functionality
 starts self-hosted under a vendor namespace and is proposed for `dev.ucp.*`
 once it has broad, multi-party adoption, through the Enhancement Proposal
-process (see [Contributing](contributing.md)).
+process (see [Contributing](/documentation/contributing/)).
 
 ## What You'll Build
 
@@ -303,7 +303,7 @@ actually used. The response carries the points themselves.
 ## Choose a Name
 
 Extension names follow the same rules as every capability name (see
-[Namespace Governance](../specification/overview/index.md#namespace-governance)):
+[Namespace Governance](overview/index.md#namespace-governance)):
 
 - Use the format `{reverse-domain}.{service}.{capability}`, for example
   `com.acme.shopping.loyalty`.
@@ -315,7 +315,7 @@ Extension names follow the same rules as every capability name (see
 The schema host must match the domain represented by the name. This is called
 *authority binding*: the Platform checks the name and host before fetching the
 schema, and rejects the extension if they do not match (see
-[Authority Binding](../specification/overview/index.md#authority-binding)).
+[Authority Binding](overview/index.md#authority-binding)).
 For `com.acme.shopping.loyalty`, a schema served from `acme.com` matches; one
 served from a shared CDN host such as `cdn.example.net` does not.
 
@@ -338,7 +338,7 @@ An extension schema is self-describing. At the top level, declare:
 For each capability your extension extends, add a `$defs` entry keyed by that
 capability's full name. The entry composes onto the capability's schema with
 `allOf`: it references the base schema, then adds your fields (see
-[Extension Schema Pattern](../specification/overview/index.md#extension-schema-pattern)).
+[Extension Schema Pattern](overview/index.md#extension-schema-pattern)).
 
 Because your schema is hosted on your domain, reference UCP base schemas by
 absolute URL, including the UCP release in the path:
@@ -385,7 +385,7 @@ in the `ucp-schema` documentation for the full resolution rules.
 
 To extend several capabilities, declare each in `extends` and add a `$defs`
 entry for each (see
-[Multi-Parent Extensions](../specification/overview/index.md#multi-parent-extensions)).
+[Multi-Parent Extensions](overview/index.md#multi-parent-extensions)).
 Each entry can add different fields; for example, a loyalty extension might
 show a points preview on cart and points earned on checkout:
 
@@ -410,7 +410,7 @@ show a points preview on cart and points earned on checkout:
 The extension stays active as long as at least one of its parents is
 negotiated, and each response lists it only when it extends that response's
 capability (see
-[Response Capability Selection](../specification/overview/index.md#response-capability-selection)).
+[Response Capability Selection](overview/index.md#response-capability-selection)).
 
 ### Extend a Container Capability
 
@@ -514,10 +514,10 @@ UCP fulfillment extension uses this pattern for its `config`:
 
 If your extension needs the Platform to carry out a step, such as a
 verification or a payment challenge, it can declare Action types (see
-[Actions](../specification/overview/index.md#actions)). Each Action type's key
+[Actions](overview/index.md#actions)). Each Action type's key
 must be in your namespace, and your specification must define its full
 contract; see
-[Extension-Declared Action Types](schema-authoring.md#extension-declared-action-types)
+[Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types)
 for what to cover.
 
 ### Avoid Composition Pitfalls
@@ -527,7 +527,7 @@ for what to cover.
 - **You can add fields, not loosen existing ones.** A composed schema must
   satisfy the base and your extension, so you cannot widen a base type, relax a
   base requirement, or add a value to a closed `enum`. See
-  [Extensibility and Forward Compatibility](schema-authoring.md#extensibility-and-forward-compatibility).
+  [Extensibility and Forward Compatibility](/documentation/schema-authoring/#extensibility-and-forward-compatibility).
 - **Property names are not namespaced.** The fields your extension adds sit
   alongside UCP's own fields and those of other extensions. If two active
   extensions add a property with the same name, a payload must satisfy both
@@ -843,7 +843,7 @@ or add an unrelated root capability to the manifest.
 ## Version Your Extension
 
 Third-party extensions version independently of UCP (see
-[Component Versioning and Release Snapshots](../specification/overview/index.md#component-versioning-and-release-snapshots)):
+[Component Versioning and Release Snapshots](overview/index.md#component-versioning-and-release-snapshots)):
 
 - **Your version is your own.** It is an ISO 8601 date that you advance on your
   own schedule; it never has to match `ucp.version`.
@@ -852,19 +852,19 @@ Third-party extensions version independently of UCP (see
   selected versions of the capabilities you extend. Each constraint has a `min`
   and an optional `max`. Every key in `requires.capabilities` must also be a
   `$defs` key in your schema (see
-  [Version Requirements](../specification/overview/index.md#version-requirements)).
+  [Version Requirements](overview/index.md#version-requirements)).
 - **`requires` verifies; it does not select.** Versions are chosen by
   negotiation first. An extension whose requirements the chosen versions do not
   satisfy is dropped from the active set.
 - **Support several versions by listing several entries.** A profile lists a
   capability as an array, one entry per supported version. Negotiation picks
   the latest version both parties list (see
-  [Capability Versions](../specification/overview/index.md#capability-versions)).
+  [Capability Versions](overview/index.md#capability-versions)).
 
 ## Host and Document It
 
 The schema, like a profile, must be reliably hosted (see
-[Hosting](../specification/overview/index.md#hosting)):
+[Hosting](overview/index.md#hosting)):
 
 - Serve it over HTTPS from the host that binds to your name.
 - Do not redirect. Platforms do not follow redirects when fetching a `schema`
@@ -902,7 +902,7 @@ its parents:
 
 A Platform that supports the extension lists it in its own profile the same
 way. Negotiation then works as follows (see
-[Intersection Algorithm](../specification/overview/index.md#intersection-algorithm)):
+[Intersection Algorithm](overview/index.md#intersection-algorithm)):
 
 1. The extension is kept only if both profiles list it with at least one
    version in common; the latest shared version is selected.
@@ -913,7 +913,7 @@ way. Negotiation then works as follows (see
 
 Responses then declare the extension in `ucp.capabilities` whenever it extends
 that response's capability (see
-[Capability Declaration in Responses](../specification/overview/index.md#capability-declaration-in-responses)).
+[Capability Declaration in Responses](overview/index.md#capability-declaration-in-responses)).
 
 ## Test Locally
 

@@ -38,13 +38,13 @@ nav:
       - UCP and AP2: documentation/ucp-and-ap2.md
       - Roadmap: documentation/roadmap.md
       - Schema Authoring: documentation/schema-authoring.md
-      - Extension Authoring: documentation/extension-authoring.md
       - Versioning: versioning.md
       - Announcements: documentation/announcements.md
       - Contributing: documentation/contributing.md
   - Specification:
       - Overview: specification/overview/index.md
       - Getting Started: specification/getting-started.md
+      - Extension Authoring: specification/extension-authoring.md
       - Glossary: specification/glossary.md
       - Common:
           - Feed Capability: specification/common/feed/index.md
@@ -413,11 +413,6 @@ plugins:
               Comprehensive guidelines and JSON Schema design conventions when
               authoring or extending UCP schemas, including strict versioning
               and registry patterns.
-          - documentation/extension-authoring.md: >-
-              End-to-end guide for businesses and platforms publishing UCP
-              extensions under their own namespace: naming and authority
-              binding, schema composition, versioning, hosting, negotiation,
-              and local testing.
           - versioning.md: >-
               UCP's strict date-based versioning policy (YYYY-MM-DD) and
               compatibility guidelines for managing breaking changes and
@@ -436,6 +431,11 @@ plugins:
           - specification/getting-started.md: >-
               Step-by-step developer guide for building a UCP checkout server
               in Python (FastAPI) or Node.js (Express).
+          - specification/extension-authoring.md: >-
+              End-to-end guide for businesses and platforms publishing UCP
+              extensions under their own namespace: naming and authority
+              binding, schema composition, versioning, hosting, negotiation,
+              and local testing.
           - specification/glossary.md: >-
               Definitions of the protocol, commerce, payment, regulatory, and
               standards terms and acronyms used throughout the specification,

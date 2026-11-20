@@ -56,7 +56,7 @@ repos:
         entry: uv run --frozen python scripts/test_extension_authoring_examples.py
         language: system
         pass_filenames: false
-        files: ^(docs/documentation/extension-authoring\.md|scripts/test_extension_authoring_examples\.py)$
+        files: ^(docs/specification/extension-authoring\.md|scripts/test_extension_authoring_examples\.py)$
         stages: [pre-commit, pre-push]
       - id: check-links-tests
         name: Link checker unit tests
