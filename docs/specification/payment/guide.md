@@ -921,6 +921,7 @@ Before publishing a payment handler specification, verify:
 - [ ] Processing steps are enumerated and clear
 - [ ] Verification requirements are specified
 - [ ] Error handling and mapping is addressed
+- [ ] Which `retry_hint` values the handler emits on `payment_failed` errors is specified, if it refines the common well-known values
 
 ### Security
 

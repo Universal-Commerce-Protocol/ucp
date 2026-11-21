@@ -625,6 +625,58 @@ messages or deferring to checkout completion.
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
 
+For a `payment_failed` error, a business **MAY** add the optional
+`retry_hint` field to say which recovery the platform should attempt for
+the instrument selected by `path`. Well-known values are
+`retry_same_instrument` (resubmitting the same instrument may succeed),
+`try_different_instrument` (collect a different instrument instead of
+resubmitting this one). `severity` does not carry this distinction: a transient issuer
+outage and insufficient funds are both `recoverable` on the same `path`,
+but the first is retried with the same instrument and the second is not.
+Platforms **MUST** tolerate and ignore unknown `retry_hint` values. When
+`retry_hint` is absent, no recovery guidance is given and existing
+behavior applies. The hint is action-shaped only: it carries no issuer,
+network, or processor reason codes, and payment handlers may refine it
+within their own specifications.
+
+A transient failure, where resubmitting the same instrument is the
+intended recovery:
+
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[0]",
+      "severity": "recoverable",
+      "retry_hint": "retry_same_instrument",
+      "content": "Issuer temporarily unavailable."
+    }
+  ]
+}
+```
+
+A value outside the well-known vocabulary: a platform that does
+not recognize it ignores the hint and behaves as if none were given.
+
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[0]",
+      "severity": "recoverable",
+      "retry_hint": "com.example.custom_recovery",
+      "content": "Payment declined by issuer."
+    }
+  ]
+}
+```
+
 #### The `path` Field
 
 The optional `path` field on a message anchors it to a specific component of the
