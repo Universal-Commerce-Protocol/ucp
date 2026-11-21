@@ -1,0 +1,40 @@
+{
+  "id": "prod-mixed",
+  "title": "Mixed public/private catalog",
+  "description": {
+    "plain": "Partial public range"
+  },
+  "variants": [
+    {
+      "id": "var-anon-private",
+      "title": "Redacted B2B item",
+      "description": {
+        "plain": "Synthetic regression example; not customer data"
+      },
+      "pricing": {
+        "mode": "undisclosed"
+      }
+    },
+    {
+      "id": "var-public",
+      "title": "Public item",
+      "description": {
+        "plain": "Public price"
+      },
+      "price": {
+        "amount": 100,
+        "currency": "USD"
+      }
+    }
+  ],
+  "price_range": {
+    "min": {
+      "amount": 100,
+      "currency": "USD"
+    },
+    "max": {
+      "amount": 100,
+      "currency": "USD"
+    }
+  }
+}

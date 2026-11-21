@@ -1,0 +1,1 @@
+{"description":{"plain":"Conflicting signals: advertised price AND no-price mode."},"id":"var_conflict","price":{"amount":99900,"currency":"USD"},"pricing":{"mode":"quote_required"},"title":"Conflicted Variant"}

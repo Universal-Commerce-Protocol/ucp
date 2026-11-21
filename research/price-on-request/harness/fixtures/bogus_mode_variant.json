@@ -1,0 +1,1 @@
+{"description":{"plain":"Unknown pricing mode with a numeric price; open vocabulary means this is schema-valid, subject to the consumer safe-fallback contract."},"id":"var_bogus","price":{"amount":100,"currency":"USD"},"pricing":{"mode":"negotiable"},"title":"Bogus Mode Variant"}

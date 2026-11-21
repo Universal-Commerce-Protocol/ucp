@@ -61,6 +61,34 @@ merchants MAY support additional custom filters via `additionalProperties`.
 
 {{ schema_fields('types/price_filter', 'shopping/catalog') }}
 
+Under the [proposed pricing-state model](index.md#pricing-state),
+numeric matching includes only prices usable for the authenticated caller
+and negotiated pricing profile. `undisclosed`, unpriced
+`buyer_specific`, `quote_required` and `contract_only` records must
+not be treated as zero. Restricted `buyer_specific` prices must not be
+used for filtering unless the caller is entitled to those prices and the
+Platform supports their disclosure semantics.
+
+A genuine public/free variant with `price.amount = 0` matches an
+inclusive numeric filter for zero. A sibling `undisclosed` or unpriced
+`quote_required` variant cannot match that filter merely because it lacks
+a price. For example, with a free variant and a hidden variant, a
+consumer can compute a partial zero-only range without concluding that
+the hidden variant costs zero. This is a synthetic, testable distinction,
+not proof of seller-wide query completeness.
+
+**Open TC decision:** an anonymous price filter can exclude items that
+would have prices after identity linking, producing an apparently empty
+result. An empty response must not be presented as a complete price match
+when the Business cannot safely evaluate the filter against hidden
+prices. A Business may reject an unsupported filter through an existing
+supported error path; a new portable "incomplete/unsupported due to
+hidden prices" status or warning code is not specified by this
+experimental patch. Do not assume AirShelf's vendor-specific
+`price_filter_unsupported` is standardized. Any signal must avoid
+revealing private price-list membership through per-item results,
+counts, ordering or pagination.
+
 ## Pagination
 
 Cursor-based pagination for list operations. Cursors are opaque strings. A

@@ -1,0 +1,1 @@
+{"description":{"plain":"NDA deployment case: entitled buyer has a real, usable catalog price, and a negotiated-quote path is additionally available. next_step does not imply price must be absent."},"id":"var_sec_suite","price":{"amount":49900,"currency":"USD"},"pricing":{"mode":"buyer_specific","next_step":"request_quote"},"title":"Security Suite"}

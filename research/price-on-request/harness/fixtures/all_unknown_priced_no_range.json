@@ -1,0 +1,38 @@
+{
+  "description": {
+    "plain": "Lightweight running shoes with responsive cushioning."
+  },
+  "handle": "blue-runner-pro",
+  "id": "prod_blue_runner",
+  "title": "Blue Runner Pro",
+  "variants": [
+    {
+      "description": {
+        "plain": "Size 10 variant"
+      },
+      "id": "var_blue_runner_10",
+      "price": {
+        "amount": 12000,
+        "currency": "USD"
+      },
+      "title": "Size 10",
+      "pricing": {
+        "mode": "com.example.future"
+      }
+    },
+    {
+      "description": {
+        "plain": "Size 11 variant"
+      },
+      "id": "var_blue_runner_11",
+      "price": {
+        "amount": 15000,
+        "currency": "USD"
+      },
+      "title": "Size 11",
+      "pricing": {
+        "mode": "com.example.future"
+      }
+    }
+  ]
+}
