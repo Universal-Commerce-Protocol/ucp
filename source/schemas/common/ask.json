@@ -6,6 +6,27 @@
   "description": "Natural-language Q&A with a Business. A Platform, on behalf of the Buyer, asks a free-form question about the Business's resources, policies, and services and receives a text answer with optional related links. `ask` is the open-question complement to UCP's structured commerce capabilities: a question that maps to a dedicated operation is owned by that capability, while `ask` covers open questions and Business-specific facts and knowledge not exposed by other capabilities. Optionally pass identifiers to ground the answer in Business resources across commerce domains.",
   "type": "object",
   "$defs": {
+    "participant_type": {
+      "type": "string",
+      "description": "Participant kind. Well-known values: `agent` (automated), `human` (a person). Receivers must tolerate unknown values without treating them as human authorship or operator support.",
+      "examples": ["agent", "human"]
+    },
+    "answer_author": {
+      "title": "Answer Author",
+      "description": "Origin of the current answer, not authentication or authority. When absent, the author is `agent`.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/participant_type",
+          "description": "Answer authorship. Use `human` only for human-authored text. Unknown values never imply human authorship."
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional author display label. Not proof of identity."
+        }
+      }
+    },
     "conversation": {
       "type": "object",
       "required": ["id"],
@@ -58,7 +79,13 @@
             { "$ref": "types/description.json" },
             {
               "type": "object",
-              "required": ["plain"]
+              "required": ["plain"],
+              "properties": {
+                "author": {
+                  "$ref": "#/$defs/answer_author",
+                  "description": "Origin of this answer. Absence means `agent`."
+                }
+              }
             }
           ],
           "description": "Answer provided by the Business. Plain text is required; Markdown and HTML are optional alternative encodings."
