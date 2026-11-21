@@ -19,12 +19,12 @@
 * **Capability Name:** `dev.ucp.common.feed`
 
 A feed is a point-in-time publication of records—each representing one logical
-data item—delivered in bulk as files. Records normally use a UCP-defined shape
-from a service or capability, so a Platform can discover them in bulk, then
-call corresponding live operations for authoritative serving-time values. A
-Business **MAY** publish feeds using a custom record shape through a record-type
-extension negotiated with the Platform, and **MAY** publish feeds without
-corresponding live operations.
+data item—delivered in bulk as files. A record-type extension defines the
+record shape: one that a UCP service or capability defines, so a Platform can
+discover records in bulk and then call the corresponding live operations for
+authoritative serving-time values, or one that an independent specification
+defines. A Business **MAY** publish feeds of either kind, and **MAY** publish
+feeds without corresponding live operations.
 
 Common Feed adds one endpoint declaration, a feed list, and a manifest; it
 defines no record model. The manifest's `ucp.capabilities` declares the record
@@ -348,11 +348,11 @@ list at the Business's declared `config.endpoint` (see
 [Access and Provenance](#access-and-provenance)), not from `digest`.
 
 `ucp` uses the same envelope shape as a UCP response. On a manifest it
-declares the UCP version and the capabilities and extensions whose schemas the
-records conform to; it does not record a negotiation, because a manifest is a
-static document, not an operation response. The Business **MUST** declare
+declares the UCP version and the capabilities and extensions that govern the
+snapshot and its records; it does not record a negotiation, because a manifest
+is a static document, not an operation response. The Business **MUST** declare
 `dev.ucp.common.feed` in `ucp.capabilities`, together with every capability
-and extension whose schemas the records conform to, and **MUST** include
+and extension that governs the snapshot and its records, and **MUST** include
 `extends` on every extension entry, as in its profile. A Platform **MUST NOT**
 consume a manifest that does not declare `dev.ucp.common.feed`; the manifest's
 own shape is defined by that capability, so without the declaration there is
@@ -366,7 +366,7 @@ no version to validate the document against.
 * An entry that extends the record type adds fields to records. A Platform
   **MAY** ignore fields from one it does not recognize.
 
-For every record type, including custom record types, the Business **MUST**
+For every record type, including independent record types, the Business **MUST**
 use stable entity identifiers that it can resolve in related operations. The
 record-type specification defines which identifiers corresponding operations
 accept and what they identify. Where those operations are advertised, the
@@ -467,10 +467,15 @@ A manifest is a complete materialization of the feed for its `context` as of
 `generated_at`. A Platform that applies a snapshot **MUST** replace its prior
 copy of that feed with it. A Platform **MUST NOT** apply a snapshot whose
 `generated_at` is earlier than that of the snapshot it holds for the same feed.
-Absence of a record from the latest complete snapshot means the record is not
-offered in this feed's `context`. Absence carries no reason: unpublished, sold
-out, filtered, and deleted are indistinguishable. Absence in one feed says
-nothing about other feeds.
+Absence of a record from a snapshot means the record is not offered in this
+feed's `context`. Absence carries no reason: unpublished, sold out, filtered,
+and deleted are indistinguishable. Absence in one feed says nothing about other
+feeds.
+
+A supplemental feed's snapshot is complete in the same way. It carries every
+record the feed supplements, each with every member it sets, not the changes
+since its previous snapshot. A record absent from it is no longer supplemented,
+and the base record stands.
 
 ### Consistency and Immutability
 
@@ -580,9 +585,9 @@ capability; Buyer-level authentication is out of scope.
 
 ### Extensions
 
-Record shape extends as operation responses do: an extension declared in the
-manifest's `ucp.capabilities` adds typed fields to records, exactly as it does
-for the responses of the capability that defines them.
+An extension of the feed's record type declared in the manifest's
+`ucp.capabilities` **MAY** enrich records, in accordance with the record-type
+specification and using record schemas where defined.
 
 An extension **MAY** define additional manifest fields, composing onto the
 manifest. Feed list entries are shared by every feed in the list and take no
@@ -592,11 +597,12 @@ document.
 ### Supplemental Feeds
 
 A feed entry with `extends` is a supplemental feed. `extends` names, by `id`,
-another entry in the same feed list: its base feed. A supplemental record is a
-partial record of the base feed's record type, optionally carrying fields of
-the extensions its manifest declares. Its manifest declares the base feed's
-record type and those extensions; the rules in [Manifest](#manifest) apply to
-it as to any other manifest.
+one or more other entries in the same feed list: its base feeds. It is a
+string for one base feed or an array for several. A supplemental record is a
+partial record of the base feeds' record type, optionally carrying fields of
+the extensions its manifest declares. Its manifest declares that record type
+and those extensions; the rules in [Manifest](#manifest) apply to it as to any
+other manifest.
 
 Records join on `id`. A record type that supports supplemental feeds **MUST**
 give each record an `id`: a Business-assigned identifier, opaque to Platforms,
@@ -617,7 +623,7 @@ supplemental feed for the Business **MUST** use the Business's identifiers in
 the base is ignored, so a supplement keyed by any other identifier joins
 nothing.
 
-A supplemental record carries only the members it changes. Each member it
+A supplemental record carries only the members it sets. Each member it
 carries replaces the base record's member of the same name, whole, or adds it
 where the base has none: a supplement that carries `price` carries the complete
 price, `amount` and `currency`. A member set to `null` removes the base member.
@@ -625,23 +631,26 @@ One kind of member works differently: an *identified list*, such as a Product's
 `variants`. An identified list is not replaced. Each supplemental element
 updates the base element with the same `id` using these rules; it cannot
 insert or delete an element. Unmentioned base elements stay unchanged, and
-unmatched supplemental elements are ignored. Because members are replaced
-whole, an incomplete member, such as a `price` without `currency`, produces a
-composed record that fails validation and is handled as [Malformed
+unmatched supplemental elements are ignored. Every other list is replaced
+whole, like any other member: a supplement that carries a Product's
+`categories` carries the complete list. Because members are replaced whole, an
+incomplete member, such as a `price` without `currency`, produces a composed
+record that fails validation and is handled as [Malformed
 Records](#malformed-records), rather than one that silently keeps the base
 currency.
 
 !!! note "Design note"
-    Supplemental feeds override as well as add because the product feeds
-    Platforms consume today work that way: a supplemental feed replaces
-    attributes of the record with the same identifier, and a regional feed
-    replaces price and availability per region. A supplement applies at the
-    record level rather than at a path within it, because a path that selects
-    the join level reaches one level per feed: a supplement that changes
-    variant prices could not also correct the Product's `price_range`. A list
-    keyed by identifier merges element by element rather than being replaced,
-    because a record-level replacement of `variants` could not change one
-    variant without restating them all.
+    Supplemental feeds override and add members on records the base feed
+    already carries. They never add records. The product feeds Platforms
+    consume today work that way: a supplemental feed replaces attributes of
+    the record with the same identifier, and a regional feed replaces price
+    and availability per region. A supplement applies at the record level
+    rather than at a path within it, because a path that selects the join
+    level reaches one level per feed: a supplement that changes variant prices
+    could not also correct the Product's `price_range`. A list keyed by
+    identifier merges element by element rather than being replaced, because a
+    record-level replacement of `variants` could not change one variant
+    without restating them all.
 
     Members replace whole rather than merging member by member so that the
     schema catches a partial member: a `price` without `currency` fails
@@ -659,42 +668,84 @@ currency.
     own on the base, such as a feed manager's, could be allowed to name it as
     the join key in a later version, as an optional member defaulting to `id`.
 
-An entry's `context` is the context of the feed a Platform obtains from it:
-for a standalone entry, its records; for a supplemental entry, the base feed
-with the supplement applied. A supplemental feed's `context` therefore need
-not equal its base's. The Business **MUST** make the composed result correct
-for that `context`: the supplement carries every member whose base value is
-not valid there, including any member whose value depends on members it
-changes.
+A standalone entry's `context` is the context of its records. A supplemental
+entry's `context` decides which feed its records go into, and the Business
+**MAY** leave it empty. Against each base feed it names:
 
-* When more than one supplemental feed extends the same base, a Platform
-  applies them in feed-list order; where two set the same member, the later
-  feed's value stands.
+* A `context` that is empty, or whose members all match the base's, changes
+  the base feed in place.
+* A `context` with a member that differs from the base's is a market override.
+  It yields a feed for another market, whose `context` is the base's with the
+  supplemental feed's members on top. The base feed stays available unchanged.
+  A feed that a market override yields is identified by its base feed and its
+  `context`.
+
+A Platform builds each feed from the base and every supplemental feed that
+names the base and fits. A supplemental feed fits a feed when each member its
+`context` carries has the same value in that feed's `context`. An empty
+`context` fits every feed. Supplemental feeds that go into the same feed apply
+in feed-list order; where two set the same member, the later feed's value
+stands.
+
+These rules define each resulting feed, not how a Platform stores it: a
+Platform can keep one copy of a base feed and group its supplemental feeds by
+the feed they go into, or materialize each feed separately. Either way, each
+feed reflects only the supplemental feeds that fit it.
+
+For example, three supplemental feeds extend a base feed whose `context` is
+`US`/`en-US`/`USD`:
+
+| Supplemental feed     | `context`          | Goes into             |
+| :-------------------- | :----------------- | :-------------------- |
+| Compliance attributes | empty              | US and Canadian feeds |
+| Hourly US prices      | `US`/`en-US`/`USD` | US feed               |
+| Canadian prices       | `CA`/`en-CA`/`CAD` | Canadian feed         |
+
+The US feed is the base with the compliance attributes and the hourly US
+prices. The Canadian feed, `CA`/`en-CA`/`CAD`, is the base with the compliance
+attributes and the Canadian prices.
+
+The Business **MUST** make each feed correct for its `context`. A supplemental
+feed carries only members that are valid in every feed it goes into. One that
+changes a member also carries every member whose value depends on it. A
+Platform **MUST NOT** treat records as resolved for a `context` other than the
+base's unless it has applied every market override that fits that `context`.
+
 * A base feed stands alone. The Business **MUST NOT** name as a base an entry
   that itself carries `extends`; a Platform **MUST NOT** consume a
-  supplemental feed whose `extends` names no entry in the feed list or names
-  one that itself carries `extends`.
+  supplemental feed if any name in its `extends` matches no entry in the feed
+  list or matches an entry that itself carries `extends`.
+* A supplemental feed that names several base feeds is evaluated against each
+  one separately. The Business **MUST** name only base feeds of the record
+  type the supplemental feed's manifest declares; a Platform **MUST NOT**
+  apply a supplemental feed to a base feed of another record type.
 * `extends` appears on the feed entry and on the manifest. The Business
-  **MUST** keep the two equal; a Platform that finds a mismatch **MUST NOT**
-  consume the snapshot.
+  **MUST** keep the two equal: they name the same set of base feeds. Order
+  carries no meaning, and a single name written as a string equals a
+  one-element array. A Platform that finds a mismatch **MUST NOT** consume the
+  snapshot.
 * The Business **MUST NOT** publish a supplemental record that matches no
-  record in the base feed; a Platform **MUST** ignore a supplemental record it
-  cannot match in its copy of the base.
+  record in any base feed the supplemental feed names. A Platform **MUST**
+  ignore a supplemental record it cannot match in its copy of a base feed.
 * Absence of a base record from a supplemental feed means the base record
   stands as it is; a supplemental feed never removes a base record. A
-  supplemental feed cannot withhold a base record from its `context`; a
+  supplemental feed cannot withhold a base record from a feed it goes into; a
   Business that offers a different set of records in a market publishes a
   standalone feed for it.
-* Base and supplemental feeds publish snapshots independently; no cross-feed
-  atomicity is defined.
-* A Business that wants the same supplement over two base feeds publishes two
-  supplemental entries, which **MAY** reference the same files.
+* Base and supplemental snapshots can be generated at different times, but
+  the feed list publishes them together. Each feed list response names one
+  snapshot of every feed. The Business **MUST** name only snapshots that
+  build correct feeds together, and a Platform **MUST** build a feed from
+  the snapshots named in one response.
+* A Business that wants the same supplement over several base feeds names
+  them all in `extends`.
 * A Platform validates the composed record, not the supplemental record on its
   own (see [Manifest](#manifest)).
 
 [Shopping Catalog Feed](../../shopping/catalog/feed.md#supplemental-feeds)
-shows two worked examples: per-market prices applied to the Variants inside a
-base feed's Products, and Platform-specific fields added to its Products.
+shows three worked examples: per-market prices applied to the Variants inside
+a base feed's Products, Platform-specific fields added to its Products, and
+one supplemental feed applied to several base feeds.
 
 ## Future Work
 

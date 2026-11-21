@@ -18,10 +18,10 @@
 
 * **Capability Name:** `dev.ucp.shopping.catalog.feed`
 
-A catalog feed is a materialized catalog: the same Product records a Platform
-would receive from [Catalog Search](search.md), published in bulk as files so
-the Platform can index, embed, and rank them offline, then call Catalog Search
-and [Catalog Lookup](lookup.md) at serving time for the authoritative price and
+A catalog feed is a materialized catalog: the Products a Platform would find
+through [Catalog Search](search.md), published in bulk as files so the Platform
+can index, embed, and rank them offline, then call Catalog Search and
+[Catalog Lookup](lookup.md) at serving time for the authoritative price and
 availability. The feed and the live catalog are complementary: the feed is
 point-in-time, the live operations are authoritative.
 
@@ -96,7 +96,9 @@ extension does not need to declare a record schema. Record enrichment
 preserves the shape and identity of Product and its nested Variants.
 Applicability to Catalog Feed does not automatically make added fields
 applicable to live Search or Lookup; those capabilities need explicit
-bindings. Extensions for non-Product record types extend Common directly.
+bindings. A feed record and a Search result for the same Product can therefore
+carry different extension fields. Extensions for non-Product record types
+extend Common directly.
 
 Catalog Feed defines two representation profiles:
 
@@ -137,12 +139,14 @@ purchase success.
 
 A catalog feed is resolved for one market. Its `context` **SHOULD** carry
 `address_country`, `language`, and `currency`; `CA`/`en-CA`/`CAD` and
-`CA`/`fr-CA`/`CAD` are two feeds. A Business that materializes sub-national
-markets **MAY** scope a feed further with `address_region` or `postal_code`. A
-catalog feed **SHOULD NOT** be scoped by members that describe a Buyer rather
-than a market (`location`, `eligibility`, `intent`, `payment`); a Platform
-obtains those Buyer-specific resolutions and the authoritative serving-time
-price and availability from Catalog Search or Catalog Lookup when advertised.
+`CA`/`fr-CA`/`CAD` are two feeds. A supplemental feed's `context` **SHOULD**
+be empty, or carry `address_country`, `language`, and `currency`. A Business
+that materializes sub-national markets **MAY** scope a feed further with
+`address_region` or `postal_code`. A catalog feed **SHOULD NOT** be scoped by
+members that describe a Buyer rather than a market (`location`,
+`eligibility`, `intent`, `payment`); a Platform obtains those Buyer-specific
+resolutions and the authoritative serving-time price and availability from
+Catalog Search or Catalog Lookup when advertised.
 
 ## Filters
 
@@ -150,8 +154,15 @@ This capability adds `filters` to the manifest: row-inclusion predicates the
 Business applied when generating the snapshot, using the same names and
 semantics as [Search Filters](search.md#search-filters). Absent means no filter
 was applied. A catalog snapshot is complete for its `context` and its
-`filters`: absence of a record from the latest complete snapshot means the
-record is not offered in this context or does not satisfy the feed's `filters`.
+`filters`: absence of a record from the snapshot means the record is not
+offered in this context or does not satisfy the feed's `filters`.
+
+`filters` says which records a snapshot carries. A supplemental feed never
+adds or removes records, so on a supplemental manifest `filters` only
+describes the records it covers. A feed built from a base feed and its
+supplemental feeds has the base feed's `filters`; a `price` filter there was
+applied in the base feed's currency.
+
 The manifest below materializes the Business's Canadian French catalog
 restricted to footwear. It declares both `dev.ucp.common.feed` and
 `dev.ucp.shopping.catalog.feed`, and the latter is what defines `filters`:
@@ -481,3 +492,67 @@ ignored; a base Product with no supplemental record carries no
 could have declared the extension on the base manifest and carried the fields
 inline; the supplemental form suits fields that are heavy, managed on a
 different cadence, or provisioned to a subset of callers.
+
+### Example: One Supplemental Feed over Several Base Feeds
+
+A Business sells in the United States and the United Kingdom from two
+standalone feeds. Titles, descriptions, and prices differ between the two
+markets; product media does not. Rather than repeat the media in both feeds,
+the Business publishes it once, as a supplemental feed that names both base
+feeds and carries an empty `context`:
+
+<!-- ucp:example schema=common/feed op=list def=feed_list -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "capabilities": {
+      "dev.ucp.common.feed": [
+        {"version": "{{ ucp_version }}"}
+      ]
+    }
+  },
+  "feeds": [
+    {
+      "id": "us-en-usd",
+      "context": {
+        "address_country": "US",
+        "language": "en-US",
+        "currency": "USD"
+      },
+      "format": "dev.ucp.shopping.catalog.parquet",
+      "interval": "P1D",
+      "generated_at": "2026-09-22T06:00:00Z",
+      "manifest": "https://merchant.example.com/feeds/us-en-usd/20260922T060000Z/manifest.json"
+    },
+    {
+      "id": "gb-en-gbp",
+      "context": {
+        "address_country": "GB",
+        "language": "en-GB",
+        "currency": "GBP"
+      },
+      "format": "dev.ucp.shopping.catalog.parquet",
+      "interval": "P1D",
+      "generated_at": "2026-09-22T06:05:00Z",
+      "manifest": "https://merchant.example.com/feeds/gb-en-gbp/20260922T060500Z/manifest.json"
+    },
+    {
+      "id": "shared-media",
+      "extends": ["us-en-usd", "gb-en-gbp"],
+      "context": {},
+      "format": "dev.ucp.shopping.catalog.jsonl",
+      "interval": "P7D",
+      "generated_at": "2026-09-21T02:00:00Z",
+      "manifest": "https://merchant.example.com/feeds/shared-media/20260921T020000Z/manifest.json"
+    }
+  ]
+}
+```
+
+Each supplemental record carries a Product's `id` and its `media`. The empty
+`context` fits both base feeds, so a Platform applies the records to each
+feed in place, and neither feed's market changes. `media` is not an
+identified list, so a record's `media` replaces the base Product's whole. A
+record for a Product that only one base feed carries is ignored for the
+other.
