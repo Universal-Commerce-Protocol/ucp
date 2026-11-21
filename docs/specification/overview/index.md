@@ -2270,6 +2270,82 @@ MCP servers:
 }
 ```
 
+#### Tool Annotations
+
+MCP lets a server describe each tool with `annotations` (`readOnlyHint`,
+`destructiveHint`, `idempotentHint`, `openWorldHint`). Hosts use them to decide
+which calls to confirm with the human. UCP defines the tools, so it defines
+their classification. The source of truth is the `x-ucp-mcp-annotations` member
+of each method in `source/services/*/mcp.openrpc.json`; the table below is
+checked against it by `scripts/test_openrpc_annotations.py`.
+
+Annotations are hints for confirmation UX. They are **not** a security control:
+
+- A Business **MUST** enforce authorization, signatures, idempotency and every
+    other rule server-side, whatever annotations it advertises or a client
+    assumes.
+- A Business **MUST NOT** use annotations as an authentication or
+    authorization input.
+- MCP requires clients to treat annotations as untrusted unless they come from
+    trusted servers. A Platform or host **MUST NOT** relax a confirmation,
+    authorization or mandate requirement because a Business advertised a less
+    restrictive annotation than this table.
+
+A Business that exposes a UCP-defined tool over MCP **SHOULD** advertise
+`annotations` on it whose values equal the table. A Business **MUST NOT**
+advertise `readOnlyHint: true` on a tool that creates, changes, completes or
+cancels state. For read-only tools `destructiveHint` and `idempotentHint` are
+omitted because MCP defines them only when `readOnlyHint` is `false`.
+
+| Tool | `readOnlyHint` | `destructiveHint` | `idempotentHint` | `openWorldHint` | Why |
+| :-- | :-: | :-: | :-: | :-: | :-- |
+| `search_catalog` | true | omitted | omitted | true | reads; results carry merchant-authored text |
+| `lookup_catalog` | true | omitted | omitted | true | reads; results carry merchant-authored text |
+| `get_product` | true | omitted | omitted | true | reads; results carry merchant-authored text |
+| `search_locations` | true | omitted | omitted | true | reads; results carry merchant-authored text |
+| `lookup_locations` | true | omitted | omitted | true | reads; results carry merchant-authored text |
+| `ask_business` | true | omitted | omitted | true | answers only, never acts (`ask` spec); free text from the Business |
+| `get_checkout` | true | omitted | omitted | false | reads the Business's own session state |
+| `get_cart` | true | omitted | omitted | false | reads the Business's own session state |
+| `get_order` | true | omitted | omitted | false | reads the Business's own order state |
+| `get_booking_session` | true | omitted | omitted | false | reads the Business's own session state |
+| `create_checkout` | false | false | false | false | adds a new session; repeating creates another |
+| `create_cart` | false | false | false | false | adds a new session; repeating creates another |
+| `create_booking_session` | false | false | false | false | adds a new session; repeating creates another |
+| `update_checkout` | false | false | true | false | full replacement of the Platform's own draft; same input, same state |
+| `update_cart` | false | false | true | false | full replacement of the Platform's own draft; same input, same state |
+| `update_booking_session` | false | false | true | false | full replacement of the Platform's own draft; same input, same state |
+| `cancel_checkout` | false | true | true | false | ends the session irreversibly; a repeat leaves the session canceled, so it has no additional effect (the error is a response, not a state change) |
+| `cancel_cart` | false | true | true | false | ends the session irreversibly; a repeat leaves the session canceled, so it has no additional effect (the error is a response, not a state change) |
+| `cancel_booking_session` | false | true | true | false | ends the session irreversibly; a repeat leaves the session canceled, so it has no additional effect (the error is a response, not a state change) |
+| `complete_checkout` | false | true | false | true | places the order and takes payment; irreversible; a new attempt needs a fresh idempotency key |
+| `complete_booking_session` | false | true | false | true | confirms the reservation and takes payment; irreversible; a new attempt needs a fresh idempotency key |
+
+<!-- ucp:example skip reason="MCP tools/list result, not a UCP schema" -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      {
+        "name": "get_checkout",
+        "annotations": {"readOnlyHint": true, "openWorldHint": false}
+      },
+      {
+        "name": "complete_checkout",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Agent-to-Agent Protocol (A2A)
 
 A business **MAY** expose an A2A agent that supports UCP as an A2A Extension,

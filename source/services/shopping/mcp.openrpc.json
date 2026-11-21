@@ -73,6 +73,7 @@
   "methods": [
     {
       "name": "create_checkout",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false},
       "summary": "Create a checkout",
       "description": "Create a new checkout session.",
       "params": [
@@ -94,6 +95,7 @@
     },
     {
       "name": "get_checkout",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": false},
       "summary": "Get checkout",
       "params": [
         {
@@ -114,6 +116,7 @@
     },
     {
       "name": "update_checkout",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false},
       "summary": "Update checkout",
       "description": "Update Checkout is a full replacement operation. A new Update Checkout operation is not permitted while Checkout status is `complete_in_progress`. Duplicate requests remain subject to Replay Protection. If the Business receives a new Update Checkout request in that state, it leaves the Checkout unchanged and returns the current Checkout with a recoverable error Message.",
       "params": [
@@ -140,6 +143,7 @@
     },
     {
       "name": "complete_checkout",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": true, "idempotentHint": false, "openWorldHint": true},
       "summary": "Complete checkout and place order",
       "params": [
         {
@@ -170,6 +174,7 @@
     },
     {
       "name": "cancel_checkout",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": true, "idempotentHint": true, "openWorldHint": false},
       "summary": "Cancel checkout",
       "params": [
         {
@@ -195,6 +200,7 @@
     },
     {
       "name": "create_cart",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false},
       "summary": "Create a cart",
       "description": "Create a new cart session.",
       "params": [
@@ -216,6 +222,7 @@
     },
     {
       "name": "get_cart",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": false},
       "summary": "Get cart",
       "params": [
         {
@@ -236,6 +243,7 @@
     },
     {
       "name": "update_cart",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false},
       "summary": "Update cart",
       "params": [
         {
@@ -261,6 +269,7 @@
     },
     {
       "name": "cancel_cart",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": true, "idempotentHint": true, "openWorldHint": false},
       "summary": "Cancel cart",
       "params": [
         {
@@ -286,6 +295,7 @@
     },
     {
       "name": "search_catalog",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": true},
       "summary": "Search for products in the catalog",
       "description": "Search for products using query text, filters, and pagination.",
       "params": [
@@ -307,6 +317,7 @@
     },
     {
       "name": "lookup_catalog",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": true},
       "summary": "Batch lookup products or variants by identifier",
       "description": "Batch lookup of products or variants by identifier. See Catalog Lookup capability for supported identifier types and resolution behavior.",
       "params": [
@@ -328,6 +339,7 @@
     },
     {
       "name": "get_order",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": false},
       "summary": "Get order",
       "description": "Get the current state of an order. Returns the full order entity as a current-state snapshot.",
       "params": [
@@ -349,6 +361,7 @@
     },
     {
       "name": "get_product",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": true},
       "summary": "Get product details",
       "description": "Retrieve complete product detail by identifier with optional interactive option selection.",
       "params": [
