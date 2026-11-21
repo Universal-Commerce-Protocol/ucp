@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/account_status.json",
+  "name": "dev.ucp.shopping.account_status",
+  "title": "Account Status Extension",
+  "description": "Extends Catalog Search and Catalog Lookup so a Business can say why a buyer with a valid user identity token does not see that account's terms yet. It defines the `account_pending` and `account_ineligible` info codes and declares the `dev.ucp.shopping.account_status.step` Action type for a hosted step the buyer still has to finish.",
+  "$defs": {
+    "step_config": {
+      "type": "object",
+      "description": "Configuration for one outstanding account step.",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[^/?#\\s@\\\\:][^/?#\\s@\\\\]*([/?#][^\\s]*)?$",
+          "description": "Absolute HTTPS URL of the hosted step, such as accepting an agreement, with no userinfo. The Platform hands this URL to the buyer. It MUST NOT differ by product and MUST NOT carry an OAuth authorization request."
+        }
+      }
+    },
+    "step_action": {
+      "type": "object",
+      "description": "One outstanding hosted step the buyer must finish before the Business applies the account's terms.",
+      "required": [
+        "config"
+      ],
+      "properties": {
+        "config": {
+          "$ref": "#/$defs/step_config"
+        }
+      }
+    },
+    "account_status_actions": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "object",
+          "ucp_request": "omit",
+          "properties": {
+            "dev.ucp.shopping.account_status.step": {
+              "type": "array",
+              "description": "Outstanding account steps, in the order the buyer should finish them.",
+              "items": {
+                "$ref": "#/$defs/step_action"
+              }
+            }
+          }
+        }
+      }
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "$ref": "#/$defs/account_status_actions"
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "$ref": "#/$defs/account_status_actions"
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "$ref": "#/$defs/account_status_actions"
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with account status (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with account status (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    }
+  }
+}
