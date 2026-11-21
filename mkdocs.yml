@@ -44,6 +44,7 @@ nav:
   - Specification:
       - Overview: specification/overview/index.md
       - Getting Started: specification/getting-started.md
+      - Extension Authoring: specification/extension-authoring.md
       - Glossary: specification/glossary.md
       - Common:
           - Feed Capability: specification/common/feed/index.md
@@ -430,6 +431,11 @@ plugins:
           - specification/getting-started.md: >-
               Step-by-step developer guide for building a UCP checkout server
               in Python (FastAPI) or Node.js (Express).
+          - specification/extension-authoring.md: >-
+              End-to-end guide for businesses and platforms publishing UCP
+              extensions under their own namespace: naming and authority
+              binding, schema composition, versioning, hosting, negotiation,
+              and local testing.
           - specification/glossary.md: >-
               Definitions of the protocol, commerce, payment, regulatory, and
               standards terms and acronyms used throughout the specification,
