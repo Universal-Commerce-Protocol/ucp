@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/incentives.json",
+  "name": "dev.ucp.common.incentives",
+  "title": "Incentives Extension",
+  "description": "Defines the shared incentive model, and extends Cart and Checkout with the offers a Business is running on the session: conditional, gated, code-based, or time-boxed promotions that are not yet applied, and the ones the session is close to qualifying for. Response-only. Nothing here applies an offer; application stays with the Discount extension and the Business remains authoritative on every amount.",
+  "$defs": {
+    "period": {
+      "title": "Incentive Period",
+      "description": "When an incentive is offered. Either bound may be omitted. Outside the period the incentive is not offered.",
+      "type": "object",
+      "properties": {
+        "start_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "First instant the incentive is offered (RFC 3339). Omitted means already in effect."
+        },
+        "end_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last instant the incentive is offered (RFC 3339). Omitted means no stated end."
+        }
+      }
+    },
+    "conditions": {
+      "title": "Incentive Conditions",
+      "description": "What must hold for the incentive to apply. Every stated condition must hold. The Business evaluates conditions at application and is authoritative on whether they are met. The set is open: extensions and Businesses MAY add condition keys (e.g., a pickup or payment-tender qualifier). Any key a Platform does not recognize, other than `ucp`, makes qualification non-evaluable for that Platform; it MUST NOT present such an incentive as met.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "minimum_order_amount": {
+          "allOf": [
+            {
+              "$ref": "types/price.json"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "minimum": 1
+                }
+              }
+            }
+          ],
+          "description": "Order value the session must reach, greater than zero, stated for presentation. Which lines and adjustments count toward it is the Business's rule (the UCP `subtotal` total is pre-discount, and Businesses differ on whether discounted value counts); a Platform MUST NOT compute qualification or the remaining gap from it, and reads the gap from `approaching`."
+        },
+        "minimum_quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Units the buyer must purchase, summed across the line items the incentive applies to. A line item nested under another (one carrying `parent_id`, such as a bundle component) is not counted; its parent is."
+        },
+        "eligibility": {
+          "$ref": "types/reverse_domain_name.json",
+          "description": "An eligibility claim the buyer must hold and the Business must accept, as in `context.eligibility` and `discounts.applied[].eligibility`. Gates the incentive on membership or a similar status."
+        }
+      }
+    },
+    "incentive": {
+      "title": "Incentive",
+      "description": "One offer a Business is running. Advisory until the Business applies it; `discounts.applied` is the record of what took effect.",
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "benefit",
+        "application"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier, stable for this Business. `approaching[].incentive_id` and `discounts.applied[].incentive_id` refer to it."
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable name that states the offer and its condition, e.g. 'Free standard shipping over $50'. This is what a Platform quotes, and all it needs when it does not recognize the benefit type or a condition."
+        },
+        "description": {
+          "$ref": "types/description.json",
+          "description": "Terms in plain, HTML, or Markdown form."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Terms page."
+        },
+        "active_period": {
+          "$ref": "#/$defs/period",
+          "description": "When the incentive is offered. Omitted means always on."
+        },
+        "benefit": {
+          "$ref": "types/discount_benefit.json",
+          "description": "What the incentive gives. Any `Price` it carries on a cart or checkout is in the session currency."
+        },
+        "conditions": {
+          "$ref": "#/$defs/conditions",
+          "description": "What must hold for it to apply. Omitted means unconditional."
+        },
+        "applies_to": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "RFC 9535 JSONPath expressions identifying the nodes this incentive applies to, relative to the embedding response root (e.g., `$.line_items[0]`, `$.line_items[?@.item.id != 'gift_card']`, or a fulfillment option for `free_shipping`). Each target covers the node it names and everything nested under it. When omitted, the incentive is not narrowed to particular nodes of the response."
+        },
+        "application": {
+          "type": "string",
+          "description": "How the incentive is applied. Well-known values: `automatic` (the Business applies it when the conditions hold) and `code` (the buyer submits a code through `discounts.codes`). Unknown values MUST be tolerated.",
+          "examples": [
+            "automatic",
+            "code"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "description": "The code to submit, when `application` is `code` and the Business chooses to disclose it. Absent with `application: code` means the buyer must already hold one."
+        },
+        "combinable": {
+          "type": "boolean",
+          "description": "False means the incentive does not stack with any other incentive. Omitted means it may. Advisory; the Business decides stacking at application."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "application": {
+                "const": "code"
+              }
+            },
+            "required": [
+              "application"
+            ]
+          },
+          "else": {
+            "properties": {
+              "code": false
+            }
+          }
+        }
+      ]
+    },
+    "approaching": {
+      "title": "Approaching Incentive",
+      "description": "An incentive the current session does not yet qualify for, with how far it is from qualifying. The Business computes the gap under its own threshold rules; it is authoritative and at least one gap is always stated.",
+      "type": "object",
+      "required": [
+        "incentive_id"
+      ],
+      "properties": {
+        "incentive_id": {
+          "type": "string",
+          "description": "The `id` of an entry in `available`. Not schema-validated."
+        },
+        "remaining_amount": {
+          "$ref": "types/amount.json",
+          "minimum": 1,
+          "description": "Order value still needed to qualify, in ISO 4217 minor units of the session currency."
+        },
+        "remaining_quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Units still needed to qualify."
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "remaining_amount"
+          ]
+        },
+        {
+          "required": [
+            "remaining_quantity"
+          ]
+        }
+      ]
+    },
+    "incentives": {
+      "title": "Incentives",
+      "description": "The incentives on offer for this session.",
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/incentive"
+          },
+          "description": "Incentives the Business is offering on this session that are not yet applied, whether or not the session qualifies yet."
+        },
+        "approaching": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/approaching"
+          },
+          "description": "Entries of `available` the session does not yet qualify for, with the remaining gap."
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Incentives",
+      "description": "Cart extended with the incentives on offer for it.",
+      "allOf": [
+        {
+          "$ref": "../shopping/cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": {
+              "$ref": "#/$defs/incentives",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Incentives",
+      "description": "Checkout extended with the incentives on offer for it.",
+      "allOf": [
+        {
+          "$ref": "../shopping/checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "incentives": {
+              "$ref": "#/$defs/incentives",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

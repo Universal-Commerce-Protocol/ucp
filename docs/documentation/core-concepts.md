@@ -158,6 +158,7 @@ up-to-date list.
 | `dev.ucp.common.location.search` | Search for physical stores and pickup locations |
 | `dev.ucp.common.location.lookup` | Retrieve location details, operating hours, and amenities |
 | `dev.ucp.common.ask` | Natural-language questions about a business's resources, policies, and services |
+| `dev.ucp.common.incentives.list` | List the offers a business is currently running |
 | `dev.ucp.lodging.booking` | Initiates and completes booking session for hotels |
 | `dev.ucp.food.checkout` | Initiates and completes checkout session for food ordering |
 
@@ -200,6 +201,7 @@ up-to-date list.
 | `dev.ucp.shopping.fulfillment` | checkout | Shipping and delivery options |
 | `dev.ucp.shopping.buyer_consent` | checkout, cart | Explicit consent capture |
 | `dev.ucp.common.loyalty` | checkout, cart, catalog | Member benefits, rewards, and points earning |
+| `dev.ucp.common.incentives` | checkout, cart | Offers not yet applied, and the ones a session is close to qualifying for |
 | `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
 | `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.common.payment.split_payments` | checkout | Multi-instrument allocation and split settlements |

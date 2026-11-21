@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/incentives_list.json",
+  "name": "dev.ucp.common.incentives.list",
+  "title": "Incentives List",
+  "description": "Lists the incentives a Business is currently offering in the request's context, without a product search or a session. Read-only: nothing is applied, and the Business remains authoritative on what applies to any cart or checkout.",
+  "type": "object",
+  "$defs": {
+    "list_request": {
+      "type": "object",
+      "description": "Request body for listing incentives.",
+      "properties": {
+        "context": {
+          "$ref": "types/context.json"
+        },
+        "signals": {
+          "$ref": "types/signals.json"
+        },
+        "pagination": {
+          "$ref": "types/pagination.json#/$defs/request"
+        }
+      }
+    },
+    "list_response": {
+      "type": "object",
+      "required": [
+        "ucp",
+        "incentives"
+      ],
+      "properties": {
+        "ucp": {
+          "$ref": "../ucp.json#/$defs/response_incentives_schema"
+        },
+        "incentives": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "incentives.json#/$defs/incentive"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "applies_to": false
+                }
+              }
+            ]
+          },
+          "description": "Incentives the Business is offering in the resolved context. The response carries no nodes to target, so entries MUST NOT carry `applies_to`; an incentive limited to part of the assortment states that in `title` and `description`."
+        },
+        "pagination": {
+          "$ref": "types/pagination.json#/$defs/response"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "types/message.json"
+          },
+          "description": "Errors, warnings, or informational messages about the listed incentives."
+        }
+      }
+    }
+  }
+}

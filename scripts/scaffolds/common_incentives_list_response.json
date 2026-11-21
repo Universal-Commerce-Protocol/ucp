@@ -1,0 +1,13 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "capabilities": {
+      "dev.ucp.common.incentives.list": [
+        {
+          "version": "2026-01-01"
+        }
+      ]
+    }
+  },
+  "incentives": []
+}
