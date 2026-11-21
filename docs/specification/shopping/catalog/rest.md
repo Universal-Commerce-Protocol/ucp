@@ -71,7 +71,14 @@ Businesses advertise REST transport availability through their UCP profile at
 
 Maps to the [Catalog Search](search.md) capability.
 
-{{ method_fields('search_catalog', 'shopping/rest.openapi.json', 'shopping/catalog/rest') }}
+{{ method_fields('search_catalog', 'shopping/rest.openapi.json', 'shopping/catalog/rest', 'request') }}
+
+**Output**
+
+{{ extension_schema_fields('catalog_search.json#/$defs/search_response', 'shopping/catalog/rest') }}
+
+When capability negotiation fails, the response is an
+[Error Response](#error-response) instead.
 
 #### Example
 
@@ -201,7 +208,14 @@ for supported identifiers, resolution behavior, and client correlation requireme
 The request body contains an array of identifiers and optional context that
 applies to all lookups in the batch.
 
-{{ method_fields('lookup_catalog', 'shopping/rest.openapi.json', 'shopping/catalog/rest') }}
+{{ method_fields('lookup_catalog', 'shopping/rest.openapi.json', 'shopping/catalog/rest', 'request') }}
+
+**Output**
+
+{{ extension_schema_fields('catalog_lookup.json#/$defs/lookup_response', 'shopping/catalog/rest') }}
+
+When capability negotiation fails, the response is an
+[Error Response](#error-response) instead.
 
 #### Example: Batch Lookup with Context
 
