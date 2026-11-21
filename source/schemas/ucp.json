@@ -102,6 +102,87 @@
       }
     },
 
+    "delegate_scope": {
+      "title": "Business Profile Delegate Scope",
+      "description": "Grants a delegate authority over one registry. v1 scope is registry-level only: it names a registry, not individual entries within it. A scoped delegate may contribute any number of entries to the granted registry.",
+      "type": "object",
+      "required": ["registry"],
+      "properties": {
+        "registry": {
+          "type": "string",
+          "description": "Registry the delegate may manage. Well-known values: `services`, `capabilities`, `payment_handlers` (the registries defined in `#/$defs/base`). UCP core does not currently define other delegable registries.",
+          "examples": ["services", "capabilities", "payment_handlers"]
+        }
+      }
+    },
+
+    "delegate": {
+      "title": "Business Profile Delegate",
+      "description": "A resource the Business authorizes to manage part or all of its profile configuration. Delegation grants authority over profile configuration only; it does not delegate Business identity, protocol-version authority, cryptographic trust, or runtime execution.",
+      "type": "object",
+      "required": ["profile"],
+      "properties": {
+        "profile": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "HTTPS URI of the delegated resource. Fetched and parsed the same way as a `supported_versions` profile URI, but the retrieved document is validated as `profile.json#/$defs/delegate_contribution_schema`, not as a full Business or Platform profile."
+        },
+        "scope": {
+          "type": "array",
+          "description": "Registries this delegate may manage. Omitted: complete-profile delegation. Complete-profile delegation is exclusive in v1 — it MUST NOT coexist with local `services`, `capabilities`, or `payment_handlers` entries, with another delegate (scoped or complete), or appear more than once.",
+          "items": { "$ref": "#/$defs/delegate_scope" },
+          "minItems": 1
+        }
+      }
+    },
+
+    "delegate_contribution": {
+      "title": "Business Profile Delegate Contribution",
+      "description": "Profile configuration contributed by a delegated resource, scoped per the Business's `delegates` declaration. Reuses the canonical `services`, `capabilities`, and `payment_handlers` registries and `map_order` so delegated and Business-owned configuration compose under identical registry semantics. A contribution MUST NOT carry `version`, `supported_versions`, or `delegates`: protocol-version authority and delegation authority remain exclusively with the Business root and cannot be replaced, extended, or delegated onward by a delegate.",
+      "type": "object",
+      "properties": {
+        "map_order": {
+          "$ref": "#/$defs/map_order",
+          "description": "Preferred key-traversal order for registry entries this delegate itself contributes. MUST NOT order or suppress Business-owned entries or another delegate's entries."
+        },
+        "services": {
+          "type": "object",
+          "description": "Service registry entries contributed by this delegate, keyed by reverse-domain name.",
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "service.json#/$defs/business_schema" }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Capability registry entries contributed by this delegate, keyed by reverse-domain name.",
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "capability.json#/$defs/business_schema" }
+          }
+        },
+        "payment_handlers": {
+          "type": "object",
+          "description": "Payment handler registry entries contributed by this delegate, keyed by reverse-domain name.",
+          "propertyNames": { "$ref": "common/types/reverse_domain_name.json" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "payment_handler.json#/$defs/business_schema" }
+          }
+        }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["version"] },
+          { "required": ["supported_versions"] },
+          { "required": ["delegates"] }
+        ]
+      }
+    },
+
     "base": {
       "description": "Base UCP metadata with shared properties for all schema types.",
       "type": "object",
@@ -218,6 +299,11 @@
                 "format": "uri"
               }
             },
+            "delegates": {
+              "type": "array",
+              "description": "Resources the Business authorizes to manage profile configuration. Resolved only for the selected `ucp.version`'s profile, after protocol-version selection; delegation relationships are not inherited or composed across different protocol-version profiles. See `#/$defs/delegate` and `#/$defs/delegate_contribution`.",
+              "items": { "$ref": "#/$defs/delegate" }
+            },
             "services": {
               "additionalProperties": {
                 "items": { "$ref": "service.json#/$defs/business_schema" }
@@ -234,6 +320,26 @@
                   "$ref": "payment_handler.json#/$defs/business_schema"
                 }
               }
+            }
+          }
+        },
+        {
+          "title": "Complete-profile delegation is exclusive",
+          "description": "If any declared delegate omits `scope` (complete-profile delegation), it MUST be the Business's only delegate, and the Business's own `services`, `capabilities`, and `payment_handlers` registries MUST be empty: complete-profile delegation cannot coexist with local registry entries, another complete delegate, or a scoped delegate.",
+          "if": {
+            "properties": {
+              "delegates": {
+                "contains": { "not": { "required": ["scope"] } }
+              }
+            },
+            "required": ["delegates"]
+          },
+          "then": {
+            "properties": {
+              "delegates": { "maxItems": 1 },
+              "services": { "maxProperties": 0 },
+              "capabilities": { "maxProperties": 0 },
+              "payment_handlers": { "maxProperties": 0 }
             }
           }
         }
