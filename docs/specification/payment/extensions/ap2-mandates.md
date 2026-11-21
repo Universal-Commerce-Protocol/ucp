@@ -594,14 +594,15 @@ to compute `prev`.
 `mandate_ref` covers. The other totals start at 0 and change only on
 `succeeded` events, as follows:
 
-| Event `type`               | Effect on totals         | Used for                                                        |
-| :------------------------- | :----------------------- | :-------------------------------------------------------------- |
-| `authorization`            | `authorized` += `amount` | An initial authorization or a re-authorization.                 |
-| `authorization_adjustment` | `authorized` += `amount` | An incremental increase to an existing authorization.           |
-| `release`                  | `authorized` -= `amount` | Releasing, voiding or expiring an uncaptured authorized amount. |
-| `capture`                  | `captured` += `amount`   | A capture, including each capture of a split shipment.          |
-| `capture_reversal`         | `captured` -= `amount`   | Voiding a capture before it settles.                            |
-| `refund`                   | `refunded` += `amount`   | Returning settled funds, whether as a refund or a reversal.     |
+| Event `type`               | Effect on totals         | Used for                                                            |
+| :------------------------- | :----------------------- | :------------------------------------------------------------------ |
+| `authorization`            | `authorized` += `amount` | An initial authorization or a re-authorization.                     |
+| `authorization_adjustment` | `authorized` += `amount` | An incremental increase to an existing authorization.               |
+| `release`                  | `authorized` -= `amount` | Releasing, voiding or expiring an uncaptured authorized amount.     |
+| `capture`                  | `captured` += `amount`   | A capture, including each capture of a split shipment.              |
+| `capture_reversal`         | `captured` -= `amount`   | Voiding a capture before it settles.                                |
+| `refund`                   | `refunded` += `amount`   | Returning settled funds, whether as a refund or a reversal.         |
+| `refund_reversal`          | `refunded` -= `amount`   | A `succeeded` refund that later fails or is returned by the issuer. |
 
 A capture does not reduce `authorized`. Within a chain, `captured` ≤
 `authorized` ≤ `mandated` and `refunded` ≤ `captured` always hold for a
@@ -610,7 +611,8 @@ compliant business.
 Each movement counts once. A later `succeeded` receipt with the same `type`
 and `event.ref.processing_entry_id` as an earlier `succeeded` receipt in the
 chain is a follow-up (for example, one that only adds `network_ref`) and does
-not change the totals again.
+not change the totals again. A second, different receipt for a `seq` already
+held (see Platform Verification rule 4) is never counted.
 
 ### Placement and Delivery
 
@@ -812,10 +814,13 @@ When order receipts are negotiated, the platform:
 4. **MUST** evaluate `seq` and `prev` continuity per `(iss, mandate_ref)`
     chain. A byte-identical redelivery of a receipt the platform already holds
     is ignored. A second, different receipt for a `seq` the platform already
-    holds is `receipt_sequence_gap`; the platform keeps both.
+    holds is `receipt_sequence_gap`; the platform keeps both. A receipt whose
+    `prev` is the hash of a receipt reported as `receipt_sequence_gap`
+    continues the chain from that receipt and is not itself a gap.
 5. **MUST** recompute `authorized`, `captured` and `refunded` for each chain
     from the `succeeded` events it holds, per
-    [Running Totals](#running-totals), and **MUST** check that
+    [Running Totals](#running-totals), counting each movement once and never
+    counting a second receipt kept under rule 4, and **MUST** check that
     `totals.mandated` equals the `payment_amount` of the Payment Mandate that
     `mandate_ref` covers. A receipt whose stated `totals` differ from these
     values is `receipt_totals_mismatch`. Recomputation stops at the first
@@ -825,21 +830,26 @@ When order receipts are negotiated, the platform:
 6. **MUST** check that `authorized` and `captured` do not exceed `mandated`
     (`receipt_exceeds_mandate`) and that `refunded` does not exceed `captured`
     (`receipt_refund_exceeds_capture`). The check uses the recomputed totals,
-    or the stated totals for receipts after the point where recomputation
-    stopped. These outcomes are independent of `receipt_totals_mismatch`: a
-    receipt can report both.
+    or the stated totals for the receipt at which recomputation stopped and
+    every receipt after it. An outcome is reported on every receipt for which
+    the totals are over, not only the first. These outcomes are independent of
+    `receipt_totals_mismatch`: a receipt can report both.
 7. **SHOULD**, when `event.seller_id` is present, also check per seller that
     succeeded captures do not exceed that seller's attributed total and that
     refunds do not exceed that seller's captures. This is a **SHOULD** because
     a seller's chargeable amount can include Order-level shipping, tax or
     discounts that are not attributed to its line items.
-8. **SHOULD** reconcile refunds against Order adjustments. The platform
-    compares the sum of `event.amount` over the `succeeded` refund receipts
-    that cite an `event.ref.adjustment_id` with the magnitude of that
-    adjustment's `total` entry. `pending` and `failed` receipts are not
-    counted. A cited `adjustment_id` that matches no adjustment on the Order
-    is also `reconciliation_adjustment_mismatch`. A mismatch is a commercial
-    problem, not a cryptographic one: the receipts remain valid.
+8. **SHOULD** reconcile refunds against Order adjustments. For each
+    `event.ref.adjustment_id` cited, the platform sums `event.amount` over the
+    `succeeded` `refund` receipts that cite it, minus `succeeded`
+    `refund_reversal` receipts that cite it, counting each movement once per
+    [Running Totals](#running-totals), and compares the result with the
+    magnitude of that adjustment's `total` entry. `pending` and `failed`
+    receipts are not counted. A cited `adjustment_id` that matches no
+    adjustment on the Order is also `reconciliation_adjustment_mismatch`. The
+    outcome is reported on the last `succeeded` receipt that cites the
+    adjustment. A mismatch is a commercial problem, not a cryptographic one:
+    the receipts remain valid.
 9. **SHOULD**, on any failed check, alert the user or the agent's policy
     engine, and **MUST** retain every receipt it received as dispute evidence.
     See [Limits](#limits).
@@ -876,6 +886,14 @@ the money has already moved:
 
 * **Split shipments:** multiple `capture` receipts against the same
     `mandate_ref`, with `captured` accumulating.
+* **Overcapture:** when the processor allows capturing more than was
+    authorized, the business first issues an `authorization_adjustment`
+    receipt for the difference, so `captured` never exceeds `authorized`. An
+    overcapture above `mandated` needs a new mandate, as for any increase.
+* **Refund returned after success:** a refund that was receipted as
+    `succeeded` and later fails or is returned by the issuer gets a
+    `refund_reversal` receipt with the same `event.ref`, which lowers
+    `refunded`.
 * **Authorization expiry:** a `release` receipt for the expired, uncaptured
     amount, then a new `authorization` receipt with the same `mandate_ref`.
     Without a new mandate, the new authorization is limited to `mandated`
