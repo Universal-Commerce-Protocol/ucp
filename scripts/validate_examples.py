@@ -77,9 +77,9 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
     the parsed displayed example before semantic validation.
   - Ellipsis sentinels are recorded as elided JSON Pointer paths,
     then removed from the tree.
-  - The example is deep-merged into a scaffold (a known-valid
-    fixture per schema/op/direction). Example fields win; scaffold
-    fills required gaps.
+  - Complete examples are deep-merged with scaffold values only for
+    authored top-level fields. With target=, the example replaces a
+    subtree in the full scaffold (a fixture per schema/op/direction).
   - Coverage walk: for each object in the example, verify every
     schema-required field is either present or elision-acknowledged;
     required-key anyOf alternatives must have at least one branch
@@ -1225,6 +1225,13 @@ def process_block(
         annotation,
       )
   else:
+    # A complete example chooses its own top-level fields; the scaffold only
+    # fills values for fields the example actually includes or elides.
+    if isinstance(example, dict) and isinstance(scaffold, dict):
+      scaffold = {k: v for k, v in scaffold.items() if k in example}
+      for key, value in example.items():
+        if key != "..." and value == "..." and key not in scaffold:
+          stripped[key] = None
     merged = deep_merge(scaffold, stripped)
 
   # 9. Validate — use extracted $def schema if specified
