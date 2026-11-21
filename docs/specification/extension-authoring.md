@@ -302,10 +302,14 @@ ucp-schema resolve checkout-response.json --request --op create --pretty
 ```
 
 The resolved create-request schema should not define the Business-computed
-`acme_carbon_estimate` field. The annotations describe which fields belong in a
-message; open-object validation can still permit unknown fields, so do not
-mistake annotation resolution for a rule that automatically rejects every
-extra input.
+`acme_carbon_estimate` field. For operation-scoped fields, repeat `resolve` for
+every parent operation in both directions. Check the message's properties;
+an unused `$defs` type may remain even when its field is omitted.
+
+Visibility and payload validity are different checks: open objects can accept
+an out-of-scope field as an unknown property in requests **or responses**.
+Test that your implementation emits fields only where intended; passing
+payload validation alone does not prove their absence.
 
 ### 5. Publish the Files and Explain the Behavior
 
@@ -401,7 +405,8 @@ reused across parents.
 A capability usually uses one object for both requests and responses. Fields
 that only one side sends carry visibility annotations: `ucp_request` and
 `ucp_response`, with the values `omit`, `optional`, or `required`, either for
-every operation or per operation (`create`, `read`, `update`, `complete`).
+every operation or per operation. Use the parent capability's operation names,
+not transport method names: Checkout's `get_checkout`, for example, uses `read`.
 
 The walkthrough uses `ucp_request: "omit"` for a Business-computed field. A
 Platform-supplied reference that is optional on create and update, but omitted
@@ -414,6 +419,33 @@ on complete, could instead use:
   "ucp_request": { "create": "optional", "update": "optional", "complete": "omit" }
 }
 ```
+
+The walkthrough's estimate is available in every response. To offer it only
+on completion instead, also set response visibility:
+
+<!-- extension-authoring-example: completion-visibility -->
+<!-- ucp:example skip reason="operation-scoped extension schema fragment; checked by test_extension_authoring_examples.py" -->
+```json
+{
+  "acme_carbon_estimate": {
+    "$ref": "#/$defs/acme_carbon_estimate",
+    "ucp_request": "omit",
+    "ucp_response": {
+      "create": "omit", "read": "omit", "update": "omit",
+      "complete": "optional", "cancel": "omit"
+    }
+  }
+}
+```
+
+A partial map is not an allow-list: leaving an operation out does not mean
+`omit`. Cover every operation supported by your parent version, including
+Checkout's [cancel](shopping/checkout/index.md#cancel-checkout), and recheck
+when supporting a new parent version.
+
+`ucp-schema` 2.0.0 resolves `cancel` but lint warns W003 (and strict lint fails).
+That tool mismatch is not a reason to remove the entry or disable a required
+check.
 
 See [Visibility Rules](https://github.com/Universal-Commerce-Protocol/ucp-schema#visibility-rules)
 in the `ucp-schema` documentation for the full resolution rules.
@@ -922,4 +954,4 @@ Third-party extensions version independently of UCP (see
 - [ ] Hosted schema validated after replacing local paths with its URL
 - [ ] A `spec` page describing behavior and fallbacks
 - [ ] Listed in Business and Platform profiles, with both profiles validated
-- [ ] Linted and validated with `ucp-schema`, including a failing case
+- [ ] Linted and validated with `ucp-schema`, including a failing case and visibility checks

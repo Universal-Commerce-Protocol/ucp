@@ -271,6 +271,82 @@ class CarbonExamples(_Examples):
     self._validate(response)
 
 
+class OperationVisibilityExamples(_Examples):
+  """Check the displayed completion-only alternative."""
+
+  def setUp(self):
+    """Apply the displayed property map to a temporary checkout extension."""
+    super().setUp()
+    self.field = "acme_carbon_estimate"
+    self.schema = _example("carbon-schema")
+    self.schema["$defs"]["dev.ucp.shopping.checkout"]["allOf"][1][
+      "properties"
+    ] = _example("completion-visibility")
+    self.response = _example("carbon-response")
+    self.version = self.response["ucp"]["version"]
+    self.response["status"] = "completed"
+    self.response["order"] = {
+      "id": "order_123",
+      "permalink_url": "https://acme.com/orders/order_123",
+    }
+    path = self._write("schemas/completion-carbon.json", self.schema)
+    self.response["ucp"]["capabilities"][self.schema["name"]][0]["schema"] = (
+      self._reference(path)
+    )
+
+  def _validate(self, data, op="complete", expected=0):
+    result = self._cli(
+      [
+        "validate",
+        self._write("response.json", data),
+        "--op",
+        op,
+        "--response",
+        "--json",
+      ],
+      self.version,
+      expected,
+    )
+    self.assertEqual(json.loads(result.stdout)["valid"], expected == 0)
+    return result
+
+  def test_all_checkout_views(self):
+    """Only the completion response includes the field in its schema."""
+    path = self._write("response.json", self.response)
+    for op in ("create", "read", "update", "complete", "cancel"):
+      for direction in ("request", "response"):
+        with self.subTest(op=op, direction=direction):
+          result = self._cli(
+            ["resolve", path, "--op", op, "--" + direction], self.version
+          )
+          self.assertEqual(
+            _property_defined(json.loads(result.stdout), self.field),
+            op == "complete" and direction == "response",
+          )
+
+  def test_completion_optional_and_constrained(self):
+    """Completion accepts absence but applies the constraint when present."""
+    self._validate(self.response)
+    absent = copy.deepcopy(self.response)
+    del absent[self.field]
+    self._validate(absent)
+    bad = copy.deepcopy(self.response)
+    bad[self.field]["grams_co2e"] = -1
+    result = self._validate(bad, expected=1)
+    self.assertIn("/acme_carbon_estimate/grams_co2e", result.stdout)
+
+  def test_omission_does_not_reject_unknown_response_fields(self):
+    """Read/cancel views omit the field without closing the base object."""
+    for op in ("read", "cancel"):
+      with self.subTest(op=op):
+        data = copy.deepcopy(self.response)
+        if op == "cancel":
+          data["status"] = "canceled"
+          del data["order"]
+        data[self.field]["grams_co2e"] = -1
+        self._validate(data, op=op)
+
+
 class ContainerExamples(_Examples):
   """Exercise the displayed nested container pattern with failing payloads."""
 
