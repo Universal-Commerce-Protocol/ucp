@@ -810,17 +810,24 @@ When order receipts are negotiated, the platform:
 3. **MUST** exclude a receipt that fails rule 1 or 2 from its chain, so the
     next receipt in that chain is reported as `receipt_sequence_gap`.
 4. **MUST** evaluate `seq` and `prev` continuity per `(iss, mandate_ref)`
-    chain. A second, different receipt for a `seq` the platform already holds
-    is `receipt_sequence_gap`; the platform keeps both.
+    chain. A byte-identical redelivery of a receipt the platform already holds
+    is ignored. A second, different receipt for a `seq` the platform already
+    holds is `receipt_sequence_gap`; the platform keeps both.
 5. **MUST** recompute `authorized`, `captured` and `refunded` for each chain
     from the `succeeded` events it holds, per
     [Running Totals](#running-totals), and **MUST** check that
     `totals.mandated` equals the `payment_amount` of the Payment Mandate that
     `mandate_ref` covers. A receipt whose stated `totals` differ from these
-    values is `receipt_totals_mismatch`.
-6. **MUST** check, on the recomputed totals, that `authorized` and `captured`
-    do not exceed `mandated` (`receipt_exceeds_mandate`) and that `refunded`
-    does not exceed `captured` (`receipt_refund_exceeds_capture`).
+    values is `receipt_totals_mismatch`. Recomputation stops at the first
+    `receipt_sequence_gap` or excluded receipt in a chain: the platform does
+    not report `receipt_totals_mismatch` for later receipts in that chain,
+    because the events it holds are incomplete.
+6. **MUST** check that `authorized` and `captured` do not exceed `mandated`
+    (`receipt_exceeds_mandate`) and that `refunded` does not exceed `captured`
+    (`receipt_refund_exceeds_capture`). The check uses the recomputed totals,
+    or the stated totals for receipts after the point where recomputation
+    stopped. These outcomes are independent of `receipt_totals_mismatch`: a
+    receipt can report both.
 7. **SHOULD**, when `event.seller_id` is present, also check per seller that
     succeeded captures do not exceed that seller's attributed total and that
     refunds do not exceed that seller's captures. This is a **SHOULD** because
@@ -845,7 +852,7 @@ the money has already moved:
 | Outcome                              | Meaning                                                                                  |
 | :----------------------------------- | :--------------------------------------------------------------------------------------- |
 | `receipt_invalid_signature`          | The signature cannot be verified, `kid` does not resolve, or `typ` is wrong.             |
-| `receipt_sequence_gap`               | A `seq` is missing or repeated, or `prev` does not match.                                |
+| `receipt_sequence_gap`               | A `seq` is missing or repeated with different content, or `prev` does not match.         |
 | `receipt_totals_mismatch`            | Stated `totals` differ from the recomputed totals or the mandate's `payment_amount`.     |
 | `receipt_exceeds_mandate`            | `authorized` or `captured` exceeds `mandated` for the chain.                             |
 | `receipt_refund_exceeds_capture`     | `refunded` exceeds `captured` for the chain.                                             |
