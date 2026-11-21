@@ -11,6 +11,11 @@
         {
           "type": "object",
           "properties": {
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL to the JSON Schema defining payload and configuration types for this capability or extension."
+            },
             "extends": {
               "oneOf": [
                 { "$ref": "common/types/reverse_domain_name.json" },
