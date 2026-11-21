@@ -41,11 +41,17 @@ import validate_examples as v  # noqa: E402
 # -----------------------------------------------------------
 
 _RESULTS: list[tuple[str, bool, str]] = []
+_SKIPPED: list[tuple[str, str]] = []
 
 
 def _check(name: str, condition: bool, detail: str = "") -> None:
   """Record a test result."""
   _RESULTS.append((name, condition, detail))
+
+
+def _skip(name: str, reason: str) -> None:
+  """Record a test that did not run; it neither passes nor fails."""
+  _SKIPPED.append((name, reason))
 
 
 def _report() -> int:
@@ -56,7 +62,9 @@ def _report() -> int:
     status = "PASS" if ok else "FAIL"
     suffix = f" \u2014 {detail}" if detail and not ok else ""
     print(f"  {status}  {name}{suffix}")
-  print(f"\n{passed} passed, {len(failed)} failed")
+  for name, reason in _SKIPPED:
+    print(f"  SKIP  {name} \u2014 {reason}")
+  print(f"\n{passed} passed, {len(failed)} failed, {len(_SKIPPED)} skipped")
   return 0 if not failed else 1
 
 
@@ -1091,6 +1099,110 @@ def test_checkout_item_source() -> None:
       )
 
 
+def test_totals_grand_total_non_negative() -> None:
+  """Buyer-pays grand total must be >= 0; adjustments stay signed."""
+  if not _has_ucp_schema():
+    _skip("totals_grand_total_non_negative", "ucp-schema binary not on PATH")
+    return
+
+  checkout = v.load_scaffold(
+    "shopping/checkout", "response", "read", _SCAFFOLDS_DIR
+  )
+  assert checkout is not None
+  for name, totals, expected in (
+    (
+      "over_applied_discount",
+      [
+        {"type": "subtotal", "amount": 1500},
+        {"type": "discount", "amount": -2000},
+        {"type": "total", "amount": -500},
+      ],
+      False,
+    ),
+    (
+      "zero_total",
+      [
+        {"type": "subtotal", "amount": 2500},
+        {"type": "discount", "amount": -2500},
+        {"type": "total", "amount": 0},
+      ],
+      True,
+    ),
+    (
+      "normal_total",
+      [
+        {"type": "subtotal", "amount": 1500},
+        {"type": "tax", "amount": 200},
+        {"type": "total", "amount": 1700},
+      ],
+      True,
+    ),
+    (
+      "custom_credit_overshoot",
+      [
+        {"type": "subtotal", "amount": 1500},
+        {
+          "type": "account_credit",
+          "display_text": "Account Credit",
+          "amount": -2000,
+        },
+        {"type": "total", "amount": -500},
+      ],
+      False,
+    ),
+  ):
+    valid, errors = v.validate_payload(
+      {**checkout, "totals": totals},
+      "shopping/checkout",
+      "response",
+      "read",
+      _SCHEMA_BASE,
+    )
+    _check(
+      f"checkout_totals[{name}]",
+      valid == expected,
+      f"valid={valid}, errors={errors}",
+    )
+
+  order = v.load_scaffold("shopping/order", "response", "read", _SCAFFOLDS_DIR)
+  assert order is not None
+  valid, errors = v.validate_payload(
+    {
+      **order,
+      "adjustments": [
+        {
+          "id": "adj_1",
+          "type": "refund",
+          "occurred_at": "2026-01-10T14:30:00Z",
+          "status": "completed",
+          "totals": [{"type": "total", "amount": -3000}],
+        }
+      ],
+    },
+    "shopping/order",
+    "response",
+    "read",
+    _SCHEMA_BASE,
+  )
+  _check("order_adjustment_negative_total_valid", valid, str(errors))
+
+  valid, errors = v.validate_payload(
+    {
+      **order,
+      "totals": [
+        {"type": "subtotal", "amount": 1500},
+        {"type": "discount", "amount": -2000},
+        {"type": "total", "amount": -500},
+      ],
+    },
+    "shopping/order",
+    "response",
+    "read",
+    _SCHEMA_BASE,
+  )
+  _check("order_totals_negative_total_rejected", not valid, str(errors))
+
+
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
   original_run = v.subprocess.run
@@ -1219,6 +1331,7 @@ def main() -> int:
   test_extension_validation()
   test_checkout_item_source_process_block()
   test_checkout_item_source()
+  test_totals_grand_total_non_negative()
   return _report()
 
 
