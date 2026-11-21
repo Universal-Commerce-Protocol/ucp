@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/brand.json",
+  "title": "Brand",
+  "description": "The brand under which a product is marketed. An object rather than a string so that members such as a logo or a brand identifier can be added without changing the meaning of existing data.",
+  "type": "object",
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Brand name as presented to buyers (e.g., 'Patagonia'). For products sold under the manufacturer's own name, this is the manufacturer's brand."
+    }
+  }
+}
