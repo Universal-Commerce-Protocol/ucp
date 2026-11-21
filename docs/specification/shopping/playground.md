@@ -595,13 +595,13 @@ const UcpData = {
       "id": "instr_stripe_d12bb703-f77e-4c64-9e38-b99a68f74297"
     },
     shop_pay: {
-      "handler_id": "shop_pay_1234",
+      "handler_id": "shop_pay",
       "type": "shop_pay",
       "email": "buyer@example.com",
       "id": "instr_sp_1338ef2c-3913-4267-83a2-a84d07d9a6a6"
     },
     gpay: {
-      "handler_id": "gpay_1234",
+      "handler_id": "gpay",
       "type": "card",
       "display": {
         "brand": "visa",
