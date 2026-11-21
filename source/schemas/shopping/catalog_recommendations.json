@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/catalog_recommendations.json",
+  "name": "dev.ucp.shopping.catalog.recommendations",
+  "title": "Catalog Recommendations",
+  "description": "Extends Catalog Search with anchored retrieval purposes: items similar to, complementary to, or substitutes for the anchors the Platform names in `references`. Responses reuse the Catalog Search response unchanged.",
+  "$defs": {
+    "purpose_policy": {
+      "type": "object",
+      "title": "Purpose Policy",
+      "description": "Policy for one supported `purpose` value. An empty object means the value is supported with no advertised limits.",
+      "properties": {
+        "max_references": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum distinct `references` the Business processes for this purpose. When a request carries more, the Business processes the first `max_references` distinct references in request order and includes an informational `batch_limit_applied` message. Does not apply to `substitute`, which always takes exactly one."
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "title": "Reference",
+      "description": "One anchor for the request. Carries exactly one anchor kind. This extension defines `id`; other extensions MAY define additional anchor kinds as additional properties. A Business that does not recognize a reference's anchor kind drops it and SHOULD include an informational `unsupported_reference` message.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Product or variant identifier. Resolution follows Catalog Lookup's supported identifiers."
+        }
+      }
+    },
+    "business_config": {
+      "type": "object",
+      "title": "Business Catalog Recommendations Config",
+      "description": "Purposes this Business supports.",
+      "required": ["purposes"],
+      "properties": {
+        "purposes": {
+          "type": "object",
+          "description": "Supported `purpose` values, keyed by value (e.g., `similar`, `complementary`, `substitute`). A Platform MUST NOT send a `purpose` value other than `search` that is absent from this map. `search` is always supported by Catalog Search and is not listed.",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/purpose_policy"
+          }
+        }
+      }
+    },
+    "recommendations_search_request": {
+      "title": "Catalog Search Request with Recommendations",
+      "description": "Catalog search request extended with an anchored retrieval purpose.",
+      "allOf": [
+        { "$ref": "catalog_search.json#/$defs/search_request" },
+        {
+          "type": "object",
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Retrieval purpose. Well-known values: `search` (default when omitted), `similar`, `complementary`, `substitute`. A Platform MUST NOT send a value other than `search` unless the Business lists it in `config.purposes`. A Business MUST NOT ignore `purpose`; it rejects a value it does not support (error code `unsupported_purpose`).",
+              "examples": ["search", "similar", "complementary", "substitute"]
+            },
+            "references": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/reference"
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "description": "Anchors for the request. Anchors are never returned. Ignored when `purpose` is `search` or omitted."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": { "purpose": { "const": "similar" } },
+                "required": ["purpose"]
+              },
+              "then": {
+                "required": ["references"],
+                "properties": {
+                  "references": {
+                    "description": "Anchors the results resemble. Multiple references form one joint anchor set; results need not resemble every anchor."
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": { "purpose": { "const": "complementary" } },
+                "required": ["purpose"]
+              },
+              "then": {
+                "required": ["references"],
+                "properties": {
+                  "references": {
+                    "description": "Anchors the results go with (for example, a product being viewed or the lines of a cart). Multiple references form one joint anchor set. The product of every catalog anchor is excluded from results."
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": { "purpose": { "const": "substitute" } },
+                "required": ["purpose"]
+              },
+              "then": {
+                "required": ["references"],
+                "properties": {
+                  "references": {
+                    "maxItems": 1,
+                    "items": {
+                      "required": ["id"]
+                    },
+                    "description": "Exactly one catalog item being replaced, named by `id`. It MUST resolve to one product or variant; otherwise the Business returns an `ambiguous_reference` error. Its attributes guide relevance and are not matching constraints."
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with recommendations (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_request": {
+          "$ref": "#/$defs/recommendations_search_request"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.recommendations": {
+      "platform_schema": {
+        "title": "Catalog Recommendations (Platform)",
+        "description": "Platform declaration for catalog recommendations. No platform config is required.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/platform_schema" }
+        ]
+      },
+      "business_schema": {
+        "title": "Catalog Recommendations (Business)",
+        "description": "Business declaration for catalog recommendations. Businesses list the purposes they support in `config.purposes`.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "required": ["config"],
+            "properties": {
+              "config": {
+                "$ref": "#/$defs/business_config"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

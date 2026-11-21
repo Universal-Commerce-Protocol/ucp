@@ -98,6 +98,8 @@ nav:
                   specification/shopping/extensions/return-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
+              - Recommendations:
+                  specification/shopping/extensions/recommendations.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -607,6 +609,12 @@ plugins:
               results in; the extension also defines the
               dev.ucp.shopping.policy.subscription policy type, its required
               buyer disclosure, and the Platform obligations that come with it.
+          - specification/shopping/extensions/recommendations.md: >-
+              Catalog Recommendations Extension, adding purpose and
+              references to catalog search so a platform can ask for items
+              similar to, complementary to, or substitutes for products or
+              variants it already knows. Businesses list supported purposes
+              in config.purposes; results reuse the catalog search response.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
