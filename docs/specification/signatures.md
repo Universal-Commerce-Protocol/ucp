@@ -861,7 +861,7 @@ requests, the payload copy alone is authoritative.
 was first used with and, where one exists, the target resource
 identifier (the path parameter for REST, the top-level `id` argument
 for MCP). Businesses **MUST** reject, without executing, any request
-that reuses a stored key with a different operation or a different
+whose key is found stored with a different operation or a different
 target resource identifier, returning `409 Conflict` (REST) or
 `-32000` (MCP) as for a mismatched payload. Within that binding,
 payload identity is defined per operation, by whether the operation's
@@ -893,17 +893,29 @@ alone, not from the transport envelope:
     * For REST, the raw request body bytes as received, the same digest
       RFC 9530 mandates as `Content-Digest`. No canonicalization: the
       body is a single byte string on the wire and is hashed as such.
-    * For MCP, the `params.arguments` object with its top-level
-      `meta` member removed, serialized with the JSON
+    * For MCP, the `params.arguments` value as parsed, with its
+      top-level `meta` member removed, serialized with the JSON
       Canonicalization Scheme
-      ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785)), the
-      canonicalization this specification already uses for durable
-      artifacts in
-      [AP2 Mandates](payment/extensions/ap2-mandates.md#canonicalization).
+      ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785)); the
+      hash is computed over the UTF-8 octets of that serialization.
+      This is the canonicalization this specification already uses for
+      durable artifacts in
+      [AP2 Mandates - Canonicalization](payment/extensions/ap2-mandates.md#canonicalization).
       Removing a member is an operation on a parsed value, not on bytes,
       so this class adopts canonicalization explicitly: logically
-      identical retries hash identically regardless of member order or
-      serializer, tolerating re-serialization across client stacks.
+      identical retries hash identically regardless of member order,
+      insignificant whitespace, numeric notation, or serializer,
+      tolerating re-serialization across client stacks.
+
+**Store Scope:** For operations that carry a target resource identifier,
+a Business **MAY** scope the store to the target resource: the key, the
+operation, and, for the payload-carrying class, the hash are persisted
+with the state of that resource, and a key is looked up within the
+resource the request names. Within such a store the target binding holds
+by construction, a key presented against a target that holds no record
+of it is a first use there, and the operation binding and the payload
+comparison above apply unchanged. A Business that keeps one store across
+targets applies the target binding by comparing the stored identifier.
 
 Platforms **MUST** generate a fresh idempotency key whenever they modify
 a payload-carrying operation's arguments — including retries with

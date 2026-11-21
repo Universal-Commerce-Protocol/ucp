@@ -237,8 +237,8 @@ The following headers are defined for the HTTP binding.
     2. Return the cached result for a duplicate key whose operation, target
        resource, and payload all match the stored record, without appending a
        second turn.
-    3. Return `409 Conflict` if the key is reused with a different operation, a
-       different target resource, or a different payload.
+    3. Return `409 Conflict` if the stored record for the key differs in
+       operation, target resource, or payload.
     See [Message Signatures — Replay Protection](../../signatures.md#replay-protection)
     for the full payload-matching contract.
 
