@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/offsite_payment_instrument.json",
+  "title": "Offsite Payment Instrument",
+  "description": "A basic offsite payment instrument. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "offsite",
+          "description": "Indicates this is an offsite payment instrument."
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for this offsite payment instrument, provided by the business. SHOULD include at least one of `instructions`, `instructions_image_url`, or `link` so the buyer knows how to complete the payment.",
+          "ucp_request": "omit",
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "An optional rich text description to display to the user (e.g., 'Cash on Delivery', 'Pay by Invoice')."
+            },
+            "instructions": {
+              "type": "string",
+              "description": "Instructions to the buyer on how to complete the offsite payment."
+            },
+            "instructions_image_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "URI to an image conveying how to complete the offsite payment (e.g., rendered payment instructions or a QR code for the buyer to scan)."
+            },
+            "link": {
+              "$ref": "link.json",
+              "description": "A link the buyer can follow to complete the offsite payment or view further instructions."
+            }
+          }
+        }
+      }
+    }
+  ]
+}
