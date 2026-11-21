@@ -887,6 +887,15 @@ authorization request; the platform constructs its own authorization
 request from the `WWW-Authenticate` challenge and discovered metadata,
 including PKCE values, `state`, and `redirect_uri` it owns.
 
+An operation that no scope in `config.scopes` gates can still receive a
+user identity token, for example to get personalized pricing. A business
+that rejects such a token as expired, invalid, or unverifiable **SHOULD**
+respond as it would for a gated operation: `401`, `error="invalid_token"`
+in the `WWW-Authenticate` challenge, and `identity_required` in the body.
+The platform can then refresh the token or retry without it. A business
+**MAY** instead ignore the token and answer as it would a request without
+one. The platform then cannot tell why it got that answer.
+
 **No token presented** (first request to a gated operation — `error` omitted per RFC 6750 §3.1):
 
 ```http
