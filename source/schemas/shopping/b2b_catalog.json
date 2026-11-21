@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/b2b_catalog.json",
+  "name": "dev.ucp.shopping.b2b_catalog",
+  "title": "B2B Catalog Extension (Working Draft)",
+  "description": "Working Draft for #1110. Extends Catalog Search and Catalog Lookup with the facts a procurement agent needs to shortlist and verify a business-to-business supplier: trade terms (minimum order quantity, quantity brackets, Incoterms), lead time and capacity, supplier type, certifications with a verification level, and technical specifications with a source pointer.",
+  "$defs": {
+    "source_pointer": {
+      "title": "Source Pointer",
+      "description": "Where a fact comes from, so a Platform can check it. Shared by attribute sources, compatibility claims (#385) and certificate evidence. `url`, `page`, `section` and `quote` point at the document that states the fact.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Who stated the fact. Well-known values: `supplier_authored` (entered by the supplier as structured data), `supplier_document` (extracted from the supplier's own datasheet, catalog or product page), `inferred` (derived by a Platform or Business from other facts). A Platform MUST treat an unrecognized value as `inferred`."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Location of the document that states the fact, ideally a stable hosted copy."
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based page number within the document at `url`."
+        },
+        "section": {
+          "type": "string",
+          "description": "Heading or section within the document (e.g. 'Technical data')."
+        },
+        "quote": {
+          "type": "string",
+          "description": "The line in the document that states the fact, quoted verbatim."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "supplier_document"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "url"
+            ]
+          }
+        }
+      ]
+    },
+    "specification": {
+      "title": "Specification",
+      "description": "One technical attribute of a variant, with its source.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "key",
+        "value"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Stable attribute identifier. A Business SHOULD use the identifier from the taxonomy it categorizes by (e.g. an ECLASS property code) when one exists."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable attribute name (e.g. 'Max. operating temperature')."
+        },
+        "value": {
+          "description": "The attribute value. A quantity SHOULD be a measure.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "../common/types/measure.json"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/source_pointer",
+          "description": "Where this value comes from. A Business MUST NOT mark safety-critical attributes (e.g. food contact, medical use, pressure rating) as `inferred`."
+        }
+      }
+    },
+    "price_bracket": {
+      "title": "Price Bracket",
+      "description": "Unit price that applies from a minimum quantity, under a stated trade term.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "min_quantity",
+        "price"
+      ],
+      "properties": {
+        "min_quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Lowest quantity, in steps of the variant's `quantity_unit`, at which this bracket applies."
+        },
+        "price": {
+          "$ref": "../common/types/price.json",
+          "description": "Price per one whole `quantity_unit.unit`, as for the variant's `price`."
+        },
+        "incoterm": {
+          "type": "string",
+          "description": "Incoterms® 2020 rule the price is quoted under. Well-known values: `EXW`, `FCA`, `CPT`, `CIP`, `DAP`, `DPU`, `DDP`, `FAS`, `FOB`, `CFR`, `CIF`."
+        },
+        "named_place": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}[A-Z2-9]{3}$",
+          "description": "UN/LOCODE of the named place or port for `incoterm` (e.g. `CNNGB` for Ningbo)."
+        }
+      }
+    },
+    "trade_terms": {
+      "title": "Trade Terms",
+      "description": "Business-to-business ordering terms for a variant: minimum order and quantity brackets. The ordering step is the variant's `quantity_unit.increment`.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "min_order_quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum order quantity (MOQ), in steps of the variant's `quantity_unit`."
+        },
+        "brackets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/price_bracket"
+          },
+          "description": "Quantity brackets. When present, a Platform SHOULD resolve the price for a quantity from the bracket with the highest `min_quantity` not above it, for the trade term it needs. These prices are indicative until confirmed in Checkout or a quotation."
+        }
+      }
+    },
+    "supply_signals": {
+      "title": "Supply Signals",
+      "description": "Lead time and capacity signals a Platform can filter and compare before a cart exists. Indicative; not a delivery promise.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "sample_lead_time": {
+          "$ref": "../common/types/duration.json",
+          "description": "Typical time to dispatch a sample (e.g. `P7D`)."
+        },
+        "production_lead_time": {
+          "$ref": "../common/types/duration.json",
+          "description": "Typical time to produce an order at the minimum order quantity (e.g. `P25D`)."
+        },
+        "capacity": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "quantity",
+            "period"
+          ],
+          "description": "Production capacity for this variant.",
+          "properties": {
+            "quantity": {
+              "$ref": "../common/types/measure.json",
+              "description": "Quantity that can be produced per `period`."
+            },
+            "period": {
+              "$ref": "../common/types/duration.json",
+              "description": "Period the quantity refers to (e.g. `P1M`)."
+            }
+          }
+        }
+      }
+    },
+    "certification": {
+      "title": "Certification",
+      "description": "A certification the product holds, with the level to which it has been verified.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "scheme",
+        "verification"
+      ],
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "description": "Certification scheme or standard (e.g. `CE`, `3-A`, `ISO 9001`)."
+        },
+        "certificate_id": {
+          "type": "string",
+          "description": "Certificate number as issued."
+        },
+        "issuer": {
+          "type": "string",
+          "description": "Body that issued the certificate."
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date",
+          "description": "Expiry date as stated on the certificate."
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "level"
+          ],
+          "description": "How far the claim has been checked, by whom and when. UCP does not run a verification authority; this states the claimed level and its source.",
+          "properties": {
+            "level": {
+              "type": "string",
+              "description": "Well-known values: `self_declared`, `document_checked`, `third_party_verified`. A Platform MUST treat an unrecognized value as `self_declared`."
+            },
+            "verified_at": {
+              "type": "string",
+              "format": "date",
+              "description": "Date of the most recent check."
+            },
+            "verified_by": {
+              "type": "string",
+              "description": "Who performed the check (e.g. `business`, `platform`, or the name of a third party)."
+            },
+            "evidence": {
+              "$ref": "#/$defs/source_pointer",
+              "description": "Optional pointer to public evidence, such as a hosted copy of the certificate. It does not replace `valid_until` and `verified_at`."
+            }
+          }
+        }
+      }
+    },
+    "supplier": {
+      "title": "Supplier",
+      "description": "Supplier identity added to the variant's `seller`.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "supplier_type": {
+          "type": "string",
+          "description": "Well-known values: `manufacturer`, `trading_company`, `distributor`."
+        },
+        "supplier_type_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Kinds of evidence behind `supplier_type`. Well-known values: `business_license`, `certificate_holder_match`, `factory_audit`."
+        }
+      }
+    },
+    "b2b_variant_fields": {
+      "title": "B2B Variant Fields",
+      "description": "The fields this extension adds to a catalog variant.",
+      "type": "object",
+      "properties": {
+        "trade_terms": {
+          "$ref": "#/$defs/trade_terms",
+          "ucp_request": "omit"
+        },
+        "supply": {
+          "$ref": "#/$defs/supply_signals",
+          "ucp_request": "omit"
+        },
+        "specifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/specification"
+          },
+          "description": "Technical attributes with their sources.",
+          "ucp_request": "omit"
+        },
+        "seller": {
+          "allOf": [
+            {
+              "$ref": "types/variant.json#/properties/seller"
+            },
+            {
+              "$ref": "#/$defs/supplier"
+            }
+          ],
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "b2b_product_fields": {
+      "title": "B2B Product Fields",
+      "description": "The fields this extension adds to a catalog product.",
+      "type": "object",
+      "properties": {
+        "certifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/certification"
+          },
+          "description": "Certifications the product holds.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "b2b_variant": {
+      "description": "A catalog variant with B2B fields.",
+      "allOf": [
+        {
+          "$ref": "types/variant.json"
+        },
+        {
+          "$ref": "#/$defs/b2b_variant_fields"
+        }
+      ]
+    },
+    "b2b_lookup_variant": {
+      "description": "A lookup variant (carrying input correlation) with B2B fields.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_variant"
+        },
+        {
+          "$ref": "#/$defs/b2b_variant_fields"
+        }
+      ]
+    },
+    "b2b_product": {
+      "description": "A catalog product with B2B fields. Used by search.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "$ref": "#/$defs/b2b_product_fields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/b2b_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "b2b_lookup_product": {
+      "description": "A lookup product with B2B fields, preserving input correlation. Used by lookup.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "$ref": "#/$defs/b2b_product_fields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/b2b_lookup_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "b2b_detail_product": {
+      "description": "A get_product detail product with B2B fields. Used by get_product.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/detail_product"
+        },
+        {
+          "$ref": "#/$defs/b2b_product_fields"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/b2b_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "b2b_search_filters": {
+      "description": "Catalog filters extended with B2B constraints. A Business that does not support a filter MUST ignore it rather than fail the request.",
+      "allOf": [
+        {
+          "$ref": "types/search_filters.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "max_min_order_quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Only return variants whose `min_order_quantity` is at most this value."
+            },
+            "certifications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Only return products holding all of these schemes."
+            },
+            "min_verification_level": {
+              "type": "string",
+              "description": "Only count certifications verified at least to this level, in the order `self_declared` < `document_checked` < `third_party_verified`."
+            },
+            "supplier_types": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Only return variants whose seller has one of these `supplier_type` values."
+            },
+            "incoterms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Only return variants with a bracket under one of these Incoterms."
+            },
+            "max_production_lead_time": {
+              "$ref": "../common/types/duration.json",
+              "description": "Only return variants whose `production_lead_time` is at most this duration."
+            }
+          }
+        }
+      ]
+    },
+    "search_request": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_request"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filters": {
+              "$ref": "#/$defs/b2b_search_filters"
+            }
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/b2b_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/b2b_lookup_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "product": {
+              "$ref": "#/$defs/b2b_detail_product"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with B2B fields (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_request": {
+          "$ref": "#/$defs/search_request"
+        },
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with B2B fields (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    }
+  }
+}
