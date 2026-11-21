@@ -94,7 +94,9 @@
                 }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     },
@@ -164,7 +166,9 @@
                 }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       },
       "put": {
@@ -243,7 +247,9 @@
                 }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     },
@@ -329,7 +335,9 @@
                 }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     },
@@ -405,7 +413,9 @@
                 }
               }
             }
-          }
+          },
+          "4XX": { "$ref": "#/components/responses/protocol_error" },
+          "5XX": { "$ref": "#/components/responses/protocol_error" }
         }
       }
     }
@@ -539,6 +549,16 @@
           "type": "string"
         },
         "description": "Compression. The client tells the server which content-codings it supports, usually for compression."
+      }
+    },
+    "responses": {
+      "protocol_error": {
+        "description": "Protocol error. The body is optional; when present it is a protocol error object. See Error Handling in the core specification for the status code registry.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "../../schemas/common/types/protocol_error.json" }
+          }
+        }
       }
     },
     "headers": {

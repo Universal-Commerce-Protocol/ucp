@@ -613,7 +613,8 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 ### Transport Errors
 
-Use HTTP status codes for protocol-level issues that prevent request processing:
+Use HTTP status codes for protocol-level issues that prevent request processing
+([Protocol Error](../../reference.md#protocol-error) schema):
 
 | Status | Meaning |
 | :--- | :--- |

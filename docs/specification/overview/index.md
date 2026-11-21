@@ -1141,7 +1141,8 @@ task through the standard web interface.
 
     **Discovery Failure (424):**
 
-    ```http
+    <!-- ucp:example schema=common/types/protocol_error -->
+    ```json
     HTTP/1.1 424 Failed Dependency
     Content-Type: application/json
 
@@ -1154,7 +1155,8 @@ task through the standard web interface.
 
     **Version Unsupported (422):**
 
-    ```http
+    <!-- ucp:example schema=common/types/protocol_error -->
+    ```json
     HTTP/1.1 422 Unprocessable Content
     Content-Type: application/json
 
@@ -1204,7 +1206,8 @@ task through the standard web interface.
     ```
 
     Protocol errors use standard HTTP status codes and headers. Response bodies
-    are optional.
+    are optional; when present they **MUST** be a
+    [Protocol Error](../reference.md#protocol-error).
 
 === "MCP"
 
@@ -3617,18 +3620,16 @@ Response with version confirmation:
 }
 ```
 
-Version unsupported error — no resource is created:
+Version unsupported error — a protocol error, so no resource is created:
 
-<!-- ucp:example schema=common/types/error_response op=read -->
+<!-- ucp:example schema=common/types/protocol_error -->
 ```json
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/json
+
 {
-  "ucp": { "version": "{{ ucp_version }}", "status": "error" },
-  "messages": [{
-    "type": "error",
-    "code": "version_unsupported",
-    "content": "Version 2026-01-12 is not supported. This business implements version {{ ucp_version }}.",
-    "severity": "unrecoverable"
-  }],
+  "code": "version_unsupported",
+  "content": "Version 2026-01-12 is not supported. This business implements version {{ ucp_version }}.",
   "continue_url": "https://merchant.com/"
 }
 ```
