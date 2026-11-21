@@ -78,6 +78,9 @@ com.shopify.shop_pay
 **Google Pay**\
 com.google.pay
 
+**Stripe Payments**\
+com.stripe.payments
+
 Mint Credential
 
 Minted Instrument
