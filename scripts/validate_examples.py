@@ -141,7 +141,7 @@ from pathlib import Path
 # -----------------------------------------------------------
 
 # any valid YYYY-MM-DD satisfies the pattern
-UCP_VERSION_PLACEHOLDER = "2026-04-08"
+UCP_VERSION_PLACEHOLDER = "2026-08-25"
 
 ANNOTATION_RE = re.compile(r"^(\s*)<!--\s*ucp:example\s+(.*?)\s*-->")
 FENCE_OPEN_RE = re.compile(r"^(\s*)```json\s*$")
