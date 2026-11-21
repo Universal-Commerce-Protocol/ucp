@@ -75,9 +75,10 @@
             "capture",
             "capture_reversal",
             "release",
-            "refund"
+            "refund",
+            "refund_reversal"
           ],
-          "description": "Kind of money movement. `authorization` and `authorization_adjustment` add to `authorized`; `release` subtracts from it; `capture` adds to `captured`; `capture_reversal` subtracts from it; `refund` adds to `refunded`."
+          "description": "Kind of money movement. `authorization` and `authorization_adjustment` add to `authorized`; `release` subtracts from it; `capture` adds to `captured`; `capture_reversal` subtracts from it; `refund` adds to `refunded`; `refund_reversal` subtracts from it."
         },
         "status": {
           "type": "string",
@@ -156,7 +157,7 @@
         "refunded": {
           "type": "integer",
           "minimum": 0,
-          "description": "Sum of succeeded `refund` amounts."
+          "description": "Sum of succeeded `refund` amounts minus succeeded `refund_reversal` amounts."
         }
       }
     },
@@ -255,7 +256,8 @@
               "capture",
               "capture_reversal",
               "release",
-              "refund"
+              "refund",
+              "refund_reversal"
             ]
           },
           "description": "In the business profile, the event types the business issues receipts for. In the platform profile, informational: the event types the platform can process."
