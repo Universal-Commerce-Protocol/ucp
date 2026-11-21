@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/ui.json",
+  "name": "dev.ucp.shopping.ui",
+  "title": "UI Actions Extension",
+  "description": "Extends Cart and Checkout with Action types for a Business whose page presents the session as a multi-view workflow. Declares the dev.ucp.shopping.ui.transition Action type, by which the Business signals that its page must transition before the negotiation can continue, and names the control that performs the transition.",
+  "$defs": {
+    "transition_config": {
+      "type": "object",
+      "description": "Identifies the control on the current view that performs the transition. Both handles identify the same control; the Platform uses whichever its environment supports.",
+      "required": ["label", "element"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The control's accessible name, as exposed on the accessibility tree. The Platform locates the control by it when operating the accessibility tree, and presents it to the Buyer as the description of the transition."
+        },
+        "element": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The control's DOM `id` attribute. The Platform locates the control by it when operating the DOM."
+        }
+      }
+    },
+    "transition": {
+      "description": "One outstanding UI transition: the boundary the Business is waiting at and the control that crosses it.",
+      "allOf": [
+        { "$ref": "../common/types/actions.json#/$defs/instance" },
+        {
+          "type": "object",
+          "required": ["config"],
+          "properties": {
+            "config": {
+              "$ref": "#/$defs/transition_config",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "actions": {
+      "type": "object",
+      "description": "Outstanding Actions, including the Action type this extension declares.",
+      "properties": {
+        "dev.ucp.shopping.ui.transition": {
+          "type": "array",
+          "description": "The transition the Business is waiting at. At most one instance is outstanding at a time.",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/transition" }
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with UI Actions",
+      "description": "Cart extended with the UI extension's Action types.",
+      "allOf": [
+        { "$ref": "cart.json" },
+        {
+          "type": "object",
+          "properties": {
+            "actions": {
+              "$ref": "#/$defs/actions",
+              "description": "Outstanding extension-defined Actions for this cart.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with UI Actions",
+      "description": "Checkout extended with the UI extension's Action types.",
+      "allOf": [
+        { "$ref": "checkout.json" },
+        {
+          "type": "object",
+          "properties": {
+            "actions": {
+              "$ref": "#/$defs/actions",
+              "description": "Outstanding extension-defined Actions for this checkout.",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
