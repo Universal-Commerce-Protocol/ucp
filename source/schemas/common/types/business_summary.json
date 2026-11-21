@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/business_summary.json",
+  "title": "Business Summary",
+  "description": "Reusable business, brand, or seller identity summary shared across discovery profiles, multi-seller catalogs, and transactional sessions.",
+  "type": "object",
+  "required": [
+    "name"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable display name of the business, brand, or seller (e.g., \"Joe's Pizza\")."
+    },
+    "legal_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Registered legal name of the business or seller, when different from the display `name` (e.g., \"Joe's Pizza LLC\")."
+    },
+    "slogan": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short brand tagline or motto for compact cards (schema.org `slogan`)."
+    },
+    "description": {
+      "$ref": "description.json",
+      "description": "Human-readable description or 'about' summary of the business or seller in one or more formats (`plain`, `markdown`, `html`)."
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "media.json"
+      },
+      "description": "Brand or seller media assets, such as a primary logo (`role: 'logo'`), compact square icon (`role: 'icon'`), or cover image (`role: 'cover'`)."
+    },
+    "colors": {
+      "type": "object",
+      "description": "Brand colors (`primary` and `secondary` background/foreground color pairs) for rendering the business or seller. Display hints only: platforms MAY use them, MAY adjust them for contrast or theme, and a business MAY omit them.",
+      "properties": {
+        "primary": {
+          "$ref": "#/$defs/color_pair",
+          "description": "Primary brand color pair."
+        },
+        "secondary": {
+          "$ref": "#/$defs/color_pair",
+          "description": "Secondary brand color pair."
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "link.json"
+      },
+      "description": "Canonical customer-facing `website` storefront URL and business-wide policy links (`privacy_policy`, `terms_of_service`, `refund_policy`, `shipping_policy`, `faq`)."
+    },
+    "address": {
+      "$ref": "postal_address.json",
+      "description": "Publicly disclosable corporate, headquarters, or statutory establishment address of the business or seller. Physical retail branches live in `dev.ucp.common.location.*`."
+    },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "$ref": "contact.json"
+      },
+      "description": "Publicly routable business-wide contact channels (e.g., `general`, `customer_support`, `legal`, `press`)."
+    }
+  },
+  "$defs": {
+    "color_pair": {
+      "title": "Color Pair",
+      "description": "A brand color and a readable foreground color for text or icons drawn on it.",
+      "type": "object",
+      "required": [
+        "background"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "background": {
+          "$ref": "color.json",
+          "description": "The brand color."
+        },
+        "foreground": {
+          "$ref": "color.json",
+          "description": "Readable text or icon color for use on `background`."
+        }
+      }
+    }
+  }
+}
