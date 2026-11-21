@@ -240,9 +240,11 @@ Response:
 }
 ```
 
+The Platform retains the `binding` and any `identity` sent with this request.
+
 ### Step 4: Complete Checkout
 
-The Platform submits the token.
+The Platform submits the token and its issuance context.
 
 <!-- ucp:example schema=shopping/checkout op=complete direction=request -->
 ```json
@@ -266,7 +268,14 @@ Content-Type: application/json
         },
         "credential": {
           "type": "token",
-          "token": "tok_a1b2c3d4e5f6"
+          "token": "tok_a1b2c3d4e5f6",
+          "binding": {
+            "type": "dev.ucp.shopping.checkout",
+            "id": "checkout_789"
+          },
+          "identity": {
+            "access_token": "merchant_xyz789"
+          }
         }
       }
     ]
@@ -277,6 +286,12 @@ Content-Type: application/json
   }
 }
 ```
+
+The Platform **MUST** copy `binding` and any `identity` unchanged from the
+tokenization request. The Business **MUST** validate the binding according to
+the handler's binding policy. In PSP Mode, the Business passes the token and
+binding to the PSP, which **MUST** compare the binding with its issuance record
+and authenticate the caller independently.
 
 ---
 
