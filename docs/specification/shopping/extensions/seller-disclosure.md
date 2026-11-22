@@ -96,9 +96,10 @@ rules below. A Platform that has not negotiated this extension ignores
 
 ### Seller Details
 
-The shared shape used on catalog variants and in every `seller_disclosures`
-entry. All fields are optional on catalog; a `seller_disclosures` entry
-requires `name` and `trader_status`.
+The shared fields added to the catalog variant `seller` (which keeps its
+existing `name` and `links`) and used in every `seller_disclosures` entry. All
+fields are optional on catalog. A `seller_disclosures` entry also requires a
+non-blank `name` and a `trader_status`, and bounds its `links`.
 
 {{ schema_fields('shopping/types/seller_details', 'shopping/extensions/seller-disclosure') }}
 
@@ -112,15 +113,15 @@ requires `name` and `trader_status`.
 
 ### Seller Disclosure Entry
 
-An entry in the cart or checkout `seller_disclosures` map. It adds optional
-`links` and the `line_item_ids` the seller sells.
+An entry in the cart or checkout `seller_disclosures` map. It adds the
+`line_item_ids` the seller sells.
 
 {{ extension_schema_fields('seller_disclosure.json#/$defs/seller_entry', 'shopping/extensions/seller-disclosure') }}
 
 ### Order Seller Disclosure Entry
 
-An entry in the order `seller_disclosures` map. It adds the notices the buyer
-was shown at checkout.
+An entry in the order `seller_disclosures` map. It adds the notices the
+Business sent at checkout and, for a later snapshot, the `seller_id`.
 
 {{ extension_schema_fields('seller_disclosure.json#/$defs/order_seller_entry', 'shopping/extensions/seller-disclosure') }}
 
@@ -158,6 +159,13 @@ unrecognized, and **MUST NOT** present such a seller as a trader.
 
 A Business that sells its own goods sends `trader`.
 
+Where the law requires the buyer to be told the seller's declared status
+before the contract (for example, Directive 2011/83/EU Art. 6a(1)(b) on an EU
+online marketplace), `not_declared` can be shown during discovery, but the
+Business **SHOULD** obtain the seller's declaration before the buyer completes
+checkout. Until it has one, it **SHOULD** keep the checkout in
+`requires_escalation` rather than let it complete.
+
 ## Display requirements
 
 The seller information is part of the offer. Showing it **MUST NOT** depend on
@@ -174,19 +182,37 @@ for every third-party offer, in the same view as the offer:
 **One step from the offer**, the Platform **MUST** make the remaining seller
 details available through a control shown next to the seller name, before the
 buyer completes checkout: `legal_name`, `address`, `complaints_address`,
-`contacts`, `registrations`, `compliance_self_certified` (as a statement that
-the seller has certified it offers only compliant products), and
-`on_behalf_of`. In a channel that has no such control, such as voice, the
-Platform **MUST** deliver these details to the buyer in a form the buyer can
-read before completing checkout, or hand off through `continue_url`.
+`contacts`, `registrations`, `compliance_self_certified`, and `on_behalf_of`.
+The Platform presents a certification only when `compliance_self_certified` is
+`true`, as a statement that the seller has certified it offers only compliant
+products. It **MUST NOT** present `false` or an absent value as a
+certification.
 
-The Business **MUST** send, for a seller with `trader_status: "trader"` where
-applicable law requires them on the product presentation, the seller's
-`legal_name`, `address`, at least one contact with `email` and one with
-`phone_number`, `registrations` with its trade register entry where the seller
-is registered, and `compliance_self_certified`, on the catalog variant as well
-as at checkout. The EU example in [Legal context](#legal-context-informative)
-is such a law.
+In a channel that has no such control, such as voice, the Platform **MUST**
+make the details available while it presents the offer: it reads them out or
+sends them in readable form in the same turn, and tells the buyer it has done
+so. If it cannot, it **MUST NOT** present the offer and hands off instead
+(see [Hand-off](#hand-off)).
+
+**Completeness.** These duties apply to any Business, whether it sells its own
+goods or runs a marketplace:
+
+- Before the buyer completes checkout, the Business **MUST** send, for every
+    seller that is a trader, the identity and contact details applicable law
+    requires for the contract. For a distance contract with a consumer in the
+    EU (Directive 2011/83/EU Art. 6(1)(b)-(d)) that is `legal_name` (or `name`
+    as the trading name), `address`, at least one contact with `email` and one
+    with `phone_number`, `complaints_address` when different, and
+    `on_behalf_of` where the seller acts for another trader. This applies to a
+    direct merchant and to a marketplace that is exempt from Regulation (EU)
+    2022/2065 Art. 30.
+- Where applicable law also requires seller details on the product
+    presentation (for example, Regulation (EU) 2022/2065 Art. 30(7)), the
+    Business **MUST** send them on the catalog variant as well: `legal_name`,
+    `address`, the contacts above, `registrations` with the trade register
+    entry where the seller is registered, and `compliance_self_certified`.
+    Where that law requires a self-certification, the Business **MUST NOT**
+    list the trader's offer unless `compliance_self_certified` is `true`.
 
 ## Disclosure warnings
 
@@ -222,30 +248,49 @@ seller's `seller_disclosures` entry in cart and checkout responses.
     seller name that impersonates the marketplace, the Platform, or another
     seller.
 - **MUST** return notices in the language requested through
-    `context.language`. When it cannot, it **MUST** escalate through
-    `continue_url` rather than send a mandatory notice the buyer may not
-    understand.
+    `context.language`. When it cannot, it **MUST** hand off (see
+    [Hand-off](#hand-off)) rather than send a mandatory notice the buyer may
+    not understand.
+- **MUST NOT** send more than 10 seller disclosure warnings for one seller in
+    one response, or a warning `content` longer than 2000 characters. The
+    order snapshot holds the same limits. In cart and checkout the extension
+    schema enforces the length.
 
 **Platform requirements:**
 
 - **MUST** follow [Display requirements](#display-requirements).
 - **MUST** render every disclosure warning that points at a seller under the
-    `disclosure` contract, including the hand-off through `continue_url` when
-    it cannot. A Platform that cannot present a seller's required notice
+    `disclosure` contract, and hand off (see [Hand-off](#hand-off)) when it
+    cannot. A Platform that cannot present a seller's required notice
     **MUST NOT** present that seller's trader status or offer as purchasable.
 - **MUST NOT** infer, change or omit a seller's trader status, and **MUST
     NOT** substitute its own identity, or the Business's identity, for the
     seller's.
-- **MUST** reject a response whose line items are not each covered by exactly
-    one entry, and hand off through `continue_url`.
+- **MUST** reject a cart or checkout response whose line items are not each
+    covered by exactly one entry, and hand off (see [Hand-off](#hand-off)).
 - **SHOULD** tell apart sellers that share a `name` by showing `legal_name`.
+
+### Hand-off
+
+Where this page requires a hand-off, the Platform sends the buyer to the
+Business's own interface:
+
+- in cart and checkout, through `continue_url`;
+- in catalog, which has no `continue_url`, through the variant or product
+    `url`, and if neither is present, by not presenting the offer;
+- on an order, through `permalink_url`.
 
 ## Business-authored text and URLs
 
 Every seller string (`name`, `legal_name`, contact `name`, `register_name`)
 and every warning `content` is plain text written by the Business or relayed
 from the seller. It carries no markup and no links. URLs go only in `links`,
-and each **MUST** use `https`.
+and each **MUST** use `https`. In `seller_disclosures` entries the schema
+enforces `https` and bounds every seller string, address field and link. On
+the catalog variant, the new seller fields are bounded too; the existing core
+`seller.name` and `seller.links` keep their current schema, because tightening
+them would break existing catalog payloads, so the `https` rule and the bound
+of 500 characters for names apply there by this text.
 
 - A Platform **MUST** treat these strings as data from the Business and **MUST
     NOT** follow instructions found in them.
@@ -259,9 +304,12 @@ and each **MUST** use `https`.
 
 Trader status, identity, registrations and self-certification are statements
 by the Business, which is responsible for their accuracy under applicable law.
-A Platform presents them as the Business's statements about the seller and is
-not required to verify them. Signed or verified claims are out of scope; see
-the attestation work in #1020.
+A Platform presents them as the Business's statements about the seller. This
+specification adds no verification duty for the Platform. That is without
+prejudice to obligations the Platform or the Business has under applicable
+law, such as the duties of an online platform in scope of Regulation (EU)
+2022/2065 Art. 30(2)-(3) to assess and act on trader information. Signed or
+verified claims are out of scope; see the attestation work in #1020.
 
 ## Privacy
 
@@ -281,22 +329,31 @@ A seller can be a natural person, so seller details can be personal data.
 
 ## Order snapshot
 
-The order records what the buyer was shown at checkout:
+The order records the seller disclosures the Business sent before the buyer
+completed checkout:
 
-- Each entry is keyed by the same seller ID as at checkout.
-- The seller facts (all [Seller Details](#seller-details) fields) are those
-    presented at checkout and do not change afterwards.
+- Each entry created at checkout is keyed by the same seller ID as at checkout.
+- Its seller facts (all [Seller Details](#seller-details) fields) are those
+    sent at checkout and do not change afterwards.
 - `presented_notices` holds the `code`, `content` and `language` of every
-    seller disclosure warning shown at checkout for that seller.
+    seller disclosure warning the Business sent at checkout for that seller.
+    It records the Business-supplied text, not how the Platform rendered it;
+    a Platform that adapted the wording for its channel keeps its own record.
 - `line_item_ids` reference the order's line item IDs. The Business maps each
     checkout line to the order line created from it.
 
-The line associations can change after the order is placed. When a line is
-removed, its ID is removed from the entry; an entry with no remaining lines
-stays on the order. When a line is added, for example in an exchange, it is
-added to the entry of its seller. A line from a seller that was not on the
-order gets a new entry, with the details and notices presented to the buyer for
-that line.
+The line associations can change after the order is placed:
+
+- A line whose `status` becomes `removed` keeps its place in its entry, so the
+    purchase stays attributed to its seller.
+- A line deleted from the order is removed from the entry. An entry whose lines
+    are all deleted stays on the order with `line_item_ids: []`.
+- A line added later, for example in an exchange, from a seller whose facts and
+    notices are unchanged, is added to that seller's entry.
+- A line added later from a seller whose facts or notices changed, or from a
+    seller that was not on the order, gets a new entry with the details and
+    notices presented for that line. For an existing seller the new entry uses
+    a new key and sets `seller_id`.
 
 ## Examples
 
@@ -437,6 +494,38 @@ and records the notice text that was shown. One entry is shown:
         }
       ]
     }
+  }
+}
+```
+
+After an exchange, the line from the trader was deleted and replaced by a line
+from the same seller under a changed obligation split. The original entry stays
+as a record with no lines, and the new snapshot has its own key:
+
+<!-- ucp:example schema=shopping/seller_disclosure def=order_seller_disclosures extract=$.seller_disclosures -->
+```json
+{
+  "id": "order_5521",
+  "seller_disclosures": {
+    "seller_101": {
+      "name": "Lumen Optics",
+      "trader_status": "trader",
+      "line_item_ids": []
+    },
+    "seller_101_x1": {
+      "seller_id": "seller_101",
+      "name": "Lumen Optics",
+      "trader_status": "trader",
+      "line_item_ids": ["oli_3"],
+      "presented_notices": [
+        {
+          "code": "seller_obligation_split",
+          "content": "The replacement is shipped by the marketplace. Lumen Optics remains responsible for its conformity.",
+          "language": "en"
+        }
+      ]
+    },
+    "seller_202": { ... }
   }
 }
 ```

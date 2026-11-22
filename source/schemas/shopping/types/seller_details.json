@@ -5,27 +5,25 @@
   "description": "Buyer-facing facts about the party that sells an item: its declared trader status, legal identity, geographic address, contact channels, and public registrations. Every value is a statement by the Business, which collects it from the seller and is responsible for its accuracy under applicable law. Every string is plain text without markup or links. Identity documents and payment account details collected to verify a seller MUST NOT be sent in this object or in any extension of it.",
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "maxLength": 500,
-      "description": "Seller display name: the name the seller trades under."
-    },
     "trader_status": {
       "type": "string",
       "maxLength": 64,
-      "description": "The seller's own declaration of whether it sells as a trader (in a professional capacity) or as a private individual, as recorded by the Business. It is a declaration, not a legal assessment. Well-known values: `trader`, `non_trader`, `not_declared`. A Business that sells its own goods sends `trader`. A Platform MUST treat an unrecognized value as `not_declared`, never as `non_trader`."
+      "description": "The seller's own declaration of whether it sells as a trader (in a professional capacity) or as a private individual, as recorded by the Business. It is a declaration, not a legal assessment. Well-known values: `trader`, `non_trader`, `not_declared`. A Business that sells its own goods sends `trader`. A Platform MUST treat an unrecognized value as `not_declared`, never as `non_trader`.",
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "legal_name": {
       "type": "string",
       "maxLength": 500,
-      "description": "Legal name of the seller: the name of the legal entity, or the full name of a natural person, whether or not it is entered in a register."
+      "description": "Legal name of the seller: the name of the legal entity, or the full name of a natural person, whether or not it is entered in a register.",
+      "minLength": 1
     },
     "address": {
-      "$ref": "../../common/types/postal_address.json",
+      "$ref": "#/$defs/bounded_address",
       "description": "Geographic address where the seller is established. Not a returns or warehouse address."
     },
     "complaints_address": {
-      "$ref": "../../common/types/postal_address.json",
+      "$ref": "#/$defs/bounded_address",
       "description": "Address to which buyers send complaints, when it differs from `address`."
     },
     "contacts": {
@@ -46,7 +44,7 @@
     },
     "compliance_self_certified": {
       "type": "boolean",
-      "description": "Whether the seller has given the Business a self-certification committing to offer only products and services that comply with the law applicable where the offer is made. `true` states that the certification exists; it is not a verification of the products."
+      "description": "Whether the seller has given the Business a self-certification committing to offer only products and services that comply with the law applicable where the offer is made. Only `true` states that the certification exists; `false` or absence states nothing, and a Platform MUST NOT present either as a certification. `true` is not a verification of the products."
     },
     "on_behalf_of": {
       "type": "object",
@@ -58,11 +56,11 @@
           "description": "Legal name of the represented trader."
         },
         "address": {
-          "$ref": "../../common/types/postal_address.json",
+          "$ref": "#/$defs/bounded_address",
           "description": "Geographic address where the represented trader is established."
         },
         "complaints_address": {
-          "$ref": "../../common/types/postal_address.json",
+          "$ref": "#/$defs/bounded_address",
           "description": "Address of the represented trader to which buyers send complaints, when it differs from `address`."
         }
       }
@@ -74,10 +72,14 @@
       "description": "A seller contact channel. At least one of `email` or `phone_number` is present.",
       "anyOf": [
         {
-          "required": ["email"]
+          "required": [
+            "email"
+          ]
         },
         {
-          "required": ["phone_number"]
+          "required": [
+            "phone_number"
+          ]
         }
       ],
       "properties": {
@@ -107,7 +109,10 @@
     "registration": {
       "type": "object",
       "description": "A public registration of the seller.",
-      "required": ["type", "number"],
+      "required": [
+        "type",
+        "number"
+      ],
       "properties": {
         "type": {
           "type": "string",
@@ -130,6 +135,87 @@
           "description": "ISO 3166-1 alpha-2 code of the country where the register is kept."
         }
       }
+    },
+    "bounded_address": {
+      "title": "Bounded Postal Address",
+      "description": "A postal address with length limits on every field.",
+      "allOf": [
+        {
+          "$ref": "../../common/types/postal_address.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "extended_address": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "street_address": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "address_locality": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "address_region": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "address_country": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "postal_code": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "first_name": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "last_name": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "phone_number": {
+              "type": "string",
+              "maxLength": 32
+            }
+          }
+        }
+      ]
+    },
+    "bounded_link": {
+      "title": "Seller Link",
+      "description": "A link with length limits and an `https` URL.",
+      "allOf": [
+        {
+          "$ref": "../../common/types/link.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "url": {
+              "type": "string",
+              "maxLength": 2048,
+              "pattern": "^https://"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "id": {
+              "type": "string",
+              "maxLength": 256
+            }
+          }
+        }
+      ]
     }
   }
 }

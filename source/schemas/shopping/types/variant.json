@@ -121,6 +121,7 @@
       "properties": {
         "id": {
           "type": "string",
+          "minLength": 1,
           "maxLength": 256,
           "description": "Business-scoped seller ID. Identifies the seller, not the buyer or the session, and equals the key of the seller's entry in `seller_disclosures` when the seller disclosure extension is active on cart, checkout, or order."
         },

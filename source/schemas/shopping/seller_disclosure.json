@@ -5,16 +5,48 @@
   "title": "Seller Disclosure Extension",
   "description": "Adds a response-only `seller_disclosures` map to cart, checkout, and order. Each entry states who sells one or more line items: the seller's declared trader status, legal identity, address, contact channels, and public registrations. On the order, each entry also records the seller disclosures the buyer was shown at checkout.",
   "$defs": {
-    "seller_entry": {
-      "title": "Seller Disclosure Entry",
-      "description": "Disclosure for one seller in the session, and the line items that seller sells.",
+    "seller_core": {
+      "title": "Seller Disclosure Core",
+      "description": "Seller details plus a required display name and trader status, and bounded seller links. Shared by cart, checkout and order entries.",
       "allOf": [
         {
           "$ref": "types/seller_details.json"
         },
         {
           "type": "object",
-          "required": ["name", "trader_status"],
+          "required": [
+            "name",
+            "trader_status"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500,
+              "pattern": "\\S",
+              "description": "Seller display name: the name the seller trades under."
+            },
+            "links": {
+              "type": "array",
+              "maxItems": 20,
+              "items": {
+                "$ref": "types/seller_details.json#/$defs/bounded_link"
+              },
+              "description": "Seller policy and information links. Each `url` uses `https`."
+            }
+          }
+        }
+      ]
+    },
+    "seller_entry": {
+      "title": "Seller Disclosure Entry",
+      "description": "Disclosure for one seller in the session, and the line items that seller sells.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/seller_core"
+        },
+        {
+          "type": "object",
           "properties": {
             "line_item_ids": {
               "type": "array",
@@ -25,15 +57,7 @@
               "minItems": 1,
               "maxItems": 1000,
               "uniqueItems": true,
-              "description": "IDs of the line items this seller sells, from the same response. Required when the map has more than one entry. May be omitted only when the map has exactly one entry, which then covers every line item. Each line item appears in exactly one entry."
-            },
-            "links": {
-              "type": "array",
-              "maxItems": 20,
-              "items": {
-                "$ref": "../common/types/link.json"
-              },
-              "description": "Seller policy and information links. Each `url` MUST use `https`."
+              "description": "IDs of the line items this seller sells, from the same response. Required on every entry when the map has more than one entry. May be omitted only when the map has exactly one entry, which then covers every line item. Each line item appears in exactly one entry."
             }
           }
         }
@@ -41,8 +65,11 @@
     },
     "presented_notice": {
       "type": "object",
-      "description": "The text of a seller disclosure warning as the buyer was shown it at checkout.",
-      "required": ["code", "content"],
+      "description": "A seller disclosure warning the Business sent at checkout. It records the Business-supplied text, not how the Platform rendered it.",
+      "required": [
+        "code",
+        "content"
+      ],
       "properties": {
         "code": {
           "type": "string",
@@ -52,7 +79,7 @@
         "content": {
           "type": "string",
           "maxLength": 2000,
-          "description": "Plain-text notice exactly as presented at checkout."
+          "description": "Plain-text notice as the Business supplied it in the warning `content`."
         },
         "language": {
           "type": "string",
@@ -63,21 +90,37 @@
     },
     "order_seller_entry": {
       "title": "Order Seller Disclosure Entry",
-      "description": "Seller disclosure entry on an order: the seller facts presented at checkout, the order line items the seller sells, and the notices the buyer was shown.",
+      "description": "Seller disclosure snapshot on an order: the seller facts presented to the buyer, the order line items they apply to, and the notices sent with them.",
       "allOf": [
         {
-          "$ref": "#/$defs/seller_entry"
+          "$ref": "#/$defs/seller_core"
         },
         {
           "type": "object",
           "properties": {
+            "seller_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "description": "Seller ID, when it differs from this entry's key. An entry created at checkout is keyed by the seller ID and omits this field. A later snapshot for the same seller with changed facts (for example after an exchange) uses a new key and sets `seller_id`."
+            },
+            "line_item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "maxItems": 1000,
+              "uniqueItems": true,
+              "description": "IDs of the order line items this snapshot applies to. Lines with `status: \"removed\"` stay listed. An empty array means every line the snapshot applied to has been deleted from the order; the entry is kept as a record. Required on every entry when the map has more than one entry."
+            },
             "presented_notices": {
               "type": "array",
               "maxItems": 10,
               "items": {
                 "$ref": "#/$defs/presented_notice"
               },
-              "description": "Seller disclosure warnings shown at checkout for this seller, with their text."
+              "description": "The seller disclosure warnings the Business sent for this seller before the buyer completed checkout, or, for a later snapshot, before the buyer agreed to the change, with their text."
             }
           }
         }
@@ -100,13 +143,15 @@
       },
       "then": {
         "additionalProperties": {
-          "required": ["line_item_ids"]
+          "required": [
+            "line_item_ids"
+          ]
         }
       }
     },
     "order_seller_disclosures": {
       "type": "object",
-      "description": "Sellers of the order's line items, keyed by the seller IDs used at checkout.",
+      "description": "Seller disclosure snapshots for the order, keyed by seller ID for entries created at checkout and by a Business-scoped snapshot ID for later snapshots (see `seller_id`).",
       "propertyNames": {
         "type": "string",
         "minLength": 1,
@@ -121,7 +166,9 @@
       },
       "then": {
         "additionalProperties": {
-          "required": ["line_item_ids"]
+          "required": [
+            "line_item_ids"
+          ]
         }
       }
     },
@@ -137,6 +184,34 @@
           "properties": {
             "seller_disclosures": {
               "$ref": "#/$defs/seller_disclosures",
+              "ucp_request": "omit"
+            },
+            "messages": {
+              "type": "array",
+              "items": {
+                "if": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "seller_non_trader",
+                        "seller_status_not_declared",
+                        "seller_obligation_split"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "content": {
+                      "maxLength": 2000
+                    }
+                  }
+                }
+              },
               "ucp_request": "omit"
             }
           }
@@ -155,6 +230,34 @@
           "properties": {
             "seller_disclosures": {
               "$ref": "#/$defs/seller_disclosures",
+              "ucp_request": "omit"
+            },
+            "messages": {
+              "type": "array",
+              "items": {
+                "if": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "seller_non_trader",
+                        "seller_status_not_declared",
+                        "seller_obligation_split"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "content": {
+                      "maxLength": 2000
+                    }
+                  }
+                }
+              },
               "ucp_request": "omit"
             }
           }
