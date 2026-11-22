@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/carrier_point_destination.json",
+  "title": "Carrier Point Destination",
+  "description": "A parcel locker or staffed pickup point operated by a carrier network, not by the Business. The point is identified by the tuple (`network`, `country`, `point_id`); the Business-scoped `id` is used for selection.",
+  "type": "object",
+  "required": ["type", "id", "network", "country", "point_id"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "carrier_point",
+      "description": "Destination type discriminator. Optional in requests under a `carrier_pickup` method, where it defaults to `carrier_point`.",
+      "ucp_request": "optional"
+    },
+    "id": {
+      "type": "string",
+      "description": "Destination identifier used by `selected_destination_id`. In requests, a Platform-chosen ID for a point it writes; in responses, the ID the Business recognizes for this point within the method.",
+      "ucp_request": "optional"
+    },
+    "network": {
+      "$ref": "../../common/types/reverse_domain_name.json",
+      "description": "Carrier network whose rules and point directory apply, as a reverse-domain name derived from a domain the network operator controls (e.g. `com.example-parcel`). A network that keeps separate point namespaces under different brands uses a distinct value per namespace. This is the operating network, not a broker or the host where the point sits.",
+      "ucp_request": "required"
+    },
+    "country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 country code of the point. Part of the point key: networks operate in several countries and do not guarantee point IDs unique across them. Never inferred from `point_id`.",
+      "ucp_request": "required"
+    },
+    "point_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Point identifier as issued by `network`, unique within (`network`, `country`). Opaque: compared as an exact, case-sensitive string, leading zeros preserved, never parsed.",
+      "ucp_request": "required"
+    },
+    "broker": {
+      "type": "object",
+      "description": "Aggregator or broker through which the point was selected, when its point identifier differs from the network's own `point_id`. Lets the Business re-resolve the point through the same integration.",
+      "required": ["id", "point_id"],
+      "properties": {
+        "id": {
+          "$ref": "../../common/types/reverse_domain_name.json",
+          "description": "Reverse-domain name of the broker (e.g. `com.example-broker`)."
+        },
+        "point_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The broker's own identifier for the same point. Opaque."
+        }
+      },
+      "ucp_request": "optional"
+    },
+    "point_type": {
+      "type": "string",
+      "description": "Kind of point. Well-known values: `locker` (automated parcel locker, collected with a code), `staffed` (counter at a host or network branch, handed over by staff). Businesses MAY use additional values.",
+      "ucp_request": "omit"
+    },
+    "name": {
+      "type": "string",
+      "description": "Buyer-facing name of the point, as the network or Business presents it.",
+      "ucp_request": "omit"
+    },
+    "address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "Postal address of the point. It is the point's address, not the Buyer's.",
+      "ucp_request": "omit"
+    },
+    "host": {
+      "type": "object",
+      "description": "Physical site that houses the point, such as a shop or a fuel station. One site can host points of several networks; each is a separate destination with its own `network`, `point_id` and terms.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Business-scoped identifier of the site, equal across the destinations located at the same site. Opaque."
+        },
+        "name": {
+          "type": "string",
+          "description": "Buyer-facing name of the site."
+        }
+      },
+      "ucp_request": "omit"
+    },
+    "pickup_period": {
+      "type": "object",
+      "description": "How long the network holds a parcel at this point after deposit, as advertised before purchase. The binding deadline for a parcel is the `pickup_by` timestamp on its deposit event.",
+      "required": ["duration"],
+      "properties": {
+        "duration": {
+          "$ref": "../../common/types/duration.json",
+          "description": "Holding period counted from deposit (e.g. `PT48H`, `P3D`)."
+        },
+        "counting": {
+          "type": "string",
+          "description": "How days in `duration` are counted. Well-known values: `calendar_days`, `business_days`. Absent means calendar time."
+        }
+      },
+      "ucp_request": "omit"
+    },
+    "limits": {
+      "type": "object",
+      "description": "Parcel limits of this point, for display. Eligibility is decided by the Business and reported through `available` and `unavailable_reasons`.",
+      "properties": {
+        "max_weight": {
+          "$ref": "../../common/types/measure.json",
+          "description": "Maximum parcel weight."
+        },
+        "max_dimensions": {
+          "type": "array",
+          "description": "Maximum parcel dimensions, largest first. A parcel fits when each of its dimensions, also sorted largest first, is at most the dimension at the same position.",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "../../common/types/measure.json"
+          }
+        }
+      },
+      "ucp_request": "omit"
+    },
+    "available": {
+      "type": "boolean",
+      "description": "Whether the Business can currently deliver the method's line items to this point. Absent means available.",
+      "ucp_request": "omit"
+    },
+    "unavailable_reasons": {
+      "type": "array",
+      "description": "Machine-readable reasons why the point cannot be used. Present only when `available` is `false`.",
+      "items": {
+        "$ref": "#/$defs/unavailable_reason"
+      },
+      "ucp_request": "omit"
+    }
+  },
+  "$defs": {
+    "unavailable_reason": {
+      "title": "Carrier Point Unavailable Reason",
+      "type": "object",
+      "required": ["code"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Reason code. Well-known values: `exceeds_size_limit`, `exceeds_weight_limit`, `item_not_eligible` (an item the network does not accept at points, independent of size), `point_full`, `point_closed` (temporarily out of service), `point_not_found` (unknown to or removed from the network directory), `network_not_supported`, `country_not_supported`. Businesses MAY use additional values."
+        },
+        "line_item_ids": {
+          "type": "array",
+          "description": "Line items that cause this reason, when it is item-specific.",
+          "items": { "type": "string" }
+        },
+        "content": {
+          "type": "string",
+          "description": "Buyer-facing explanation."
+        }
+      }
+    }
+  }
+}

@@ -267,6 +267,9 @@ A request that includes `destinations[]` MUST also include the method's
 
 Additional values are defined by negotiated extensions. Destination fields
 specific to such a value are validated by the negotiated extension's schema.
+For example, the [Carrier Pickup Extension](carrier-pickup.md) defines the
+`carrier_pickup` method and the `carrier_point` destination for parcel lockers
+and pickup points run by carrier networks.
 
 ### Shipping Destination
 

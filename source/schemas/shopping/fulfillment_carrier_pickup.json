@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/fulfillment_carrier_pickup.json",
+  "name": "dev.ucp.shopping.fulfillment.carrier_pickup",
+  "title": "Carrier Pickup Extension",
+  "description": "Defines the `carrier_pickup` fulfillment method: the Business ships to a parcel locker or staffed pickup point operated by a carrier network, and the Buyer collects the parcel there. Requires the Fulfillment extension.",
+  "$defs": {
+    "carrier_point_destination": {
+      "$ref": "types/carrier_point_destination.json"
+    },
+    "network_offer": {
+      "title": "Carrier Network Offer",
+      "description": "A carrier network the Business ships to through this method.",
+      "type": "object",
+      "required": ["network"],
+      "properties": {
+        "network": {
+          "$ref": "../common/types/reverse_domain_name.json",
+          "description": "Carrier network identifier, matching `network` on Carrier Point Destinations."
+        },
+        "name": {
+          "type": "string",
+          "description": "Buyer-facing name of the network or of the service the Business sells on it."
+        },
+        "countries": {
+          "type": "array",
+          "description": "ISO 3166-1 alpha-2 codes of the countries where the Business ships to this network's points. Absent means not stated.",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
+        },
+        "point_types": {
+          "type": "array",
+          "description": "Point types the Business accepts on this network, using the `point_type` values of Carrier Point Destinations. Absent means all.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "buyer_field_requirement": {
+      "title": "Buyer Field Requirement",
+      "description": "A Buyer field the method needs, and why.",
+      "type": "object",
+      "required": ["field", "purpose"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Name of the field on Checkout `buyer`. Well-known values: `phone_number`, `email`, `first_name`, `last_name`."
+        },
+        "purpose": {
+          "type": "string",
+          "description": "Why the method needs the field. Well-known values: `pickup_notification` (the network sends the deposit notice or the collection code to it; a `phone_number` for this purpose must receive text messages), `recipient_identification` (staff check the recipient's name at handover). Businesses MAY use additional values."
+        },
+        "networks": {
+          "type": "array",
+          "description": "Networks that need the field. Absent means every network of the method.",
+          "items": { "$ref": "../common/types/reverse_domain_name.json" }
+        }
+      }
+    },
+    "carrier_pickup_method": {
+      "title": "Fulfillment Method (Carrier Pickup)",
+      "description": "Contract for a Fulfillment Method whose `type` is `carrier_pickup`. Methods of other types are unchanged.",
+      "type": "object",
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "carrier_pickup" } },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "destinations": {
+                "type": "array",
+                "description": "Carrier points for this method. The Platform MAY write a point the Buyer chose by its point key; the Business returns resolved points, and MAY list nearby points it suggests.",
+                "ucp_request": "optional",
+                "items": {
+                  "$ref": "types/carrier_point_destination.json"
+                }
+              },
+              "networks": {
+                "type": "array",
+                "description": "Carrier networks the Business accepts for this method's line items.",
+                "items": { "$ref": "#/$defs/network_offer" },
+                "ucp_request": "omit"
+              },
+              "required_buyer_fields": {
+                "type": "array",
+                "description": "Buyer fields the method needs to create the shipment. The Business lists only fields the method needs; Platforms collect and send these, and need not send other Buyer fields for this method.",
+                "items": { "$ref": "#/$defs/buyer_field_requirement" },
+                "ucp_request": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Carrier Pickup",
+      "description": "Checkout whose fulfillment methods may use the `carrier_pickup` type.",
+      "allOf": [
+        { "$ref": "fulfillment.json#/$defs/dev.ucp.shopping.checkout" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "type": "object",
+              "properties": {
+                "methods": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/carrier_pickup_method" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Carrier Pickup",
+      "description": "Order whose fulfillment events may report deposit at, collection from, and expiry at a carrier point.",
+      "allOf": [
+        { "$ref": "order.json" },
+        {
+          "type": "object",
+          "properties": {
+            "fulfillment": {
+              "type": "object",
+              "properties": {
+                "events": {
+                  "type": "array",
+                  "items": { "$ref": "types/carrier_pickup_event.json" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.fulfillment.carrier_pickup": {
+      "business_schema": {
+        "title": "Carrier Pickup Capability (Business)",
+        "description": "Business-level carrier pickup configuration.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "description": "Carrier pickup configuration.",
+                "properties": {
+                  "networks": {
+                    "type": "array",
+                    "description": "Carrier networks the Business ships to, so a Platform can offer the right point selector before Checkout.",
+                    "items": { "$ref": "#/$defs/network_offer" }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

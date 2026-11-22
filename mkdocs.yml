@@ -91,6 +91,8 @@ nav:
                   - MCP: specification/shopping/order/mcp.md
           - Extensions:
               - Fulfillment: specification/shopping/extensions/fulfillment.md
+              - Carrier Pickup:
+                  specification/shopping/extensions/carrier-pickup.md
               - Discounts: specification/shopping/extensions/discount.md
               - Buyer Consent:
                   specification/shopping/extensions/buyer-consent.md
@@ -580,6 +582,14 @@ plugins:
           - specification/shopping/extensions/fulfillment.md: >-
               Fulfillment extension for checkouts, defining delivery methods,
               pickup destinations, and method-agnostic UI rendering contracts.
+          - specification/shopping/extensions/carrier-pickup.md: >-
+              Carrier Pickup Extension, defining the carrier_pickup fulfillment
+              method for parcel lockers and staffed pickup points run by
+              carrier networks: point identity by network, country and point
+              ID, broker IDs, shared host sites, Buyer field requirements,
+              point re-validation with machine-readable unavailability
+              reasons, and order events that separate deposit at the point
+              from collection by the Buyer.
           - specification/shopping/extensions/discount.md: >-
               Discount Extension, covering discount code discovery, applied
               discounts, allocation method stacking orders, rejected code

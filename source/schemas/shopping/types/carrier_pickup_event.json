@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/carrier_pickup_event.json",
+  "title": "Carrier Pickup Event Fields",
+  "description": "Fields a Fulfillment Event carries when it concerns a parcel sent to a carrier point. Deposit at the point (`ready_for_pickup`) and collection by the Buyer (`picked_up`) are separate events: deposit starts the holding period, collection is the moment the Buyer acquires physical possession.",
+  "type": "object",
+  "properties": {
+    "point": {
+      "title": "Carrier Point Key",
+      "type": "object",
+      "description": "The carrier point the event concerns, by its point key. For `ready_for_pickup` after a redirect, the point where the parcel now waits.",
+      "required": ["network", "country", "point_id"],
+      "properties": {
+        "network": {
+          "$ref": "../../common/types/reverse_domain_name.json",
+          "description": "Carrier network of the point."
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code of the point."
+        },
+        "point_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Point identifier as issued by `network`."
+        }
+      }
+    },
+    "pickup_by": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp until which the parcel waits at `point`. A later `ready_for_pickup` event with a new `pickup_by` supersedes an earlier one (extension or redirect)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "ready_for_pickup" } },
+        "required": ["type", "point"]
+      },
+      "then": {
+        "required": ["pickup_by"]
+      }
+    }
+  ]
+}
