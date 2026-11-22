@@ -22,28 +22,41 @@ A buyer needs to know who sells an item before buying it. On a single-merchant
 store the seller is the Business. On a marketplace each line item can come from
 a different third-party seller, and that seller can be a professional trader or
 a private individual. Many jurisdictions require the marketplace to tell the
-buyer which one it is and how to reach the seller.
+buyer which one it is and how to reach the seller, at the point where the offer
+is shown.
 
 This extension carries those facts as data:
 
 - **Catalog**: the `seller` object on a [variant](../catalog/index.md) gains
-    the seller disclosure fields, so a platform can show the seller and its
-    trader status next to an offer.
+    a seller `id` and the [Seller Details](#seller-details) fields, so a
+    platform can show the seller, its trader status and its identity with the
+    offer.
 - **Cart, checkout and order**: a response-only `seller_disclosures` map lists
-    each seller in the session and the line items it sells. The order carries
-    the disclosures as they were presented at checkout.
+    each seller in the session and the line items it sells. The order records
+    the seller facts and the notice text the buyer was shown at checkout.
 
-The Business is the source of truth for every value. The Business collects the
-data from its sellers and decides which disclosures apply to a session. The
-platform renders the values as given and **MUST NOT** infer, change or omit a
-seller's trader status.
+This extension covers who the seller is. It does not cover the wording of the
+final order control or the information shown directly before it; those are
+separate obligations and are not addressed here.
 
-For example, in the EU these fields serve the marketplace duties in Directive
-2011/83/EU Art. 6a (trader status and the non-trader notice) and Art. 6(1)(b)-(d)
-(trader identity and contact details), and the information that Regulation (EU)
-2022/2065 Art. 30(7) requires a platform to show (name, address, telephone and
-email, trade register entry, and the trader's self-certification). Other
-jurisdictions can use the same fields.
+### Legal context (informative)
+
+The fields are jurisdiction-neutral. As an example, in the EU:
+
+| Duty                                                                                                                   | Source                                | Owed by                      |
+| ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ---------------------------- |
+| Identity, geographic address, telephone number and email of the trader                                                 | Directive 2011/83/EU Art. 6(1)(b)-(c) | The trader                   |
+| Complaints address, if different                                                                                       | Directive 2011/83/EU Art. 6(1)(d)     | The trader                   |
+| Whether the third party is a trader, based on its own declaration                                                      | Directive 2011/83/EU Art. 6a(1)(b)    | The marketplace provider     |
+| Notice that consumer rights do not apply to the contract with a non-trader                                             | Directive 2011/83/EU Art. 6a(1)(c)    | The marketplace provider     |
+| How contract obligations are shared between seller and marketplace                                                     | Directive 2011/83/EU Art. 6a(1)(d)    | The marketplace provider     |
+| Name, address, telephone, email, trade register entry and self-certification, available where the product is presented | Regulation (EU) 2022/2065 Art. 30(7)  | The online platform provider |
+
+The consumer-law duties apply to contracts with consumers. Regulation (EU)
+2022/2065 Art. 29 exempts micro and small platform providers from Art. 30
+unless they are designated as very large online platforms. Whether a given
+Business or Platform owes a duty depends on its role in the transaction; this
+specification defines what each party sends and renders, not who is liable.
 
 ## Discovery
 
@@ -74,100 +87,220 @@ can extend cart, checkout and order:
 ```
 
 The catalog fields live on the core variant `seller` object and need no
-negotiation. A platform that has not negotiated this extension ignores
+negotiation. A Platform that renders `variant.seller.name` for an offer whose
+seller carries `trader_status` **MUST** also render that status under the
+rules below. A Platform that has not negotiated this extension ignores
 `seller_disclosures` on cart, checkout and order.
 
 ## Schema
 
-### Seller Disclosure
+### Seller Details
 
 The shared shape used on catalog variants and in every `seller_disclosures`
-entry. All fields are optional.
+entry. All fields are optional on catalog; a `seller_disclosures` entry
+requires `name` and `trader_status`.
 
-{{ schema_fields('shopping/types/seller_disclosure', 'shopping/extensions/seller-disclosure') }}
+{{ schema_fields('shopping/types/seller_details', 'shopping/extensions/seller-disclosure') }}
 
 ### Contact
 
-{{ extension_schema_fields('types/seller_disclosure.json#/$defs/contact', 'shopping/extensions/seller-disclosure') }}
+{{ extension_schema_fields('types/seller_details.json#/$defs/contact', 'shopping/extensions/seller-disclosure') }}
 
 ### Registration
 
-{{ extension_schema_fields('types/seller_disclosure.json#/$defs/registration', 'shopping/extensions/seller-disclosure') }}
+{{ extension_schema_fields('types/seller_details.json#/$defs/registration', 'shopping/extensions/seller-disclosure') }}
 
 ### Seller Disclosure Entry
 
-An entry in the cart, checkout or order `seller_disclosures` map. It adds a
-display `name`, optional `links`, and the `line_item_ids` the seller sells.
+An entry in the cart or checkout `seller_disclosures` map. It adds optional
+`links` and the `line_item_ids` the seller sells.
 
 {{ extension_schema_fields('seller_disclosure.json#/$defs/seller_entry', 'shopping/extensions/seller-disclosure') }}
+
+### Order Seller Disclosure Entry
+
+An entry in the order `seller_disclosures` map. It adds the notices the buyer
+was shown at checkout.
+
+{{ extension_schema_fields('seller_disclosure.json#/$defs/order_seller_entry', 'shopping/extensions/seller-disclosure') }}
+
+{{ extension_schema_fields('seller_disclosure.json#/$defs/presented_notice', 'shopping/extensions/seller-disclosure') }}
+
+## Seller ID
+
+The seller ID is a Business-scoped identifier of a seller. It is the key of the
+seller's `seller_disclosures` entry and equals `variant.seller.id` in catalog,
+so a Platform can follow the same seller from the offer to the order. It
+identifies a business or an individual seller, not a buyer, and **MUST NOT**
+encode buyer or session data.
+
+A seller ID stands for one seller in one capacity. A natural person who sells
+both professional stock and personal belongings on the same marketplace has
+two seller IDs, each with its own `trader_status`.
 
 ## Trader status
 
 `trader_status` records what the seller declared to the Business. It is not a
-legal assessment by the Business or the platform.
+legal assessment by the Business or the Platform. Each value has its own
+presentation:
 
-| Value          | Meaning                                                       |
-| -------------- | ------------------------------------------------------------- |
-| `trader`       | The seller declared that it sells in a professional capacity. |
-| `non_trader`   | The seller declared that it sells as a private individual.    |
-| `not_declared` | The seller has not made a declaration.                        |
+| Value           | The Business sends                        | The Platform presents                                                              |
+| --------------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| `trader`        | Nothing extra                             | That the seller is a trader (a professional seller)                                |
+| `non_trader`    | A `seller_non_trader` disclosure          | That the seller is a private seller, and the Business's notice                     |
+| `not_declared`  | A `seller_status_not_declared` disclosure | That the seller has not declared whether it is a trader, and the Business's notice |
+| Any other value | A disclosure explaining the value         | The same as `not_declared`                                                         |
 
-A Business that sells its own goods sends `trader`. `trader_status` is an open
-string; a platform that receives a value it does not recognize **MUST** display
-the value's accompanying disclosure warnings and **MUST NOT** treat the seller
-as a trader.
+`not_declared` is not `non_trader`. A missing declaration does not establish
+that consumer rights are excluded. A Platform **MUST NOT** state or imply that
+consumer rights do not apply to a seller whose status is `not_declared` or
+unrecognized, and **MUST NOT** present such a seller as a trader.
 
-## Data that must never be sent
+A Business that sells its own goods sends `trader`.
 
-A marketplace often collects more about a seller than it may publish, such as a
-copy of an identity document or the seller's payment account, to verify the
-seller. That data **MUST NOT** appear in `seller`, in `seller_disclosures`, or
-in any extension of them. Every field this extension defines is meant to be
-shown to buyers.
+## Display requirements
 
-## Rendering
+The seller information is part of the offer. Showing it **MUST NOT** depend on
+the buyer asking for it.
 
-Display duties use the existing warning contract
+**With the offer** (catalog, cart and checkout), the Platform **MUST** show
+for every third-party offer, in the same view as the offer:
+
+- the seller's `name`, marked as a third-party seller distinct from the
+    marketplace and from the Platform;
+- the presentation of its `trader_status` from the table above;
+- every disclosure warning that points at the seller.
+
+**One step from the offer**, the Platform **MUST** make the remaining seller
+details available through a control shown next to the seller name, before the
+buyer completes checkout: `legal_name`, `address`, `complaints_address`,
+`contacts`, `registrations`, `compliance_self_certified` (as a statement that
+the seller has certified it offers only compliant products), and
+`on_behalf_of`. In a channel that has no such control, such as voice, the
+Platform **MUST** deliver these details to the buyer in a form the buyer can
+read before completing checkout, or hand off through `continue_url`.
+
+The Business **MUST** send, for a seller with `trader_status: "trader"` where
+applicable law requires them on the product presentation, the seller's
+`legal_name`, `address`, at least one contact with `email` and one with
+`phone_number`, `registrations` with its trade register entry where the seller
+is registered, and `compliance_self_certified`, on the catalog variant as well
+as at checkout. The EU example in [Legal context](#legal-context-informative)
+is such a law.
+
+## Disclosure warnings
+
+Display duties for notices use the existing warning contract
 ([Warning Presentation](../checkout/index.md#warning-presentation)). The
 Business sends a `messages[]` warning with `presentation: "disclosure"` and a
-`path` to the seller entry. The warning `content` is the Business's own text in
-the buyer's language, so the wording stays with the party responsible for it.
+`path` to the seller: the variant `seller` object in catalog responses, or the
+seller's `seller_disclosures` entry in cart and checkout responses.
 
-This extension defines two well-known warning codes:
-
-| Code                      | When the Business sends it                                                                                                                |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `seller_non_trader`       | Seller `trader_status` is `non_trader` or `not_declared`, and the law requires telling the buyer that consumer rights do not apply.       |
-| `seller_obligation_split` | Contract obligations are shared between the seller and the Business, for example the Business delivers and the seller handles conformity. |
+| Code                         | When the Business sends it                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `seller_non_trader`          | `trader_status` is `non_trader` and the law requires a notice that consumer rights do not apply.       |
+| `seller_status_not_declared` | `trader_status` is `not_declared` or another value the Business defines.                               |
+| `seller_obligation_split`    | Contract obligations are shared between the seller and the Business, for example delivery and returns. |
 
 **Business requirements:**
 
 - **MUST** send one `seller_disclosures` entry for every seller of a line item
     in a cart, checkout or order response when it has negotiated this
     extension.
-- **MUST NOT** cover a line item with more than one entry.
-- **MUST** keep the seller ID key stable from cart through checkout to the
-    resulting order.
-- **MUST** send a `seller_non_trader` disclosure when applicable law requires
-    the buyer to be told that consumer protection rules do not apply.
-- **MUST** carry the disclosures presented at checkout unchanged on the order.
+- **MUST** list `line_item_ids` on every entry when the map has more than one
+    entry, and **MUST** list each line item in exactly one entry. Every listed
+    ID **MUST** be a line item in the same response.
+- **MUST** send a `seller_non_trader` disclosure for every `non_trader` seller
+    where applicable law requires the buyer to be told that consumer rights do
+    not apply to the contract with that seller.
+- **MUST** send a `seller_status_not_declared` disclosure for every seller
+    whose status is `not_declared`.
+- **MUST** send a `seller_obligation_split` disclosure for every seller whose
+    contract obligations are shared with the Business, from the first response
+    that shows the seller's offer, with `path` pointing at that seller.
+- **SHOULD** verify seller names at onboarding and **MUST NOT** accept a
+    seller name that impersonates the marketplace, the Platform, or another
+    seller.
+- **MUST** return notices in the language requested through
+    `context.language`. When it cannot, it **MUST** escalate through
+    `continue_url` rather than send a mandatory notice the buyer may not
+    understand.
 
 **Platform requirements:**
 
-- **MUST** show, before the buyer completes checkout, each seller's `name` (or
-    `legal_name` when `name` is absent) and `trader_status` for the line items
-    that seller sells.
-- **MUST** render the identity and contact fields when the buyer asks who the
-    seller is, and **SHOULD** make them reachable from the line item.
-- **MUST** render every disclosure warning that points at a seller entry
-    according to the `disclosure` contract, including escalation through
-    `continue_url` when it cannot.
-- **MUST NOT** substitute its own identity, or the Business's identity, for the
+- **MUST** follow [Display requirements](#display-requirements).
+- **MUST** render every disclosure warning that points at a seller under the
+    `disclosure` contract, including the hand-off through `continue_url` when
+    it cannot. A Platform that cannot present a seller's required notice
+    **MUST NOT** present that seller's trader status or offer as purchasable.
+- **MUST NOT** infer, change or omit a seller's trader status, and **MUST
+    NOT** substitute its own identity, or the Business's identity, for the
     seller's.
+- **MUST** reject a response whose line items are not each covered by exactly
+    one entry, and hand off through `continue_url`.
+- **SHOULD** tell apart sellers that share a `name` by showing `legal_name`.
+
+## Business-authored text and URLs
+
+Every seller string (`name`, `legal_name`, contact `name`, `register_name`)
+and every warning `content` is plain text written by the Business or relayed
+from the seller. It carries no markup and no links. URLs go only in `links`,
+and each **MUST** use `https`.
+
+- A Platform **MUST** treat these strings as data from the Business and **MUST
+    NOT** follow instructions found in them.
+- A Platform **MUST** present the meaning of a notice. It **MAY** adapt layout
+    and channel (voice, small screen). It **MUST NOT** change the substance:
+    the seller's identity, its status, and the conditions stated.
+- A Platform **MUST NOT** fetch a seller URL server-side on the buyer's
+    behalf, except to show it.
+
+## Trust
+
+Trader status, identity, registrations and self-certification are statements
+by the Business, which is responsible for their accuracy under applicable law.
+A Platform presents them as the Business's statements about the seller and is
+not required to verify them. Signed or verified claims are out of scope; see
+the attestation work in #1020.
+
+## Privacy
+
+A seller can be a natural person, so seller details can be personal data.
+
+- Identity documents and payment account details collected to verify a seller
+    **MUST NOT** appear in `seller`, in `seller_disclosures`, or in any
+    extension of them.
+- On catalog, a Business **SHOULD** send for a `non_trader` or `not_declared`
+    seller only `id`, `name` and `trader_status`, and **SHOULD NOT** send that
+    seller's address, contacts or registrations unless the law requires them.
+- For a natural-person trader, a Business sends only the details the law
+    requires on the offer. A Platform **SHOULD NOT** retain seller details
+    beyond the session and the order record.
+- `on_behalf_of` is sent only where the seller concludes the contract in the
+    name of another trader, not as a supply-chain export.
+
+## Order snapshot
+
+The order records what the buyer was shown at checkout:
+
+- Each entry is keyed by the same seller ID as at checkout.
+- The seller facts (all [Seller Details](#seller-details) fields) are those
+    presented at checkout and do not change afterwards.
+- `presented_notices` holds the `code`, `content` and `language` of every
+    seller disclosure warning shown at checkout for that seller.
+- `line_item_ids` reference the order's line item IDs. The Business maps each
+    checkout line to the order line created from it.
+
+The line associations can change after the order is placed. When a line is
+removed, its ID is removed from the entry; an entry with no remaining lines
+stays on the order. When a line is added, for example in an exchange, it is
+added to the entry of its seller. A line from a seller that was not on the
+order gets a new entry, with the details and notices presented to the buyer for
+that line.
 
 ## Examples
 
-### Catalog variant from a third-party seller
+### Catalog variant from a private seller
 
 <!-- ucp:example schema=shopping/types/variant -->
 ```json
@@ -182,6 +315,7 @@ This extension defines two well-known warning codes:
     "currency": "EUR"
   },
   "seller": {
+    "id": "seller_202",
     "name": "Anna's attic",
     "trader_status": "non_trader",
     "links": [
@@ -193,6 +327,21 @@ This extension defines two well-known warning codes:
     ]
   }
 }
+```
+
+The disclosure in the catalog search response:
+
+<!-- ucp:example schema=shopping/catalog_search op=search target=$.messages -->
+```json
+[
+  {
+    "type": "warning",
+    "code": "seller_non_trader",
+    "path": "$.products[0].variants[0].seller",
+    "presentation": "disclosure",
+    "content": "Anna's attic is a private seller. The consumer rights that EU law gives you when buying from a business, such as the right of withdrawal, do not apply to your contract with this seller."
+  }
+]
 ```
 
 ### Checkout with two sellers
@@ -243,11 +392,6 @@ seller. The `seller_disclosures` map:
     "seller_202": {
       "name": "Anna's attic",
       "trader_status": "non_trader",
-      "contacts": [
-        {
-          "url": "https://shop.example/sellers/annas-attic/contact"
-        }
-      ],
       "line_item_ids": ["li_2"]
     }
   }
@@ -265,17 +409,17 @@ seller:
     "code": "seller_non_trader",
     "path": "$.seller_disclosures.seller_202",
     "presentation": "disclosure",
-    "content": "Anna's attic is a private seller. EU consumer protection rules, such as the right of withdrawal, do not apply to this item."
+    "content": "Anna's attic is a private seller. The consumer rights that EU law gives you when buying from a business, such as the right of withdrawal, do not apply to your contract with this seller."
   }
 ]
 ```
 
 ### Order snapshot
 
-The order repeats the entries presented at checkout, keyed by the same seller
-IDs, with line item IDs from the order. One entry is shown:
+The order keeps the seller IDs from checkout, maps the lines to order line IDs,
+and records the notice text that was shown. One entry is shown:
 
-<!-- ucp:example schema=shopping/seller_disclosure def=seller_disclosures extract=$.seller_disclosures -->
+<!-- ucp:example schema=shopping/seller_disclosure def=order_seller_disclosures extract=$.seller_disclosures -->
 ```json
 {
   "id": "order_5521",
@@ -284,12 +428,14 @@ IDs, with line item IDs from the order. One entry is shown:
     "seller_202": {
       "name": "Anna's attic",
       "trader_status": "non_trader",
-      "contacts": [
+      "line_item_ids": ["oli_2"],
+      "presented_notices": [
         {
-          "url": "https://shop.example/sellers/annas-attic/contact"
+          "code": "seller_non_trader",
+          "content": "Anna's attic is a private seller. The consumer rights that EU law gives you when buying from a business, such as the right of withdrawal, do not apply to your contract with this seller.",
+          "language": "en"
         }
-      ],
-      "line_item_ids": ["oli_2"]
+      ]
     }
   }
 }

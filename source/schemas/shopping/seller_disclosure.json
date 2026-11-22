@@ -3,36 +3,81 @@
   "$id": "https://ucp.dev/schemas/shopping/seller_disclosure.json",
   "name": "dev.ucp.shopping.seller_disclosure",
   "title": "Seller Disclosure Extension",
-  "description": "Adds a response-only `seller_disclosures` map to cart, checkout, and order. Each entry states who sells one or more line items: the seller's declared trader status, legal identity, address, contact channels, and public registrations. The order carries the disclosures as presented at checkout.",
+  "description": "Adds a response-only `seller_disclosures` map to cart, checkout, and order. Each entry states who sells one or more line items: the seller's declared trader status, legal identity, address, contact channels, and public registrations. On the order, each entry also records the seller disclosures the buyer was shown at checkout.",
   "$defs": {
     "seller_entry": {
       "title": "Seller Disclosure Entry",
       "description": "Disclosure for one seller in the session, and the line items that seller sells.",
       "allOf": [
         {
-          "$ref": "types/seller_disclosure.json"
+          "$ref": "types/seller_details.json"
+        },
+        {
+          "type": "object",
+          "required": ["name", "trader_status"],
+          "properties": {
+            "line_item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "minItems": 1,
+              "maxItems": 1000,
+              "uniqueItems": true,
+              "description": "IDs of the line items this seller sells, from the same response. Required when the map has more than one entry. May be omitted only when the map has exactly one entry, which then covers every line item. Each line item appears in exactly one entry."
+            },
+            "links": {
+              "type": "array",
+              "maxItems": 20,
+              "items": {
+                "$ref": "../common/types/link.json"
+              },
+              "description": "Seller policy and information links. Each `url` MUST use `https`."
+            }
+          }
+        }
+      ]
+    },
+    "presented_notice": {
+      "type": "object",
+      "description": "The text of a seller disclosure warning as the buyer was shown it at checkout.",
+      "required": ["code", "content"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Code of the warning that carried the notice, such as `seller_non_trader`."
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Plain-text notice exactly as presented at checkout."
+        },
+        "language": {
+          "type": "string",
+          "maxLength": 35,
+          "description": "BCP 47 language tag of `content`."
+        }
+      }
+    },
+    "order_seller_entry": {
+      "title": "Order Seller Disclosure Entry",
+      "description": "Seller disclosure entry on an order: the seller facts presented at checkout, the order line items the seller sells, and the notices the buyer was shown.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/seller_entry"
         },
         {
           "type": "object",
           "properties": {
-            "name": {
-              "type": "string",
-              "description": "Seller display name."
-            },
-            "line_item_ids": {
+            "presented_notices": {
               "type": "array",
+              "maxItems": 10,
               "items": {
-                "type": "string"
+                "$ref": "#/$defs/presented_notice"
               },
-              "minItems": 1,
-              "description": "IDs of the line items this seller sells. When omitted, the entry covers every line item. A line item MUST NOT be covered by more than one entry."
-            },
-            "links": {
-              "type": "array",
-              "items": {
-                "$ref": "../common/types/link.json"
-              },
-              "description": "Seller policy and information links."
+              "description": "Seller disclosure warnings shown at checkout for this seller, with their text."
             }
           }
         }
@@ -40,13 +85,44 @@
     },
     "seller_disclosures": {
       "type": "object",
-      "description": "Sellers in this session, keyed by a Business-scoped seller ID that stays stable across the cart, checkout, and resulting order.",
+      "description": "Sellers in this session, keyed by the Business-scoped seller ID (the same value as `variant.seller.id` in catalog). The key identifies the seller, not the buyer, and stays the same from cart through checkout to the resulting order.",
       "propertyNames": {
         "type": "string",
-        "minLength": 1
+        "minLength": 1,
+        "maxLength": 256
       },
+      "maxProperties": 100,
       "additionalProperties": {
         "$ref": "#/$defs/seller_entry"
+      },
+      "if": {
+        "minProperties": 2
+      },
+      "then": {
+        "additionalProperties": {
+          "required": ["line_item_ids"]
+        }
+      }
+    },
+    "order_seller_disclosures": {
+      "type": "object",
+      "description": "Sellers of the order's line items, keyed by the seller IDs used at checkout.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "maxProperties": 100,
+      "additionalProperties": {
+        "$ref": "#/$defs/order_seller_entry"
+      },
+      "if": {
+        "minProperties": 2
+      },
+      "then": {
+        "additionalProperties": {
+          "required": ["line_item_ids"]
+        }
       }
     },
     "dev.ucp.shopping.cart": {
@@ -87,7 +163,7 @@
     },
     "dev.ucp.shopping.order": {
       "title": "Order with Seller Disclosure",
-      "description": "Order extended with the per-seller disclosures presented at checkout.",
+      "description": "Order extended with the seller disclosures presented at checkout.",
       "allOf": [
         {
           "$ref": "order.json"
@@ -96,7 +172,7 @@
           "type": "object",
           "properties": {
             "seller_disclosures": {
-              "$ref": "#/$defs/seller_disclosures",
+              "$ref": "#/$defs/order_seller_disclosures",
               "ucp_request": "omit"
             }
           }

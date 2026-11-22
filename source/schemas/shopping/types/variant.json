@@ -112,13 +112,18 @@
     },
     "seller": {
       "type": "object",
-      "description": "Optional seller context for this variant. A marketplace that lists third-party offers uses the seller disclosure fields to state who sells the variant and whether that seller declared itself a trader.",
+      "description": "Optional seller context for this variant. A marketplace that lists third-party offers uses the seller details fields to state who sells the variant and whether that seller declared itself a trader.",
       "allOf": [
         {
-          "$ref": "seller_disclosure.json"
+          "$ref": "seller_details.json"
         }
       ],
       "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Business-scoped seller ID. Identifies the seller, not the buyer or the session, and equals the key of the seller's entry in `seller_disclosures` when the seller disclosure extension is active on cart, checkout, or order."
+        },
         "name": {
           "type": "string",
           "description": "Seller display name."
