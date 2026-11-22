@@ -49,14 +49,14 @@
           "format": "uri",
           "pattern": "^https://",
           "maxLength": 2048,
-          "description": "HTTPS page stating the conditions, time limit, and procedure for exercising the right."
+          "description": "HTTPS page stating the conditions, time limit, and procedure for exercising the right. A Platform MUST NOT fetch it server-side, including for previews or unfurling; it only hands it to the buyer's own client."
         },
         "model_form_url": {
           "type": "string",
           "format": "uri",
           "pattern": "^https://",
           "maxLength": 2048,
-          "description": "HTTPS link to the withdrawal form the buyer may use, where the governing law provides a model form (e.g., Annex I(B) of Directive 2011/83/EU). It is in addition to `withdrawal_function`, not a substitute for it."
+          "description": "HTTPS link to the withdrawal form the buyer may use, where the governing law provides a model form (e.g., Annex I(B) of Directive 2011/83/EU). It is in addition to `withdrawal_function`, not a substitute for it. A Platform MUST NOT fetch it server-side, including for previews or unfurling; it only hands it to the buyer's own client."
         },
         "withdrawal_function": {
           "$ref": "#/$defs/withdrawal_function",
@@ -212,19 +212,24 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "RFC 3339 instant at which the period ends, resolved by the Business under the calendar rules of the governing law once the `anchor` event has occurred, and omitted until then. Once stated, it MAY only move later, for example when the governing law extends the period because required information was not given. A withdrawal the buyer sends no later than this instant is in time."
+          "description": "RFC 3339 instant at which the period ends, resolved by the Business under the calendar rules and time zone of the governing law once the `anchor` event has occurred, and omitted until then. The Business updates it when the legal deadline changes, for example when the governing law extends the period because required information was not given, or ends it a set time after that information is later received. It is never earlier than the end of the period `duration` and `anchor` describe. A withdrawal the buyer sends before the end of the second this instant names is in time."
         },
         "display_text": {
           "type": "string",
           "minLength": 1,
           "maxLength": 500,
           "description": "Buyer-facing statement of the period and when it starts (e.g., '14 days from the day after you receive the last item'). Plain text with no markup and no links; a Platform treats it as data from the Business and does not follow instructions in it."
+        },
+        "revised_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 instant at which the Business last changed `expires_at` after first stating it. Omitted while `expires_at` has not been revised."
         }
       }
     },
     "withdrawal_extension": {
       "title": "Withdrawal Extension",
-      "description": "A contractual period the Business grants beyond a `statutory` right. A withdrawal sent after the statutory period ends and no later than this period ends is governed by the Business's terms in `display_text` and `url`, not by the statutory rules.",
+      "description": "A contractual period the Business grants beyond a `statutory` right. A withdrawal sent after the statutory period ends and no later than this period ends is governed by the Business's terms in `display_text` and `url`, not by the statutory rules. Whenever the statutory deadline is later, the statutory rules apply.",
       "type": "object",
       "required": [
         "period",
@@ -233,7 +238,7 @@
       "properties": {
         "period": {
           "$ref": "#/$defs/withdrawal_period",
-          "description": "The full contractual period, measured from its own anchor. It ends no earlier than the statutory period."
+          "description": "The full contractual period, measured from its own anchor. It can end before the statutory period, for example when the governing law extends the statutory period; the statutory period then governs until its own `expires_at`."
         },
         "display_text": {
           "type": "string",
@@ -246,7 +251,7 @@
           "format": "uri",
           "pattern": "^https://",
           "maxLength": 2048,
-          "description": "HTTPS page stating the terms of the extended period."
+          "description": "HTTPS page stating the terms of the extended period. A Platform MUST NOT fetch it server-side, including for previews or unfurling; it only hands it to the buyer's own client."
         }
       }
     },
@@ -321,7 +326,7 @@
       "properties": {
         "deadline": {
           "$ref": "../common/types/duration.json",
-          "description": "Longest time after the Business is informed of the withdrawal within which it refunds the payments received (e.g., `P14D`), subject to `withholding`."
+          "description": "Time limit for the refund of the payments received, counted from the day the Business is informed of the withdrawal (e.g., `P14D`). It is an outer limit: the Business refunds without undue delay and in any event within it, subject to `withholding`."
         },
         "withholding": {
           "type": "string",
@@ -355,16 +360,29 @@
           "format": "uri",
           "pattern": "^https://",
           "maxLength": 2048,
-          "description": "HTTPS page on the Business's online interface where the buyer withdraws. It is available for the whole withdrawal period, also before the goods arrive, without installing an application the buyer did not use to conclude the contract. It MUST NOT carry a guessable contract identifier that gives access without authenticating the buyer."
+          "description": "HTTPS page on the Business's online interface where the buyer withdraws. It is available for the whole withdrawal period, also before the goods arrive, without installing an application the buyer did not use to conclude the contract. It MUST NOT carry a guessable contract identifier that gives access without authenticating the buyer. A Platform MUST NOT fetch it server-side, including for previews or unfurling; it only hands it to the buyer's own client."
         },
         "labels": {
           "type": "array",
-          "description": "Labels of the function's controls, one entry per language, each language at most once. It includes the language the contract is concluded in.",
+          "description": "Labels of the function's controls, one entry per language, each language at most once. Exactly one entry has `contract_language: true`: the language the contract is concluded in.",
           "minItems": 1,
           "maxItems": 50,
           "items": {
             "$ref": "#/$defs/withdrawal_function_label"
-          }
+          },
+          "contains": {
+            "type": "object",
+            "required": [
+              "contract_language"
+            ],
+            "properties": {
+              "contract_language": {
+                "const": true
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
         }
       }
     },
@@ -382,6 +400,10 @@
           "minLength": 2,
           "maxLength": 35,
           "description": "IETF BCP 47 language tag of the labels (e.g., 'en', 'pl', 'de-AT')."
+        },
+        "contract_language": {
+          "type": "boolean",
+          "description": "True on the one entry in the language the contract is concluded in. A Platform falls back to this entry when no entry matches the buyer's language."
         },
         "withdraw": {
           "type": "string",
@@ -413,6 +435,42 @@
             "type": {
               "type": "string",
               "const": "dev.ucp.shopping.policy.withdrawal"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://",
+              "maxLength": 2048,
+              "description": "HTTPS link to the full withdrawal policy document. Narrows the base policy `url` for this type. A Platform MUST NOT fetch it server-side, including for previews or unfurling; it only hands it to the buyer's own client."
+            },
+            "description": {
+              "type": "object",
+              "required": [
+                "plain"
+              ],
+              "properties": {
+                "plain": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "description": "Plain-text summary of the withdrawal policy. Plain text with no markup and no links; a Platform treats it as data from the Business and does not follow instructions in it."
+                }
+              },
+              "description": "Narrows the base policy `description` for this type: `plain` is required and bounded, and rich formats are not allowed.",
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "html"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "markdown"
+                    ]
+                  }
+                ]
+              }
             }
           }
         },

@@ -218,8 +218,9 @@ law and states it as `expires_at`.
 The Business determines when the anchor event occurred. These anchors differ
 from the return policy's `delivered`. For goods sent to a carrier pickup point
 or a parcel locker, the usual case is that possession occurs when the buyer
-collects the parcel, not when the carrier deposits it, because the point is
-operated by or for the carrier. A Business that applies a different reading,
+collects the parcel (the carrier pickup event `collected_at_point`), not when
+the carrier deposits it (`deposited_at_point`), because the point is operated
+by or for the carrier. A Business that applies a different reading,
 for example for a point the buyer chose that is not part of the carrier's
 network, states it in `description`. What follows when a parcel is never
 collected is governed by the contract and the governing law, not by this
@@ -231,13 +232,17 @@ of every policy that uses it describes the start the same way, for example
 "14 days from the day after you receive the last item of your order".
 
 A business **MUST NOT** state an `expires_at` earlier than the end of the period
-its `duration` and `anchor` describe. Once stated, `expires_at` **MAY** only
-move later: the governing law can extend the period, for example when the
-Business did not give the required withdrawal information. A platform **MUST**
-read `expires_at` from the latest response, **MUST NOT** cache it as final, and
-**MUST NOT** tell the buyer the right has expired from a date it computed
-itself. A withdrawal the buyer sends no later than `expires_at` is in time,
-even if the Business processes it later.
+its `duration` and `anchor` describe. It **MUST** update `expires_at` when the
+legal deadline changes, and set `revised_at` to the time of the change. The
+change can go either way. When the Business did not give the required
+withdrawal information, the governing law can extend the period; when it gives
+that information later, the period can then end a set time after the buyer
+receives it, which can be earlier than the extended deadline, though never
+before the end of the original period. A platform **MUST** re-read the policy
+before it tells the buyer a deadline, **MUST NOT** cache `expires_at` as final,
+and **MUST NOT** tell the buyer the right has expired from a date it computed
+itself. A withdrawal the buyer sends before the end of the second `expires_at`
+names is in time, even if the Business processes it later.
 
 The right can be exercised before the anchor event. A missing `expires_at`
 means the deadline is not yet resolved, not that the buyer cannot withdraw yet;
@@ -255,7 +260,10 @@ A Business that grants more than the statutory period, for example 30 days
 instead of 14, keeps one `statutory` policy and adds `extension`. The
 policy's `period` and other fields state the statutory terms. `extension.period`
 states the full contractual period, and `extension.display_text` the terms that
-apply to a withdrawal sent after the statutory period ends. Only a `statutory`
+apply to a withdrawal sent after the statutory period ends. The contractual
+period can end before the statutory one, for example when the governing law
+extends the statutory period; the statutory period then governs until its own
+`expires_at`. Only a `statutory`
 policy carries `extension`; the schema rejects it elsewhere. A Business does
 not publish a second withdrawal policy for the same items, since two policies
 of one type at the same target collide under
@@ -279,8 +287,10 @@ the buyer that the buyer pays.
 
 ### Refund
 
-`refund.deadline` states the longest time after the Business is informed of the
-withdrawal within which it refunds the payments received. `refund.withholding`
+`refund.deadline` is the outer limit for refunding the payments received,
+counted from the day the Business is informed of the withdrawal. The Business
+refunds without undue delay and in any event within it; the limit is not a
+waiting period. `refund.withholding`
 states whether, for a sale of goods, the Business may hold the refund until it
 receives the goods back or the buyer shows they were sent, whichever is
 earlier. A platform **MUST NOT** present `deadline` as unconditional when
@@ -325,21 +335,34 @@ governing law provides one; it is in addition to the online function.
 - `labels` gives, per language, the label of the control that opens the
   withdrawal statement (`withdraw`) and, for information, the label of the
   control on the Business's function that submits it (`confirm`). Each
-  language appears at most once, and the language of the contract is always
-  present.
+  language appears at most once. Exactly one entry has
+  `contract_language: true`, marking the language the contract is concluded
+  in; the schema requires it.
 
 A platform that renders a control leading to `url` **MUST** label it with the
-Business's `withdraw` text for the buyer's language, matching the language tag
-exactly or by its language part alone (`de` for `de-AT`), and otherwise with the
-entry for the language of the contract. If it cannot show that wording, for example in a voice
-channel, it **MUST NOT** substitute its own label; it gives the buyer `url`, or
-hands off through `continue_url` on a checkout.
+Business's `withdraw` text. It picks the entry by the Lookup scheme of
+RFC 4647 Section 3.4 against the buyer's language tag: an exact match first,
+then the tag shortened one part at a time from the end (`zh-Hant-TW`, then
+`zh-Hant`, then `zh`), comparing tags case-insensitively. With no match, it uses
+the entry with `contract_language: true`. If it cannot show that wording, for
+example in a voice channel, it **MUST NOT** substitute its own label. On a
+checkout it hands off through `continue_url`; on an order it gives the buyer
+`url` to open in the buyer's own client, where the Business's interface shows
+its own label.
 
-What the function asks for, the two-step statement and confirmation, and the
-acknowledgement of receipt on a durable medium without undue delay are
-obligations of the Business on its own interface. The Business sends that
-acknowledgement itself; a UCP response to the platform is not that
-acknowledgement.
+The function itself is the Business's obligation on its own interface:
+
+- The withdrawal statement lets the buyer easily give or confirm their name,
+  details identifying the contract, and the electronic means by which the
+  Business will send the acknowledgement. A buyer who is logged in should not
+  need to identify themselves or the contract again. Questions such as the reason
+  for withdrawing are separate and optional.
+- The buyer submits the statement through a separate confirmation control,
+  labelled as in `confirm`.
+- After submission, the Business sends, without undue delay and on a durable
+  medium, an acknowledgement of receipt that states the content of the
+  statement and the date and time it was submitted. The Business sends it
+  itself; a UCP response to the platform is not that acknowledgement.
 
 This extension advertises the function; it does not define a UCP operation to
 withdraw. A platform **MUST NOT** submit a withdrawal on the buyer's behalf,
@@ -408,10 +431,15 @@ written by the Business:
   present the right, or its absence, in its own words. It hands off through
   `continue_url`.
 
-Every URL in this extension a buyer may open (`instructions_url`,
+Every URL in this extension a buyer may open (`url`, `instructions_url`,
 `model_form_url`, `withdrawal_function.url`, `extension.url`) is `https`, and
-the schema requires it. A platform **MUST NOT** fetch such a URL server-side on
-the buyer's behalf, except to show it to the buyer.
+the schema requires it; for the base policy `url` this type narrows the core
+field. A platform **MUST NOT** fetch such a URL server-side at all, including
+for link previews or unfurling. It only hands the URL to the buyer's own
+client, for example as a link the buyer opens.
+
+`description` is also narrowed for this type: it carries a bounded `plain`
+text, and the `html` and `markdown` formats are not allowed.
 
 ### Trust
 
@@ -448,8 +476,10 @@ snapshot and **MUST NOT** change after the order is placed: `basis`,
 `availability`, `period.duration`, `period.anchor`, `period.display_text`,
 `extension` terms, `return_costs`, `refund`, and the links. `period.expires_at`
 (and `extension.period.expires_at`) is a fact the Business adds once the anchor
-event has occurred and **MAY** move later, as the return policy does with its
-own `expires_at`. Adding or moving it does not change the terms. A business
+event has occurred and updates, with `revised_at`, when the legal deadline
+changes (see [Period and anchor](#period-and-anchor)), as the return policy
+resolves its own `expires_at`. Adding or updating it does not change the
+terms. A business
 **MAY** split the policy into per-line copies with `applies_to` to state a
 deadline per line, each copy carrying the checkout terms unchanged.
 
@@ -492,10 +522,10 @@ business in that case typically states:
 | `basis` | `statutory` | Art. 9(1) |
 | `period.duration` | `P14D` | Art. 9(1) |
 | `period.anchor` | `possession`, `possession_last_item`, `possession_first_item` for goods; `contract_concluded` for services and digital content not on a tangible medium | Art. 9(2) |
-| `period.expires_at` | The period starts the day after the anchor event; if its last day is a Saturday, Sunday, or public holiday, it ends at the end of the next working day. It can move later by up to 12 months if the withdrawal information was not given. | Recital 41 and Regulation (EEC, Euratom) No 1182/71 Art. 3(1), 3(4); Art. 10 |
+| `period.expires_at` | The period starts the day after the anchor event; if its last day is a Saturday, Sunday, or public holiday, it ends at the end of the next working day. If the withdrawal information was not given, it ends 12 months after the end of the initial period; if the information is given within those 12 months, it ends 14 days after the day the consumer receives it. | Recital 41 and Regulation (EEC, Euratom) No 1182/71 Art. 3(1), 3(4); Art. 10 |
 | `availability.exception.code` | `eu.crd.art16.a` to `eu.crd.art16.m` | Art. 16, Art. 6(1)(k) |
 | `return_costs` | `buyer` only if the consumer was told; a cost for goods that cannot normally be returned by post | Art. 6(1)(i), Art. 14(1) |
-| `refund.deadline` | `P14D`, refunded with the same means of payment unless the consumer expressly agrees otherwise, at no fee | Art. 13(1) |
+| `refund.deadline` | `P14D`: without undue delay and in any event within 14 days, with the same means of payment unless the consumer expressly agrees otherwise, at no fee | Art. 13(1) |
 | `refund.withholding` | `until_goods_or_proof_of_dispatch` for goods, unless the trader offered to collect them | Art. 13(3) |
 | `refund.delivery` | `up_to_least_expensive_standard` | Art. 13(1), 13(2) |
 | `instructions_url`, `model_form_url` | The withdrawal information and the Annex I(B) model form | Art. 6(1)(h), Annex I |
@@ -504,10 +534,18 @@ business in that case typically states:
 The consumer sends the goods back within 14 days of communicating the
 withdrawal, unless the trader offered to collect them (Art. 14(1)); the
 instructions state this. For digital content not on a tangible medium, the
-exception in Art. 16(m) requires the consumer's prior express consent, the
-acknowledgement that the right is lost, and the trader's confirmation; a
-`conditional` exception states those conditions in `display_text`. Checkout
-consent for services and digital content is not covered by this extension.
+Art. 16(m) exception applies only once performance has begun. Where the
+contract obliges the consumer to pay, it also needs the consumer's prior
+express consent, the acknowledgement that the right is lost, and the trader's
+confirmation under Art. 8(7). A `conditional` exception states those conditions
+in `display_text`, and a platform **MUST NOT** present the right as lost before
+the Business says performance has begun.
+
+For services, the instructions and the pre-order disclosure also state that a
+consumer who asks for the service to start during the withdrawal period and
+then withdraws pays an amount in proportion to what was provided (Art. 6(1)(j),
+Art. 14(3)). Collecting that request at checkout is not covered by this
+extension.
 
 On a medium with limited space or time, the conditions, time limit, and
 procedure for withdrawal are given on that medium before the contract; the
@@ -559,7 +597,7 @@ page, not a per-order link:
   "withdrawal_function": {
     "url": "https://example.com/account/withdraw",
     "labels": [
-      { "language": "en", "withdraw": "Withdraw from contract here", "confirm": "Confirm withdrawal" }
+      { "language": "en", "contract_language": true, "withdraw": "Withdraw from contract here", "confirm": "Confirm withdrawal" }
     ]
   },
   "url": "https://example.com/withdrawal"
@@ -653,7 +691,7 @@ contract-wide start as the default:
   "withdrawal_function": {
     "url": "https://example.com/account/withdraw",
     "labels": [
-      { "language": "en", "withdraw": "Withdraw from contract here" }
+      { "language": "en", "contract_language": true, "withdraw": "Withdraw from contract here" }
     ]
   }
 }
@@ -687,7 +725,7 @@ return:
   "refund": { "deadline": "P14D", "withholding": "until_goods_or_proof_of_dispatch", "delivery": "up_to_least_expensive_standard" },
   "withdrawal_function": {
     "url": "https://example.com/account/withdraw",
-    "labels": [{ "language": "en", "withdraw": "Withdraw from contract here" }]
+    "labels": [{ "language": "en", "contract_language": true, "withdraw": "Withdraw from contract here" }]
   }
 }
 ```
@@ -708,17 +746,20 @@ period from delivery and pays return shipping:
   "return_costs": { "payer": "business" },
   "withdrawal_function": {
     "url": "https://example.com/account/cancel",
-    "labels": [{ "language": "en", "withdraw": "Cancel your order here" }]
+    "labels": [{ "language": "en", "contract_language": true, "withdraw": "Cancel your order here" }]
   }
 }
 ```
 
 ### Order after collection from a parcel locker
 
-The order was delivered to a parcel locker and collected on Tuesday
-2027-03-02. The period started the day after collection, not on the day the
-carrier deposited the parcel. The last day, 2027-03-16, is a Tuesday, so the deadline is the end
-of that day in the Business's time zone. The checkout terms are unchanged; only
+The contract is governed by German law. The order was delivered to a parcel
+locker and collected on Tuesday 2027-03-02. The period started the day after
+collection, not on the day the carrier deposited the parcel. The last day,
+2027-03-16, is a Tuesday and, for this example, assumed not to be a public
+holiday, so the period ends at the end of that day.
+The Business states the instant in the time zone it applies under the governing
+law, here Central European Time (UTC+1). The checkout terms are unchanged; only
 `expires_at` is added:
 
 <!-- ucp:example schema=shopping/policy_withdrawal def=dev.ucp.shopping.order -->
@@ -762,7 +803,7 @@ of that day in the Business's time zone. The checkout terms are unchanged; only
       "withdrawal_function": {
         "url": "https://example.com/account/withdraw",
         "labels": [
-          { "language": "en", "withdraw": "Withdraw from contract here", "confirm": "Confirm withdrawal" }
+          { "language": "en", "contract_language": true, "withdraw": "Withdraw from contract here", "confirm": "Confirm withdrawal" }
         ]
       }
     }
