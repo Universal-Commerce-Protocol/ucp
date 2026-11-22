@@ -615,9 +615,10 @@ plugins:
               needs to shortlist and verify a business-to-business supplier:
               minimum order quantity and quantity brackets under Incoterms,
               lead time and capacity, supplier type, certifications with a
-              verification level and evidence pointer, and technical
-              specifications with a source pointer, plus matching search
-              filters.
+              verification level and evidence pointer, and product and
+              variant attributes in the #401 shape with a source pointer
+              (document copy hash, last-checked date, additional sources),
+              plus matching search filters.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data

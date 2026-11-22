@@ -3,11 +3,11 @@
   "$id": "https://ucp.dev/schemas/shopping/b2b_catalog.json",
   "name": "dev.ucp.shopping.b2b_catalog",
   "title": "B2B Catalog Extension (Working Draft)",
-  "description": "Working Draft for #1110. Extends Catalog Search and Catalog Lookup with the facts a procurement agent needs to shortlist and verify a business-to-business supplier: trade terms (minimum order quantity, quantity brackets, Incoterms), lead time and capacity, supplier type, certifications with a verification level, and technical specifications with a source pointer.",
+  "description": "Working Draft for #1110. Extends Catalog Search and Catalog Lookup with the facts a procurement agent needs to shortlist and verify a business-to-business supplier: trade terms (minimum order quantity, quantity brackets, Incoterms), lead time and capacity, supplier type, certifications with a verification level, and product and variant attributes in the #401 shape with a source pointer.",
   "$defs": {
     "source_pointer": {
       "title": "Source Pointer",
-      "description": "Where a fact comes from, so a Platform can check it. Shared by attribute sources, compatibility claims (#385) and certificate evidence. `url`, `page`, `section` and `quote` point at the document that states the fact.",
+      "description": "Where a fact comes from, so a Platform can check it. Shared by attribute sources, compatibility claims (#385) and certificate evidence. `url`, `page`, `section` and `quote` point at the document that states the fact; `sha256` and `checked_at` say which copy was read and when the quote was last confirmed.",
       "type": "object",
       "additionalProperties": true,
       "properties": {
@@ -32,6 +32,20 @@
         "quote": {
           "type": "string",
           "description": "The line in the document that states the fact, quoted verbatim."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Lowercase hex SHA-256 of the bytes of the document at `url` that the quote was read from. Lets a Platform tell which copy a quote came from when the document changes."
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the quote was last confirmed in the document."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this source was chosen when other documents state a different value (e.g. 'Footnote limits the 150 °C rating to the DN50 model'). Present only when such a conflict exists."
         }
       },
       "allOf": [
@@ -54,41 +68,46 @@
         }
       ]
     },
-    "specification": {
-      "title": "Specification",
-      "description": "One technical attribute of a variant, with its source.",
+    "attribute": {
+      "title": "Attribute",
+      "description": "A product or variant fact with its source. Mirrors the `attribute` shape proposed in #401 (`name`, `key`, `value`, `numeric_value`, `unit`) and adds `source` and `additional_sources`, so that one shape serves both proposals. If #401 is adopted, this definition becomes #401's type plus the two source fields.",
       "type": "object",
       "additionalProperties": true,
       "required": [
-        "key",
+        "name",
         "value"
       ],
       "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable attribute name (e.g. 'Max. operating temperature'). As in #401."
+        },
         "key": {
           "type": "string",
-          "description": "Stable attribute identifier. A Business SHOULD use the identifier from the taxonomy it categorizes by (e.g. an ECLASS property code) when one exists."
-        },
-        "label": {
-          "type": "string",
-          "description": "Human-readable attribute name (e.g. 'Max. operating temperature')."
+          "description": "Stable identifier for cross-merchant correlation. As in #401. A Business SHOULD use the identifier from the taxonomy it categorizes by (e.g. an ECLASS property code) when one exists."
         },
         "value": {
-          "description": "The attribute value. A quantity SHOULD be a measure.",
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "boolean"
-            },
-            {
-              "$ref": "../common/types/measure.json"
-            }
-          ]
+          "type": "string",
+          "description": "Display value, as stated. As in #401. May hold a range or several numbers (e.g. '60-256 g/m²', '520 x 540 x 634 mm')."
+        },
+        "numeric_value": {
+          "type": "number",
+          "description": "Comparable numeric form of `value` when the attribute is a single measurement. As in #401. A value with more than one number SHOULD instead be split into one attribute per number (see the spec page)."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit of `numeric_value`. As in #401: open vocabulary, SI/UCUM-style symbols preferred (e.g. `mm`, `kg`, `C`)."
         },
         "source": {
           "$ref": "#/$defs/source_pointer",
-          "description": "Where this value comes from. A Business MUST NOT mark safety-critical attributes (e.g. food contact, medical use, pressure rating) as `inferred`."
+          "description": "The line `value` was taken from. When several lines state the fact, this is the line that wins. A Business MUST NOT mark safety-critical attributes (e.g. food contact, medical use, pressure rating) as `inferred`."
+        },
+        "additional_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_pointer"
+          },
+          "description": "Other lines that state the same fact, including lines that give a different value. When one of them conflicts with `value`, `source.reason` says why `source` wins."
         }
       }
     },
@@ -242,14 +261,14 @@
       "properties": {
         "supplier_type": {
           "type": "string",
-          "description": "Well-known values: `manufacturer`, `trading_company`, `distributor`."
+          "description": "Well-known values: `manufacturer`, `trading_company`, `distributor`. For a `distributor`, `supplier_type_evidence` can state whether the maker authorized it."
         },
         "supplier_type_evidence": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Kinds of evidence behind `supplier_type`. Well-known values: `business_license`, `certificate_holder_match`, `factory_audit`."
+          "description": "Kinds of evidence behind `supplier_type`. Well-known values: `business_license`, `certificate_holder_match`, `factory_audit`, `manufacturer_authorization` (the maker has authorized this seller to sell its products)."
         }
       }
     },
@@ -266,12 +285,12 @@
           "$ref": "#/$defs/supply_signals",
           "ucp_request": "omit"
         },
-        "specifications": {
+        "attributes": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/specification"
+            "$ref": "#/$defs/attribute"
           },
-          "description": "Technical attributes with their sources.",
+          "description": "Variant facts with their sources. Same field name and shape as #401.",
           "ucp_request": "omit"
         },
         "seller": {
@@ -298,6 +317,14 @@
             "$ref": "#/$defs/certification"
           },
           "description": "Certifications the product holds.",
+          "ucp_request": "omit"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attribute"
+          },
+          "description": "Product facts with their sources, for facts shared by all variants. Same field name and shape as #401.",
           "ucp_request": "omit"
         }
       }

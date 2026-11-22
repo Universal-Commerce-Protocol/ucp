@@ -42,8 +42,8 @@ This extension adds, all optional and response-only:
     brackets priced under an Incoterms® rule and a named place.
 - `supply` on a catalog variant — sample and production lead time and
     production capacity.
-- `specifications[]` on a catalog variant — technical attributes, each with a
-    `source` pointer.
+- `attributes[]` on a catalog product and variant — facts in the shape
+    proposed in #401, each with a `source` pointer.
 - `supplier_type` and `supplier_type_evidence` on the variant's `seller`.
 - `certifications[]` on a catalog product — scheme, certificate number,
     expiry and a verification level with an optional evidence pointer.
@@ -77,6 +77,10 @@ This draft deliberately does not redefine work that other proposals cover:
 - **Trade classification (#1110 item 6).** No new field is needed. A Business
   lists the HS code as a `categories[]` entry with `taxonomy: "hs"`, next to
   entries with `taxonomy: "unspsc"` or `taxonomy: "eclass"`.
+- **Attributes (#401).** `attributes[]` uses the field name and shape
+  proposed in [#401](https://github.com/Universal-Commerce-Protocol/ucp/issues/401)
+  (`name`, `key`, `value`, `numeric_value`, `unit`), so a Business sends each
+  fact once. This extension only adds `source` and `additional_sources`.
 - **Order multiple.** The ordering step is the variant's existing
   `quantity_unit.increment`.
 
@@ -112,9 +116,9 @@ Businesses advertise the extension in their profile:
 
 {{ extension_schema_fields('b2b_catalog.json#/$defs/source_pointer', 'shopping/extensions/b2b-catalog') }}
 
-### Specification
+### Attribute
 
-{{ extension_schema_fields('b2b_catalog.json#/$defs/specification', 'shopping/extensions/b2b-catalog') }}
+{{ extension_schema_fields('b2b_catalog.json#/$defs/attribute', 'shopping/extensions/b2b-catalog') }}
 
 ### Trade Terms
 
@@ -140,7 +144,7 @@ Businesses advertise the extension in their profile:
 
 ### Source pointer
 
-Every specification may carry a `source`. Its `type` says who stated the
+Every attribute may carry a `source`. Its `type` says who stated the
 fact:
 
 | `type` | Meaning | Pointer fields |
@@ -160,6 +164,31 @@ A Business MUST NOT mark safety-critical attributes, such as food contact,
 medical use or pressure ratings, as `inferred`. A Platform SHOULD show the
 source type alongside a value and SHOULD NOT present an `inferred` value as a
 supplier statement.
+
+### Which copy was read
+
+Supplier pages and documents change, so a quote that was in a document when it
+was read can be gone later. `sha256` is the SHA-256 of the bytes of the
+document the quote was read from, and `checked_at` is the date the quote was
+last confirmed in it. A Platform that fetches `url` and gets different bytes
+knows the document has changed since the quote was taken.
+
+### More than one line per fact
+
+A fact is often stated in several lines of a supplier's documents. `source` is
+the line the `value` was taken from; `additional_sources[]` lists the other
+lines. When another line gives a different value, `source.reason` states why
+`source` wins, for example a footnote that ties a value to one model.
+
+### Values with more than one number
+
+`numeric_value` holds one number in one `unit`. A value that holds several
+numbers, such as `520 x 540 x 634 mm`, or a range, such as `60-256 g/m²`,
+SHOULD be sent as one attribute per number so that a Platform can compare
+them in code: for example `width`, `depth` and `height`, or `paper_weight_min`
+and `paper_weight_max`. Each of those attributes can point at the same
+`source`, whose `quote` keeps the original line. A Business MAY also send the
+combined value as an attribute without `numeric_value` for display.
 
 ### Certification verification
 
@@ -274,22 +303,35 @@ certificate was compared with a copy of the certificate.
           "period": "P1M"
         }
       },
-      "specifications": [
+      "attributes": [
         {
           "key": "max_operating_temperature",
-          "label": "Max. operating temperature",
-          "value": { "value": 150, "unit": "CEL", "display_text": "°C" },
+          "name": "Max. operating temperature",
+          "value": "150 °C",
+          "numeric_value": 150,
+          "unit": "C",
           "source": {
             "type": "supplier_document",
             "url": "https://example.com/datasheets/sbv-dn50.pdf",
             "page": 4,
             "section": "Technical data",
-            "quote": "Max. operating temperature: 150 °C"
-          }
+            "quote": "Max. operating temperature: 150 °C (DN50 only)",
+            "sha256": "9f2b5c0e8a7d4c1b3e6f0a9d8c7b6a5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a",
+            "checked_at": "2026-11-10",
+            "reason": "The brochure gives 120 °C for the whole range; the datasheet footnote ties 150 °C to DN50."
+          },
+          "additional_sources": [
+            {
+              "type": "supplier_document",
+              "url": "https://example.com/brochures/sanitary-valves.pdf",
+              "page": 12,
+              "quote": "Operating temperature up to 120 °C"
+            }
+          ]
         },
         {
           "key": "seat_material",
-          "label": "Seat material",
+          "name": "Seat material",
           "value": "PTFE",
           "source": { "type": "supplier_authored" }
         }
@@ -309,3 +351,8 @@ certificate was compared with a copy of the certificate.
    pricing states from #969 when a variant has no public `price`?
 4. **Verification levels.** Are three levels enough, and should
    `verified_by` be an open vocabulary or a reverse-domain identifier?
+5. **Range values.** This draft splits a value with several numbers into one
+   attribute per number. Is a range or multi-dimension type in scope instead?
+6. **Attribute placement.** If #401 is adopted, should `source` and
+   `additional_sources` move into #401's attribute type, so that every
+   catalog attribute can carry a source without this extension?
