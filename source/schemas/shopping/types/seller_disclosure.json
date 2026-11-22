@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/seller_disclosure.json",
+  "title": "Seller Disclosure",
+  "description": "Buyer-facing facts about the party that sells an item: its declared trader status, legal identity, geographic address and contact channels, and public registrations. All values are asserted by the Business, which collects them from the seller. Identity documents and payment account details collected to verify a seller MUST NOT be sent in this object or in any extension of it.",
+  "type": "object",
+  "properties": {
+    "trader_status": {
+      "type": "string",
+      "description": "The seller's own declaration of whether it acts as a trader (a business selling in a professional capacity) or as a private individual, as recorded by the Business. It is a declaration, not a legal assessment by the Business. Well-known values: `trader`, `non_trader`, `not_declared`. A Business that sells its own goods sends `trader`."
+    },
+    "legal_name": {
+      "type": "string",
+      "description": "Registered legal name of the seller."
+    },
+    "trading_name": {
+      "type": "string",
+      "description": "Name the seller trades under, when it differs from `legal_name`."
+    },
+    "address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "Geographic address where the seller is established. Not a returns or warehouse address."
+    },
+    "complaints_address": {
+      "$ref": "../../common/types/postal_address.json",
+      "description": "Address to which buyers send complaints, when it differs from `address`."
+    },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contact"
+      },
+      "description": "Channels through which a buyer can contact the seller quickly and directly."
+    },
+    "registrations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/registration"
+      },
+      "description": "Public registrations of the seller, such as a trade register entry or a tax registration number."
+    },
+    "compliance_self_certified": {
+      "type": "boolean",
+      "description": "Whether the seller has certified to the Business that it offers only products and services that comply with applicable law."
+    },
+    "on_behalf_of": {
+      "type": "object",
+      "description": "The trader on whose behalf the seller acts, when the seller sells for another trader (for example, as an agent).",
+      "properties": {
+        "legal_name": {
+          "type": "string",
+          "description": "Registered legal name of the principal trader."
+        },
+        "address": {
+          "$ref": "../../common/types/postal_address.json",
+          "description": "Geographic address where the principal trader is established."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "contact": {
+      "type": "object",
+      "description": "A seller contact channel. At least one of `email`, `phone_number` or `url` is present.",
+      "anyOf": [
+        {
+          "required": ["email"]
+        },
+        {
+          "required": ["phone_number"]
+        },
+        {
+          "required": ["url"]
+        }
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Purpose of the channel. Well-known values: `general`, `customer_support`, `complaints`."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address."
+        },
+        "phone_number": {
+          "type": "string",
+          "description": "Phone number in E.164 format."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of an online contact channel, such as a contact form or chat."
+        }
+      }
+    },
+    "registration": {
+      "type": "object",
+      "description": "A public registration of the seller.",
+      "required": ["type", "number"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Kind of registration. Well-known values: `trade_register`, `vat`."
+        },
+        "number": {
+          "type": "string",
+          "description": "Registration number as issued by the register."
+        },
+        "register_name": {
+          "type": "string",
+          "description": "Name of the register or issuing authority."
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 code of the country where the register is kept."
+        }
+      }
+    }
+  }
+}

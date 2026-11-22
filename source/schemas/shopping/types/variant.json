@@ -112,7 +112,12 @@
     },
     "seller": {
       "type": "object",
-      "description": "Optional seller context for this variant.",
+      "description": "Optional seller context for this variant. A marketplace that lists third-party offers uses the seller disclosure fields to state who sells the variant and whether that seller declared itself a trader.",
+      "allOf": [
+        {
+          "$ref": "seller_disclosure.json"
+        }
+      ],
       "properties": {
         "name": {
           "type": "string",

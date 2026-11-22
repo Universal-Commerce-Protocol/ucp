@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/seller_disclosure.json",
+  "name": "dev.ucp.shopping.seller_disclosure",
+  "title": "Seller Disclosure Extension",
+  "description": "Adds a response-only `seller_disclosures` map to cart, checkout, and order. Each entry states who sells one or more line items: the seller's declared trader status, legal identity, address, contact channels, and public registrations. The order carries the disclosures as presented at checkout.",
+  "$defs": {
+    "seller_entry": {
+      "title": "Seller Disclosure Entry",
+      "description": "Disclosure for one seller in the session, and the line items that seller sells.",
+      "allOf": [
+        {
+          "$ref": "types/seller_disclosure.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Seller display name."
+            },
+            "line_item_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "description": "IDs of the line items this seller sells. When omitted, the entry covers every line item. A line item MUST NOT be covered by more than one entry."
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "$ref": "../common/types/link.json"
+              },
+              "description": "Seller policy and information links."
+            }
+          }
+        }
+      ]
+    },
+    "seller_disclosures": {
+      "type": "object",
+      "description": "Sellers in this session, keyed by a Business-scoped seller ID that stays stable across the cart, checkout, and resulting order.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/seller_entry"
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Seller Disclosure",
+      "description": "Cart extended with per-seller disclosures.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "seller_disclosures": {
+              "$ref": "#/$defs/seller_disclosures",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Seller Disclosure",
+      "description": "Checkout extended with per-seller disclosures.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "seller_disclosures": {
+              "$ref": "#/$defs/seller_disclosures",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Seller Disclosure",
+      "description": "Order extended with the per-seller disclosures presented at checkout.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "seller_disclosures": {
+              "$ref": "#/$defs/seller_disclosures",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
