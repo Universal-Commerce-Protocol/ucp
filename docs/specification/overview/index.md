@@ -2568,7 +2568,9 @@ Once the Platform and the Business have negotiated a protocol version that
 defines `list_price_basis`, a Platform **MUST NOT** present a `list_price`
 without a basis as a reduction: no percentage, amount saved, "was" wording,
 strikethrough, or sale badge. It **MAY** show it as a reference price with no
-reduction wording, or not at all. Under earlier versions the rules in
+reduction wording, or not at all. A higher reference shown next to the selling price
+without explanation can itself read as a reduction, so that reference
+**MUST NOT** be laid out like a strikethrough or a "was" price. Under earlier versions the rules in
 [List price](#list-price) apply unchanged. A Business that has negotiated a
 version defining `list_price_basis` **SHOULD** therefore send it with every
 `list_price` it wants presented as a reduction.

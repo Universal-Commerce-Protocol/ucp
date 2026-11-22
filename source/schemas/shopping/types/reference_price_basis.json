@@ -11,7 +11,7 @@
     "type": {
       "type": "string",
       "maxLength": 64,
-      "pattern": "^[a-z][a-z0-9_.]*(?![\\s\\S])",
+      "pattern": "^[a-z][a-z0-9_.]*$",
       "description": "What `list_price` is measured against. Well-known values: `lowest_prior` (the lowest price the selling trader applied to this item, in the channel the Buyer is buying through, during the `window_days` before the reduction took effect), `lowest_before_campaign` (for a reduction increased step by step without interruption in one campaign, the lowest price applied during the `window_days` before the first reduction of that campaign), `before_first_reduction` (the price applied before the first reduction, where the rule governing the Buyer's context allows it, typically for goods liable to deteriorate or expire rapidly), `immediately_preceding` (the price applied immediately before the current reduction, where the rule governing the Buyer's context allows it, typically for goods liable to deteriorate or expire rapidly that are reduced in successive steps), `regular` (the price usually charged outside promotions), `recommended_retail` (the price recommended by the manufacturer or supplier). The first four are prior-price types. A Platform MUST treat any other value as a basis that is not a prior-price type."
     },
     "window_days": {
@@ -27,13 +27,13 @@
     "display_text": {
       "type": "string",
       "maxLength": 500,
-      "pattern": "^[^\\u0000-\\u001F\\u007F<>]*(?![\\s\\S])",
+      "pattern": "^[^\\u0000-\\u001F\\u007F<>]*$",
       "description": "Business-authored plain-text label that names the reference price for the Buyer (for example, 'Lowest price in the 30 days before the reduction'). It has no markup and no links, and MUST NOT contain amounts or instructions. A Platform MUST treat it as data from the Business and MUST NOT follow instructions found in it. A Platform MUST present its meaning when it presents a reduction derived from `list_price`; it MAY adapt the layout or the channel (for example, voice or a small screen) but MUST NOT change the substance. When it contradicts `type`, `window_days`, or `reduced_at`, the structured fields govern and the Platform MUST NOT present the label."
     },
     "language": {
       "type": "string",
       "maxLength": 35,
-      "pattern": "^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*(?![\\s\\S])",
+      "pattern": "^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$",
       "description": "IETF BCP 47 language tag of `display_text`. When absent, `display_text` is in the language resolved from `context.language` (or `Accept-Language`). Because a Business MAY return content in a different language, it MUST send `language` whenever `display_text` is not in the requested language, and SHOULD always send it in Orders and feeds."
     }
   },
