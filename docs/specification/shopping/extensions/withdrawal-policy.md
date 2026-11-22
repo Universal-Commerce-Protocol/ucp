@@ -14,6 +14,8 @@
    limitations under the License.
 -->
 
+<!-- cspell:ignore inpost InPost orlenpaczka Poczta poczta Polska polska Odstąp umowy tutaj Potwierdź odstąpienie -->
+
 # Withdrawal Policy Extension
 
 ## Overview
@@ -44,12 +46,19 @@ withdrawal right. See
   (`period`), and a longer contractual period on top of a statutory one
   (`extension`)
 - Who pays for returning goods, and how much (`return_costs`)
+- How the goods go back: collection by the Business, a carrier network's
+  points, a courier, post, or a shop, and whether the Business issues a label
+  or a return code (`return_methods`)
 - Refund terms: deadline, withholding, and which delivery payments are
   refunded (`refund`)
 - Links to the instructions and the model withdrawal form
   (`instructions_url`, `model_form_url`)
 - Where the online withdrawal function is and how its controls are labelled
   in each language (`withdrawal_function`)
+- On the order, after a withdrawal or a return request: the return shipments
+  the Business set up, with a return label or a carrier return code and the
+  time to send the goods back (`return_shipments`), and return-side
+  fulfillment events
 
 **Dependencies:**
 
@@ -138,6 +147,10 @@ structurally, not that it is absent from the Business's terms.
 
 {{ extension_schema_fields('policy_withdrawal.json#/$defs/withdrawal_return_costs', 'shopping/extensions/withdrawal-policy') }}
 
+### Withdrawal Return Method
+
+{{ extension_schema_fields('policy_withdrawal.json#/$defs/withdrawal_return_method', 'shopping/extensions/withdrawal-policy') }}
+
 ### Withdrawal Refund
 
 {{ extension_schema_fields('policy_withdrawal.json#/$defs/withdrawal_refund', 'shopping/extensions/withdrawal-policy') }}
@@ -151,6 +164,26 @@ structurally, not that it is absent from the Business's terms.
 Each entry in `withdrawal_function.labels` uses this shape.
 
 {{ extension_schema_fields('policy_withdrawal.json#/$defs/withdrawal_function_label', 'shopping/extensions/withdrawal-policy') }}
+
+### Return Shipment
+
+{{ schema_fields('types/return_shipment', 'shopping/extensions/withdrawal-policy') }}
+
+### Return Code
+
+{{ extension_schema_fields('types/return_shipment.json#/$defs/return_code', 'shopping/extensions/withdrawal-policy') }}
+
+### Return Label
+
+{{ extension_schema_fields('types/return_shipment.json#/$defs/return_label', 'shopping/extensions/withdrawal-policy') }}
+
+### Return Point
+
+{{ extension_schema_fields('types/return_shipment.json#/$defs/return_point', 'shopping/extensions/withdrawal-policy') }}
+
+### Return Fulfillment Event
+
+{{ extension_schema_fields('types/return_shipment.json#/$defs/return_event', 'shopping/extensions/withdrawal-policy') }}
 
 ## Withdrawal terms
 
@@ -286,6 +319,67 @@ shipment (`per_shipment`), or each item (`per_item`). When `return_costs` is
 omitted, the terms are not stated structurally and a platform **MUST NOT** tell
 the buyer that the buyer pays.
 
+### Return methods
+
+`return_methods` lists how the buyer can send the goods back or have them
+collected after withdrawing. It is part of the procedure for exercising the
+right that the Business states before the contract, so it is static: the
+label or code for one order comes later, on the order (see
+[Return shipments](#return-shipments)). When `return_methods` is omitted, the
+methods are not stated structurally and `instructions_url` remains the
+statement of the procedure.
+
+| `type` | The buyer | `network` |
+| :-- | :-- | :-- |
+| `trader_collects` | hands the goods over; the Business collects them itself or through a carrier it sends | no |
+| `carrier_point` | drops the parcel at a locker or a staffed point of the network | required |
+| `carrier_pickup_at_address` | has a courier of the network collect the parcel, using the Business's label or code | optional |
+| `postal` | posts the goods through a postal or parcel service to the return address in the instructions | optional |
+| `in_store` | hands the goods over at the Business's premises | no |
+
+`type` is an open string. A platform that does not recognize a value presents
+the entry's `display_text` and does not describe the method itself; an
+unrecognized entry without `display_text` is not presented.
+
+`network` uses the network identifier format proposed for carrier pickup
+points ([#1139](https://github.com/Universal-Commerce-Protocol/ucp/pull/1139)):
+a reverse-domain name of the operator's primary domain, such as `eu.inpost`,
+`pl.orlenpaczka`, `pl.poczta-polska`, `com.dhl` or `com.dpd`. Where that
+proposal lists a well-known value for a network, Businesses and platforms use
+it, so that a return and a delivery name the same network the same way. A host site that serves several networks, such as a
+convenience store chain, is not a network: a return through such a site names
+the network whose code or label it accepts. Two entries with the same `type`
+and different `network` values are two methods; a Business that accepts
+returns at the points of several networks lists each.
+
+`artifacts` says what the Business issues for a return by the method once
+the buyer has withdrawn: a `label`, a return `code`, or both. When it is
+omitted or empty, the Business issues neither. `printer_required` is `true`
+only when the buyer must print a label; the schema rejects it on a method
+without `label`. A Business that offers a method with a code and no label
+**MUST** accept the parcel on the code alone and **MUST NOT** require the
+buyer to print anything for that method. A platform **MUST NOT** tell the
+buyer a printer is needed unless `printer_required` is `true`.
+
+`return_costs` on a method states the return costs for that method, and only
+where they differ from the policy-level `return_costs`. When present, it
+replaces the policy-level `return_costs` for returns by that method; when
+omitted, the policy-level `return_costs` applies. A Business **MUST NOT**
+repeat the policy-level terms on every method. When the buyer bears a cost by
+one method and not by another, a platform presents both and does not present
+the lower one as the cost of returning.
+
+`trader_collects` means the Business has offered to collect the goods itself.
+The Business lists it only when it has made that offer for the goods the policy
+covers. Under EU law that offer has two effects: the buyer does not have to send the
+goods back within the 14 days (CRD Art. 14(1)), and the Business cannot hold the
+refund until it has the goods back or proof of dispatch (Art. 13(3)). The
+schema therefore rejects `refund.withholding:
+until_goods_or_proof_of_dispatch` in a policy whose `return_methods` contains
+`trader_collects`. Only `trader_collects` carries that meaning in this
+extension: a Business that books the courier itself and only asks the buyer to
+hand the goods over lists `trader_collects`, not `carrier_pickup_at_address`.
+
 ### Refund
 
 `refund.deadline` is the outer limit for refunding the payments received,
@@ -331,8 +425,9 @@ governing law provides one; it is in addition to the online function.
   that the function meets the governing law.
 - `url` **MUST NOT** carry a contract identifier that gives access without
   authenticating the buyer. A Business that deep-links to a contract uses an
-  authenticated session or an unguessable token, and verifies the buyer when
-  the link is opened outside a session.
+  authenticated session or an unguessable token. A link opened outside a
+  session opens the withdrawal statement without the contract details filled
+  in, so the buyer provides them; it does not open a login step.
 - `labels` gives, per language, the label of the control that opens the
   withdrawal statement (`withdraw`) and, for information, the label of the
   control on the Business's function that submits it (`confirm`). Each
@@ -355,9 +450,20 @@ The function itself is the Business's obligation on its own interface:
 
 - The withdrawal statement lets the buyer easily give or confirm their name,
   details identifying the contract, and the electronic means by which the
-  Business will send the acknowledgement. A buyer who is logged in should not
-  need to identify themselves or the contract again. Questions such as the reason
-  for withdrawing are separate and optional.
+  Business will send the acknowledgement.
+- Between the buyer opening the function and confirming, the Business
+  **MUST NOT** require any step other than the statement and the confirmation.
+  In particular it **MUST NOT** require a reason for withdrawing, an answer to
+  a survey, a new login or account creation, or the acceptance or dismissal of
+  an offer before the confirmation control can be used. A buyer who is already
+  identified, for example by being logged in, **MUST NOT** have to identify
+  themselves or the contract again; the Business fills in what it already
+  knows and lets the buyer confirm it. Questions, such as the reason for
+  withdrawing, **MAY** be asked only if answering is optional and the
+  confirmation control works without an answer.
+- The Business **SHOULD NOT** show an offer meant to keep the contract, such
+  as a discount or an exchange, inside the function at all, even one that does
+  not block the confirmation.
 - The buyer submits the statement through a separate confirmation control,
   labelled with the wording the governing law prescribes. `confirm` states that
   label for information; when it is omitted, a platform does not render a
@@ -365,7 +471,11 @@ The function itself is the Business's obligation on its own interface:
 - After submission, the Business sends, without undue delay and on a durable
   medium, an acknowledgement of receipt that states the content of the
   statement and the date and time it was submitted. The Business sends it
-  itself; a UCP response to the platform is not that acknowledgement.
+  itself; a UCP response to the platform is not that acknowledgement. The
+  Business **MUST NOT** delay the acknowledgement until a return label or
+  code exists, and **MUST NOT** make it depend on the buyer answering an
+  offer. An offer the Business makes after the acknowledgement does not affect
+  the withdrawal the buyer has already exercised.
 
 This extension advertises the function; it does not define a UCP operation to
 withdraw. A platform **MUST NOT** submit a withdrawal on the buyer's behalf,
@@ -477,7 +587,7 @@ On an order, `policies` record the terms that applied at checkout (see
 [Order](../order/index.md#policies)). The terms of a withdrawal policy are that
 snapshot and **MUST NOT** change after the order is placed: `basis`,
 `availability`, `period.duration`, `period.anchor`, `period.display_text`,
-`extension` terms, `return_costs`, `refund`, and the links. `period.expires_at`
+`extension` terms, `return_costs`, `return_methods`, `refund`, and the links. `period.expires_at`
 (and `extension.period.expires_at`) is a fact the Business adds once the anchor
 event has occurred and updates, with `revised_at`, when the legal deadline
 changes (see [Period and anchor](#period-and-anchor)), as the return policy
@@ -490,11 +600,96 @@ The contract confirmation on a durable medium, which the governing law usually
 requires and which repeats the withdrawal information, is sent by the
 Business. A policy, its URLs, or a UCP response do not fulfil that duty.
 
+## Return shipments
+
+After the buyer withdraws, or asks for a commercial return, the Business can
+set up the return of the goods and issue a return label, a return code for a
+specific network, or both. That is per order and per return, so it is on the
+order in `return_shipments`, not in the policy. Each entry names the `method`
+(a `return_methods` type), the `network` and, when the code works at one point
+only, that `point`; the `line_items` and quantities that go back; the `label`
+and the `return_code`; the time it was issued; and `return_by`, the time by
+which the buyer must send the goods back. `policy_type` says whether the
+return proceeds under the withdrawal policy or the return policy.
+
+### Return code and label
+
+`return_code` follows the displayable code of the payment render artifact
+proposal ([#778](https://github.com/Universal-Commerce-Protocol/ucp/issues/778)):
+an open `type` (`text`, `qr_code`, `barcode`), copyable `code` text, an inert
+`image`, and `expires_at`. A platform renders the fields that are present: a
+`qr_code` with only `code` is shown as text, and a platform **MUST NOT**
+generate an image from `code`. When the network needs a scannable code, the
+Business supplies `image`. `label.url` links to a label document (PDF or
+image).
+
+Unlike a payment artifact, a return code is not public. Whoever holds it can
+drop a parcel into the network on the Business's account. Therefore:
+
+- A platform **MUST** show `return_code` and `label.url` only to the buyer of
+  that order, in the buyer's own session.
+- A platform **MUST NOT** log or store `code`, `image` or `label.url` beyond
+  what keeping the order record requires, and **MUST NOT** pass them to a
+  third party, including when rendering.
+- A platform **MUST NOT** fetch `label.url`, `tracking_url` or an HTTPS
+  `image` server-side, including for previews; it hands them to the buyer's
+  own client. The client loads an HTTPS `image` without credentials or a
+  referrer, does not follow redirects, and shows it as pixels only.
+- `code` is data. A platform **MUST NOT** open, resolve or execute it, and
+  **MUST NOT** follow instructions found in it or in `display_text`.
+- A Business **MUST NOT** put a credential to the buyer's account or to the
+  network's systems in `code`, `image` or `label.url`; a `label.url` opens
+  this one label and nothing else.
+
+### Withdrawal first, label second
+
+Under EU law the withdrawal takes effect when the buyer sends the statement
+within the period (CRD Art. 11(2), Art. 11a(5)). A return label or code is a
+service for sending the goods back; it is not part of the withdrawal.
+
+- A Business **MUST NOT** make the withdrawal, or its acknowledgement, depend
+  on a label or code being issued, requested or used.
+- `return_by` is the Business's statement of when the buyer must send the
+  goods back. For a statutory withdrawal under EU law, the buyer sends them
+  within 14 days from the day they communicated the withdrawal, and the
+  deadline is met if they send them before it expires (Art. 14(1)). A
+  Business **MUST NOT** state a `return_by` earlier than that.
+- `return_code.expires_at` and `label.expires_at` are about the network, not
+  about the buyer's right. A code or label that expires before `return_by`
+  does not shorten the buyer's time. The Business **MUST** issue a new code or
+  label on request until `return_by`, and a platform **MUST NOT** tell the
+  buyer that the time to send the goods back ends when the code expires.
+- When `trader_collects` is the method, the buyer does not send the goods and
+  `return_by` is omitted; `display_text` says how the collection is arranged.
+- The deadline to send the goods back is met by sending them in time
+  (Art. 14(1)); it does not depend on the label or code. A platform **MUST
+  NOT** present a label or code as a condition of the withdrawal.
+
+### Return events
+
+Progress of a return uses the core
+[Fulfillment Event](../order/index.md#fulfillment-event) log with two
+well-known values of its open `type`:
+
+- `return_dropped_off`: the buyer handed the parcel to the network, the
+  carrier or the Business. Its `occurred_at` is evidence that the goods were
+  sent, which matters where the Business may hold the refund until it has the
+  goods back or proof of dispatch.
+- `return_received`: the Business received the goods back.
+
+Both carry `return_shipment_id`, the `return_shipments[].id` they belong to,
+and the `line_items` that went back. They do not change `fulfilled`
+quantities; the Business records the quantity taken back and the refund as a
+`return` or `refund` [adjustment](../order/index.md#adjustments).
+
 ## Responsibilities
 
 Withdrawal policies are business-stated facts. They are response-only data
 (`ucp_request: omit` on cart, checkout, and order) that a platform never
-submits. They carry no buyer data. A business **SHOULD** state the terms of the
+submits. They carry no buyer data. `return_shipments` on the order is
+response-only as well; it carries no buyer data either, but its return code
+and label are bearer data handled as [Return code and label](#return-code-and-label)
+describes. A business **SHOULD** state the terms of the
 law that governs the buyer's contract. Which law that is can depend on more
 than the buyer's language or shipping address; the Business decides it, and
 uses the request's `context` and addresses only as inputs.
@@ -509,7 +704,8 @@ sole traders.
 
 A policy's `description` and its structured fields are two representations of
 the same policy and **MUST** agree. The `description` **MAY** add detail, but
-**MUST NOT** state a different period, start event, cost, or refund term.
+**MUST NOT** state a different period, start event, cost, return method, or
+refund term.
 
 ## EU consumer contracts
 
@@ -529,10 +725,12 @@ business in that case typically states:
 | `availability.exception.code` | `eu.crd.art16.a` to `eu.crd.art16.m` | Art. 16, Art. 6(1)(k) |
 | `return_costs` | `buyer` only if the consumer was told; a cost for goods that cannot normally be returned by post | Art. 6(1)(i), Art. 14(1) |
 | `refund.deadline` | `P14D`: without undue delay and in any event within 14 days, with the same means of payment unless the consumer expressly agrees otherwise, at no fee | Art. 13(1) |
-| `refund.withholding` | `until_goods_or_proof_of_dispatch` for goods, unless the trader offered to collect them | Art. 13(3) |
+| `return_methods` | The procedure for sending the goods back; `trader_collects` when the trader offers to collect them | Art. 6(1)(h), Art. 13(3), Art. 14(1) |
+| `refund.withholding` | `until_goods_or_proof_of_dispatch` for goods, unless the trader offered to collect them (then not allowed with `trader_collects`) | Art. 13(3) |
 | `refund.delivery` | `up_to_least_expensive_standard` | Art. 13(1), 13(2) |
 | `instructions_url`, `model_form_url` | The withdrawal information and the Annex I(B) model form | Art. 6(1)(h), Annex I |
 | `withdrawal_function` | The function, labelled "withdraw from contract here" or an unambiguous corresponding formulation in the contract language | Art. 11a(1), Art. 6(1)(h) |
+| `return_shipments[].return_by` | At least 14 days from the day the consumer communicated the withdrawal; sending before it is in time | Art. 14(1) |
 
 The consumer sends the goods back within 14 days of communicating the
 withdrawal, unless the trader offered to collect them (Art. 14(1)); the
@@ -812,6 +1010,167 @@ law, here Central European Time (UTC+1). The checkout terms are unchanged; only
           { "language": "en", "contract_language": true, "withdraw": "Withdraw from contract here", "confirm": "Confirm withdrawal" }
         ]
       }
+    }
+  ]
+}
+```
+
+### Return methods: locker with a code, collection, and post
+
+A Business in Poland offers three ways to send the goods back after a
+withdrawal. A return through InPost lockers is free and uses a return code,
+so no printer is needed. The Business also offers to collect bulky goods for a
+fee, which means it cannot hold the refund until it has the goods back. The
+buyer can also post the goods at their own cost:
+
+<!-- ucp:example schema=shopping/policy_withdrawal def=withdrawal_policy -->
+```json
+{
+  "type": "dev.ucp.shopping.policy.withdrawal",
+  "description": {
+    "plain": "You can withdraw within 14 days from the day after you receive the last item of your order. Return the goods free at an InPost locker with the code we email you, have us collect them for PLN 49, or post them at your own cost. We refund your payments within 14 days of your withdrawal."
+  },
+  "basis": "statutory",
+  "availability": { "type": "available" },
+  "period": {
+    "duration": "P14D",
+    "anchor": "possession_last_item",
+    "display_text": "14 days from the day after you receive the last item of your order"
+  },
+  "return_costs": {
+    "payer": "buyer",
+    "display_text": "You pay the cost of posting the goods back."
+  },
+  "return_methods": [
+    {
+      "type": "carrier_point",
+      "network": "eu.inpost",
+      "artifacts": ["code"],
+      "printer_required": false,
+      "return_costs": { "payer": "business" },
+      "display_text": "Free return at any InPost locker in Poland. We email you a return code to type on the locker screen; no printer needed."
+    },
+    {
+      "type": "trader_collects",
+      "return_costs": {
+        "payer": "buyer",
+        "cost": { "amount": 4900, "currency": "PLN" },
+        "cost_type": "exact",
+        "cost_unit": "per_return"
+      },
+      "display_text": "We collect the goods from your address for PLN 49."
+    },
+    {
+      "type": "postal",
+      "display_text": "Post the goods to the return address in the instructions, with any carrier."
+    }
+  ],
+  "refund": {
+    "deadline": "P14D",
+    "withholding": "none",
+    "delivery": "up_to_least_expensive_standard"
+  },
+  "instructions_url": "https://example.com/withdrawal",
+  "model_form_url": "https://example.com/withdrawal/model-form.pdf",
+  "withdrawal_function": {
+    "url": "https://example.com/account/withdraw",
+    "labels": [
+      { "language": "pl", "contract_language": true, "withdraw": "Odstąp od umowy tutaj", "confirm": "Potwierdź odstąpienie" },
+      { "language": "en", "withdraw": "Withdraw from contract here", "confirm": "Confirm withdrawal" }
+    ]
+  }
+}
+```
+
+### Order with a locker return code and a return label
+
+The buyer withdrew from the whole order on Friday 2027-03-05. The Business
+sent the acknowledgement the same day and then set up two returns. The kettle
+goes back through an InPost locker with a return code. The code is valid for
+seven days, but the buyer's 14 days to send the goods run to the end of
+2027-03-19, so the Business reissues the code on request until then. The
+lamp goes back by post with a Poczta Polska label. The buyer dropped the
+kettle off on 2027-03-08:
+
+<!-- ucp:example schema=shopping/policy_withdrawal def=dev.ucp.shopping.order -->
+```json
+{
+  "ucp": {...},
+  "id": "order_pl_5521",
+  "checkout_id": "checkout_pl_5521",
+  "permalink_url": "https://example.com/orders/5521",
+  "currency": "PLN",
+  "line_items": [
+    {
+      "id": "li_kettle",
+      "item": { "id": "prod_kettle", "title": "Electric Kettle", "price": 19900 },
+      "quantity": { "original": 1, "total": 1, "fulfilled": 1 },
+      "totals": [...],
+      "status": "fulfilled"
+    },
+    {
+      "id": "li_lamp",
+      "item": { "id": "prod_lamp", "title": "Desk Lamp", "price": 14900 },
+      "quantity": { "original": 1, "total": 1, "fulfilled": 1 },
+      "totals": [...],
+      "status": "fulfilled"
+    }
+  ],
+  "fulfillment": {
+    "expectations": [...],
+    "events": [
+      {
+        "id": "evt_delivered",
+        "occurred_at": "2027-03-01T10:12:00Z",
+        "type": "delivered",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }, { "id": "li_lamp", "quantity": 1 }],
+        "tracking_number": "620000123456789",
+        "tracking_url": "https://example.com/track/620000123456789"
+      },
+      {
+        "id": "evt_return_kettle_dropped",
+        "occurred_at": "2027-03-08T16:40:00Z",
+        "type": "return_dropped_off",
+        "return_shipment_id": "ret_kettle",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "tracking_number": "RT6200009876543",
+        "tracking_url": "https://example.com/returns/ret_kettle/track"
+      }
+    ]
+  },
+  "totals": [...],
+  "policies": [...],
+  "return_shipments": [
+    {
+      "id": "ret_kettle",
+      "policy_type": "dev.ucp.shopping.policy.withdrawal",
+      "method": "carrier_point",
+      "network": "eu.inpost",
+      "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+      "return_code": {
+        "type": "text",
+        "code": "552188304417",
+        "expires_at": "2027-03-12T22:59:59Z"
+      },
+      "issued_at": "2027-03-05T14:03:00Z",
+      "return_by": "2027-03-19T22:59:59Z",
+      "tracking_number": "RT6200009876543",
+      "tracking_url": "https://example.com/returns/ret_kettle/track",
+      "display_text": "Type the code on the screen of any InPost locker in Poland. Ask us for a new code if it expires; you have until 19 March to send the kettle."
+    },
+    {
+      "id": "ret_lamp",
+      "policy_type": "dev.ucp.shopping.policy.withdrawal",
+      "method": "postal",
+      "network": "pl.poczta-polska",
+      "line_items": [{ "id": "li_lamp", "quantity": 1 }],
+      "label": {
+        "url": "https://example.com/returns/ret_lamp/label.pdf",
+        "media_type": "application/pdf"
+      },
+      "issued_at": "2027-03-05T14:03:00Z",
+      "return_by": "2027-03-19T22:59:59Z",
+      "display_text": "Print the label, stick it on the parcel and post it at any Poczta Polska office."
     }
   ]
 }

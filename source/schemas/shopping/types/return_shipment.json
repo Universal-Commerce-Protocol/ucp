@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/return_shipment.json",
+  "title": "Return Shipment",
+  "description": "A return of goods from one order that the Business has set up after a withdrawal or a return request: the method, the network, the label and the return code it issued, and the last time to send the goods. Issued per order; the static terms are in the policy. All fields are statements by the Business.",
+  "type": "object",
+  "required": [
+    "id",
+    "method",
+    "line_items",
+    "issued_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Return shipment identifier, unique within the order."
+    },
+    "policy_type": {
+      "$ref": "../../common/types/reverse_domain_name.json",
+      "maxLength": 128,
+      "description": "Policy type the return proceeds under, for example `dev.ucp.shopping.policy.withdrawal` for a statutory or contractual withdrawal, or `dev.ucp.shopping.policy.return` for a commercial return. Omitted means the Business has not stated it."
+    },
+    "method": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "How the goods go back. Well-known values: `trader_collects`, `carrier_point`, `carrier_pickup_at_address`, `postal`, `in_store`; see the Withdrawal Return Method `type`. A Platform that does not recognize the value presents `display_text` and the label or code, and does not describe the method itself."
+    },
+    "network": {
+      "$ref": "../../common/types/reverse_domain_name.json",
+      "maxLength": 128,
+      "description": "Carrier network that accepts the parcel, in the network identifier format proposed for carrier pickup points, #1139 (reversed primary domain of the operator, e.g., 'com.dhl', 'com.dpd'). A host site that serves several networks is not a network."
+    },
+    "point": {
+      "$ref": "#/$defs/return_point",
+      "description": "The one point where the parcel must be dropped off. Omitted means any point of `network` that accepts this return; `display_text` states any other limit."
+    },
+    "line_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "quantity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Line item ID reference."
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Integer count of steps of the referenced line item's `quantity_unit` (`10^-scale` × `unit`) covered by this return shipment; when `quantity_unit` is absent, it counts whole items (`each`)."
+          }
+        }
+      },
+      "description": "Which line items and quantities go back in this shipment."
+    },
+    "return_code": {
+      "$ref": "#/$defs/return_code",
+      "description": "Code the buyer types or shows at the point or to the courier instead of, or in addition to, a printed label."
+    },
+    "label": {
+      "$ref": "#/$defs/return_label",
+      "description": "Return label the buyer prints or shows."
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp when the Business issued this return shipment, its label or its code."
+    },
+    "return_by": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp by which the buyer must send the goods back, as the Business states it. For a withdrawal under EU law it is the end of the 14 days from the day the buyer communicated the withdrawal; sending before it is in time. It does not depend on `return_code.expires_at`."
+    },
+    "tracking_number": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Carrier tracking number of the return parcel, once the network or carrier has one."
+    },
+    "tracking_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "maxLength": 2048,
+      "description": "HTTPS page where the buyer tracks the return parcel. A Platform MUST NOT fetch it server-side; it only hands it to the buyer's own client."
+    },
+    "display_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Buyer-facing instructions for this return (e.g., 'Drop the parcel at any locker of the network and type the code on the screen.'). Plain text with no markup and no links; a Platform treats it as data from the Business and does not follow instructions in it."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "carrier_point"
+          }
+        },
+        "required": [
+          "method"
+        ]
+      },
+      "then": {
+        "required": [
+          "network"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "return_point": {
+      "title": "Return Point",
+      "description": "A carrier point keyed the same way as a Carrier Point Destination: (`network` of the return shipment, `country`, `point_id`).",
+      "type": "object",
+      "required": [
+        "country",
+        "point_id"
+      ],
+      "properties": {
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code of the point."
+        },
+        "point_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Point identifier as issued by the network, unique within (`network`, `country`). Opaque: compared as an exact, case-sensitive string, never parsed."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Buyer-facing name of the point. Plain text with no markup and no links; a Platform treats it as data from the Business and does not follow instructions in it."
+        }
+      }
+    },
+    "return_code": {
+      "title": "Return Code",
+      "description": "A code issued for one return shipment, in the shape of the displayable code of the payment render artifact proposal (#778): an open `type`, copyable `code` text and an inert `image`. Unlike a payment artifact it is not public: it lets the holder drop a parcel into the network on the Business's account.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Kind of code, as display metadata. Well-known values: `text` (typed at the point or read out), `qr_code`, `barcode`. A Platform renders the fields that are present; the value never asks it to generate an image."
+        },
+        "symbology": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Symbology of a `qr_code` or `barcode`, for information (e.g., 'qr', 'code128', 'pdf417')."
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[!-~]+( [!-~]+)*$",
+          "description": "Copyable code text, printable ASCII. A Platform renders it as text and MAY offer a copy action. It is never a URL or an instruction: a Platform MUST NOT open, resolve or execute it."
+        },
+        "image": {
+          "type": "string",
+          "anyOf": [
+            {
+              "format": "uri",
+              "pattern": "^https://",
+              "maxLength": 2048
+            },
+            {
+              "pattern": "^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$",
+              "maxLength": 1398200
+            }
+          ],
+          "description": "Inert raster image of the code (QR code or barcode): an HTTPS URL, or a base64 `data:` URI of type `image/png`, `image/jpeg` or `image/webp` of at most 1 MiB decoded. A Platform shows it as pixels in the buyer's own client and MUST NOT decode it to infer anything. When both `code` and `image` are present they encode the same code."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp after which the network no longer accepts the code. It does not shorten the buyer's time to send the goods back (`return_by`); the Business issues a new code on request."
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "code"
+          ]
+        },
+        {
+          "required": [
+            "image"
+          ]
+        }
+      ]
+    },
+    "return_label": {
+      "title": "Return Label",
+      "description": "A return label document.",
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "maxLength": 2048,
+          "description": "HTTPS link to the label. A Platform MUST NOT fetch it server-side, including for previews; it only hands it to the buyer's own client. It MUST NOT carry a bearer credential beyond what opens this one label."
+        },
+        "media_type": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Media type of the label. Well-known values: `application/pdf`, `image/png`, `image/jpeg`."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 timestamp after which the label is no longer valid. It does not shorten `return_by`."
+        }
+      }
+    },
+    "return_event": {
+      "title": "Return Fulfillment Event",
+      "description": "Fields and well-known event types for the return side of an order, on the core Fulfillment Event: `return_dropped_off` (the buyer handed the parcel to the network, carrier or Business) and `return_received` (the Business received the goods back). These events do not change `fulfilled` quantities; a quantity taken back is recorded as a `return` adjustment.",
+      "type": "object",
+      "properties": {
+        "return_shipment_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The `return_shipments[].id` this event belongs to. Required on `return_dropped_off` and `return_received`."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "return_dropped_off",
+                  "return_received"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "return_shipment_id"
+            ],
+            "properties": {
+              "description": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "Plain text, no markup or links."
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
