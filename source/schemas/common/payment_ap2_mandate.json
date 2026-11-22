@@ -392,6 +392,7 @@
         "receipt_sequence_gap",
         "receipt_totals_mismatch",
         "receipt_exceeds_mandate",
+        "receipt_capture_exceeds_authorization",
         "receipt_refund_exceeds_capture",
         "receipt_exceeds_seller_total",
         "receipt_mandate_unknown",
