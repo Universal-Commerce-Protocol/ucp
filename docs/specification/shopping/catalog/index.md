@@ -194,9 +194,11 @@ explicit currency codes confirming the resolution.
 When `context.eligibility` claims are present, Businesses that accept them
 **MAY** adjust `price` / `list_price` directly for strikethrough display and
 **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the
-adjustment to a specific claim. A Business that adjusts `list_price` **MUST**
-update or omit `list_price_basis` to match (see
-[Reference price basis](../../overview/index.md#reference-price-basis)).
+adjustment to a specific claim. A Business that adjusts `price` or
+`list_price` **MUST** update or omit `list_price_basis` to match (see
+[Reference price basis](../../overview/index.md#reference-price-basis)). An
+adjustment open to many Buyers, such as a widely held membership, can itself be
+a price reduction that needs a prior-price basis.
 
 {{ schema_fields('types/context', 'shopping/catalog') }}
 
