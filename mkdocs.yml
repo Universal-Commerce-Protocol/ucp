@@ -96,6 +96,8 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
               - Return Policy:
                   specification/shopping/extensions/return-policy.md
+              - Withdrawal Policy:
+                  specification/shopping/extensions/withdrawal-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
           - Playground: specification/shopping/playground.md
@@ -597,6 +599,16 @@ plugins:
               limit, or returns not accepted), supported resolutions, return
               channels, and typed return fees optionally scoped to channels,
               across catalog, cart, checkout, and order.
+          - specification/shopping/extensions/withdrawal-policy.md: >-
+              Withdrawal Policy Extension, defining the
+              dev.ucp.shopping.policy.withdrawal type on the core policies
+              primitive for the buyer's right to withdraw from a distance
+              contract without giving a reason, statutory or contractual:
+              availability with per-item exceptions, the period and its start
+              event, return costs, refund terms including the refunded
+              delivery amount, the model form, and the location and labels of
+              the online withdrawal function, across catalog, cart, checkout,
+              and order.
           - specification/shopping/extensions/purchase-options.md: >-
               Purchase Options Extension, letting a business advertise the
               ways a variant can be bought (once, or as a subscription) as

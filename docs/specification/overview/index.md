@@ -3123,6 +3123,7 @@ A Business publishes well-known and custom policies. Every policy carries a
 | Well-known type | Description |
 | :-- | :-- |
 | `dev.ucp.shopping.policy.return` | Return terms. |
+| `dev.ucp.shopping.policy.withdrawal` | The buyer's right to withdraw from a distance contract within a set period without giving a reason, granted by law or by the Business. Separate from return terms. See the [Withdrawal Policy Extension](../shopping/extensions/withdrawal-policy.md). |
 | `dev.ucp.shopping.policy.warranty` | Warranty terms. |
 | `dev.ucp.shopping.policy.subscription` | Terms for the recurring orders that follow a purchase. See the [Purchase Options Extension](../shopping/extensions/purchase-options.md#subscription-policy). |
 | `dev.ucp.lodging.policy.cancellation` | Cancellation terms for lodging reservations. |

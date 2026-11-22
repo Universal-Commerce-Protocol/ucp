@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/policy_withdrawal.json",
+  "name": "dev.ucp.shopping.policy.withdrawal",
+  "title": "Withdrawal Policy Extension",
+  "description": "Defines the `dev.ucp.shopping.policy.withdrawal` policy type on the core `policies[]` primitive: the buyer's right to withdraw from a distance contract within a set period without giving a reason (a cooling-off right), granted by law or by the Business, across one or more supported capabilities (catalog, cart, checkout, and order). It is separate from the commercial return policy `dev.ucp.shopping.policy.return`; both can govern the same item.",
+  "$defs": {
+    "withdrawal_body": {
+      "title": "Withdrawal Policy Terms",
+      "description": "Withdrawal terms for a `dev.ucp.shopping.policy.withdrawal` policy.",
+      "type": "object",
+      "required": ["basis"],
+      "properties": {
+        "basis": {
+          "type": "string",
+          "description": "Why the right exists. Well-known values: `statutory` (the law that governs the contract grants it, so contract terms cannot narrow it), `contractual` (the Business grants it where no law requires it). A Platform MUST NOT present a `statutory` right as a distinctive feature of the Business's offer. A Platform that does not recognize the value presents the policy from its `description` and MUST NOT present the right as statutory."
+        },
+        "legal_reference": {
+          "type": "string",
+          "description": "Human-readable citation of the law that grants a `statutory` right, for presentation (e.g., 'Directive 2011/83/EU, Art. 9-16')."
+        },
+        "availability": {
+          "$ref": "#/$defs/withdrawal_availability",
+          "description": "Whether the right covers the targeted items. Omitted means availability is not stated structurally."
+        },
+        "period": {
+          "$ref": "#/$defs/withdrawal_period",
+          "description": "Length of the withdrawal period and the event it is measured from. Omitted means the period is not stated structurally."
+        },
+        "return_costs": {
+          "$ref": "#/$defs/withdrawal_return_costs",
+          "description": "Who bears the direct cost of returning goods after a withdrawal. Omitted means it is not stated structurally; a Platform MUST NOT infer that the buyer pays."
+        },
+        "refund": {
+          "$ref": "#/$defs/withdrawal_refund",
+          "description": "Refund terms after a withdrawal."
+        },
+        "instructions_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Page stating the conditions, time limit, and procedure for exercising the right."
+        },
+        "model_form_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Withdrawal form the buyer may use, where the governing law provides a model form (e.g., Annex I(B) of Directive 2011/83/EU). It is in addition to `withdrawal_function`, not a substitute for it."
+        },
+        "withdrawal_function": {
+          "$ref": "#/$defs/withdrawal_function",
+          "description": "Where and how the buyer withdraws online."
+        }
+      },
+      "if": {
+        "properties": {
+          "availability": {
+            "properties": {
+              "type": {
+                "const": "not_available"
+              }
+            },
+            "required": ["type"]
+          }
+        },
+        "required": ["availability"]
+      },
+      "then": {
+        "properties": {
+          "period": false,
+          "return_costs": false,
+          "refund": false,
+          "model_form_url": false,
+          "withdrawal_function": false
+        }
+      }
+    },
+    "withdrawal_availability": {
+      "title": "Withdrawal Availability",
+      "description": "Whether the right covers the targeted items. `available` states that it does. `not_available` states that the governing law or the Business's terms provide no right for these items. `conditional` states that the right applies but is lost when a condition occurs, such as unsealing a sealed hygiene item after delivery. Unknown types establish no availability inference; consumers may use the base policy's `description`.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Availability kind. Well-known values: `available`, `not_available`, `conditional`."
+        },
+        "exception": {
+          "$ref": "#/$defs/withdrawal_exception",
+          "description": "The exception that removes or limits the right. Required when `type` is `not_available` or `conditional`."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["not_available", "conditional"]
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["exception"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "available"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "exception": false
+            }
+          }
+        }
+      ]
+    },
+    "withdrawal_exception": {
+      "title": "Withdrawal Exception",
+      "description": "An exception to the withdrawal right, as stated by the Business. Whether an exception applies is the Business's determination.",
+      "type": "object",
+      "required": ["display_text"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Exception identifier, namespaced by the legal regime that defines it. Well-known values: `eu.crd.art16.a` to `eu.crd.art16.m`, one per point of Article 16 of Directive 2011/83/EU (e.g., `eu.crd.art16.c` for goods made to the consumer's specifications, `eu.crd.art16.e` for sealed goods not suitable for return for health or hygiene reasons once unsealed). Unknown values establish no inference; consumers use `display_text`."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Buyer-facing statement of the exception: that there is no right of withdrawal for these items, or the circumstances in which it is lost (e.g., 'You lose the right to withdraw once you unseal this item after delivery.')."
+        }
+      }
+    },
+    "withdrawal_period": {
+      "title": "Withdrawal Period",
+      "description": "The withdrawal period: a length measured from an anchor event and, once resolved, the instant it ends.",
+      "type": "object",
+      "required": ["duration", "anchor"],
+      "properties": {
+        "duration": {
+          "$ref": "../common/types/duration.json",
+          "description": "Length of the period after the `anchor` event (e.g., `P14D`). It states the term for presentation; the Business resolves the deadline as `expires_at`."
+        },
+        "anchor": {
+          "type": "string",
+          "description": "Event the period is measured from. Well-known values: `contract_concluded` (the order is placed; services and digital content not on a tangible medium), `possession` (the buyer, or a third party other than the carrier that the buyer indicated, acquires physical possession of the goods), `possession_last_item` (possession of the last item or lot of an order delivered in several shipments or lots), `possession_first_item` (possession of the first item of a contract for regular delivery of goods). For goods sent to a carrier pickup point or parcel locker, possession is the buyer's collection, not the deposit at the point."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 instant at which the period ends, resolved by the Business once the `anchor` event has occurred. Omitted until then. It MAY move later after it is first stated, for example when the governing law extends the period because required information was not given. A withdrawal the buyer sends no later than this instant is in time."
+        }
+      }
+    },
+    "withdrawal_return_costs": {
+      "title": "Withdrawal Return Costs",
+      "description": "Who bears the direct cost of returning goods after a withdrawal, and how much it is when the buyer bears it.",
+      "type": "object",
+      "required": ["payer"],
+      "properties": {
+        "payer": {
+          "type": "string",
+          "description": "Party that bears the direct cost of returning the goods. Well-known values: `buyer`, `business`."
+        },
+        "amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Cost of returning the goods when the buyer bears it, in ISO 4217 minor units of the currency the covered items are priced in. Requires `amount_type`."
+        },
+        "amount_type": {
+          "type": "string",
+          "description": "How to read `amount`. Well-known values: `exact` (the cost the buyer will bear), `maximum` (a reasonable estimate of the highest cost, for goods that cannot normally be returned by post)."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable statement of the return cost terms (e.g., 'You pay the cost of returning the goods.')."
+        }
+      },
+      "dependentRequired": {
+        "amount": ["amount_type"],
+        "amount_type": ["amount"]
+      },
+      "if": {
+        "properties": {
+          "payer": {
+            "const": "business"
+          }
+        },
+        "required": ["payer"]
+      },
+      "then": {
+        "properties": {
+          "amount": false,
+          "amount_type": false
+        }
+      }
+    },
+    "withdrawal_refund": {
+      "title": "Withdrawal Refund",
+      "description": "Refund terms after a withdrawal. A Business MUST NOT deduct a return-policy fee, such as `dev.ucp.shopping.fee.restocking`, from a refund for a `statutory` withdrawal.",
+      "type": "object",
+      "properties": {
+        "deadline": {
+          "$ref": "../common/types/duration.json",
+          "description": "Longest time after the Business is informed of the withdrawal within which it refunds (e.g., `P14D`)."
+        },
+        "delivery_amount": {
+          "$ref": "../common/types/amount.json",
+          "description": "Delivery cost the Business refunds on a withdrawal from the whole order, in ISO 4217 minor units of the order currency: the price of the cheapest standard delivery the Business offered for the order, where the governing law limits the refund to it (e.g., Directive 2011/83/EU Art. 13(2)). On a checkout it reflects the methods currently offered; on an order it records the value at checkout."
+        },
+        "display_text": {
+          "type": "string",
+          "description": "Human-readable statement of the refund terms."
+        }
+      }
+    },
+    "withdrawal_function": {
+      "title": "Withdrawal Function",
+      "description": "The Business's online withdrawal function: where the buyer withdraws, how its controls are labelled, what it asks for, and how the Business acknowledges receipt.",
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Page on the Business's online interface where the buyer withdraws. It is reachable for the whole withdrawal period without installing an application the buyer did not use to conclude the contract."
+        },
+        "labels": {
+          "type": "array",
+          "description": "Labels of the function's controls, one entry per language, as the Business shows them. A Platform that renders a control leading to `url` uses the `withdraw` label for the buyer's language verbatim.",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/withdrawal_function_label"
+          }
+        },
+        "statement_fields": {
+          "type": "array",
+          "description": "Information the function asks the buyer to give or confirm in the withdrawal statement. Well-known values: `name` (the buyer's name), `contract_reference` (details identifying the contract, such as the order id), `confirmation_channel` (the electronic channel for the acknowledgement, such as an email address). Any other question, such as the reason, is separate and optional for the buyer.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "acknowledgement_channels": {
+          "type": "array",
+          "description": "Channels on which the Business sends the buyer an acknowledgement of receipt on a durable medium, stating the content of the withdrawal statement and the date and time it was submitted. Well-known values: `email`.",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "withdrawal_function_label": {
+      "title": "Withdrawal Function Label",
+      "description": "Labels of the withdrawal function's controls in one language.",
+      "type": "object",
+      "required": ["language", "withdraw", "confirm"],
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "IETF BCP 47 language tag of the labels (e.g., 'en', 'pl', 'de-AT')."
+        },
+        "withdraw": {
+          "type": "string",
+          "description": "Label of the control that opens the withdrawal statement (e.g., 'Withdraw from contract here')."
+        },
+        "confirm": {
+          "type": "string",
+          "description": "Label of the control that submits the withdrawal statement (e.g., 'Confirm withdrawal')."
+        }
+      }
+    },
+    "withdrawal_policy": {
+      "title": "Withdrawal Policy",
+      "description": "A withdrawal policy statement with type `dev.ucp.shopping.policy.withdrawal`.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dev.ucp.shopping.policy.withdrawal"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/withdrawal_body"
+        }
+      ]
+    },
+    "policies_item": {
+      "description": "A `policies[]` entry; validates against `withdrawal_policy` when `type` is `dev.ucp.shopping.policy.withdrawal`.",
+      "allOf": [
+        {
+          "$ref": "../common/types/policy.json"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dev.ucp.shopping.policy.withdrawal"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "$ref": "#/$defs/withdrawal_policy"
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Withdrawal Policy",
+      "description": "Cart extended with withdrawal policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Withdrawal Policy",
+      "description": "Checkout extended with withdrawal policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Withdrawal Policy",
+      "description": "Order extended with withdrawal policy terms on `policies[]`.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policies_item"
+              },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with withdrawal policy (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with withdrawal policy (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    }
+  }
+}
