@@ -828,12 +828,14 @@ When order receipts are negotiated, the platform:
     not report `receipt_totals_mismatch` for later receipts in that chain,
     because the events it holds are incomplete.
 6. **MUST** check that `authorized` and `captured` do not exceed `mandated`
-    (`receipt_exceeds_mandate`) and that `refunded` does not exceed `captured`
-    (`receipt_refund_exceeds_capture`). The check uses the recomputed totals,
-    or the stated totals for the receipt at which recomputation stopped and
-    every receipt after it. An outcome is reported on every receipt for which
-    the totals are over, not only the first. These outcomes are independent of
-    `receipt_totals_mismatch`: a receipt can report both.
+    (`receipt_exceeds_mandate`), that `captured` does not exceed `authorized`
+    (`receipt_capture_exceeds_authorization`), and that `refunded` does not
+    exceed `captured` (`receipt_refund_exceeds_capture`). The check uses the
+    recomputed totals, or the stated totals for the receipt at which
+    recomputation stopped and every receipt after it. An outcome is reported
+    on every receipt for which the totals are over, not only the first. These
+    outcomes are independent of `receipt_totals_mismatch`: a receipt can report
+    both.
 7. **SHOULD**, when `event.seller_id` is present, also check per seller that
     succeeded captures do not exceed that seller's attributed total and that
     refunds do not exceed that seller's captures. This is a **SHOULD** because
@@ -859,16 +861,17 @@ the money has already moved:
 
 {{ extension_schema_fields('payment_ap2_mandate.json#/$defs/receipt_verification_outcome', 'payment/extensions/ap2-mandates') }}
 
-| Outcome                              | Meaning                                                                                  |
-| :----------------------------------- | :--------------------------------------------------------------------------------------- |
-| `receipt_invalid_signature`          | The signature cannot be verified, `kid` does not resolve, or `typ` is wrong.             |
-| `receipt_sequence_gap`               | A `seq` is missing or repeated with different content, or `prev` does not match.         |
-| `receipt_totals_mismatch`            | Stated `totals` differ from the recomputed totals or the mandate's `payment_amount`.     |
-| `receipt_exceeds_mandate`            | `authorized` or `captured` exceeds `mandated` for the chain.                             |
-| `receipt_refund_exceeds_capture`     | `refunded` exceeds `captured` for the chain.                                             |
-| `receipt_exceeds_seller_total`       | A seller's captures exceed what is attributed to it, or its refunds exceed its captures. |
-| `receipt_mandate_unknown`            | `mandate_ref` is unknown, or `iss` is not the business it covers.                        |
-| `reconciliation_adjustment_mismatch` | Succeeded refunds disagree with the cited adjustment, or it does not exist.              |
+| Outcome                                 | Meaning                                                                                  |
+| :-------------------------------------- | :--------------------------------------------------------------------------------------- |
+| `receipt_invalid_signature`             | The signature cannot be verified, `kid` does not resolve, or `typ` is wrong.             |
+| `receipt_sequence_gap`                  | A `seq` is missing or repeated with different content, or `prev` does not match.         |
+| `receipt_totals_mismatch`               | Stated `totals` differ from the recomputed totals or the mandate's `payment_amount`.     |
+| `receipt_exceeds_mandate`               | `authorized` or `captured` exceeds `mandated` for the chain.                             |
+| `receipt_capture_exceeds_authorization` | `captured` exceeds `authorized` for the chain.                                           |
+| `receipt_refund_exceeds_capture`        | `refunded` exceeds `captured` for the chain.                                             |
+| `receipt_exceeds_seller_total`          | A seller's captures exceed what is attributed to it, or its refunds exceed its captures. |
+| `receipt_mandate_unknown`               | `mandate_ref` is unknown, or `iss` is not the business it covers.                        |
+| `reconciliation_adjustment_mismatch`    | Succeeded refunds disagree with the cited adjustment, or it does not exist.              |
 
 ### Limits
 
@@ -888,7 +891,8 @@ the money has already moved:
     `mandate_ref`, with `captured` accumulating.
 * **Overcapture:** when the processor allows capturing more than was
     authorized, the business first issues an `authorization_adjustment`
-    receipt for the difference, so `captured` never exceeds `authorized`. An
+    receipt for the difference, so `captured` never exceeds `authorized`.
+    Without it, the capture is `receipt_capture_exceeds_authorization`. An
     overcapture above `mandated` needs a new mandate, as for any increase.
 * **Refund returned after success:** a refund that was receipted as
     `succeeded` and later fails or is returned by the issuer gets a
