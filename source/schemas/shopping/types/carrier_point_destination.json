@@ -60,11 +60,38 @@
       "type": "object",
       "description": "The person who collects the parcel, when the method needs recipient data (see `recipient_requirements` on the selected option). May differ from the purchaser, for example for a gift or a company purchase. Contains only the fields the selected option requires.",
       "properties": {
-        "first_name": { "type": "string", "maxLength": 128, "description": "Recipient's first name." },
-        "last_name": { "type": "string", "maxLength": 128, "description": "Recipient's last name." },
-        "phone_number": { "type": "string", "maxLength": 32, "description": "Recipient's phone number, E.164 format." },
-        "email": { "type": "string", "format": "email", "maxLength": 254, "description": "Recipient's email address." },
-        "carrier_account_id": { "type": "string", "maxLength": 64, "description": "Recipient's customer number with the network, where the network requires one to deliver to its points (for example a locker network that delivers only to registered customers). Opaque." }
+        "first_name": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Recipient's first name.",
+          "minLength": 1
+        },
+        "last_name": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Recipient's last name.",
+          "minLength": 1
+        },
+        "phone_number": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Recipient's phone number in E.164 format.",
+          "minLength": 1,
+          "pattern": "^\\+[1-9][0-9]{6,14}$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254,
+          "description": "Recipient's email address.",
+          "minLength": 1
+        },
+        "carrier_account_id": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Recipient's customer number with the network, where the network requires one to deliver to its points (for example a locker network that delivers only to registered customers). Opaque.",
+          "minLength": 1
+        }
       },
       "ucp_request": "optional"
     },
@@ -78,18 +105,23 @@
       "type": "string",
       "maxLength": 500,
       "description": "Buyer-facing name of the point. Plain text, no markup or links.",
-      "ucp_request": "omit"
+      "ucp_request": "omit",
+      "minLength": 1
     },
     "address": {
-      "$ref": "../../common/types/postal_address.json",
-      "description": "Postal address of the point, with at least `address_locality` and `address_country`. It is the point's address, not the Buyer's.",
+      "description": "Postal address of the point, not the recipient's. Carries `address_country`, and `address_locality` or `street_address` unless `description` says how to find the point.",
+      "allOf": [
+        { "$ref": "../../common/types/postal_address.json" },
+        { "$ref": "#/$defs/point_address" }
+      ],
       "ucp_request": "omit"
     },
     "description": {
       "type": "string",
       "maxLength": 500,
       "description": "How to find the point when the address alone is not enough (e.g. 'Car park behind the station, next to the ticket office'). Plain text, no markup or links.",
-      "ucp_request": "omit"
+      "ucp_request": "omit",
+      "minLength": 1
     },
     "geo": {
       "$ref": "../../common/types/geo.json",
@@ -108,14 +140,17 @@
         "name": {
           "type": "string",
           "maxLength": 500,
-          "description": "Buyer-facing name of the site. Plain text, no markup or links."
+          "description": "Buyer-facing name of the site. Plain text, no markup or links.",
+          "minLength": 1
         }
       },
       "ucp_request": "omit"
     },
-    "pickup_period": {
-      "$ref": "#/$defs/pickup_period",
-      "description": "Holding period at this point when it differs from the period of the selected option (for example a locker at a site with limited opening hours).",
+    "option_terms": {
+      "type": "array",
+      "description": "Terms of this point that differ from those of an option, keyed by option. For the option a group selects, an entry here replaces that option's `pickup_period` and `recipient_requirements` for this point; fields an entry omits keep the option's value.",
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/option_terms" },
       "ucp_request": "omit"
     },
     "limits": {
@@ -124,16 +159,16 @@
       "properties": {
         "max_weight": {
           "$ref": "#/$defs/positive_measure",
-          "description": "Maximum parcel weight."
+          "description": "Maximum parcel weight, in a weight unit (UN/CEFACT Rec 20, e.g. `KGM`, `GRM`)."
         },
         "max_dimensions": {
           "type": "array",
-          "description": "Maximum parcel dimensions in one length unit, largest first. Three values describe a box: a parcel fits when each of its dimensions, also sorted largest first, is at most the value at the same position. One value is the maximum length of the longest side.",
-          "minItems": 1,
-          "maxItems": 3,
-          "items": {
-            "$ref": "#/$defs/positive_measure"
-          }
+          "description": "Maximum parcel dimensions, all in one length unit (UN/CEFACT Rec 20, e.g. `CMT`, `MMT`), largest first. Exactly one or three values. One value is the maximum length of the longest side. Three values describe a box: a parcel fits when each of its dimensions, sorted largest first, is at most the value at the same position. A Platform that does not recognize the unit shows `display_text` and does not compare.",
+          "anyOf": [
+            { "minItems": 1, "maxItems": 1 },
+            { "minItems": 3, "maxItems": 3 }
+          ],
+          "items": { "$ref": "#/$defs/positive_measure" }
         }
       },
       "ucp_request": "omit"
@@ -148,9 +183,7 @@
       "description": "Machine-readable reasons why the point cannot be used. Present if and only if `available` is `false`.",
       "minItems": 1,
       "maxItems": 10,
-      "items": {
-        "$ref": "#/$defs/unavailable_reason"
-      },
+      "items": { "$ref": "#/$defs/unavailable_reason" },
       "ucp_request": "omit"
     }
   },
@@ -161,7 +194,9 @@
   "allOf": [
     {
       "if": {
-        "properties": { "available": { "const": false } },
+        "properties": {
+          "available": { "const": false }
+        },
         "required": ["available"]
       },
       "then": { "required": ["unavailable_reasons"] }
@@ -170,7 +205,25 @@
       "if": { "required": ["unavailable_reasons"] },
       "then": {
         "required": ["available"],
-        "properties": { "available": { "const": false } }
+        "properties": {
+          "available": { "const": false }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["address"],
+        "not": { "required": ["description"] }
+      },
+      "then": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              { "required": ["address_locality"] },
+              { "required": ["street_address"] }
+            ]
+          }
+        }
       }
     }
   ],
@@ -201,7 +254,7 @@
     },
     "pickup_period": {
       "title": "Pickup Period",
-      "description": "How long the network holds a parcel at the point, as advertised before purchase. Informational: the deadline for a given parcel is the `pickup_by` the Business reports on its deposit event.",
+      "description": "How long the network holds a parcel at the point, counted from the event in `starts`, as advertised before purchase. Informational: the deadline for a given parcel is the `pickup_by` the Business reports.",
       "type": "object",
       "required": ["duration"],
       "properties": {
@@ -225,7 +278,18 @@
       "title": "Positive Measure",
       "allOf": [
         { "$ref": "../../common/types/measure.json" },
-        { "type": "object", "properties": { "value": { "type": "integer", "minimum": 1 } } }
+        {
+          "type": "object",
+          "properties": {
+            "value": { "type": "integer", "minimum": 1 },
+            "unit": { "type": "string", "maxLength": 16 },
+            "display_text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            }
+          }
+        }
       ]
     },
     "unavailable_reason": {
@@ -247,7 +311,83 @@
         "content": {
           "type": "string",
           "maxLength": 500,
-          "description": "Buyer-facing explanation. Plain text, no markup or links."
+          "description": "Buyer-facing explanation. Plain text, no markup or links.",
+          "minLength": 1
+        }
+      }
+    },
+    "point_address": {
+      "title": "Carrier Point Address",
+      "description": "Local bounds on the point's postal address.",
+      "type": "object",
+      "required": ["address_country"],
+      "properties": {
+        "street_address": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "extended_address": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "address_locality": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "address_region": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "postal_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "address_country": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "first_name": {
+          "type": "string",
+          "maxLength": 0,
+          "description": "Not used for a point."
+        },
+        "last_name": {
+          "type": "string",
+          "maxLength": 0,
+          "description": "Not used for a point."
+        },
+        "phone_number": { "type": "string", "maxLength": 32 }
+      }
+    },
+    "option_terms": {
+      "title": "Carrier Point Option Terms",
+      "description": "Point-specific terms for one option.",
+      "type": "object",
+      "required": ["option_id"],
+      "properties": {
+        "option_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "`id` of the Fulfillment Option these terms apply to."
+        },
+        "pickup_period": {
+          "$ref": "#/$defs/pickup_period",
+          "description": "Holding period at this point for this option."
+        },
+        "recipient_requirements": {
+          "type": "array",
+          "maxItems": 10,
+          "description": "Recipient requirements at this point for this option. Replaces the option's list.",
+          "items": {
+            "$ref": "../fulfillment_carrier_pickup.json#/$defs/recipient_requirement"
+          }
         }
       }
     }

@@ -3,11 +3,9 @@
   "$id": "https://ucp.dev/schemas/shopping/fulfillment_carrier_pickup.json",
   "name": "dev.ucp.shopping.fulfillment.carrier_pickup",
   "title": "Carrier Pickup Extension",
-  "description": "Defines the `carrier_pickup` fulfillment method: the Business ships to a parcel locker or staffed pickup point operated by a carrier network, and the recipient collects the parcel there. Its Checkout composition takes effect only when the Fulfillment extension is also active.",
+  "description": "Defines the `carrier_pickup` fulfillment method: the Business ships to a parcel locker or staffed pickup point operated by a carrier network, and the recipient collects the parcel there. Used together with the Fulfillment extension.",
   "$defs": {
-    "carrier_point_destination": {
-      "$ref": "types/carrier_point_destination.json"
-    },
+    "carrier_point_destination": { "$ref": "types/carrier_point_destination.json" },
     "network_summary": {
       "title": "Carrier Network Summary",
       "description": "A carrier network the Business ships to.",
@@ -52,12 +50,14 @@
         "purpose": {
           "type": "string",
           "maxLength": 64,
-          "description": "Why the option needs the data. Well-known values: `pickup_notification` (the network sends the deposit notice or the collection code there), `recipient_identification` (staff check the recipient at handover), `network_account` (the network delivers only to its registered customers). Businesses MAY use additional values with a `description`."
+          "description": "Why the option needs the data. Well-known values: `pickup_notification` (the network sends the deposit notice or the collection code there), `recipient_identification` (staff check the recipient at handover), `network_account` (the network delivers only to its registered customers). Businesses MAY use additional values with a `description`.",
+          "minLength": 1
         },
         "description": {
           "type": "string",
           "maxLength": 500,
-          "description": "Buyer-facing explanation of the requirement, for example the notification channel. Plain text, no markup or links. Required in practice for a `purpose` that is not well known."
+          "description": "Buyer-facing explanation of the requirement, for example the notification channel. Plain text, no markup or links. Required when `purpose` is not a well-known value.",
+          "minLength": 1
         },
         "countries": {
           "type": "array",
@@ -71,7 +71,22 @@
           "maxItems": 10,
           "items": { "type": "string", "maxLength": 64 }
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "purpose": {
+                "not": {
+                  "enum": ["pickup_notification", "recipient_identification", "network_account"]
+                }
+              }
+            },
+            "required": ["purpose"]
+          },
+          "then": { "required": ["description"] }
+        }
+      ]
     },
     "carrier_pickup_option": {
       "title": "Fulfillment Option (Carrier Pickup)",
@@ -115,12 +130,14 @@
     },
     "carrier_pickup_method": {
       "title": "Fulfillment Method (Carrier Pickup)",
-      "description": "Constraints on a Fulfillment Method whose `type` is `carrier_pickup`. Methods of other types are unchanged.",
-      "type": "object",
+      "description": "A Fulfillment Method, with the contract for `type: carrier_pickup`. Methods of other types keep the core contract unchanged.",
       "allOf": [
+        { "$ref": "types/fulfillment_method.json" },
         {
           "if": {
-            "properties": { "type": { "const": "carrier_pickup" } },
+            "properties": {
+              "type": { "const": "carrier_pickup" }
+            },
             "required": ["type"]
           },
           "then": {
@@ -130,23 +147,12 @@
                 "description": "Carrier points for this method. The Platform MAY write the point the recipient chose; the Business returns resolved points and MAY list points it suggests.",
                 "maxItems": 50,
                 "ucp_request": "optional",
-                "items": {
-                  "$ref": "types/carrier_point_destination.json"
-                }
+                "items": { "$ref": "types/carrier_point_destination.json" }
               },
               "groups": {
                 "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "options": {
-                      "type": "array",
-                      "maxItems": 50,
-                      "items": { "$ref": "#/$defs/carrier_pickup_option" },
-                      "ucp_request": "omit"
-                    }
-                  }
-                }
+                "maxItems": 20,
+                "items": { "$ref": "#/$defs/carrier_pickup_group" }
               }
             }
           }
@@ -155,11 +161,11 @@
     },
     "carrier_pickup_expectation": {
       "title": "Expectation (Carrier Pickup)",
-      "description": "Fields an Order Expectation carries when its `method_type` is `carrier_pickup`, so the Order shows the selected point before any fulfillment event exists.",
+      "description": "Fields an Order Expectation carries when its `method_type` is `carrier_pickup`, so the Order shows the selected point, by key, name and address, before any fulfillment event exists.",
       "type": "object",
       "properties": {
         "point": {
-          "description": "The selected carrier point. Required when `method_type` is `carrier_pickup`.",
+          "description": "The selected carrier point, with its name. Required when `method_type` is `carrier_pickup`.",
           "allOf": [
             { "$ref": "types/carrier_point_destination.json#/$defs/point_key" },
             {
@@ -168,9 +174,11 @@
                 "name": {
                   "type": "string",
                   "maxLength": 500,
-                  "description": "Buyer-facing name of the point. Plain text, no markup or links."
+                  "description": "Buyer-facing name of the point. Plain text, no markup or links.",
+                  "minLength": 1
                 }
-              }
+              },
+              "required": ["name"]
             }
           ]
         }
@@ -178,33 +186,48 @@
       "allOf": [
         {
           "if": {
-            "properties": { "method_type": { "const": "carrier_pickup" } },
+            "properties": {
+              "method_type": { "const": "carrier_pickup" }
+            },
             "required": ["method_type"]
           },
-          "then": { "required": ["point"] }
+          "then": {
+            "required": ["point"],
+            "properties": {
+              "destination": {
+                "description": "The point's address. Under `carrier_pickup` it carries at least `address_country` and `address_locality`.",
+                "required": ["address_country", "address_locality"]
+              }
+            }
+          }
         }
       ]
     },
+    "carrier_pickup_fulfillment": {
+      "title": "Fulfillment (Carrier Pickup)",
+      "description": "The Fulfillment object, narrowed for `carrier_pickup` methods.",
+      "type": "object",
+      "properties": {
+        "methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/carrier_pickup_method" }
+        }
+      }
+    },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Carrier Pickup",
-      "description": "Checkout whose fulfillment methods may use the `carrier_pickup` type. Narrows `fulfillment` only where the Fulfillment extension defines it.",
+      "description": "Checkout whose Fulfillment object is narrowed for `carrier_pickup` methods. It narrows only `fulfillment.methods[]` and declares nothing else. UCP has no way to compose an extension only when another extension is active, so this composition also applies when Fulfillment is not negotiated; a Business then MUST NOT send `fulfillment`.",
       "allOf": [
         { "$ref": "checkout.json" },
         {
           "type": "object",
           "properties": {
             "fulfillment": {
-              "type": "object",
+              "$ref": "#/$defs/carrier_pickup_fulfillment",
               "ucp_request": {
                 "create": "optional",
                 "update": "optional",
                 "complete": "omit"
-              },
-              "properties": {
-                "methods": {
-                  "type": "array",
-                  "items": { "$ref": "#/$defs/carrier_pickup_method" }
-                }
               }
             }
           }
@@ -261,6 +284,32 @@
           }
         ]
       }
+    },
+    "carrier_pickup_option_composed": {
+      "title": "Fulfillment Option (Carrier Pickup, composed)",
+      "description": "A Fulfillment Option with the carrier pickup fields.",
+      "allOf": [
+        { "$ref": "types/fulfillment_option.json" },
+        { "$ref": "#/$defs/carrier_pickup_option" }
+      ]
+    },
+    "carrier_pickup_group": {
+      "title": "Fulfillment Group (Carrier Pickup)",
+      "description": "A Fulfillment Group whose options are carrier services.",
+      "allOf": [
+        { "$ref": "types/fulfillment_group.json" },
+        {
+          "type": "object",
+          "properties": {
+            "options": {
+              "type": "array",
+              "maxItems": 50,
+              "items": { "$ref": "#/$defs/carrier_pickup_option_composed" },
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
     }
   }
 }

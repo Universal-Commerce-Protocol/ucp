@@ -7,7 +7,7 @@
   "properties": {
     "type": {
       "type": "string",
-      "description": "Event types this extension defines for parcels sent to a carrier point: `deposited_at_point` (the carrier reports the parcel placed at the point; the holding period runs), `collected_at_point` (the carrier reports the parcel collected), `pickup_expired` (the holding period ended without collection), `returning_to_sender` (the parcel is on its way back to the Business). The core `returned_to_sender` keeps its core meaning (back at the Business)."
+      "description": "Event types this extension defines for parcels sent to a carrier point: `deposited_at_point` (the carrier reports the parcel placed at the point; the holding period runs from the event its `pickup_period.starts` names, deposit or notification), `pickup_deadline_changed` (the carrier reports a new deadline at the same point, for example an extension, without a new deposit), `collected_at_point` (the carrier reports the parcel collected), `pickup_expired` (the holding period ended without collection), `returning_to_sender` (the parcel is on its way back to the Business). The core `returned_to_sender` keeps its core meaning (back at the Business)."
     },
     "parcel_id": {
       "type": "string",
@@ -22,23 +22,53 @@
     "pickup_by": {
       "type": ["string", "null"],
       "format": "date-time",
-      "description": "RFC 3339 timestamp until which the parcel waits at `point`, as reported by the carrier. Required on `deposited_at_point`; `null` means the Business does not know the deadline, and the Platform MUST NOT compute one. A later `deposited_at_point` for the same `parcel_id` replaces it."
+      "description": "RFC 3339 timestamp until which the parcel waits at `point`, as reported by the carrier. Required on `deposited_at_point` and `pickup_deadline_changed`; `null` means the Business does not know the deadline, and the Platform MUST NOT compute one. The latest of these events for the same `parcel_id` gives the current deadline."
+    },
+    "corrects": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "`id` of an earlier event of the same Order that this event corrects. The earlier event stays in the log but no longer counts; this event states what happened instead. A correction of a `collected_at_point` reopens the parcel's state."
     }
   },
   "allOf": [
     {
       "if": {
         "properties": {
-          "type": { "enum": ["deposited_at_point", "collected_at_point", "pickup_expired", "returning_to_sender"] }
+          "type": {
+            "enum": [
+              "deposited_at_point",
+              "pickup_deadline_changed",
+              "collected_at_point",
+              "pickup_expired",
+              "returning_to_sender"
+            ]
+          }
         },
         "required": ["type"]
       },
-      "then": { "required": ["parcel_id"] }
+      "then": {
+        "required": ["parcel_id"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Plain text, no markup or links."
+          }
+        }
+      }
     },
     {
       "if": {
         "properties": {
-          "type": { "enum": ["deposited_at_point", "collected_at_point", "pickup_expired"] }
+          "type": {
+            "enum": [
+              "deposited_at_point",
+              "pickup_deadline_changed",
+              "collected_at_point",
+              "pickup_expired"
+            ]
+          }
         },
         "required": ["type"]
       },
@@ -46,7 +76,9 @@
     },
     {
       "if": {
-        "properties": { "type": { "const": "deposited_at_point" } },
+        "properties": {
+          "type": { "enum": ["deposited_at_point", "pickup_deadline_changed"] }
+        },
         "required": ["type"]
       },
       "then": { "required": ["pickup_by"] }

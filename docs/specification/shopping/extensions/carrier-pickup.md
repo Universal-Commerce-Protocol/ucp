@@ -59,10 +59,13 @@ agent:
 **Dependencies:**
 
 - [Fulfillment Extension](fulfillment.md). This extension narrows the
-  `fulfillment` object that Fulfillment defines. If Fulfillment is not in the
-  negotiated capability set, the Checkout composition has no effect, and a
-  Business **MUST NOT** return a `carrier_pickup` method. The Order composition
-  (expectations and events) does not depend on Fulfillment.
+  `fulfillment.methods[]` that Fulfillment defines, and declares nothing else
+  on Checkout. UCP has no mechanism to compose an extension only when another
+  extension is active, so the Checkout composition also applies when
+  Fulfillment is not negotiated. In that case a Business **MUST NOT** send
+  `fulfillment` in a Checkout response, and a Platform **MUST NOT** send it in
+  a request. The Order composition (expectations and events) does not depend
+  on Fulfillment.
 - Checkout, and Order for the post-purchase data.
 
 ## Discovery
@@ -113,6 +116,14 @@ Checkout:
 ### Pickup Period
 
 {{ extension_schema_fields('types/carrier_point_destination.json#/$defs/pickup_period', 'shopping/extensions/carrier-pickup') }}
+
+### Carrier Point Option Terms
+
+{{ extension_schema_fields('types/carrier_point_destination.json#/$defs/option_terms', 'shopping/extensions/carrier-pickup') }}
+
+### Carrier Point Address
+
+{{ extension_schema_fields('types/carrier_point_destination.json#/$defs/point_address', 'shopping/extensions/carrier-pickup') }}
 
 ### Unavailable Reason
 
@@ -309,10 +320,14 @@ Buyer, for example for a gift or a company purchase, so recipient data is
 written on the selected destination's `recipient`, not taken from `buyer`.
 
 Each option lists the recipient data it needs in `recipient_requirements[]`. A
-requirement is met when at least one field in its `fields` is present, so "phone
-or email" is one requirement with two fields. `countries` and `point_types`
-narrow where a requirement applies. The requirements that apply are those of
-the selected option, for the selected point's country and type.
+requirement is met when at least one field in its `fields` carries a valid,
+non-empty value, so "phone or email" is one requirement with two fields.
+`countries` and `point_types` narrow where a requirement applies. The
+requirements that apply are those of the selected option, for the selected
+point's country and type. When a point has its own terms for that option
+(`option_terms[]` on the destination), its `recipient_requirements` replace the
+option's list, and its `pickup_period` replaces the option's period, for that
+point only.
 
 The Business:
 
@@ -322,10 +337,13 @@ The Business:
   another purpose, such as an invoice, tax or customs, requests it through the
   field and the legal basis that purpose has (for example the billing address),
   not through this method.
-- **MUST** return a recoverable error with a `path` that selects the missing
-  field on the selected destination's `recipient` (for example
+- **MUST** return a recoverable error with a `path` that selects the field on
+  the selected destination's `recipient` (for example
   `$.fulfillment.methods[0].destinations[0].recipient.phone_number`) when an
-  applicable requirement is not met at Complete Checkout.
+  applicable requirement is not met at Complete Checkout: with `code:
+  "missing"` when no field of the requirement is present, and with a code
+  naming the field, such as `invalid_phone`, when a value is present but the
+  network does not accept it.
 - **MUST** use recipient data received for this method only to deliver the
   parcel, and pass to the network only the data the requirement names.
 
@@ -345,20 +363,22 @@ The Platform:
 ### Expectations
 
 When an Order Expectation has `method_type: "carrier_pickup"`, it carries
-`point` with the point key and name of the selected point, from the moment the
-Order exists, before any fulfillment event. The base `destination` carries the
-point's address.
+`point` with the point key and the non-empty name of the selected point, from
+the moment the Order exists, before any fulfillment event. The base
+`destination` carries the point's address, with at least `address_country` and
+`address_locality`.
 
 ### Events
 
-This extension defines four event types for parcels sent to a carrier point.
+This extension defines five event types for parcels sent to a carrier point.
 Each carries `parcel_id`, a Business-scoped identifier that stays the same for
 the parcel across redirects and extensions. A Business **SHOULD** also put
 `parcel_id` on the core events of the same parcel, such as `shipped`.
 
 | Event `type` | Meaning | Required fields |
 | :-- | :-- | :-- |
-| `deposited_at_point` | The carrier reports the parcel placed at the point. The holding period runs. | `parcel_id`, `point`, `pickup_by` (`null` when unknown) |
+| `deposited_at_point` | The carrier reports the parcel placed at the point. The holding period runs from the event the applicable `pickup_period.starts` names: this deposit, or the later notification of the recipient. | `parcel_id`, `point`, `pickup_by` (`null` when unknown) |
+| `pickup_deadline_changed` | The carrier reports a new deadline at the same point, for example an extension, without a new deposit. | `parcel_id`, `point`, `pickup_by` (`null` when unknown) |
 | `collected_at_point` | The carrier reports the parcel collected. | `parcel_id`, `point` |
 | `pickup_expired` | The holding period ended without collection. | `parcel_id`, `point` |
 | `returning_to_sender` | The parcel is on its way back to the Business. | `parcel_id` |
@@ -370,13 +390,33 @@ Ordering and correlation:
 
 - Events of one parcel are ordered by `occurred_at`, not by array position or
   by the order in which they arrive. Events with equal `occurred_at` keep their
-  array order. An event `id` that appears again is the same event, not a new
-  one.
-- The latest `deposited_at_point` of a parcel, by `occurred_at`, gives its
-  current `point` and `pickup_by`, for example after an extension or a redirect
-  to another point. It never affects another `parcel_id`.
+  array order.
+- Event `id` values are unique within the Order. A Business **MUST NOT** reuse
+  an `id` for a different event. A Platform that receives an `id` again with
+  the same content treats it as a repeated delivery; with different content,
+  it keeps the first and treats the Order's event log as needing the
+  Business's correction.
+- The latest `deposited_at_point` or `pickup_deadline_changed` of a parcel, by
+  `occurred_at`, gives its current `point` and `pickup_by`. A redirect to
+  another point is a new `deposited_at_point`; an extension at the same point
+  is a `pickup_deadline_changed`. Neither affects another `parcel_id`.
 - `collected_at_point` is terminal for the parcel. A Business **MUST NOT** emit
-  a later `deposited_at_point` or `pickup_expired` for the same `parcel_id`.
+  a later `deposited_at_point`, `pickup_deadline_changed` or `pickup_expired`
+  for the same `parcel_id`, except as a correction.
+
+Corrections:
+
+- Events are append-only. To correct an event that was wrong, for example a
+  collection the carrier reported by mistake, the Business appends a new event
+  with `corrects` set to the `id` of the wrong one. The new event states what
+  actually happened (for example a `deposited_at_point` showing that the
+  parcel is still waiting). The corrected event stays in the log and no longer
+  counts. A correction of a correction follows the same rule; the latest
+  correction counts.
+- When a correction changes a fact a deadline counts from, such as
+  collection, the Business recomputes that deadline and states the revised
+  value with its revision time where the deadline is published (for example
+  the `expires_at` and `revised_at` of a withdrawal period).
 - When `pickup_by` is `null`, the Platform **MUST NOT** compute a deadline from
   the deposit time and the advertised `pickup_period`, because networks count
   from different events (deposit or notification) and calendars.
@@ -403,20 +443,30 @@ Meaning for the Buyer:
   verify them. A disputed collection is resolved between the Buyer, the
   Business and the carrier; the events do not settle it. Signed or attested
   carrier data is out of scope (see #1020 for verified claims).
-- **Display text.** `name`, `description`, `host.name`, `unavailable_reasons[].content`,
-  the network `name` and the requirement `description` are plain text with no
-  markup and no links. A Platform **MUST** treat them as data from the
-  Business and **MUST NOT** follow instructions found in them. It **MAY** adapt
-  layout and channel (voice, small screens) but **MUST NOT** change the
-  substance: the point, the deadline, the conditions and the price. Their
-  language follows the response language rules of the Checkout.
+- **Display text.** `name`, `description`, `host.name`,
+  `unavailable_reasons[].content`, the network `name`, the requirement
+  `description` and the event `description` are plain text with no markup and
+  no links, each with a `maxLength`. URLs never appear inside them. A Platform
+  **MUST** treat them as data from the Business and **MUST NOT** follow
+  instructions found in them. It **MUST** present the meaning the Buyer needs:
+  where the point is, how long the parcel waits, what data is required and
+  why, and the price. It **MAY** adapt layout and channel (voice, small
+  screens) but **MUST NOT** change the substance: the point, the deadline, the
+  conditions and the price. Their language follows the response language rules
+  of the Checkout. A Platform that cannot present the point and the recipient
+  requirements of the selected option **MUST NOT** offer the option, and hands
+  off through `continue_url` instead. This extension defines no wording the law
+  prescribes.
 - **Point resolution.** Resolving a written point key returns the point's
   location, so a Platform could probe the directory point by point. A Business
   **SHOULD** rate-limit point resolution per Platform and per Checkout, and
   **MAY** reject further writes with `point_not_found` once a limit is reached.
-- **Bounds.** The schemas bound every array and display string. A Business
-  **SHOULD** keep `destinations[]` to the points it suggests and the selected
-  one, not the whole directory.
+- **Bounds.** The schemas this extension defines bound their arrays and
+  strings, including `groups[]`, the point's address fields and the unit
+  labels of limits, and the event `description` on carrier events. Core fields
+  they reuse keep their core definitions. A Business **SHOULD** keep
+  `destinations[]` to the points it suggests and the selected one, not the
+  whole directory.
 
 ## Relation to the store pickup proposal
 
@@ -430,7 +480,7 @@ two fit, so the boundary can be agreed there:
   `pickup_point` cases; `point_type` keeps those words as values.
 - **Hold durations.** #375 plans pickup windows and hold durations on
   `fulfillment_option`. This extension also puts the holding period on the
-  option (`pickup_period`), with a per-point override. If #375 defines a
+  option (`pickup_period`), with per-point terms keyed by option. If #375 defines a
   general hold field on options, `pickup_period` should be replaced by it.
 - **Unavailability reasons.** #375 plans structured reasons distinct from
   availability. The codes here should become values of that vocabulary.
@@ -649,6 +699,12 @@ network at the same site, and lists a locker it cannot use.
             "point_id": "100417",
             "point_type": "staffed",
             "name": "Orlen Paczka, Corner shop",
+            "option_terms": [
+              {
+                "option_id": "orlen_point",
+                "pickup_period": { "duration": "P7D", "starts": "notification" }
+              }
+            ],
             "address": {
               "street_address": "ul. Prosta 5",
               "address_locality": "Warszawa",
@@ -892,6 +948,66 @@ unchanged and returns a recoverable error on the selection.
         "parcel_id": "parcel_7",
         "tracking_number": "Z0042110001",
         "tracking_url": "https://tracking.example.com/Z0042110001"
+      }
+    ]
+  }
+}
+```
+
+### Order: collection reported by mistake
+
+The carrier reported a collection, then confirmed the parcel was still in the
+locker and extended the deadline. The Business appends a correction and a
+deadline change; the collection no longer counts.
+
+<!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.order op=read -->
+```json
+{
+  "ucp": { ... },
+  "id": "ord_51c2",
+  "checkout_id": "chk_7f3a",
+  "permalink_url": "https://shop.example.com/orders/ord_51c2",
+  "currency": "PLN",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "fulfillment": {
+    "events": [
+      {
+        "id": "evt_2",
+        "occurred_at": "2026-11-24T07:40:00Z",
+        "type": "deposited_at_point",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW99X" },
+        "pickup_by": "2026-11-26T07:40:00Z"
+      },
+      {
+        "id": "evt_3",
+        "occurred_at": "2026-11-25T12:02:00Z",
+        "type": "collected_at_point",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW99X" }
+      },
+      {
+        "id": "evt_4",
+        "occurred_at": "2026-11-25T16:30:00Z",
+        "type": "deposited_at_point",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
+        "corrects": "evt_3",
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW99X" },
+        "pickup_by": "2026-11-26T07:40:00Z",
+        "description": "Collection was reported in error; the parcel is still in the locker."
+      },
+      {
+        "id": "evt_5",
+        "occurred_at": "2026-11-26T06:00:00Z",
+        "type": "pickup_deadline_changed",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW99X" },
+        "pickup_by": "2026-11-28T07:40:00Z"
       }
     ]
   }
