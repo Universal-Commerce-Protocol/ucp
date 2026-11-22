@@ -47,7 +47,7 @@
           "items": {
             "$ref": "#/$defs/withdrawal_return_method"
           },
-          "description": "How the buyer can send the goods back or have them collected after a withdrawal, part of the procedure for exercising the right. Omitted means the methods are not stated structurally; `instructions_url` still states the procedure. A `trader_collects` entry means the Business has offered to collect the goods itself; on a `statutory` policy, an offer at the Business's expense rules out withholding the refund."
+          "description": "How the buyer can send the goods back or have them collected after a withdrawal, part of the procedure for exercising the right. Omitted means the methods are not stated structurally; `instructions_url` still states the procedure. A `trader_collects` entry means the Business has offered to collect the goods itself; where EU law governs, an offer at the Business's expense rules out withholding the refund (see the extension docs)."
         },
         "refund": {
           "$ref": "#/$defs/withdrawal_refund",
@@ -117,109 +117,6 @@
           "then": {
             "properties": {
               "extension": false
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "basis": {
-                "const": "statutory"
-              },
-              "return_methods": {
-                "contains": {
-                  "properties": {
-                    "type": {
-                      "const": "trader_collects"
-                    },
-                    "return_costs": {
-                      "properties": {
-                        "payer": {
-                          "const": "business"
-                        }
-                      },
-                      "required": [
-                        "payer"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "return_costs"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "basis",
-              "return_methods"
-            ]
-          },
-          "then": {
-            "properties": {
-              "refund": {
-                "properties": {
-                  "withholding": {
-                    "not": {
-                      "const": "until_goods_or_proof_of_dispatch"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "basis": {
-                "const": "statutory"
-              },
-              "return_costs": {
-                "properties": {
-                  "payer": {
-                    "const": "business"
-                  }
-                },
-                "required": [
-                  "payer"
-                ]
-              },
-              "return_methods": {
-                "contains": {
-                  "properties": {
-                    "type": {
-                      "const": "trader_collects"
-                    }
-                  },
-                  "required": [
-                    "type"
-                  ],
-                  "not": {
-                    "required": [
-                      "return_costs"
-                    ]
-                  }
-                }
-              }
-            },
-            "required": [
-              "basis",
-              "return_costs",
-              "return_methods"
-            ]
-          },
-          "then": {
-            "properties": {
-              "refund": {
-                "properties": {
-                  "withholding": {
-                    "not": {
-                      "const": "until_goods_or_proof_of_dispatch"
-                    }
-                  }
-                }
-              }
             }
           }
         }
@@ -893,7 +790,7 @@
     },
     "return_event_composed": {
       "title": "Fulfillment Event (Return)",
-      "description": "A core Fulfillment Event with the return-side event types and the link to the return shipment.",
+      "description": "A core Fulfillment Event with the return-side event types and the link to the return shipment. On `return_dropped_off` and `return_received`, `line_items` are the goods going back (not fulfilled quantities), and `tracking_number` and `tracking_url` are present only when a carrier or network carries the parcel, which overrides the core description that they are required on every type other than `processing`.",
       "allOf": [
         {
           "$ref": "types/fulfillment_event.json"

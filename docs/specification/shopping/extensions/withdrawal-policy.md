@@ -386,10 +386,14 @@ directive (2021/C 525/01, sections 5.5.2 and 5.5.3) reads both by who pays:
 an offer to collect binds the buyer only if the trader also offered to bear
 the cost, and the trader cannot withhold the refund if the buyer accepts the
 offer or the trader offered to collect at its own expense. For a `statutory`
-policy this extension follows that reading:
+policy under EU law this extension follows that reading:
 
-- When a `trader_collects` method is at the Business's expense, the schema
-  rejects `refund.withholding: until_goods_or_proof_of_dispatch`.
+- When a `trader_collects` method is at the Business's expense (its own
+  `return_costs`, or else the policy-level one, has `payer: business`), the
+  Business **MUST NOT** state `refund.withholding:
+  until_goods_or_proof_of_dispatch`. The schema does not enforce this,
+  because a policy has no field that says which law governs it, and the rule
+  does not hold for statutory rights under other laws.
 - When the buyer pays for the collection, the policy may still state
   withholding, because it applies to returns by the other methods. For a
   return the buyer has the Business collect, the Business **MUST NOT**
@@ -398,8 +402,8 @@ policy this extension follows that reading:
 - A paid collection does not oblige the buyer to use it; the buyer may send
   the goods back by another method within the time Art. 14(1) allows.
 
-For a `contractual` policy, and outside the EU, the Business's own terms
-decide; the schema does not constrain them.
+For a `contractual` policy, and for statutory rights under other laws, the
+Business's own terms and that law decide.
 
 ### Refund
 
@@ -685,9 +689,11 @@ drop a parcel into the network on the Business's account. Therefore:
   shipment, **SHOULD** use a single-use code bound to the shipment where the
   network supports it, and **MUST** be able to revoke a code and issue a new
   one, for example when the buyer reports it exposed.
-- `label.url` **SHOULD** be unguessable and short-lived, with
-  `label.expires_at` set, and **MUST NOT** contain buyer data in the URL
-  itself. The label document holds personal data (the buyer's name and
+- `label.url` **SHOULD** be unguessable and **SHOULD** stop working after a
+  short time, and **MUST NOT** contain buyer data in the URL itself. The
+  lifetime of that download link is not stated in the schema and is separate
+  from `label.expires_at`, which is when the carrier stops accepting the
+  label, even one already downloaded or printed. The label document holds personal data (the buyer's name and
   address, the return address and the tracking number) and opens this one
   label and nothing else.
 - A Business **MUST NOT** put a credential to the buyer's account or to the
@@ -802,7 +808,7 @@ business in that case typically states:
 | `return_costs` | `buyer` only if the consumer was told; a cost for goods that cannot normally be returned by post | Art. 6(1)(i), Art. 14(1) |
 | `refund.deadline` | `P14D`: without undue delay and in any event within 14 days, with the same means of payment unless the consumer expressly agrees otherwise, at no fee | Art. 13(1) |
 | `return_methods` | The procedure for sending the goods back; `trader_collects` when the trader offers to collect them, with its cost | Art. 6(1)(h), Art. 13(3), Art. 14(1) |
-| `refund.withholding` | `until_goods_or_proof_of_dispatch` for goods, unless the trader offered to collect them at its expense (then rejected next to such a `trader_collects` method); never for a return the buyer has the trader collect | Art. 13(3); Commission guidance 2021/C 525/01, 5.5.3 |
+| `refund.withholding` | `until_goods_or_proof_of_dispatch` for goods, unless the trader offered to collect them at its expense; never for a return the buyer has the trader collect | Art. 13(3); Commission guidance 2021/C 525/01, 5.5.3 |
 | `refund.delivery` | `up_to_least_expensive_standard` | Art. 13(1), 13(2) |
 | `instructions_url`, `model_form_url` | The withdrawal information and the Annex I(B) model form | Art. 6(1)(h), Annex I |
 | `withdrawal_function` | The function, labelled "withdraw from contract here" or an unambiguous corresponding formulation in the contract language | Art. 11a(1), Art. 6(1)(h) |

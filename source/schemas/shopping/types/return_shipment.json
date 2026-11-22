@@ -236,7 +236,7 @@
             },
             {
               "pattern": "^data:image/(png|jpeg|webp);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$",
-              "maxLength": 1398123
+              "maxLength": 1398127
             }
           ],
           "description": "Inert raster image of the code (QR code or barcode), with the bounds of #778: an HTTPS URL, or a base64 `data:` URI of type `image/png`, `image/jpeg` or `image/webp`. The decoded image is at most 1 MiB and at most 4096 pixels on either axis and 16 million pixels in total; the schema bounds the data URI length, and a Platform checks the decoded size, the file signature and the dimensions. An HTTPS image is loaded by the buyer's own client without credentials or a referrer, without following redirects, within a finite timeout, and only when the response is one of those media types, its signature matches, and it is within those bounds; otherwise the Platform shows `code`, or `display_text`. A Platform shows it as pixels and MUST NOT decode it to infer anything. When both `code` and `image` are present they encode the same code."
@@ -244,7 +244,7 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "RFC 3339 timestamp after which the network no longer accepts the code. It does not shorten the buyer's time to send the goods back (`return_by`); the Business issues a new code on request."
+          "description": "RFC 3339 timestamp after which the network no longer accepts the code. It does not shorten the buyer's time to send the goods back (`return_by`). As a rule of this extension, not of the law, the Business SHOULD issue a new code on request until `return_by`."
         }
       },
       "anyOf": [
@@ -273,7 +273,7 @@
           "format": "uri",
           "pattern": "^https://",
           "maxLength": 2048,
-          "description": "HTTPS link to the label. The label document holds personal data (the buyer's name and address, the return address and the tracking number). The URL SHOULD be unguessable and short-lived, MUST NOT contain buyer data itself, and opens this one label and nothing else. A Platform MUST NOT fetch it server-side, including for previews; it only hands it to the buyer's own client."
+          "description": "HTTPS link to the label. The label document holds personal data (the buyer's name and address, the return address and the tracking number). The link SHOULD be unguessable and SHOULD stop working after a short time; that link lifetime is separate from the label's own validity (`expires_at`). The URL MUST NOT contain buyer data itself and opens this one label and nothing else. A Platform MUST NOT fetch it server-side, including for previews; it only hands it to the buyer's own client."
         },
         "media_type": {
           "type": "string",
@@ -283,7 +283,7 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "RFC 3339 timestamp after which the label is no longer valid. It does not shorten `return_by`."
+          "description": "RFC 3339 timestamp after which the carrier no longer accepts the label, even when it has already been downloaded or printed. It is not the lifetime of the download link `url`, and it does not shorten `return_by`."
         }
       }
     },
@@ -323,6 +323,19 @@
                 "type": "string",
                 "maxLength": 500,
                 "description": "Plain text, no markup or links."
+              },
+              "tracking_number": {
+                "type": "string",
+                "description": "Carrier tracking number of the return parcel. On `return_dropped_off` and `return_received` it is present only when a carrier or network carries the parcel, not on every type other than `processing`; an `in_store` handover or a `trader_collects` collection without carrier tracking omits it."
+              },
+              "tracking_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to track the return parcel. On `return_dropped_off` and `return_received` it is present only when a carrier or network carries the parcel; an `in_store` handover or a `trader_collects` collection without carrier tracking omits it."
+              },
+              "line_items": {
+                "type": "array",
+                "description": "On `return_dropped_off` and `return_received`: the line items and quantities going back, not quantities fulfilled; they do not change `fulfilled`."
               }
             }
           }
