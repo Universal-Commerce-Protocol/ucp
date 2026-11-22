@@ -47,7 +47,7 @@
           "items": {
             "$ref": "#/$defs/withdrawal_return_method"
           },
-          "description": "How the buyer can send the goods back or have them collected after a withdrawal, part of the procedure for exercising the right. Omitted means the methods are not stated structurally; `instructions_url` still states the procedure. A `trader_collects` entry means the Business has offered to collect the goods itself."
+          "description": "How the buyer can send the goods back or have them collected after a withdrawal, part of the procedure for exercising the right. Omitted means the methods are not stated structurally; `instructions_url` still states the procedure. A `trader_collects` entry means the Business has offered to collect the goods itself; on a `statutory` policy, an offer at the Business's expense rules out withholding the refund."
         },
         "refund": {
           "$ref": "#/$defs/withdrawal_refund",
@@ -123,6 +123,68 @@
         {
           "if": {
             "properties": {
+              "basis": {
+                "const": "statutory"
+              },
+              "return_methods": {
+                "contains": {
+                  "properties": {
+                    "type": {
+                      "const": "trader_collects"
+                    },
+                    "return_costs": {
+                      "properties": {
+                        "payer": {
+                          "const": "business"
+                        }
+                      },
+                      "required": [
+                        "payer"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "return_costs"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "basis",
+              "return_methods"
+            ]
+          },
+          "then": {
+            "properties": {
+              "refund": {
+                "properties": {
+                  "withholding": {
+                    "not": {
+                      "const": "until_goods_or_proof_of_dispatch"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis": {
+                "const": "statutory"
+              },
+              "return_costs": {
+                "properties": {
+                  "payer": {
+                    "const": "business"
+                  }
+                },
+                "required": [
+                  "payer"
+                ]
+              },
               "return_methods": {
                 "contains": {
                   "properties": {
@@ -132,11 +194,18 @@
                   },
                   "required": [
                     "type"
-                  ]
+                  ],
+                  "not": {
+                    "required": [
+                      "return_costs"
+                    ]
+                  }
                 }
               }
             },
             "required": [
+              "basis",
+              "return_costs",
               "return_methods"
             ]
           },
@@ -374,12 +443,13 @@
         "type": {
           "type": "string",
           "maxLength": 64,
-          "description": "Return method. Well-known values: `trader_collects` (the Business collects the goods from the buyer itself or through a carrier it sends, and the buyer only hands them over), `carrier_point` (the buyer drops the parcel at a locker or a staffed point of `network`), `carrier_pickup_at_address` (the buyer has a courier of `network` collect the parcel from an address, using the Business's label or code), `postal` (the buyer posts the goods through a postal or parcel service to the return address in the instructions; with `network` when the Business issues a label or code of one operator), `in_store` (the buyer hands the goods over at the Business's premises). A Platform that does not recognize the value presents `display_text` and does not describe the method itself; when `display_text` is absent it does not present the entry."
+          "description": "Return method. Well-known values: `trader_collects` (the Business collects the goods from the buyer itself or through a carrier it sends, and the buyer only hands them over), `carrier_point` (the buyer drops the parcel at a locker or a staffed point of `network`), `carrier_pickup_at_address` (the buyer has a courier of `network` collect the parcel from an address, using the Business's label or code), `postal` (the buyer posts the goods through a postal or parcel service to the return address in the instructions; with `network` when the Business issues a label or code of one operator), `in_store` (the buyer hands the goods over at the Business's premises). A Platform that does not recognize the value presents `display_text` and does not describe the method itself; when `display_text` is absent it does not present the entry.",
+          "minLength": 1
         },
         "network": {
           "$ref": "../common/types/reverse_domain_name.json",
           "maxLength": 128,
-          "description": "Carrier network for `carrier_point` (required), `carrier_pickup_at_address` and `postal`, in the network identifier format proposed for carrier pickup points (#1139): the reversed primary domain of the operator, using the well-known values listed there (e.g., 'com.dhl', 'com.dpd'). A host site that serves several networks, such as a convenience store chain, is not a network."
+          "description": "Carrier network for `carrier_point` and `carrier_pickup_at_address` (required) and `postal` (required when the Business issues a label or code), in the network identifier format proposed for carrier pickup points (#1139): the reversed primary domain of the operator, using the well-known values listed there (e.g., 'com.dhl', 'com.dpd'). A host site that serves several networks, such as a convenience store chain, is not a network."
         },
         "artifacts": {
           "type": "array",
@@ -387,13 +457,14 @@
           "maxItems": 8,
           "items": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 64
           },
-          "description": "What the Business issues for a return by this method once the buyer has withdrawn. Well-known values: `label` (a return label), `code` (a return code typed or shown at the point or to the courier). Omitted or empty means the Business issues neither, for example for `postal` at the buyer's choice of carrier."
+          "description": "What the Business issues for a return by this method once the buyer has withdrawn. Well-known values: `label` (a return label), `code` (a return code typed or shown at the point or to the courier). Omitted or empty means the Business issues neither, for example for `postal` at the buyer's choice of carrier. A Platform that does not recognize a value does not claim anything about it and relies on `display_text`."
         },
         "printer_required": {
           "type": "boolean",
-          "description": "True when the buyer must print a label for this method. MUST be false or omitted when `artifacts` does not contain `label`: a method with a code and no label never needs a printer."
+          "description": "True when the buyer needs a printer to return the goods by this method, whether for a label the Business issues or one the buyer buys. MUST be false or omitted for a method whose `artifacts` contain `code` and not `label`: a code-only method never needs a printer."
         },
         "return_costs": {
           "$ref": "#/$defs/withdrawal_return_costs",
@@ -411,7 +482,10 @@
           "if": {
             "properties": {
               "type": {
-                "const": "carrier_point"
+                "enum": [
+                  "carrier_point",
+                  "carrier_pickup_at_address"
+                ]
               }
             },
             "required": [
@@ -426,18 +500,47 @@
         },
         {
           "if": {
-            "not": {
-              "properties": {
-                "artifacts": {
+            "properties": {
+              "type": {
+                "const": "postal"
+              },
+              "artifacts": {
+                "contains": {
+                  "enum": [
+                    "label",
+                    "code"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type",
+              "artifacts"
+            ]
+          },
+          "then": {
+            "required": [
+              "network"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifacts": {
+                "contains": {
+                  "const": "code"
+                },
+                "not": {
                   "contains": {
                     "const": "label"
                   }
                 }
-              },
-              "required": [
-                "artifacts"
-              ]
-            }
+              }
+            },
+            "required": [
+              "artifacts"
+            ]
           },
           "then": {
             "properties": {
@@ -751,7 +854,8 @@
                 "$ref": "types/return_shipment.json"
               },
               "ucp_request": "omit",
-              "description": "Return shipments the Business has set up for this order, each with its method, network, label or return code and the time to send the goods back. Appears only after the buyer has withdrawn or requested a return."
+              "description": "Return shipments the Business has set up for this order, each with its method, network, label or return code and the time to send the goods back. Appears only after the buyer has withdrawn or requested a return.",
+              "maxItems": 100
             },
             "fulfillment": {
               "type": "object",
