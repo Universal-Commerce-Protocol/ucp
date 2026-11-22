@@ -586,10 +586,10 @@ plugins:
               Carrier Pickup Extension, defining the carrier_pickup fulfillment
               method for parcel lockers and staffed pickup points run by
               carrier networks: point identity by network, country and point
-              ID, broker IDs, shared host sites, Buyer field requirements,
-              point re-validation with machine-readable unavailability
-              reasons, and order events that separate deposit at the point
-              from collection by the Buyer.
+              ID, broker IDs, shared host sites, options priced per carrier
+              service, recipient requirements, point re-validation with
+              machine-readable unavailability reasons, and parcel-level order
+              events that separate deposit at the point from collection.
           - specification/shopping/extensions/discount.md: >-
               Discount Extension, covering discount code discovery, applied
               discounts, allocation method stacking orders, rejected code

@@ -2,46 +2,54 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/carrier_pickup_event.json",
   "title": "Carrier Pickup Event Fields",
-  "description": "Fields a Fulfillment Event carries when it concerns a parcel sent to a carrier point. Deposit at the point (`ready_for_pickup`) and collection by the Buyer (`picked_up`) are separate events: deposit starts the holding period, collection is the moment the Buyer acquires physical possession.",
+  "description": "Fields and event types for a parcel sent to a carrier point. Deposit at the point and collection by the recipient are separate events. Events of a parcel are ordered by `occurred_at`, not by array or arrival order.",
   "type": "object",
   "properties": {
+    "type": {
+      "type": "string",
+      "description": "Event types this extension defines for parcels sent to a carrier point: `deposited_at_point` (the carrier reports the parcel placed at the point; the holding period runs), `collected_at_point` (the carrier reports the parcel collected), `pickup_expired` (the holding period ended without collection), `returning_to_sender` (the parcel is on its way back to the Business). The core `returned_to_sender` keeps its core meaning (back at the Business)."
+    },
+    "parcel_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Business-scoped identifier of the parcel, stable across all events of that parcel, including redirects and extensions. Required on the carrier pickup event types. Distinct from `tracking_number`, which a carrier may reuse or replace."
+    },
     "point": {
-      "title": "Carrier Point Key",
-      "type": "object",
-      "description": "The carrier point the event concerns, by its point key. For `ready_for_pickup` after a redirect, the point where the parcel now waits.",
-      "required": ["network", "country", "point_id"],
-      "properties": {
-        "network": {
-          "$ref": "../../common/types/reverse_domain_name.json",
-          "description": "Carrier network of the point."
-        },
-        "country": {
-          "type": "string",
-          "pattern": "^[A-Z]{2}$",
-          "description": "ISO 3166-1 alpha-2 country code of the point."
-        },
-        "point_id": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Point identifier as issued by `network`."
-        }
-      }
+      "$ref": "carrier_point_destination.json#/$defs/point_key",
+      "description": "The carrier point where the parcel is, or was, waiting. Required on `deposited_at_point`, `collected_at_point` and `pickup_expired`."
     },
     "pickup_by": {
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date-time",
-      "description": "RFC 3339 timestamp until which the parcel waits at `point`. A later `ready_for_pickup` event with a new `pickup_by` supersedes an earlier one (extension or redirect)."
+      "description": "RFC 3339 timestamp until which the parcel waits at `point`, as reported by the carrier. Required on `deposited_at_point`; `null` means the Business does not know the deadline, and the Platform MUST NOT compute one. A later `deposited_at_point` for the same `parcel_id` replaces it."
     }
   },
   "allOf": [
     {
       "if": {
-        "properties": { "type": { "const": "ready_for_pickup" } },
-        "required": ["type", "point"]
+        "properties": {
+          "type": { "enum": ["deposited_at_point", "collected_at_point", "pickup_expired", "returning_to_sender"] }
+        },
+        "required": ["type"]
       },
-      "then": {
-        "required": ["pickup_by"]
-      }
+      "then": { "required": ["parcel_id"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "enum": ["deposited_at_point", "collected_at_point", "pickup_expired"] }
+        },
+        "required": ["type"]
+      },
+      "then": { "required": ["point"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "deposited_at_point" } },
+        "required": ["type"]
+      },
+      "then": { "required": ["pickup_by"] }
     }
   ]
 }

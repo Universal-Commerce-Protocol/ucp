@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-<!-- cspell:ignore inpost orlenpaczka packeta Paczka Orlen Paczkomat Prosta Warszawa -->
+<!-- cspell:ignore inpost orlenpaczka orlen packeta Paczka Orlen Paczkomat Prosta Warszawa mondialrelay Mondial postnord Postnord Euratom gls Poczta poczta Polska polska Pocztex Krakowskie Przedmieście -->
 
 # Carrier Pickup Extension
 
@@ -22,43 +22,48 @@
 
 The Carrier Pickup Extension defines the `carrier_pickup` fulfillment method.
 The Business ships the parcel to a parcel locker or a staffed pickup point that
-a carrier network operates, and the Buyer collects it there. The point belongs
-to the network, not to the Business, which is what separates this method from
-`pickup` at a Business Location.
+a carrier network operates, and the recipient collects it there. The point
+belongs to the network, not to the Business, which is what separates this
+method from `pickup` at a Business Location.
 
 A carrier point differs from a Business Location in four ways that matter to an
 agent:
 
 - **The network owns the point identifier.** Point IDs are issued by the
   network, are unique only within a network and country, and are usually chosen
-  by the Buyer in the network's own point selector.
+  in the network's or a broker's point selector.
 - **Several networks serve one market and one site.** A Buyer may choose among
   several networks in one checkout, and one shop counter can be a point of
   several networks, each with its own ID, holding period and limits.
-- **The method needs Buyer contact data.** Networks deliver the collection code
-  or the deposit notice to the Buyer's phone or email, so the shipment cannot be
-  created without them. A street address of the Buyer is not needed for the
-  delivery itself.
+- **The service needs recipient data.** Networks send the collection code or
+  the deposit notice to the recipient's phone or email, and some deliver only to
+  their registered customers. A street address of the recipient is not needed
+  for delivery to the point.
 - **Delivery has two steps.** The carrier deposits the parcel at the point, and
-  the Buyer later collects it, or does not collect it before the holding period
-  ends.
+  the recipient later collects it, or does not collect it before the holding
+  period ends.
 
 **Key features:**
 
 - A Carrier Point Destination keyed by (`network`, `country`, `point_id`),
-  with an optional broker identifier, point type, host site, holding period and
-  parcel limits
-- Platform-writable point selection, with Business re-validation on every
-  update
+  with an optional broker identifier, point type, location details, host site
+  and parcel limits
+- Options that are carrier services, each with its price, holding period and
+  recipient requirements
+- Platform-writable point selection, by point key or by broker identifier, with
+  Business re-validation on every update
 - Machine-readable reasons why a point cannot be used
-- Per-method Buyer field requirements with a stated purpose
-- Order events that separate deposit at the point from collection by the Buyer
+- Order expectations that keep the selected point, and parcel-level events that
+  separate deposit at the point from collection
 
 **Dependencies:**
 
-- [Fulfillment Extension](fulfillment.md): this extension defines one more
-  method `type` and one more destination `type` on top of it.
-- Checkout, and Order for the post-purchase events.
+- [Fulfillment Extension](fulfillment.md). This extension narrows the
+  `fulfillment` object that Fulfillment defines. If Fulfillment is not in the
+  negotiated capability set, the Checkout composition has no effect, and a
+  Business **MUST NOT** return a `carrier_pickup` method. The Order composition
+  (expectations and events) does not depend on Fulfillment.
+- Checkout, and Order for the post-purchase data.
 
 ## Discovery
 
@@ -83,22 +88,9 @@ Checkout:
           "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/fulfillment_carrier_pickup.json",
           "config": {
             "networks": [
-              {
-                "network": "pl.inpost",
-                "name": "InPost Paczkomat",
-                "countries": ["PL"],
-                "point_types": ["locker", "staffed"]
-              },
-              {
-                "network": "pl.orlenpaczka",
-                "name": "Orlen Paczka",
-                "countries": ["PL"]
-              },
-              {
-                "network": "com.packeta",
-                "name": "Packeta",
-                "countries": ["CZ", "SK", "HU"]
-              }
+              { "network": "eu.inpost", "name": "InPost", "countries": ["PL"] },
+              { "network": "pl.orlenpaczka", "name": "Orlen Paczka", "countries": ["PL"] },
+              { "network": "com.packeta", "name": "Packeta", "countries": ["CZ", "SK", "HU"] }
             ]
           }
         }
@@ -108,30 +100,39 @@ Checkout:
 }
 ```
 
-The network identifiers in these examples are illustrative; see
-[Network identifier](#network-identifier).
-
-The Fulfillment extension **MUST** also be negotiated. A Platform that has not
-negotiated this extension does not create `carrier_pickup` methods; a Business
-**MUST NOT** return a `carrier_pickup` method to such a Platform.
-
 ## Schema
 
 ### Carrier Point Destination
 
 {{ schema_fields('types/carrier_point_destination_resp', 'shopping/extensions/carrier-pickup') }}
 
+### Carrier Point Key
+
+{{ extension_schema_fields('types/carrier_point_destination.json#/$defs/point_key', 'shopping/extensions/carrier-pickup') }}
+
+### Pickup Period
+
+{{ extension_schema_fields('types/carrier_point_destination.json#/$defs/pickup_period', 'shopping/extensions/carrier-pickup') }}
+
 ### Unavailable Reason
 
 {{ extension_schema_fields('types/carrier_point_destination.json#/$defs/unavailable_reason', 'shopping/extensions/carrier-pickup') }}
 
-### Network Offer
+### Carrier Pickup Option
 
-{{ extension_schema_fields('fulfillment_carrier_pickup.json#/$defs/network_offer', 'shopping/extensions/carrier-pickup') }}
+{{ extension_schema_fields('fulfillment_carrier_pickup.json#/$defs/carrier_pickup_option', 'shopping/extensions/carrier-pickup') }}
 
-### Buyer Field Requirement
+### Recipient Requirement
 
-{{ extension_schema_fields('fulfillment_carrier_pickup.json#/$defs/buyer_field_requirement', 'shopping/extensions/carrier-pickup') }}
+{{ extension_schema_fields('fulfillment_carrier_pickup.json#/$defs/recipient_requirement', 'shopping/extensions/carrier-pickup') }}
+
+### Network Summary
+
+{{ extension_schema_fields('fulfillment_carrier_pickup.json#/$defs/network_summary', 'shopping/extensions/carrier-pickup') }}
+
+### Carrier Pickup Expectation
+
+{{ extension_schema_fields('fulfillment_carrier_pickup.json#/$defs/carrier_pickup_expectation', 'shopping/extensions/carrier-pickup') }}
 
 ### Carrier Pickup Event Fields
 
@@ -144,19 +145,34 @@ A Fulfillment Method whose `type` is `carrier_pickup` follows the base
 
 | Field | Direction | Meaning |
 | :-- | :-- | :-- |
-| `destinations[]` | Request and response | Carrier Point Destinations. The Platform **MAY** write the point the Buyer chose; the Business returns the resolved point. |
-| `networks[]` | Response | Networks the Business accepts for this method's line items. It **MAY** be narrower than the profile list, for example when a line item is too large for lockers. |
-| `required_buyer_fields[]` | Response | Buyer fields the method needs. See [Buyer fields](#buyer-fields). |
+| `destinations[]` | Request and response | Carrier Point Destinations. The Platform **MAY** write the point the recipient chose; the Business returns the resolved point. |
+| `groups[].options[]` | Response | Carrier services. Each option names its `network` and carries its `pickup_period` and `recipient_requirements`. |
 
 The method opts into a Platform-writable request shape, as the
 [Destinations](fulfillment.md#destinations) contract permits: under a
 `carrier_pickup` method, a request destination that omits `type` is a
-`carrier_point`, and only `network`, `country`, `point_id`, `broker` and `id`
-are request fields. Everything else about a point is Business-authored.
+`carrier_point`, and only `id`, `network`, `country`, `point_id`, `broker` and
+`recipient` are request fields. Everything else about a point is
+Business-authored.
 
-Groups and options work as for `shipping`: the Business computes options and
-their totals for the selected point, because the price depends on the network
-and the service the Business buys from it.
+### Options and price
+
+Each option is one carrier service, priced as a whole. The price depends on the
+service and the line items, not on which point of that service is selected, and
+a Business **MUST NOT** change an option's totals because the recipient picked
+another point of the same service. This matches how commerce platforms already
+model carriers: one shipping method or rate per carrier service.
+
+The Business **SHOULD** return the options before a point is selected, so a
+Platform can show "network A, price X; network B, price Y" first and then open
+the selector of the chosen network. The selected point **MUST** belong to the
+`network` of the selected option. When it does not, the Business rejects the
+selection with the reason `option_mismatch`; it **MUST NOT** switch the
+selected option by itself.
+
+A Business that prefers one method per carrier service **MAY** instead return
+several `carrier_pickup` methods, as its method combination rules allow; the
+rules on this page apply to each.
 
 ### Point identity
 
@@ -173,21 +189,39 @@ A carrier point is identified by the tuple (`network`, `country`, `point_id`).
 
 #### Network identifier
 
-`network` is a reverse-domain name derived from a domain the network operator
-controls, such as `pl.inpost` for a network reached at `inpost.pl`. Domain
-control prevents collisions without a central registry. The value names the
-operating network, whose point directory and rules apply:
+`network` names the operating network, whose point directory and rules apply.
+It is a reverse-domain name of the operator's primary domain. Where a
+well-known value is listed below, Businesses and Platforms **MUST** use it, so
+that two integrations name the same directory the same way. For other
+networks, they use the reversed primary domain of the operator; a new
+well-known value is added to this list by a change to this specification.
 
-- A buyer-facing brand that sells several networks' points under one name, or a
-  marketplace delivery program, is not a network. The point keeps the network
+| Value | Network |
+| :-- | :-- |
+| `eu.inpost` | InPost lockers and points (all countries except those served under the Mondial Relay brand) |
+| `com.mondialrelay` | Mondial Relay points and lockers |
+| `pl.orlenpaczka` | Orlen Paczka |
+| `pl.poczta-polska` | Poczta Polska and Pocztex points |
+| `com.dhl` | DHL points and lockers |
+| `com.dpd` | DPD Pickup points and lockers |
+| `com.gls-group` | GLS points and lockers |
+| `com.packeta` | Packeta (Z-BOX and points) |
+| `com.postnord` | PostNord service points and lockers |
+
+These values are proposed by this specification and are not registered or
+endorsed by the operators. `network` is a namespace, not an authentication:
+the Business **MUST** resolve `point_id` only against the directory it has
+configured for that `network` value, so a point written with the wrong
+`network` fails to resolve.
+
+- A buyer-facing brand that sells several networks' points under one name, or
+  a marketplace delivery program, is not a network. The point keeps the network
   that operates it.
 - A host site, such as a convenience store chain, is not a network. See
   [Host sites](#host-sites).
-- An operator that runs separate point namespaces under different brands uses a
-  distinct value for each namespace.
-
-The values in this page's examples are illustrative and are not registered or
-endorsed by the named operators.
+- When one carrier delivers to another network's lockers, `network` names the
+  locker network; the option's base `carrier` field names the delivering
+  carrier.
 
 #### Brokers
 
@@ -195,46 +229,53 @@ A Platform or Business can reach a network through a broker that runs its own
 point selector or directory. When the broker's identifier for the point differs
 from the network's own, the destination carries both: `point_id` is always the
 network's identifier, and `broker.point_id` is the broker's. A Platform that
-knows only the broker's identifier **MUST NOT** put it in `point_id`; it
-resolves the network identifier first, or the Business resolves it through the
-same broker.
+knows only the broker's identifier **MUST NOT** put it in `point_id`. It writes
+`broker` without the point key, and the Business resolves it through the same
+broker and returns the full point key, or rejects it with `point_not_found`.
 
 #### Host sites
 
 One physical site can be a point of several networks. Each is a separate
-destination with its own `network`, `point_id`, `pickup_period` and `limits`.
-The Business **MAY** set the same `host.id` on those destinations so the
-Platform can group them on a map, and **MUST NOT** merge them into one
-destination.
+destination with its own point key and terms. A Business that knows the site,
+typically through a broker, **MAY** set the same `host.id` on those
+destinations within one response so the Platform can group them on a map. It
+**MUST NOT** merge them into one destination, and `host.id` **MUST NOT** be an
+identifier shared with other Businesses.
 
 ### Selection and re-validation
 
 The Platform selects a point in one of two ways:
 
-1. It writes the point the Buyer chose as a destination with a Platform-chosen
-   `id`, and sets `selected_destination_id` to that `id`.
+1. It writes the point the recipient chose as a destination with a
+   Platform-chosen `id`, and sets `selected_destination_id` to that `id`.
 2. It sets `selected_destination_id` to the `id` of a point the Business
    returned in `destinations[]`.
 
 The Business resolves the written point against the network directory and
-returns it with its Business-authored fields. The rules of
+returns it with its Business-authored fields: at least `name` and `address`
+(with at least `address_locality` and `address_country`), and `description` or
+`geo` where they help the recipient find it. The rules of
 [Selection and Location Identity](fulfillment.md#selection-and-location-identity)
 apply unchanged: the response echoes the selection and contains exactly one
 matching destination, and the Business **MUST NOT** substitute another point.
 
 Points go full, close for maintenance or leave the network between selection
 and order placement. The Business **MUST** re-validate the selected point on
-every Update Checkout and before Complete Checkout. When the point cannot be
-used, the Business rejects the selection with an error Message with
-`severity: "recoverable"`, a `path` that selects the method's
-`selected_destination_id`, and a `code` from the
-[unavailable reason](#unavailable-reason) codes. The Platform asks the Buyer
-to choose another point, or offers another method.
+every Update Checkout and before Complete Checkout, and **MUST** set
+`available` on the selected destination. Re-validation uses the best data the
+network offers; some networks report live capacity, others only an estimate.
+`available: true` is the Business's assessment at the time of the response. It
+does not reserve a compartment. When the point cannot be used, or the network
+cannot be reached to check it, the Business rejects the selection with an
+error Message with `severity: "recoverable"`, a `path` that selects the
+method's `selected_destination_id`, and a `code` from the
+[unavailable reason](#eligibility) codes. The Platform asks the Buyer to choose
+another point, or offers another method.
 
-A Business **MAY** list points it cannot use in a response, with
-`available: false` and `unavailable_reasons[]`, so the Platform can explain why
-a point the Buyer knows is not offered. The Platform **MUST NOT** select a point
-marked `available: false`.
+A Business **MAY** list points it cannot use, with `available: false` and
+`unavailable_reasons[]`, so the Platform can explain why a point the Buyer
+knows is not offered. The Platform **MUST NOT** select a point marked
+`available: false`.
 
 ### Eligibility
 
@@ -253,96 +294,205 @@ Business decides eligibility, because it knows the parcel it will build.
 | `point_not_found` | The network directory does not know the point, or it has been removed. |
 | `network_not_supported` | The Business does not ship to this network for this cart. |
 | `country_not_supported` | The Business does not ship to this network in this country. |
+| `option_mismatch` | The point does not belong to the network of the selected option. |
+| `point_type_not_supported` | The selected option does not deliver to this type of point. |
 
 A reason that comes from particular line items **SHOULD** list them in
 `line_item_ids`, so a Platform can propose splitting the cart across methods.
 When no point of any network can take the cart, the Business **SHOULD** omit
 the `carrier_pickup` method and **MAY** explain it in `available_methods[]`.
 
-### Buyer fields
+### Recipient data
 
-`required_buyer_fields[]` lists the Checkout `buyer` fields the method needs to
-create the shipment, each with a `purpose`. The Business:
+The recipient is the person who collects the parcel. It can differ from the
+Buyer, for example for a gift or a company purchase, so recipient data is
+written on the selected destination's `recipient`, not taken from `buyer`.
 
-- **MUST** list only fields the selected network needs for this method. A
-  Business **MUST NOT** list a Buyer postal address as needed for a carrier
-  point; a billing address, where required, has its own basis and its own
-  field.
+Each option lists the recipient data it needs in `recipient_requirements[]`. A
+requirement is met when at least one field in its `fields` is present, so "phone
+or email" is one requirement with two fields. `countries` and `point_types`
+narrow where a requirement applies. The requirements that apply are those of
+the selected option, for the selected point's country and type.
+
+The Business:
+
+- **MUST** list only data the service needs to deliver to the point and hand
+  the parcel over. It **MUST NOT** list a postal address of the recipient or
+  Buyer as needed for delivery to a point. A Business that needs an address for
+  another purpose, such as an invoice, tax or customs, requests it through the
+  field and the legal basis that purpose has (for example the billing address),
+  not through this method.
 - **MUST** return a recoverable error with a `path` that selects the missing
-  `buyer` field when a listed field is missing at Complete Checkout, so the
-  Platform can collect it in band.
+  field on the selected destination's `recipient` (for example
+  `$.fulfillment.methods[0].destinations[0].recipient.phone_number`) when an
+  applicable requirement is not met at Complete Checkout.
+- **MUST** use recipient data received for this method only to deliver the
+  parcel, and pass to the network only the data the requirement names.
 
 The Platform:
 
-- **SHOULD** collect the listed fields before Complete Checkout and tell the
-  Buyer what each one is for, using `purpose`.
-- **SHOULD NOT** send Buyer fields for this method beyond those listed and those
-  required by other parts of the Checkout.
-- **MUST NOT** fill a listed field from stored or identity-linked data without
+- **SHOULD** collect the applicable requirements before Complete Checkout and
+  tell the Buyer what each one is for. For a well-known `purpose` it **MAY** use
+  its own wording; for any other value it shows the requirement's
+  `description`. A `purpose` code is not a complete privacy notice; the
+  information duties of the controllers involved still apply.
+- **MUST NOT** send recipient fields that no applicable requirement names.
+- **MUST NOT** fill a requirement from stored or identity-linked data without
   the Buyer seeing the value that will be shared.
 
-A `phone_number` with purpose `pickup_notification` must receive text messages,
-because the network sends the collection code or deposit notice to it.
+## Order data
 
-## Order events
+### Expectations
 
-This extension adds `point` and `pickup_by` to Fulfillment Events on the Order
-and gives four event types a defined meaning for carrier points:
+When an Order Expectation has `method_type: "carrier_pickup"`, it carries
+`point` with the point key and name of the selected point, from the moment the
+Order exists, before any fulfillment event. The base `destination` carries the
+point's address.
 
-| Event `type` | Meaning | Fields |
+### Events
+
+This extension defines four event types for parcels sent to a carrier point.
+Each carries `parcel_id`, a Business-scoped identifier that stays the same for
+the parcel across redirects and extensions. A Business **SHOULD** also put
+`parcel_id` on the core events of the same parcel, such as `shipped`.
+
+| Event `type` | Meaning | Required fields |
 | :-- | :-- | :-- |
-| `ready_for_pickup` | The carrier deposited the parcel at the point. The holding period runs. | `point`, and `pickup_by` (required with `point`) |
-| `picked_up` | The Buyer collected the parcel. | `point` |
-| `not_collected` | The holding period ended without collection. | `point` |
-| `returned_to_sender` | The parcel is on its way back to, or back at, the Business. | |
+| `deposited_at_point` | The carrier reports the parcel placed at the point. The holding period runs. | `parcel_id`, `point`, `pickup_by` (`null` when unknown) |
+| `collected_at_point` | The carrier reports the parcel collected. | `parcel_id`, `point` |
+| `pickup_expired` | The holding period ended without collection. | `parcel_id`, `point` |
+| `returning_to_sender` | The parcel is on its way back to the Business. | `parcel_id` |
 
-- `ready_for_pickup` is not delivery to the Buyer. A Platform **MUST NOT**
+The core `returned_to_sender` keeps its core meaning: the parcel is back at
+the Business.
+
+Ordering and correlation:
+
+- Events of one parcel are ordered by `occurred_at`, not by array position or
+  by the order in which they arrive. Events with equal `occurred_at` keep their
+  array order. An event `id` that appears again is the same event, not a new
+  one.
+- The latest `deposited_at_point` of a parcel, by `occurred_at`, gives its
+  current `point` and `pickup_by`, for example after an extension or a redirect
+  to another point. It never affects another `parcel_id`.
+- `collected_at_point` is terminal for the parcel. A Business **MUST NOT** emit
+  a later `deposited_at_point` or `pickup_expired` for the same `parcel_id`.
+- When `pickup_by` is `null`, the Platform **MUST NOT** compute a deadline from
+  the deposit time and the advertised `pickup_period`, because networks count
+  from different events (deposit or notification) and calendars.
+
+Meaning for the Buyer:
+
+- `deposited_at_point` is not delivery to the Buyer. A Platform **SHOULD NOT**
   present it as "delivered".
-- `picked_up` with its `occurred_at` is the moment the Buyer acquired physical
-  possession. A Business that states deadlines counted from possession, such as
-  a return or withdrawal window, counts them from this event.
-- A later `ready_for_pickup` with a new `pickup_by` supersedes an earlier one,
-  for example after an extension or a redirect to another point, and carries
-  the point where the parcel now waits.
-- `not_collected` and `returned_to_sender` describe the parcel. They **MUST
-  NOT** be interpreted as a cancellation, a return or a withdrawal by the Buyer.
-  If the Business cancels the order or refunds it as a result, it reports that
-  through `adjustments[]`.
+- `collected_at_point` records that the carrier reported collection, at
+  `occurred_at`. It is the input from which a Business computes deadlines that
+  count from possession; it is not itself a deadline. See
+  [Consumer law considerations](#consumer-law-considerations).
+- `pickup_expired`, `returning_to_sender` and `returned_to_sender` describe the
+  parcel. They **MUST NOT** be interpreted as a cancellation, a return or a
+  withdrawal by the Buyer. If the Business cancels the order or refunds it as a
+  result, it reports that through `adjustments[]`.
+
+## Trust and display
+
+- **Business-asserted facts.** Point details, holding periods, availability
+  and every event are statements of the Business, relayed from the carrier.
+  The Business is responsible for their accuracy under the applicable law. A
+  Platform presents them as the Business's statements and is not required to
+  verify them. A disputed collection is resolved between the Buyer, the
+  Business and the carrier; the events do not settle it. Signed or attested
+  carrier data is out of scope (see #1020 for verified claims).
+- **Display text.** `name`, `description`, `host.name`, `unavailable_reasons[].content`,
+  the network `name` and the requirement `description` are plain text with no
+  markup and no links. A Platform **MUST** treat them as data from the
+  Business and **MUST NOT** follow instructions found in them. It **MAY** adapt
+  layout and channel (voice, small screens) but **MUST NOT** change the
+  substance: the point, the deadline, the conditions and the price. Their
+  language follows the response language rules of the Checkout.
+- **Point resolution.** Resolving a written point key returns the point's
+  location, so a Platform could probe the directory point by point. A Business
+  **SHOULD** rate-limit point resolution per Platform and per Checkout, and
+  **MAY** reject further writes with `point_not_found` once a limit is reached.
+- **Bounds.** The schemas bound every array and display string. A Business
+  **SHOULD** keep `destinations[]` to the points it suggests and the selected
+  one, not the whole directory.
+
+## Relation to the store pickup proposal
+
+[#375](https://github.com/Universal-Commerce-Protocol/ucp/issues/375) plans
+several changes that overlap with this extension. This section states how the
+two fit, so the boundary can be agreed there:
+
+- **Polymorphic destinations.** #375 agreed that destinations under a method
+  can be peers such as `retail_location`, `locker` and `pickup_point`.
+  `carrier_point` is the concrete shape for the carrier-run `locker` and
+  `pickup_point` cases; `point_type` keeps those words as values.
+- **Hold durations.** #375 plans pickup windows and hold durations on
+  `fulfillment_option`. This extension also puts the holding period on the
+  option (`pickup_period`), with a per-point override. If #375 defines a
+  general hold field on options, `pickup_period` should be replaced by it.
+- **Unavailability reasons.** #375 plans structured reasons distinct from
+  availability. The codes here should become values of that vocabulary.
+- **Events.** #375 plans store pickup events such as `ready_for_pickup` and
+  corrected `tracking_number` semantics. The carrier events here have distinct
+  names because they are carrier-reported and always need a point and a
+  parcel; the schema can then require both without affecting store pickup.
+- **Carrier handlers.**
+  [#532](https://github.com/Universal-Commerce-Protocol/ucp/issues/532)
+  discusses runtime carrier integrations and point choice tied to shipping
+  options. Here, too, the service is the option; point lookup behind a handler
+  would not change the shapes on this page.
 
 ## Consumer law considerations
 
 This section is informative. It explains why the contract separates deposit
-from collection and limits Buyer fields, for Businesses selling to consumers in
-the European Union.
+from collection and limits recipient data, for Businesses selling to consumers
+in the European Union.
 
-- **Passing of risk.** Under Article 20 of Directive 2011/83/EU (Consumer
-  Rights Directive), risk passes when the consumer, or a third party the
-  consumer indicated other than the carrier, acquires physical possession. The
-  European Consumer Centres Network treats a pickup point the Business offered
-  as part of the carrier's delivery, so on that reading risk passes at
-  `picked_up`, not at `ready_for_pickup`.
-- **Withdrawal period.** Under Article 9(2)(b) of the same Directive, the
-  14-day withdrawal period for goods starts on the day the consumer acquires
-  physical possession. For a carrier point that is `picked_up`. A parcel that is
-  never collected does not start the period.
+- **Passing of risk.** Under Article 20 of
+  [Directive 2011/83/EU](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011L0083)
+  (Consumer Rights Directive), risk passes when the consumer, or a third party
+  the consumer indicated other than the carrier, acquires physical possession.
+  The European Consumer Centres Network, in non-binding guidance
+  ([Parcel delivery issues, 2024, section 4](https://www.eccnet.eu/media/679/download)),
+  treats a pickup point the trader offered as part of the carrier's delivery;
+  on that reading risk passes at collection, not at deposit. The same guidance
+  treats a point the consumer arranged with a carrier the trader did not offer
+  differently.
+- **Withdrawal period.** Under Article 9(2)(b), the 14-day period for goods
+  counts from the day the consumer acquires physical possession of the goods.
+  For several goods delivered separately it is the last good, for a good
+  delivered in lots the last lot, and for regular delivery the first good
+  (points (i) to (iii)). Under
+  [Regulation (EEC, Euratom) No 1182/71](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:31971R1182),
+  Article 3(1), the day of possession itself is not counted, and under Article
+  3(4) a period whose last day is a public holiday, Saturday or Sunday ends at
+  the end of the next working day. One `collected_at_point` event is therefore
+  not always the start of the period, and a deadline is not `occurred_at` plus
+  14 days. The Business computes it per contract. The consumer may also
+  withdraw before collecting the parcel.
 - **Not collecting is not withdrawing.** Withdrawal requires an unequivocal
-  statement (Article 11(1)). `not_collected` and `returned_to_sender` are
+  statement (Article 11(1)). `pickup_expired` and `returned_to_sender` are
   therefore not withdrawals; what follows depends on the contract and national
   law.
-- **Data minimization.** Under Article 5(1)(c) and Article 25 of Regulation
-  (EU) 2016/679 (GDPR), personal data is limited to what is necessary for the
-  purpose. The European Data Protection Board Guidelines 2/2019 on Article
-  6(1)(b) state that a home address is no longer necessary for the contract
-  when the customer chose a pickup point. This is why `required_buyer_fields[]` carries a purpose and why
-  a carrier point needs no Buyer address.
+- **Data minimization.** Under Article 5(1)(c) and Article 25 of
+  [Regulation (EU) 2016/679](https://eur-lex.europa.eu/eli/reg/2016/679/oj)
+  (GDPR), personal data is limited to what is necessary for the purpose. The
+  European Data Protection Board
+  [Guidelines 2/2019](https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines-art_6-1-b-adopted_after_public_consultation_en.pdf)
+  on Article 6(1)(b), Example 1, state that a home address is no longer
+  necessary for the contract when the customer chose a pickup point. Other
+  rules can still require an address for another purpose; for example, Article
+  226(5) of Directive 2006/112/EC requires the customer's address on a full VAT
+  invoice.
 
 ## Examples
 
-### Checkout response with several networks
+### Checkout response: options before point selection
 
-The Business lists the networks it accepts and the phone number the method
-needs. The Buyer selected a locker; the Business also suggests a staffed point
-of another network at the same site, and lists a third point it cannot use.
+The Business returns one option per network with its price, holding period and
+recipient requirements. No point is selected yet.
 
 <!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.checkout op=read -->
 ```json
@@ -360,77 +510,36 @@ of another network at the same site, and lists a third point it cannot use.
         "id": "method_1",
         "type": "carrier_pickup",
         "line_item_ids": ["li_kettle"],
-        "networks": [
-          { "network": "pl.inpost", "name": "InPost Paczkomat", "countries": ["PL"] },
-          { "network": "pl.orlenpaczka", "name": "Orlen Paczka", "countries": ["PL"] }
-        ],
-        "required_buyer_fields": [
-          { "field": "phone_number", "purpose": "pickup_notification" },
-          { "field": "email", "purpose": "pickup_notification", "networks": ["pl.inpost"] }
-        ],
-        "selected_destination_id": "pt_1",
-        "destinations": [
-          {
-            "type": "carrier_point",
-            "id": "pt_1",
-            "network": "pl.inpost",
-            "country": "PL",
-            "point_id": "WAW99X",
-            "point_type": "locker",
-            "name": "Paczkomat WAW99X",
-            "address": {
-              "street_address": "ul. Prosta 5",
-              "address_locality": "Warszawa",
-              "postal_code": "00-850",
-              "address_country": "PL"
-            },
-            "host": { "id": "site_17", "name": "Corner shop, ul. Prosta 5" },
-            "pickup_period": { "duration": "PT48H" },
-            "limits": {
-              "max_weight": { "value": 25, "unit": "KGM", "display_text": "kg" },
-              "max_dimensions": [
-                { "value": 64, "unit": "CMT", "display_text": "cm" },
-                { "value": 41, "unit": "CMT", "display_text": "cm" },
-                { "value": 38, "unit": "CMT", "display_text": "cm" }
-              ]
-            }
-          },
-          {
-            "type": "carrier_point",
-            "id": "pt_2",
-            "network": "pl.orlenpaczka",
-            "country": "PL",
-            "point_id": "100417",
-            "point_type": "staffed",
-            "name": "Orlen Paczka, Corner shop",
-            "host": { "id": "site_17", "name": "Corner shop, ul. Prosta 5" },
-            "pickup_period": { "duration": "P3D", "counting": "business_days" }
-          },
-          {
-            "type": "carrier_point",
-            "id": "pt_3",
-            "network": "pl.inpost",
-            "country": "PL",
-            "point_id": "WAW12M",
-            "point_type": "locker",
-            "name": "Paczkomat WAW12M",
-            "available": false,
-            "unavailable_reasons": [
-              { "code": "point_full", "content": "This locker is full today." }
-            ]
-          }
-        ],
+        "selected_destination_id": null,
         "groups": [
           {
             "id": "package_1",
             "line_item_ids": ["li_kettle"],
-            "selected_option_id": "locker_standard",
+            "selected_option_id": "inpost_locker",
             "options": [
               {
-                "id": "locker_standard",
-                "title": "Parcel locker",
-                "description": { "plain": "Ready for pickup in 1-2 business days" },
+                "id": "inpost_locker",
+                "title": "InPost parcel locker",
+                "network": "eu.inpost",
+                "countries": ["PL"],
+                "point_types": ["locker", "staffed"],
+                "pickup_period": { "duration": "PT48H", "starts": "notification" },
+                "recipient_requirements": [
+                  { "fields": ["phone_number"], "purpose": "pickup_notification" },
+                  { "fields": ["email"], "purpose": "pickup_notification" }
+                ],
                 "totals": [{ "type": "total", "amount": 1299 }]
+              },
+              {
+                "id": "orlen_point",
+                "title": "Orlen Paczka point",
+                "network": "pl.orlenpaczka",
+                "countries": ["PL"],
+                "pickup_period": { "duration": "P3D", "starts": "notification", "counting": "business_days" },
+                "recipient_requirements": [
+                  { "fields": ["phone_number", "email"], "purpose": "pickup_notification" }
+                ],
+                "totals": [{ "type": "total", "amount": 999 }]
               }
             ]
           }
@@ -441,10 +550,164 @@ of another network at the same site, and lists a third point it cannot use.
 }
 ```
 
-### Platform selects a point chosen in a broker's selector
+### Platform writes the chosen point and the recipient
 
-The Buyer picked a point in a broker's map. The Platform writes the network's
-identifier and the broker's identifier, and selects the point.
+The Buyer buys a gift and picks a locker in the network's selector. The
+Platform writes the point key and the recipient's phone and email.
+
+<!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.checkout op=update direction=request -->
+```json
+{
+  "line_items": [ ... ],
+  "fulfillment": {
+    "methods": [
+      {
+        "id": "method_1",
+        "type": "carrier_pickup",
+        "line_item_ids": ["li_kettle"],
+        "selected_destination_id": "buyer_choice",
+        "destinations": [
+          {
+            "id": "buyer_choice",
+            "network": "eu.inpost",
+            "country": "PL",
+            "point_id": "WAW99X",
+            "recipient": {
+              "phone_number": "+48500100200",
+              "email": "recipient@example.com"
+            }
+          }
+        ],
+        "groups": [
+          { "id": "package_1", "selected_option_id": "inpost_locker" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Checkout response: point resolved, with alternatives
+
+The Business resolves the locker and suggests a staffed point of another
+network at the same site, and lists a locker it cannot use.
+
+<!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.checkout op=read -->
+```json
+{
+  "ucp": { ... },
+  "id": "chk_7f3a",
+  "status": "incomplete",
+  "currency": "PLN",
+  "line_items": [ ... ],
+  "totals": [ ... ],
+  "links": [ ... ],
+  "fulfillment": {
+    "methods": [
+      {
+        "id": "method_1",
+        "type": "carrier_pickup",
+        "line_item_ids": ["li_kettle"],
+        "selected_destination_id": "buyer_choice",
+        "destinations": [
+          {
+            "type": "carrier_point",
+            "id": "buyer_choice",
+            "network": "eu.inpost",
+            "country": "PL",
+            "point_id": "WAW99X",
+            "point_type": "locker",
+            "name": "Paczkomat WAW99X",
+            "address": {
+              "street_address": "ul. Prosta 5",
+              "address_locality": "Warszawa",
+              "postal_code": "00-850",
+              "address_country": "PL"
+            },
+            "description": "Next to the shop entrance",
+            "geo": { "latitude": 52.2319, "longitude": 20.9917 },
+            "host": { "id": "site_17", "name": "Corner shop, ul. Prosta 5" },
+            "limits": {
+              "max_weight": { "value": 25, "unit": "KGM", "display_text": "kg" },
+              "max_dimensions": [
+                { "value": 64, "unit": "CMT", "display_text": "cm" },
+                { "value": 41, "unit": "CMT", "display_text": "cm" },
+                { "value": 38, "unit": "CMT", "display_text": "cm" }
+              ]
+            },
+            "recipient": {
+              "phone_number": "+48500100200",
+              "email": "recipient@example.com"
+            },
+            "available": true
+          },
+          {
+            "type": "carrier_point",
+            "id": "pt_2",
+            "network": "pl.orlenpaczka",
+            "country": "PL",
+            "point_id": "100417",
+            "point_type": "staffed",
+            "name": "Orlen Paczka, Corner shop",
+            "address": {
+              "street_address": "ul. Prosta 5",
+              "address_locality": "Warszawa",
+              "address_country": "PL"
+            },
+            "host": { "id": "site_17", "name": "Corner shop, ul. Prosta 5" },
+            "available": true
+          },
+          {
+            "type": "carrier_point",
+            "id": "pt_3",
+            "network": "eu.inpost",
+            "country": "PL",
+            "point_id": "WAW12M",
+            "point_type": "locker",
+            "name": "Paczkomat WAW12M",
+            "address": {
+              "street_address": "Krakowskie Przedmieście 1",
+              "address_locality": "Warszawa",
+              "address_country": "PL"
+            },
+            "available": false,
+            "unavailable_reasons": [
+              { "code": "point_full", "content": "This locker is full today." }
+            ]
+          }
+        ],
+        "groups": [
+          {
+            "id": "package_1",
+            "line_item_ids": ["li_kettle"],
+            "selected_option_id": "inpost_locker",
+            "options": [
+              {
+                "id": "inpost_locker",
+                "title": "InPost parcel locker",
+                "network": "eu.inpost",
+                "pickup_period": { "duration": "PT48H", "starts": "notification" },
+                "totals": [{ "type": "total", "amount": 1299 }]
+              },
+              {
+                "id": "orlen_point",
+                "title": "Orlen Paczka point",
+                "network": "pl.orlenpaczka",
+                "totals": [{ "type": "total", "amount": 999 }]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Platform knows only a broker's identifier
+
+The Buyer picked a point in a broker's map, which returned only the broker's
+identifier. The Business resolves it into the network's point key.
 
 <!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.checkout op=update direction=request -->
 ```json
@@ -460,9 +723,6 @@ identifier and the broker's identifier, and selects the point.
         "destinations": [
           {
             "id": "buyer_choice",
-            "network": "com.packeta",
-            "country": "CZ",
-            "point_id": "004211",
             "broker": { "id": "com.example-broker", "point_id": "PK-CZ-004211" }
           }
         ]
@@ -499,7 +759,7 @@ unchanged and returns a recoverable error on the selection.
 }
 ```
 
-### Order events: deposit, extension, collection
+### Order: expectation, deposit, redirect, collection
 
 <!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.order op=read -->
 ```json
@@ -512,59 +772,83 @@ unchanged and returns a recoverable error on the selection.
   "line_items": [ ... ],
   "totals": [ ... ],
   "fulfillment": {
+    "expectations": [
+      {
+        "id": "exp_1",
+        "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "method_type": "carrier_pickup",
+        "destination": {
+          "street_address": "ul. Prosta 5",
+          "address_locality": "Warszawa",
+          "postal_code": "00-850",
+          "address_country": "PL"
+        },
+        "point": {
+          "network": "eu.inpost",
+          "country": "PL",
+          "point_id": "WAW99X",
+          "name": "Paczkomat WAW99X"
+        },
+        "description": "Ready for pickup in 1-2 business days"
+      }
+    ],
     "events": [
       {
         "id": "evt_1",
         "occurred_at": "2026-11-23T09:12:00Z",
         "type": "shipped",
         "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
         "tracking_number": "TRK123456789",
         "tracking_url": "https://tracking.example.com/TRK123456789"
       },
       {
         "id": "evt_2",
         "occurred_at": "2026-11-24T07:40:00Z",
-        "type": "ready_for_pickup",
+        "type": "deposited_at_point",
         "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
         "tracking_number": "TRK123456789",
         "tracking_url": "https://tracking.example.com/TRK123456789",
-        "point": { "network": "pl.inpost", "country": "PL", "point_id": "WAW99X" },
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW99X" },
         "pickup_by": "2026-11-26T07:40:00Z"
       },
       {
         "id": "evt_3",
         "occurred_at": "2026-11-26T08:05:00Z",
-        "type": "ready_for_pickup",
+        "type": "deposited_at_point",
         "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
         "tracking_number": "TRK123456789",
         "tracking_url": "https://tracking.example.com/TRK123456789",
-        "point": { "network": "pl.inpost", "country": "PL", "point_id": "WAW01B" },
-        "pickup_by": "2026-11-29T08:05:00Z",
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW01B" },
+        "pickup_by": null,
         "description": "Not collected from the locker; moved to a staffed point."
       },
       {
         "id": "evt_4",
         "occurred_at": "2026-11-27T17:21:00Z",
-        "type": "picked_up",
+        "type": "collected_at_point",
         "line_items": [{ "id": "li_kettle", "quantity": 1 }],
+        "parcel_id": "parcel_1",
         "tracking_number": "TRK123456789",
         "tracking_url": "https://tracking.example.com/TRK123456789",
-        "point": { "network": "pl.inpost", "country": "PL", "point_id": "WAW01B" }
+        "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW01B" }
       }
     ]
   }
 }
 ```
 
-### Order events: not collected
+### Order: not collected, returning, returned
 
 <!-- ucp:example schema=shopping/fulfillment_carrier_pickup def=dev.ucp.shopping.order op=read -->
 ```json
 {
   "ucp": { ... },
-  "id": "ord_51c2",
-  "checkout_id": "chk_7f3a",
-  "permalink_url": "https://shop.example.com/orders/ord_51c2",
+  "id": "ord_88d1",
+  "checkout_id": "chk_2b90",
+  "permalink_url": "https://shop.example.com/orders/ord_88d1",
   "currency": "CZK",
   "line_items": [ ... ],
   "totals": [ ... ],
@@ -573,8 +857,9 @@ unchanged and returns a recoverable error on the selection.
       {
         "id": "evt_2",
         "occurred_at": "2026-11-24T10:00:00Z",
-        "type": "ready_for_pickup",
+        "type": "deposited_at_point",
         "line_items": [{ "id": "li_book", "quantity": 1 }],
+        "parcel_id": "parcel_7",
         "tracking_number": "Z0042110001",
         "tracking_url": "https://tracking.example.com/Z0042110001",
         "point": { "network": "com.packeta", "country": "CZ", "point_id": "004211" },
@@ -583,17 +868,28 @@ unchanged and returns a recoverable error on the selection.
       {
         "id": "evt_3",
         "occurred_at": "2026-12-01T10:00:00Z",
-        "type": "not_collected",
+        "type": "pickup_expired",
         "line_items": [{ "id": "li_book", "quantity": 1 }],
+        "parcel_id": "parcel_7",
         "tracking_number": "Z0042110001",
         "tracking_url": "https://tracking.example.com/Z0042110001",
         "point": { "network": "com.packeta", "country": "CZ", "point_id": "004211" }
       },
       {
         "id": "evt_4",
+        "occurred_at": "2026-12-02T08:00:00Z",
+        "type": "returning_to_sender",
+        "line_items": [{ "id": "li_book", "quantity": 1 }],
+        "parcel_id": "parcel_7",
+        "tracking_number": "Z0042110001",
+        "tracking_url": "https://tracking.example.com/Z0042110001"
+      },
+      {
+        "id": "evt_5",
         "occurred_at": "2026-12-04T13:30:00Z",
         "type": "returned_to_sender",
         "line_items": [{ "id": "li_book", "quantity": 1 }],
+        "parcel_id": "parcel_7",
         "tracking_number": "Z0042110001",
         "tracking_url": "https://tracking.example.com/Z0042110001"
       }
