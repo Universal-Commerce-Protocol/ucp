@@ -197,8 +197,9 @@ When `context.eligibility` claims are present, Businesses that accept them
 adjustment to a specific claim. A Business that adjusts `price` or
 `list_price` **MUST** update or omit `list_price_basis` to match (see
 [Reference price basis](../../overview/index.md#reference-price-basis)). An
-adjustment open to many Buyers, such as a widely held membership, can itself be
-a price reduction that needs a prior-price basis.
+adjustment announced to Buyers in general, rather than a long-running loyalty
+benefit or a genuinely personalized reduction, can itself be a price reduction
+that needs a prior-price basis.
 
 {{ schema_fields('types/context', 'shopping/catalog') }}
 
