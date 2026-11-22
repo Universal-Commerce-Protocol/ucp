@@ -58,14 +58,22 @@ agent:
 
 **Dependencies:**
 
-- [Fulfillment Extension](fulfillment.md). This extension narrows the
-  `fulfillment.methods[]` that Fulfillment defines, and declares nothing else
-  on Checkout. UCP has no mechanism to compose an extension only when another
-  extension is active, so the Checkout composition also applies when
-  Fulfillment is not negotiated. In that case a Business **MUST NOT** send
-  `fulfillment` in a Checkout response, and a Platform **MUST NOT** send it in
-  a request. The Order composition (expectations and events) does not depend
-  on Fulfillment.
+- [Fulfillment Extension](fulfillment.md). The Checkout part of this
+  extension narrows the `fulfillment` object that Fulfillment defines, so it
+  depends on Fulfillment. The Order part (expectations and events) does not.
+
+  The intended declaration is a transitive extension chain,
+  `extends: ["dev.ucp.shopping.fulfillment", "dev.ucp.shopping.order"]`, which
+  the [intersection algorithm](../../overview/index.md#intersection-algorithm)
+  already supports: without Fulfillment, the Checkout part is pruned. Today
+  `ucp-schema generate-types` does not compose a chained extension onto
+  Checkout, so generated Checkout types would miss the carrier pickup method.
+  Until the tool supports chains, this extension is declared with
+  `extends: ["dev.ucp.shopping.checkout", "dev.ucp.shopping.order"]`, and its
+  Checkout composition also applies when Fulfillment is not negotiated. In that
+  case a Business **MUST NOT** send `fulfillment` in a Checkout response, and a
+  Platform **MUST NOT** send it in a request. Once the tool composes chains,
+  the declaration moves to the chain without a change to the payloads.
 - Checkout, and Order for the post-purchase data.
 
 ## Discovery
@@ -264,7 +272,7 @@ The Platform selects a point in one of two ways:
 
 The Business resolves the written point against the network directory and
 returns it with its Business-authored fields: at least `name` and `address`
-(with at least `address_locality` and `address_country`), and `description` or
+(with `address_country`, plus `address_locality` or `street_address`), and `description` or
 `geo` where they help the recipient find it. The rules of
 [Selection and Location Identity](fulfillment.md#selection-and-location-identity)
 apply unchanged: the response echoes the selection and contains exactly one
@@ -327,7 +335,9 @@ requirements that apply are those of the selected option, for the selected
 point's country and type. When a point has its own terms for that option
 (`option_terms[]` on the destination), its `recipient_requirements` replace the
 option's list, and its `pickup_period` replaces the option's period, for that
-point only.
+point only. A Business **MUST NOT** list the same `option_id` twice in one
+destination's `option_terms[]`; a Platform that receives a duplicate uses the
+first entry.
 
 The Business:
 
@@ -365,8 +375,8 @@ The Platform:
 When an Order Expectation has `method_type: "carrier_pickup"`, it carries
 `point` with the point key and the non-empty name of the selected point, from
 the moment the Order exists, before any fulfillment event. The base
-`destination` carries the point's address, with at least `address_country` and
-`address_locality`.
+`destination` carries the point's address with the same minimum as in
+Checkout: `address_country`, plus `address_locality` or `street_address`.
 
 ### Events
 
@@ -403,6 +413,9 @@ Ordering and correlation:
 - `collected_at_point` is terminal for the parcel. A Business **MUST NOT** emit
   a later `deposited_at_point`, `pickup_deadline_changed` or `pickup_expired`
   for the same `parcel_id`, except as a correction.
+- When `pickup_by` is `null`, the Platform **MUST NOT** compute a deadline from
+  the deposit time and the advertised `pickup_period`, because networks count
+  from different events (deposit or notification) and calendars.
 
 Corrections:
 
@@ -411,15 +424,18 @@ Corrections:
   with `corrects` set to the `id` of the wrong one. The new event states what
   actually happened (for example a `deposited_at_point` showing that the
   parcel is still waiting). The corrected event stays in the log and no longer
-  counts. A correction of a correction follows the same rule; the latest
-  correction counts.
+  counts. The correcting event carries the same `parcel_id` as the event it
+  corrects, and `corrected_at`, the time the Business issued the correction.
+  `occurred_at` keeps the time of the physical event, which can be earlier.
+  When several events correct the same event, the one with the latest
+  `corrected_at` counts; a correction of a correction follows the same rule.
+- A correction of a `collected_at_point` by an event of another type reopens
+  the parcel. A correction by another `collected_at_point`, for example with a
+  different time or point, keeps the parcel collected.
 - When a correction changes a fact a deadline counts from, such as
   collection, the Business recomputes that deadline and states the revised
   value with its revision time where the deadline is published (for example
   the `expires_at` and `revised_at` of a withdrawal period).
-- When `pickup_by` is `null`, the Platform **MUST NOT** compute a deadline from
-  the deposit time and the advertised `pickup_period`, because networks count
-  from different events (deposit or notification) and calendars.
 
 Meaning for the Buyer:
 
@@ -445,7 +461,8 @@ Meaning for the Buyer:
   carrier data is out of scope (see #1020 for verified claims).
 - **Display text.** `name`, `description`, `host.name`,
   `unavailable_reasons[].content`, the network `name`, the requirement
-  `description` and the event `description` are plain text with no markup and
+  `description`, the `display_text` of `limits` and the event `description`
+  are plain text with no markup and
   no links, each with a `maxLength`. URLs never appear inside them. A Platform
   **MUST** treat them as data from the Business and **MUST NOT** follow
   instructions found in them. It **MUST** present the meaning the Buyer needs:
@@ -996,6 +1013,7 @@ deadline change; the collection no longer counts.
         "line_items": [{ "id": "li_kettle", "quantity": 1 }],
         "parcel_id": "parcel_1",
         "corrects": "evt_3",
+        "corrected_at": "2026-11-25T16:30:00Z",
         "point": { "network": "eu.inpost", "country": "PL", "point_id": "WAW99X" },
         "pickup_by": "2026-11-26T07:40:00Z",
         "description": "Collection was reported in error; the parcel is still in the locker."

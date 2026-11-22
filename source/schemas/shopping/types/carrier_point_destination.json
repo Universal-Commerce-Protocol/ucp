@@ -109,7 +109,7 @@
       "minLength": 1
     },
     "address": {
-      "description": "Postal address of the point, not the recipient's. Carries `address_country`, and `address_locality` or `street_address` unless `description` says how to find the point.",
+      "description": "Postal address of the point, not the recipient's. Carries `address_country`, and `address_locality` or `street_address`. `description` adds how to find the point.",
       "allOf": [
         { "$ref": "../../common/types/postal_address.json" },
         { "$ref": "#/$defs/point_address" }
@@ -148,7 +148,7 @@
     },
     "option_terms": {
       "type": "array",
-      "description": "Terms of this point that differ from those of an option, keyed by option. For the option a group selects, an entry here replaces that option's `pickup_period` and `recipient_requirements` for this point; fields an entry omits keep the option's value.",
+      "description": "Terms of this point that differ from those of an option, keyed by option. Each `option_id` appears at most once. For the option a group selects, the entry replaces that option's `pickup_period` and `recipient_requirements` for this point; fields the entry omits keep the option's value.",
       "maxItems": 20,
       "items": { "$ref": "#/$defs/option_terms" },
       "ucp_request": "omit"
@@ -207,22 +207,6 @@
         "required": ["available"],
         "properties": {
           "available": { "const": false }
-        }
-      }
-    },
-    {
-      "if": {
-        "required": ["address"],
-        "not": { "required": ["description"] }
-      },
-      "then": {
-        "properties": {
-          "address": {
-            "anyOf": [
-              { "required": ["address_locality"] },
-              { "required": ["street_address"] }
-            ]
-          }
         }
       }
     }
@@ -318,7 +302,7 @@
     },
     "point_address": {
       "title": "Carrier Point Address",
-      "description": "Local bounds on the point's postal address.",
+      "description": "Local bounds on the point's postal address: `address_country`, plus `address_locality` or `street_address`.",
       "type": "object",
       "required": ["address_country"],
       "properties": {
@@ -363,7 +347,11 @@
           "description": "Not used for a point."
         },
         "phone_number": { "type": "string", "maxLength": 32 }
-      }
+      },
+      "anyOf": [
+        { "required": ["address_locality"] },
+        { "required": ["street_address"] }
+      ]
     },
     "option_terms": {
       "title": "Carrier Point Option Terms",

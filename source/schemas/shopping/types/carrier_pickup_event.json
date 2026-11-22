@@ -27,8 +27,12 @@
     "corrects": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 128,
-      "description": "`id` of an earlier event of the same Order that this event corrects. The earlier event stays in the log but no longer counts; this event states what happened instead. A correction of a `collected_at_point` reopens the parcel's state."
+      "description": "`id` of an earlier event of the same Order and the same `parcel_id` that this event corrects. The earlier event stays in the log but no longer counts; this event states what happened instead. When several events correct the same event, the one with the latest `corrected_at` counts. Correcting a `collected_at_point` with an event of another type reopens the parcel; correcting it with another `collected_at_point` (for example a different time or point) keeps the parcel collected."
+    },
+    "corrected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp at which the Business issued this correction. Required with `corrects`. Orders corrections of the same event; `occurred_at` keeps the time of the physical event."
     }
   },
   "allOf": [
@@ -83,5 +87,6 @@
       },
       "then": { "required": ["pickup_by"] }
     }
-  ]
+  ],
+  "dependentRequired": { "corrects": ["corrected_at"] }
 }

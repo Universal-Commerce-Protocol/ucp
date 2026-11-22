@@ -130,9 +130,81 @@
     },
     "carrier_pickup_method": {
       "title": "Fulfillment Method (Carrier Pickup)",
-      "description": "A Fulfillment Method, with the contract for `type: carrier_pickup`. Methods of other types keep the core contract unchanged.",
+      "description": "A Fulfillment Method with the contract for `type: carrier_pickup`. It composes the core Fulfillment Method and restates its properties and its `shipping` and `pickup` branches, because generated types take this schema in place of the core one; methods of other types keep the core contract unchanged.",
+      "type": "object",
+      "required": ["id", "type", "line_item_ids"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique fulfillment method identifier.",
+          "ucp_request": { "create": "omit", "update": "optional" }
+        },
+        "type": {
+          "type": "string",
+          "description": "Fulfillment method type. Well-known values: `shipping`, `pickup`, `carrier_pickup`. Businesses MAY use additional values.",
+          "ucp_request": { "create": "required", "update": "optional" }
+        },
+        "line_item_ids": {
+          "type": "array",
+          "description": "Line item IDs fulfilled via this method.",
+          "items": { "type": "string" },
+          "ucp_request": { "create": "omit", "update": "required" }
+        },
+        "destinations": {
+          "type": "array",
+          "description": "Available destinations for this method. In Business responses, each destination carries a `type` and `id`.",
+          "ucp_request": "omit",
+          "items": { "$ref": "types/fulfillment_destination.json" }
+        },
+        "selected_destination_id": {
+          "type": ["string", "null"],
+          "description": "ID of the selected destination. Accepts any stable, Business-scoped ID the Business recognizes for this method, including Location IDs not yet enumerated in `destinations`."
+        },
+        "groups": {
+          "type": "array",
+          "description": "Fulfillment groups for selecting options. Agent sets selected_option_id on groups to choose shipping method.",
+          "items": { "$ref": "types/fulfillment_group.json" }
+        }
+      },
+      "dependentRequired": { "destinations": ["type"] },
       "allOf": [
         { "$ref": "types/fulfillment_method.json" },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "shipping" }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "destinations": {
+                "type": "array",
+                "items": { "$ref": "types/shipping_destination.json" },
+                "description": "Platform-authored shipping addresses for this method (core contract, restated).",
+                "ucp_request": "optional"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "pickup" }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "destinations": {
+                "type": "array",
+                "items": { "$ref": "types/location_destination.json" },
+                "description": "Business-authored business locations able to fulfill this method (core contract, restated). Response-only.",
+                "ucp_request": "omit"
+              }
+            }
+          }
+        },
         {
           "if": {
             "properties": {
@@ -182,37 +254,23 @@
             }
           ]
         }
-      },
+      }
+    },
+    "carrier_pickup_fulfillment": {
+      "title": "Fulfillment (Carrier Pickup)",
+      "description": "The Fulfillment object: the core Fulfillment type, with `methods[]` narrowed for `carrier_pickup`.",
       "allOf": [
+        { "$ref": "types/fulfillment.json" },
         {
-          "if": {
-            "properties": {
-              "method_type": { "const": "carrier_pickup" }
-            },
-            "required": ["method_type"]
-          },
-          "then": {
-            "required": ["point"],
-            "properties": {
-              "destination": {
-                "description": "The point's address. Under `carrier_pickup` it carries at least `address_country` and `address_locality`.",
-                "required": ["address_country", "address_locality"]
-              }
+          "type": "object",
+          "properties": {
+            "methods": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/carrier_pickup_method" }
             }
           }
         }
       ]
-    },
-    "carrier_pickup_fulfillment": {
-      "title": "Fulfillment (Carrier Pickup)",
-      "description": "The Fulfillment object, narrowed for `carrier_pickup` methods.",
-      "type": "object",
-      "properties": {
-        "methods": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/carrier_pickup_method" }
-        }
-      }
     },
     "dev.ucp.shopping.checkout": {
       "title": "Checkout with Carrier Pickup",
@@ -234,6 +292,39 @@
         }
       ]
     },
+    "carrier_pickup_event_composed": {
+      "title": "Fulfillment Event (Carrier Pickup)",
+      "description": "A core Fulfillment Event with the carrier pickup fields and event types.",
+      "allOf": [
+        { "$ref": "types/fulfillment_event.json" },
+        { "$ref": "types/carrier_pickup_event.json" }
+      ]
+    },
+    "carrier_pickup_expectation_composed": {
+      "title": "Expectation (Carrier Pickup, composed)",
+      "description": "A core Expectation with the carrier pickup fields.",
+      "allOf": [
+        { "$ref": "types/expectation.json" },
+        { "$ref": "#/$defs/carrier_pickup_expectation" },
+        {
+          "if": {
+            "properties": {
+              "method_type": { "const": "carrier_pickup" }
+            },
+            "required": ["method_type"]
+          },
+          "then": {
+            "required": ["point"],
+            "properties": {
+              "destination": {
+                "description": "The point's address, with the same minimum as the Carrier Point Destination `address`: `address_country`, plus `address_locality` or `street_address`.",
+                "$ref": "types/carrier_point_destination.json#/$defs/point_address"
+              }
+            }
+          }
+        }
+      ]
+    },
     "dev.ucp.shopping.order": {
       "title": "Order with Carrier Pickup",
       "description": "Order whose expectations keep the selected carrier point and whose fulfillment events report deposit at, collection from and expiry at a carrier point.",
@@ -247,11 +338,11 @@
               "properties": {
                 "expectations": {
                   "type": "array",
-                  "items": { "$ref": "#/$defs/carrier_pickup_expectation" }
+                  "items": { "$ref": "#/$defs/carrier_pickup_expectation_composed" }
                 },
                 "events": {
                   "type": "array",
-                  "items": { "$ref": "types/carrier_pickup_event.json" }
+                  "items": { "$ref": "#/$defs/carrier_pickup_event_composed" }
                 }
               }
             }
