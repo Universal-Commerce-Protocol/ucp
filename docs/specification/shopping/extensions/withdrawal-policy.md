@@ -236,12 +236,13 @@ its `duration` and `anchor` describe. It **MUST** update `expires_at` when the
 legal deadline changes, and set `revised_at` to the time of the change. The
 change can go either way. When the Business did not give the required
 withdrawal information, the governing law can extend the period; when it gives
-that information later, the period can then end a set time after the buyer
-receives it, which can be earlier than the extended deadline, though never
-before the end of the original period. A platform **MUST** re-read the policy
+that information later, within a set time counted from the anchor event, the
+period can then end a set time after the buyer receives it, which can be
+earlier than the extended deadline, though never before the end of the original
+period. A platform **MUST** re-read the policy
 before it tells the buyer a deadline, **MUST NOT** cache `expires_at` as final,
 and **MUST NOT** tell the buyer the right has expired from a date it computed
-itself. A withdrawal the buyer sends before the end of the second `expires_at`
+itself. A withdrawal the buyer sends at or before the instant `expires_at`
 names is in time, even if the Business processes it later.
 
 The right can be exercised before the anchor event. A missing `expires_at`
@@ -337,14 +338,14 @@ governing law provides one; it is in addition to the online function.
   control on the Business's function that submits it (`confirm`). Each
   language appears at most once. Exactly one entry has
   `contract_language: true`, marking the language the contract is concluded
-  in; the schema requires it.
+  in or, on a catalog or cart surface before a contract exists, the language
+  it will be concluded in; the schema requires it.
 
 A platform that renders a control leading to `url` **MUST** label it with the
-Business's `withdraw` text. It picks the entry by the Lookup scheme of
-RFC 4647 Section 3.4 against the buyer's language tag: an exact match first,
-then the tag shortened one part at a time from the end (`zh-Hant-TW`, then
-`zh-Hant`, then `zh`), comparing tags case-insensitively. With no match, it uses
-the entry with `contract_language: true`. If it cannot show that wording, for
+Business's `withdraw` text. It picks the entry by applying the Lookup scheme
+of RFC 4647, Section 3.4, to the buyer's language tag, with the entries'
+`language` tags as the available tags. With no match, it uses the entry with
+`contract_language: true`. If it cannot show that wording, for
 example in a voice channel, it **MUST NOT** substitute its own label. On a
 checkout it hands off through `continue_url`; on an order it gives the buyer
 `url` to open in the buyer's own client, where the Business's interface shows
@@ -358,7 +359,9 @@ The function itself is the Business's obligation on its own interface:
   need to identify themselves or the contract again. Questions such as the reason
   for withdrawing are separate and optional.
 - The buyer submits the statement through a separate confirmation control,
-  labelled as in `confirm`.
+  labelled with the wording the governing law prescribes. `confirm` states that
+  label for information; when it is omitted, a platform does not render a
+  confirmation control or derive a label of its own.
 - After submission, the Business sends, without undue delay and on a durable
   medium, an acknowledgement of receipt that states the content of the
   statement and the date and time it was submitted. The Business sends it
@@ -522,7 +525,7 @@ business in that case typically states:
 | `basis` | `statutory` | Art. 9(1) |
 | `period.duration` | `P14D` | Art. 9(1) |
 | `period.anchor` | `possession`, `possession_last_item`, `possession_first_item` for goods; `contract_concluded` for services and digital content not on a tangible medium | Art. 9(2) |
-| `period.expires_at` | The period starts the day after the anchor event; if its last day is a Saturday, Sunday, or public holiday, it ends at the end of the next working day. If the withdrawal information was not given, it ends 12 months after the end of the initial period; if the information is given within those 12 months, it ends 14 days after the day the consumer receives it. | Recital 41 and Regulation (EEC, Euratom) No 1182/71 Art. 3(1), 3(4); Art. 10 |
+| `period.expires_at` | The period starts the day after the anchor event; if its last day is a Saturday, Sunday, or public holiday, it ends at the end of the next working day. If the withdrawal information was not given, it ends 12 months after the end of the initial period. If the information is given within 12 months from the anchor day (the day referred to in Art. 9(2), the start of the original period), it ends 14 days after the day the consumer receives it. | Recital 41 and Regulation (EEC, Euratom) No 1182/71 Art. 3(1), 3(4); Art. 10 |
 | `availability.exception.code` | `eu.crd.art16.a` to `eu.crd.art16.m` | Art. 16, Art. 6(1)(k) |
 | `return_costs` | `buyer` only if the consumer was told; a cost for goods that cannot normally be returned by post | Art. 6(1)(i), Art. 14(1) |
 | `refund.deadline` | `P14D`: without undue delay and in any event within 14 days, with the same means of payment unless the consumer expressly agrees otherwise, at no fee | Art. 13(1) |
@@ -542,9 +545,12 @@ in `display_text`, and a platform **MUST NOT** present the right as lost before
 the Business says performance has begun.
 
 For services, the instructions and the pre-order disclosure also state that a
-consumer who asks for the service to start during the withdrawal period and
-then withdraws pays an amount in proportion to what was provided (Art. 6(1)(j),
-Art. 14(3)). Collecting that request at checkout is not covered by this
+consumer who expressly asks for the service to start during the withdrawal
+period and then withdraws pays an amount in proportion to what was provided
+(Art. 6(1)(j), Art. 14(3)). That payment is owed only if the trader gave the
+Art. 6(1)(h) and (j) information and the consumer made the express request;
+otherwise the consumer pays nothing for performance during the period
+(Art. 14(4)(a)). Collecting that request at checkout is not covered by this
 extension.
 
 On a medium with limited space or time, the conditions, time limit, and

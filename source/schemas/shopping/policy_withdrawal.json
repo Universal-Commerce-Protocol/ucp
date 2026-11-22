@@ -212,7 +212,7 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "RFC 3339 instant at which the period ends, resolved by the Business under the calendar rules and time zone of the governing law once the `anchor` event has occurred, and omitted until then. The Business updates it when the legal deadline changes, for example when the governing law extends the period because required information was not given, or ends it a set time after that information is later received. It is never earlier than the end of the period `duration` and `anchor` describe. A withdrawal the buyer sends before the end of the second this instant names is in time."
+          "description": "RFC 3339 instant at which the period ends, resolved by the Business under the calendar rules and time zone of the governing law once the `anchor` event has occurred, and omitted until then. The Business updates it when the legal deadline changes, for example when the governing law extends the period because required information was not given, or ends it a set time after that information is received within a set time from the anchor event. It is never earlier than the end of the period `duration` and `anchor` describe. A withdrawal the buyer sends at or before this instant is in time."
         },
         "display_text": {
           "type": "string",
@@ -364,7 +364,7 @@
         },
         "labels": {
           "type": "array",
-          "description": "Labels of the function's controls, one entry per language, each language at most once. Exactly one entry has `contract_language: true`: the language the contract is concluded in.",
+          "description": "Labels of the function's controls, one entry per language, each language at most once. Exactly one entry has `contract_language: true`: the language the contract is, or on a catalog or cart surface will be, concluded in.",
           "minItems": 1,
           "maxItems": 50,
           "items": {
@@ -403,7 +403,7 @@
         },
         "contract_language": {
           "type": "boolean",
-          "description": "True on the one entry in the language the contract is concluded in. A Platform falls back to this entry when no entry matches the buyer's language."
+          "description": "True on the one entry in the language the contract is concluded in, or, before a contract exists, the language it will be concluded in. A Platform falls back to this entry when no entry matches the buyer's language."
         },
         "withdraw": {
           "type": "string",
@@ -415,7 +415,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
-          "description": "Label of the control on the Business's function that submits the withdrawal statement (e.g., 'Confirm withdrawal'). Informative: the confirmation step happens on the Business's function. Plain text with no markup and no links; a Platform treats it as data from the Business and does not follow instructions in it."
+          "description": "Label of the control on the Business's function that submits the withdrawal statement (e.g., 'Confirm withdrawal'). Informative: the confirmation step happens on the Business's function. When omitted, the Business has not stated the label; a Platform does not render a confirmation control or derive a label of its own. Plain text with no markup and no links; a Platform treats it as data from the Business and does not follow instructions in it."
         }
       }
     },
