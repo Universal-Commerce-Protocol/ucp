@@ -151,13 +151,13 @@
     },
     "order_seller_disclosures": {
       "type": "object",
-      "description": "Seller disclosure snapshots for the order, keyed by seller ID for entries created at checkout and by a Business-scoped snapshot ID for later snapshots (see `seller_id`).",
+      "description": "Seller disclosure snapshots for the order, keyed by seller ID for entries created at checkout and by a Business-scoped snapshot ID for later snapshots (see `seller_id`). At most 100 entries are active (list at least one line); the rest are superseded snapshots kept as a record.",
       "propertyNames": {
         "type": "string",
         "minLength": 1,
         "maxLength": 256
       },
-      "maxProperties": 100,
+      "maxProperties": 200,
       "additionalProperties": {
         "$ref": "#/$defs/order_seller_entry"
       },
@@ -191,18 +191,30 @@
               "items": {
                 "if": {
                   "type": "object",
-                  "required": [
-                    "code"
-                  ],
-                  "properties": {
-                    "code": {
-                      "enum": [
-                        "seller_non_trader",
-                        "seller_status_not_declared",
-                        "seller_obligation_split"
-                      ]
+                  "anyOf": [
+                    {
+                      "required": [
+                        "code"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^seller_"
+                        }
+                      }
+                    },
+                    {
+                      "required": [
+                        "path"
+                      ],
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "pattern": "^\\$\\.seller_disclosures"
+                        }
+                      }
                     }
-                  }
+                  ]
                 },
                 "then": {
                   "properties": {
@@ -212,7 +224,8 @@
                   }
                 }
               },
-              "ucp_request": "omit"
+              "ucp_request": "omit",
+              "description": "Messages, with seller disclosure warnings (a `code` starting with `seller_` or a `path` into `seller_disclosures`) limited to 2000 characters of `content`."
             }
           }
         }
@@ -237,18 +250,30 @@
               "items": {
                 "if": {
                   "type": "object",
-                  "required": [
-                    "code"
-                  ],
-                  "properties": {
-                    "code": {
-                      "enum": [
-                        "seller_non_trader",
-                        "seller_status_not_declared",
-                        "seller_obligation_split"
-                      ]
+                  "anyOf": [
+                    {
+                      "required": [
+                        "code"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^seller_"
+                        }
+                      }
+                    },
+                    {
+                      "required": [
+                        "path"
+                      ],
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "pattern": "^\\$\\.seller_disclosures"
+                        }
+                      }
                     }
-                  }
+                  ]
                 },
                 "then": {
                   "properties": {
@@ -258,7 +283,8 @@
                   }
                 }
               },
-              "ucp_request": "omit"
+              "ucp_request": "omit",
+              "description": "Messages, with seller disclosure warnings (a `code` starting with `seller_` or a `path` into `seller_disclosures`) limited to 2000 characters of `content`."
             }
           }
         }

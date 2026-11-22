@@ -159,12 +159,14 @@ unrecognized, and **MUST NOT** present such a seller as a trader.
 
 A Business that sells its own goods sends `trader`.
 
-Where the law requires the buyer to be told the seller's declared status
-before the contract (for example, Directive 2011/83/EU Art. 6a(1)(b) on an EU
-online marketplace), `not_declared` can be shown during discovery, but the
-Business **SHOULD** obtain the seller's declaration before the buyer completes
-checkout. Until it has one, it **SHOULD** keep the checkout in
-`requires_escalation` rather than let it complete.
+`not_declared` can be shown during discovery. Where applicable law requires
+the buyer to be told the seller's declared status before the contract (for
+example, Directive 2011/83/EU Art. 6a(1)(b) for a consumer contract on an EU
+online marketplace), the Business **MUST** obtain the seller's declaration
+before the buyer completes checkout and **MUST NOT** complete the checkout for
+that seller's line items without it; until then it keeps the checkout in
+`requires_escalation`. Where no such law applies, the Business **SHOULD** do
+the same.
 
 ## Display requirements
 
@@ -252,9 +254,16 @@ seller's `seller_disclosures` entry in cart and checkout responses.
     [Hand-off](#hand-off)) rather than send a mandatory notice the buyer may
     not understand.
 - **MUST NOT** send more than 10 seller disclosure warnings for one seller in
-    one response, or a warning `content` longer than 2000 characters. The
-    order snapshot holds the same limits. In cart and checkout the extension
-    schema enforces the length.
+    one response, or a seller disclosure warning `content` longer than 2000
+    characters. This covers every seller warning, including codes the
+    Business defines: in cart and checkout the extension schema enforces the
+    length for any warning whose `code` starts with `seller_` or whose `path`
+    points into `seller_disclosures`. The order snapshot holds the same
+    limits.
+- **MUST NOT** have more than 100 active entries on an order (entries that
+    list at least one line). Superseded snapshots kept as a record count
+    toward a schema limit of 200 entries.
+- **SHOULD** give Business-defined seller warning codes the `seller_` prefix.
 
 **Platform requirements:**
 
@@ -279,6 +288,10 @@ Business's own interface:
 - in catalog, which has no `continue_url`, through the variant or product
     `url`, and if neither is present, by not presenting the offer;
 - on an order, through `permalink_url`.
+
+Every hand-off URL **MUST** be an absolute `https` URL. A Platform **MUST NOT**
+hand off to any other URL; if no suitable URL exists, it does not present the
+offer or does not continue the checkout.
 
 ## Business-authored text and URLs
 
@@ -333,8 +346,9 @@ The order records the seller disclosures the Business sent before the buyer
 completed checkout:
 
 - Each entry created at checkout is keyed by the same seller ID as at checkout.
-- Its seller facts (all [Seller Details](#seller-details) fields) are those
-    sent at checkout and do not change afterwards.
+- Its seller facts (`name` and all [Seller Details](#seller-details) fields)
+    and its `presented_notices` are those sent at checkout and do not change
+    afterwards.
 - `presented_notices` holds the `code`, `content` and `language` of every
     seller disclosure warning the Business sent at checkout for that seller.
     It records the Business-supplied text, not how the Platform rendered it;
