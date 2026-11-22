@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/reference_price_basis.json",
+  "title": "Reference Price Basis",
+  "description": "Business-declared basis of a reference price (`list_price`): what it is measured against and, where a price-indication rule shaped it, which rule. It describes the reference price sent alongside it in the same response and asserts nothing on its own.",
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "What the reference price is measured against. Well-known values: `lowest_prior` (the lowest price the Business applied to this item, in the channel the Buyer is buying through, during `window` before the reduction took effect), `before_first_reduction` (the price applied before the first of an uninterrupted series of reductions, where the applicable rule allows it in place of `lowest_prior`), `regular` (the price the Business usually charges outside promotions), `recommended_retail` (the price recommended by the manufacturer or supplier). `lowest_prior` and `before_first_reduction` are prior-price types. A Platform MUST treat an unrecognized value as a basis that is not a prior-price type."
+    },
+    "window": {
+      "$ref": "../../common/types/duration.json",
+      "description": "Length of the period, counted back from `reduced_at`, over which a `lowest_prior` reference price was taken (for example, `P30D`). A Business SHOULD include it when `type` is `lowest_prior`."
+    },
+    "reduced_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current reduction took effect (RFC 3339). For `before_first_reduction`, when the first reduction of the series took effect."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "Region whose price-indication rule the Business applied to the Buyer's context when choosing this reference price: an ISO 3166-1 alpha-2 country code, or `EU` for a rule common to the European Union. A Business MUST NOT send it unless it applied such a rule. When present and `type` is not a prior-price type, a Platform MUST NOT present the gap between `list_price` and `price` as a reduction."
+    },
+    "display_text": {
+      "type": "string",
+      "description": "Business-authored text that describes the reference price to the Buyer, in the language of the response (for example, 'Lowest price in the 30 days before the reduction'). A Platform that presents `list_price` MUST present this text with it unchanged, and MUST NOT present `list_price` if it cannot. It MUST NOT be used for machine logic."
+    }
+  }
+}

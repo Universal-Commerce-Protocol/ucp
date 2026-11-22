@@ -2458,9 +2458,11 @@ manufacturer's suggested retail price. Some jurisdictions prescribe or
 restrict which may be used, and the Business is generally expected to be
 able to substantiate the comparison. It is the Business's responsibility to
 determine whether to send a `list_price`, and which, for the Buyer's context
-(when known). Because `list_price` carries no basis label and typically reads
-as a price reduction, a Business omits it where its basis (such as a suggested
-retail price) cannot lawfully be shown that way. Platforms do not resolve what
+(when known). A Business **MAY** declare the basis in `list_price_basis` (see
+[Reference price basis](#reference-price-basis)). Without that declaration
+`list_price` carries no basis label and typically reads as a price reduction,
+so a Business omits it where its basis (such as a suggested retail price)
+cannot lawfully be shown that way. Platforms do not resolve what
 basis is appropriate; presenting `list_price` is optional, and a Platform that
 presents it uses the value received.
 
@@ -2474,6 +2476,144 @@ A Platform **SHOULD NOT** present a saving (a strikethrough, percentage, or
 "save" amount) unless `list_price` is greater than `price`. A `list_price` at or
 below `price` is valid, for example a manufacturer's suggested retail price on
 goods sold at a premium.
+
+### Reference price basis
+
+`list_price_basis` is an optional, Business-declared label for `list_price` on
+catalog variants and on cart, checkout, and order items. It states what the
+reference price is measured against and, where a price-indication rule shaped
+it, which region's rule. It describes the `list_price` in the same response and
+**MUST NOT** be present without it. On an Order, it is the value captured at
+Checkout, like `list_price`.
+
+{{ schema_fields('types/reference_price_basis', 'shopping/catalog') }}
+
+`type` is an open string with four well-known values:
+
+| Value | `list_price` is |
+| :--- | :--- |
+| `lowest_prior` | The lowest price the Business applied to the item, in the channel the Buyer is buying through, during `window` before the reduction took effect at `reduced_at`. |
+| `before_first_reduction` | The price applied before the first of an uninterrupted series of reductions, where the applicable rule allows it in place of `lowest_prior`. |
+| `regular` | The price the Business usually charges outside promotions. |
+| `recommended_retail` | The price recommended by the manufacturer or supplier. |
+
+`lowest_prior` and `before_first_reduction` are **prior-price types**. A
+Platform **MUST** treat an unrecognized `type` as a basis that is not a
+prior-price type.
+
+A Business:
+
+- **MUST** update or omit `list_price_basis` whenever it changes or omits
+  `list_price`, including adjustments from `context.eligibility`.
+- **MUST NOT** send `lowest_prior` unless `list_price` is the lowest price it
+  applied as described above, and **SHOULD** include `window` with it.
+- **MUST NOT** send `jurisdiction` unless it applied that region's
+  price-indication rule to the Buyer's context. `jurisdiction` is a
+  declaration of what the Business did, not an instruction to the Platform to
+  apply law.
+
+A Platform:
+
+- **MUST** compute any reduction it presents (a percentage, an amount saved,
+  "was" wording, or a sale badge) from `list_price` and `price` as received,
+  and **MUST NOT** compute one from any other reference, such as a price it
+  observed earlier or another Business's price.
+- **MUST NOT** present the gap between `list_price` and `price` as a reduction
+  when `jurisdiction` is present and `type` is not a prior-price type. It
+  **MAY** present `list_price` as a labelled comparison instead.
+- **MUST NOT** present a `recommended_retail` `list_price` as a price the
+  Business previously charged, and **SHOULD NOT** present a percentage or
+  amount saved against it.
+- **MUST** present `display_text` unchanged with `list_price` when both are
+  present, and **MUST NOT** present `list_price` if it cannot. `display_text`
+  **MUST NOT** be used for machine logic.
+- **MUST NOT** assume a basis when `list_price_basis` is absent; the rules in
+  [List price](#list-price) apply unchanged.
+
+Variants of one product can carry different bases. A Platform **MUST NOT**
+present a reduction from `product.list_price_range` alone.
+
+A variant reduced in a market with a 30-day prior-price rule:
+
+<!-- ucp:example schema=shopping/types/variant -->
+```json
+{
+  "id": "gid://shop.example/ProductVariant/1001",
+  "title": "Espresso grinder, black",
+  "description": {
+    "plain": "Conical burr grinder."
+  },
+  "price": { "amount": 7999, "currency": "EUR" },
+  "list_price": { "amount": 8999, "currency": "EUR" },
+  "list_price_basis": {
+    "type": "lowest_prior",
+    "window": "P30D",
+    "reduced_at": "2026-11-20T00:00:00Z",
+    "jurisdiction": "EU",
+    "display_text": "Lowest price in the 30 days before the reduction"
+  }
+}
+```
+
+The Platform may show "-11%" (computed from 8999 and 7999) next to the
+strikethrough, with the `display_text` unchanged.
+
+A suggested retail price in the same market:
+
+<!-- ucp:example schema=shopping/types/variant -->
+```json
+{
+  "id": "gid://shop.example/ProductVariant/1002",
+  "title": "Espresso grinder, white",
+  "description": {
+    "plain": "Conical burr grinder."
+  },
+  "price": { "amount": 7999, "currency": "EUR" },
+  "list_price": { "amount": 9999, "currency": "EUR" },
+  "list_price_basis": {
+    "type": "recommended_retail",
+    "jurisdiction": "EU",
+    "display_text": "Manufacturer's suggested retail price"
+  }
+}
+```
+
+The Platform may show "Manufacturer's suggested retail price: 99.99" as a
+comparison, but no strikethrough-as-reduction, percentage, or "was" wording.
+
+A checkout line item carries the same label:
+
+<!-- ucp:example schema=shopping/types/item -->
+```json
+{
+  "id": "gid://shop.example/ProductVariant/1001",
+  "title": "Espresso grinder, black",
+  "price": 7999,
+  "list_price": 8999,
+  "list_price_basis": {
+    "type": "lowest_prior",
+    "window": "P30D",
+    "reduced_at": "2026-11-20T00:00:00Z"
+  }
+}
+```
+
+!!! note "Example: European Union"
+
+    Directive 98/6/EC Article 6a requires every announcement of a price
+    reduction to indicate the prior price: the lowest price the trader applied
+    in a period of at least 30 days before the reduction. Member states may set
+    a shorter period for goods on the market under 30 days and may allow the
+    price before the first reduction for progressive reductions; national rules
+    differ in detail. The Court of Justice of the European Union held in Case
+    C-330/23 that a reduction announced as a percentage or promotional
+    statement must be determined from that prior price. A Business subject to
+    such a rule that announces a reduction sends the prior price as
+    `list_price` with a prior-price `type` and `jurisdiction` set, and uses
+    `display_text` for any wording national law requires next to the reduced
+    price. Other reference prices, such as a suggested retail price, are sent
+    with their own `type` so that the Platform presents them only as
+    comparisons.
 
 ## Request Constraints
 
