@@ -224,3 +224,5 @@ CPF
 Pix
 NIT
 RUT
+partita
+iva

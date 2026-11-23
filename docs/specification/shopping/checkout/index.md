@@ -78,9 +78,12 @@ the payer lives on the instrument, a checkout using
 different payer per instrument.
 
 `identification.type` is an open, lowercase token made of the ISO 3166-1
-alpha-2 country code, a dot, and the document name (for example `br.cpf`,
-`br.cnpj`, `mx.rfc`, `cl.rut`). Core applies no format or check-digit
-validation to `number`: the business or the payment handler validates it.
+alpha-2 code of the issuing jurisdiction, a dot, and the document name (for
+example `br.cpf`, `br.cnpj`, `mx.rfc`, `cl.rut`, `gr.vat`). The country code
+names the jurisdiction, not a prefix printed with the number: a Greek VAT
+number is printed with `EL`, its type is `gr.vat`, and `number` carries no
+prefix. Core applies no format or check-digit validation to `number`: the
+business or the payment handler validates it.
 
 A platform:
 

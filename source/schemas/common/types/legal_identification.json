@@ -12,19 +12,20 @@
     "type": {
       "type": "string",
       "minLength": 1,
-      "description": "Document type as an open, lowercase token: the ISO 3166-1 alpha-2 country code, a dot, and the document name. Open so a new jurisdiction needs no spec change. Non-exhaustive registry: br.cpf, br.cnpj, mx.rfc, ar.cuit, ar.cuil, cl.rut, uy.ci, co.nit, pe.ruc.",
+      "description": "Document type as an open, lowercase token: the ISO 3166-1 alpha-2 code of the issuing jurisdiction, a dot, and the document name. The country code names the jurisdiction, not any prefix printed with the number: a Greek VAT number is printed with EL but its type is gr.vat. Open so a new jurisdiction needs no spec change. Non-exhaustive registry: br.cpf, br.cnpj, mx.rfc, ar.cuit, ar.cuil, cl.rut, uy.ci, co.nit, pe.ruc, gr.vat, it.partita_iva, gb.vat.",
       "examples": [
         "br.cpf",
         "br.cnpj",
         "mx.rfc",
         "ar.cuit",
-        "cl.rut"
+        "cl.rut",
+        "gr.vat"
       ]
     },
     "number": {
       "type": "string",
       "minLength": 1,
-      "description": "The document value as issued. Senders SHOULD use the issuer's canonical form. Core applies no per-jurisdiction format or check-digit validation; the receiving business or payment handler validates and MAY normalize common variants. Never returned in responses: a sender that still needs it MUST resend it.",
+      "description": "The document value as issued, without any country or scheme prefix that type already conveys (a Greek VAT number is sent without EL). A receiver that needs the prefixed form, for example for an electronic invoice, rebuilds it from type. Senders SHOULD use the issuer's canonical form. Core applies no per-jurisdiction format or check-digit validation; the receiving business or payment handler validates and MAY normalize common variants. Never returned in responses: a sender that still needs it MUST resend it.",
       "ucp_response": "omit"
     },
     "last_digits": {
