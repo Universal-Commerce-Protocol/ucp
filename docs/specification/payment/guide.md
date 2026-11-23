@@ -853,6 +853,13 @@ The specification **MUST** define a mapping for common failures (e.g.,
 definitions. This ensures the platform can render localized, consistent
 error messages to the buyer regardless of the underlying processor.
 
+For handlers that supply [payment recovery hints](../shopping/checkout/index.md#payment-recovery-hints),
+document when a new attempt with the same or a different instrument is
+permitted, when buyer action is needed, and how to reconcile a payment
+that may already exist. A suspected duplicate can map to `do_not_retry`.
+For attempt limits, base the mapping on the scope of the limit and whether
+the handler permits a new attempt using another instrument.
+
 ### Key Definitions
 
 | Term        | Definition                                                                                                                                                                                                                                                                             |
@@ -921,7 +928,7 @@ Before publishing a payment handler specification, verify:
 - [ ] Processing steps are enumerated and clear
 - [ ] Verification requirements are specified
 - [ ] Error handling and mapping is addressed
-- [ ] Which `retry_hint` values the handler emits on `payment_failed` errors is specified, if it refines the common well-known values
+- [ ] If supplied, `retry_hint` mappings document retry eligibility, buyer action, and reconciliation for suspected duplicates
 
 ### Security
 

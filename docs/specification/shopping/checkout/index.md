@@ -625,22 +625,37 @@ messages or deferring to checkout completion.
 Example: `out_of_stock` requires specific upfront UX, whereas
 `payment_required` can be handled generically at submission.
 
-For a `payment_failed` error, a business **MAY** add the optional
-`retry_hint` field to say which recovery the platform should attempt for
-the instrument selected by `path`. Well-known values are
-`retry_same_instrument` (resubmitting the same instrument may succeed),
-`try_different_instrument` (collect a different instrument instead of
-resubmitting this one). `severity` does not carry this distinction: a transient issuer
-outage and insufficient funds are both `recoverable` on the same `path`,
-but the first is retried with the same instrument and the second is not.
-Platforms **MUST** tolerate and ignore unknown `retry_hint` values. When
-`retry_hint` is absent, no recovery guidance is given and existing
-behavior applies. The hint is action-shaped only: it carries no issuer,
-network, or processor reason codes, and payment handlers may refine it
-within their own specifications.
+##### Payment Recovery Hints
 
-A transient failure, where resubmitting the same instrument is the
-intended recovery:
+A Business **MAY** add `retry_hint` to a recoverable `payment_failed`
+error whose `path` selects the failed payment instrument. The Platform
+**MUST** ignore the hint if any of those conditions is absent or if the
+value is unknown. When the hint is absent or ignored, existing error
+handling applies. The hint carries no issuer, network, or processor reason
+codes. Checkout state, buyer authorization, and handler rules still govern
+whether a new attempt is permitted.
+
+* `retry_same_instrument`: The Business **MAY** emit this value only if the
+  previous attempt is known to have failed, the handler permits a new
+  attempt with the same instrument, and no buyer action is required.
+* `try_different_instrument`: The Business **MAY** emit this value when
+  the handler permits recovery with a different instrument. The Platform
+  can collect an eligible different instrument as recovery.
+* `do_not_retry`: The Platform **MUST NOT** initiate a new attempt for the
+  affected payment as recovery for this error, using any instrument. The
+  Platform **SHOULD** use [Get Checkout](#get-checkout) to read the current
+  state. If a previous attempt may already exist, the Business **MUST**
+  reconcile its outcome with the handler before reporting a state that
+  permits a new attempt for that payment.
+
+In a split payment, `path` identifies the instrument that reported the
+failure. The stop applies to any new attempt for that same payment. The
+Platform **MUST NOT** submit a new completion if it cannot determine whether
+the operation would make a new attempt for that payment. Any replay of the
+original request remains subject to [Complete Checkout](#complete-checkout).
+
+A confirmed transient failure where the handler permits a new attempt
+with the same instrument and no buyer action is needed:
 
 <!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
 ```json
@@ -653,6 +668,43 @@ intended recovery:
       "severity": "recoverable",
       "retry_hint": "retry_same_instrument",
       "content": "Issuer temporarily unavailable."
+    }
+  ]
+}
+```
+
+A suspected duplicate where the Platform reads the current checkout state
+instead of initiating another payment:
+
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[0]",
+      "severity": "recoverable",
+      "retry_hint": "do_not_retry",
+      "content": "An earlier payment may already exist. Check the checkout status."
+    }
+  ]
+}
+```
+
+An issuer requires the buyer to contact them before another attempt with
+the same instrument. The Business signals buyer input through `severity`:
+
+<!-- ucp:example schema=shopping/checkout extract=$.messages target=$.messages -->
+```json
+{
+  "messages": [
+    {
+      "type": "error",
+      "code": "payment_failed",
+      "path": "$.payment.instruments[0]",
+      "severity": "requires_buyer_input",
+      "content": "Contact your card issuer to authorize this payment."
     }
   ]
 }
