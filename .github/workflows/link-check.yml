@@ -1,0 +1,90 @@
+---
+#   Copyright 2026 Google LLC
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+# Weekly external-link check for the docs.
+#
+# scripts/check_links.py validates links on the built site, but it never
+# fetches external URLs, so a link that rots upstream goes unnoticed until
+# someone clicks it. The broken AP2 links fixed in #1124 are the case in
+# point: the built-site check passed while ap2-protocol.org/specification
+# 404'd and ap2-extension.org stopped resolving. This workflow runs lychee
+# against the raw Markdown instead and files an issue when it finds broken
+# links, rather than failing a build.
+#
+# The check is intentionally not a PR gate: fixing a rotted upstream link
+# should not block an unrelated change.
+
+name: Weekly Link Check
+
+permissions: {}
+
+on:
+  schedule:
+    # Mondays 14:00 UTC (09:00 US/Eastern standard time).
+    - cron: "0 14:00 * * 1"
+  workflow_dispatch:
+
+jobs:
+  link-check:
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Check links with lychee
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --config lychee.toml --root-dir docs --fallback-extensions md
+            --no-progress docs README.md
+          fail: false
+          failIfEmpty: false
+
+      - name: File issue for broken links
+        if: steps.lychee.outputs.exit_code != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          title="Weekly link check: broken links in docs"
+          body_file="$(mktemp)"
+          {
+            echo "The weekly link check found broken links in \`docs/\` or \`README.md\`."
+            echo
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo "Fix the links below, or update \`lychee.toml\` if a link is"
+            echo "intentionally uncheckable (a placeholder, a local dev-server"
+            echo "URL, or a build-time reference)."
+            echo
+            if [ -f lychee/out.md ]; then
+              cat lychee/out.md
+            else
+              echo "(lychee did not produce a report file.)"
+            fi
+          } > "$body_file"
+          existing="$(gh issue list --state open --limit 100 --json number,title \
+            --jq '.[] | select(.title == "Weekly link check: broken links in docs") | .number' \
+            | head -n 1)"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "$body_file"
+          else
+            gh issue create --title "$title" --body-file "$body_file"
+          fi
