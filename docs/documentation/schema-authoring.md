@@ -774,11 +774,6 @@ aid clarity; default to strict JSON otherwise.
 Block comments (`/* */`) are **not** supported. Use multiple `//` lines if you
 need a multi-line note.
 
-**Limitation:** the `//` stripper tracks string boundaries per-line and is
-approximate. An example containing a string literal with an escaped backslash
-followed by `//` will be misparsed. No corpus example currently triggers this;
-if you hit it, restructure the example.
-
 #### Template variable
 
 Exactly one variable is substituted: `{{ ucp_version }}` becomes a valid date

@@ -168,6 +168,61 @@ def test_layer1_to_layer2() -> None:
 # -----------------------------------------------------------
 
 
+def test_text_reduction_preserves_strings() -> None:
+  """Authoring conveniences only transform text outside JSON strings."""
+  values = [
+    "Size [...] guide",
+    "Notes {...}",
+    'Quoted "[...]" and // text',
+    "Path " + "\\" * 2 + " // not a comment",
+  ]
+  values.extend("Path " + "\\" * count for count in range(1, 5))
+  for index, value in enumerate(values):
+    payload = {"title": value, "url": "https://example.com/help"}
+    raw = json.dumps(payload)
+    for transform in (v.strip_line_comments, v.lower_ellipsis_to_sentinels):
+      _check(
+        f"{transform.__name__}_preserves_string[{index}]",
+        transform(raw) == raw,
+      )
+    try:
+      parsed = v.parse_example(raw + " // author note\n")
+      ok, detail = parsed == payload, repr(parsed)
+    except json.JSONDecodeError as error:
+      ok, detail = False, str(error)
+    _check(f"parse_preserves_string[{index}]", ok, detail)
+
+  raw = (
+    '{"title": "[...] {...}", "items": [ ... ], // note\n "details": { ... }}'
+  )
+  try:
+    parsed = v.parse_example(raw)
+    ok = parsed == {
+      "title": "[...] {...}",
+      "items": ["..."],
+      "details": {"...": "..."},
+    }
+    detail = repr(parsed)
+  except json.JSONDecodeError as error:
+    ok, detail = False, str(error)
+  _check("strings_and_authoring_syntax_compose", ok, detail)
+
+  for raw in (
+    '{"title": "unterminated // note}',
+    '{"title": "line\nbreak"}',
+    '{"title": "bad\\q"}',
+    '{"title": "text",}',
+    '{"title": "text" /* note */}',
+    '{"items": [1, ..., 2]}',
+  ):
+    try:
+      v.parse_example(raw)
+      rejected = False
+    except json.JSONDecodeError:
+      rejected = True
+    _check(f"invalid_json_still_rejected[{raw!r}]", rejected)
+
+
 def test_parse_example_keeps_sentinels() -> None:
   """parse_example returns the parsed tree with sentinels intact.
 
@@ -1203,6 +1258,7 @@ def main() -> int:
   """Run all contract tests and report. Exit 0 on pass, 1 on failure."""
   print("Running validate_examples contract tests...\n")
   test_layer1_to_layer2()
+  test_text_reduction_preserves_strings()
   test_parse_example_keeps_sentinels()
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()

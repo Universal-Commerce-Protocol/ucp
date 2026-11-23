@@ -100,10 +100,6 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
 KNOWN LIMITATIONS
 ================================================================
 
-  - Line-comment stripper tracks string boundaries per-line and is
-    approximate. An example with a string literal containing an
-    escaped backslash followed by `//` will be misparsed. No corpus
-    example currently triggers this.
   - The literal three-character string "..." cannot appear in an
     example as actual data — it is reserved as the elision sentinel.
 
@@ -339,32 +335,17 @@ def expand_templates(content: str) -> str:
   return content.replace("{{ ucp_version }}", UCP_VERSION_PLACEHOLDER)
 
 
-def strip_line_comments(content: str) -> str:
-  """Stage 3. Strip // line comments outside string literals.
+# Match quoted strings first so authoring syntax never rewrites their contents.
+_JSON_STRING_PATTERN = r'"(?:[^"\\\n]|\\[^\n])*"'
+_LINE_COMMENT_RE = re.compile(rf"{_JSON_STRING_PATTERN}|//[^\n]*")
 
-  Per-line string-boundary tracking. Approximate — see module
-  docstring for the documented edge case.
-  """
-  lines = content.split("\n")
-  cleaned = []
-  for line in lines:
-    result = []
-    in_string = False
-    i = 0
-    while i < len(line):
-      ch = line[i]
-      if ch == '"' and (i == 0 or line[i - 1] != "\\"):
-        in_string = not in_string
-        result.append(ch)
-      elif (
-        ch == "/" and not in_string and i + 1 < len(line) and line[i + 1] == "/"
-      ):
-        break  # rest of line is comment
-      else:
-        result.append(ch)
-      i += 1
-    cleaned.append("".join(result).rstrip())
-  return "\n".join(cleaned)
+
+def strip_line_comments(content: str) -> str:
+  """Stage 3. Strip // line comments outside string literals."""
+  content = _LINE_COMMENT_RE.sub(
+    lambda match: "" if match[0].startswith("//") else match[0], content
+  )
+  return "\n".join(line.rstrip() for line in content.split("\n"))
 
 
 # Bare ... inside an otherwise-empty [] or {} container. Authors
@@ -377,15 +358,23 @@ def strip_line_comments(content: str) -> str:
 # dots (e.g. `[1, ..., 3]`) are not supported — only whole-container
 # bare-dot ellipsis. For partial elision use the string form
 # (`[1, "...", 3]`).
-_BARE_ELLIPSIS_ARRAY = re.compile(r"(\[\s*)\.\.\.(\s*\])")
-_BARE_ELLIPSIS_OBJECT = re.compile(r"(\{\s*)\.\.\.(\s*\})")
+_BARE_ELLIPSIS_RE = re.compile(
+  rf"{_JSON_STRING_PATTERN}|(?P<array>\[\s*\.\.\.\s*\])"
+  r"|(?P<object>\{\s*\.\.\.\s*\})"
+)
 
 
 def lower_ellipsis_to_sentinels(content: str) -> str:
-  """Stage 4. Lower bare `...` to string-sentinel form."""
-  content = _BARE_ELLIPSIS_ARRAY.sub(r'\1"..."\2', content)
-  content = _BARE_ELLIPSIS_OBJECT.sub(r'\1"...": "..."\2', content)
-  return content
+  """Stage 4. Lower bare `...` outside strings to string-sentinel form."""
+
+  def replace(match: re.Match) -> str:
+    if match.group("array") is not None:
+      return match[0].replace("...", '"..."', 1)
+    if match.group("object") is not None:
+      return match[0].replace("...", '"...": "..."', 1)
+    return match[0]
+
+  return _BARE_ELLIPSIS_RE.sub(replace, content)
 
 
 def reduce_to_canonical_json(raw: str) -> str:
