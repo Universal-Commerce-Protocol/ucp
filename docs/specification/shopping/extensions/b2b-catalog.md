@@ -170,8 +170,18 @@ supplier statement.
 Supplier pages and documents change, so a quote that was in a document when it
 was read can be gone later. `sha256` is the SHA-256 of the bytes of the
 document the quote was read from, and `checked_at` is the date the quote was
-last confirmed in it. A Platform that fetches `url` and gets different bytes
-knows the document has changed since the quote was taken.
+last confirmed in it.
+
+`sha256` covers the response body of `url` as served, before any script
+runs. For a hosted copy of a file, such as a PDF, the bytes stay the same
+and a matching hash shows the same copy was read. Web pages often return
+different bytes on every fetch, through templates, scripts or tracking
+markup, while the quoted line is unchanged. A different hash therefore tells
+a Platform to recheck, not that the fact has changed. A Platform that gets
+different bytes SHOULD look for `quote` in the document next, after
+collapsing whitespace, and SHOULD treat the fact as unconfirmed only when
+`quote` is not found. A Business SHOULD point `url` at a stable hosted copy
+when it has one.
 
 ### More than one line per fact
 
@@ -180,13 +190,27 @@ the line the `value` was taken from; `additional_sources[]` lists the other
 lines. When another line gives a different value, `source.reason` states why
 `source` wins, for example a footnote that ties a value to one model.
 
+`additional_sources` requires `source`. When no document line supports the
+`value` itself, `source` still states where the value comes from, for example
+`supplier_authored` when the supplier entered it, or `inferred`, and
+`source.reason` says why it differs from the lines in `additional_sources`.
+
 ### Values with more than one number
 
 `numeric_value` holds one number in one `unit`. A value that holds several
 numbers, such as `520 x 540 x 634 mm`, or a range, such as `60-256 g/m²`,
 SHOULD be sent as one attribute per number so that a Platform can compare
 them in code: for example `width`, `depth` and `height`, or `paper_weight_min`
-and `paper_weight_max`. Each of those attributes can point at the same
+and `paper_weight_max`.
+
+Split a value only when the source says what each number means. A range
+states its own minimum and maximum. For dimensions, split only when the
+source names the axis order, such as `W x D x H`, and name each attribute
+after the axis the source uses: `length`, `width`, `depth` or `height`. Do
+not map one axis name to another, because suppliers use `length` and `depth`
+for different directions. When the source names no order, as in
+`520 x 540 x 634 mm` or `600 x 600 dpi`, send the value whole without
+`numeric_value`. Each of those attributes can point at the same
 `source`, whose `quote` keeps the original line. A Business MAY also send the
 combined value as an attribute without `numeric_value` for display.
 
@@ -353,6 +377,8 @@ certificate was compared with a copy of the certificate.
    `verified_by` be an open vocabulary or a reverse-domain identifier?
 5. **Range values.** This draft splits a value with several numbers into one
    attribute per number. Is a range or multi-dimension type in scope instead?
+   Should the dimension keys (`length`, `width`, `depth`, `height`) come from
+   a shared vocabulary?
 6. **Attribute placement.** If #401 is adopted, should `source` and
    `additional_sources` move into #401's attribute type, so that every
    catalog attribute can carry a source without this extension?

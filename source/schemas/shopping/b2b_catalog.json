@@ -31,16 +31,17 @@
         },
         "quote": {
           "type": "string",
-          "description": "The line in the document that states the fact, quoted verbatim."
+          "description": "The line in the document that states the fact, quoted verbatim. A Platform rechecking a source SHOULD look for this text in the document."
         },
         "sha256": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$",
-          "description": "Lowercase hex SHA-256 of the bytes of the document at `url` that the quote was read from. Lets a Platform tell which copy a quote came from when the document changes."
+          "description": "Lowercase hex SHA-256 of the response body bytes of `url` as served, before any script runs, at the time the quote was read. A changed hash is a signal to recheck `quote`, not proof that the fact changed (see the spec page)."
         },
         "checked_at": {
           "type": "string",
           "format": "date",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
           "description": "Date the quote was last confirmed in the document."
         },
         "reason": {
@@ -73,6 +74,11 @@
       "description": "A product or variant fact with its source. Mirrors the `attribute` shape proposed in #401 (`name`, `key`, `value`, `numeric_value`, `unit`) and adds `source` and `additional_sources`, so that one shape serves both proposals. If #401 is adopted, this definition becomes #401's type plus the two source fields.",
       "type": "object",
       "additionalProperties": true,
+      "dependentRequired": {
+        "additional_sources": [
+          "source"
+        ]
+      },
       "required": [
         "name",
         "value"
@@ -107,7 +113,7 @@
           "items": {
             "$ref": "#/$defs/source_pointer"
           },
-          "description": "Other lines that state the same fact, including lines that give a different value. When one of them conflicts with `value`, `source.reason` says why `source` wins."
+          "description": "Other lines that state the same fact, including lines that give a different value. Requires `source`. When one of them conflicts with `value`, `source.reason` says why `source` wins."
         }
       }
     },
@@ -222,6 +228,7 @@
         "valid_until": {
           "type": "string",
           "format": "date",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
           "description": "Expiry date as stated on the certificate."
         },
         "verification": {
@@ -239,6 +246,7 @@
             "verified_at": {
               "type": "string",
               "format": "date",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
               "description": "Date of the most recent check."
             },
             "verified_by": {
