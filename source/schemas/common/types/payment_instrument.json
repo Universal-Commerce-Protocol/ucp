@@ -22,6 +22,10 @@
       "type": "string",
       "description": "The broad category of the instrument (e.g., 'card', 'tokenized_card'). Specific schemas will constrain this to a constant value."
     },
+    "program": {
+      "$ref": "tender_program.json",
+      "description": "The tender program this instrument draws on. When the code is listed in `payment.eligible_amounts`, the instrument is restricted: it may pay only up to that program's eligible amount. Absent for ordinary, unrestricted instruments. A business MUST reject an instrument whose `program` it does not accept, with `path` pointing at the instrument."
+    },
     "billing_address": {
       "$ref": "postal_address.json",
       "description": "The billing address associated with this payment method."

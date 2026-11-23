@@ -42,6 +42,15 @@
         "create": "omit",
         "update": "optional"
       }
+    },
+    "tender_eligibility": {
+      "type": "array",
+      "items": {
+        "$ref": "../../common/types/tender_program.json"
+      },
+      "uniqueItems": true,
+      "description": "Item-restricted tender programs that may pay for this line, as determined by the business (for example 'us_snap'). Absence means no item-restricted program may pay for the line. Readers MUST tolerate unknown codes.",
+      "ucp_request": "omit"
     }
   }
 }

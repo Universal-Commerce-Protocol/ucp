@@ -20,8 +20,9 @@
 
 > **Note on examples:** Instrument `type` strings used in this spec
 > (`card`, `gift_card`, `store_credit`, `loyalty`) are illustrative.
-> Only `card` has a normative instrument schema in the base spec
-> (`card_payment_instrument.json`); the others are handler-defined.
+> Only `card` and `benefit_card` have normative instrument schemas in the
+> base spec (`card_payment_instrument.json`,
+> `benefit_card_payment_instrument.json`); the others are handler-defined.
 > Credential shapes shown in examples are similarly illustrative —
 > real handlers MUST publish their credential schemas. Each usage
 > example below assumes a business `allowed_combinations` config that
@@ -162,6 +163,50 @@ Reading each combination:
      up to the remaining checkout total after all prior contributions.
      A zero available balance is a valid $0 contribution, not a failure.
 
+### Restricted Instruments
+
+An instrument is **restricted** when its `program` appears in
+`payment.eligible_amounts` (see
+[Restricted Tender Programs](../tender-programs.md)). A restricted instrument
+MUST NOT contribute more than its program's eligible amount, less any
+contribution already allocated to earlier instruments of the same program.
+
+* **Open-amount:** the business MUST cap the contribution at the lesser of the
+  instrument's available balance and that remaining eligible amount.
+* **Specified-amount:** an `amount` above that remaining eligible amount MUST
+  fail with `payment_failed`, with `path` pointing at the instrument.
+
+Unrestricted instruments are unaffected, so existing combinations behave as
+before. A business that accepts EBT declares it in `allowed_combinations` as
+usual, for example up to two EBT instruments (SNAP and cash) followed by an
+optional card:
+
+<!-- ucp:example schema=profile def=business_schema extract=$.capabilities target=$.ucp.capabilities -->
+```json
+{
+  "capabilities": {
+    "dev.ucp.common.payment.split_payments": [
+      {
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/payment/extensions/split-payments",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/payment_split_payments.json",
+        "extends": [
+          "dev.ucp.shopping.checkout"
+        ],
+        "config": {
+          "allowed_combinations": [
+            [
+              { "types": ["benefit_card"], "min": 1, "max": 2 },
+              { "types": ["card"], "max": 1 }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
 ### Error Handling
 
 A split payment either completes fully or has no financial effect. If
@@ -227,6 +272,8 @@ Error conditions:
 * If the sum of all specified `amount` values exceeds the
   checkout total, the business MUST return an error.
 * If the submitted instruments did not match any valid `allowed_combinations`, the business MUST return an error.
+* If a restricted instrument's specified `amount` exceeds its program's
+  remaining eligible amount, the business MUST return an error.
 
 ### Response: Actual Charges
 
@@ -439,6 +486,74 @@ credit card covers the remaining $45.
 The first gift card had a $25 balance (charged in full). The second gift
 card had a $0 balance — this is not an error, it simply contributes
 nothing. The credit card covers the remaining $75.
+
+### EBT SNAP + Credit Card (low balance)
+
+> "Pay for the eligible groceries with my EBT card, credit card for the rest."
+
+The checkout total is $38.12 and the business reports
+`eligible_amounts: [{ "program": "us_snap", "amount": 1375 }]`. The EBT card
+holds only $10.00 of SNAP benefits.
+
+**Inbound:**
+
+<!-- ucp:example schema=shopping/checkout op=complete direction=request extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "instruments": [
+      {
+        "id": "pi_ebt",
+        "handler_id": "ebt_tpp",
+        "type": "benefit_card",
+        "program": "us_snap",
+        "credential": { "type": "ebt_pin_token", "token": "ebt_tok_7f3a" }
+      },
+      {
+        "id": "pi_card",
+        "handler_id": "card_psp",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" }
+      }
+    ]
+  }
+}
+```
+
+**Outbound (completed checkout):**
+
+<!-- ucp:example schema=shopping/checkout extract=$.payment target=$.payment -->
+```json
+{
+  "payment": {
+    "eligible_amounts": [
+      { "program": "us_snap", "amount": 1375 }
+    ],
+    "instruments": [
+      {
+        "id": "pi_ebt",
+        "handler_id": "ebt_tpp",
+        "type": "benefit_card",
+        "program": "us_snap",
+        "credential": { "type": "ebt_pin_token", "token": "ebt_tok_7f3a" },
+        "amount": 1000
+      },
+      {
+        "id": "pi_card",
+        "handler_id": "card_psp",
+        "type": "card",
+        "credential": { "type": "card", "token": "tok_visa_xxxx" },
+        "amount": 2843
+      }
+    ]
+  }
+}
+```
+
+The EBT card contributed its full $10.00 balance, below the $13.75 cap. The
+card paid the rest: $28.12, plus $0.31 of sales tax (8.25%) on the $3.75 of
+food that is now paid by card, which the business recomputed. Had the balance been $20.00,
+the EBT card would have contributed only $13.75.
 
 ### Partial Failure with Recovery
 

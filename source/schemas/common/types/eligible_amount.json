@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/eligible_amount.json",
+  "title": "Eligible Amount",
+  "description": "The most that instruments of one item-restricted tender program may pay toward this checkout, as computed by the business.",
+  "type": "object",
+  "required": [
+    "program",
+    "amount"
+  ],
+  "properties": {
+    "program": {
+      "$ref": "tender_program.json",
+      "description": "The item-restricted program this amount applies to."
+    },
+    "amount": {
+      "$ref": "amount.json",
+      "description": "Maximum combined contribution of instruments of this program, in minor units of the containing capability object's `currency`: the eligible lines after their discounts and any tax the program may pay, excluding fees, tips and fulfillment unless the program's rules allow them. Zero when no line qualifies."
+    }
+  }
+}

@@ -11,6 +11,14 @@
         "$ref": "payment_instrument.json#/$defs/selected_payment_instrument"
       },
       "description": "The payment instruments available for this payment. Each instrument is associated with a specific handler via the handler_id field. Handlers can extend the base payment_instrument schema to add handler-specific fields."
+    },
+    "eligible_amounts": {
+      "type": "array",
+      "items": {
+        "$ref": "eligible_amount.json"
+      },
+      "description": "Business-computed caps for item-restricted tender programs. A business that accepts an item-restricted program MUST list it here on every response, with `amount` 0 when no line qualifies. Programs that are not item-restricted are never listed. An instrument whose `program` is listed here is restricted; see the Tender Programs specification.",
+      "ucp_request": "omit"
     }
   }
 }
