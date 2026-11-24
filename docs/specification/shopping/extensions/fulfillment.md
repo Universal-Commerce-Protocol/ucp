@@ -37,6 +37,7 @@ On Checkout, the `fulfillment` field contains:
     * `destinations[]` — where to fulfill (address, store location)
     * `groups[]` — business-generated packages, each with selectable `options[]`
 * `available_methods[]` — inventory availability per item (optional)
+    * `destination_id` — destination that availability applies to (optional)
 
 **Mental model:**
 
@@ -73,6 +74,7 @@ These fields carry distinct roles, not precision levels of one value:
 | `context.location` | Provisional Business Location to evaluate fulfillment against. |
 | Catalog `filters.fulfills_to` | Explicit destination items are fulfilled to, and a filter on results. |
 | Catalog `methods[].location` | The Business Location resolved for a place-based method (e.g. `pickup`) on a variant. |
+| Checkout `available_methods[].destination_id` | The destination an availability hint is scoped to. |
 | Checkout `methods[].selected_destination_id` | The destination selected from that method's `destinations[]`. |
 
 Precedence is scoped to what each field governs:
@@ -454,6 +456,16 @@ method, and when. Use cases:
 * **Alternative methods**: "These pants are also available for pickup at Downtown Store"
 * **Fulfill later**: Preorders, items shipping from a distant warehouse, pickup when store gets inventory
 
+An `available_methods[]` entry **MAY** carry `destination_id` to scope its
+availability to one destination (e.g., a Business Location for `pickup`); a
+Business **MAY** return one entry per destination for the same `type`. An
+entry without `destination_id` describes the method without naming a
+destination. A Business that returns a `destination_id` **MUST** recognize
+that same ID as `selected_destination_id` on a method of the same `type`. The
+Business revalidates current availability and terms; an availability hint
+neither reserves inventory nor guarantees eligibility. See [Selection and
+Location Identity](#selection-and-location-identity).
+
 <!-- ucp:example schema=shopping/checkout op=read -->
 ```json
 {
@@ -486,6 +498,7 @@ method, and when. Use cases:
       {
         "type": "pickup",
         "line_item_ids": ["pants"],
+        "destination_id": "loc_downtown",
         "fulfillable_on": "2026-12-01T10:00:00Z",
         "description": "Available for pickup at Downtown Store today at 2pm"
       }
@@ -498,6 +511,9 @@ The `description` field enables platforms to surface alternatives to buyers:
 
 > 🤖 The shirt and pants ship for $5, arriving in 5-8 days. Or the pants can
 > be picked up at Downtown Store in 4 hours.
+
+To act on the pickup hint, the Platform moves `pants` to the `pickup` method
+with `selected_destination_id: "loc_downtown"`.
 
 If the buyer chooses pickup but the platform doesn't support split
 fulfillment, the platform **SHOULD** use `continue_url` to hand off to the
