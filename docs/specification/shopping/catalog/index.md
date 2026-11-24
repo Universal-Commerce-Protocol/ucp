@@ -362,6 +362,10 @@ string. Platforms **MAY** use it for search, filtering, and recognizing the
 same product across sellers. It is not verified: a Platform that needs
 assurance about a brand claim needs a separate mechanism.
 
+For products without an available brand, omit `brand` rather than provide
+placeholders such as "N/A" or "Generic". `brand` is optional, but when provided
+it requires a non-empty `name`.
+
 {{ schema_fields('types/brand', 'shopping/catalog') }}
 
 ### Policy
