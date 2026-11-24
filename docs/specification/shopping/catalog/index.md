@@ -251,6 +251,9 @@ A variant can carry three kinds of identifier, each with a different scope:
 | `barcodes` | A registry (for example, GS1 for GTINs) | Globally unique; the same code identifies the same item at every seller. |
 | `mpn` | The manufacturer | Unique only together with the brand (`Product.brand`). |
 
+GTIN entries in `barcodes` **SHOULD** identify the item sold by the variant,
+not a different level of its packaging hierarchy.
+
 Platforms recognizing the same item across sellers **SHOULD** prefer
 `barcodes`, and **SHOULD NOT** match on `mpn` without also matching the brand.
 

@@ -35,7 +35,7 @@
           }
         }
       },
-      "description": "Scannable trade item identifiers printed on the item or its packaging, such as GTINs (including UPC, EAN, JAN, and ISBN-13). Used to recognize the same item across sellers. Manufacturer part numbers belong in `mpn`; other supplier-assigned codes do not belong here."
+      "description": "Scannable trade item identifiers printed on the item or its packaging, such as GTINs (including UPC, EAN, JAN, and ISBN-13). GTIN entries SHOULD identify the item sold by the variant, not a different level of its packaging hierarchy. Used to recognize the same item across sellers. Manufacturer part numbers belong in `mpn`; other supplier-assigned codes do not belong here."
     },
     "mpn": {
       "type": "string",
