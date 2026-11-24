@@ -99,9 +99,11 @@ Scalar profile fields connected to the authenticated user, such as
 use their normal schema-defined values; the base buyer schema does not define
 separate selectable ids for email addresses or phone numbers. Fulfillment
 destination selection remains governed by the
-[Fulfillment](../../shopping/extensions/fulfillment.md) contract; identity
-linking alone does not authorize proactive disclosure of the precise address
-or recipient-contact fields of an unselected saved fulfillment destination.
+[Fulfillment](../../shopping/extensions/fulfillment.md) contract. Identity linking
+alone neither authorizes nor prohibits proactive disclosure of the precise address
+nor recipient-contact fields of an unselected saved fulfillment destination. Any
+such disclosure remains subject to the applicable response contract and the
+data-minimization guidance in this section.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is
 user-authenticated and authorized for the operation. They **MUST** only return
