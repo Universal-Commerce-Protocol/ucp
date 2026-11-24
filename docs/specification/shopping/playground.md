@@ -426,7 +426,7 @@ const HANDLERS = {
   },
   STRIPE: {
     key: 'stripe_payments',
-    handlerId: 'stripe_payments_1234',
+    handlerId: 'stripe_payments',
     spec: 'com.stripe.payments',
     label: 'Stripe Payments'
   }
