@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""MCP binding: one tool per operation, served by the official MCP SDK.
+"""MCP binding: one tool per method read from the generated OpenRPC document.
 
 The specification defines the binding as a transform of the OpenRPC
 service definition: a method becomes a tool name and its params become
@@ -20,9 +20,10 @@ the tool arguments. `meta["ucp-agent"].profile` carries the Platform
 profile, `meta["idempotency-key"]` the idempotency key, `id` the resource,
 and one more argument the payload.
 
-Tool schemas come from the type bundle generated for the Business's
-profile, so they describe everything the Business offers. What a given
-Platform negotiated is decided per call, as on REST.
+Tool schemas come from `openrpc.json` generated for the Business's
+profile, so they describe everything the Business offers without
+requiring a REST service binding. What a given Platform negotiated is
+decided per call, as on REST.
 """
 
 import copy
@@ -41,7 +42,6 @@ from starlette.routing import Route
 from reference import build
 from reference.business.negotiation import NEGOTIATION_ERRORS, ProtocolError
 
-OPENRPC = build.REPO / "source" / "services" / "shopping" / "mcp.openrpc.json"
 PATH = "/mcp"
 # HTTP status for the JSON-RPC errors this Business raises without a UCP
 # code: invalid arguments, and an idempotency conflict. A Business that
@@ -76,38 +76,32 @@ def _local(schema: dict) -> dict:
 
 
 def tools(business) -> dict[str, tuple[types.Tool, str | None]]:
-  """Build one tool per operation: name to (tool, payload argument name)."""
-  openrpc = json.loads(OPENRPC.read_text())
-  defs = {**business.types, "meta": openrpc["components"]["schemas"]["meta"]}
+  """Build one tool per generated OpenRPC method: name to (tool, payload)."""
+  openrpc = json.loads((build.OUT / "full" / "openrpc.json").read_text())
+  defs = _local(openrpc["components"]["schemas"])
   built = {}
   for method in openrpc["methods"]:
-    route = business.routes.get(method["name"])
-    if route is None:
-      continue  # an operation of a capability this profile does not declare
     properties, required, payload = {}, [], None
     for param in method["params"]:
-      if param["name"] in ("meta", "id"):
-        properties[param["name"]] = _local(param["schema"])
-      else:
-        # The OpenRPC schema here is a pointer to the base capability. Use
-        # the request type composed for this Business's profile instead.
-        payload = param["name"]
-        properties[payload] = {"$ref": f"#/$defs/{route.request}"}
+      name = param["name"]
+      properties[name] = _local(param["schema"])
+      if name not in ("meta", "id"):
+        payload = name
       if param.get("required"):
-        required.append(param["name"])
+        required.append(name)
     arguments = {
       "type": "object",
       "properties": properties,
       "required": required,
     }
-    result = {"type": "object", **_local(route.response)}
+    result = {"type": "object", **_local(method["result"]["schema"])}
     tool = types.Tool(
-      name=route.name,
-      description=route.summary,
+      name=method["name"],
+      description=method.get("summary") or method.get("description", ""),
       input_schema={**arguments, "$defs": _closure(defs, arguments)},
       output_schema={**result, "$defs": _closure(defs, result)},
     )
-    built[route.name] = (tool, payload)
+    built[method["name"]] = (tool, payload)
   return built
 
 
