@@ -254,10 +254,12 @@ not establish return eligibility, which is governed by the applicable
 
 Condition is set per variant because variants of one product can differ (for
 example, a new and a refurbished edition of the same phone). Businesses
-**SHOULD** set `condition` on every variant that is not `new`. When
-`condition` is absent, the condition is not stated; a Platform filtering for
-new items decides for itself whether to include such variants. Platforms
-**MUST NOT** treat an unrecognized value as `new`.
+**SHOULD** set `condition` explicitly on every physical-goods variant,
+including `new`. It need not be supplied for non-physical goods, such as
+digital goods, gift cards, or services. When `condition` is absent, the
+condition is not stated; a Platform filtering for new items decides for
+itself whether to include such variants. Platforms **MUST NOT** treat an
+unrecognized value as `new`.
 
 {{ schema_fields('types/variant', 'shopping/catalog') }}
 
