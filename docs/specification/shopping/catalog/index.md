@@ -365,6 +365,12 @@ string. Platforms **MAY** use it for search, filtering, and recognizing the
 same product across sellers. It is not verified: a Platform that needs
 assurance about a brand claim needs a separate mechanism.
 
+`url` is the brand's own canonical website, matching schema.org
+[`Brand.url`](https://schema.org/Brand){ target="_blank" }, not the seller's.
+Like `name`, it is not verified, so Platforms **MUST NOT** treat it alone as
+proof that a seller is authorized to sell the brand. A Platform that needs that
+assurance **SHOULD** pair it with verifiable attestations signed by the brand.
+
 For products without an available brand, omit `brand` rather than provide
 placeholders such as "N/A" or "Generic". `brand` is optional, but when provided
 it requires a non-empty `name`.

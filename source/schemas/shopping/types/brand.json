@@ -12,6 +12,11 @@
       "type": "string",
       "minLength": 1,
       "description": "Brand name as presented to buyers (e.g., 'Patagonia'). For products sold under the manufacturer's own name, this is the manufacturer's brand."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "The brand's own canonical website, as an https URL (equivalent to schema.org `Brand.url`). A Business assertion that UCP does not verify: Platforms MUST NOT treat it alone as proof that a seller is authorized to sell the brand, and SHOULD pair it with verifiable attestations signed by the brand."
     }
   }
 }
