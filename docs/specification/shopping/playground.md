@@ -319,18 +319,8 @@ Accept: application/json</pre>
     <div class="grid">
       <div class="card">
         <h3>Select Handler</h3>
-        <div class="handler-opt selected" data-handler="shop_pay">
-          <strong>Shop Pay</strong><br>
-          <small>com.shopify.shop_pay</small>
-        </div>
-        <div class="handler-opt" data-handler="gpay">
-          <strong>Google Pay</strong><br>
-          <small>com.google.pay</small>
-        </div>
-        <div class="handler-opt" data-handler="stripe_payments">
-          <strong>Stripe Payments</strong><br>
-          <small>com.stripe.payments</small>
-        </div>
+        <!-- Handler options are rendered from HANDLERS in the script below. -->
+        <div id="handler-options"></div>
         <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" id="btn-run-mint">Mint Credential</button>
       </div>
       <div class="json-panel">
@@ -405,6 +395,57 @@ Accept: application/json</pre>
 (() => {
 /**
  * ------------------------------------------------------------------
+ * 0. PAYMENT HANDLER CONSTANTS
+ * ------------------------------------------------------------------
+ * Single source of truth for the demo payment handlers. Every
+ * handler reference in this playground — the advertised handler
+ * configs, the mock instruments, the handler picker, and the mint
+ * flow — reads from here, so adding or renaming a handler means
+ * changing one entry below instead of hunting string literals.
+ *
+ * - `key`: short key used by the picker (`data-handler`), the app
+ *   state (`selectedHandler`), and the `mock_instruments` lookup.
+ * - `handlerId`: the `id` advertised in the handler configs and
+ *   carried on the minted instrument (`handler_id`).
+ * - `spec`: the handler's specification name, used as the key in
+ *   the advertised handler configs and shown in the picker.
+ * - `label`: display name shown in the handler picker.
+ */
+const HANDLERS = {
+  SHOP_PAY: {
+    key: 'shop_pay',
+    handlerId: 'shop_pay',
+    spec: 'dev.shopify.shop_pay',
+    label: 'Shop Pay'
+  },
+  GPAY: {
+    key: 'gpay',
+    handlerId: 'gpay',
+    spec: 'com.google.pay',
+    label: 'Google Pay'
+  },
+  STRIPE: {
+    key: 'stripe_payments',
+    handlerId: 'stripe_payments_1234',
+    spec: 'com.stripe.payments',
+    label: 'Stripe Payments'
+  }
+};
+
+// Render the handler picker from HANDLERS so the option list can never
+// drift from the keys the mint flow understands. The first handler is
+// selected by default, matching the initial `selectedHandler` state.
+const handlerOptionsEl = document.getElementById('handler-options');
+if (handlerOptionsEl) {
+  handlerOptionsEl.innerHTML = Object.values(HANDLERS).map(h => `
+    <div class="handler-opt${h.key === HANDLERS.SHOP_PAY.key ? ' selected' : ''}" data-handler="${h.key}">
+      <strong>${h.label}</strong><br>
+      <small>${h.spec}</small>
+    </div>`).join('');
+}
+
+/**
+ * ------------------------------------------------------------------
  * 1. MOCK DATA
  * ------------------------------------------------------------------
  */
@@ -417,9 +458,9 @@ const UcpData = {
   },
 
   business_payment_handlers: {
-    "com.stripe.payments": [
+    [HANDLERS.STRIPE.spec]: [
       {
-        id: "stripe_payments_1234",
+        id: HANDLERS.STRIPE.handlerId,
         version: "2026-06-25",
         spec: "https://docs.stripe.com/agentic-commerce/protocols/ucp/stripe-payments-handler",
         schema: "https://ucp.stripe.com/payments/2026-06-25/schema.json",
@@ -430,9 +471,9 @@ const UcpData = {
         }
       }
     ],
-    "dev.shopify.shop_pay": [
+    [HANDLERS.SHOP_PAY.spec]: [
       {
-        id: "shop_pay",
+        id: HANDLERS.SHOP_PAY.handlerId,
         version: "{{ ucp_version }}",
         spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
@@ -440,9 +481,9 @@ const UcpData = {
         config: { shop_id: "shopify-559128571" }
       }
     ],
-    "com.google.pay": [
+    [HANDLERS.GPAY.spec]: [
       {
-        id: "gpay",
+        id: HANDLERS.GPAY.handlerId,
         version: "{{ ucp_version }}",
         spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
         config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
@@ -481,27 +522,27 @@ const UcpData = {
   },
 
   platform_payment_handlers: {
-    "com.stripe.payments": [
+    [HANDLERS.STRIPE.spec]: [
       {
-        id: "stripe_payments_1234",
+        id: HANDLERS.STRIPE.handlerId,
         version: "2026-06-25",
         spec: "https://docs.stripe.com/agentic-commerce/protocols/ucp/stripe-payments-handler",
         schema: "https://ucp.stripe.com/payments/2026-06-25/schema.json",
         available_instruments: [{ type: "card" }]
       }
     ],
-    "dev.shopify.shop_pay": [
+    [HANDLERS.SHOP_PAY.spec]: [
       {
-        id: "shop_pay",
+        id: HANDLERS.SHOP_PAY.handlerId,
         version: "2026-01-11",
         spec: "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
         config_schema: "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
         instrument_schemas: ["https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"]
       }
     ],
-    "com.google.pay": [
+    [HANDLERS.GPAY.spec]: [
       {
-        id: "gpay",
+        id: HANDLERS.GPAY.handlerId,
         version: "2026-01-11",
         spec: "https://pay.google.com/gp/p/ucp/2026-01-11/",
         config_schema: "https://pay.google.com/gp/p/ucp/2026-01-11/schemas/config.json",
@@ -582,8 +623,8 @@ const UcpData = {
   },
 
   mock_instruments: {
-    stripe_payments: {
-      "handler_id": "stripe_payments_1234",
+    [HANDLERS.STRIPE.key]: {
+      "handler_id": HANDLERS.STRIPE.handlerId,
       "type": "card",
       "billing_address": {
         "street_address": "123 Main Street",
@@ -594,14 +635,14 @@ const UcpData = {
       },
       "id": "instr_stripe_d12bb703-f77e-4c64-9e38-b99a68f74297"
     },
-    shop_pay: {
-      "handler_id": "shop_pay",
+    [HANDLERS.SHOP_PAY.key]: {
+      "handler_id": HANDLERS.SHOP_PAY.handlerId,
       "type": "shop_pay",
       "email": "buyer@example.com",
       "id": "instr_sp_1338ef2c-3913-4267-83a2-a84d07d9a6a6"
     },
-    gpay: {
-      "handler_id": "gpay",
+    [HANDLERS.GPAY.key]: {
+      "handler_id": HANDLERS.GPAY.handlerId,
       "type": "card",
       "display": {
         "brand": "visa",
@@ -857,7 +898,7 @@ class UcpApp {
       agent: 'basic',
       activeCaps: [],
       scenario: 'missing_buyer',
-      selectedHandler: 'shop_pay',
+      selectedHandler: HANDLERS.SHOP_PAY.key,
       lastRequests: {}
     };
 
@@ -977,7 +1018,7 @@ class UcpApp {
     const payload = {
       line_items: [{ item: { id: "sku_stickers" }, quantity: 2 }, { item: { id: "sku_mug" }, quantity: 1 }],
       buyer: {},
-      payment: { instruments: [UcpData.mock_instruments.shop_pay] }
+      payment: { instruments: [UcpData.mock_instruments[HANDLERS.SHOP_PAY.key]] }
     };
 
     if (Object.keys(this.state.activeCaps).some(name => name.includes('fulfillment'))) {
@@ -1068,11 +1109,11 @@ class UcpApp {
 
     const tokenStr = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
 
-    if (handlerId === 'gpay') {
+    if (handlerId === HANDLERS.GPAY.key) {
       instrument.credential = { type: "PAYMENT_GATEWAY", token: "gpaytok_" + tokenStr };
-    } else if (handlerId === 'shop_pay') {
+    } else if (handlerId === HANDLERS.SHOP_PAY.key) {
       instrument.credential = { type: "ShopPayToken", token: "shoppay_tok_" + tokenStr };
-    } else if (handlerId === 'stripe_payments') {
+    } else if (handlerId === HANDLERS.STRIPE.key) {
       const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
       const suffix = Array.from({ length: 24 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
       instrument.credential = { type: "stripe_payment_token", token: "spt_demo_" + suffix };
