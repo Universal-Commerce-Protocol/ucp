@@ -23,25 +23,6 @@ image: assets/banner.png
 -->
 
 <div class="landing-page">
-  <div class="custom-announce-banner" id="announce-banner">
-    <div class="custom-banner-container">
-      <img src="assets/UCP-small.svg" alt="UCP Logo" class="custom-banner-icon">
-      <div class="custom-banner-text">
-        <div class="banner-title">UCP is expanding beyond retail: Lodging draft specification now available. <strong>Food coming soon.</strong></div>
-      </div>
-    </div>
-    <button class="custom-banner-close" onclick="document.getElementById('announce-banner').style.display='none'; localStorage.setItem('ucp_banner_closed', 'true');" aria-label="Close banner">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 1L1 13M1 1L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-  </div>
-  <script>
-    if (localStorage.getItem('ucp_banner_closed') === 'true') {
-      document.getElementById('announce-banner').style.display = 'none';
-    }
-  </script>
-
   <div class="hero-wrapper">
     <div class="hero-content">
       <h1>Universal Commerce<br>Protocol</h1>
@@ -956,13 +937,140 @@ image: assets/banner.png
       </div>
       <div id="action-tab-food" class="tab-pane">
         <div class="pane-text">
-          <h3>Food</h3>
-          <p>Powers conversational food ordering journeys that seamlessly handle nuanced meal customization, real-time availability and deals, tipping, and delivery instructions through a scalable checkout experience on AI surfaces.</p>
-          <a href="https://developers.google.com/actions-center/verticals/ordering/ucp" target="_blank" class="lifecycle-container-item-link">Learn more</a>
+          <h3>Checkout</h3>
+          <p>Powers conversational food ordering journeys that seamlessly handle tipping, and delivery/pickup instructions through a scalable checkout experience on AI surfaces.</p>
+          <a href="draft/specification/food/checkout/" class="learn-more-btn">Get Started</a>
         </div>
         <div class="pane-visuals">
-          <div class="coming-soon-placeholder">
-            <span>Detailed specifications coming soon</span>
+          <div class="image-container">
+            <img src="assets/food_checkout.png" alt="Example user interface showing food delivery checkout details" class="phone-mockup" onerror="this.src='https://placehold.co/260x500/EEE/31343C?text=Food+Checkout+UI'">
+          </div>
+          <div class="code-block-placeholder">
+
+  ```json {.yaml .no-copy}
+  {
+    "ucp": { ... },
+    "id": "chk_123456789",
+    "status": "ready_for_complete",
+    "currency": "USD",
+    "buyer": {
+      "email": "c.walsh@example.com",
+      "first_name": "Camille",
+      "last_name": "Walsh"
+    },
+    "food_establishment": {
+      "id": "est_thai_restaurant",
+      "name": "Thai Restaurant",
+      "address": {
+        "street_address": "2821 Bristol St",
+        "address_locality": "Costa Mesa",
+        "address_region": "CA",
+        "address_country": "US",
+        "postal_code": "92626"
+      },
+      "media": [
+        {
+          "type": "image",
+          "url": "https://example.com/thai-basil-restaurant.jpg"
+        }
+      ]
+    },
+    "line_items": [
+      {
+        "id": "li_1",
+        "dish": {
+          "id": "duck_spicy_basil",
+          "title": "Duck Spicy Basil",
+          "price": 750
+        },
+        "modifications": [
+          {
+            "id": "jasmine_rice",
+            "title": "Jasmine Rice",
+            "price": 150
+          }
+        ],
+        "note": "Extra spicy, please.",
+        "quantity": 1,
+        "totals": [ ... ]
+      },
+      {
+        "id": "li_2",
+        "dish": {
+          "id": "salmon_green_curry",
+          "title": "Salmon Green Curry",
+          "price": 650
+        },
+        "quantity": 1,
+        "totals": [ ... ]
+      }
+    ],
+    "totals": [
+      { "type": "subtotal", "display_text": "Subtotal", "amount": 1550 },
+      { "type": "fulfillment", "display_text": "Express Delivery", "amount": 299 },
+      { "type": "tax", "display_text": "Tax", "amount": 141 },
+      { "type": "tip", "display_text": "Tip", "amount": 700 },
+      { "type": "total", "display_text": "Total", "amount": 2690 }
+    ],
+    "links": [ ... ],
+    "payment": { ... },
+    "fulfillment": {
+      "methods": [
+        {
+          "id": "method_1",
+          "type": "delivery",
+          "destination": {
+            "id": "dest_1",
+            "type": "delivery_address",
+            "address": {
+              "first_name": "Camille",
+              "last_name": "Walsh",
+              "street_address": "19510 Jamboree Road",
+              "address_locality": "Irvine",
+              "address_region": "CA",
+              "postal_code": "92612",
+              "address_country": "US"
+            }
+          },
+          "options": [
+            {
+              "id": "opt_express",
+              "title": "Express Delivery",
+              "description": "19-34 min · Direct to you",
+              "earliest_fulfillment_time": "2026-05-12T18:19:00-07:00",
+              "latest_fulfillment_time": "2026-05-12T18:34:00-07:00",
+              "totals": [{ "type": "total", "amount": 299 }]
+            },
+            {
+              "id": "opt_standard",
+              "title": "Standard Delivery",
+              "description": "Arrives in 35-45 minutes.",
+              "earliest_fulfillment_time": "2026-05-12T18:35:00-07:00",
+              "latest_fulfillment_time": "2026-05-12T18:45:00-07:00",
+              "totals": [{ "type": "total", "amount": 99 }]
+            }
+          ],
+          "selected_option_id": "opt_express",
+          "preference_options": [
+            { "id": "pref_hand_to_me", "label": "Hand it to me" },
+            { "id": "pref_leave_at_door", "label": "Leave at the door" }
+          ],
+          "selected_preference_option_ids": ["pref_leave_at_door"],
+          "notes": "Gate code 4321. Please ring the bell."
+        }
+      ]
+    },
+    "tip": {
+      "options": [
+        { "id": "tip_650", "unit": "absolute", "amount": 650 },
+        { "id": "tip_700", "unit": "absolute", "amount": 700 },
+        { "id": "tip_750", "unit": "absolute", "amount": 750 }
+      ],
+      "selected_option_id": "tip_700"
+    }
+  }
+  ```
+
           </div>
         </div>
       </div>
