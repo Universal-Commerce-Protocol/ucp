@@ -15,10 +15,11 @@
 """Generate routes and types from a profile: `make generate`.
 
 A profile names capabilities. `ucp-schema` turns it into an OpenAPI
-document (the operations those capabilities expose, bound to composed
-types) and a JSON Schema bundle (the types themselves). A stock generator
-turns the bundle into Pydantic models. Nothing here is specific to this
-sample: point it at another profile to bootstrap another server.
+document (REST operations bound to composed types), an OpenRPC document
+(MCP methods bound to composed types), and a JSON Schema bundle (the
+types themselves). A stock generator turns the bundle into Pydantic
+models. Nothing here is specific to this sample: point it at another
+profile to bootstrap another server.
 
 Output lands in `reference/generated/`, which is not committed. There is
 one directory per combination of the profile's extensions, because the
@@ -150,8 +151,9 @@ def _localize(node, published: str, local: str):
 INSTALL = """\
 {problem}
 
-The generate-types and generate-openapi commands need ucp-schema 2.0.0
-or newer. Install the latest release with:
+The generate-types, generate-openapi and generate-openrpc commands need a
+ucp-schema release that includes OpenRPC generation. Install the latest
+release with:
 
     cargo install --locked ucp-schema
 
@@ -165,7 +167,7 @@ def ucp_schema() -> str:
   binary = os.environ.get("UCP_SCHEMA_BIN") or shutil.which("ucp-schema")
   usable = binary and not any(
     subprocess.run([binary, command, "--help"], capture_output=True).returncode
-    for command in ("generate-openapi", "generate-types")
+    for command in ("generate-openapi", "generate-openrpc", "generate-types")
   )
   if not usable:
     problem = (
@@ -178,7 +180,7 @@ def ucp_schema() -> str:
 
 
 def generate(profile: dict, out: Path) -> None:
-  """Write `openapi.json` and `types.json` for `profile` into `out`."""
+  """Write `openapi.json`, `openrpc.json` and `types.json` for `profile`."""
   out.mkdir(parents=True, exist_ok=True)
   published = f"https://ucp.dev/{ucp_version()}/"
   local = os.path.relpath(REPO / "source", out)
@@ -188,6 +190,7 @@ def generate(profile: dict, out: Path) -> None:
   )
   for command, name in (
     ("generate-openapi", "openapi.json"),
+    ("generate-openrpc", "openrpc.json"),
     ("generate-types", "types.json"),
   ):
     subprocess.run(

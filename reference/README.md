@@ -42,7 +42,8 @@ the protocol version when the profile is loaded.)
 the result:
 
 ```sh
-ucp-schema generate-openapi --profile profile.json -o openapi.json  # operations
+ucp-schema generate-openapi --profile profile.json -o openapi.json  # REST
+ucp-schema generate-openrpc --profile profile.json -o openrpc.json  # MCP
 ucp-schema generate-types   --profile profile.json -o types.json    # types
 datamodel-codegen --input types.json --output models.py             # models
 ```
@@ -134,7 +135,8 @@ of these functions; payment handlers are written out in full.
 The bindings contain no operation-specific code.
 [`business/rest.py`](business/rest.py) reads its routes from the generated
 OpenAPI document. [`business/mcp.py`](business/mcp.py) builds one tool per
-operation from the same document and serves them with the official MCP SDK.
+method from the generated OpenRPC document and serves them with the official
+MCP SDK.
 
 The Platform, [`platform/client.py`](platform/client.py), uses the same
 generated types: it builds a request object, sends it, and gets a response
