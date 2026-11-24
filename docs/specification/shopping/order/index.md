@@ -86,6 +86,8 @@ Fulfillment tracks how items are delivered to the buyer.
 
 * What items are grouped together
 * Where they're going (`destination`)
+* Where they're collected from, for place-based methods such as `pickup`
+    (`business_location`)
 * How they're being delivered (`method_type`)
 * When they'll arrive (`description`, `fulfillable_on`)
 
@@ -179,6 +181,36 @@ delivered. They represent the current promise to the buyer and can be
 split, merged, or adjusted post-order.
 
 {{ schema_fields('expectation', 'shopping/order') }}
+
+For a place-based method such as `pickup`, `destination` carries the Business
+Location's Postal Address, and a Business **SHOULD** identify the Location in
+`business_location`. `business_location.id` is the same Business-scoped ID
+that Checkout accepts as `selected_destination_id` (see
+[Selection and Location Identity](../extensions/fulfillment.md#selection-and-location-identity));
+a Business **MAY** omit `business_location.address`, since `destination`
+carries it.
+
+<!-- ucp:example schema=shopping/types/expectation op=read -->
+```json
+{
+  "id": "exp_pickup",
+  "line_items": [{ "id": "li_pants", "quantity": 1 }],
+  "method_type": "pickup",
+  "business_location": {
+    "id": "loc_downtown",
+    "name": "Downtown Store"
+  },
+  "destination": {
+    "street_address": "123 Main St",
+    "address_locality": "Springfield",
+    "address_region": "IL",
+    "postal_code": "62701",
+    "address_country": "US"
+  },
+  "description": "Ready for pickup at Downtown Store today after 2pm",
+  "fulfillable_on": "now"
+}
+```
 
 ### Fulfillment Event
 
@@ -850,6 +882,10 @@ zero-downtime key rotation procedures.
 ### Item
 
 {{ schema_fields('types/item_resp', 'shopping/order') }}
+
+### Location Summary
+
+{{ schema_fields('location_summary', 'shopping/order') }}
 
 ### Postal Address
 
