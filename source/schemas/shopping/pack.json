@@ -15,6 +15,18 @@
           "description": "Declared content of the physical item this variant sells. Only on a variant whose sale basis is `each`. Absent when the Business states none.",
           "ucp_request": "omit"
         }
+      },
+      "if": {
+        "required": ["pack"]
+      },
+      "then": {
+        "properties": {
+          "quantity_unit": {
+            "properties": {
+              "unit": { "const": "C62" }
+            }
+          }
+        }
       }
     },
     "pack_variant": {

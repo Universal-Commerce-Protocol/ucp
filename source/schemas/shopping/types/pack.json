@@ -4,6 +4,7 @@
   "title": "Pack",
   "description": "Declared content of the physical item a catalog variant sells. Measures are stated at one level: on `pack` for the whole item, or in `contained` for one of the identical inner units the item holds. An omitted member is not stated.",
   "type": "object",
+  "minProperties": 1,
   "properties": {
     "net_content": {
       "description": "GS1 `netContent` of the whole item: the declared amount of product, such as a mass, a volume or a count. Its integer `value` MUST be at least 1. Absent when `contained` is present.",

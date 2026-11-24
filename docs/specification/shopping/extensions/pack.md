@@ -16,10 +16,9 @@
 
 # Pack Extension
 
-!!! note "Draft - Work in Progress"
-    This extension is in **draft status**. Implementers are cautioned that data
-    models and semantics are under active iteration and may undergo breaking
-    changes as the specification evolves.
+!!! note "Proposed extension"
+    [EP #1060](https://github.com/Universal-Commerce-Protocol/ucp/issues/1060)
+    proposes this schema for discussion. Its name and design may change.
 
 ## Overview
 
@@ -27,11 +26,10 @@ A catalog variant can be a case of six cans. The Pack extension lets a Business
 state what that item holds: how many identical inner units, their net content,
 and their drained weight.
 
-Today a variant can carry one content quantity, in
-[`unit_price.measure`](../catalog/index.md#distinction-from-unit-price). It
-cannot say whether that quantity is net or drained, and it cannot say that the
-item holds six cans. A Platform comparing canned goods from two Businesses has
-no typed drained weight to compare.
+A variant's [`unit_price.measure`](../catalog/index.md#distinction-from-unit-price)
+can state a content quantity. It does not distinguish net content from drained
+weight or identify the count of identical inner units. Business-defined
+metadata can carry these facts when the trading parties agree on its meaning.
 
 This extension adds `pack` to a catalog variant in Search and Lookup responses,
 including Get Product: the declared content of the physical item the variant
@@ -46,6 +44,8 @@ sells. `pack` is response-only.
 does not appear on Cart, Checkout or Order lines. Out of scope: variants not
 sold by `each`, variable-weight items, packaging types, identifiers per
 packaging level, nesting deeper than one level, gross weight and dimensions.
+This extension defines no Catalog Feed binding. It adds no barcode to
+`contained`; variant identifiers keep their existing meaning.
 
 ## Discovery
 
@@ -95,11 +95,16 @@ the same variants without `pack`.
 `pack` describes one `each`: the physical item one `quantity` step buys, such
 as one case or one bottle. A Business **MUST NOT** return `pack` on a variant
 whose [sale basis](../catalog/index.md#sale-basis-and-quantity-units) is not
-`each`. `pack` changes neither `quantity` nor `price`, and `contained.count` is
+`each`. An omitted `quantity_unit` has this basis. An explicit descriptor
+uses `C62` with effective scale zero, including when its display text is
+"case". Variable-weight goods remain outside scope even when ordered by case.
+`pack` changes neither `quantity` nor `price`, and `contained.count` is
 not an ordering increment.
 
-Its values are the Business's declarations, as on a label. They are current
-catalog data, not measurements and not order terms.
+Its values are the Business's declarations, from sources such as a label or
+supplier product specification. A minimum or range alone does not establish
+a single declared drained weight. These values describe current catalog
+content and create no order term.
 
 ### One level
 
@@ -121,7 +126,8 @@ exactly under the shared
 [integer rules](../../overview/index.md#integer-range-and-ingestion). A
 Business that has only the total for a case of identical units states the
 per-unit value when the division is exact. Otherwise it states either the count
-or the total.
+or the total. The per-unit value must fit the scale and integer range of the
+shared measure.
 
 ### Values not stated
 
@@ -156,7 +162,9 @@ A Business **MUST** use a unit of mass, such as `GRM`, `KGM` or `LBR`, for
 `net_content` can be any quantity a label declares, such as a mass, a volume
 or a count. Where
 `net_content` and `drained_weight` share a `unit`, a Business **MUST NOT**
-state a drained weight greater than the net content.
+state a drained weight greater than the net content. Compare the quantities
+after applying their respective scales. Checking the unit's physical dimension
+and comparing two declared measures are implementation checks.
 
 This extension defines no conversion factors. A Platform **MAY** convert
 between units of mass it recognizes for its own comparison. The result is the
