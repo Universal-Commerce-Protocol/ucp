@@ -467,6 +467,11 @@ The `ap2` object included in checkout responses.
 
 {{ extension_schema_fields('payment_ap2_mandate.json#/$defs/checkout_mandate', 'payment/extensions/ap2-mandates') }}
 
+A user-signed SD-JWT+kb, a platform provider signed SD-JWT, and a delegated
+SD-JWT chain all pass schema validation. See
+[Business Verification](#business-verification) for the checks the business
+performs on the credential.
+
 ### AP2 Complete Request
 
 The `ap2` object included in COMPLETE checkout requests.

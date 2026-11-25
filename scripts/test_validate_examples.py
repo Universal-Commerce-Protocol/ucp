@@ -27,7 +27,6 @@ are gated and skipped if the binary is missing.
 """
 
 import json
-import re
 import shutil
 import sys
 import tempfile
@@ -230,69 +229,6 @@ def test_array_ellipsis_paths_use_stripped_indices() -> None:
     "array_ellipsis_paths_use_stripped_indices",
     "/items/0/price" in paths and "/items/1/price" not in paths,
     f"got {paths!r}",
-  )
-
-
-# -----------------------------------------------------------
-# AP2 checkout_mandate pattern
-# -----------------------------------------------------------
-
-
-def test_ap2_checkout_mandate_pattern() -> None:
-  """checkout_mandate accepts an SD-JWT+kb and stays a superset of the old.
-
-  An SD-JWT+kb is <issuer-JWT>~<disclosure>...~<KB-JWT>; the trailing
-  KB-JWT is itself a JWT, so it contains dots. The pattern must accept that,
-  keep accepting what the old pattern accepted, and not go wide open. Reads
-  the pattern from the schema so a revert fails here.
-  """
-  schema_path = (
-    Path(__file__).parent.parent / "source/schemas/shopping/ap2_mandate.json"
-  )
-  pattern = json.loads(schema_path.read_text())["$defs"]["checkout_mandate"][
-    "pattern"
-  ]
-
-  def matches(value: str) -> bool:
-    # fullmatch, not search: the pattern is anchored ^...$ and a JSON Schema
-    # validator treats $ as end-of-string (no trailing-newline match).
-    return re.fullmatch(pattern, value) is not None
-
-  j = "eyJh.eyJz.SIG"  # a JWT: three base64url parts with dots
-  d = "WyJzYWx0Il0"  # a disclosure: one base64url segment, no dots
-
-  for value, why in [
-    (f"{j}~{j}", "key binding, zero disclosures"),
-    (f"{j}~{d}~{j}", "key binding, one disclosure"),
-    (f"{j}~{d}~{d}~{j}", "key binding, many disclosures"),
-    (j, "old form: bare issuer JWT"),
-    (f"{j}~{d}", "old form: issuer JWT + disclosure"),
-  ]:
-    _check(
-      f"checkout_mandate_accepts[{why}]",
-      matches(value),
-      f"{value!r} should match {pattern!r}",
-    )
-
-  for value, why in [
-    ("not a credential", "free text"),
-    (f"{j}~{j}~{j}", "two KB-JWTs"),
-    (f"{j}~d.e", "malformed two-segment KB-JWT"),
-  ]:
-    _check(
-      f"checkout_mandate_rejects[{why}]",
-      not matches(value),
-      f"{value!r} should not match {pattern!r}",
-    )
-
-  # The fix must be a strict superset: the key-bound form was rejected by
-  # the old pattern and is accepted by the new one.
-  old = r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(~[A-Za-z0-9_-]+)*$"
-  kb = f"{j}~{d}~{j}"
-  _check(
-    "checkout_mandate_expands_to_key_binding",
-    re.fullmatch(old, kb) is None and matches(kb),
-    "old pattern should reject the key-bound form, new should accept it",
   )
 
 
@@ -937,6 +873,60 @@ def test_extension_validation() -> None:
   )
 
 
+def test_ap2_checkout_mandate_format() -> None:
+  """checkout_mandate accepts every credential form AP2 allows.
+
+  The old pattern allowed dots only in the issuer JWT, so it rejected any
+  SD-JWT+kb (the KB-JWT has dots) and any delegated chain. The schema has no
+  pattern now; the business verifies the credential per the AP2 spec. Each
+  form goes through the validator the way a complete request carries it.
+  """
+  if not _has_ucp_schema():
+    _check(
+      "checkout_mandate_format",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  j = "eyJh.eyJz.SIG"  # a JWT: three base64url parts with dots
+  d = "WyJzYWx0Il0"  # a disclosure: one base64url segment, no dots
+
+  forms = [
+    (f"{j}~{j}", "SD-JWT+kb, zero disclosures"),
+    (f"{j}~{d}~{j}", "SD-JWT+kb, one disclosure"),
+    (f"{j}~{d}~{d}~{j}", "SD-JWT+kb, many disclosures"),
+    (f"{j}~{d}~", "SD-JWT without key binding"),
+    (f"{j}~{d}~~{j}~{d}~{j}", "delegated SD-JWT chain"),
+  ]
+
+  def complete_request(mandate: str) -> str:
+    return (
+      "<!-- ucp:example schema=shopping/checkout op=complete"
+      " direction=request target=$.ap2 -->\n"
+      f'```json\n{{ "checkout_mandate": {mandate} }}\n```\n'
+    )
+
+  for value, why in forms:
+    result = _process(complete_request(json.dumps(value)))
+    _check(
+      f"checkout_mandate_validates[{why}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+  # The schema still requires a non-empty string.
+  for mandate, why in [('""', "empty string"), ("42", "not a string")]:
+    result = _process(complete_request(mandate))
+    _check(
+      f"checkout_mandate_rejects[{why}]",
+      result.status == "fail"
+      and "extension common/payment_ap2_mandate:" in result.message
+      and "/ap2/checkout_mandate" in result.message,
+      f"got {result.status}: {result.message}",
+    )
+
+
 def test_checkout_item_source_process_block() -> None:
   """Authored checkout create examples provide an item source before merge."""
   if not _has_ucp_schema():
@@ -1271,7 +1261,6 @@ def main() -> int:
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()
   test_array_ellipsis_paths_use_stripped_indices()
-  test_ap2_checkout_mandate_pattern()
   test_annotation_parsing()
   test_extract_blocks()
   test_reads_are_utf8()
@@ -1282,6 +1271,7 @@ def main() -> int:
   test_parallel_validation_keeps_order_and_single_resolve()
   test_process_block_integration()
   test_extension_validation()
+  test_ap2_checkout_mandate_format()
   test_checkout_item_source_process_block()
   test_checkout_item_source()
   return _report()
