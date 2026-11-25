@@ -163,7 +163,7 @@ Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform **MUS
 
 The checkout mandate **MUST** contain the full checkout response including the `ap2.merchant_authorization` field. This creates a nested cryptographic binding where the platform's signature covers the business's signature.
 
-**Specification Boundary:** This extension defines *where* mandates are placed in UCP requests and responses. The mandate credential structure (claims, selective disclosure, key binding) is defined by the [AP2 Protocol Specification](https://ap2-protocol.org/specification).
+**Specification Boundary:** This extension defines *where* mandates are placed in UCP requests and responses. The mandate credential structure (claims, selective disclosure, key binding) is defined by the [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/).
 
 ### Canonicalization
 
@@ -341,7 +341,7 @@ Upon receiving the `complete` request, the business **MUST**:
 
 **Mandate Verification (per AP2 spec):**
 
-1. **Verify Mandate:** Decode and verify the SD-JWT signature, key binding, and expiration per the [AP2 Protocol Specification](https://ap2-protocol.org/specification).
+1. **Verify Mandate:** Decode and verify the SD-JWT signature, key binding, and expiration per the [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/).
 1. **Extract Embedded Checkout:** Extract the checkout object from the verified mandate claims.
 
 **UCP Verification:**
@@ -364,7 +364,7 @@ Upon receiving the `complete` request, the business **MUST**:
 
 ### PSP Verification
 
-The business passes the `token` (composite object) to their Payment Handler / PSP. The PSP verifies the `payment_mandate` per the [AP2 Protocol Specification](https://ap2-protocol.org/specification), including signature validation, expiration, and correlation with the checkout.
+The business passes the `token` (composite object) to their Payment Handler / PSP. The PSP verifies the `payment_mandate` per the [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/), including signature validation, expiration, and correlation with the checkout.
 
 ## Schema
 

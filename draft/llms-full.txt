@@ -13070,7 +13070,7 @@ The host **MUST** respond with either an error, or the credential for the select
 
 1. **Confirmation:** Host displays the Trusted Payment UI (Payment Sheet / Biometric Prompt). The host **MUST NOT** silently release a token based solely on the message.
 1. **Auth:** host performs User Authorization via the Payment Handler.
-1. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see **[AP2 extension](https://ap2-extension.org/)**), the host generates the `payment_mandate` here using trusted user interface.
+1. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see **[AP2 extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)**), the host generates the `payment_mandate` here using trusted user interface.
 
 ## Fulfillment Extension
 
@@ -30873,7 +30873,7 @@ Mandates are **SD-JWT** credentials with Key Binding (`+kb`). The platform **MUS
 
 The checkout mandate **MUST** contain the full checkout response including the `ap2.merchant_authorization` field. This creates a nested cryptographic binding where the platform's signature covers the business's signature.
 
-**Specification Boundary:** This extension defines *where* mandates are placed in UCP requests and responses. The mandate credential structure (claims, selective disclosure, key binding) is defined by the [AP2 Protocol Specification](https://ap2-protocol.org/specification).
+**Specification Boundary:** This extension defines *where* mandates are placed in UCP requests and responses. The mandate credential structure (claims, selective disclosure, key binding) is defined by the [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/).
 
 ### Canonicalization
 
@@ -31051,7 +31051,7 @@ Upon receiving the `complete` request, the business **MUST**:
 
 **Mandate Verification (per AP2 spec):**
 
-1. **Verify Mandate:** Decode and verify the SD-JWT signature, key binding, and expiration per the [AP2 Protocol Specification](https://ap2-protocol.org/specification).
+1. **Verify Mandate:** Decode and verify the SD-JWT signature, key binding, and expiration per the [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/).
 1. **Extract Embedded Checkout:** Extract the checkout object from the verified mandate claims.
 
 **UCP Verification:**
@@ -31074,7 +31074,7 @@ Upon receiving the `complete` request, the business **MUST**:
 
 ### PSP Verification
 
-The business passes the `token` (composite object) to their Payment Handler / PSP. The PSP verifies the `payment_mandate` per the [AP2 Protocol Specification](https://ap2-protocol.org/specification), including signature validation, expiration, and correlation with the checkout.
+The business passes the `token` (composite object) to their Payment Handler / PSP. The PSP verifies the `payment_mandate` per the [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/), including signature validation, expiration, and correlation with the checkout.
 
 ## Schema
 

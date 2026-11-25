@@ -974,7 +974,7 @@ The host **MUST** respond with either an error, or the credential for the select
 
 1. **Confirmation:** Host displays the Trusted Payment UI (Payment Sheet / Biometric Prompt). The host **MUST NOT** silently release a token based solely on the message.
 1. **Auth:** host performs User Authorization via the Payment Handler.
-1. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see **[AP2 extension](https://ap2-extension.org/)**), the host generates the `payment_mandate` here using trusted user interface.
+1. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see **[AP2 extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)**), the host generates the `payment_mandate` here using trusted user interface.
 
 ## Fulfillment Extension
 

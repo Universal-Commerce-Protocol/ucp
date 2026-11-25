@@ -4893,7 +4893,7 @@ where the platform's signature covers the business's signature.</p>
 <p><strong>Specification Boundary:</strong> This extension defines <em>where</em> mandates are placed
 in UCP requests and responses. The mandate credential structure (claims,
 selective disclosure, key binding) is defined by the
-<a href="https://ap2-protocol.org/specification">AP2 Protocol Specification</a>.</p>
+<a href="https://ap2-protocol.org/ap2/specification/">AP2 Protocol Specification</a>.</p>
 <h3 id="canonicalization">Canonicalization<a class="headerlink" href="#canonicalization" title="Permanent link">&para;</a></h3>
 <p>All JSON payloads <strong>MUST</strong> be canonicalized using <strong>JSON Canonicalization
 Scheme (JCS)</strong> per <a href="https://datatracker.ietf.org/doc/html/rfc8785">RFC 8785</a>.</p>
@@ -5190,7 +5190,7 @@ request:</p>
 <ol>
 <li><strong>Verify Mandate:</strong> Decode and verify the SD-JWT signature, key binding,
     and expiration per the
-    <a href="https://ap2-protocol.org/specification">AP2 Protocol Specification</a>.</li>
+    <a href="https://ap2-protocol.org/ap2/specification/">AP2 Protocol Specification</a>.</li>
 <li><strong>Extract Embedded Checkout:</strong> Extract the checkout object from the
     verified mandate claims.</li>
 </ol>
@@ -5218,7 +5218,7 @@ request:</p>
 <h3 id="psp-verification">PSP Verification<a class="headerlink" href="#psp-verification" title="Permanent link">&para;</a></h3>
 <p>The business passes the <code>token</code> (composite object) to their Payment
 Handler / PSP. The PSP verifies the <code>payment_mandate</code> per the
-<a href="https://ap2-protocol.org/specification">AP2 Protocol Specification</a>,
+<a href="https://ap2-protocol.org/ap2/specification/">AP2 Protocol Specification</a>,
 including signature validation, expiration, and correlation with the
 checkout.</p>
 <h2 id="schema">Schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
