@@ -546,13 +546,23 @@ business is required to show it, it emits a `messages[]` warning with
 `presentation: "disclosure"` and `code` equal to
 `dev.ucp.shopping.policy.withdrawal`, as defined in
 [Presenting policies](../../overview/index.md#presenting-policies): one for the
-response-wide terms and one per item-scoped exception. The disclosure content
-states the conditions, the time limit, and the procedure for withdrawing,
-including the existence and placement of the withdrawal function.
+response-wide terms and one per item-scoped policy that changes them, such as
+an exception or a contractual right for an excluded item. The disclosure
+content depends on `availability.type`:
+
+| `availability.type` | The disclosure states |
+| :-- | :-- |
+| `available` | The conditions, the time limit, and the procedure for withdrawing, including the existence and placement of the withdrawal function where the Business has one. |
+| `conditional` | The same, and the circumstances in which the buyer loses the right. |
+| `not_available` | That the right the policy's `basis` describes does not apply to the items. It gives no period, procedure, or function, because none applies. Commercial cancellation or return terms, if any, are stated by their own policies. |
+
+For any other value, a platform shows the Business's disclosure content as
+given and does not infer from the value whether the right exists.
 
 A platform that shows a short summary, such as an agent conversation, **MUST**
-include those elements in the summary itself before the buyer places the order:
-links alone are not enough. The model form **MAY** be supplied through
+include the content of each disclosure in the summary itself before the buyer
+places the order: links alone are not enough. A platform that cannot show it
+hands off through `continue_url`. The model form **MAY** be supplied through
 `model_form_url` instead.
 
 On an order, a platform **SHOULD** show the resolved `expires_at`, and a control
@@ -803,7 +813,7 @@ business in that case typically states:
 | `basis` | `statutory` | Art. 9(1) |
 | `period.duration` | `P14D` | Art. 9(1) |
 | `period.anchor` | `possession`, `possession_last_item`, `possession_first_item` for goods; `contract_concluded` for services and digital content not on a tangible medium | Art. 9(2) |
-| `period.expires_at` | The period starts the day after the anchor event; if its last day is a Saturday, Sunday, or public holiday, it ends at the end of the next working day. If the withdrawal information was not given, it ends 12 months after the end of the initial period. If the information is given within 12 months from the anchor day (the day referred to in Art. 9(2), the start of the original period), it ends 14 days after the day the consumer receives it. | Recital 41 and Regulation (EEC, Euratom) No 1182/71 Art. 3(1), 3(4); Art. 10 |
+| `period.expires_at` | The period starts the day after the anchor event; if its last day is a Saturday, Sunday, or public holiday, it ends at the end of the next working day. If the information on an existing right required by Art. 6(1)(h) was not given, it ends 12 months after the end of the initial period. If the trader supplies that missing information within 12 months from the anchor day (the day referred to in Art. 9(2)), it ends 14 days after the day the consumer receives it. | Recital 41 and Regulation (EEC, Euratom) No 1182/71 Art. 3(1), 3(4); Art. 10 |
 | `availability.exception.code` | `eu.crd.art16.a` to `eu.crd.art16.m` | Art. 16, Art. 6(1)(k) |
 | `return_costs` | `buyer` only if the consumer was told; a cost for goods that cannot normally be returned by post | Art. 6(1)(i), Art. 14(1) |
 | `refund.deadline` | `P14D`: without undue delay and in any event within 14 days, with the same means of payment unless the consumer expressly agrees otherwise, at no fee | Art. 13(1) |
@@ -824,14 +834,40 @@ confirmation under Art. 8(7). A `conditional` exception states those conditions
 in `display_text`, and a platform **MUST NOT** present the right as lost before
 the Business says performance has begun.
 
-For services, the instructions and the pre-order disclosure also state that a
-consumer who expressly asks for the service to start during the withdrawal
+For services that carry the right, the instructions and the pre-order
+disclosure also state that a consumer who expressly asks for the service to start during the withdrawal
 period and then withdraws pays an amount in proportion to what was provided
 (Art. 6(1)(j), Art. 14(3)). That payment is owed only if the trader gave the
 Art. 6(1)(h) and (j) information and the consumer made the express request;
 otherwise the consumer pays nothing for performance during the period
 (Art. 14(4)(a)). Collecting that request at checkout is not covered by this
 extension.
+
+Art. 16(l) excludes the right for accommodation other than for residential
+purposes, transport of goods, car rental, catering, and services related to
+leisure activities, if the contract provides for a specific date or period of
+performance. The date is the date of performance, not the date of the booking.
+The Commission reads the exception narrowly and in light of Recital 49, which
+concerns capacity set aside that the trader may find difficult to fill
+(guidance 2021/C 525/01, 5.11.6). An intermediary acting in its own name on
+behalf of the organizer can rely on it when withdrawal would leave the risk of
+the released capacity with the organizer (Court of Justice, Case C-96/21). A
+Business that determines the exception applies, for example to a ticket for a
+capacity-limited concert on a specific date, states
+`availability.type: not_available` with `exception.code: eu.crd.art16.l`: on
+the response-wide policy when the exception covers the whole contract, or on an
+item-scoped policy when other lines keep the right. The trader still informs
+the consumer before the contract that there is no right (Art. 6(1)(k)). A
+standalone hotel reservation for fixed dates is the usual Recital 49 case; in
+the lodging vertical, the booking's commercial cancellation terms are stated by
+`dev.ucp.lodging.policy.cancellation`, which neither states a statutory
+withdrawal right nor gives the Art. 6(1)(k) information on its own.
+
+A Business may grant a contractual right of withdrawal for an item that the
+law excludes. It then publishes one `contractual` policy for that item, not a
+second `statutory` one at the same target. Its `description` and the paired
+disclosure state both facts: the statutory right does not apply, and the right
+the buyer has comes from the Business's terms.
 
 On a medium with limited space or time, the conditions, time limit, and
 procedure for withdrawal are given on that medium before the contract; the
