@@ -1,5 +1,4 @@
----
-#   Copyright 2026 Google LLC
+#   Copyright 2026 UCP Authors
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,32 +32,85 @@ permissions: {}
 on:
   schedule:
     # Mondays 14:00 UTC (09:00 US/Eastern standard time).
-    - cron: "0 14:00 * * 1"
+    - cron: "0 14 * * 1"
   workflow_dispatch:
 
+# One scheduled run at a time: overlapping runs would race to file
+# duplicate tracking issues.
+concurrency:
+  group: link-check
+  cancel-in-progress: false
+
 jobs:
-  link-check:
+  check:
+    # Scheduled runs only on the upstream repo, so forks don't file issues
+    # against themselves; manual dispatch still works anywhere (for testing).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.repository == 'Universal-Commerce-Protocol/ucp'
     permissions:
       contents: read
-      issues: write
+      # Uploading the lychee report artifact. The link-checking step never
+      # sees issues: write; that stays with the report job below.
+      actions: write
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      exit_code: ${{ steps.lychee.outputs.exit_code }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
 
       - name: Check links with lychee
         id: lychee
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: >-
-            --config lychee.toml --root-dir docs --fallback-extensions md
-            --no-progress docs README.md
+            --config .github/linters/lychee.toml --root-dir docs
+            --fallback-extensions md --no-progress docs README.md
           fail: false
-          failIfEmpty: false
+
+      - name: Upload lychee report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lychee-report
+          path: lychee/out.md
+          if-no-files-found: warn
+          retention-days: 7
+
+      # lychee exit codes: 0 = clean, 2 = broken links, anything else = a
+      # config/tool error. Broken links are reported (not failed) by the
+      # report job; tool errors fail loudly here instead of filing a
+      # misleading "broken links" issue with an empty report.
+      - name: Fail on lychee tool errors
+        if: >-
+          steps.lychee.outputs.exit_code != '0' &&
+          steps.lychee.outputs.exit_code != '2'
+        run: |
+          echo "::error::lychee exited with code ${{ steps.lychee.outputs.exit_code }} (expected 0 or 2); see the check job log."
+          exit 1
+
+  report:
+    needs: check
+    # Only file when lychee actually found broken links (exit code 2).
+    if: needs.check.outputs.exit_code == '2'
+    permissions:
+      # Downloading the lychee report artifact.
+      actions: read
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download lychee report
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: lychee-report
+          path: lychee-report
 
       - name: File issue for broken links
-        if: steps.lychee.outputs.exit_code != '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -68,23 +120,25 @@ jobs:
           {
             echo "The weekly link check found broken links in \`docs/\` or \`README.md\`."
             echo
-            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             echo
-            echo "Fix the links below, or update \`lychee.toml\` if a link is"
+            echo "Fix the links below, or update \`.github/linters/lychee.toml\` if a link is"
             echo "intentionally uncheckable (a placeholder, a local dev-server"
             echo "URL, or a build-time reference)."
             echo
-            if [ -f lychee/out.md ]; then
-              cat lychee/out.md
+            if [ -f lychee-report/out.md ]; then
+              cat lychee-report/out.md
             else
               echo "(lychee did not produce a report file.)"
             fi
           } > "$body_file"
-          existing="$(gh issue list --state open --limit 100 --json number,title \
+          existing="$(gh issue list --state open \
+            --search "\"$title\" in:title" \
+            --json number,title \
             --jq '.[] | select(.title == "Weekly link check: broken links in docs") | .number' \
             | head -n 1)"
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body-file "$body_file"
           else
-            gh issue create --title "$title" --body-file "$body_file"
+            gh issue create --title "$title" --label documentation --body-file "$body_file"
           fi

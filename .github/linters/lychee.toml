@@ -40,6 +40,5 @@ exclude = [
   "127\\.0\\.0\\.1",
   "localhost",
   "https://ucp\\.dev/specification/reference\\?v=2026-01-11",
-  "/latest/specification/.*",
-  "latest/specification/.*",
+  "^/?latest/specification/",
 ]
