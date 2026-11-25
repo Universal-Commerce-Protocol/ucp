@@ -144,6 +144,8 @@ The following are examples of capabilities defined in UCP — see the
 [Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
+<div class="capabilities-table" markdown>
+
 | Capability | Description |
 | :--- | :--- |
 | `dev.ucp.shopping.checkout` | Initiates and completes purchase sessions |
@@ -155,12 +157,17 @@ up-to-date list.
 | `dev.ucp.common.identity_linking` | OAuth-based account linking |
 | `dev.ucp.common.location.search` | Search for physical stores and pickup locations |
 | `dev.ucp.common.location.lookup` | Retrieve location details, operating hours, and amenities |
+| `dev.ucp.common.ask` | Natural-language questions about a business's resources, policies, and services |
+| `dev.ucp.lodging.booking` | Initiates and completes booking session for hotels |
+| `dev.ucp.food.checkout` | Initiates and completes checkout session for food ordering |
+
+</div>
 
 ### Extensions
 
 Extensions optionally augment a base capability. They use the
 `extends` field to declare their parent(s) and compose onto the base schema
-using JSON Schema `allOf`. Extensions appear in `ucp.capabilities[]` alongside
+using JSON Schema `allOf`. Extensions appear in `ucp.capabilities{}` alongside
 core capabilities.
 
 <!-- ucp:example schema=profile def=business_schema target=$.ucp.capabilities -->
@@ -185,6 +192,8 @@ The following are examples of extensions defined in UCP — see the
 [Specification](../specification/overview/index.md) for the authoritative and
 up-to-date list.
 
+<div class="capabilities-table" markdown>
+
 | Extension | Extends | Description |
 | :--- | :--- | :--- |
 | `dev.ucp.shopping.discount` | checkout, cart | Discount codes and promotions |
@@ -194,7 +203,11 @@ up-to-date list.
 | `dev.ucp.common.payment.authentication` | checkout | Browser-surface device data collection and 3DS challenges |
 | `dev.ucp.common.payment.ap2_mandate` | checkout | Non-repudiable authorization for autonomous commerce |
 | `dev.ucp.common.payment.split_payments` | checkout | Multi-instrument allocation and split settlements |
-| `dev.ucp.common.payment.payment_terms` | checkout | Deposits, installments, and deferred payment schedules |
+| `dev.ucp.common.payment.terms` | checkout | Deposits, installments, and deferred payment schedules |
+| `dev.ucp.food.fulfillment` | food checkout | Food delivery and pickup options |
+| `dev.ucp.food.tip` | food checkout | Food delivery and pickup gratuity options |
+
+</div>
 
 ### Services
 

@@ -327,6 +327,10 @@ Accept: application/json</pre>
           <strong>Google Pay</strong><br>
           <small>com.google.pay</small>
         </div>
+        <div class="handler-opt" data-handler="stripe_payments">
+          <strong>Stripe Payments</strong><br>
+          <small>com.stripe.payments</small>
+        </div>
         <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" id="btn-run-mint">Mint Credential</button>
       </div>
       <div class="json-panel">
@@ -413,6 +417,19 @@ const UcpData = {
   },
 
   business_payment_handlers: {
+    "com.stripe.payments": [
+      {
+        id: "stripe_payments_1234",
+        version: "2026-06-25",
+        spec: "https://docs.stripe.com/agentic-commerce/protocols/ucp/stripe-payments-handler",
+        schema: "https://ucp.stripe.com/payments/2026-06-25/schema.json",
+        available_instruments: [{ type: "card" }],
+        config: {
+          environment: "testmode",
+          business_profile: "profile_test_example"
+        }
+      }
+    ],
     "dev.shopify.shop_pay": [
       {
         id: "shop_pay",
@@ -464,6 +481,15 @@ const UcpData = {
   },
 
   platform_payment_handlers: {
+    "com.stripe.payments": [
+      {
+        id: "stripe_payments_1234",
+        version: "2026-06-25",
+        spec: "https://docs.stripe.com/agentic-commerce/protocols/ucp/stripe-payments-handler",
+        schema: "https://ucp.stripe.com/payments/2026-06-25/schema.json",
+        available_instruments: [{ type: "card" }]
+      }
+    ],
     "dev.shopify.shop_pay": [
       {
         id: "shop_pay",
@@ -556,6 +582,18 @@ const UcpData = {
   },
 
   mock_instruments: {
+    stripe_payments: {
+      "handler_id": "stripe_payments_1234",
+      "type": "card",
+      "billing_address": {
+        "street_address": "123 Main Street",
+        "address_locality": "Charleston",
+        "address_region": "SC",
+        "postal_code": "29401",
+        "address_country": "US"
+      },
+      "id": "instr_stripe_d12bb703-f77e-4c64-9e38-b99a68f74297"
+    },
     shop_pay: {
       "handler_id": "shop_pay_1234",
       "type": "shop_pay",
@@ -795,10 +833,11 @@ class UcpBackend {
         li.status = "fulfilled";
     });
 
+    // The webhook POST body is the order entity; the event id and timestamp
+    // travel in the Webhook-Id and Webhook-Timestamp headers (see the Order
+    // Event Webhook section of shopping/order/index.md).
     const webhookPayload = {
-        ...order,
-        event_id: eventId,
-        created_time: eventTime
+        ...order
     };
 
     return webhookPayload;
@@ -1033,6 +1072,10 @@ class UcpApp {
       instrument.credential = { type: "PAYMENT_GATEWAY", token: "gpaytok_" + tokenStr };
     } else if (handlerId === 'shop_pay') {
       instrument.credential = { type: "ShopPayToken", token: "shoppay_tok_" + tokenStr };
+    } else if (handlerId === 'stripe_payments') {
+      const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+      const suffix = Array.from({ length: 24 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+      instrument.credential = { type: "stripe_payment_token", token: "spt_demo_" + suffix };
     }
 
     instrument.selected = true;
@@ -1040,7 +1083,7 @@ class UcpApp {
     this.state.lastRequests.instrument = instrument;
     this.setJson('json-mint-res', instrument);
     document.getElementById('nav-to-complete').disabled = false;
-    this.setJson('json-complete-req', { payment: instrument });
+    this.setJson('json-complete-req', { payment: { instruments: [instrument] } });
   }
 
   executeComplete() {

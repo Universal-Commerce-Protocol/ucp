@@ -1,0 +1,37 @@
+{
+  "ucp": {
+    "version": "2026-01-01",
+    "status": "success",
+    "capabilities": {
+      "dev.ucp.food.checkout": [
+        { "version": "2026-01-01" }
+      ]
+    },
+    "payment_handlers": {}
+  },
+  "id": "chk_food_scaffold",
+  "status": "incomplete",
+  "currency": "USD",
+  "food_establishment": {
+    "id": "rest_scaffold",
+    "name": "Scaffold Food Establishment"
+  },
+  "line_items": [
+    {
+      "id": "li_scaffold",
+      "dish": { "id": "dish_scaffold", "title": "Scaffold Dish", "price": 1000 },
+      "quantity": 1,
+      "totals": [
+        { "type": "subtotal", "amount": 1000 },
+        { "type": "total", "amount": 1000 }
+      ]
+    }
+  ],
+  "totals": [
+    { "type": "subtotal", "amount": 1000 },
+    { "type": "total", "amount": 1000 }
+  ],
+  "links": [
+    { "type": "terms_of_service", "url": "https://example.com/terms" }
+  ]
+}

@@ -167,6 +167,17 @@ Maps to the [Location Lookup](lookup.md) capability. See the
     }
     ```
 
+## HTTP Headers
+
+The following headers are defined for the HTTP binding and apply to all
+operations unless otherwise noted.
+
+{{ header_fields('search_locations', 'common/rest.openapi.json') }}
+
+### Specific Header Requirements
+
+{{ header_requirements('ucp_agent') }}
+
 ## Error Handling
 
 UCP uses a two-layer error model separating transport-level errors from business outcomes.
