@@ -443,7 +443,12 @@ rules specific to UCP.
 * A business that issues DPoP-bound tokens **MUST** list
     `dpop_signing_alg_values_supported` in its RFC 8414 metadata
     ([RFC 9449 §5.1](https://datatracker.ietf.org/doc/html/rfc9449#section-5.1){ target="_blank" })
-    and **MUST** include `ES256` in it.
+    and in the protected resource metadata of each resource that
+    accepts them
+    ([RFC 9728 §2](https://datatracker.ietf.org/doc/html/rfc9728#section-2){ target="_blank" }),
+    and **MUST** include `ES256` in both. The resource's listing is
+    what tells a platform that the resource verifies proofs; the
+    authorization server's listing alone does not.
 * A business that requires DPoP-bound tokens at a protected resource
     **MUST** set `dpop_bound_access_tokens_required` to `true` in that
     resource's protected resource metadata
@@ -457,8 +462,9 @@ rules specific to UCP.
 
 ### Platform Requirements
 
-* When the business's metadata lists `dpop_signing_alg_values_supported`,
-    platforms **SHOULD** send a DPoP proof with every token request
+* When the business's RFC 8414 metadata and the protected resource
+    metadata both list `dpop_signing_alg_values_supported`, platforms
+    **SHOULD** send a DPoP proof with every token request
     (authorization code, refresh token, and JWT bearer grants) and
     **SHOULD** bind the authorization code to the key with `dpop_jkt`
     ([RFC 9449 §10](https://datatracker.ietf.org/doc/html/rfc9449#section-10){ target="_blank" }).
@@ -1421,7 +1427,8 @@ when `none` is advertised, PKCE with `S256` is required. Businesses that
 do not serve public clients **MAY** omit `none`.
 
 `dpop_signing_alg_values_supported` is optional. It advertises that the
-business issues DPoP-bound tokens (see
+authorization server can issue DPoP-bound tokens. The business offers
+them at resources whose metadata also lists it (see
 [Sender-Constrained Tokens](#sender-constrained-tokens)).
 
 ### Business Profile (`/.well-known/ucp`)
