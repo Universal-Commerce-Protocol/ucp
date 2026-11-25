@@ -234,7 +234,7 @@ where the platform's signature covers the business's signature.
 **Specification Boundary:** This extension defines *where* mandates are placed
 in UCP requests and responses. The mandate credential structure (claims,
 selective disclosure, key binding) is defined by the
-[AP2 Protocol Specification](https://ap2-protocol.org/specification).
+[AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/).
 
 ### Canonicalization
 
@@ -419,7 +419,7 @@ Upon receiving the `complete` request, the business **MUST**:
 
 1. **Verify Mandate:** Decode and verify the SD-JWT signature, key binding,
     and expiration per the
-    [AP2 Protocol Specification](https://ap2-protocol.org/specification).
+    [AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/).
 2. **Extract Embedded Checkout:** Extract the checkout object from the
     verified mandate claims.
 
@@ -447,7 +447,7 @@ Upon receiving the `complete` request, the business **MUST**:
 
 The business passes the `token` (composite object) to their Payment
 Handler / PSP. The PSP verifies the `payment_mandate` per the
-[AP2 Protocol Specification](https://ap2-protocol.org/specification),
+[AP2 Protocol Specification](https://ap2-protocol.org/ap2/specification/),
 including signature validation, expiration, and correlation with the
 checkout.
 
