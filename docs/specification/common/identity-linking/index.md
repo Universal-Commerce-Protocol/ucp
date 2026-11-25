@@ -463,7 +463,9 @@ rules specific to UCP.
     **SHOULD** bind the authorization code to the key with `dpop_jkt`
     ([RFC 9449 §10](https://datatracker.ietf.org/doc/html/rfc9449#section-10){ target="_blank" }).
     Platforms **MUST** send proofs when the protected resource metadata
-    sets `dpop_bound_access_tokens_required` to `true`.
+    sets `dpop_bound_access_tokens_required` to `true`. A platform that
+    does not support DPoP cannot present access tokens to such a
+    resource and **SHOULD NOT** start account linking for it.
 * Platforms **MUST** use each DPoP key for one user's account link at one
     business. One key per user keeps a token copied from one user from
     being presented with another user's proof. One key per business keeps
@@ -506,9 +508,9 @@ rules specific to UCP.
     the window **SHOULD** be no longer than 60 seconds. Businesses
     **SHOULD** reject a proof whose `jti` was already used with the same
     key within that window.
-* On the MCP transport, every operation of a service is a `POST` to the
-    same URL, so `htm` and `htu` do not distinguish operations and a
-    captured proof could authorize a different operation. Businesses
+* On a transport where every operation of a service uses one method and
+    URL, such as MCP, `htm` and `htu` do not distinguish operations and
+    a captured proof could authorize a different operation. Businesses
     **MUST** reject a reused `jti` there.
 * Businesses **MAY** reject, with `invalid_dpop_proof`, a token request
     whose DPoP key is already bound to another user's account link.
