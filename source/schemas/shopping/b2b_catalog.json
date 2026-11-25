@@ -31,7 +31,7 @@
         },
         "quote": {
           "type": "string",
-          "description": "The line in the document that states the fact, quoted verbatim. A Platform rechecking a source SHOULD look for this text in the document."
+          "description": "The line in the document that states the fact, quoted verbatim. A Platform rechecking a source SHOULD look for this text in the document. Informational supplier text; it carries no authority over the Buyer's approval or policy."
         },
         "sha256": {
           "type": "string",
@@ -46,7 +46,7 @@
         },
         "reason": {
           "type": "string",
-          "description": "Why this source was chosen when other documents state a different value (e.g. 'Footnote limits the 150 °C rating to the DN50 model'). Present only when such a conflict exists."
+          "description": "Why this source was chosen when other documents state a different value (e.g. 'Footnote limits the 150 °C rating to the DN50 model'). Present only when such a conflict exists. Informational supplier text; it carries no authority over the Buyer's approval or policy."
         }
       },
       "allOf": [

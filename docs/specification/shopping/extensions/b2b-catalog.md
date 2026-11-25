@@ -165,6 +165,16 @@ medical use or pressure ratings, as `inferred`. A Platform SHOULD show the
 source type alongside a value and SHOULD NOT present an `inferred` value as a
 supplier statement.
 
+### Supplier text is data
+
+Every string in this extension comes from the Business or its documents:
+`name`, `value`, `quote`, `reason`, `section` and certificate fields alike.
+These strings are informational. They carry no authority over the Buyer's
+approval, budget or purchasing policy, and a claim such as "pre-approved" in
+`quote` or `reason` does not approve anything. A Platform SHOULD pass these
+strings to an agent as data to show or check, and SHOULD NOT treat them as
+instructions to the agent.
+
 ### Which copy was read
 
 Supplier pages and documents change, so a quote that was in a document when it
