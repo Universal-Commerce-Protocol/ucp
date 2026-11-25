@@ -9355,7 +9355,7 @@ splits responsibilities as follows:</p>
 <h3 id="payment-in-the-checkout-lifecycle">Payment in the Checkout Lifecycle<a class="headerlink" href="#payment-in-the-checkout-lifecycle" title="Permanent link">&para;</a></h3>
 <p>When payment is required, the payment process follows a standard 3-step lifecycle
 within UCP: <strong>Negotiation</strong>, <strong>Acquisition</strong>, and <strong>Completion</strong>.</p>
-<p><img alt="High-level payment flow sequence diagram" src="/draft/specification/images/ucp-payment-flow.png" /></p>
+<p><img alt="High-level payment flow sequence diagram" src="../images/ucp-payment-flow.png" /></p>
 <ol>
 <li><strong>Negotiation (Business → Platform):</strong> The business advertises available payment handlers in their UCP profile. This tells the platform <em>how</em> to pay (e.g., "Use this specific payment credential provider endpoint with this public key").</li>
 <li><strong>Acquisition (Platform ↔ Payment Credential Provider):</strong> The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token). The business is not involved, ensuring raw data never touches the business's frontend API.</li>
@@ -10968,7 +10968,7 @@ through <code>supported_versions</code>; see <a href="#protocol-version">Protoco
 </div>
 </div>
 <h3 id="version-selection">Version Selection<a class="headerlink" href="#version-selection" title="Permanent link">&para;</a></h3>
-<p><img alt="High-level resolution flow sequence diagram" src="/draft/specification/images/ucp-discovery-negotiation.png" /></p>
+<p><img alt="High-level resolution flow sequence diagram" src="../images/ucp-discovery-negotiation.png" /></p>
 <p>Protocol version selection chooses one complete Business profile first.
 Capability negotiation then selects active capabilities and extensions by exact
 version intersection within that profile. The sections below define each step;
