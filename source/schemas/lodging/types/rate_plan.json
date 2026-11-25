@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/rate_plan.json",
+  "title": "Rate Plan",
+  "description": "Commercial rate contract.",
+  "type": "object",
+  "required": [
+    "id",
+    "title"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the rate plan.",
+      "ucp_request": {
+        "create": "optional",
+        "update": "optional",
+        "complete": "omit"
+      }
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable name of the rate plan.",
+      "ucp_request": "omit"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the rate plan.",
+      "ucp_request": "omit"
+    }
+  }
+}

@@ -16,8 +16,7 @@
         "limit": {
           "type": "integer",
           "minimum": 1,
-          "default": 10,
-          "description": "Requested page size. Implementations MAY clamp to a lower maximum."
+          "description": "Requested page size, not a guaranteed result count. When omitted, the Business MUST apply a default page size. A default of 10 is RECOMMENDED, but the Business MAY choose another value. The Business MAY return fewer results than the requested or default page size, including when enforcing its maximum page size. A Platform MUST NOT assume that the response count equals either value."
         }
       }
     },

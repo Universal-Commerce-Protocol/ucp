@@ -1096,3 +1096,11 @@ p.hero-description {
 .custom-banner-close:hover {
   background-color: #e9ecef;
 }
+
+/* Keep capability identifiers on a single line in Core Concepts > Capabilities */
+.capabilities-table table th:first-child,
+.capabilities-table table td:first-child,
+.capabilities-table table td:first-child code {
+  white-space: nowrap;
+  word-break: normal;
+}

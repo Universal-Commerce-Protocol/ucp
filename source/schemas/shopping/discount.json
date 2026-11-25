@@ -15,7 +15,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "description": "JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals.shipping')."
+          "description": "RFC 9535 JSONPath to the allocation target (e.g., '$.line_items[0]', '$.totals[?@.type == \"fulfillment\"]')."
         },
         "amount": {
           "$ref": "../common/types/amount.json",

@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Generate GitHub App Token (if available)
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         # Only attempt this if the secret exists (e.g., on the main repo)
         env:
           APP_ID: ${{ secrets.RELEASE_APP_ID }}
@@ -38,9 +38,10 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
 
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           # Checkout the newly created branch
           ref: ${{ github.ref_name }}
@@ -64,6 +65,8 @@ jobs:
           # Use the app token if generated, otherwise fallback to default GITHUB_TOKEN
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           # Configure Git identity conditionally
           if [ -n "$APP_SLUG" ]; then
@@ -82,5 +85,5 @@ jobs:
           else
             git commit -m "chore: bake version $VERSION into mkdocs.yml"
             # Authenticate the push
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY}.git" "HEAD:${REF_NAME}"
           fi

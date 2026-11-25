@@ -8,6 +8,9 @@
     "final_sale",
     "prop65",
     "fulfillment_changed",
+    "payment_term_changed",
+    "purchase_option_changed",
+    "totals_changed",
     "age_restricted"
   ]
 }
