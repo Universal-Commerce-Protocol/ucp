@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/order_item_input_value.json",
+  "title": "Order Item Input Value",
+  "description": "A record of one answer the buyer supplied for an order line, as it stood at checkout.",
+  "type": "object",
+  "required": [
+    "id",
+    "label",
+    "type",
+    "value"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The `id` of the input that was answered. A historical reference that need not still resolve in the catalog."
+    },
+    "label": {
+      "type": "string",
+      "description": "The input's buyer-facing name at the time of purchase."
+    },
+    "type": {
+      "type": "string",
+      "description": "The input's type at the time of purchase. Well-known values: `text`, `choice`, `boolean`, `date`. Platforms MUST tolerate unknown values.",
+      "examples": [
+        "text",
+        "choice",
+        "boolean",
+        "date"
+      ]
+    },
+    "value": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "description": "The answer the Business accepted."
+    },
+    "value_label": {
+      "type": "string",
+      "description": "For a `choice` input, the buyer-facing name of the selected option at the time of purchase."
+    }
+  }
+}

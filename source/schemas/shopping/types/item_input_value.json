@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/item_input_value.json",
+  "title": "Item Input Value",
+  "description": "The buyer's answer to one item input on a cart or checkout line.",
+  "type": "object",
+  "required": [
+    "id",
+    "value"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The `id` of the input being answered, one of the line's `item_inputs[].id`."
+    },
+    "value": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "description": "The answer. A string for `text`; an option's `value` for `choice`; `true` or `false` for `boolean`; a `YYYY-MM-DD` string for `date`. To leave an input unanswered, omit its entry."
+    }
+  }
+}
