@@ -1154,7 +1154,7 @@ session.
 
 * Operations gated solely by chain-state predicates do **not** appear in
     `config.scopes`. The business defines the predicate at request time
-    and emits a `wallet_state_required` info code (see below) when the
+    and emits a `wallet_state_required` error code (see below) when the
     attestation is missing or fails.
 * Operations gated by **both** account-state and chain-state predicates
     **MAY** appear in `config.scopes` (for the OAuth side) and require a
@@ -1211,7 +1211,7 @@ HTTP/1.1 401 Unauthorized
 WWW-Authenticate: WalletAttestation realm="https://merchant.example.com",
                   predicate="chain=base&erc20=0xABC...&op=gte&value=1",
                   expected_kid="<provider-kid>",
-                  resource_metadata="https://merchant.example.com/.well-known/ucp-protected-resource"
+                  resource_metadata="https://merchant.example.com/.well-known/oauth-protected-resource"
 Content-Type: application/json
 
 {

@@ -28,12 +28,12 @@
     "provider": {
       "type": "object",
       "title": "Identity Provider",
-      "description": "A trusted identity provider for delegated authentication, keyed by the 'type' discriminator. 'oauth2' denotes an OAuth 2.0 / OIDC authorization server. Future versions MAY define additional types (e.g. wallet attestation) as non-breaking extensions; platforms MUST treat entries whose 'type' they do not support as filtered out (see Provider Selection).",
+      "description": "A trusted identity provider for delegated authentication, keyed by the 'type' discriminator. 'oauth2' denotes an OAuth 2.0 / OIDC authorization server; 'wallet_attestation' denotes a chain-state attestation provider (see Wallet Attestation). Future versions MAY define additional types as non-breaking extensions; platforms MUST treat entries whose 'type' they do not support as filtered out (see Provider Selection).",
       "required": ["type"],
       "properties": {
         "type": {
           "type": "string",
-          "description": "Provider mechanism discriminator. 'oauth2' for OAuth 2.0 / OIDC authorization servers. Additional values MAY be defined by future versions; the value is an open string, not a closed enum, so unrecognized types remain valid and are filtered at runtime."
+          "description": "Provider mechanism discriminator. 'oauth2' for OAuth 2.0 / OIDC authorization servers; 'wallet_attestation' for chain-state attestation providers. Additional values MAY be defined by future versions; the value is an open string, not a closed enum, so unrecognized types remain valid and are filtered at runtime."
         }
       },
       "allOf": [
