@@ -151,8 +151,11 @@ vocabulary); runtime messages carry per-request advisories.
     that is compatible with the platform's deployment model.
 
 * **MUST** include user identity tokens in the HTTP `Authorization` header
-    using the Bearer scheme: `Authorization: Bearer <access_token>`
-    ([RFC 6750 §2.1](https://datatracker.ietf.org/doc/html/rfc6750#section-2.1){ target="_blank" }).
+    using the scheme named by the token response's `token_type`: the Bearer
+    scheme, `Authorization: Bearer <access_token>`
+    ([RFC 6750 §2.1](https://datatracker.ietf.org/doc/html/rfc6750#section-2.1){ target="_blank" }),
+    or, for sender-constrained tokens, the DPoP scheme with a DPoP proof
+    (see [Sender-Constrained Tokens](#sender-constrained-tokens)).
 * **MUST** process `WWW-Authenticate: Bearer` challenges per
     [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
     on `401` and `403` responses to user-authenticated operations.
@@ -161,6 +164,9 @@ vocabulary); runtime messages carry per-request advisories.
     the `resource_metadata` pointer
     ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728){ target="_blank" })
     when present to discover the protecting authorization server.
+    Platforms that send DPoP proofs **MUST** process `DPoP` challenges
+    in the same way (see
+    [Sender-Constrained Tokens](#sender-constrained-tokens)).
 * **MUST** implement the OAuth 2.0 Authorization Code flow
     ([RFC 6749 §4.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1){ target="_blank" })
     as the account linking mechanism.
@@ -238,12 +244,16 @@ vocabulary); runtime messages carry per-request advisories.
     scopes, and `client_id` / `azp` (or equivalent) to confirm the token was
     issued to the authenticated platform client
     ([RFC 9068 §4](https://datatracker.ietf.org/doc/html/rfc9068#section-4){ target="_blank" }).
+    For a sender-constrained token, businesses **MUST** also verify the
+    DPoP proof (see [Sender-Constrained Tokens](#sender-constrained-tokens)).
 * **MUST** emit a `WWW-Authenticate: Bearer` challenge per
     [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
     on `401 Unauthorized` (`identity_required`) and `403 Forbidden`
     (`insufficient_scope`) responses to user-authenticated operations.
     See [Error Handling](#error-handling) for the full normative
     requirements.
+    For sender-constrained tokens, the challenge uses the `DPoP` scheme
+    (see [Sender-Constrained Tokens](#sender-constrained-tokens)).
 * **MUST** implement token revocation
     ([RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009){ target="_blank" }).
     Revoking a `refresh_token` **MUST** also immediately invalidate all
@@ -382,7 +392,7 @@ Platform                              Business AS
    |                                       |
    |<-- (5) Token Response ----------------|
    |       access_token, refresh_token     |
-   |       token_type=Bearer, scope        |
+   |       token_type, scope               |
 ```
 
 **Step 2 — Scope set:** Platforms derive the authorization scope set from the
@@ -399,6 +409,220 @@ response.
 `code_challenge` sent in step 2. Businesses **MUST** reject token requests
 where `code_verifier` is absent or does not verify against the stored
 `code_challenge`.
+
+**Step 5 - Token type:** `token_type` is `Bearer` unless the business
+binds the token to a platform key, in which case it is `DPoP` (see
+[Sender-Constrained Tokens](#sender-constrained-tokens)).
+
+## Sender-Constrained Tokens
+
+User identity tokens are bearer tokens by default: any party that holds
+the token string can present it. A platform's client identity is
+typically shared by every user of the platform, so client authentication
+and `client_id` / `azp` checks bind a token to the platform, not to the
+user who linked the account. Businesses **MAY** bind user identity tokens
+to a key the platform holds for that user, using DPoP
+([RFC 9449](https://datatracker.ietf.org/doc/html/rfc9449){ target="_blank" }).
+A DPoP-bound token carries the SHA-256 JWK thumbprint of that key in its
+`cnf.jkt` confirmation claim, so a copied token is unusable without a
+proof signed by the same key.
+
+Other binding mechanisms do not provide a per-user key. Certificate-bound
+tokens
+([RFC 8705](https://datatracker.ietf.org/doc/html/rfc8705){ target="_blank" })
+bind to the platform's client certificate, and the signing keys in a UCP
+profile identify the platform and are the same for every user. A DPoP key
+travels in the proof itself, so a platform can hold a distinct key for
+each account link without publishing it.
+
+The requirements of RFC 9449 apply in full. This section adds only the
+rules specific to UCP.
+
+### Signaling
+
+* A business that issues DPoP-bound tokens **MUST** list
+    `dpop_signing_alg_values_supported` in its RFC 8414 metadata
+    ([RFC 9449 §5.1](https://datatracker.ietf.org/doc/html/rfc9449#section-5.1){ target="_blank" })
+    and **MUST** include `ES256` in it.
+* A business that requires DPoP-bound tokens at a protected resource
+    **MUST** set `dpop_bound_access_tokens_required` to `true` in that
+    resource's protected resource metadata
+    ([RFC 9728 §2](https://datatracker.ietf.org/doc/html/rfc9728#section-2){ target="_blank" }).
+    The requirement applies to every access token presented to that
+    resource, including tokens that identify only the platform. Requests
+    that carry no access token are unaffected.
+* A business that advertises neither issues `token_type` `Bearer`, and
+    platforms that do not support DPoP link accounts as described in
+    [Account Linking Flow](#account-linking-flow).
+
+### Platform Requirements
+
+* When the business's metadata lists `dpop_signing_alg_values_supported`,
+    platforms **SHOULD** send a DPoP proof with every token request
+    (authorization code, refresh token, and JWT bearer grants) and
+    **SHOULD** bind the authorization code to the key with `dpop_jkt`
+    ([RFC 9449 §10](https://datatracker.ietf.org/doc/html/rfc9449#section-10){ target="_blank" }).
+    Platforms **MUST** send proofs when the protected resource metadata
+    sets `dpop_bound_access_tokens_required` to `true`.
+* Platforms **MUST** use each DPoP key for one user's account link at one
+    business. One key per user keeps a token copied from one user from
+    being presented with another user's proof. One key per business keeps
+    businesses from correlating a user by key thumbprint.
+* Platforms **MUST** select the DPoP key from the authenticated user
+    context of the task being performed, never from the token being
+    presented, and **MUST NOT** let any other user cause a proof to be
+    signed with that key. Platforms **SHOULD** keep DPoP private keys
+    non-exportable.
+* Platforms **MUST** send proofs from the same key with every refresh of
+    a refresh token obtained with that key, and of the refresh tokens that
+    replace it. A platform that no longer holds the key recovers by
+    running the [Account Linking Flow](#account-linking-flow) again.
+
+### Business Requirements
+
+* A business that binds a token **MUST** return `token_type` `DPoP` and
+    convey the bound key in the `cnf.jkt` claim, in the JWT access token
+    or in its introspection response
+    ([RFC 9449 §6](https://datatracker.ietf.org/doc/html/rfc9449#section-6){ target="_blank" }).
+* A business that binds an access token **MUST** bind any refresh token
+    it issues with that access token to the same key, for confidential
+    and public clients alike, and **MUST** reject a refresh whose proof is
+    missing or uses another key with `invalid_grant`.
+    [RFC 9449 §5](https://datatracker.ietf.org/doc/html/rfc9449#section-5){ target="_blank" }
+    leaves a confidential client's refresh tokens unbound because client
+    authentication constrains the sender. That does not hold for a client
+    identity shared by every user of a platform.
+* On every request that presents a DPoP-bound token, businesses **MUST**
+    verify the proof
+    ([RFC 9449 §4.3](https://datatracker.ietf.org/doc/html/rfc9449#section-4.3){ target="_blank" }),
+    including that the SHA-256 JWK thumbprint of the proof's key equals
+    the token's `cnf.jkt` and that `ath` matches the presented token.
+    Businesses **MUST** reject a DPoP-bound token presented with the
+    `Bearer` scheme
+    ([RFC 9449 §7.2](https://datatracker.ietf.org/doc/html/rfc9449#section-7.2){ target="_blank" }).
+* Businesses **MUST** accept a proof only for a short time after its
+    `iat`
+    ([RFC 9449 §11.1](https://datatracker.ietf.org/doc/html/rfc9449#section-11.1){ target="_blank" });
+    the window **SHOULD** be no longer than 60 seconds. Businesses
+    **SHOULD** reject a proof whose `jti` was already used with the same
+    key within that window.
+* On the MCP transport, every operation of a service is a `POST` to the
+    same URL, so `htm` and `htu` do not distinguish operations and a
+    captured proof could authorize a different operation. Businesses
+    **MUST** reject a reused `jti` there.
+* Businesses **MAY** reject, with `invalid_dpop_proof`, a token request
+    whose DPoP key is already bound to another user's account link.
+
+### Proof Errors
+
+A request that presents a valid DPoP-bound token and a proof from the
+bound key, but whose proof is otherwise unacceptable (for example, it is
+outside the accepted window, reuses a `jti`, or lacks a required nonce),
+is not an `identity_required` condition: the account link is intact and
+the user is not involved.
+
+* Businesses **MUST** answer such a request with `401` and a `DPoP`
+    challenge whose `error` is `invalid_dpop_proof`, or `use_dpop_nonce`
+    with a `DPoP-Nonce` header
+    ([RFC 9449 §7.1](https://datatracker.ietf.org/doc/html/rfc9449#section-7.1){ target="_blank" },
+    [§9](https://datatracker.ietf.org/doc/html/rfc9449#section-9){ target="_blank" }).
+    The response **MUST NOT** carry an `identity_required` message.
+* Platforms recover by sending a corrected proof, using the supplied
+    nonce when one is given. Platforms **MUST NOT** restart account
+    linking or prompt the user in response. The same applies to
+    `use_dpop_nonce` at the token endpoint
+    ([RFC 9449 §8](https://datatracker.ietf.org/doc/html/rfc9449#section-8){ target="_blank" }).
+* A proof signed by a key other than the one the token is bound to does
+    not authenticate the request. Businesses handle it as an invalid
+    token under [Error Handling](#error-handling), with
+    `error="invalid_token"`.
+* Other challenges for DPoP-bound tokens follow
+    [Error Handling](#error-handling) with the `DPoP` scheme in place of
+    `Bearer`, and **SHOULD** include `algs`.
+
+### Example
+
+Token request with a DPoP proof, and the bound token response:
+
+```http
+POST /oauth2/token HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/x-www-form-urlencoded
+DPoP: <dpop-proof>
+
+grant_type=authorization_code
+&code=<auth-code>
+&redirect_uri=https://agent.example.com/callback
+&code_verifier=<verifier>
+&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+&client_assertion=<client-assertion>
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "access_token": "<token>",
+  "token_type": "DPoP",
+  "expires_in": 3600,
+  "refresh_token": "<refresh>",
+  "scope": "dev.ucp.shopping.order:read"
+}
+```
+
+Claims of the issued JWT access token:
+
+<!-- ucp:example skip reason="OAuth access token claims, not UCP payload" -->
+```json
+{
+  "iss": "https://merchant.example.com",
+  "aud": "https://merchant.example.com",
+  "sub": "user-7781",
+  "client_id": "platform-client-id",
+  "scope": "dev.ucp.shopping.order:read",
+  "exp": 1790903600,
+  "cnf": { "jkt": "<sha256-jwk-thumbprint-of-dpop-key>" }
+}
+```
+
+A user-authenticated request that presents the token:
+
+```http
+GET /orders/order_abc123 HTTP/1.1
+Host: merchant.example.com
+UCP-Agent: profile="https://agent.example.com/.well-known/ucp"
+Authorization: DPoP <token>
+DPoP: <dpop-proof>
+```
+
+The decoded DPoP proof for that request. Header:
+
+<!-- ucp:example skip reason="DPoP proof header, not UCP payload" -->
+```json
+{
+  "typ": "dpop+jwt",
+  "alg": "ES256",
+  "jwk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "<base64url-x-coordinate>",
+    "y": "<base64url-y-coordinate>"
+  }
+}
+```
+
+Claims:
+
+<!-- ucp:example skip reason="DPoP proof claims, not UCP payload" -->
+```json
+{
+  "jti": "<unique-proof-id>",
+  "htm": "GET",
+  "htu": "https://merchant.example.com/orders/order_abc123",
+  "iat": 1790900000,
+  "ath": "<base64url-sha256-of-access-token>"
+}
+```
 
 ## Identity Providers
 
@@ -576,10 +800,13 @@ mandate: `aud` **MUST** be a single-valued URI plus a unique `jti` (see
     * `grant_type`: `urn:ietf:params:oauth:grant-type:jwt-bearer`
     * `assertion`: the JWT authorization grant
     * `scope`: the derived scope set (see [Scope Derivation](#scope-derivation))
+
+    The request carries a DPoP proof when the business offers DPoP-bound
+    tokens (see [Sender-Constrained Tokens](#sender-constrained-tokens)).
 5. The business validates the grant, resolves the user identity, and issues
    an access token under its own authority.
-6. Platform uses the business-issued token via `Authorization: Bearer <access_token>`
-   on subsequent requests.
+6. Platform presents the business-issued token on subsequent requests
+   using the scheme its `token_type` names.
 
 The platform **MUST NOT** present a raw IdP token directly to a business.
 Identity chaining ensures each business issues tokens under its own authority
@@ -854,6 +1081,11 @@ intelligibly rather than listing individual operations: for example, "Allow
 
 ## Error Handling
 
+For sender-constrained tokens, the challenges in this section use the
+`DPoP` scheme with the same parameters. A request that fails only because
+of its DPoP proof is a proof error, not `identity_required` (see
+[Proof Errors](#proof-errors)).
+
 ### `identity_required`
 
 When an operation is gated by a scope listed in `config.scopes` and the
@@ -861,8 +1093,9 @@ request arrives with an absent, expired, invalid, or unverifiable user
 identity token, the business **MUST** return:
 
 * HTTP `401 Unauthorized`
-* A `WWW-Authenticate: Bearer` challenge header per
-    [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" }
+* A `WWW-Authenticate` challenge header using the `Bearer` scheme per
+    [RFC 6750 §3](https://datatracker.ietf.org/doc/html/rfc6750#section-3){ target="_blank" },
+    or the `DPoP` scheme for sender-constrained tokens
 * A UCP error response body containing a message with
     `code: "identity_required"`
 
@@ -936,7 +1169,8 @@ lacks a scope required by the operation (or fails a scope-level policy
 such as `min_acr` or `max_token_age`), the business **MUST** return:
 
 * HTTP `403 Forbidden`
-* A `WWW-Authenticate: Bearer` challenge header per RFC 6750 §3
+* A `WWW-Authenticate` challenge header using the `Bearer` scheme per
+    RFC 6750 §3, or the `DPoP` scheme for sender-constrained tokens
 * A UCP error response body containing a message with
     `code: "insufficient_scope"`
 
@@ -1044,6 +1278,8 @@ field conveys the business's value prompt to the platform (e.g.,
   hint only and **MUST NOT** be used for control-flow decisions. The
   `realm` parameter **MUST** match the business's issuer URI so platforms
   can correlate the challenge with the correct authorization server.
+  For sender-constrained tokens, challenges use the `DPoP` scheme with
+  the same parameters.
 * **`redirect_uri` exactness.** Businesses **MUST** enforce exact string
   matching for `redirect_uri`. Partial-match or prefix-match implementations
   are a common source of open redirect and token theft vulnerabilities.
@@ -1069,6 +1305,22 @@ field conveys the business's value prompt to the platform (e.g.,
 * **Token revocation.** Platforms **MUST** revoke user identity tokens at the
   business's revocation endpoint (RFC 7009) when a user unlinks their account.
   Businesses **MUST** reject subsequent requests that present revoked tokens.
+* **Sender-constrained tokens.** A bearer user identity token can be
+  replayed by any party that obtains it, including another user of the
+  same platform, because client authentication identifies the platform
+  rather than the user. DPoP-bound tokens narrow this exposure; they do
+  not remove it. The binding holds only while each DPoP key is used for
+  one user's account link, no other user can obtain proofs signed with
+  it, and refresh tokens are bound to the same key (see
+  [Sender-Constrained Tokens](#sender-constrained-tokens)). A proof does
+  not cover the request body, and an `Idempotency-Key` does not stop a
+  captured proof from being replayed with a different body, so
+  businesses limit how long and how often a proof is accepted. In the
+  [Accelerated IdP Flow](#accelerated-idp-flow), the JWT authorization
+  grant remains a bearer credential: binding begins with the token the
+  business issues. Businesses **SHOULD** consider requiring DPoP-bound
+  tokens at resources that expose personal data or allow changes that
+  cannot be undone.
 * **JWT grant lifetime.** JWT authorization grants **MUST** be short-lived;
   the `exp` claim **SHOULD** be no more than 60 seconds after `iat`. Short
   lifetimes limit the window for grant theft and replay.
@@ -1145,6 +1397,7 @@ Example metadata hosted at `/.well-known/oauth-authorization-server` per
     "none"
   ],
   "authorization_response_iss_parameter_supported": true,
+  "dpop_signing_alg_values_supported": ["ES256"],
   "service_documentation": "https://merchant.example.com/docs/oauth2"
 }
 ```
@@ -1164,6 +1417,10 @@ on-device agents per
 [RFC 8252](https://datatracker.ietf.org/doc/html/rfc8252){ target="_blank" });
 when `none` is advertised, PKCE with `S256` is required. Businesses that
 do not serve public clients **MAY** omit `none`.
+
+`dpop_signing_alg_values_supported` is optional. It advertises that the
+business issues DPoP-bound tokens (see
+[Sender-Constrained Tokens](#sender-constrained-tokens)).
 
 ### Business Profile (`/.well-known/ucp`)
 

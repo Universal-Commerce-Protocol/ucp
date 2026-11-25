@@ -216,3 +216,7 @@ mpegurl
 usdz
 vnd
 webm
+# OAuth sender-constrained tokens (RFC 9449 DPoP)
+DPoP
+dpop
+algs
