@@ -1091,6 +1091,61 @@ def test_checkout_item_source() -> None:
       )
 
 
+def test_ap2_merchant_authorization_required() -> None:
+  """An AP2 response must carry merchant_authorization; requests need not.
+
+  The spec requires the business to include `ap2.merchant_authorization` in
+  every checkout response once AP2 is negotiated. The field is response-only
+  (`ucp_request: omit`), so a complete request with only the mandate stays
+  valid. The extension composes three capabilities, so each is checked.
+  """
+  if not _has_ucp_schema():
+    _check(
+      "ap2_merchant_authorization_required",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  def ap2(schema: str, attrs: str, body: str) -> v.Result:
+    return _process(
+      f"<!-- ucp:example schema={schema} {attrs} target=$.ap2 -->\n"
+      f"```json\n{body}\n```\n"
+    )
+
+  signature = '"eyJhbGciOiJFUzI1NiJ9..c2ln"'
+  mandate = '"eyJh.eyJz.SIG~WyJzYWx0Il0"'
+
+  for schema in ("shopping/checkout", "lodging/booking", "food/checkout"):
+    result = ap2(schema, "op=read", "{}")
+    _check(
+      f"ap2_response_without_merchant_authorization_fails[{schema}]",
+      result.status == "fail"
+      and '"merchant_authorization" is a required property' in result.message,
+      f"got {result.status}: {result.message}",
+    )
+
+    result = ap2(
+      schema, "op=read", f'{{ "merchant_authorization": {signature} }}'
+    )
+    _check(
+      f"ap2_response_with_merchant_authorization_ok[{schema}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+    result = ap2(
+      schema,
+      "op=complete direction=request",
+      f'{{ "checkout_mandate": {mandate} }}',
+    )
+    _check(
+      f"ap2_complete_request_without_merchant_authorization_ok[{schema}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+
 def test_resolve_schema_cache_key() -> None:
   """Resolved schemas are cached per schema root as well as schema identity."""
   original_run = v.subprocess.run
@@ -1219,6 +1274,7 @@ def main() -> int:
   test_extension_validation()
   test_checkout_item_source_process_block()
   test_checkout_item_source()
+  test_ap2_merchant_authorization_required()
   return _report()
 
 
