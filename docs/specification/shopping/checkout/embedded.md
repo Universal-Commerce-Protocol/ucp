@@ -1209,7 +1209,7 @@ new data with existing state.
     solely on the message.
 2. **Auth:** host performs User Authorization via the Payment Handler.
 3. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see
-    **[AP2 extension](https://ap2-extension.org/)**), the host generates the
+    **[AP2 extension](../../payment/extensions/ap2-mandates.md)**), the host generates the
     `payment_mandate` here using trusted user interface.
 
 ## Fulfillment Extension
