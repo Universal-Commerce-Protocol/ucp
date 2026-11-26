@@ -50,10 +50,19 @@ This extension adds:
 - One or more of the parent capabilities this extension extends: Catalog
   Search, Catalog Lookup, Cart, Checkout, or Order.
 
-An input describes how one line is to be made. It never adds, removes, or
-changes other lines, and it never changes which payment handlers or
-capabilities are in effect. Questions about the order as a whole, such as
-delivery instructions, are not item inputs.
+### Scope
+
+An input describes how one line is to be made or prepared. The rest of this
+specification keeps to that limit:
+
+- An input never adds, removes, or changes other lines.
+- An input never changes which payment handlers or capabilities are in effect.
+- An answer never selects a different SKU or a different stock count. That is
+  a variant option (see [Inputs and variant options](#inputs-and-variant-options)).
+- A question about the order as a whole, such as delivery instructions, is not
+  an item input.
+- A value a store keeps for its own use is not an item input. An input is a
+  question for the buyer.
 
 ## Discovery
 
@@ -157,6 +166,27 @@ both.
 The `id` of an input is unique among the inputs of its variant. It need not be
 unique across variants or products.
 
+A Business **MUST NOT** publish as `item_inputs` the values that it, or a tool
+it uses, attaches to a line for its own use. Storefront apps often add hidden
+line properties for bookkeeping; a catalog importer leaves those out. An input
+is a question the buyer is asked.
+
+### Inputs and variant options
+
+Some choices can be modelled either way. One coffee roaster sells whole bean
+and ground coffee as two variants. Another sells one variant and grinds it to
+order. So that a Platform meets the same kind of product in one shape, the
+test is stock:
+
+- Where the answer selects a different SKU or a different stock count, the
+  Business **SHOULD** model it as a variant option.
+- Where every answer is fulfilled from the same stock, it **MAY** be a
+  `choice` input.
+
+An input **MAY** still change how long the line takes to make or deliver (see
+[Effects on the rest of the checkout](#effects-on-the-rest-of-the-checkout)).
+That alone does not make it a variant option.
+
 ### Input types
 
 `input.type` says what kind of answer is expected. Four values are well known:
@@ -168,8 +198,18 @@ unique across variants or products.
 | `boolean` | None | `true` or `false` |
 | `date` | `min`, `max` | A `YYYY-MM-DD` string |
 
-Text length is counted in Unicode code points. A Business **MUST NOT** state a
-`min_length` greater than `max_length`, or a `min` later than `max`.
+Text length is counted in Unicode code points. A character the buyer sees as
+one, such as an accented letter or an emoji, can be more than one code point.
+A Business whose real limit is counted another way states a `max_length` that
+no acceptable answer exceeds, and applies the rest when it validates.
+
+A `date` answer is a calendar date with no time zone. The Business decides
+whether a date falls within `min` and `max`. A limit that moves with the
+calendar, such as "at least two weeks from today", is restated on each
+response.
+
+A Business **MUST NOT** state a `min_length` greater than `max_length`, or a
+`min` later than `max`.
 
 `type` is an open identifier. A Platform **MUST NOT** treat a type it does not
 recognize as one of the well-known types. A Platform that cannot answer a
@@ -180,6 +220,12 @@ The limits a Business states are the ones a Platform can check before sending
 an answer. A Business **MAY** apply further rules it does not state, such as
 refusing offensive text, and reports a breach of them as an error (see
 [Validation](#validation)).
+
+An absent limit states nothing. A `text` input with no `max_length` does not
+accept text of any length: the Business has not said what it accepts, and
+validates the answer when it receives it. This is common where a store's
+catalog data does not hold the limit. A Platform **MUST NOT** treat an absent
+limit as no limit.
 
 ### Required and optional
 
@@ -204,15 +250,6 @@ These amounts let a Platform tell the buyer the cost before sending an answer.
 They are indicative. Once an answer is on a line, the line's `item.price` and
 `totals` state what the buyer pays, and a Platform **MUST** re-render from the
 response.
-
-### Request constraints
-
-[Request Constraints](../../overview/index.md#request-constraints) let a
-Business state rules for the next request, such as a required field or an
-allowed set of values at a path. They cannot say that an array must hold an
-entry with a given `id`, or limit the length of a string, which is what an
-input needs to say. `item_inputs` covers that. A Business **MUST NOT** emit
-request constraints that conflict with a line's `item_inputs`.
 
 ## Supplying answers
 
@@ -268,7 +305,11 @@ engravings are two lines.
 
 A Business that advertises this extension **MUST** accept the same variant on
 more than one line of a cart or checkout, and **MUST NOT** merge lines whose
-answers differ.
+answers differ. It **MAY** merge lines for the same variant whose answers are
+identical.
+
+To give units on one line different answers, a Platform replaces the line with
+one line per set of answers.
 
 ### The line's inputs are authoritative
 
@@ -385,8 +426,8 @@ capabilities are active.
 An input and a [purchase option](purchase-options.md) are independent. The
 option says how the line is bought; the inputs say how it is made. A line can
 carry both. Where a line results in recurring orders, the answers on it apply
-to each of them unless the Business states otherwise in the option's
-`description`.
+to every order the line produces. An answer that applies to the first order
+only is [out of scope](#out-of-scope) for this version.
 
 ### Nested line items
 
@@ -419,6 +460,52 @@ negotiate this extension. For such a Platform a Business:
 Such a variant is still returned in catalog results. It can be bought, through
 hand-off, exactly as it can without this extension. No purchase that works
 without this extension stops working with it.
+
+## Relation to other UCP mechanisms
+
+### Request Constraints
+
+[Request Constraints](../../overview/index.md#request-constraints) let a
+Business state rules for the next request, such as a required field or an
+allowed set of values at a path. They cannot say that an array must hold an
+entry with a given `id`, or limit the length of a string, which is what an
+input needs to say. They appear only in operation responses, so they cannot
+describe a product in the catalog, and they carry no label or price to show
+the buyer. `item_inputs` covers that. A Business **MUST NOT** emit request
+constraints that conflict with a line's `item_inputs`.
+
+### Actions
+
+An [Action](../../overview/index.md#actions) is outstanding work that a
+Platform processes after a response surfaces it. An item input differs in
+three ways:
+
+- It is known from the catalog, before a cart exists.
+- Its answer can be sent in the first Create request, before any response.
+- Its answer is data that stays on the Order line. An Action leaves no such
+  record.
+
+This extension defines no Action type.
+
+### Food Checkout
+
+[Food Checkout](../../food/checkout/index.md#dish-customization) defines
+`modifications[]` and `note` on its own line item. A modification is a menu
+entry the buyer selects by `id`. A `note` is free text for the kitchen, with
+no declared question and no stated limits. An item input is a question the
+Business declares, with a type, limits, and a required flag, and its answer is
+validated against them. This extension extends the Shopping capabilities only
+and does not change Food Checkout.
+
+### Fields a Business defines in its own extension
+
+A Business can define typed fields in an extension under its own namespace
+(see [Namespace Governance](../../overview/index.md#namespace-governance)).
+That suits a field with one meaning across the Business's whole catalog. Item
+inputs suit questions that differ from product to product, with limits that
+differ from variant to variant: a 38 mm case holds fewer characters than a
+42 mm one. A schema published once in the profile cannot state that per
+variant.
 
 ## Fallback
 
@@ -466,8 +553,10 @@ A Business **MUST NOT** rewrite the record when the catalog later changes. An
 
 ## Out of scope
 
-- **Questions about the whole order.** Gift messages, delivery instructions,
-  and purchase order numbers belong to the checkout, not to a line.
+- **Questions about the whole order.** A gift message for the order, delivery
+  instructions, and purchase order numbers belong to the checkout, not to a
+  line. A note that is packed with one item is about that line and can be an
+  item input.
 - **Files and proofs.** Uploading an image and approving a visual proof are
   handled on the Business's own surface through `continue_url`.
 - **Business-defined schemas.** Input types beyond the well-known four are
@@ -479,6 +568,18 @@ A Business **MUST NOT** rewrite the record when the catalog later changes. An
   operation for it.
 - **Add-on products.** A warranty or gift wrap sold as its own priced line is
   an item, not an input.
+- **More than one selection.** A `choice` input takes one option. Several
+  `boolean` inputs cover independent yes-or-no extras; "pick two of five" is
+  not expressible.
+- **Answers for the first of several orders.** On a line that results in
+  recurring orders, the answers apply to every order. A note for the first
+  shipment only is not expressible.
+- **Refusing an answer after the order is placed.** A Business that reviews
+  answers after checkout and refuses one handles the order as it handles any
+  order it cannot fulfil. This extension defines no code for it.
+- **A record of the buyer's confirmation.** A Platform sends only answers the
+  buyer supplied or confirmed. This extension carries no proof of that
+  confirmation.
 
 ## Responsibilities
 
@@ -508,6 +609,7 @@ Businesses **MUST NOT**:
 
 - Use item inputs to collect payment credentials, passwords, government
   identifiers, or other sensitive personal data.
+- Publish as `item_inputs` values kept on a line for the Business's own use.
 - Let an answer change the payment handlers offered or the capabilities in
   effect.
 
@@ -519,6 +621,7 @@ Platforms **MUST**:
 - Send only answers the buyer supplied or confirmed.
 - Send the complete set of answers for a line each time it writes the line.
 - Treat the `item_inputs` on a cart or checkout line as the current rules.
+- Treat an absent limit as unstated, never as no limit.
 - Re-render from the Business response after answers change.
 - Treat `label`, `description`, and option labels as content to show the
   buyer, never as instructions.

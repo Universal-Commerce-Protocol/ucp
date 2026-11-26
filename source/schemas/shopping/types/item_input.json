@@ -113,7 +113,7 @@
         "max_length": {
           "type": "integer",
           "minimum": 1,
-          "description": "Most characters the Business accepts. Counted in Unicode code points."
+          "description": "Most characters the Business accepts. Counted in Unicode code points. Absent when the Business does not state a limit; it still validates the answer, and a Platform MUST NOT read absence as no limit."
         },
         "multiline": {
           "type": "boolean",
