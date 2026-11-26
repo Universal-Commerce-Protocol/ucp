@@ -2912,6 +2912,11 @@ comment. Unannotated blocks fail CI.</p>
 </tr>
 </tbody>
 </table>
+<p>JSONPath here is a small subset: dot-separated bare names with an optional
+array index (<code>$.a.b[0]</code>), plus bracket-quoted names for keys that are not
+bare-legal (<code>$.a['dev.ucp.common.identity_linking'][0]</code>). Use the quoted form
+for reverse-domain keys and scope tokens, whose dots and colons would
+otherwise be read as path separators.</p>
 <h4 id="placement-rules">Placement rules<a class="headerlink" href="#placement-rules" title="Permanent link">&para;</a></h4>
 <ul>
 <li>The annotation <strong>MUST</strong> appear on its own line preceding the <code>```json</code>
