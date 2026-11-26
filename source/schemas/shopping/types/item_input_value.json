@@ -17,9 +17,10 @@
     "value": {
       "type": [
         "string",
+        "number",
         "boolean"
       ],
-      "description": "The answer. A string for `text`; an option's `value` for `choice`; `true` or `false` for `boolean`; a `YYYY-MM-DD` string for `date`. To leave an input unanswered, omit its entry."
+      "description": "The answer. A string for `text`; an option's `value` for `choice`; a JSON number for `number`; `true` or `false` for `boolean`; a `YYYY-MM-DD` string for `date`. To leave an input unanswered, omit its entry."
     }
   }
 }

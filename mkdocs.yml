@@ -615,7 +615,7 @@ plugins:
               text, a monogram, a font choice) as item_inputs[] on catalog variants
               and cart or checkout lines, a platform answer them with
               item_input_values[], and the Order preserve the answers. Defines the
-              text, choice, boolean, and date input types and the
+              text, choice, number, boolean, and date input types and the
               item_input_* error codes.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-

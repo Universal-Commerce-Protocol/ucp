@@ -98,7 +98,7 @@ variants that have them, accepts and validates `item_input_values` on cart and
 checkout lines, and preserves accepted answers on the resulting Order line.
 
 A Platform that advertises this extension **MUST** be able to collect an
-answer for each of the four well-known input types.
+answer for each of the five well-known input types.
 
 ## Schema
 
@@ -121,6 +121,10 @@ answer for each of the four well-known input types.
 #### Choice Option
 
 {{ extension_schema_fields('types/item_input.json#/$defs/choice_option', 'shopping/extensions/item-inputs') }}
+
+#### Number
+
+{{ extension_schema_fields('types/item_input.json#/$defs/number_input', 'shopping/extensions/item-inputs') }}
 
 #### Date
 
@@ -189,12 +193,13 @@ That alone does not make it a variant option.
 
 ### Input types
 
-`input.type` says what kind of answer is expected. Four values are well known:
+`input.type` says what kind of answer is expected. Five values are well known:
 
 | `type` | Limits the Business can state | The answer |
 | :--- | :--- | :--- |
 | `text` | `min_length`, `max_length`, `multiline` | A string |
 | `choice` | `options[]`, each with a `value`, a `label`, and an optional `price` | One option's `value` |
+| `number` | `min`, `max`, `integer` | A JSON number |
 | `boolean` | None | `true` or `false` |
 | `date` | `min`, `max` | A `YYYY-MM-DD` string |
 
@@ -208,8 +213,12 @@ whether a date falls within `min` and `max`. A limit that moves with the
 calendar, such as "at least two weeks from today", is restated on each
 response.
 
+A `number` answer is a JSON number, not a string. Where `integer` is `true`,
+only whole numbers are accepted. A value where leading zeros matter, such as a
+code, is a `text` input.
+
 A Business **MUST NOT** state a `min_length` greater than `max_length`, or a
-`min` later than `max`.
+`min` that exceeds `max`.
 
 `type` is an open identifier. A Platform **MUST NOT** treat a type it does not
 recognize as one of the well-known types. A Platform that cannot answer a
@@ -242,9 +251,9 @@ is sold without engraving.
 ### Price
 
 An input **MAY** carry a `price`: the extra charge per unit when the input is
-answered. It applies when a `text` or `date` answer is supplied, when a
-`boolean` answer is `true`, and when any `choice` option is selected. A choice
-option **MAY** carry its own `price`, charged in addition.
+answered. It applies when a `text`, `number`, or `date` answer is supplied,
+when a `boolean` answer is `true`, and when any `choice` option is selected. A
+choice option **MAY** carry its own `price`, charged in addition.
 
 These amounts let a Platform tell the buyer the cost before sending an answer.
 They are indicative. Once an answer is on a line, the line's `item.price` and
@@ -559,7 +568,7 @@ A Business **MUST NOT** rewrite the record when the catalog later changes. An
   item input.
 - **Files and proofs.** Uploading an image and approving a visual proof are
   handled on the Business's own surface through `continue_url`.
-- **Business-defined schemas.** Input types beyond the well-known four are
+- **Business-defined schemas.** Input types beyond the well-known five are
   identified by an open `type`; this extension does not define how a Business
   publishes a schema for one.
 - **Inputs that depend on one another.** A Business applies such rules when it
@@ -673,7 +682,54 @@ wants it, they can also choose a font.
 }
 ```
 
-### Catalog: all four input types
+### Catalog: a team shirt with a name and a number
+
+Each shirt is printed with a player's name and number. Both are required.
+Fifteen players with different names are fifteen lines.
+
+<!-- ucp:example schema=shopping/item_inputs def=get_product_response op=get_product target=$.product.variants[0] -->
+```json
+{
+  "id": "gid://example/Variant/team-shirt-m",
+  "title": "Medium",
+  "description": { "plain": "Home shirt, printed to order." },
+  "price": { "amount": 4500, "currency": "USD" },
+  "item_inputs": [
+    {
+      "id": "player_name",
+      "label": "Name on the back",
+      "required": true,
+      "input": { "type": "text", "min_length": 1, "max_length": 12 }
+    },
+    {
+      "id": "player_number",
+      "label": "Number on the back",
+      "required": true,
+      "input": { "type": "number", "min": 0, "max": 99, "integer": true }
+    }
+  ]
+}
+```
+
+The Platform sends the number as a JSON number:
+
+<!-- ucp:example schema=shopping/item_inputs def=dev.ucp.shopping.checkout op=create direction=request -->
+```json
+{
+  "line_items": [
+    {
+      "item": { "id": "gid://example/Variant/team-shirt-m" },
+      "quantity": 1,
+      "item_input_values": [
+        { "id": "player_name", "value": "RIVERA" },
+        { "id": "player_number", "value": 7 }
+      ]
+    }
+  ]
+}
+```
+
+### Catalog: several input types on one variant
 
 A printed welcome sign for an event. The names and the date are required. The
 finish is a choice, and one finish costs more. A stand is a yes-or-no extra.

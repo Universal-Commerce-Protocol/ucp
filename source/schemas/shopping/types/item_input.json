@@ -34,13 +34,13 @@
     },
     "price": {
       "$ref": "../../common/types/price.json",
-      "description": "Extra charge per unit, before taxes and fees, when the input is answered: when a `text` or `date` value is supplied, when a `boolean` value is `true`, or when any `choice` option is selected. Indicative: the line's `item.price` and `totals` are authoritative. Absent when answering costs nothing."
+      "description": "Extra charge per unit, before taxes and fees, when the input is answered: when a `text`, `number`, or `date` value is supplied, when a `boolean` value is `true`, or when any `choice` option is selected. Indicative: the line's `item.price` and `totals` are authoritative. Absent when answering costs nothing."
     }
   },
   "$defs": {
     "input": {
       "title": "Item Input Type",
-      "description": "The kind of value an item input expects. `type` is an open identifier; `text`, `choice`, `boolean`, and `date` are the well-known values. A Platform MUST NOT render or coerce a type it does not recognize as another type.",
+      "description": "The kind of value an item input expects. `type` is an open identifier; `text`, `choice`, `number`, `boolean`, and `date` are the well-known values. A Platform MUST NOT render or coerce a type it does not recognize as another type.",
       "type": "object",
       "required": [
         "type"
@@ -49,7 +49,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "description": "Input type identifier. Well-known values: `text`, `choice`, `boolean`, `date`. Platforms MUST tolerate unknown values and MUST NOT treat one as a well-known type."
+          "description": "Input type identifier. Well-known values: `text`, `choice`, `number`, `boolean`, `date`. Platforms MUST tolerate unknown values and MUST NOT treat one as a well-known type."
         }
       },
       "allOf": [
@@ -81,6 +81,21 @@
           },
           "then": {
             "$ref": "#/$defs/choice_input"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "number"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/number_input"
           }
         },
         {
@@ -161,6 +176,26 @@
         "price": {
           "$ref": "../../common/types/price.json",
           "description": "Extra charge per unit when this option is selected, in addition to the input's own `price`. Indicative: the line's `item.price` and `totals` are authoritative."
+        }
+      }
+    },
+    "number_input": {
+      "title": "Number Input",
+      "description": "A number, such as a shirt number or a length in centimetres. The value is a JSON number.",
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "number",
+          "description": "Smallest number the Business accepts. MUST NOT exceed `max`."
+        },
+        "max": {
+          "type": "number",
+          "description": "Largest number the Business accepts."
+        },
+        "integer": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether only whole numbers are accepted."
         }
       }
     },

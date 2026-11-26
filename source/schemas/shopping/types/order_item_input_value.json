@@ -22,10 +22,11 @@
     },
     "type": {
       "type": "string",
-      "description": "The input's type at the time of purchase. Well-known values: `text`, `choice`, `boolean`, `date`. Platforms MUST tolerate unknown values.",
+      "description": "The input's type at the time of purchase. Well-known values: `text`, `choice`, `number`, `boolean`, `date`. Platforms MUST tolerate unknown values.",
       "examples": [
         "text",
         "choice",
+        "number",
         "boolean",
         "date"
       ]
@@ -33,6 +34,7 @@
     "value": {
       "type": [
         "string",
+        "number",
         "boolean"
       ],
       "description": "The answer the Business accepted."
