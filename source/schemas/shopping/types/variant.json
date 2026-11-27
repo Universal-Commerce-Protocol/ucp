@@ -81,6 +81,10 @@
       "$ref": "availability.json",
       "description": "Variant availability for purchase."
     },
+    "condition": {
+      "type": "string",
+      "description": "Physical condition of the item as sold, not its state when returned; does not establish return eligibility. Well-known values: `new`, `refurbished`, `used`. Businesses SHOULD set `condition` explicitly on every physical-goods variant, including `new`; it need not be supplied for non-physical goods such as digital goods, gift cards, or services. Absent means the Business has not stated a condition. Platforms MUST NOT reject a variant with an unrecognized value, and MUST NOT treat an unrecognized value as `new`."
+    },
     "options": {
       "type": "array",
       "items": {
