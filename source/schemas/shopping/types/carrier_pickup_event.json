@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/carrier_pickup_event.json",
+  "title": "Carrier Pickup Event Fields",
+  "description": "Fields and event types for a parcel sent to a carrier point. Deposit at the point and collection by the recipient are separate events. Events of a parcel are ordered by `occurred_at`, not by array or arrival order.",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Event types this extension defines for parcels sent to a carrier point: `deposited_at_point` (the carrier reports the parcel placed at the point; the holding period runs from the event its `pickup_period.starts` names, deposit or notification), `pickup_deadline_changed` (the carrier reports a new deadline at the same point, for example an extension, without a new deposit), `collected_at_point` (the carrier reports the parcel collected), `pickup_expired` (the holding period ended without collection), `returning_to_sender` (the parcel is on its way back to the Business). The core `returned_to_sender` keeps its core meaning (back at the Business)."
+    },
+    "parcel_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Business-scoped identifier of the parcel, stable across all events of that parcel, including redirects and extensions. Required on the carrier pickup event types. Distinct from `tracking_number`, which a carrier may reuse or replace."
+    },
+    "point": {
+      "$ref": "carrier_point_destination.json#/$defs/point_key",
+      "description": "The carrier point where the parcel is, or was, waiting. Required on `deposited_at_point`, `collected_at_point` and `pickup_expired`."
+    },
+    "pickup_by": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "RFC 3339 timestamp until which the parcel waits at `point`, as reported by the carrier. Required on `deposited_at_point` and `pickup_deadline_changed`; `null` means the Business does not know the deadline, and the Platform MUST NOT compute one. The latest of these events for the same `parcel_id` gives the current deadline."
+    },
+    "corrects": {
+      "type": "string",
+      "minLength": 1,
+      "description": "`id` of an earlier event of the same Order and the same `parcel_id` that this event corrects. The earlier event stays in the log but no longer counts; this event states what happened instead. When several events correct the same event, the one with the latest `corrected_at` counts. Correcting a `collected_at_point` with an event of another type reopens the parcel; correcting it with another `collected_at_point` (for example a different time or point) keeps the parcel collected."
+    },
+    "corrected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp at which the Business issued this correction. Required with `corrects`. Orders corrections of the same event; `occurred_at` keeps the time of the physical event."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "deposited_at_point",
+              "pickup_deadline_changed",
+              "collected_at_point",
+              "pickup_expired",
+              "returning_to_sender"
+            ]
+          }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "required": ["parcel_id"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Plain text, no markup or links."
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "deposited_at_point",
+              "pickup_deadline_changed",
+              "collected_at_point",
+              "pickup_expired"
+            ]
+          }
+        },
+        "required": ["type"]
+      },
+      "then": { "required": ["point"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "enum": ["deposited_at_point", "pickup_deadline_changed"] }
+        },
+        "required": ["type"]
+      },
+      "then": { "required": ["pickup_by"] }
+    }
+  ],
+  "dependentRequired": { "corrects": ["corrected_at"] }
+}
