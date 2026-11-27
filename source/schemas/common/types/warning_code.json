@@ -11,6 +11,7 @@
     "payment_term_changed",
     "purchase_option_changed",
     "totals_changed",
-    "age_restricted"
+    "age_restricted",
+    "membership_benefit_ineligible"
   ]
 }
