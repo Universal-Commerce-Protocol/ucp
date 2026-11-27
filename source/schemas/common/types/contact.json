@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/contact.json",
+  "title": "Contact",
+  "description": "A contact point for a business or organization. At least one of `email` or `phone_number` MUST be provided.",
+  "type": "object",
+  "additionalProperties": true,
+  "anyOf": [
+    {
+      "required": [
+        "email"
+      ]
+    },
+    {
+      "required": [
+        "phone_number"
+      ]
+    }
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Purpose of the contact channel. Well-known values: `general`, `customer_support`, `legal`, `press`. Open vocabulary; Businesses MAY use additional values."
+    },
+    "name": {
+      "type": "string",
+      "description": "Optional human-readable label or department name for this contact point (e.g., `'Customer Care'`)."
+    },
+    "email": {
+      "type": "string",
+      "description": "Contact email address."
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Contact phone number in E.164 format (e.g., `'+12125550100'`)."
+    }
+  }
+}
