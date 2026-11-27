@@ -448,6 +448,7 @@ Each entry is described by its `type`:
 | :---- | :--- | :------- | :---------- |
 | `type` | string | Yes | Provider mechanism discriminator. `oauth2` is the only type defined in this version; future versions **MAY** define additional types as non-breaking extensions. |
 | `auth_url` | string (URI) | Yes, for `oauth2` | Base URL for authorization server metadata discovery. |
+| `client_id` | string | No, for `oauth2` | OAuth 2.0 client identifier (or Client ID Metadata Document HTTPS URI per [draft-ietf-oauth-client-id-metadata-document](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document){ target="_blank" }) that identifies the business as a relying party at this identity provider. Required when the IdP indexes relying party registrations, user consent, or pairwise subject identifiers by `client_id` rather than by the business's authorization server issuer URI. |
 | `required_claims` | array of strings | No, for `oauth2` | OIDC Core §5.1 claim names the business requires in the JWT authorization grant (e.g. `email`). Optional pre-filter hint — see [Provider Selection](#provider-selection). |
 
 The `type` value is an open string, not a closed enumeration. Platforms
@@ -513,6 +514,7 @@ direct OAuth flows (always available via discovery):
               {
                 "type": "oauth2",
                 "auth_url": "https://accounts.example-login.app/",
+                "client_id": "business-rp-client-id",
                 "required_claims": ["email"]
               }
             ]
@@ -558,13 +560,22 @@ mandate: `aud` **MUST** be a single-valued URI plus a unique `jti` (see
     * `grant_type`: `urn:ietf:params:oauth:grant-type:token-exchange`
     * `subject_token`: the platform's existing IdP access token
     * `subject_token_type`: `urn:ietf:params:oauth:token-type:access_token`
-    * `resource` and/or `audience`: the business's authorization server
-      issuer URI. Platforms **MUST** include at least one.
-      [RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }
-      permits URI values in either parameter; IdP implementations vary
-      in which they accept. The IdP maps the value to the `aud` claim
-      in the resulting grant; when both are sent they **MUST** carry
-      identical values.
+    * `resource` and/or `audience`: identify the target business's
+      authorization server issuer URI and (when declared) the business's
+      relying party `client_id` at the IdP per
+      [RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }:
+        * When the selected provider entry declares `client_id`, platforms
+          **MUST** send `resource` set to the business's authorization
+          server issuer URI and `audience` set to `provider.client_id`
+          (the business's OAuth 2.0 `client_id` or Client ID Metadata
+          Document HTTPS URI at the IdP).
+        * When `client_id` is omitted, platforms **MUST** include at least
+          one of `resource` or `audience` set to the business's
+          authorization server issuer URI; when both are sent they **MUST**
+          carry identical values.
+        * In all cases, the IdP maps the business's authorization server
+          issuer URI (`resource`) to the `aud` claim in the resulting JWT
+          authorization grant.
     * `requested_token_type`: `urn:ietf:params:oauth:token-type:jwt`
 3. The IdP validates the subject token, verifies the platform is authorized
    to request a grant for the target business, and returns a short-lived
@@ -731,11 +742,18 @@ IdP **MUST**:
 * Authenticate the platform and verify it is authorized to present the
     subject token
     ([RFC 8693 §2.1](https://datatracker.ietf.org/doc/html/rfc8693#section-2.1){ target="_blank" }).
-* Verify the target business (identified by `resource` and/or `audience`,
-    which **MUST** carry identical values when both are sent — see
-    [Flow](#flow)) is a known relying party and the user has authorized
-    identity sharing with it. The IdP **MUST NOT** issue grants for
-    businesses the user has not authorized.
+* Verify the target business (identified by `resource` and/or `audience` —
+    see [Flow](#flow)) is a known relying party and the user has authorized
+    identity sharing with it. When `audience` carries a `client_id` (or
+    Client ID Metadata Document HTTPS URI) distinct from `resource` (the
+    business's authorization server issuer URI), the IdP **MUST** verify
+    that `resource` (and/or the business discovery origin) is an authorized
+    domain or origin bound to that `client_id` registration or metadata
+    document before rendering consent or issuing a grant, and **MUST** set
+    `aud` in the issued JWT authorization grant to the business's
+    authorization server issuer URI (`resource`). The IdP **MUST NOT**
+    issue grants for businesses the user has not authorized or for
+    `resource` URIs not bound to the declared `client_id`.
 * Issue a JWT authorization grant conforming to the
     [JWT Authorization Grant](#jwt-authorization-grant) requirements.
 * Return `issued_token_type` as `urn:ietf:params:oauth:token-type:jwt`.
@@ -1079,6 +1097,18 @@ field conveys the business's value prompt to the platform (e.g.,
 * **Grant relay.** Businesses **MUST NOT** store or forward JWT
   authorization grants received from platforms. Grants are bearer
   credentials scoped to a single audience (`aud`) and a single use.
+* **Relying party `client_id` binding.** Because `config.providers` is
+  self-asserted in `/.well-known/ucp`, a malicious business could advertise
+  another relying party's `client_id` alongside its own authorization server
+  `issuer` URI to spoof brand metadata on the IdP consent screen, reuse
+  existing user consent, or obtain pairwise subject identifiers scoped to
+  the victim relying party. When `audience` carries a `client_id` (or Client
+  ID Metadata Document URI), the IdP **MUST** verify that the target
+  business's authorization server `issuer` URI (`resource`) is bound to that
+  `client_id` (for example, via registered origins or domains in the IdP's
+  client registry, or matching authority in the Client ID Metadata Document)
+  and **MUST** set the JWT authorization grant's `aud` claim to the verified
+  business AS `issuer` URI (`resource`), never to the `client_id` alone.
 * **Cross-IdP account linking.** Federation collapses trust boundaries:
   a business that auto-links accounts across listed providers based on
   any IdP-asserted claim (email, phone, name) extends each provider's
