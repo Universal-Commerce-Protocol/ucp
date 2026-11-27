@@ -286,4 +286,4 @@ UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a s
 
 Every UCP-defined service, capability, and extension in release `D` declares version `D`. Third-party extensions and payment handlers are versioned by their authors, independently of UCP releases.
 
-See [Protocol Version](/latest/specification/overview/#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.
+See [Protocol Version](/latest/specification/overview/#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](https://ucp.dev/versioning/index.md) for the release-branch and backport process.

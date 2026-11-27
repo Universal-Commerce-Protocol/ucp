@@ -39,7 +39,7 @@ UCP provides building blocks for agentic commerce across industries—from disco
 
 Protocol overview, core concepts, and design principles
 
-[Get Started](http://ucp.dev/latest/specification/overview/index.md)
+[Get Started](https://ucp.dev/latest/specification/overview/index.md)
 
 ### Implement
 
@@ -135,7 +135,7 @@ Catalog Cart Checkout Identity Linking Order
 
 Enables platforms to search and browse business product catalogs through free-text search, category filtering, and batch retrieval to drive user journeys like price comparisons, sale price and back-in-stock/low-stock alerts.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/catalog/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/catalog/index.md)
 
 ```json
 {
@@ -226,7 +226,7 @@ Enables platforms to search and browse business product catalogs through free-te
 
 Enables multi-item cart building and management across AI surfaces, allowing shoppers to seamlessly transfer carts directly to the merchant's site or complete purchases in-place through unified, multi-item checkout.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/cart/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/cart/index.md)
 
 ```json
 {
@@ -328,7 +328,7 @@ Enables multi-item cart building and management across AI surfaces, allowing sho
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/checkout/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/checkout/index.md)
 
 ```json
 {
@@ -400,7 +400,7 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/checkout/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/checkout/index.md)
 
 ```json
 {
@@ -472,7 +472,7 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Get Started](http://ucp.dev/latest/specification/common/identity-linking/index.md)
+[Get Started](https://ucp.dev/latest/specification/common/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -503,7 +503,7 @@ Sample of /.well-known/oauth-authorization-server
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/order/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/order/index.md)
 
 ```json
 {
@@ -563,7 +563,7 @@ From purchase confirmation to delivery. Real-time webhooks power status updates,
 
 Enable high-quality booking flows within AI surfaces with real time pricing and availability checks for rooms, easy guest registration and secure checkout with complex payments schedules.
 
-[Get Started](http://ucp.dev/draft/specification/lodging/booking/index.md)
+[Get Started](https://ucp.dev/draft/specification/lodging/booking/index.md)
 
 ```json
 {
@@ -715,7 +715,7 @@ Enable high-quality booking flows within AI surfaces with real time pricing and 
 
 Powers conversational food ordering journeys that seamlessly handle tipping, and delivery/pickup instructions through a scalable checkout experience on AI surfaces.
 
-[Get Started](http://ucp.dev/draft/specification/food/checkout/index.md)
+[Get Started](https://ucp.dev/draft/specification/food/checkout/index.md)
 
 ```json
 {
@@ -845,13 +845,13 @@ Powers conversational food ordering journeys that seamlessly handle tipping, and
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/checkout/rest/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/checkout/rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[See how it works](http://ucp.dev/latest/specification/shopping/checkout/embedded/index.md)
+[See how it works](https://ucp.dev/latest/specification/shopping/checkout/embedded/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -859,7 +859,7 @@ Embed and render business checkout UI to support complex checkout flows, with ad
 
 Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
 
-[View the technical spec](http://ucp.dev/latest/specification/overview/index.md)
+[View the technical spec](https://ucp.dev/latest/specification/overview/index.md)
 
 ### For Businesses
 
@@ -871,13 +871,13 @@ UCP empowers businesses to meet customers wherever they are—AI assistants, age
 
 Simplify business onboarding with standardized APIs and provide your audience with an integrated agentic commerce experience. Compatible with MCP, A2A, and existing agent frameworks.
 
-[Learn more about UCP core concepts](http://ucp.dev/documentation/core-concepts/index.md)
+[Learn more about UCP core concepts](https://ucp.dev/documentation/core-concepts/index.md)
 
 ### For Payment Providers
 
 Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
 
-[Learn more about UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md)
+[Learn more about UCP and AP2](https://ucp.dev/documentation/ucp-and-ap2/index.md)
 
 ## Endorsed across the ecosystem
 
@@ -1095,7 +1095,7 @@ The complete technical specification, documentation, and reference implementatio
 
 Download and run our code samples
 
-### [Experiment](http://ucp.dev/latest/specification/shopping/playground/index.md)
+### [Experiment](https://ucp.dev/latest/specification/shopping/playground/index.md)
 
 Experiment with the protocol and its different agent roles
 
@@ -1393,7 +1393,7 @@ UCP uses date-based version identifiers (`YYYY-MM-DD`). A UCP release `D` is a s
 
 Every UCP-defined service, capability, and extension in release `D` declares version `D`. Third-party extensions and payment handlers are versioned by their authors, independently of UCP releases.
 
-See [Protocol Version](/latest/specification/overview/#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](http://ucp.dev/versioning/index.md) for the release-branch and backport process.
+See [Protocol Version](/latest/specification/overview/#protocol-version) for version discovery, [Component Versioning and Release Snapshots](/latest/specification/overview/#component-versioning-and-release-snapshots) for the normative release contract, and [Versioning](https://ucp.dev/versioning/index.md) for the release-branch and backport process.
 
 # UCP and AP2
 
@@ -1458,7 +1458,7 @@ New specifications are being developed with industry leaders across key industri
 
 The future of commerce cannot be built in a vacuum. We invite businesses, developers, and payment providers to join us in refining these specifications. Your feedback on our early builds helps us shape the standards that will power the next generation of global commerce.
 
-[Become a UCP contributor](http://ucp.dev/documentation/contributing/index.md)
+[Become a UCP contributor](https://ucp.dev/documentation/contributing/index.md)
 
 # Schema Authoring Guide
 
@@ -2009,8 +2009,6 @@ The validator accepts these features beyond strict JSON. Use them where they aid
 
 Block comments (`/* */`) are **not** supported. Use multiple `//` lines if you need a multi-line note.
 
-**Limitation:** the `//` stripper tracks string boundaries per-line and is approximate. An example containing a string literal with an escaped backslash followed by `//` will be misparsed. No corpus example currently triggers this; if you hit it, restructure the example.
-
 #### Template variable
 
 Exactly one variable is substituted: `draft` becomes a valid date stamp. No other template variables are recognized — any other `{{ name }}` will survive into JSON parse and fail.
@@ -2374,7 +2372,7 @@ Significant changes include:
 - **Core Schema Modifications**: Adding, removing, or modifying fields or descriptions in JSON schemas.
 - **Protocol Changes**: Altering communication flows or expected capability behaviors (Checkout, Cart, Catalog, Order, Identity Linking).
 - **New API Endpoints / Transports**: Introducing new transport bindings (REST, MCP, A2A, Embedded) or new protocol endpoints.
-- **Backwards Incompatibility**: Any breaking change to an existing capability or schema (requires Governing Council approval and a 2-week advance notice in Discussions; see [Versioning](http://ucp.dev/versioning/index.md)).
+- **Backwards Incompatibility**: Any breaking change to an existing capability or schema (requires Governing Council approval and a 2-week advance notice in Discussions; see [Versioning](https://ucp.dev/versioning/index.md)).
 
 **Vendor Extensions vs. Core (`dev.ucp.*`)**: UCP is designed to keep the core protocol light. New capabilities or extensions for vendor-specific or emerging use cases should first be self-hosted under a vendor namespace (e.g., `com.{vendor}.*`; see [Namespace Governance](/latest/specification/overview/#namespace-governance)) and proposed for adoption into `dev.ucp.*` once there is broad multi-party ecosystem adoption.
 
@@ -2452,11 +2450,11 @@ flowchart LR
     CD -->|DTC Vote| ST["Stable (YYYY-MM-DD)<br/>Production ready & backward compatible"]
 ```
 
-| Level             | Version Tag     | Stability Guarantee                                                                | Purpose                                              | Exit Criteria                |
-| ----------------- | --------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------- |
-| **Working Draft** | `Working Draft` | Breaking changes expected                                                          | Prototyping, gathering feedback, iterating on design | DTC majority vote to advance |
-| **Candidate**     | `Candidate`     | API surface stable; implementation details evolve                                  | Early adopter implementations, production pilots     | DTC majority vote to advance |
-| **Stable**        | `YYYY-MM-DD`    | Full backward compatibility (see [Versioning](http://ucp.dev/versioning/index.md)) | Production deployments                               | Date-based version assigned  |
+| Level             | Version Tag     | Stability Guarantee                                                                 | Purpose                                              | Exit Criteria                |
+| ----------------- | --------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------- |
+| **Working Draft** | `Working Draft` | Breaking changes expected                                                           | Prototyping, gathering feedback, iterating on design | DTC majority vote to advance |
+| **Candidate**     | `Candidate`     | API surface stable; implementation details evolve                                   | Early adopter implementations, production pilots     | DTC majority vote to advance |
+| **Stable**        | `YYYY-MM-DD`    | Full backward compatibility (see [Versioning](https://ucp.dev/versioning/index.md)) | Production deployments                               | Date-based version assigned  |
 
 ______________________________________________________________________
 
@@ -2487,4 +2485,4 @@ ______________________________________________________________________
 
 Ready to jump in? Head over to the [UCP GitHub organization](https://github.com/Universal-Commerce-Protocol) to explore the repositories, browse [open issues](https://github.com/Universal-Commerce-Protocol/ucp/issues), or submit your first pull request.
 
-If you are new to the protocol, start with [Core Concepts](http://ucp.dev/documentation/core-concepts/index.md) to learn about the architecture, explore our [samples](https://github.com/Universal-Commerce-Protocol/samples) for reference implementations, and join the conversation in [GitHub Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).
+If you are new to the protocol, start with [Core Concepts](https://ucp.dev/documentation/core-concepts/index.md) to learn about the architecture, explore our [samples](https://github.com/Universal-Commerce-Protocol/samples) for reference implementations, and join the conversation in [GitHub Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).

@@ -547,8 +547,6 @@ The validator accepts these features beyond strict JSON. Use them where they aid
 
 Block comments (`/* */`) are **not** supported. Use multiple `//` lines if you need a multi-line note.
 
-**Limitation:** the `//` stripper tracks string boundaries per-line and is approximate. An example containing a string literal with an escaped backslash followed by `//` will be misparsed. No corpus example currently triggers this; if you hit it, restructure the example.
-
 #### Template variable
 
 Exactly one variable is substituted: `draft` becomes a valid date stamp. No other template variables are recognized — any other `{{ name }}` will survive into JSON parse and fail.

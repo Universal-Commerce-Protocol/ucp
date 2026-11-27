@@ -30,7 +30,7 @@ Significant changes include:
 - **Core Schema Modifications**: Adding, removing, or modifying fields or descriptions in JSON schemas.
 - **Protocol Changes**: Altering communication flows or expected capability behaviors (Checkout, Cart, Catalog, Order, Identity Linking).
 - **New API Endpoints / Transports**: Introducing new transport bindings (REST, MCP, A2A, Embedded) or new protocol endpoints.
-- **Backwards Incompatibility**: Any breaking change to an existing capability or schema (requires Governing Council approval and a 2-week advance notice in Discussions; see [Versioning](http://ucp.dev/versioning/index.md)).
+- **Backwards Incompatibility**: Any breaking change to an existing capability or schema (requires Governing Council approval and a 2-week advance notice in Discussions; see [Versioning](https://ucp.dev/versioning/index.md)).
 
 **Vendor Extensions vs. Core (`dev.ucp.*`)**: UCP is designed to keep the core protocol light. New capabilities or extensions for vendor-specific or emerging use cases should first be self-hosted under a vendor namespace (e.g., `com.{vendor}.*`; see [Namespace Governance](/latest/specification/overview/#namespace-governance)) and proposed for adoption into `dev.ucp.*` once there is broad multi-party ecosystem adoption.
 
@@ -108,11 +108,11 @@ flowchart LR
     CD -->|DTC Vote| ST["Stable (YYYY-MM-DD)<br/>Production ready & backward compatible"]
 ```
 
-| Level             | Version Tag     | Stability Guarantee                                                                | Purpose                                              | Exit Criteria                |
-| ----------------- | --------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------- |
-| **Working Draft** | `Working Draft` | Breaking changes expected                                                          | Prototyping, gathering feedback, iterating on design | DTC majority vote to advance |
-| **Candidate**     | `Candidate`     | API surface stable; implementation details evolve                                  | Early adopter implementations, production pilots     | DTC majority vote to advance |
-| **Stable**        | `YYYY-MM-DD`    | Full backward compatibility (see [Versioning](http://ucp.dev/versioning/index.md)) | Production deployments                               | Date-based version assigned  |
+| Level             | Version Tag     | Stability Guarantee                                                                 | Purpose                                              | Exit Criteria                |
+| ----------------- | --------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------- |
+| **Working Draft** | `Working Draft` | Breaking changes expected                                                           | Prototyping, gathering feedback, iterating on design | DTC majority vote to advance |
+| **Candidate**     | `Candidate`     | API surface stable; implementation details evolve                                   | Early adopter implementations, production pilots     | DTC majority vote to advance |
+| **Stable**        | `YYYY-MM-DD`    | Full backward compatibility (see [Versioning](https://ucp.dev/versioning/index.md)) | Production deployments                               | Date-based version assigned  |
 
 ______________________________________________________________________
 
@@ -143,4 +143,4 @@ ______________________________________________________________________
 
 Ready to jump in? Head over to the [UCP GitHub organization](https://github.com/Universal-Commerce-Protocol) to explore the repositories, browse [open issues](https://github.com/Universal-Commerce-Protocol/ucp/issues), or submit your first pull request.
 
-If you are new to the protocol, start with [Core Concepts](http://ucp.dev/documentation/core-concepts/index.md) to learn about the architecture, explore our [samples](https://github.com/Universal-Commerce-Protocol/samples) for reference implementations, and join the conversation in [GitHub Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).
+If you are new to the protocol, start with [Core Concepts](https://ucp.dev/documentation/core-concepts/index.md) to learn about the architecture, explore our [samples](https://github.com/Universal-Commerce-Protocol/samples) for reference implementations, and join the conversation in [GitHub Discussions](https://github.com/Universal-Commerce-Protocol/ucp/discussions).

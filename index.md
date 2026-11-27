@@ -8,7 +8,7 @@ UCP provides building blocks for agentic commerce across industries—from disco
 
 Protocol overview, core concepts, and design principles
 
-[Get Started](http://ucp.dev/latest/specification/overview/index.md)
+[Get Started](https://ucp.dev/latest/specification/overview/index.md)
 
 ### Implement
 
@@ -104,7 +104,7 @@ Catalog Cart Checkout Identity Linking Order
 
 Enables platforms to search and browse business product catalogs through free-text search, category filtering, and batch retrieval to drive user journeys like price comparisons, sale price and back-in-stock/low-stock alerts.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/catalog/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/catalog/index.md)
 
 ```json
 {
@@ -195,7 +195,7 @@ Enables platforms to search and browse business product catalogs through free-te
 
 Enables multi-item cart building and management across AI surfaces, allowing shoppers to seamlessly transfer carts directly to the merchant's site or complete purchases in-place through unified, multi-item checkout.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/cart/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/cart/index.md)
 
 ```json
 {
@@ -297,7 +297,7 @@ Enables multi-item cart building and management across AI surfaces, allowing sho
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/checkout/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/checkout/index.md)
 
 ```json
 {
@@ -369,7 +369,7 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 
 Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/checkout/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/checkout/index.md)
 
 ```json
 {
@@ -441,7 +441,7 @@ Support complex cart logic, dynamic pricing, tax calculations, and more across m
 
 OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.
 
-[Get Started](http://ucp.dev/latest/specification/common/identity-linking/index.md)
+[Get Started](https://ucp.dev/latest/specification/common/identity-linking/index.md)
 
 ```json
 Sample of /.well-known/oauth-authorization-server
@@ -472,7 +472,7 @@ Sample of /.well-known/oauth-authorization-server
 
 From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/order/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/order/index.md)
 
 ```json
 {
@@ -532,7 +532,7 @@ From purchase confirmation to delivery. Real-time webhooks power status updates,
 
 Enable high-quality booking flows within AI surfaces with real time pricing and availability checks for rooms, easy guest registration and secure checkout with complex payments schedules.
 
-[Get Started](http://ucp.dev/draft/specification/lodging/booking/index.md)
+[Get Started](https://ucp.dev/draft/specification/lodging/booking/index.md)
 
 ```json
 {
@@ -684,7 +684,7 @@ Enable high-quality booking flows within AI surfaces with real time pricing and 
 
 Powers conversational food ordering journeys that seamlessly handle tipping, and delivery/pickup instructions through a scalable checkout experience on AI surfaces.
 
-[Get Started](http://ucp.dev/draft/specification/food/checkout/index.md)
+[Get Started](https://ucp.dev/draft/specification/food/checkout/index.md)
 
 ```json
 {
@@ -814,13 +814,13 @@ Powers conversational food ordering journeys that seamlessly handle tipping, and
 
 Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
 
-[Get Started](http://ucp.dev/latest/specification/shopping/checkout/rest/index.md)
+[Get Started](https://ucp.dev/latest/specification/shopping/checkout/rest/index.md)
 
 ### Embed business checkout
 
 Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
 
-[See how it works](http://ucp.dev/latest/specification/shopping/checkout/embedded/index.md)
+[See how it works](https://ucp.dev/latest/specification/shopping/checkout/embedded/index.md)
 
 ## Designed for the entire commerce ecosystem
 
@@ -828,7 +828,7 @@ Embed and render business checkout UI to support complex checkout flows, with ad
 
 Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
 
-[View the technical spec](http://ucp.dev/latest/specification/overview/index.md)
+[View the technical spec](https://ucp.dev/latest/specification/overview/index.md)
 
 ### For Businesses
 
@@ -840,13 +840,13 @@ UCP empowers businesses to meet customers wherever they are—AI assistants, age
 
 Simplify business onboarding with standardized APIs and provide your audience with an integrated agentic commerce experience. Compatible with MCP, A2A, and existing agent frameworks.
 
-[Learn more about UCP core concepts](http://ucp.dev/documentation/core-concepts/index.md)
+[Learn more about UCP core concepts](https://ucp.dev/documentation/core-concepts/index.md)
 
 ### For Payment Providers
 
 Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
 
-[Learn more about UCP and AP2](http://ucp.dev/documentation/ucp-and-ap2/index.md)
+[Learn more about UCP and AP2](https://ucp.dev/documentation/ucp-and-ap2/index.md)
 
 ## Endorsed across the ecosystem
 
@@ -1064,7 +1064,7 @@ The complete technical specification, documentation, and reference implementatio
 
 Download and run our code samples
 
-### [Experiment](http://ucp.dev/latest/specification/shopping/playground/index.md)
+### [Experiment](https://ucp.dev/latest/specification/shopping/playground/index.md)
 
 Experiment with the protocol and its different agent roles
 
