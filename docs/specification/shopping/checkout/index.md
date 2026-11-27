@@ -501,9 +501,10 @@ Both result in buyer handoff, but represent different checkout states.
 
 * `requires_buyer_input` means the checkout is **incomplete** — the business
 requires information their API doesn't support collecting programmatically.
-* `requires_buyer_review` means the checkout is **complete** — but policy,
-regulatory, or entitlement rules require buyer authorization before order
-placement (e.g., high-value order approval, first-purchase policy).
+* `requires_buyer_review` means the checkout has **all required information**
+— but policy, regulatory, or entitlement rules require buyer authorization
+before order placement (e.g., high-value order approval, first-purchase policy).
+This differs from `status: completed`: no order has been placed yet.
 
 When the business cannot create a new resource or the requested resource
 no longer exists, the response contains `ucp.status: "error"` with

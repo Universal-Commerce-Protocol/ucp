@@ -376,8 +376,10 @@ Both result in user handoff, but represent different booking session states:
 
 * `requires_buyer_input` means the booking session is **incomplete** — the business
   requires information their API doesn't support collecting programmatically.
-* `requires_buyer_review` means the booking session is **complete** — but policy,
-  regulatory, or entitlement rules require user authorization before completion.
+* `requires_buyer_review` means the booking session has **all required
+  information** — but policy, regulatory, or entitlement rules require user
+  authorization before completion. This differs from `status: completed`: no
+  booking has been made yet.
 
 #### Standard Errors
 
