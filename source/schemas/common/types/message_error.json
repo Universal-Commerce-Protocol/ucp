@@ -44,6 +44,15 @@
         "unrecoverable"
       ],
       "description": "Reflects the resource state and recommended action. 'recoverable': platform can resolve the condition in band, for example by modifying inputs or processing a related Action, and submit a new operation when needed. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_*' severity contribute to 'status: requires_escalation'."
+    },
+    "retry_hint": {
+      "type": "string",
+      "description": "Optional recovery guidance for a 'payment_failed' error with 'severity' set to 'recoverable' and a 'path' selecting the failed payment instrument. Well-known values: 'retry_same_instrument' (the previous attempt is known to have failed, the handler permits another attempt with the same instrument, and no buyer action is required), 'try_different_instrument' (the handler permits recovery with a different instrument), and 'do_not_retry' (do not initiate a new attempt for the affected payment in response to this error, regardless of instrument). Clients MUST tolerate and ignore unknown values. When absent, existing behavior applies. The field carries no issuer, network, or processor reason codes.",
+      "examples": [
+        "retry_same_instrument",
+        "try_different_instrument",
+        "do_not_retry"
+      ]
     }
   }
 }

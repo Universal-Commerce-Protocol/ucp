@@ -206,6 +206,7 @@ surface to the buyer:
       "code": "payment_failed",
       "path": "$.payment.instruments[1]",
       "severity": "recoverable",
+      "retry_hint": "try_different_instrument",
       "content": "Card declined — insufficient funds."
     }
   ]
@@ -216,6 +217,12 @@ Severity is `recoverable` because the platform's API supports collecting
 a replacement instrument and re-submitting. This contrasts with
 `requires_buyer_input`, which is reserved for cases where the API cannot
 programmatically collect what the merchant needs.
+
+If one error carries [`do_not_retry`](../../shopping/checkout/index.md#payment-recovery-hints),
+the platform MUST withhold any new split submission that would make a new
+attempt for the affected payment, even if another instrument's error suggests
+retrying. The platform SHOULD read the current checkout state before deciding
+whether it can recover the split.
 
 Error conditions:
 
