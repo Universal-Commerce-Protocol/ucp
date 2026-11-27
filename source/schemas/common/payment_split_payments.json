@@ -98,6 +98,22 @@
             }
           }
         ]
+      },
+      "response_schema": {
+        "title": "Split Payments Capability (Response)",
+        "description": "Split payments capability in checkout responses. May carry the configuration resolved for this checkout.",
+        "allOf": [
+          { "$ref": "../capability.json#/$defs/response_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/business_split_payments_config.json",
+                "description": "Split payments configuration resolved for this checkout. When present, its `allowed_combinations` are authoritative for this checkout in place of the profile's, and admit only combinations the profile's also admits."
+              }
+            }
+          }
+        ]
       }
     }
   }
