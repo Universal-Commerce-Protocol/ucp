@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/seller_details.json",
+  "title": "Seller Details",
+  "description": "Buyer-facing facts about the party that sells an item: its declared trader status, legal identity, geographic address, contact channels, and public registrations. Every value is a statement by the Business, which collects it from the seller and is responsible for its accuracy under applicable law. Every string is plain text without markup or links. Identity documents and payment account details collected to verify a seller MUST NOT be sent in this object or in any extension of it.",
+  "type": "object",
+  "properties": {
+    "trader_status": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "The seller's own declaration of whether it sells as a trader (in a professional capacity) or as a private individual, as recorded by the Business. It is a declaration, not a legal assessment. Well-known values: `trader`, `non_trader`, `not_declared`. A Business that sells its own goods sends `trader`. A Platform MUST treat an unrecognized value as `not_declared`, never as `non_trader`.",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "legal_name": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Legal name of the seller: the name of the legal entity, or the full name of a natural person, whether or not it is entered in a register.",
+      "minLength": 1
+    },
+    "address": {
+      "$ref": "#/$defs/bounded_address",
+      "description": "Geographic address where the seller is established. Not a returns or warehouse address."
+    },
+    "complaints_address": {
+      "$ref": "#/$defs/bounded_address",
+      "description": "Address to which buyers send complaints, when it differs from `address`."
+    },
+    "contacts": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/contact"
+      },
+      "description": "Channels through which a buyer can contact the seller quickly and directly."
+    },
+    "registrations": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/registration"
+      },
+      "description": "Public registrations of the seller, such as a trade register entry or a tax registration number."
+    },
+    "compliance_self_certified": {
+      "type": "boolean",
+      "description": "Whether the seller has given the Business a self-certification committing to offer only products and services that comply with the law applicable where the offer is made. Only `true` states that the certification exists; `false` or absence states nothing, and a Platform MUST NOT present either as a certification. `true` is not a verification of the products."
+    },
+    "on_behalf_of": {
+      "type": "object",
+      "description": "The trader for whom the seller acts as a representative, when the seller concludes the contract in that trader's name. A seller that buys from a supplier and resells (for example, dropshipping) is itself the contracting seller and does not use this field.",
+      "properties": {
+        "legal_name": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Legal name of the represented trader."
+        },
+        "address": {
+          "$ref": "#/$defs/bounded_address",
+          "description": "Geographic address where the represented trader is established."
+        },
+        "complaints_address": {
+          "$ref": "#/$defs/bounded_address",
+          "description": "Address of the represented trader to which buyers send complaints, when it differs from `address`."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "contact": {
+      "type": "object",
+      "description": "A seller contact channel. At least one of `email` or `phone_number` is present.",
+      "anyOf": [
+        {
+          "required": [
+            "email"
+          ]
+        },
+        {
+          "required": [
+            "phone_number"
+          ]
+        }
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Purpose of the channel. Well-known values: `general`, `customer_support`, `complaints`."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Display label for the channel."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 320,
+          "description": "Email address."
+        },
+        "phone_number": {
+          "type": "string",
+          "pattern": "^\\+[1-9][0-9]{1,14}$",
+          "description": "Phone number in E.164 format."
+        }
+      }
+    },
+    "registration": {
+      "type": "object",
+      "description": "A public registration of the seller.",
+      "required": [
+        "type",
+        "number"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Kind of registration. Well-known values: `trade_register`, `vat`."
+        },
+        "number": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Registration number, or equivalent identifier, as issued by the register."
+        },
+        "register_name": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Name of the register or issuing authority."
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 code of the country where the register is kept."
+        }
+      }
+    },
+    "bounded_address": {
+      "title": "Bounded Postal Address",
+      "description": "A postal address with length limits on every field.",
+      "allOf": [
+        {
+          "$ref": "../../common/types/postal_address.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "extended_address": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "street_address": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "address_locality": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "address_region": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "address_country": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "postal_code": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "first_name": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "last_name": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "phone_number": {
+              "type": "string",
+              "maxLength": 32
+            }
+          }
+        }
+      ]
+    },
+    "bounded_link": {
+      "title": "Seller Link",
+      "description": "A link with length limits and an `https` URL.",
+      "allOf": [
+        {
+          "$ref": "../../common/types/link.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "url": {
+              "type": "string",
+              "maxLength": 2048,
+              "pattern": "^https://"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "id": {
+              "type": "string",
+              "maxLength": 256
+            }
+          }
+        }
+      ]
+    }
+  }
+}

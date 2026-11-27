@@ -96,6 +96,8 @@ nav:
                   specification/shopping/extensions/buyer-consent.md
               - Return Policy:
                   specification/shopping/extensions/return-policy.md
+              - Seller Disclosure:
+                  specification/shopping/extensions/seller-disclosure.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
           - Playground: specification/shopping/playground.md
@@ -597,6 +599,13 @@ plugins:
               limit, or returns not accepted), supported resolutions, return
               channels, and typed return fees optionally scoped to channels,
               across catalog, cart, checkout, and order.
+          - specification/shopping/extensions/seller-disclosure.md: >-
+              Seller Disclosure Extension, stating who sells each item: the
+              seller's declared trader status, legal identity, address,
+              contact channels and public registrations, on catalog variants
+              and as a response-only seller_disclosures map on cart, checkout
+              and order, with disclosure warnings for non-trader sellers and
+              shared obligations.
           - specification/shopping/extensions/purchase-options.md: >-
               Purchase Options Extension, letting a business advertise the
               ways a variant can be bought (once, or as a subscription) as
