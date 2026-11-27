@@ -203,9 +203,12 @@ resolved-address check are independent, and both apply.
 | `com.{vendor}.*`  | {vendor}.com | Vendor organization |
 | `org.{org}.*`     | {org}.org    | Organization        |
 
-The `dev.ucp.*` namespace is reserved for capabilities sanctioned by the UCP
-governing body. Vendors **MUST** use their own reverse-domain namespace for
-custom capabilities.
+The `dev.ucp.*` namespace is reserved for generic, cross-organization
+capabilities sanctioned by the UCP governing body and hosted on `ucp.dev`.
+Vendors and organizations **MUST** use their own reverse-domain namespace (e.g.,
+`com.{vendor}.*`, `org.{org}.*`) for custom capabilities, extensions, and
+payment handlers, and **self-host** the corresponding specifications and schemas
+on their own authority domain rather than submitting them to this repository.
 
 ### Services
 

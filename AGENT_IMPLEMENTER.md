@@ -12,6 +12,7 @@ You are an AI agent tasked with implementing the Universal Commerce Protocol (UC
 * **Capabilities:** Standardized functional primitives (e.g., discovery, transactions, identity linking).
 * **Extensions:** Modular enhancements to capabilities to support specific use cases without bloating base interfaces.
 * **Dynamic Discovery:** UCP nodes declare supported capabilities via `.well-known/ucp` (or profile endpoints) to enable autonomous discovery and connection by client platforms.
+* **Namespaces & Self-Hosting:** Core protocol definitions use `dev.ucp.*` (hosted on `ucp.dev`), whereas organization- or vendor-specific capabilities, extensions, and payment handlers use reverse-domain namespaces (`com.{vendor}.*`, `org.{org}.*`) with schemas self-hosted on the matching authority domain rather than submitted to the core UCP repository.
 
 ## 2. Protocol Specifications & Schema Resources
 

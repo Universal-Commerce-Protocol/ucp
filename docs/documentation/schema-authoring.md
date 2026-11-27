@@ -416,10 +416,14 @@ in [Protocol Version](../specification/overview/index.md#protocol-version).
 
 ### Third-Party Extensions and Payment Handlers
 
-Third-party extensions and payment handlers publish versions on their authors'
-own schedules. Their versions remain independent of the selected `ucp.version`
-and are not constrained to `D`. UCP's `payment_handler.json` defines the shared
-declaration shape, not a payment-handler implementation or its release cadence.
+Third-party extensions and payment handlers (`com.{vendor}.*`, `org.{org}.*`)
+are **self-hosted** on their authors' own authority domains (see
+[Namespace Governance](../specification/overview/index.md#namespace-governance))
+rather than in the `Universal-Commerce-Protocol/ucp` repository, and publish
+versions on their authors' own schedules. Their versions remain independent of
+the selected `ucp.version` and are not constrained to `D`. UCP's
+`payment_handler.json` defines the shared declaration shape, not a
+payment-handler implementation or its release cadence.
 
 Third-party extensions version independently:
 
