@@ -36,6 +36,10 @@
       "type": "string",
       "description": "Optional. Last name of the contact associated with the address."
     },
+    "company": {
+      "type": "string",
+      "description": "Optional. Name of the company or organization associated with the address."
+    },
     "phone_number": {
       "type": "string",
       "description": "Optional. Phone number of the contact associated with the address."

@@ -280,6 +280,7 @@ identity provider.
 <!-- ucp:example schema=shopping/types/shipping_destination op=update direction=request -->
 ```json
 {
+  "company": "Example Company",
   "street_address": "123 Main St",
   "address_locality": "Springfield",
   "address_region": "IL",
@@ -295,6 +296,7 @@ identity provider.
 {
   "type": "shipping_address",
   "id": "dest_1",
+  "company": "Example Company",
   "street_address": "123 Main St",
   "address_locality": "Springfield",
   "address_region": "IL",
