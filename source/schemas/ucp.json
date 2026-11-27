@@ -145,6 +145,10 @@
             "type": "array",
             "items": { "$ref": "payment_handler.json#/$defs/base" }
           }
+        },
+        "event_feed": {
+          "$ref": "common/types/event_feed.json",
+          "description": "Agent-subscribable commerce event feed advertised by this party. When present, agents MAY subscribe to receive typed commerce events (order updates, price changes, low stock) without out-of-band configuration."
         }
       }
     },
@@ -234,6 +238,9 @@
                   "$ref": "payment_handler.json#/$defs/business_schema"
                 }
               }
+            },
+            "event_feed": {
+              "$ref": "common/types/event_feed.json"
             }
           }
         }
