@@ -928,6 +928,60 @@ def test_extension_validation() -> None:
   )
 
 
+def test_ap2_checkout_mandate_format() -> None:
+  """checkout_mandate accepts every credential form AP2 allows.
+
+  The old pattern allowed dots only in the issuer JWT, so it rejected any
+  SD-JWT+kb (the KB-JWT has dots) and any delegated chain. The schema has no
+  pattern now; the business verifies the credential per the AP2 spec. Each
+  form goes through the validator the way a complete request carries it.
+  """
+  if not _has_ucp_schema():
+    _check(
+      "checkout_mandate_format",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  j = "eyJh.eyJz.SIG"  # a JWT: three base64url parts with dots
+  d = "WyJzYWx0Il0"  # a disclosure: one base64url segment, no dots
+
+  forms = [
+    (f"{j}~{j}", "SD-JWT+kb, zero disclosures"),
+    (f"{j}~{d}~{j}", "SD-JWT+kb, one disclosure"),
+    (f"{j}~{d}~{d}~{j}", "SD-JWT+kb, many disclosures"),
+    (f"{j}~{d}~", "SD-JWT without key binding"),
+    (f"{j}~{d}~~{j}~{d}~{j}", "delegated SD-JWT chain"),
+  ]
+
+  def complete_request(mandate: str) -> str:
+    return (
+      "<!-- ucp:example schema=shopping/checkout op=complete"
+      " direction=request target=$.ap2 -->\n"
+      f'```json\n{{ "checkout_mandate": {mandate} }}\n```\n'
+    )
+
+  for value, why in forms:
+    result = _process(complete_request(json.dumps(value)))
+    _check(
+      f"checkout_mandate_validates[{why}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+  # The schema still requires a non-empty string.
+  for mandate, why in [('""', "empty string"), ("42", "not a string")]:
+    result = _process(complete_request(mandate))
+    _check(
+      f"checkout_mandate_rejects[{why}]",
+      result.status == "fail"
+      and "extension common/payment_ap2_mandate:" in result.message
+      and "/ap2/checkout_mandate" in result.message,
+      f"got {result.status}: {result.message}",
+    )
+
+
 def test_checkout_item_source_process_block() -> None:
   """Authored checkout create examples provide an item source before merge."""
   if not _has_ucp_schema():
@@ -1414,6 +1468,7 @@ def main() -> int:
   test_parallel_validation_keeps_order_and_single_resolve()
   test_process_block_integration()
   test_extension_validation()
+  test_ap2_checkout_mandate_format()
   test_checkout_item_source_process_block()
   test_checkout_item_source()
   return _report()
