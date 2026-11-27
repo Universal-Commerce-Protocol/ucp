@@ -127,6 +127,7 @@ nav:
                       specification/payment/extensions/actions/three-ds-challenge.md
               - Payment Terms Extension: specification/payment/extensions/terms.md
               - Split Payments Extension: specification/payment/extensions/split-payments.md
+          - Restricted Tender Programs: specification/payment/tender-programs.md
           - Payment Handlers:
               - Guide: specification/payment/guide.md
               - Template: specification/payment/template.md
@@ -671,6 +672,11 @@ plugins:
               Payment Terms Extension, enabling checkout payment schedules for
               immediate and deferred payments such as deposits, installments,
               and lodging balance-at-check-in flows.
+          - specification/payment/tender-programs.md: >-
+              Restricted tender programs (prototype for EP #1143): program
+              codes and registry, the benefit card instrument, business-set
+              line-item tender eligibility, and eligible amounts that cap
+              instruments such as US SNAP EBT cards.
           - specification/payment/guide.md: >-
               Architectural framework and standard vocabulary for specifying UCP
               payment handlers, covering configuration declarations and

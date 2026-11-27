@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/benefit_card_payment_instrument.json",
+  "title": "Benefit Card Payment Instrument",
+  "description": "A benefit card processed outside the card networks, such as a US EBT card. One physical card that carries several programs appears as one instrument per program. Any PIN is entered by the buyer in the payment handler's own secure field; it never appears in a UCP payload, and platforms and agents MUST NOT collect it.",
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "type",
+        "program"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "benefit_card",
+          "description": "Indicates this is a benefit card payment instrument."
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for this benefit card payment instrument.",
+          "properties": {
+            "last_digits": {
+              "type": "string",
+              "description": "Last 4 digits of the card number."
+            },
+            "issuer_region": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}(-[A-Z0-9]{1,3})?$",
+              "description": "ISO 3166-1 alpha-2 or ISO 3166-2 code of the issuing jurisdiction (for example 'US-TX'). Presentational only."
+            }
+          }
+        }
+      }
+    }
+  ]
+}

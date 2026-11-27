@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/tender_program.json",
+  "title": "Tender Program",
+  "description": "A registered tender program code: the lowercase ISO 3166-1 alpha-2 code of the jurisdiction whose rules define the program, an underscore, and a lowercase slug naming the scheme (not an issuer or brand), for example 'us_snap'. Codes are listed in the Tender Programs registry. Readers MUST tolerate codes they do not recognize.",
+  "type": "string",
+  "pattern": "^[a-z]{2}_[a-z0-9]+(_[a-z0-9]+)*$",
+  "examples": [
+    "us_snap",
+    "us_ebt_cash"
+  ]
+}
