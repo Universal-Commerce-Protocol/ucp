@@ -6,6 +6,10 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
+    "honorific_prefix": {
+      "type": "string",
+      "description": "Honorific prefix used to address the booker on the reservation and in correspondence. Well-known values: `mr`, `mrs`, `ms`, `mx`, `dr`. Platforms MAY send other values; a Business that does not recognize a value SHOULD address the booker by name only rather than reject the booking. Platforms MUST NOT infer this value from other fields."
+    },
     "first_name": {
       "type": "string",
       "description": "First name of the booker."
@@ -26,6 +30,11 @@
       "type": "string",
       "format": "date",
       "description": "Date of birth of the booker in ISO 8601 format."
+    },
+    "nationality": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "Nationality (citizenship) of the booker as an ISO 3166-1 alpha-2 country code. At booking this is a value declared by the booker, not an identity-document record or a guest registration filed at check-in. A Business SHOULD NOT require it at booking solely to meet a registration duty that applies on arrival."
     },
     "company": {
       "type": "string",
