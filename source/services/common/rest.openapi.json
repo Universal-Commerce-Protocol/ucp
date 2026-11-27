@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "UCP Common Service",
-    "description": "Canonical REST interface for UCP Common services, including Ask and Location discovery. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
+    "description": "Canonical REST interface for UCP Common services, including Ask, Location discovery, and Incentives. Schema references are logical pointers - actual payload shape is determined by negotiated capabilities.\n\n**Endpoint Resolution:** This spec defines operations only. The base URL MUST be obtained from the Business's discovery profile at `/.well-known/ucp` under `services[\"dev.ucp.common\"][transport=rest].endpoint`. The `{endpoint}` server variable below is a placeholder for tooling compatibility."
   },
   "servers": [
     {
@@ -99,6 +99,50 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/location_lookup_response" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentives/list": {
+      "post": {
+        "operationId": "list_incentives",
+        "summary": "List Incentives",
+        "description": "List the incentives the Business is currently offering in the request's context, without a product search or a session. Read-only; nothing is applied.",
+        "parameters": [
+          { "$ref": "#/components/parameters/authorization" },
+          { "$ref": "#/components/parameters/x_api_key" },
+          { "$ref": "#/components/parameters/signature" },
+          { "$ref": "#/components/parameters/signature_input" },
+          { "$ref": "#/components/parameters/content_digest" },
+          { "$ref": "#/components/parameters/request_id" },
+          { "$ref": "#/components/parameters/user_agent" },
+          { "$ref": "#/components/parameters/ucp_agent" },
+          { "$ref": "#/components/parameters/content_type" },
+          { "$ref": "#/components/parameters/accept" },
+          { "$ref": "#/components/parameters/accept_language" },
+          { "$ref": "#/components/parameters/accept_encoding" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/incentives_list_request" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Incentives on offer",
+            "headers": {
+              "Signature": { "$ref": "#/components/headers/signature" },
+              "Signature-Input": { "$ref": "#/components/headers/signature_input" },
+              "Content-Digest": { "$ref": "#/components/headers/content_digest" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/incentives_list_response" }
               }
             }
           }
@@ -314,6 +358,12 @@
       },
       "ask_response": {
         "$ref": "../../schemas/common/ask.json#/$defs/ask_response"
+      },
+      "incentives_list_request": {
+        "$ref": "../../schemas/common/incentives_list.json#/$defs/list_request"
+      },
+      "incentives_list_response": {
+        "$ref": "../../schemas/common/incentives_list.json#/$defs/list_response"
       }
     }
   }

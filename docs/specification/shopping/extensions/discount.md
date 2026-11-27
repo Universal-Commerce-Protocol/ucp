@@ -193,6 +193,12 @@ segment, or promotional rules:
 - Cannot be removed by the platform
 - Surfaced for transparency (platform can explain to user why discount was applied)
 
+When an applied discount results from an offer the business listed through
+[Incentives](../../common/incentives/index.md), the business **SHOULD** set
+`incentive_id` on the applied discount to that incentive's `id`. An automatic
+discount carries no `code`, so `incentive_id` is how a platform matches it to
+the offer it was shown.
+
 ## Eligibility Claims
 
 Eligibility claims are buyer claims about eligible benefits (see

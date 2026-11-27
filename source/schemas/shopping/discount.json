@@ -48,6 +48,10 @@
           "default": false,
           "description": "True if applied automatically by merchant rules (no code required)."
         },
+        "incentive_id": {
+          "type": "string",
+          "description": "The `id` of the incentive this discount results from, as listed by the Incentives extension (`incentives.available[].id`) or the Incentives List capability. Lets a Platform tell that an offer it was shown has been applied, including an automatic one that carries no `code`. Omitted when the discount does not correspond to a listed incentive."
+        },
         "method": {
           "type": "string",
           "enum": [

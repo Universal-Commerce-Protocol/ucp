@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/discount_benefit.json",
+  "title": "Discount Benefit",
+  "description": "The structured shape of a discount: what it gives, typed by `type`. One shared model for the common discount shapes, reusable wherever a discount is described, whether it is an offer not yet applied or the attribution of one that was. Well-known types: `amount_off` (carries `amount`), `percent_off` (carries `basis_points`, optionally capped by `max_amount`), `fixed_price` (carries `price`), `free_shipping`, and `free_item` (optionally carries `quantity` and `item`). The vocabulary is open. A consumer that does not recognize `type` MUST NOT derive any amount from the benefit; it MAY still present the human-readable fields of the object that embeds it.",
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Benefit kind. Well-known values: `amount_off`, `percent_off`, `fixed_price`, `free_shipping`, `free_item`. Businesses MAY use reverse-domain names for custom kinds (e.g., `com.example.benefit.gift_wrap`). Unknown values MUST be tolerated and establish no price inference.",
+      "examples": [
+        "amount_off",
+        "percent_off",
+        "fixed_price",
+        "free_shipping",
+        "free_item"
+      ]
+    },
+    "amount": {
+      "allOf": [
+        {
+          "$ref": "price.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "minimum": 1
+            }
+          }
+        }
+      ],
+      "description": "For `amount_off`: the amount taken off, greater than zero. Mutually exclusive with `basis_points` and `price`."
+    },
+    "basis_points": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "For `percent_off`: the percentage taken off, in basis points (hundredths of a percent; `1250` = 12.5%). Mutually exclusive with `amount` and `price`."
+    },
+    "max_amount": {
+      "allOf": [
+        {
+          "$ref": "price.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "minimum": 1
+            }
+          }
+        }
+      ],
+      "description": "Cap on a `basis_points` benefit: the most it takes off in total. Omitted means no cap. Requires `basis_points`."
+    },
+    "price": {
+      "allOf": [
+        {
+          "$ref": "price.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "minimum": 1
+            }
+          }
+        }
+      ],
+      "description": "For `fixed_price`: what each unit the benefit applies to costs while it applies. Mutually exclusive with `amount` and `basis_points`."
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "For `free_item`: the number of units given free."
+    },
+    "item": {
+      "type": "object",
+      "title": "Free Item",
+      "description": "For `free_item`: the item given free, when it is a specific gift. Omitted means the free units are among the items the benefit applies to (e.g., 'buy two, get one free'), chosen by the Business.",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier of the gift in the Business's catalog, when it can be looked up."
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable name of the gift."
+        },
+        "value": {
+          "$ref": "price.json",
+          "description": "What the gift is worth, for presentation."
+        }
+      }
+    }
+  },
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "amount",
+          "basis_points"
+        ]
+      },
+      {
+        "required": [
+          "amount",
+          "price"
+        ]
+      },
+      {
+        "required": [
+          "basis_points",
+          "price"
+        ]
+      }
+    ]
+  },
+  "dependentRequired": {
+    "max_amount": [
+      "basis_points"
+    ]
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "amount_off"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "quantity": false,
+          "item": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "percent_off"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "basis_points"
+        ],
+        "properties": {
+          "quantity": false,
+          "item": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "fixed_price"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "price"
+        ],
+        "properties": {
+          "quantity": false,
+          "item": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "free_shipping"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "amount": false,
+          "basis_points": false,
+          "max_amount": false,
+          "price": false,
+          "quantity": false,
+          "item": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "free_item"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "amount": false,
+          "basis_points": false,
+          "max_amount": false,
+          "price": false
+        }
+      }
+    }
+  ]
+}
