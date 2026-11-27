@@ -141,6 +141,7 @@ sandboxing
 schemas
 sdjwt
 shopify
+soulbound
 streamable
 superfences
 talla
