@@ -1,0 +1,1 @@
+{"description":{"plain":"pricing object with mode public plus an unknown vendor-defined field; priced."},"id":"var_vendorext","price":{"amount":2500,"currency":"USD"},"pricing":{"mode":"public","vendor_note":"x"},"title":"Vendor Extension"}

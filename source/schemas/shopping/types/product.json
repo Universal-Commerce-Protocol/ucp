@@ -8,7 +8,6 @@
     "id",
     "title",
     "description",
-    "price_range",
     "variants"
   ],
   "properties": {
@@ -42,7 +41,7 @@
     },
     "price_range": {
       "$ref": "../../common/types/price_range.json",
-      "description": "Price range across all variants."
+      "description": "Price range across all variants. [PROPOSED: when one or more variants do not carry a range-eligible price in this response (see Variant `pricing`), `price_range` MAY be omitted; when present it MUST be computed only over the variants that carry a range-eligible price in this response — never zero-filled or synthesized for unpriced/ineligible variants (for example, variants priced $100, quote_required (no price), and $150 yield a range of $100–$150, never $0–$150) — and the product SHOULD carry a `price_on_request` disclosure warning. When no variant carries a range-eligible price, `price_range` MUST be omitted. A range-eligible price is a numeric `price` whose pricing semantics the Platform understands as usable for this caller: `pricing` absent + `price` is eligible; `mode: public` + `price` is eligible; `mode: buyer_specific` + `price` is eligible for this caller; `mode: quote_required` and `mode: contract_only` are never eligible (no price exists on the variant in either case); a variant carrying an unrecognized/unknown `pricing.mode` alongside a numeric `price` is NOT eligible to a Platform that does not understand that mode — JSON Schema cannot verify which modes a given Platform understands, so this is a behavioral producer/consumer rule, not a schema constraint. The core well-known range calculation (producer side) includes ordinary/public prices and resolved `buyer_specific` prices only. Consumer-side fallback: if a product contains a pricing mode the Platform does not understand, the Platform MUST NOT assume `product.price_range` includes only prices that are safe for it to display — the safest old-consumer behavior is to suppress or recompute the range from variants it understands. The presence of a variant's `next_step` (e.g. `request_quote`) has no bearing on range eligibility; eligibility depends solely on `pricing.mode` and price usability. When the priced variants are `buyer_specific` and resolved for a recognized caller, the resulting `price_range` is itself caller-specific and is subject to the same cache-isolation requirement as the underlying buyer-specific prices: a Platform MUST NOT expose or reuse that `price_range` for a different caller. `list_price_range`, when present, follows the same rule.] [REVIEW REVISION] `undisclosed` is never range-eligible and must not disclose whether a hidden variant is on a confidential price list. A range that includes buyer_specific prices is itself restricted and MUST NOT be sent to an unnegotiated or unauthorized consumer. Schema validity does not prove confidentiality, arithmetic, or old-client safety."
     },
     "list_price_range": {
       "$ref": "../../common/types/price_range.json",
@@ -85,5 +84,104 @@
       "type": "object",
       "description": "Business-defined custom data extending the standard product model."
     }
-  }
+  },
+  "allOf": [
+    {
+      "description": "[PROPOSED] `price_range` is REQUIRED when every variant carries a price with absent/public/buyer_specific mode. It MAY be omitted if a variant lacks a price or uses another mode; consumers still apply range-eligibility rules.",
+      "if": {
+        "properties": {
+          "variants": {
+            "type": "array",
+            "contains": {
+              "anyOf": [
+                {
+                  "not": {
+                    "required": [
+                      "price"
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "pricing"
+                  ],
+                  "properties": {
+                    "pricing": {
+                      "required": [
+                        "mode"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "not": {
+                            "enum": [
+                              "public",
+                              "buyer_specific"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "then": {},
+      "else": {
+        "required": [
+          "price_range"
+        ]
+      }
+    },
+    {
+      "description": "[PROPOSED] `price_range` MUST be omitted when no variant carries a numeric price in this response.",
+      "if": {
+        "properties": {
+          "variants": {
+            "type": "array",
+            "not": {
+              "contains": {
+                "required": [
+                  "price"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "price_range"
+          ]
+        }
+      }
+    },
+    {
+      "description": "[PROPOSED] `list_price_range` MUST be omitted when no variant carries a numeric price in this response.",
+      "if": {
+        "properties": {
+          "variants": {
+            "type": "array",
+            "not": {
+              "contains": {
+                "required": [
+                  "price"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "list_price_range"
+          ]
+        }
+      }
+    }
+  ]
 }

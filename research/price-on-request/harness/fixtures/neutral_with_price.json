@@ -1,0 +1,14 @@
+{
+  "id": "var-confidential",
+  "title": "Redacted B2B item",
+  "description": {
+    "plain": "Synthetic regression example; not customer data"
+  },
+  "price": {
+    "amount": 4100,
+    "currency": "USD"
+  },
+  "pricing": {
+    "mode": "undisclosed"
+  }
+}
