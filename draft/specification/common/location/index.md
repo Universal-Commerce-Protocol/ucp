@@ -9,27 +9,27 @@ This is vertical-agnostic and enables key commerce flows such as:
 
 ## Capabilities
 
-| Capability                                                                                             | Description                                                                                                                                       |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`dev.ucp.common.location.search`](http://ucp.dev/draft/specification/common/location/search/index.md) | Search for Locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `items`). |
-| [`dev.ucp.common.location.lookup`](http://ucp.dev/draft/specification/common/location/lookup/index.md) | Retrieve full details for one or more Locations by identifier, optionally refined by the same relations and filters.                              |
+| Capability                                                                                              | Description                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`dev.ucp.common.location.search`](https://ucp.dev/draft/specification/common/location/search/index.md) | Search for Locations using free-text queries, explicit spatial relations (`distance`, `serves`), and filters (`hours`, `amenities`, and `items`). |
+| [`dev.ucp.common.location.lookup`](https://ucp.dev/draft/specification/common/location/lookup/index.md) | Retrieve full details for one or more Locations by identifier, optionally refined by the same relations and filters.                              |
 
 ## Key Concepts
 
 - **Location**: A physical entity that can be found on a map. Defined by a display name, address, operating hours, and **geographic context** (geographic coordinates).
-- **Amenities**: Static features, services, or capabilities of the Location. Responses use a map with reverse-DNS amenity identifiers as keys, combining collision-resistant names, one entry per identifier, and buyer-facing descriptions that keep custom amenities renderable. See [Amenity Vocabulary](http://ucp.dev/draft/specification/common/location/search/#amenity-vocabulary).
-- **Item Availability**: The `items` filter asks whether the Business can currently provide every referenced item at a candidate Location. Returning the Location is a coarse, provisional assertion, not item-level detail or a reservation. See [Item Availability Filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter).
+- **Amenities**: Static features, services, or capabilities of the Location. Responses use a map with reverse-DNS amenity identifiers as keys, combining collision-resistant names, one entry per identifier, and buyer-facing descriptions that keep custom amenities renderable. See [Amenity Vocabulary](https://ucp.dev/draft/specification/common/location/search/#amenity-vocabulary).
+- **Item Availability**: The `items` filter asks whether the Business can currently provide every referenced item at a candidate Location. Returning the Location is a coarse, provisional assertion, not item-level detail or a reservation. See [Item Availability Filter](https://ucp.dev/draft/specification/common/location/search/#item-availability-filter).
 - **Proximity & Serviceability**: Two distinct, explicit spatial relations:
   - **`distance`**: Compares a Location's coordinates against a Platform-supplied center point and inclusive radius.
-  - **`serves`**: Asks whether the Location can provisionally serve one explicit Platform-supplied target; the Business is authoritative for that answer, and UCP does not model or expose the underlying coverage geometry — a Location does not implicitly carry a geometric boundary around its coordinates. See [Spatial Relations](http://ucp.dev/draft/specification/common/location/search/#spatial-relations).
+  - **`serves`**: Asks whether the Location can provisionally serve one explicit Platform-supplied target; the Business is authoritative for that answer, and UCP does not model or expose the underlying coverage geometry — a Location does not implicitly carry a geometric boundary around its coordinates. See [Spatial Relations](https://ucp.dev/draft/specification/common/location/search/#spatial-relations).
 - **Operating Hours**: Regular weekly schedules (`hours`) and date-specific exceptions (`exception_hours`), interpreted in the Location's `timezone`. See [Operating Hours](#operating-hours).
 
 ### Relationship to Other Capabilities
 
 The Location capability provides the foundation for localized commerce by integrating tightly with other capabilities (like Catalog, Cart, and Checkout in Shopping):
 
-1. **Stable Identifiers**: Location Search and Lookup return stable, Business-scoped `Location.id` values representing physical entities. A Location ID selects only the physical entity; it does not determine the interaction mode, guarantee availability, or bind operational terms. Downstream capabilities authoritatively negotiate and revalidate all terms during transaction processing (for example, a returned ID submitted as `selected_destination_id`; see [Selection and Location Identity](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/#selection-and-location-identity)).
-1. **Separation of Discovery Concerns**: Each capability answers one narrow question, and later stages revalidate earlier signals. Location answers which places can currently provide a set of referenced items (the [`items` filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter)).
+1. **Stable Identifiers**: Location Search and Lookup return stable, Business-scoped `Location.id` values representing physical entities. A Location ID selects only the physical entity; it does not determine the interaction mode, guarantee availability, or bind operational terms. Downstream capabilities authoritatively negotiate and revalidate all terms during transaction processing (for example, a returned ID submitted as `selected_destination_id`; see [Selection and Location Identity](https://ucp.dev/draft/specification/shopping/extensions/fulfillment/#selection-and-location-identity)).
+1. **Separation of Discovery Concerns**: Each capability answers one narrow question, and later stages revalidate earlier signals. Location answers which places can currently provide a set of referenced items (the [`items` filter](https://ucp.dev/draft/specification/common/location/search/#item-availability-filter)).
 1. **Provisional vs. Authoritative Boundaries**:
    - *Discovery Phase (Provisional)*: Location responses based on operating hours, current item availability, and amenities represent the Business's *current terms* at the time of query. They are **provisional signals** and are not binding commitments.
    - *Checkout Phase (Authoritative)*: Final transaction terms that depend on a location (e.g., pickup) **MUST** be negotiated and finalized authoritatively. Discovery signals **SHOULD NOT** be cached or reused across sessions without re-validation.
@@ -38,7 +38,7 @@ The Location capability provides the foundation for localized commerce by integr
 
 ### Representation
 
-The hours filter's [`open_at`](http://ucp.dev/draft/specification/common/location/search/#hours-based-filter) value is an exact instant. Operating hours use the Location's local date and clock time, interpreted using its IANA timezone.
+The hours filter's [`open_at`](https://ucp.dev/draft/specification/common/location/search/#hours-based-filter) value is an exact instant. Operating hours use the Location's local date and clock time, interpreted using its IANA timezone.
 
 - `hours` is a list of regular weekly intervals. Each item contains `day`, `opens`, and `closes`. `day` is a stable UCP day-of-week identifier for the day on which the interval begins, not localized display text. A Platform **MAY** localize it for presentation. Times use 24-hour `HH:MM` form.
 - `exception_hours` is a list of date-specific timed intervals or full closures. Each item contains inclusive local-date bounds `valid_from` and `valid_through` in `YYYY-MM-DD` form; equal bounds select one date. Both `opens` and `closes` define a timed interval, while omitting both defines a full closure. The optional `title` is a short, human-readable heading. It is presentation metadata and does not affect schedule evaluation.
@@ -110,7 +110,7 @@ Buyer-facing presentation metadata for one amenity identifier. The containing ma
 
 Buyer location and market context for the operations. All fields are optional hints for relevance and localization. Platforms **MAY** geo-detect context from request headers.
 
-Context signals are provisional—not authoritative data. A Business **MAY** use them to influence ranking, localization, or selection of a bounded default browse page, and **MAY** ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection). A Business **MUST NOT** substitute them for explicit `distance` or `serves` operands or for `filters.items` item identifiers; they prove neither proximity, serviceability, nor item availability (see [Request Grammar](http://ucp.dev/draft/specification/common/location/search/#request-grammar)).
+Context signals are provisional—not authoritative data. A Business **MAY** use them to influence ranking, localization, or selection of a bounded default browse page, and **MAY** ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection). A Business **MUST NOT** substitute them for explicit `distance` or `serves` operands or for `filters.items` item identifiers; they prove neither proximity, serviceability, nor item availability (see [Request Grammar](https://ucp.dev/draft/specification/common/location/search/#request-grammar)).
 
 | Name            | Type                                                                                | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------- | ----------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -133,7 +133,7 @@ Context signals are provisional—not authoritative data. A Business **MAY** use
 
 ### Signals
 
-Environment data provided by the Platform to support authorization and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the Platform to support authorization and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Requirement | Description                                    |
 | ------------------ | ------ | ----------- | ---------------------------------------------- |
@@ -207,8 +207,8 @@ An ordinary empty result is not an error: the query was valid but returned no ma
 
 The capabilities above are bound to specific transport protocols:
 
-- [REST Binding](http://ucp.dev/draft/specification/common/location/rest/index.md): RESTful API mapping.
-- [MCP Binding](http://ucp.dev/draft/specification/common/location/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
+- [REST Binding](https://ucp.dev/draft/specification/common/location/rest/index.md): RESTful API mapping.
+- [MCP Binding](https://ucp.dev/draft/specification/common/location/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
 
 ## Security & Privacy Considerations
 

@@ -1,6 +1,6 @@
 # Order Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Order Capability](http://ucp.dev/draft/specification/shopping/order/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Order Capability](https://ucp.dev/draft/specification/shopping/order/index.md).
 
 ## Protocol Fundamentals
 
@@ -60,19 +60,19 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
 In an MCP binding, each exposed UCP operation maps to one MCP tool.
 
-| Tool        | Operation                                                                 | Description                        |
-| ----------- | ------------------------------------------------------------------------- | ---------------------------------- |
-| `get_order` | [Get Order](http://ucp.dev/draft/specification/shopping/order/#get-order) | Get the current state of an order. |
+| Tool        | Operation                                                                  | Description                        |
+| ----------- | -------------------------------------------------------------------------- | ---------------------------------- |
+| `get_order` | [Get Order](https://ucp.dev/draft/specification/shopping/order/#get-order) | Get the current state of an order. |
 
 ### `get_order`
 
-Maps to the [Get Order](http://ucp.dev/draft/specification/shopping/order/#get-order) operation. Returns the current-state snapshot of an order.
+Maps to the [Get Order](https://ucp.dev/draft/specification/shopping/order/#get-order) operation. Returns the current-state snapshot of an order.
 
 #### Input Schema
 
@@ -279,4 +279,4 @@ Businesses implementing the MCP binding:
 
 - **MUST** implement the `get_order` tool per the [OpenRPC schema](/draft/services/shopping/mcp.openrpc.json)
 
-See [Order Capability - Guidelines](http://ucp.dev/draft/specification/shopping/order/#operations-guidelines) for capability-level requirements that apply across all transports.
+See [Order Capability - Guidelines](https://ucp.dev/draft/specification/shopping/order/#operations-guidelines) for capability-level requirements that apply across all transports.

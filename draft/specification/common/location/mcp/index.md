@@ -1,6 +1,6 @@
 # Location - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Location Capability](http://ucp.dev/draft/specification/common/location/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Location Capability](https://ucp.dev/draft/specification/common/location/index.md).
 
 ## Protocol Fundamentals
 
@@ -46,14 +46,14 @@ A Platform using MCP **MUST** include a `meta` object with `meta["ucp-agent"].pr
 
 ## Tools
 
-| Tool               | Capability                                                                   | Description                                                                                         |
-| ------------------ | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `search_locations` | [Search](http://ucp.dev/draft/specification/common/location/search/index.md) | Search for Locations using text, explicit spatial relations, and filters.                           |
-| `lookup_locations` | [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) | Batch lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
+| Tool               | Capability                                                                    | Description                                                                                         |
+| ------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `search_locations` | [Search](https://ucp.dev/draft/specification/common/location/search/index.md) | Search for Locations using text, explicit spatial relations, and filters.                           |
+| `lookup_locations` | [Lookup](https://ucp.dev/draft/specification/common/location/lookup/index.md) | Batch lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
 
 ### `search_locations`
 
-Maps to the [Location Search](http://ucp.dev/draft/specification/common/location/search/index.md) capability. See the [complete transport-neutral Search example](http://ucp.dev/draft/specification/common/location/search/#examples).
+Maps to the [Location Search](https://ucp.dev/draft/specification/common/location/search/index.md) capability. See the [complete transport-neutral Search example](https://ucp.dev/draft/specification/common/location/search/#examples).
 
 #### Request Arguments
 
@@ -128,7 +128,7 @@ Request body for location search. The `distance` and `serves` relations and ever
 
 ### `lookup_locations`
 
-Maps to the [Location Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) capability. See the [complete transport-neutral Lookup example](http://ucp.dev/draft/specification/common/location/lookup/#examples).
+Maps to the [Location Lookup](https://ucp.dev/draft/specification/common/location/lookup/index.md) capability. See the [complete transport-neutral Lookup example](https://ucp.dev/draft/specification/common/location/lookup/#examples).
 
 #### Request Arguments
 
@@ -208,11 +208,11 @@ UCP uses a two-layer error model separating transport-level errors from business
 
 ### Transport Errors
 
-Transport-level failures (authentication, rate limiting, invalid parameters) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-codes) for details.
+Transport-level failures (authentication, rate limiting, invalid parameters) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-codes) for details.
 
 ### Business Outcomes
 
-All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Location Overview](http://ucp.dev/draft/specification/common/location/#messages-and-error-handling) for message semantics.
+All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Location Overview](https://ucp.dev/draft/specification/common/location/#messages-and-error-handling) for message semantics.
 
 ## Entities
 
@@ -310,10 +310,10 @@ Location with required correlation metadata for lookup responses.
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-1. Implement tools for each Location capability advertised in the Business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/common/location/search/index.md), [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md)). Each capability **MAY** be adopted independently.
+1. Implement tools for each Location capability advertised in the Business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/common/location/search/index.md), [Lookup](https://ucp.dev/draft/specification/common/location/lookup/index.md)). Each capability **MAY** be adopted independently.
 1. Evaluate the `distance` and `serves` relations and the `filters.items` availability predicate only against their explicit Platform-supplied operands. Never derive an operand from `context`, `signals`, or an IP address, and never apply an implicit serviceability or item-availability check when its input is absent.
 1. Apply `distance`, `serves`, and every supplied `filters` predicate conjunctively (AND).
-1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/common/location/search/#pagination)).
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](https://ucp.dev/draft/specification/common/location/search/#pagination)).
 1. Return a successful JSON-RPC result for Lookup requests; unknown identifiers result in fewer or no Locations returned (**MAY** include informational `not_found` messages in the `messages` array).
 1. Return a successful JSON-RPC result when a Lookup request exceeds the Business's batch maximum, process the first maximum number of distinct identifiers in request order, and include an informational `batch_limit_applied` message.
 1. Validate tool inputs against UCP schemas.

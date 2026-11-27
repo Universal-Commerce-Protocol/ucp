@@ -86,14 +86,14 @@ If a public key cannot be resolved, or if the signature is invalid, the business
 
 ## Cryptographic Requirements
 
-This extension uses the cryptographic primitives defined in the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification:
+This extension uses the cryptographic primitives defined in the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification:
 
 - **Algorithm:** per AP2's Checkout JWT signing rule — AP2 v0.2 requires ECDSA (`ES256`/`ES384`/`ES512`); see the note below.
 - **Canonicalization:** JCS ([RFC 8785](https://datatracker.ietf.org/doc/html/rfc8785))
 - **Key Format:** JWK ([RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517))
-- **Key Discovery:** `keys[]` in `/.well-known/ucp` (see [Key Discovery](http://ucp.dev/draft/specification/overview/#key-discovery))
+- **Key Discovery:** `keys[]` in `/.well-known/ucp` (see [Key Discovery](https://ucp.dev/draft/specification/overview/#key-discovery))
 
-See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for key format and rotation.
+See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for key format and rotation.
 
 > **Note (algorithm requirement).** AP2 binds the Payment Mandate to the Checkout via `hash(checkout_jwt)`; the underlying security property is per-session unpredictability of the signed bytes — which UCP's unique per-session Checkout `id` supplies structurally. AP2 v0.2 is internally inconsistent on how to require this: `specification.md` states an algorithm-class rule (non-deterministic only, e.g. ECDSA), while the Security & Privacy considerations state an entropy rule satisfied by any algorithm given sufficient payload entropy. [AP2 #268](https://github.com/google-agentic-commerce/AP2/issues/268) tracks converging on the entropy formulation. Follow AP2 for the authoritative rule; under the entropy reading a UCP Checkout JWT may be signed with any algorithm (including Ed25519), letting one key serve both AP2 mandate signing and Web Bot Auth.
 

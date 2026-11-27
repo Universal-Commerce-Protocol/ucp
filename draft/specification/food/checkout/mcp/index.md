@@ -1,6 +1,6 @@
 # Checkout Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the food [Checkout Capability](http://ucp.dev/draft/specification/food/checkout/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the food [Checkout Capability](https://ucp.dev/draft/specification/food/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -93,7 +93,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety — retrying `complete_checkout` without the same key risks sending the same order to the kitchen twice. Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_checkout` and `cancel_checkout` operations also require `meta["idempotency-key"]` for retry safety — retrying `complete_checkout` without the same key risks sending the same order to the kitchen twice. Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -107,31 +107,31 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses include `checkout.id` as part of the full resource state.
 - **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
 
-| Tool                | Operation                                                                                | Description                |
-| ------------------- | ---------------------------------------------------------------------------------------- | -------------------------- |
-| `create_checkout`   | [Create Checkout](http://ucp.dev/draft/specification/food/checkout/#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](http://ucp.dev/draft/specification/food/checkout/#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](http://ucp.dev/draft/specification/food/checkout/#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](http://ucp.dev/draft/specification/food/checkout/#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](http://ucp.dev/draft/specification/food/checkout/#cancel-checkout)     | Cancel a checkout session. |
+| Tool                | Operation                                                                                 | Description                |
+| ------------------- | ----------------------------------------------------------------------------------------- | -------------------------- |
+| `create_checkout`   | [Create Checkout](https://ucp.dev/draft/specification/food/checkout/#create-checkout)     | Create a checkout session. |
+| `get_checkout`      | [Get Checkout](https://ucp.dev/draft/specification/food/checkout/#get-checkout)           | Get a checkout session.    |
+| `update_checkout`   | [Update Checkout](https://ucp.dev/draft/specification/food/checkout/#update-checkout)     | Update a checkout session. |
+| `complete_checkout` | [Complete Checkout](https://ucp.dev/draft/specification/food/checkout/#complete-checkout) | Place the order.           |
+| `cancel_checkout`   | [Cancel Checkout](https://ucp.dev/draft/specification/food/checkout/#cancel-checkout)     | Cancel a checkout session. |
 
-The examples below follow the same order used in the [REST Binding](http://ucp.dev/draft/specification/food/checkout/rest/#examples): two customized pizzas and a salad from Luigi's, delivered ASAP with an 18% tip.
+The examples below follow the same order used in the [REST Binding](https://ucp.dev/draft/specification/food/checkout/rest/#examples): two customized pizzas and a salad from Luigi's, delivered ASAP with an 18% tip.
 
 ### `create_checkout`
 
-Maps to the [Create Checkout](http://ucp.dev/draft/specification/food/checkout/#create-checkout) operation. The Platform sends the establishment and the configured dishes; the Business prices them and asks for a fulfillment method.
+Maps to the [Create Checkout](https://ucp.dev/draft/specification/food/checkout/#create-checkout) operation. The Platform sends the establishment and the configured dishes; the Business prices them and asks for a fulfillment method.
 
 #### Input Schema
 
-- `checkout` ([Checkout](http://ucp.dev/draft/specification/food/checkout/#create-checkout)): **Required**. Contains the establishment, dishes, and optional buyer and extension data.
+- `checkout` ([Checkout](https://ucp.dev/draft/specification/food/checkout/#create-checkout)): **Required**. Contains the establishment, dishes, and optional buyer and extension data.
   - Extensions (Optional):
-    - `dev.ucp.food.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/food/extensions/fulfillment/index.md)
-    - `dev.ucp.food.tip`: [Tip](http://ucp.dev/draft/specification/food/extensions/tip/index.md)
-    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
+    - `dev.ucp.food.fulfillment`: [Fulfillment](https://ucp.dev/draft/specification/food/extensions/fulfillment/index.md)
+    - `dev.ucp.food.tip`: [Tip](https://ucp.dev/draft/specification/food/extensions/tip/index.md)
+    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](http://ucp.dev/draft/specification/food/checkout/#create-checkout) object.
+- [Checkout](https://ucp.dev/draft/specification/food/checkout/#create-checkout) object.
 
 #### Example
 
@@ -344,7 +344,7 @@ The kitchen has stopped taking orders — no checkout resource is created:
 
 ### `get_checkout`
 
-Maps to the [Get Checkout](http://ucp.dev/draft/specification/food/checkout/#get-checkout) operation. Use it to re-read Business-authored state (prices, delivery windows, tip resolution) or to poll while the checkout is `complete_in_progress`.
+Maps to the [Get Checkout](https://ucp.dev/draft/specification/food/checkout/#get-checkout) operation. Use it to re-read Business-authored state (prices, delivery windows, tip resolution) or to poll while the checkout is `complete_in_progress`.
 
 #### Input Schema
 
@@ -352,26 +352,26 @@ Maps to the [Get Checkout](http://ucp.dev/draft/specification/food/checkout/#get
 
 #### Output Schema
 
-- [Checkout](http://ucp.dev/draft/specification/food/checkout/#get-checkout) object.
+- [Checkout](https://ucp.dev/draft/specification/food/checkout/#get-checkout) object.
 
 ### `update_checkout`
 
-Maps to the [Update Checkout](http://ucp.dev/draft/specification/food/checkout/#update-checkout) operation. Update is a full replacement of the writable state: the Platform resends every line item (with its `id`), the buyer, the fulfillment selection, and the tip — anything omitted is removed.
+Maps to the [Update Checkout](https://ucp.dev/draft/specification/food/checkout/#update-checkout) operation. Update is a full replacement of the writable state: the Platform resends every line item (with its `id`), the buyer, the fulfillment selection, and the tip — anything omitted is removed.
 
-The Platform **MUST NOT** start a new `update_checkout` operation while the Checkout is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new `update_checkout` request in that state, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message.
+The Platform **MUST NOT** start a new `update_checkout` operation while the Checkout is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new `update_checkout` request in that state, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message.
 
 #### Input Schema
 
 - `id` (String): **Required**. The ID of the checkout session to update.
-- `checkout` ([Checkout](http://ucp.dev/draft/specification/food/checkout/#update-checkout)): **Required**. Contains the full writable checkout state.
+- `checkout` ([Checkout](https://ucp.dev/draft/specification/food/checkout/#update-checkout)): **Required**. Contains the full writable checkout state.
   - Extensions (Optional):
-    - `dev.ucp.food.fulfillment`: [Fulfillment](http://ucp.dev/draft/specification/food/extensions/fulfillment/index.md)
-    - `dev.ucp.food.tip`: [Tip](http://ucp.dev/draft/specification/food/extensions/tip/index.md)
-    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
+    - `dev.ucp.food.fulfillment`: [Fulfillment](https://ucp.dev/draft/specification/food/extensions/fulfillment/index.md)
+    - `dev.ucp.food.tip`: [Tip](https://ucp.dev/draft/specification/food/extensions/tip/index.md)
+    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](http://ucp.dev/draft/specification/food/checkout/#update-checkout) object.
+- [Checkout](https://ucp.dev/draft/specification/food/checkout/#update-checkout) object.
 
 #### Example
 
@@ -578,20 +578,20 @@ The Platform adds a delivery address and selects the 18% tip preset. The Busines
 
 ### `complete_checkout`
 
-Maps to the [Complete Checkout](http://ucp.dev/draft/specification/food/checkout/#complete-checkout) operation. The Platform submits payment; the Business places the order with the kitchen and returns the order confirmation.
+Maps to the [Complete Checkout](https://ucp.dev/draft/specification/food/checkout/#complete-checkout) operation. The Platform submits payment; the Business places the order with the kitchen and returns the order confirmation.
 
 #### Input Schema
 
 - `id` (String): **Required**. The ID of the checkout session.
-- `checkout` ([Checkout](http://ucp.dev/draft/specification/food/checkout/#complete-checkout)): **Required**. Contains `payment` and optional `signals`.
+- `checkout` ([Checkout](https://ucp.dev/draft/specification/food/checkout/#complete-checkout)): **Required**. Contains `payment` and optional `signals`.
   - Extensions (Optional):
-    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
+    - `dev.ucp.common.payment.ap2_mandate`: [AP2 Mandates](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)
 
 #### Output Schema
 
-- [Checkout](http://ucp.dev/draft/specification/food/checkout/#complete-checkout) object.
+- [Checkout](https://ucp.dev/draft/specification/food/checkout/#complete-checkout) object.
 
-**Note:** Response **MUST** include an `order` object (`id`, `tracking_url`, and optionally a pickup `label`) if completion succeeds. See [Order Confirmation & Tracking](http://ucp.dev/draft/specification/food/checkout/#order-confirmation-tracking).
+**Note:** Response **MUST** include an `order` object (`id`, `tracking_url`, and optionally a pickup `label`) if completion succeeds. See [Order Confirmation & Tracking](https://ucp.dev/draft/specification/food/checkout/#order-confirmation-tracking).
 
 #### Example
 
@@ -703,7 +703,7 @@ Maps to the [Complete Checkout](http://ucp.dev/draft/specification/food/checkout
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](http://ucp.dev/draft/specification/food/checkout/#cancel-checkout) operation. Cancels an in-progress checkout before an order is placed; it does not cancel an order the kitchen has already accepted.
+Maps to the [Cancel Checkout](https://ucp.dev/draft/specification/food/checkout/#cancel-checkout) operation. Cancels an in-progress checkout before an order is placed; it does not cancel an order the kitchen has already accepted.
 
 #### Input Schema
 
@@ -711,13 +711,13 @@ Maps to the [Cancel Checkout](http://ucp.dev/draft/specification/food/checkout/#
 
 #### Output Schema
 
-- [Checkout](http://ucp.dev/draft/specification/food/checkout/#cancel-checkout) object.
+- [Checkout](https://ucp.dev/draft/specification/food/checkout/#cancel-checkout) object.
 
 **Note:** Response **MUST** include `"status": "canceled"` if cancellation succeeds.
 
 ## Error Handling
 
-UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and [Error Handling](http://ucp.dev/draft/specification/food/checkout/#error-handling) for the food-specific codes.
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and [Error Handling](https://ucp.dev/draft/specification/food/checkout/#error-handling) for the food-specific codes.
 
 - **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
 - **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
@@ -817,7 +817,7 @@ For `create_checkout`, when no checkout session can be created, the Business ret
 
 ## Message Signing
 
-Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -850,7 +850,7 @@ Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON canonicalization is required.
 
-See [Message Signatures - MCP Transport](http://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
+See [Message Signatures - MCP Transport](https://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
 
 ### Response Signing
 
@@ -874,7 +874,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"chk_food_7187","status":"completed","order":{"id":"ord_food_9876543210","label":"#42",...}}}}
 ```
 
-See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
+See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
 
 ## Conformance
 
@@ -882,14 +882,14 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core checkout tools defined in this specification.
-1. Return errors per the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 
 A conforming implementation **SHOULD**:
 
-1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md)).
+1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md)).
 1. Verify authentication on incoming requests before processing.
 
 ## Implementation

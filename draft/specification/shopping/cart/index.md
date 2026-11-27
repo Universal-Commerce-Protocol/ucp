@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Cart capability enables basket building without the complexity of checkout. While [Checkout](http://ucp.dev/draft/specification/shopping/checkout/index.md) manages payment handlers, status lifecycle, and order finalization, cart provides a lightweight CRUD interface for item collection before purchase intent is established.
+The Cart capability enables basket building without the complexity of checkout. While [Checkout](https://ucp.dev/draft/specification/shopping/checkout/index.md) manages payment handlers, status lifecycle, and order finalization, cart provides a lightweight CRUD interface for item collection before purchase intent is established.
 
 **When to use Cart vs Checkout:**
 
@@ -39,7 +39,7 @@ When the Cart capability is negotiated, the Platform converts a cart to a checko
 }
 ```
 
-The Platform **MAY** omit `line_items`, or send an empty array (`"line_items": []`), when it provides `cart_id`. The Business **MUST** use the cart contents and **MUST** ignore overlapping fields in the checkout payload. All other input and negotiation requirements of [Create Checkout](http://ucp.dev/draft/specification/shopping/checkout/#create-checkout) apply to the request. `cart_id` is a checkout initialization input only; the Business does not return it in checkout responses.
+The Platform **MAY** omit `line_items`, or send an empty array (`"line_items": []`), when it provides `cart_id`. The Business **MUST** use the cart contents and **MUST** ignore overlapping fields in the checkout payload. All other input and negotiation requirements of [Create Checkout](https://ucp.dev/draft/specification/shopping/checkout/#create-checkout) apply to the request. `cart_id` is a checkout initialization input only; the Business does not return it in checkout responses.
 
 **Idempotent conversion:**
 
@@ -54,15 +54,15 @@ When checkout is initialized via `cart_id`, the cart and checkout sessions SHOUL
 
 ## Quantity and sale basis
 
-Cart line items apply the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract. Each `line_items[].quantity` is an integer step count in the item's authoritative sale basis. On a Business response, an absent `line_items[].item.quantity_unit` encodes the default `each` basis, so `quantity` counts whole items.
+Cart line items apply the shared [quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units) contract. Each `line_items[].quantity` is an integer step count in the item's authoritative sale basis. On a Business response, an absent `line_items[].item.quantity_unit` encodes the default `each` basis, so `quantity` counts whole items.
 
 On a Platform request, omission of `line_items[].item.quantity_unit` makes no assertion. The Business interprets `quantity` using the item's authoritative sale basis, so a request for a measure-denominated item can omit the descriptor without asserting `each`. The Platform **MAY** include `item.quantity_unit` to assert the sale-basis identity.
 
-Cart follows [Checkout — Quantity and sale basis](http://ucp.dev/draft/specification/shopping/checkout/#quantity-and-sale-basis) for sale-basis discovery, assertion matching, mismatch conversion or rejection, response echo, ordering-increment handling, and line pricing. Cart totals remain estimates (see [Total](#total)). A measure-denominated line counts as one line item in cart summaries; its `quantity` is an amount, not an item count.
+Cart follows [Checkout — Quantity and sale basis](https://ucp.dev/draft/specification/shopping/checkout/#quantity-and-sale-basis) for sale-basis discovery, assertion matching, mismatch conversion or rejection, response echo, ordering-increment handling, and line pricing. Cart totals remain estimates (see [Total](#total)). A measure-denominated line counts as one line item in cart summaries; its `quantity` is an amount, not an item count.
 
 ## Actions
 
-The cart surfaces outstanding Action instances in its response-only `actions` map, defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions).
+The cart surfaces outstanding Action instances in its response-only `actions` map, defined in [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions).
 
 The cart has no status lifecycle. Each Action gates only the cart effect specified for its Action type. The Business **MUST NOT** treat an outstanding Action as a reason to reject an unrelated cart operation. The Platform **MAY** continue to add, remove, and update items while an Action is outstanding.
 
@@ -76,7 +76,7 @@ The Cart capability defines the following well-known scopes for user-authenticat
 | ------------------------------ | ---------------------------------------------------------------------------------------- |
 | `dev.ucp.shopping.cart:manage` | All cart operations on behalf of the authenticated user — create, read, update, persist. |
 
-Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/common/identity-linking/#scopes).
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](https://ucp.dev/draft/specification/common/identity-linking/#scopes).
 
 ## Guidelines
 
@@ -149,33 +149,33 @@ When **all** requested items are unavailable, the business MAY return an error r
 }
 ```
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/cart/rest/#create-cart)
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/cart/mcp/#create_cart)
+- [REST Binding](https://ucp.dev/draft/specification/shopping/cart/rest/#create-cart)
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/cart/mcp/#create_cart)
 
 ### Get Cart
 
 Retrieves the latest state of a cart session. Returns `not_found` if the cart does not exist, has expired, or was canceled.
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/cart/rest/#get-cart)
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/cart/mcp/#get_cart)
+- [REST Binding](https://ucp.dev/draft/specification/shopping/cart/rest/#get-cart)
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/cart/mcp/#get_cart)
 
 ### Update Cart
 
 Performs a full replacement of the cart session. The platform **MUST** send the entire cart resource. The provided resource replaces the existing cart state on the business side.
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/cart/rest/#update-cart)
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/cart/mcp/#update_cart)
+- [REST Binding](https://ucp.dev/draft/specification/shopping/cart/rest/#update-cart)
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/cart/mcp/#update_cart)
 
 ### Cancel Cart
 
 Cancels a cart session. Business MUST return the cart state before deletion. Subsequent operations for this cart ID SHOULD return `not_found`.
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/cart/rest/#cancel-cart)
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/cart/mcp/#cancel_cart)
+- [REST Binding](https://ucp.dev/draft/specification/shopping/cart/rest/#cancel-cart)
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/cart/mcp/#cancel_cart)
 
 ## Entities
 
-Cart reuses the same entity schemas as [Checkout](http://ucp.dev/draft/specification/shopping/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
+Cart reuses the same entity schemas as [Checkout](https://ucp.dev/draft/specification/shopping/checkout/index.md). This ensures consistent data structures when converting a cart to a checkout session.
 
 ### UCP Response Cart
 
@@ -262,7 +262,7 @@ UCP metadata for cart responses. No payment handlers needed pre-checkout.
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Requirement | Description                                    |
 | ------------------ | ------ | ----------- | ---------------------------------------------- |
@@ -271,13 +271,13 @@ Environment data provided by the platform to support authorization and abuse pre
 
 ### Attribution
 
-Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
+Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](https://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
 
 Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.
 
 ### Total
 
-The same totals contract applies to cart and checkout. See [Checkout Totals](http://ucp.dev/draft/specification/shopping/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
+The same totals contract applies to cart and checkout. See [Checkout Totals](https://ucp.dev/draft/specification/shopping/checkout/#totals) for the rendering contract, accounting identity, well-known types, repeating types, and sub-line semantics.
 
 | Name         | Type                                                           | Requirement  | Description                                                                                                                                                                                                                                                                                 |
 | ------------ | -------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -336,7 +336,7 @@ This object MUST be one of the following types: [Message Error](/draft/specifica
 
 ### Policy
 
-Policies (return/refund terms, warranty, and the like) that apply to the items in this cart. JSONPath targets in `applies_to` are relative to this response root (e.g., `$.line_items[0]`). See [Policies](http://ucp.dev/draft/specification/overview/#policies) for the full model.
+Policies (return/refund terms, warranty, and the like) that apply to the items in this cart. JSONPath targets in `applies_to` are relative to this response root (e.g., `$.line_items[0]`). See [Policies](https://ucp.dev/draft/specification/overview/#policies) for the full model.
 
 | Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

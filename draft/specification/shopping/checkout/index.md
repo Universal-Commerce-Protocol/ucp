@@ -16,7 +16,7 @@ Payment handlers are discovered from the business's UCP profile at `/.well-known
 
 The `payment` object is optional on checkout creation and may be omitted for use cases that don't require payment processing (e.g., quote generation, cart management).
 
-Businesses may also populate `payment.instruments` on responses with display-safe payment instruments from their own user state, such as payment methods the authenticated buyer has saved with the business. Such an instrument carries no raw credential: it is a display-safe, business-scoped reference (an opaque `id` plus `display` fields) that the business resolves server-side when the buyer selects it. The [create checkout REST example](http://ucp.dev/draft/specification/shopping/checkout/rest/#create-checkout) already returns this shape for a Shop Pay instrument. Returning user-specific saved state requires a user-authenticated request; see [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/#business-populated-response-values) for the limits that apply.
+Businesses may also populate `payment.instruments` on responses with display-safe payment instruments from their own user state, such as payment methods the authenticated buyer has saved with the business. Such an instrument carries no raw credential: it is a display-safe, business-scoped reference (an opaque `id` plus `display` fields) that the business resolves server-side when the buyer selects it. The [create checkout REST example](https://ucp.dev/draft/specification/shopping/checkout/rest/#create-checkout) already returns this shape for a Shop Pay instrument. Returning user-specific saved state requires a user-authenticated request; see [Identity Linking](https://ucp.dev/draft/specification/common/identity-linking/#business-populated-response-values) for the limits that apply.
 
 The `display` fields let the platform present a saved instrument and let the buyer recognize it. Whether the instrument can be charged as-is or still requires credential collection is not distinguished by the base schema today, so platforms should not infer readiness from the absence of a `credential` or from `id` naming.
 
@@ -28,13 +28,13 @@ Fulfillment is optional in the checkout object. This is done to enable a platfor
 
 ### Quantity and sale basis
 
-Checkout applies the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract, including the default (`C62`, `0`) identity. The Business determines each item's authoritative sale basis for the transaction. The Business's response is authoritative, and each `line_items[].quantity` is an integer step count in that basis.
+Checkout applies the shared [quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units) contract, including the default (`C62`, `0`) identity. The Business determines each item's authoritative sale basis for the transaction. The Business's response is authoritative, and each `line_items[].quantity` is an integer step count in that basis.
 
-**Discovering the sale basis.** The sale basis is item data: the Platform **SHOULD** discover an item's `quantity_unit` — including `scale` and any `increment` — from the [catalog](http://ucp.dev/draft/specification/shopping/catalog/#sale-basis-and-quantity-units) before transacting. A Platform without catalog knowledge can omit the descriptor: the Business applies its authoritative basis and confirms it on the response line, and the Platform inspects the echoed descriptor and, if that interpretation is not what it intended, resubmits the quantity denominated in the now-known basis. Asserting `quantity_unit` on a request (below) is how the Platform checks that a basis it previously discovered still holds; a Platform that does not know the basis omits the descriptor rather than asserting a guess.
+**Discovering the sale basis.** The sale basis is item data: the Platform **SHOULD** discover an item's `quantity_unit` — including `scale` and any `increment` — from the [catalog](https://ucp.dev/draft/specification/shopping/catalog/#sale-basis-and-quantity-units) before transacting. A Platform without catalog knowledge can omit the descriptor: the Business applies its authoritative basis and confirms it on the response line, and the Platform inspects the echoed descriptor and, if that interpretation is not what it intended, resubmits the quantity denominated in the now-known basis. Asserting `quantity_unit` on a request (below) is how the Platform checks that a basis it previously discovered still holds; a Platform that does not know the basis omits the descriptor rather than asserting a guess.
 
 **Requesting a quantity.** When a Platform request omits `line_items[].item.quantity_unit`, the Platform makes no assertion about the sale-basis identity. The Business interprets `quantity` using the item's authoritative sale basis. A request for a measure-denominated item can therefore omit the descriptor without asserting the default identity.
 
-The Platform **MAY** include `quantity_unit` on a request line to assert the basis it believes it is ordering in. When the Platform includes it, the Business **MUST** compare the asserted and authoritative [machine identities](http://ucp.dev/draft/specification/overview/#quantities-and-units). An explicit assertion with `unit: "C62"` and effective `scale` `0` matches the default identity represented by an absent descriptor; a `display_text` difference is not a mismatch.
+The Platform **MAY** include `quantity_unit` on a request line to assert the basis it believes it is ordering in. When the Platform includes it, the Business **MUST** compare the asserted and authoritative [machine identities](https://ucp.dev/draft/specification/overview/#quantities-and-units). An explicit assertion with `unit: "C62"` and effective `scale` `0` matches the default identity represented by an absent descriptor; a `display_text` difference is not a mismatch.
 
 If an asserted `quantity_unit` does not match the item's authoritative sale basis, the requested quantity is denominated in a basis the Business does not sell in. Silent conversion is forbidden in both directions: neither party may reinterpret a quantity the other denominated without surfacing the change. The Business resolves the mismatch in one of two ways:
 
@@ -141,7 +141,7 @@ A Business that does not convert rejects the update instead. The line remains un
 }
 ```
 
-**Ordering increment.** The sale basis **MAY** declare an [`increment`](http://ucp.dev/draft/specification/overview/#ordering-increment) — the ordering granularity, in steps, the Business sells in. The declaration lets the Platform build quantity steppers and validate input before submission. Platform-authored quantities **SHOULD** be integer multiples of the line's effective increment. The increment is merchandising policy, not a representational bound, and schema validation does not enforce it: on receiving an off-increment quantity, the Business **MAY** accept it, revise the line to an increment multiple, or reject it with a recoverable business outcome. A revision **MUST** be returned as a revised line `quantity` with an explanatory `messages[]` entry; the Business **MUST NOT** silently reinterpret the requested quantity. The Business **MAY** also revise a quantity for its own reasons (for example, limited stock); such revisions **SHOULD** stay on the increment grid so subsequent Platform stepper edits from the revised value remain on-grid.
+**Ordering increment.** The sale basis **MAY** declare an [`increment`](https://ucp.dev/draft/specification/overview/#ordering-increment) — the ordering granularity, in steps, the Business sells in. The declaration lets the Platform build quantity steppers and validate input before submission. Platform-authored quantities **SHOULD** be integer multiples of the line's effective increment. The increment is merchandising policy, not a representational bound, and schema validation does not enforce it: on receiving an off-increment quantity, the Business **MAY** accept it, revise the line to an increment multiple, or reject it with a recoverable business outcome. A revision **MUST** be returned as a revised line `quantity` with an explanatory `messages[]` entry; the Business **MUST NOT** silently reinterpret the requested quantity. The Business **MAY** also revise a quantity for its own reasons (for example, limited stock); such revisions **SHOULD** stay on the increment grid so subsequent Platform stepper edits from the revised value remain on-grid.
 
 For example, bananas sold by the pound in quarter-pound multiples (`increment` `25` at `scale` `2`). A request for `quantity` `137` (1.37 lb) is off-increment; a Business that snaps it returns the line revised to `125` with a warning:
 
@@ -158,7 +158,7 @@ For example, bananas sold by the pound in quarter-pound multiples (`increment` `
 
 **Echoing the sale basis.** The Business **MAY** omit `quantity_unit` from a response line whose effective sale-basis identity is the default identity. The Business **MUST** include `quantity_unit` on the item in every Cart, Checkout, and Order line response whenever the effective identity differs from the default identity. Omission would otherwise make a measure-denominated line read as a count of whole items.
 
-**Pricing a line.** `item.price` is the amount per one whole `quantity_unit.unit` (for example, per kg or per hour); when `quantity_unit` is absent, it is the price per `each`. Other characteristics of a sale unit may affect the quoted `item.price`, but do not change its sale-basis denominator. The Business **MUST** compute the line total as `price × quantity × 10^-scale` and round once at the line. The presented `totals[]` remain authoritative (see [Totals](http://ucp.dev/draft/specification/shopping/checkout/#totals)). The Platform **MUST NOT** recompute a line total from the fractional quantity and substitute its own rounding.
+**Pricing a line.** `item.price` is the amount per one whole `quantity_unit.unit` (for example, per kg or per hour); when `quantity_unit` is absent, it is the price per `each`. Other characteristics of a sale unit may affect the quoted `item.price`, but do not change its sale-basis denominator. The Business **MUST** compute the line total as `price × quantity × 10^-scale` and round once at the line. The presented `totals[]` remain authoritative (see [Totals](https://ucp.dev/draft/specification/shopping/checkout/#totals)). The Platform **MUST NOT** recompute a line total from the fractional quantity and substitute its own rounding.
 
 **Pricing basis.** `item.price` is always denominated against the sale basis, but the Business MAY quote it from a different measurement basis — for example, apples priced per pound and sold per `each`. On authoritative responses the Business **MUST** include `item.unit_price` on every cart, checkout, and order line whose pricing basis differs from its sale basis: the rate that determines the charge travels with the line, exactly as the sale basis itself does. When the pricing basis is the sale basis, `unit_price` remains a catalog display comparator and MAY be omitted from lines. Presence on a line is the marker: a line-level `unit_price` is transactional; a catalog-only one is display.
 
@@ -235,11 +235,11 @@ stateDiagram-v2
 
 ### Actions
 
-When an active extension has outstanding work for the checkout, the Business surfaces instances under the Action types that extension declares in the response-only `actions` map. The common rules are defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions); this section states only how the checkout status lifecycle interprets them. [Status Values](#status-values) is the authoritative home for the status invariants governing outstanding Actions.
+When an active extension has outstanding work for the checkout, the Business surfaces instances under the Action types that extension declares in the response-only `actions` map. The common rules are defined in [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions); this section states only how the checkout status lifecycle interprets them. [Status Values](#status-values) is the authoritative home for the status invariants governing outstanding Actions.
 
 Every Action gates the effect specified for its Action type. While `incomplete`, an Action may identify work the Business needs completed before it can return `ready_for_complete`. After processing the Action according to its Action type's contract, the Platform **SHOULD** use [Get Checkout](#get-checkout) or, outside `complete_in_progress`, a subsequent [Update Checkout](#update-checkout) response to obtain the latest Checkout.
 
-An Action does not select the Checkout status, and a Message's type or severity does not determine whether the Action gates its Action-defined effect. A Message can report the outcome of a particular operation. An info or warning Message can identify an outstanding Action without reporting failure. A recoverable error Message can identify an Action to report that the requested effect was not applied because of it. In that case, the Business returns the current Checkout and sets the Message's `path` to the exact Action occurrence, as defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions). The Message does not turn the Action into a lock on unrelated Checkout operations.
+An Action does not select the Checkout status, and a Message's type or severity does not determine whether the Action gates its Action-defined effect. A Message can report the outcome of a particular operation. An info or warning Message can identify an outstanding Action without reporting failure. A recoverable error Message can identify an Action to report that the requested effect was not applied because of it. In that case, the Business returns the current Checkout and sets the Message's `path` to the exact Action occurrence, as defined in [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions). The Message does not turn the Action into a lock on unrelated Checkout operations.
 
 If an Action prevents Complete Checkout from being accepted, the Business **MUST** return the current Checkout with `status: incomplete` and an error Message with `severity: "recoverable"` whose `path` selects that exact Action occurrence. Processing the Action does not retry the rejected Complete Checkout request. A later Complete Checkout request is a new operation under the existing idempotency rules.
 
@@ -247,12 +247,12 @@ If an Action prevents Complete Checkout from being accepted, the Business **MUST
 
 `complete_in_progress` means Complete Checkout was accepted. The Checkout state reported by the Business is authoritative. While a Checkout has this status, the following operation contract applies:
 
-| Operation         | Contract                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Get Checkout      | The Platform **MAY** invoke Get Checkout; the Business's response is authoritative. The Platform **MAY** repeat Get Checkout with bounded backoff set by the Action contract or Platform policy, and **MUST** stop repeated requests at `expires_at`.                                                                                                           |
-| Update Checkout   | The Platform **MUST NOT** start a new Update Checkout operation. Duplicate requests remain subject to [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update Checkout request, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message. |
-| Complete Checkout | The Platform **MUST NOT** start a new Complete Checkout operation during `complete_in_progress`. See [Complete Checkout](#complete-checkout) for the narrow lost-response recovery retry.                                                                                                                                                                       |
-| Cancel Checkout   | The Platform **MUST** follow the fallback, handoff, and cancellation race rules below before attempting Cancel Checkout.                                                                                                                                                                                                                                        |
+| Operation         | Contract                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Get Checkout      | The Platform **MAY** invoke Get Checkout; the Business's response is authoritative. The Platform **MAY** repeat Get Checkout with bounded backoff set by the Action contract or Platform policy, and **MUST** stop repeated requests at `expires_at`.                                                                                                            |
+| Update Checkout   | The Platform **MUST NOT** start a new Update Checkout operation. Duplicate requests remain subject to [Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update Checkout request, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message. |
+| Complete Checkout | The Platform **MUST NOT** start a new Complete Checkout operation during `complete_in_progress`. See [Complete Checkout](#complete-checkout) for the narrow lost-response recovery retry.                                                                                                                                                                        |
+| Cancel Checkout   | The Platform **MUST** follow the fallback, handoff, and cancellation race rules below before attempting Cancel Checkout.                                                                                                                                                                                                                                         |
 
 When a `complete_in_progress` Checkout includes an Action, the Platform processes it according to its Action-type contract. When it contains no Action, the Platform **SHOULD** use Get Checkout to observe Business processing.
 
@@ -299,7 +299,7 @@ When the business cannot create a new resource or the requested resource no long
 }
 ```
 
-See [REST](http://ucp.dev/draft/specification/shopping/checkout/rest/#create-checkout) and [MCP](http://ucp.dev/draft/specification/shopping/checkout/mcp/#create_checkout) binding examples.
+See [REST](https://ucp.dev/draft/specification/shopping/checkout/rest/#create-checkout) and [MCP](https://ucp.dev/draft/specification/shopping/checkout/mcp/#create_checkout) binding examples.
 
 #### Error Processing Algorithm
 
@@ -433,9 +433,9 @@ The Business **MUST** return an error in `messages` with `code: "eligibility_inv
 
 ##### Example: resolving a claim with a verification Action
 
-This example is illustrative. It uses a negotiated vendor extension, `com.example.identity.student_verification`, that declares a single Action type under a key of the same name in `actions` and defines the instance `config` and verification transport. It composes that extension with `context.eligibility`, a provisional [Discount](http://ucp.dev/draft/specification/shopping/extensions/discount/index.md), an [Action](#actions), and `messages`.
+This example is illustrative. It uses a negotiated vendor extension, `com.example.identity.student_verification`, that declares a single Action type under a key of the same name in `actions` and defines the instance `config` and verification transport. It composes that extension with `context.eligibility`, a provisional [Discount](https://ucp.dev/draft/specification/shopping/extensions/discount/index.md), an [Action](#actions), and `messages`.
 
-The provisional discount fields (`provisional`, `eligibility`) belong to the [Discount extension](http://ucp.dev/draft/specification/shopping/extensions/discount/#eligibility-claims) and are available only when that extension is active for the checkout.
+The provisional discount fields (`provisional`, `eligibility`) belong to the [Discount extension](https://ucp.dev/draft/specification/shopping/extensions/discount/#eligibility-claims) and are available only when that extension is active for the checkout.
 
 **1. Claim accepted, discount provisional, verification Action outstanding.** The Platform submits `org.example.student` in `context.eligibility` on Create Checkout. The Business accepts the claim and, with the Discount extension active, returns a provisional discount, an explanatory `info` message, and a verification Action. The claim is unresolved, so the checkout stays `incomplete`:
 
@@ -525,7 +525,7 @@ Platforms that cannot honor the disclosure rendering contract **MUST** escalate 
 
 - **MUST** set `presentation: "disclosure"` when the warning content must be displayed alongside a specific component and must not be hidden or auto-dismissed.
 - **SHOULD** use the `path` field to associate disclosures with the relevant component in the response.
-- **SHOULD** provide a `code` that identifies the disclosure category (e.g., `prop65`, `allergens`, `energy_label`). When the disclosure renders a structured `policies[]` entry, the `code` **MUST** equal that policy's `type` to link the two (see [Policies](http://ucp.dev/draft/specification/overview/#policies)).
+- **SHOULD** provide a `code` that identifies the disclosure category (e.g., `prop65`, `allergens`, `energy_label`). When the disclosure renders a structured `policies[]` entry, the `code` **MUST** equal that policy's `type` to link the two (see [Policies](https://ucp.dev/draft/specification/overview/#policies)).
 - **SHOULD** provide `image_url` when the disclosure has an associated visual element (e.g., warning symbol, energy class label).
 - **SHOULD** provide `url` when a reference link is available for the buyer to learn more.
 
@@ -615,7 +615,7 @@ https://business.example.com/checkout-sessions/{checkout_id}
 
 A stateless URL that encodes checkout state directly, allowing reconstruction without server-side persistence. Businesses **SHOULD** implement support for this format to facilitate checkout handoff and accelerated entry—for example, a platform can prefill checkout state when initiating a buy-now flow.
 
-> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](http://ucp.dev/draft/specification/shopping/checkout/rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
+> **Note:** Checkout permalinks are a REST-specific construct that extends the [REST transport binding](https://ucp.dev/draft/specification/shopping/checkout/rest/index.md). Accessing a permalink returns a redirect to the checkout UI or renders the checkout page directly.
 
 ## Scopes
 
@@ -625,7 +625,7 @@ The Checkout capability defines the following well-known scopes for user-authent
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `dev.ucp.shopping.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout sessions. |
 
-Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/common/identity-linking/#scopes).
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](https://ucp.dev/draft/specification/common/identity-linking/#scopes).
 
 ## Guidelines
 
@@ -691,7 +691,7 @@ To be invoked by the platform when the user has expressed purchase intent (e.g.,
 
 **Recommendation**: To minimize discrepancies and a streamlined user experience, product data (price/title etc.) provided by the business through the feeds **SHOULD** match the actual attributes returned in the response.
 
-The create request initializes the checkout from one of two item sources: the `line_items` provided inline, or the contents of a [Cart](http://ucp.dev/draft/specification/shopping/cart/index.md) identified by `cart_id`. The Platform **MUST** provide `line_items` or `cart_id`, and **MAY** provide both. Neither field is required on its own; the create request schema requires at least one of them. When both are present, the cart contents are authoritative and the Business ignores the overlapping checkout fields; see [Cart → Cart-to-Checkout Conversion](http://ucp.dev/draft/specification/shopping/cart/#cart-to-checkout-conversion) for the conversion contract, including precedence, idempotent conversion, and cart lifecycle.
+The create request initializes the checkout from one of two item sources: the `line_items` provided inline, or the contents of a [Cart](https://ucp.dev/draft/specification/shopping/cart/index.md) identified by `cart_id`. The Platform **MUST** provide `line_items` or `cart_id`, and **MAY** provide both. Neither field is required on its own; the create request schema requires at least one of them. When both are present, the cart contents are authoritative and the Business ignores the overlapping checkout fields; see [Cart → Cart-to-Checkout Conversion](https://ucp.dev/draft/specification/shopping/cart/#cart-to-checkout-conversion) for the conversion contract, including precedence, idempotent conversion, and cart lifecycle.
 
 The `cart_id` source is available only when the Cart capability is negotiated. The Platform **MUST NOT** provide `cart_id` otherwise. The Business **MUST** reject a create request that provides `cart_id` when the Cart capability is not negotiated, and **MUST NOT** ignore `cart_id` and initialize the checkout from the inline `line_items` instead. Schema validation establishes only that the request names an item source; it does not establish that the Cart capability is negotiated, that the cart exists, or that the Buyer may access it.
 
@@ -798,10 +798,10 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 The abstract operations above are bound to specific transport protocols as defined below:
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/checkout/rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/checkout/mcp/index.md): Model Context Protocol mapping for agentic interaction.
-- [A2A Binding](http://ucp.dev/draft/specification/shopping/checkout/a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
-- [Embedded Checkout Binding](http://ucp.dev/draft/specification/shopping/checkout/embedded/index.md): JSON-RPC for powering embedded checkout.
+- [REST Binding](https://ucp.dev/draft/specification/shopping/checkout/rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/checkout/mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [A2A Binding](https://ucp.dev/draft/specification/shopping/checkout/a2a/index.md): Agent-to-Agent Protocol mapping for agentic interactions.
+- [Embedded Checkout Binding](https://ucp.dev/draft/specification/shopping/checkout/embedded/index.md): JSON-RPC for powering embedded checkout.
 
 ## Entities
 
@@ -839,7 +839,7 @@ Context signals are provisional—not authoritative data. Businesses SHOULD use 
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer` (self-reported identity), signal values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or by relaying independently verifiable third-party attestations. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Unlike `context` (buyer-asserted preferences) and `buyer` (self-reported identity), signal values MUST NOT be buyer-asserted claims — platforms provide signals based on direct observation or by relaying independently verifiable third-party attestations. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Requirement | Description                                    |
 | ------------------ | ------ | ----------- | ---------------------------------------------- |
@@ -848,7 +848,7 @@ Environment data provided by the platform to support authorization and abuse pre
 
 ### Attribution
 
-Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
+Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](https://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
 
 Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.
 
@@ -933,7 +933,7 @@ Businesses **MAY** define custom types for domain-specific needs. Platforms **SH
 
 ### Policy
 
-Policies (return/refund terms, warranty, and the like) that apply to the items in this checkout. JSONPath targets in `applies_to` are relative to this response root (e.g., `$.line_items[0]`). See [Policies](http://ucp.dev/draft/specification/overview/#policies) for the full model.
+Policies (return/refund terms, warranty, and the like) that apply to the items in this checkout. JSONPath targets in `applies_to` are relative to this response root (e.g., `$.line_items[0]`). See [Policies](https://ucp.dev/draft/specification/overview/#policies) for the full model.
 
 | Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

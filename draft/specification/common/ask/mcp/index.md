@@ -1,6 +1,6 @@
 # Ask - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Ask Capability](http://ucp.dev/draft/specification/common/ask/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Ask Capability](https://ucp.dev/draft/specification/common/ask/index.md).
 
 ## Protocol Fundamentals
 
@@ -60,17 +60,17 @@ A Platform using MCP **MUST** include a `meta` object with `meta["ucp-agent"].pr
 }
 ```
 
-The Common service's `meta` also defines an optional `idempotency-key`, the MCP counterpart of the HTTP `Idempotency-Key` header. A Platform **SHOULD** include `meta["idempotency-key"]` on any request that carries a `conversation`, and **MAY** include it on any other; see [Conversation](http://ucp.dev/draft/specification/common/ask/#conversation) for the retry contract.
+The Common service's `meta` also defines an optional `idempotency-key`, the MCP counterpart of the HTTP `Idempotency-Key` header. A Platform **SHOULD** include `meta["idempotency-key"]` on any request that carries a `conversation`, and **MAY** include it on any other; see [Conversation](https://ucp.dev/draft/specification/common/ask/#conversation) for the retry contract.
 
 ## Tools
 
-| Tool           | Capability                                                    | Description                                                                                                         |
-| -------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `ask_business` | [Ask](http://ucp.dev/draft/specification/common/ask/index.md) | Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. |
+| Tool           | Capability                                                     | Description                                                                                                         |
+| -------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ask_business` | [Ask](https://ucp.dev/draft/specification/common/ask/index.md) | Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. |
 
 ### `ask_business`
 
-Maps to the [Ask](http://ucp.dev/draft/specification/common/ask/index.md) capability.
+Maps to the [Ask](https://ucp.dev/draft/specification/common/ask/index.md) capability.
 
 #### Ask Request
 
@@ -94,7 +94,7 @@ Maps to the [Ask](http://ucp.dev/draft/specification/common/ask/index.md) capabi
 
 #### Ask Example
 
-The Buyer asks a policy question about a specific product, identified here by its page URL. `ids` grounds the question in any Business resource, by a Business-issued Global ID (GID) or by a secondary identifier the Business recognizes — a SKU, handle, or URL — so the Platform can pass whichever it already has (see [Scoping a Question](http://ucp.dev/draft/specification/common/ask/#scoping-a-question)).
+The Buyer asks a policy question about a specific product, identified here by its page URL. `ids` grounds the question in any Business resource, by a Business-issued Global ID (GID) or by a secondary identifier the Business recognizes — a SKU, handle, or URL — so the Platform can pass whichever it already has (see [Scoping a Question](https://ucp.dev/draft/specification/common/ask/#scoping-a-question)).
 
 ```json
 {
@@ -288,11 +288,11 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 ### Transport Errors
 
-Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-codes) for the complete error code registry and JSON-RPC error code mappings.
+Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-codes) for the complete error code registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
 
-All application-level outcomes return a successful JSON-RPC result with the UCP envelope and a populated `answer`. Per-answer warnings or info notes ride in the optional `messages` array. See [Ask Overview](http://ucp.dev/draft/specification/common/ask/#messages-and-error-handling) for message semantics.
+All application-level outcomes return a successful JSON-RPC result with the UCP envelope and a populated `answer`. Per-answer warnings or info notes ride in the optional `messages` array. See [Ask Overview](https://ucp.dev/draft/specification/common/ask/#messages-and-error-handling) for message semantics.
 
 #### Example: Answer with a Disclosure Warning
 
@@ -366,6 +366,6 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0.
 1. When `dev.ucp.common.ask` is advertised in the Business's UCP profile, expose the `ask_business` tool at the `dev.ucp.common` service's MCP `endpoint`.
-1. Validate tool inputs against the [Ask schema](http://ucp.dev/draft/specification/common/ask/index.md).
+1. Validate tool inputs against the [Ask schema](https://ucp.dev/draft/specification/common/ask/index.md).
 1. Return a successful JSON-RPC result for every well-formed, authorized, in-limits request; convey business outcomes through the `answer` and `messages` array, and use JSON-RPC errors only for transport-level issues (authentication, rate limiting, unavailability, malformed input).
 1. Return a populated `answer` on every successful response. A "can't answer" outcome is a populated `answer` that states the limitation plainly, **not** an omitted field, error code, or JSON-RPC error.

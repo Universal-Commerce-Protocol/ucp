@@ -30,7 +30,7 @@ When a request exceeds that maximum, the Business **MUST** process the first max
 
 ### Refinement
 
-The Business first resolves the identifiers and deduplicates repeated values. Optional root `distance` and `serves` relations and `filters` predicates then refine the resolved set. All supplied criteria combine with AND: a resolved Location is returned only when it satisfies every supplied relation and filter. The relations and predicates use the same schemas and semantics as Search — see [Spatial Relations](http://ucp.dev/draft/specification/common/location/search/#spatial-relations), [Search Filters](http://ucp.dev/draft/specification/common/location/search/#search-filters), and [Item Availability Filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter).
+The Business first resolves the identifiers and deduplicates repeated values. Optional root `distance` and `serves` relations and `filters` predicates then refine the resolved set. All supplied criteria combine with AND: a resolved Location is returned only when it satisfies every supplied relation and filter. The relations and predicates use the same schemas and semantics as Search — see [Spatial Relations](https://ucp.dev/draft/specification/common/location/search/#spatial-relations), [Search Filters](https://ucp.dev/draft/specification/common/location/search/#search-filters), and [Item Availability Filter](https://ucp.dev/draft/specification/common/location/search/#item-availability-filter).
 
 For example, if a Platform requests `["loc_downtown", "loc_uptown"]` with an hours filter of `{"open_at": "2026-05-18T17:00:00Z"}`:
 
@@ -135,7 +135,7 @@ The following request and response are transport-neutral UCP payloads.
 }
 ```
 
-The response correlates the canonical identifier and the Business-supported alias to one Location. Tuesday's two `hours` entries form a split shift. Sunday has no `hours` entry, meaning no regular interval begins that day. The `exception_hours` entry omits `opens` and `closes`, making it a full closure. See [Operating Hours](http://ucp.dev/draft/specification/common/location/#operating-hours) for schedule representation and evaluation rules.
+The response correlates the canonical identifier and the Business-supported alias to one Location. Tuesday's two `hours` entries form a split shift. Sunday has no `hours` entry, meaning no regular interval begins that day. The `exception_hours` entry omits `opens` and `closes`, making it a full closure. See [Operating Hours](https://ucp.dev/draft/specification/common/location/#operating-hours) for schedule representation and evaluation rules.
 
 ### Item availability refinement
 
@@ -170,7 +170,7 @@ The response correlates the canonical identifier and the Business-supported alia
 }
 ```
 
-Both identifiers resolve, but the Business cannot currently provide the referenced item at `loc_uptown`, so that Location and its `inputs` entry are omitted. The request still succeeds, and this ordinary refinement non-match requires no message (see [Item Availability Filter](http://ucp.dev/draft/specification/common/location/search/#item-availability-filter)).
+Both identifiers resolve, but the Business cannot currently provide the referenced item at `loc_uptown`, so that Location and its `inputs` entry are omitted. The request still succeeds, and this ordinary refinement non-match requires no message (see [Item Availability Filter](https://ucp.dev/draft/specification/common/location/search/#item-availability-filter)).
 
 ### Partial success
 
@@ -257,5 +257,5 @@ The Business evaluates `loc_downtown` and `loc_uptown` in request order. `loc_ai
 
 ## Transport Bindings
 
-- [REST Binding](http://ucp.dev/draft/specification/common/location/rest/#post-locationslookup): `POST /locations/lookup`
-- [MCP Binding](http://ucp.dev/draft/specification/common/location/mcp/#lookup_locations): `lookup_locations` tool
+- [REST Binding](https://ucp.dev/draft/specification/common/location/rest/#post-locationslookup): `POST /locations/lookup`
+- [MCP Binding](https://ucp.dev/draft/specification/common/location/mcp/#lookup_locations): `lookup_locations` tool

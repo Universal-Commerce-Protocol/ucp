@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Payment Authentication extension defines browser-surface interactions that a Platform may need to process while a payment attempt is underway. It declares two concrete [Action types](http://ucp.dev/draft/specification/overview/#actions):
+The Payment Authentication extension defines browser-surface interactions that a Platform may need to process while a payment attempt is underway. It declares two concrete [Action types](https://ucp.dev/draft/specification/overview/#actions):
 
 | Action type                                     | Platform interaction                                             |
 | ----------------------------------------------- | ---------------------------------------------------------------- |
@@ -109,7 +109,7 @@ Each Action's `config.payment_instrument_id` **MUST** identify an instrument in 
 
 ## Checkout Lifecycle
 
-These Action types use the parent Checkout lifecycle defined in [Checkout — Actions](http://ucp.dev/draft/specification/shopping/checkout/#actions):
+These Action types use the parent Checkout lifecycle defined in [Checkout — Actions](https://ucp.dev/draft/specification/shopping/checkout/#actions):
 
 - Every emitted Payment Authentication Action gates advancement of its associated payment attempt while the same Action type and `id` remain outstanding in the authoritative Checkout. A terminal surface event ends the Platform's current processing attempt; it does not lift the gate.
 - A Business **MAY** emit device data collection from Create or Update Checkout to perform it before payment completion. While the Checkout is `incomplete`, the Action prevents `ready_for_complete` until it resolves; unrelated Updates remain allowed.
@@ -140,14 +140,14 @@ For an Action on an `incomplete` Checkout, the Platform may instead choose a dif
 
 The individual Action specifications define type-specific timeout and fallback behavior:
 
-- [Payment Device Data Collection](http://ucp.dev/draft/specification/payment/extensions/actions/device-data-collection/index.md)
-- [Payment 3DS Challenge](http://ucp.dev/draft/specification/payment/extensions/actions/three-ds-challenge/index.md)
+- [Payment Device Data Collection](https://ucp.dev/draft/specification/payment/extensions/actions/device-data-collection/index.md)
+- [Payment 3DS Challenge](https://ucp.dev/draft/specification/payment/extensions/actions/three-ds-challenge/index.md)
 
 ## Surface Rendering and Notifications
 
 Returning a Payment Authentication Action asks the Platform to render its `config.url`. The payment handler specification names the origins its Action surfaces load from; those are the occurrence's **allowed origins**. They may be provider-operated, Business-operated, or both, so this specification does not choose which party holds that trust, only that the expectation exists before the Action is emitted. The Platform **MUST** decline an occurrence whose `config.url` origin is not among them, and **MUST** install its message receiver before navigating so an immediately completing surface cannot race initialization.
 
-The `postMessage` and native-webview mechanics follow [Embedded Protocol — Communication Channels](http://ucp.dev/draft/specification/embedded-protocol/#communication-channels). Payment Authentication uses the Action methods below. It does not use a capability-specific Embedded Protocol `ready` method or `MessageChannel` upgrade; `action.ready` is its scoped handshake.
+The `postMessage` and native-webview mechanics follow [Embedded Protocol — Communication Channels](https://ucp.dev/draft/specification/embedded-protocol/#communication-channels). Payment Authentication uses the Action methods below. It does not use a capability-specific Embedded Protocol `ready` method or `MessageChannel` upgrade; `action.ready` is its scoped handshake.
 
 Each Action occurrence uses a fresh, isolated browsing context. Device data collection is hidden and non-interactive. A 3DS challenge is visible, blocks interaction with the rest of Checkout, and **SHOULD** show a loading state until its content renders. Web Platforms use an iframe or other handler-approved browser context. For messages from a native surface to the Platform, native Platforms **MUST** expose a JSON-string bridge through `window.EmbeddedActionProtocolConsumer` (Android) or `window.webkit.messageHandlers.EmbeddedActionProtocolConsumer` (iOS). For the ready response from the Platform to the surface, the Platform calls `window.EmbeddedActionProtocol.postMessage()` with the JSON-stringified JSON-RPC response.
 
@@ -199,7 +199,7 @@ Cancellation inside a 3DS surface is a provider outcome, not a surface error. Af
 
 ## Security and Data Handling
 
-Web Platforms **MUST** follow the shared [Embedded Protocol security requirements](http://ucp.dev/draft/specification/embedded-protocol/#security) for CSP, iframe sandboxing, credentialless iframe evaluation, and strict origin validation. [Embedded Checkout security](http://ucp.dev/draft/specification/shopping/checkout/embedded/#security-for-web-based-hosts) shows how a UCP capability applies those requirements. Payment Authentication uses its own `action.ready` handshake and terminal notification methods; it does not adopt the Embedded Protocol's capability lifecycle or delegation messages.
+Web Platforms **MUST** follow the shared [Embedded Protocol security requirements](https://ucp.dev/draft/specification/embedded-protocol/#security) for CSP, iframe sandboxing, credentialless iframe evaluation, and strict origin validation. [Embedded Checkout security](https://ucp.dev/draft/specification/shopping/checkout/embedded/#security-for-web-based-hosts) shows how a UCP capability applies those requirements. Payment Authentication uses its own `action.ready` handshake and terminal notification methods; it does not adopt the Embedded Protocol's capability lifecycle or delegation messages.
 
 In addition, Platforms **MUST**:
 

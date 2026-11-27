@@ -108,13 +108,13 @@ All ECaP parameters are passed via URL query string, not HTTP headers, to ensure
 
 ## Transport & Messaging
 
-ECaP uses the shared EP transport layer. See [Embedded Protocol — Transport & Messaging](http://ucp.dev/draft/specification/embedded-protocol/#transport-messaging) for message format, message types, and response handling conventions.
+ECaP uses the shared EP transport layer. See [Embedded Protocol — Transport & Messaging](https://ucp.dev/draft/specification/embedded-protocol/#transport-messaging) for message format, message types, and response handling conventions.
 
 The `ucp.version` in all responses **MUST** echo the `ep_version` negotiated during session initialization and confirmed by the host in the `ep.cart.ready` response. The version is session-bound — it **MUST NOT** change for the duration of the ECaP session.
 
 ### Communication Channels
 
-ECaP follows the shared EP communication channel model. See [Embedded Protocol — Communication Channels](http://ucp.dev/draft/specification/embedded-protocol/#communication-channels) for the general pattern.
+ECaP follows the shared EP communication channel model. See [Embedded Protocol — Communication Channels](https://ucp.dev/draft/specification/embedded-protocol/#communication-channels) for the general pattern.
 
 For native hosts, the cart-specific globals are:
 
@@ -213,16 +213,16 @@ If the host cannot complete the handshake (e.g., origin validation failure or pr
 
 #### `ep.cart.auth`
 
-`ep.cart.auth` implements the shared EP authentication pattern — see [Embedded Protocol — Authentication](http://ucp.dev/draft/specification/embedded-protocol/#authentication) for the request/response contract, examples, and error escalation flow.
+`ep.cart.auth` implements the shared EP authentication pattern — see [Embedded Protocol — Authentication](https://ucp.dev/draft/specification/embedded-protocol/#authentication) for the request/response contract, examples, and error escalation flow.
 
 - **Method:** `ep.cart.auth`
 - **Direction:** Embedded Cart → Host (request); Host → Embedded Cart (response)
 
-When error escalation is required, Embedded Cart **MUST** issue an `ep.cart.error` notification per the [session error pattern](http://ucp.dev/draft/specification/embedded-protocol/#session-error).
+When error escalation is required, Embedded Cart **MUST** issue an `ep.cart.error` notification per the [session error pattern](https://ucp.dev/draft/specification/embedded-protocol/#session-error).
 
 ### Lifecycle Messages
 
-Lifecycle notifications follow the shared EP pattern — see [Embedded Protocol — Lifecycle](http://ucp.dev/draft/specification/embedded-protocol/#lifecycle). All lifecycle notifications carry the full `cart` object as their payload.
+Lifecycle notifications follow the shared EP pattern — see [Embedded Protocol — Lifecycle](https://ucp.dev/draft/specification/embedded-protocol/#lifecycle). All lifecycle notifications carry the full `cart` object as their payload.
 
 #### `ep.cart.start`
 
@@ -256,7 +256,7 @@ Signals that cart is visible and ready for interaction. Sent after a successful 
 
 Indicates completion of cart building process and buyer now is ready to be transitioned to the next stage of their purchase journey.
 
-This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is part of the negotiated capabilities during service discovery, host **MAY** proceed to initiate a checkout session based on the completed cart by issuing a [create checkout](http://ucp.dev/draft/specification/shopping/checkout/#create-checkout) operation.
+This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is part of the negotiated capabilities during service discovery, host **MAY** proceed to initiate a checkout session based on the completed cart by issuing a [create checkout](https://ucp.dev/draft/specification/shopping/checkout/#create-checkout) operation.
 
 - **Direction:** Embedded Cart → Host
 - **Type:** Notification
@@ -284,7 +284,7 @@ This marks the completion of Embedded Cart. If `dev.ucp.shopping.checkout` is pa
 
 ### State Change Messages
 
-State change notifications follow the shared EP pattern — see [Embedded Protocol — State Change](http://ucp.dev/draft/specification/embedded-protocol/#state-change). All state change notifications are sent from the Embedded Cart to the host and carry the full `cart` object as their payload.
+State change notifications follow the shared EP pattern — see [Embedded Protocol — State Change](https://ucp.dev/draft/specification/embedded-protocol/#state-change). All state change notifications are sent from the Embedded Cart to the host and carry the full `cart` object as their payload.
 
 #### `ep.cart.line_items.change`
 
@@ -377,17 +377,17 @@ Cart messages have been updated. Messages include errors, warnings, and informat
 
 #### `ep.cart.error`
 
-`ep.cart.error` implements the shared EP session error pattern — see [Embedded Protocol — Session Error](http://ucp.dev/draft/specification/embedded-protocol/#session-error) for the payload specification and host handling requirements.
+`ep.cart.error` implements the shared EP session error pattern — see [Embedded Protocol — Session Error](https://ucp.dev/draft/specification/embedded-protocol/#session-error) for the payload specification and host handling requirements.
 
 ## Security & Error Handling
 
 ### Error Codes
 
-ECaP uses the shared EP error code set — see [Embedded Protocol — Error Codes](http://ucp.dev/draft/specification/embedded-protocol/#error-codes).
+ECaP uses the shared EP error code set — see [Embedded Protocol — Error Codes](https://ucp.dev/draft/specification/embedded-protocol/#error-codes).
 
 ### Security for Web-Based Hosts
 
-ECaP inherits the shared EP security requirements for CSP, iframe sandboxing, credentialless iframes, and strict origin validation. See [Embedded Protocol — Security](http://ucp.dev/draft/specification/embedded-protocol/#security) for the full specification.
+ECaP inherits the shared EP security requirements for CSP, iframe sandboxing, credentialless iframes, and strict origin validation. See [Embedded Protocol — Security](https://ucp.dev/draft/specification/embedded-protocol/#security) for the full specification.
 
 ## Schema Definitions
 

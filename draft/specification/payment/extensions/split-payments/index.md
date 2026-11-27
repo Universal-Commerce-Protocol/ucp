@@ -126,7 +126,7 @@ A split payment either completes fully or has no financial effect. If the busine
 
 At the protocol layer, each request is processed independently — split-payments state does not persist between requests. The business MUST process each request as a fresh, full submission, without reference to prior requests or responses.
 
-> [!NOTE] Each split payments submission is processed as a complete, self-contained request: a modified instrument set is a new submission, requiring a fresh [idempotency key](http://ucp.dev/draft/specification/signatures/#replay-protection). Split-payments state — including authorizations — does not persist between submissions; the unwind-on-failure requirement above enforces this.
+> [!NOTE] Each split payments submission is processed as a complete, self-contained request: a modified instrument set is a new submission, requiring a fresh [idempotency key](https://ucp.dev/draft/specification/signatures/#replay-protection). Split-payments state — including authorizations — does not persist between submissions; the unwind-on-failure requirement above enforces this.
 
 **Per-instrument reporting:** when a split is incomplete or has failed, the business MUST emit a `payment_failed` error for each failed instrument, with `path` pointing at the instrument. Businesses MAY also emit `info` messages for succeeded instruments to convey positive context (e.g., "Gift card authorized for $10.00") that the platform can surface to the buyer:
 

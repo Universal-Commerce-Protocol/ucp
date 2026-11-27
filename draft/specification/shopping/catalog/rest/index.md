@@ -1,6 +1,6 @@
 # Catalog - REST Binding
 
-This document specifies the HTTP/REST binding for the [Catalog Capability](http://ucp.dev/draft/specification/shopping/catalog/index.md).
+This document specifies the HTTP/REST binding for the [Catalog Capability](https://ucp.dev/draft/specification/shopping/catalog/index.md).
 
 ## Protocol Fundamentals
 
@@ -42,15 +42,15 @@ Businesses advertise REST transport availability through their UCP profile at `/
 
 ## Endpoints
 
-| Endpoint           | Method | Capability                                                                                    | Description                            |
-| ------------------ | ------ | --------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `/catalog/search`  | POST   | [Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md)                 | Search for products.                   |
-| `/catalog/lookup`  | POST   | [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)                 | Lookup one or more products by ID.     |
-| `/catalog/product` | POST   | [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) | Get full product detail by identifier. |
+| Endpoint           | Method | Capability                                                                                     | Description                            |
+| ------------------ | ------ | ---------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `/catalog/search`  | POST   | [Search](https://ucp.dev/draft/specification/shopping/catalog/search/index.md)                 | Search for products.                   |
+| `/catalog/lookup`  | POST   | [Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)                 | Lookup one or more products by ID.     |
+| `/catalog/product` | POST   | [Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) | Get full product detail by identifier. |
 
 ### `POST /catalog/search`
 
-Maps to the [Catalog Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md) capability.
+Maps to the [Catalog Search](https://ucp.dev/draft/specification/shopping/catalog/search/index.md) capability.
 
 **Inputs**
 
@@ -190,7 +190,7 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/shopping/catalog
 
 ### `POST /catalog/lookup`
 
-Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
+Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
 
 The request body contains an array of identifiers and optional context that applies to all lookups in the batch.
 
@@ -347,7 +347,7 @@ When some identifiers in the batch are not found, the response includes the foun
 
 ### `POST /catalog/product`
 
-Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object (not an array) for full product detail page rendering.
+Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object (not an array) for full product detail page rendering.
 
 **Inputs**
 
@@ -640,7 +640,7 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 
 ### Business Outcomes
 
-All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Catalog Overview](http://ucp.dev/draft/specification/shopping/catalog/#messages-and-error-handling) for message semantics and common scenarios.
+All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Catalog Overview](https://ucp.dev/draft/specification/shopping/catalog/#messages-and-error-handling) for message semantics and common scenarios.
 
 #### Example: All Products Not Found
 
@@ -733,8 +733,8 @@ A product in a get_product response, extended with effective selections and avai
 
 A conforming REST transport implementation **MUST**:
 
-1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `/catalog/lookup` and `/catalog/product` MUST be available.
+1. Implement endpoints for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/shopping/catalog/search/index.md), [Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `/catalog/lookup` and `/catalog/product` MUST be available.
 1. Return products with valid `Price` objects (amount + currency).
-1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](https://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
 1. Return HTTP 200 for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Return HTTP 400 with `request_too_large` error for requests exceeding batch size limits.

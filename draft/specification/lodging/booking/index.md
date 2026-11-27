@@ -196,7 +196,7 @@ The booking `status` field indicates the current phase of the session and determ
 - **`incomplete`**: Booking session is missing required information or has issues that need resolution. Platform should inspect `messages` array for context and should attempt to resolve via Update Booking Session.
 - **`requires_escalation`**: Booking session requires information that cannot be provided via API, or user input is required. Platform should inspect `messages` to understand what's needed. If any `recoverable` errors exist, resolve those first. Then hand off to user via `continue_url`.
 - **`ready_for_complete`**: Booking session has all necessary information (confirmed pricing totals, valid stay dates, payment instrument collected if required, lead guest identification via `booker` or primary guest assignment (`role: "primary"`), and all outstanding gating actions resolved) and platform can finalize programmatically. Platform can call Complete Booking Session.
-- **`complete_in_progress`**: Business is processing the Complete Booking request. The response **MUST NOT** contain a `confirmation` field. See [Accepted Completion](http://ucp.dev/draft/specification/shopping/checkout/#accepted-completion) for permitted operations.
+- **`complete_in_progress`**: Business is processing the Complete Booking request. The response **MUST NOT** contain a `confirmation` field. See [Accepted Completion](https://ucp.dev/draft/specification/shopping/checkout/#accepted-completion) for permitted operations.
 - **`completed`**: Booking confirmed successfully.
 - **`canceled`**: Booking session is invalid or expired. Platform should start a new booking session if needed.
 
@@ -208,7 +208,7 @@ The booking `status` field indicates the current phase of the session and determ
 
 ### Actions
 
-When an active capability or extension has outstanding step-up work for the booking session (such as PSD2 / 3D Secure strong customer authentication, biometric step-up, or identity verification), the Business surfaces instances in the response-only `actions` map. The common rules are defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions); this section states how the booking status lifecycle interprets them.
+When an active capability or extension has outstanding step-up work for the booking session (such as PSD2 / 3D Secure strong customer authentication, biometric step-up, or identity verification), the Business surfaces instances in the response-only `actions` map. The common rules are defined in [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions); this section states how the booking status lifecycle interprets them.
 
 Every Action gates the effect specified for its Action type. While `incomplete`, an Action may identify work the Business needs completed before it can return `ready_for_complete`. After processing the Action according to its Action type contract (e.g., redirecting buyer via `url_redirect`), the Platform **SHOULD** use Get Booking Session or a subsequent Update Booking Session to obtain the latest booking state.
 
@@ -241,7 +241,7 @@ Errors with `requires_*` severity contribute to `status: requires_escalation`. B
 
 ### Warning Presentation
 
-The `presentation` field on warning messages controls the rendering contract the platform **MUST** follow (e.g., `notice` vs. `disclosure`). For the authoritative rendering rules, see [Checkout — Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation).
+The `presentation` field on warning messages controls the rendering contract the platform **MUST** follow (e.g., `notice` vs. `disclosure`). For the authoritative rendering rules, see [Checkout — Warning Presentation](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation).
 
 #### Totals Changes
 
@@ -422,8 +422,8 @@ This object MUST be one of the following types: [Booking](/draft/specification/l
 
 The abstract operations above are bound to specific transport protocols:
 
-- [REST Binding](http://ucp.dev/draft/specification/lodging/booking/rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](http://ucp.dev/draft/specification/lodging/booking/mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [REST Binding](https://ucp.dev/draft/specification/lodging/booking/rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](https://ucp.dev/draft/specification/lodging/booking/mcp/index.md): Model Context Protocol mapping for agentic interaction.
 
 ## Examples
 
@@ -925,7 +925,7 @@ Payment details and collected payment instruments.
 
 ### Policy
 
-Policies (cancellation terms, house rules, and the like) that apply to the booking session or stays. JSONPath targets in `applies_to` are relative to this response root (e.g., `$.stays[0]`). See [Policies](http://ucp.dev/draft/specification/overview/#policies) for the full model.
+Policies (cancellation terms, house rules, and the like) that apply to the booking session or stays. JSONPath targets in `applies_to` are relative to this response root (e.g., `$.stays[0]`). See [Policies](https://ucp.dev/draft/specification/overview/#policies) for the full model.
 
 | Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

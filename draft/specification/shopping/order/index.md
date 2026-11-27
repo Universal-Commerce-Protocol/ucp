@@ -34,11 +34,11 @@ Orders have three main components:
 Line items reflect what was purchased at checkout and their current state:
 
 - Item details (product, price, quantity ordered)
-- Quantity counts and fulfillment status — `original`, `total`, and `fulfilled` are integer step counts of the item's inherited `quantity_unit` under the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract; an absent `quantity_unit` means the quantities count whole items (`each`) at `scale` 0
+- Quantity counts and fulfillment status — `original`, `total`, and `fulfilled` are integer step counts of the item's inherited `quantity_unit` under the shared [quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units) contract; an absent `quantity_unit` means the quantities count whole items (`each`) at `scale` 0
 
-All order lifecycle arithmetic over quantities operates on sale-basis step counts inherited from the item; other item characteristics do not enter that arithmetic. Business-recorded quantities — fulfillment events, adjustments, and revised totals — are bounded only by `scale`: a declared ordering [`increment`](http://ucp.dev/draft/specification/overview/#ordering-increment) binds Platform requests at cart and checkout and does not constrain what the Business records (a 0.25-lb ordering increment does not prevent recording an actual picked weight of 1.90 lb).
+All order lifecycle arithmetic over quantities operates on sale-basis step counts inherited from the item; other item characteristics do not enter that arithmetic. Business-recorded quantities — fulfillment events, adjustments, and revised totals — are bounded only by `scale`: a declared ordering [`increment`](https://ucp.dev/draft/specification/overview/#ordering-increment) binds Platform requests at cart and checkout and does not constrain what the Business records (a 0.25-lb ordering increment does not prevent recording an actual picked weight of 1.90 lb).
 
-**List price.** Businesses **MAY** surface a snapshot of the originating Checkout's [`item.list_price`](http://ucp.dev/draft/specification/overview/#list-price) on Order lines. This is the value captured at Checkout, not recomputed from live Catalog; a Business that did not retain it omits it.
+**List price.** Businesses **MAY** surface a snapshot of the originating Checkout's [`item.list_price`](https://ucp.dev/draft/specification/overview/#list-price) on Order lines. This is the value captured at Checkout, not recomputed from live Catalog; a Business that did not retain it omits it.
 
 ### Fulfillment
 
@@ -69,11 +69,11 @@ Expectations can be split, merged, or adjusted post-order. For example:
 
 ### Attribution
 
-Businesses MAY surface a snapshot of the originating checkout's `attribution` on the order. Read-only on the order — agents do not write `order.attribution`. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for the underlying contract.
+Businesses MAY surface a snapshot of the originating checkout's `attribution` on the order. Read-only on the order — agents do not write `order.attribution`. See [Attribution](https://ucp.dev/draft/specification/overview/#attribution) for the underlying contract.
 
 ### Policies
 
-Businesses MAY surface a snapshot of the policies that applied at checkout on the order. See [Policies](http://ucp.dev/draft/specification/overview/#policies) for the underlying contract.
+Businesses MAY surface a snapshot of the policies that applied at checkout on the order. See [Policies](https://ucp.dev/draft/specification/overview/#policies) for the underlying contract.
 
 ### Adjustments
 
@@ -390,7 +390,7 @@ An order for bananas sold by the pound (`item.quantity_unit` `{ "unit": "LBR", "
 
 ## Example: count-sold, measure-priced settlement
 
-Some items are sold by count but priced by measurement — apples at $2.00/lb, sold per `each`, with a nominal per-apple weight. Two bases are in play, and both travel: the sale basis governs `quantity` (whole apples, lifecycle arithmetic untouched), and the pricing basis — the line's echoed [`unit_price`](http://ucp.dev/draft/specification/shopping/checkout/#quantity-and-sale-basis) — carries the rate and nominal measure the charge is computed from. When the price settles against an actual measurement, the adjustment **MUST** carry the settled `measure`; its unit identity **MUST** match the pricing basis (no conversion), and a pure price settlement uses `quantity: 0` so the count is untouched. (A settled `measure` is Business-recorded fact; Buyer-configured measurements that define item identity are a separate negotiated extension.)
+Some items are sold by count but priced by measurement — apples at $2.00/lb, sold per `each`, with a nominal per-apple weight. Two bases are in play, and both travel: the sale basis governs `quantity` (whole apples, lifecycle arithmetic untouched), and the pricing basis — the line's echoed [`unit_price`](https://ucp.dev/draft/specification/shopping/checkout/#quantity-and-sale-basis) — carries the rate and nominal measure the charge is computed from. When the price settles against an actual measurement, the adjustment **MUST** carry the settled `measure`; its unit identity **MUST** match the pricing basis (no conversion), and a pure price settlement uses `quantity: 0` so the count is untouched. (A settled `measure` is Business-recorded fact; Buyer-configured measurements that define item identity are a separate negotiated extension.)
 
 A Buyer orders 3 apples at $0.80 each (nominal 0.40 lb × $2.00/lb; line total `240`). The picker weighs the three apples at 1.14 lb against the nominal 1.20 lb, and the settlement is fully verifiable from the order alone: nominal steps `3 × 40 = 120`, settled `114`, delta `6` steps `× 200 × 10^-2 = 12` — the `-12` adjustment checks out in integer arithmetic:
 
@@ -467,7 +467,7 @@ The count lifecycle never moves — `fulfilled == total` holds on whole apples �
 
 For weighed goods, the picked weight routinely differs from the ordered weight. The difference is a commercial fact, not a numeric error: the Business records the actual pick and reconciles the difference with an [adjustment](#adjustments) that moves money together with quantity. No tolerance comparison is involved; the status derivation operates on exact step counts throughout.
 
-A Buyer orders 2.00 lb of the same bananas at $0.79/lb, sold in quarter-pound increments (`quantity` `200`, line total `79 × 2.00 = 158`). The picker weighs out 1.90 lb — an off-increment fact, recorded as-is, because the [`increment`](http://ucp.dev/draft/specification/overview/#ordering-increment) binds Platform ordering, not Business records. The fulfillment event records the actual `190` steps, and a `price_adjustment` of `-10` steps reconciles `total` to the actual pick with its price delta (`79 × 0.10 = 7.9`, rounded once to `8`). `fulfilled == total` then holds exactly (`190 == 190`) and the line derives `fulfilled`:
+A Buyer orders 2.00 lb of the same bananas at $0.79/lb, sold in quarter-pound increments (`quantity` `200`, line total `79 × 2.00 = 158`). The picker weighs out 1.90 lb — an off-increment fact, recorded as-is, because the [`increment`](https://ucp.dev/draft/specification/overview/#ordering-increment) binds Platform ordering, not Business records. The fulfillment event records the actual `190` steps, and a `price_adjustment` of `-10` steps reconciles `total` to the actual pick with its price delta (`79 × 0.10 = 7.9`, rounded once to `8`). `fulfilled == total` then holds exactly (`190 == 190`) and the line derives `fulfilled`:
 
 ```json
 {
@@ -534,7 +534,7 @@ The Order capability defines the following well-known scopes for user-authentica
 | `dev.ucp.shopping.order:read`   | Read access to the user's orders — Get Order on resources owned by the authenticated user.      |
 | `dev.ucp.shopping.order:manage` | Post-purchase operations on the user's orders — cancellation, returns, and other modifications. |
 
-Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/common/identity-linking/#scopes).
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](https://ucp.dev/draft/specification/common/identity-linking/#scopes).
 
 ## Operations
 
@@ -546,7 +546,7 @@ The `permalink_url` is the authoritative reference for the full order experience
 | ----------------------- | ------ | -------------- | --------------------------------------- |
 | [Get Order](#get-order) | `GET`  | `/orders/{id}` | Platform retrieves current order state. |
 
-For transport-specific details, see [REST Binding](http://ucp.dev/draft/specification/shopping/order/rest/index.md), and [MCP Binding](http://ucp.dev/draft/specification/shopping/order/mcp/index.md)
+For transport-specific details, see [REST Binding](https://ucp.dev/draft/specification/shopping/order/rest/index.md), and [MCP Binding](https://ucp.dev/draft/specification/shopping/order/mcp/index.md)
 
 ### Get Order
 
@@ -554,7 +554,7 @@ Returns the current-state snapshot of an order.
 
 #### Authorization
 
-The business **MUST** authenticate requests to order data before returning a response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual TLS, or HTTP Message Signatures (see [Identity and Authentication](http://ucp.dev/draft/specification/shopping/checkout/rest/#authentication)). The authentication method determines which orders are accessible to the caller:
+The business **MUST** authenticate requests to order data before returning a response, using any supported UCP mechanism - API keys, OAuth 2.0, mutual TLS, or HTTP Message Signatures (see [Identity and Authentication](https://ucp.dev/draft/specification/shopping/checkout/rest/#authentication)). The authentication method determines which orders are accessible to the caller:
 
 | Authentication       | Accessible Orders                                              |
 | -------------------- | -------------------------------------------------------------- |
@@ -563,7 +563,7 @@ The business **MUST** authenticate requests to order data before returning a res
 
 **Platform credentials** (API key, signatures, OAuth client credentials) - businesses **MAY** allow access for orders the platform originated. The platform provided buyer and payment information during the checkout flow, observed the order confirmation, and is retrieving the latest state of an order it already has context for.
 
-**Buyer authorization** - the platform obtains buyer authorization via [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/index.md) with the necessary scopes, or a similar mechanism. This grants access to the buyer's orders regardless of which platform originated them.
+**Buyer authorization** - the platform obtains buyer authorization via [Identity Linking](https://ucp.dev/draft/specification/common/identity-linking/index.md) with the necessary scopes, or a similar mechanism. This grants access to the buyer's orders regardless of which platform originated them.
 
 Businesses **MAY** define additional access policies (e.g., trusted partner agreements), enforce data availability constraints (e.g., retention windows, regulatory erasure), and omit or redact optional fields from the response based on context, business policy, or other requirements - independently of authorization.
 
@@ -639,7 +639,7 @@ Businesses push order lifecycle updates to the platform via webhooks. The payloa
 
 Businesses POST order events to a webhook URL provided by the platform during partner onboarding. The URL format is platform-specific.
 
-Headers follow **[Standard Webhooks](https://www.standardwebhooks.com/)**; except for request signing, which follows [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421). See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for more details.
+Headers follow **[Standard Webhooks](https://www.standardwebhooks.com/)**; except for request signing, which follows [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421). See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for more details.
 
 **Required Headers:**
 
@@ -705,7 +705,7 @@ Platform's order capability configuration.
 
 ### Webhook Signature Verification
 
-Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
+Webhook payloads **MUST** be signed by the business and verified by the platform to ensure authenticity and integrity. Signatures follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using the REST binding (RFC 9421).
 
 **Required Headers:**
 
@@ -716,7 +716,7 @@ Webhook payloads **MUST** be signed by the business and verified by the platform
 | `Signature`       | Contains the signature value               |
 | `Content-Digest`  | Body digest (RFC 9530)                     |
 
-`Webhook-Id` and `Webhook-Timestamp` are required headers on this delivery, so the covered-component rule in [REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) requires the signature to cover them, and [REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) requires platforms to reject a delivery whose signature omits either. Webhooks carry no `Idempotency-Key`, so these two headers are the only per-event replay signal.
+`Webhook-Id` and `Webhook-Timestamp` are required headers on this delivery, so the covered-component rule in [REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) requires the signature to cover them, and [REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) requires platforms to reject a delivery whose signature omits either. Webhooks carry no `Idempotency-Key`, so these two headers are the only per-event replay signal.
 
 An order webhook carries the full current state of the order rather than a delta, so a platform that applies deliveries in `Webhook-Timestamp` order, or reconciles through `GET /orders/{id}`, converges on the current state without keeping per-delivery state. Platforms **SHOULD** deduplicate on `Webhook-Id`, which short-circuits retries and separates events that share a `Webhook-Timestamp`, whose resolution is one second.
 
@@ -741,11 +741,11 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 #### Signing (Business)
 
 1. Compute SHA-256 digest of the raw request body and set `Content-Digest` header
-1. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), covering every component [REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) requires
+1. Build signature base per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421), covering every component [REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) requires
 1. Sign using a key from `keys` in the business's UCP profile
 1. Set `Signature-Input` and `Signature` headers
 
-See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
+See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for complete algorithm.
 
 #### Verification (Platform)
 
@@ -756,9 +756,9 @@ See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specificati
 1. Locate key in `keys` with matching `kid`
 1. Verify `Content-Digest` matches SHA-256 of raw body
 1. Reconstruct signature base and verify signature
-1. Confirm every component [REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) requires is among the signed components, and reject the delivery otherwise
+1. Confirm every component [REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) requires is among the signed components, and reject the delivery otherwise
 
-See [Message Signatures - REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
+See [Message Signatures - REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) for complete algorithm.
 
 **Authorization** (order ownership):
 
@@ -772,7 +772,7 @@ This prevents a malicious business from sending fake events for another business
 
 #### Key Rotation
 
-See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
+See [Message Signatures - Key Rotation](https://ucp.dev/draft/specification/signatures/#key-rotation) for zero-downtime key rotation procedures.
 
 ### Guidelines
 
@@ -783,7 +783,7 @@ See [Message Signatures - Key Rotation](http://ucp.dev/draft/specification/signa
 **Business:**
 
 - **MUST** include `UCP-Agent` header with profile URL for signer identification
-- **MUST** sign all webhook payloads per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`)
+- **MUST** sign all webhook payloads per the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 headers (`Signature`, `Signature-Input`, `Content-Digest`)
 - **MUST** send "Order created" event with fully populated order entity
 - **MUST** send full order entity on updates (not incremental deltas)
 - **MUST** retry failed webhook deliveries

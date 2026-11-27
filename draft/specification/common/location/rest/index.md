@@ -1,6 +1,6 @@
 # Location - REST Binding
 
-This document specifies the HTTP/REST binding for the [Location Capability](http://ucp.dev/draft/specification/common/location/index.md).
+This document specifies the HTTP/REST binding for the [Location Capability](https://ucp.dev/draft/specification/common/location/index.md).
 
 ## Protocol Fundamentals
 
@@ -42,14 +42,14 @@ Businesses advertise REST transport availability for the Common service and Loca
 
 ## Endpoints
 
-| Endpoint            | Method | Capability                                                                   | Description                                                                                   |
-| ------------------- | ------ | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `/locations/search` | POST   | [Search](http://ucp.dev/draft/specification/common/location/search/index.md) | Search for physical locations.                                                                |
-| `/locations/lookup` | POST   | [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) | Lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
+| Endpoint            | Method | Capability                                                                    | Description                                                                                   |
+| ------------------- | ------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `/locations/search` | POST   | [Search](https://ucp.dev/draft/specification/common/location/search/index.md) | Search for physical locations.                                                                |
+| `/locations/lookup` | POST   | [Lookup](https://ucp.dev/draft/specification/common/location/lookup/index.md) | Lookup Locations by identifier, optionally refined by explicit spatial relations and filters. |
 
 ### `POST /locations/search`
 
-Maps to the [Location Search](http://ucp.dev/draft/specification/common/location/search/index.md) capability. See the [complete transport-neutral Search example](http://ucp.dev/draft/specification/common/location/search/#examples).
+Maps to the [Location Search](https://ucp.dev/draft/specification/common/location/search/index.md) capability. See the [complete transport-neutral Search example](https://ucp.dev/draft/specification/common/location/search/#examples).
 
 **Inputs**
 
@@ -111,7 +111,7 @@ Content-Digest: sha-256=:yG9a8bC7...:
 
 ### `POST /locations/lookup`
 
-Maps to the [Location Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md) capability. See the [complete transport-neutral Lookup example](http://ucp.dev/draft/specification/common/location/lookup/#examples).
+Maps to the [Location Lookup](https://ucp.dev/draft/specification/common/location/lookup/index.md) capability. See the [complete transport-neutral Lookup example](https://ucp.dev/draft/specification/common/location/lookup/#examples).
 
 **Inputs**
 
@@ -221,7 +221,7 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 
 ### Business Outcomes
 
-All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Location Overview](http://ucp.dev/draft/specification/common/location/#messages-and-error-handling) for message semantics.
+All application-level outcomes return HTTP 200 with the UCP envelope and optional `messages` array. See [Location Overview](https://ucp.dev/draft/specification/common/location/#messages-and-error-handling) for message semantics.
 
 ## Entities
 
@@ -331,9 +331,9 @@ Location with required correlation metadata for lookup responses.
 
 A conforming REST transport implementation **MUST**:
 
-1. Implement endpoints for each Location capability advertised in the Business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/common/location/search/index.md), [Lookup](http://ucp.dev/draft/specification/common/location/lookup/index.md)). Each capability **MAY** be adopted independently.
+1. Implement endpoints for each Location capability advertised in the Business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/common/location/search/index.md), [Lookup](https://ucp.dev/draft/specification/common/location/lookup/index.md)). Each capability **MAY** be adopted independently.
 1. Evaluate the `distance` and `serves` relations and the `filters.items` availability predicate only against their explicit Platform-supplied operands. Never derive an operand from `context`, `signals`, or an IP address, and never apply an implicit serviceability or item-availability check when its input is absent.
 1. Apply `distance`, `serves`, and every supplied `filters` predicate conjunctively (AND).
-1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/common/location/search/#pagination)).
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](https://ucp.dev/draft/specification/common/location/search/#pagination)).
 1. Return HTTP 200 for Lookup requests; unknown identifiers result in fewer or no Locations returned (**MAY** include informational `not_found` messages).
 1. Return HTTP 200 when a Lookup request exceeds the Business's batch maximum, process the first maximum number of distinct identifiers in request order, and include an informational `batch_limit_applied` message.

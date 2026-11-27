@@ -146,7 +146,7 @@ The handler declaration conforms to the [`PaymentHandler`](/draft/schemas/paymen
 
 **`available_instruments`** is optional. When absent, the handler places no restrictions on instrument types or constraints — it supports the full set of instrument types defined by its handler schema. When present, it narrows the advertised types and/or applies additional constraints (e.g., limiting card brands to `visa` and `mastercard`). In a Business profile and authoritative response, array order communicates preferred instrument presentation, earliest first.
 
-Each entry narrows along two axes. Both are [Constraint Expressions](http://ucp.dev/draft/specification/overview/#constraint-expression), so one evaluator runs both; they differ only in the object they describe:
+Each entry narrows along two axes. Both are [Constraint Expressions](https://ucp.dev/draft/specification/overview/#constraint-expression), so one evaluator runs both; they differ only in the object they describe:
 
 ```text
 available_instruments[]
@@ -159,7 +159,7 @@ available_instruments[]
 
 `ucp.request_constraints` carries everything that *is* on the wire: which instrument fields are required, which credential types are accepted, and which fields each of those credential types must carry. Use field requirements rather than handler-specific booleans for modeled data.
 
-When an authoritative response includes `ucp.request_constraints` on an available instrument, the Business **MUST** include an explicit `path` because the available instrument's response Normalized Path does not identify submitted instruments. The path matches the containing handler's `id` to submitted `handler_id` and the available instrument's `type` to submitted `type`, and applies when the next request contains matching instruments. Payment-handler and instrument specifications define any stronger association the query needs. See [Request Constraints](http://ucp.dev/draft/specification/overview/#request-constraints).
+When an authoritative response includes `ucp.request_constraints` on an available instrument, the Business **MUST** include an explicit `path` because the available instrument's response Normalized Path does not identify submitted instruments. The path matches the containing handler's `id` to submitted `handler_id` and the available instrument's `type` to submitted `type`, and applies when the next request contains matching instruments. Payment-handler and instrument specifications define any stronger association the query needs. See [Request Constraints](https://ucp.dev/draft/specification/overview/#request-constraints).
 
 One path selects the submitted instrument, and one Constraint Expression describes it. Requirements shared by every instrument of the type are sibling members; requirements that differ per credential family are `anyOf` branches on the nested `credential` object. Splitting the credential families into distinct schemas is what gives each branch a stable discriminator.
 
@@ -675,12 +675,12 @@ A payment handler may require the Platform to perform additional work while the 
 
 Handler authors have two options:
 
-- **Use the standard Payment Authentication extension.** Handlers that need device data collection or a 3DS challenge use [`dev.ucp.common.payment.authentication`](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md), which defines the `dev.ucp.common.payment.device_data_collection` and `dev.ucp.common.payment.three_ds_challenge` Action types. The handler specification states which types it can cause and any provider-specific trust or fallback requirements, such as allowed origins.
+- **Use the standard Payment Authentication extension.** Handlers that need device data collection or a 3DS challenge use [`dev.ucp.common.payment.authentication`](https://ucp.dev/draft/specification/payment/extensions/authentication/index.md), which defines the `dev.ucp.common.payment.device_data_collection` and `dev.ucp.common.payment.three_ds_challenge` Action types. The handler specification states which types it can cause and any provider-specific trust or fallback requirements, such as allowed origins.
 - **Define handler-specific Actions.** When the standard types do not fit, the handler author publishes a Checkout extension that declares its Action type keys and `config` shapes. Both the Business and Platform advertise that extension before those Actions are emitted.
 
 For each handler-specific Action, document when it is emitted, the exact effect its type gates, how the Platform processes its config, how the Business observes its completion, whether processing the same occurrence is ever safe to retry, and its trust, failure, abandonment, and fallback behavior.
 
-See [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common envelope and [Schema Authoring — Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types) for the extension schema pattern.
+See [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions) for the common envelope and [Schema Authoring — Extension-Declared Action Types](/documentation/schema-authoring/#extension-declared-action-types) for the extension schema pattern.
 
 ### Processing
 
@@ -721,7 +721,7 @@ ______________________________________________________________________
 
 Handler specifications **SHOULD** use the standard template structure. Sections marked **[REQUIRED]** **MUST** be present; sections marked **[CONDITIONAL]** are required only when applicable.
 
-**→ [Payment Handler Template](http://ucp.dev/draft/specification/payment/template/index.md)**
+**→ [Payment Handler Template](https://ucp.dev/draft/specification/payment/template/index.md)**
 
 ## Conformance Checklist for Spec Authors
 
@@ -823,16 +823,16 @@ Follow these guidelines to create high-quality, maintainable handler specificati
 
 ### Maintainability
 
-| Practice                        | Description                                                                                                                                       |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                                                                     |
-| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                                                                        |
-| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](http://ucp.dev/draft/specification/payment/tokenization/index.md) for common flows. |
+| Practice                        | Description                                                                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Host schemas at stable URLs** | Schema URLs should not change; use versioned paths if needed.                                                                                      |
+| **Fail gracefully**             | Define clear error responses for common failure scenarios.                                                                                         |
+| **Link to examples**            | Reference existing handler specs and the [Tokenization Guide](https://ucp.dev/draft/specification/payment/tokenization/index.md) for common flows. |
 
 ______________________________________________________________________
 
 ## See Also
 
-- **[Tokenization Guide](http://ucp.dev/draft/specification/payment/tokenization/index.md)** — Guide for building tokenization payment handlers
+- **[Tokenization Guide](https://ucp.dev/draft/specification/payment/tokenization/index.md)** — Guide for building tokenization payment handlers
 - **[Google Pay Handler](https://developers.google.com/merchant/ucp/guides/google-pay-payment-handler)** — Handler for Google Pay integration
 - **[Shop Pay Handler](https://shopify.dev/docs/agents/checkout/shop-pay-handler)** — Handler for Shop Pay integration

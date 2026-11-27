@@ -11,17 +11,17 @@ The Catalog capability allows platforms to search and browse business product ca
 
 ## Capabilities
 
-| Capability                                                                                               | Description                                       |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| [`dev.ucp.shopping.catalog.search`](http://ucp.dev/draft/specification/shopping/catalog/search/index.md) | Search for products using query text and filters. |
-| [`dev.ucp.shopping.catalog.lookup`](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
+| Capability                                                                                                | Description                                       |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`dev.ucp.shopping.catalog.search`](https://ucp.dev/draft/specification/shopping/catalog/search/index.md) | Search for products using query text and filters. |
+| [`dev.ucp.shopping.catalog.lookup`](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md) | Retrieve products or variants by identifier.      |
 
 ## Key Concepts
 
 - **Product**: A catalog item with title, description, media, and one or more variants.
 - **Variant**: A purchasable item with specific option selections (e.g., "Blue / Large"), price, and availability.
 - **Price**: Price values include both amount (in minor currency units) and currency code, enabling multi-currency catalogs.
-- **Sale basis**: How quantity is denominated—as whole items (`each`, the default) or in a unit of measure such as weight, length, area, volume, or time. See [Quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units).
+- **Sale basis**: How quantity is denominated—as whole items (`each`, the default) or in a unit of measure such as weight, length, area, volume, or time. See [Quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units).
 
 ### Relationship to Checkout
 
@@ -31,9 +31,9 @@ Catalog responses (pricing, availability, etc.) reflect the Business's current t
 
 ## Sale basis and quantity units
 
-`variants[].quantity_unit` advertises a variant's sale basis before a transaction. The descriptor follows the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract. Its absence advertises the default `each` basis; the Business advertises a non-`each` basis by including the descriptor.
+`variants[].quantity_unit` advertises a variant's sale basis before a transaction. The descriptor follows the shared [quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units) contract. Its absence advertises the default `each` basis; the Business advertises a non-`each` basis by including the descriptor.
 
-The catalog is where the Platform learns the sale basis before transacting: `unit` and `scale` define how quantities are denominated, and an optional [`increment`](http://ucp.dev/draft/specification/overview/#ordering-increment) advertises the ordering granularity the Business sells in, letting the Platform build quantity steppers and validate input before submission. A Business selling bananas by the pound in quarter-pound multiples advertises `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
+The catalog is where the Platform learns the sale basis before transacting: `unit` and `scale` define how quantities are denominated, and an optional [`increment`](https://ucp.dev/draft/specification/overview/#ordering-increment) advertises the ordering granularity the Business sells in, letting the Platform build quantity steppers and validate input before submission. A Business selling bananas by the pound in quarter-pound multiples advertises `{ "unit": "LBR", "scale": 2, "display_text": "lb", "increment": 25 }`.
 
 The sale basis is not limited to physical measure: metered offerings — parking by the minute, labor by the hour — use the same descriptor (`MIN`, `HUR`) with the same contract.
 
@@ -46,7 +46,7 @@ The sale basis is not limited to physical measure: metered offerings — parking
 - `quantity_unit` is the **sale basis** — the unit `quantity` is counted in and `price` is quoted in.
 - `unit_price` is a **display comparator** — a derived "price per standard measure" (for example, per 100 mL) for shelf-style comparison. Its `measure` is the packaging or content quantity of the variant and its `reference` is the comparison denominator.
 
-The unit fields in `quantity_unit`, `unit_price.measure`, and `unit_price.reference` follow the shared [quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units) contract. The two unit-price fields use the shared measure type, so their integer `value` fields are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`, both, or neither on a variant.
+The unit fields in `quantity_unit`, `unit_price.measure`, and `unit_price.reference` follow the shared [quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units) contract. The two unit-price fields use the shared measure type, so their integer `value` fields are step counts. The Business **MAY** provide `quantity_unit`, `unit_price`, both, or neither on a variant.
 
 To keep the display comparator defined, the Business **MUST** use a positive integer for both `unit_price.measure.value` and `unit_price.reference.value`. The Business **MUST** set `unit_price.currency` equal to `price.currency`. Within `unit_price`, the Business **MUST** use identical values for `measure.unit` and `reference.unit`. The Business **MAY** use different `scale` values for those measures. The Business **MUST NOT** perform cross-unit or currency conversion as part of the unit-price calculation. Each measure represents its integer `value × 10^-scale` in the common unit. The Business **MUST** compute the comparator from `price.amount` and those scaled values:
 
@@ -60,7 +60,7 @@ The same-unit and same-currency rules are semantic invariants. JSON Schema valid
 
 For example, a 50 m cable spool sold by `each` can omit `quantity_unit` while carrying a `unit_price` per metre. Its `measure` can be `{ "value": 5000, "unit": "MTR", "scale": 2, "display_text": "m" }` and its `reference` can be `{ "value": 1, "unit": "MTR", "display_text": "m" }`. Both measures use `MTR`; they represent 50 m and 1 m respectively without cross-unit conversion.
 
-On transaction lines, presence marks the role: the Business **MUST** echo `unit_price` on any line whose pricing basis differs from its sale basis (see [Checkout — pricing basis](http://ucp.dev/draft/specification/shopping/checkout/#quantity-and-sale-basis)). A catalog-only `unit_price`, like this spool's per-metre figure, is a display comparator; a line-level one carries the rate the charge is computed from.
+On transaction lines, presence marks the role: the Business **MUST** echo `unit_price` on any line whose pricing basis differs from its sale basis (see [Checkout — pricing basis](https://ucp.dev/draft/specification/shopping/checkout/#quantity-and-sale-basis)). A catalog-only `unit_price`, like this spool's per-metre figure, is a display comparator; a line-level one carries the rate the charge is computed from.
 
 ### Example: a good sold by weight
 
@@ -99,7 +99,7 @@ Location and market context for catalog operations. All fields are optional hint
 
 Context signals are provisional—not authoritative data. Businesses SHOULD use these values when verified inputs (e.g., shipping address) are absent, and MAY ignore or down-rank them if inconsistent with higher-confidence signals (authenticated account, risk detection) or regulatory constraints (export controls). Eligibility and policy enforcement MUST occur at checkout time using binding transaction data.
 
-Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](http://ucp.dev/draft/specification/shopping/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
+Businesses determine market assignment—including currency—based on context signals. Price filter values are denominated in `context.currency`; when the presentment currency differs, businesses SHOULD convert before applying (see [Price Filter](https://ucp.dev/draft/specification/shopping/catalog/search/#price-filter)). Response prices include explicit currency codes confirming the resolution.
 
 When `context.eligibility` claims are present, Businesses that accept them **MAY** adjust `price` / `list_price` directly for strikethrough display and **MAY** use `messages` with `code: "eligibility_benefit"` to attribute the adjustment to a specific claim.
 
@@ -124,7 +124,7 @@ When `context.eligibility` claims are present, Businesses that accept them **MAY
 
 ### Signals
 
-Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the platform to support authorization and abuse prevention. Signal values MUST NOT be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Requirement | Description                                    |
 | ------------------ | ------ | ----------- | ---------------------------------------------- |
@@ -133,7 +133,7 @@ Environment data provided by the platform to support authorization and abuse pre
 
 ### Attribution
 
-Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](http://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
+Platform-provided referral and conversion-event context — campaign IDs, click identifiers, and source/medium markers communicated by the platform. See [Attribution](https://ucp.dev/draft/specification/overview/#attribution) for details and consent requirements.
 
 Platform-emitted referral and conversion-event context — campaign identifiers, click IDs, source/medium markers, etc. The same parameters platforms communicate via URL query parameters in browser-based flows.
 
@@ -164,7 +164,7 @@ A catalog item representing a sellable item with one or more purchasable variant
 
 A purchasable item with specific option selections, price, and availability.
 
-In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](http://ucp.dev/draft/specification/shopping/catalog/lookup/#client-correlation) for details.
+In lookup responses, each variant carries an `inputs` array for correlation: which request identifiers resolved to this variant, and whether the match was `exact` or `featured` (server-selected). See [Client Correlation](https://ucp.dev/draft/specification/shopping/catalog/lookup/#client-correlation) for details.
 
 `media` is an ordered array. Businesses **SHOULD** return the featured variant media item as the first element. Platforms **SHOULD** treat the first media item they present as featured.
 
@@ -278,7 +278,7 @@ A Platform that embeds the player **MUST** isolate it from the Platform's author
 <iframe sandbox="allow-scripts allow-same-origin" allow="fullscreen" credentialless src="https://videos.example.com/embed/123"></iframe>
 ```
 
-See [Iframe Sandbox Attributes](http://ucp.dev/draft/specification/embedded-protocol/#iframe-sandbox-attributes) and [Credentialless Iframes](http://ucp.dev/draft/specification/embedded-protocol/#credentialless-iframes).
+See [Iframe Sandbox Attributes](https://ucp.dev/draft/specification/embedded-protocol/#iframe-sandbox-attributes) and [Credentialless Iframes](https://ucp.dev/draft/specification/embedded-protocol/#credentialless-iframes).
 
 | Name    | Type                                                                  | Requirement  | Description                                                                                                                                          |
 | ------- | --------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -329,7 +329,7 @@ See [Iframe Sandbox Attributes](http://ucp.dev/draft/specification/embedded-prot
 
 ### Policy
 
-Policies (return/refund terms, warranty, and the like) that apply to the products in a catalog response. JSONPath targets in `applies_to` are relative to the response root — `$.products[N]` for search and batch lookup, `$.product` for get_product. See [Policies](http://ucp.dev/draft/specification/overview/#policies) for the full model.
+Policies (return/refund terms, warranty, and the like) that apply to the products in a catalog response. JSONPath targets in `applies_to` are relative to the response root — `$.products[N]` for search and batch lookup, `$.product` for get_product. See [Policies](https://ucp.dev/draft/specification/overview/#policies) for the full model.
 
 | Name        | Type                                                                       | Requirement  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ----------- | -------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -346,7 +346,7 @@ Search, batch Lookup, and successful Get Product are independent Catalog operati
 
 For Search and batch Lookup, the Business decides whether to return zero, some, or all otherwise relevant products under the Action-type contract and its own policy. A Message can point to the Action to explain the response. Successful Get Product still includes `product`; its existing error response is unchanged.
 
-After processing an Action, the Platform performs a fresh Catalog operation and the later Business response is authoritative. Catalog defines no Action lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY** define those behaviors for processing its instances. The common shape and rules are defined in [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions).
+After processing an Action, the Platform performs a fresh Catalog operation and the later Business response is authoritative. Catalog defines no Action lifecycle, polling, or resume behavior; a concrete Action-type contract **MAY** define those behaviors for processing its instances. The common shape and rules are defined in [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions).
 
 For example, this Search response returns no products and explains that age verification may affect the results:
 
@@ -388,9 +388,9 @@ Messages communicate business outcomes and provide context:
 | `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE`              |
 | `info`    | Additional context without issues       | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY`    |
 
-Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) for the full rendering contract.
+Warnings with `presentation: "disclosure"` carry notices (e.g., allergen declarations, safety warnings) that platforms must not hide or dismiss. See [Warning Presentation](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) for the full rendering contract.
 
-**Note**: Most catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives). `get_product` returns `severity: "unrecoverable"` when an identifier doesn't resolve; agents MUST NOT retry the same `id` (see the [REST](http://ucp.dev/draft/specification/shopping/catalog/rest/#product-not-found) and [MCP](http://ucp.dev/draft/specification/shopping/catalog/mcp/#product-not-found) examples).
+**Note**: Most catalog errors use `severity: "recoverable"` - agents handle them programmatically (retry, inform user, show alternatives). `get_product` returns `severity: "unrecoverable"` when an identifier doesn't resolve; agents MUST NOT retry the same `id` (see the [REST](https://ucp.dev/draft/specification/shopping/catalog/rest/#product-not-found) and [MCP](https://ucp.dev/draft/specification/shopping/catalog/mcp/#product-not-found) examples).
 
 #### Message (Error)
 
@@ -499,7 +499,7 @@ When requested identifiers don't exist, return success with the found products (
 }
 ```
 
-Agents correlate results using the `inputs` array on each variant. See [Client Correlation](http://ucp.dev/draft/specification/shopping/catalog/lookup/#client-correlation).
+Agents correlate results using the `inputs` array on each variant. See [Client Correlation](https://ucp.dev/draft/specification/shopping/catalog/lookup/#client-correlation).
 
 #### Product Disclosure
 
@@ -550,7 +550,7 @@ When a product requires a disclosure (e.g., allergen notice, safety warning), re
 }
 ```
 
-See [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) for the full rendering contract.
+See [Warning Presentation](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) for the full rendering contract.
 
 ## Scopes
 
@@ -561,11 +561,11 @@ The Catalog Search and Catalog Lookup capabilities define the following well-kno
 | `dev.ucp.shopping.catalog.search:read` | Search on behalf of the authenticated user — personalized results, member pricing, gated inventory.      |
 | `dev.ucp.shopping.catalog.lookup:read` | Lookup on behalf of the authenticated user — personalized pricing or availability for specific products. |
 
-Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/common/identity-linking/#scopes).
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](https://ucp.dev/draft/specification/common/identity-linking/#scopes).
 
 ## Transport Bindings
 
 The capabilities above are bound to specific transport protocols:
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/catalog/rest/index.md): RESTful API mapping.
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.
+- [REST Binding](https://ucp.dev/draft/specification/shopping/catalog/rest/index.md): RESTful API mapping.
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/catalog/mcp/index.md): Model Context Protocol mapping via JSON-RPC.

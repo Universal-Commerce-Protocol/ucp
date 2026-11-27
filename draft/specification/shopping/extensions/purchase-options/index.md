@@ -6,7 +6,7 @@ A product can be bought once or as a subscription. The Purchase Options extensio
 
 Today a variant has one price and one way to buy it. A Business that also sells the same coffee on a monthly plan has no way to say so in its catalog, a Platform has no way to choose, and a checkout has no way to know which was chosen.
 
-A **purchase option** is an addressable, renderable choice: an `id`, a `title`, and a `price` for the current purchase. An option that results in recurring orders also carries their `schedules`. The Business enumerates the options it sells; the Platform selects one. This is `options[]` plus a selected id, the same shape as a [fulfillment option](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md) and a [payment term](http://ucp.dev/draft/specification/payment/extensions/terms/index.md), applied on the axis where the choice to subscribe actually lives: the item. As with payment terms, the schedules of unselected options are indicative and the selected option's bind.
+A **purchase option** is an addressable, renderable choice: an `id`, a `title`, and a `price` for the current purchase. An option that results in recurring orders also carries their `schedules`. The Business enumerates the options it sells; the Platform selects one. This is `options[]` plus a selected id, the same shape as a [fulfillment option](https://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md) and a [payment term](https://ucp.dev/draft/specification/payment/extensions/terms/index.md), applied on the axis where the choice to subscribe actually lives: the item. As with payment terms, the schedules of unselected options are indicative and the selected option's bind.
 
 This extension adds:
 
@@ -18,7 +18,7 @@ This extension adds:
 **Dependencies:**
 
 - One or more of the parent capabilities this extension extends: Catalog Search, Catalog Lookup, Cart, Checkout, or Order.
-- The core `policies[]` primitive (see [Policies](http://ucp.dev/draft/specification/overview/#policies)), on which this extension defines the [subscription policy](#subscription-policy) type.
+- The core `policies[]` primitive (see [Policies](https://ucp.dev/draft/specification/overview/#policies)), on which this extension defines the [subscription policy](#subscription-policy) type.
 
 An option states how the line it is selected on is bought — its price now and the recurring orders that follow. It never adds, removes, or changes other lines. When payment is due and how the item is fulfilled are stated by the capabilities that own those concerns.
 
@@ -127,7 +127,7 @@ On catalog surfaces, all purchase option prices and recurring schedule amounts u
 
 The same rule holds across arrangements:
 
-- A $10 item whose payment is collected in 14 days has a `price` of $10. When the $10 is collected is a [payment term](http://ucp.dev/draft/specification/payment/extensions/terms/index.md).
+- A $10 item whose payment is collected in 14 days has a `price` of $10. When the $10 is collected is a [payment term](https://ucp.dev/draft/specification/payment/extensions/terms/index.md).
 - A subscription whose first order costs $8.50 has a `price` of $8.50. The recurring orders are stated in its `schedules`.
 - A free trial has a `price` of `0`, and its recurring orders begin when the trial ends. See [Payment terms](#payment-terms).
 - `0` means the current purchase is genuinely free. It never means a non-zero amount is merely collected later.
@@ -156,17 +156,17 @@ Schedules are listed in the order they take effect. Each continues until the nex
 
 ### Totals
 
-A recurring order is an order, and a schedule states what it costs the way a line item does. The Business **MUST** include `totals` in every schedule, with exactly one `total` entry. These follow the [line-item contract](http://ucp.dev/draft/specification/shopping/checkout/#totals) — entries carry a `type` and a signed `amount`. A Platform renders them in the order provided and **MUST NOT** aggregate, filter, or reorder them. Unlike a line, whose amounts the checkout's own `totals` back, a schedule is the only statement of what each recurring order costs. On a catalog variant they are for one unit; on a cart or checkout line, for the line at its quantity. Because they follow the quantity, a change the Platform makes to the quantity changes them, and is not a change to the option. The option's own `price` is always per unit.
+A recurring order is an order, and a schedule states what it costs the way a line item does. The Business **MUST** include `totals` in every schedule, with exactly one `total` entry. These follow the [line-item contract](https://ucp.dev/draft/specification/shopping/checkout/#totals) — entries carry a `type` and a signed `amount`. A Platform renders them in the order provided and **MUST NOT** aggregate, filter, or reorder them. Unlike a line, whose amounts the checkout's own `totals` back, a schedule is the only statement of what each recurring order costs. On a catalog variant they are for one unit; on a cart or checkout line, for the line at its quantity. Because they follow the quantity, a change the Platform makes to the quantity changes them, and is not a change to the option. The option's own `price` is always per unit.
 
 `total` is the amount of the order **before** the taxes, fulfillment, and fees the Business computes when it places it, because the rates that apply on a future date are not knowable at checkout; the schedule `description` **MUST** say so where they apply. A Business that *can* state one of those costs — a flat shipping rate, a tax-exempt item — includes its entry, and `total` then includes it. An omitted entry is not stated, not zero. A saving that expires is a schedule that ends and another that begins.
 
 ### Start dates and the current purchase
 
-The current purchase is the first order. Everything the buyer owes for it is in the checkout `totals`, paid at completion or on the [payment term](http://ucp.dev/draft/specification/payment/extensions/terms/index.md) the buyer selected; the first schedule's `starts_at` is when the first recurring order **after** it is placed. An order is either this checkout or a recurring order under a schedule, never both. `starts_at` **MAY** be omitted where the Business cannot yet determine it — on a catalog surface, or on a cart that lacks the context its first order date depends on — and **SHOULD** be present once a checkout is `ready_for_complete`.
+The current purchase is the first order. Everything the buyer owes for it is in the checkout `totals`, paid at completion or on the [payment term](https://ucp.dev/draft/specification/payment/extensions/terms/index.md) the buyer selected; the first schedule's `starts_at` is when the first recurring order **after** it is placed. An order is either this checkout or a recurring order under a schedule, never both. `starts_at` **MAY** be omitted where the Business cannot yet determine it — on a catalog surface, or on a cart that lacks the context its first order date depends on — and **SHOULD** be present once a checkout is `ready_for_complete`.
 
 ## Subscription policy
 
-This extension also defines the `dev.ucp.shopping.policy.subscription` type on the core [`policies[]`](http://ucp.dev/draft/specification/overview/#policies) primitive. The selected option's `schedules` state what each recurring order costs and when; the policy states the rest of the agreement — that the line results in recurring orders and until when, and how the buyer cancels and manages it — and carries the disclosure buyers must see before agreeing to recurring orders. It adds no fields to the base policy. Negotiating this extension is how a Platform accepts the [Platform obligations](#platform-obligations) below.
+This extension also defines the `dev.ucp.shopping.policy.subscription` type on the core [`policies[]`](https://ucp.dev/draft/specification/overview/#policies) primitive. The selected option's `schedules` state what each recurring order costs and when; the policy states the rest of the agreement — that the line results in recurring orders and until when, and how the buyer cancels and manages it — and carries the disclosure buyers must see before agreeing to recurring orders. It adds no fields to the base policy. Negotiating this extension is how a Platform accepts the [Platform obligations](#platform-obligations) below.
 
 ### Where
 
@@ -190,7 +190,7 @@ The policy **MUST NOT** contradict the selected option's `schedules`, and `url` 
 
 ### The disclosure
 
-Alongside every governing policy on a cart, checkout, or order, the Business **MUST** emit a `messages[]` warning with `presentation: "disclosure"`, `code` set to `dev.ucp.shopping.policy.subscription`, and `path` naming the line, as [Presenting policies](http://ucp.dev/draft/specification/overview/#presenting-policies) defines. Its `content` **MUST** be sufficient on its own, because presenting a policy is optional for a Platform and the disclosure is not. It **MUST** state:
+Alongside every governing policy on a cart, checkout, or order, the Business **MUST** emit a `messages[]` warning with `presentation: "disclosure"`, `code` set to `dev.ucp.shopping.policy.subscription`, and `path` naming the line, as [Presenting policies](https://ucp.dev/draft/specification/overview/#presenting-policies) defines. Its `content` **MUST** be sufficient on its own, because presenting a policy is optional for a Platform and the disclosure is not. It **MUST** state:
 
 - what the current purchase costs and when it is paid, where either differs from a recurring order;
 - what each recurring order costs, and whether taxes and shipping are added;
@@ -204,8 +204,8 @@ A disclosure **MUST** agree with the governing policy, with the selected option'
 
 A Platform that negotiates this extension **MUST**:
 
-- present every subscription disclosure to the buyer under the [`disclosure` rendering contract](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation): in proximity to the line, not hidden, collapsed, or dismissed;
-- present it before completing the checkout, unless the buyer authorized the disclosed terms in advance — for example through a signed [AP2 mandate](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) over the checkout;
+- present every subscription disclosure to the buyer under the [`disclosure` rendering contract](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation): in proximity to the line, not hidden, collapsed, or dismissed;
+- present it before completing the checkout, unless the buyer authorized the disclosed terms in advance — for example through a signed [AP2 mandate](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) over the checkout;
 - escalate through `continue_url` when it cannot honor either of the above, rather than completing;
 - honor an error with `severity: "requires_buyer_review"`, which a Business uses where it or a jurisdiction requires affirmative acknowledgment beyond display; and
 - re-present the disclosure whenever a response returns it with changed content.
@@ -216,7 +216,7 @@ Completing a checkout under these obligations is the buyer's agreement to the re
 
 Recurring orders are paid with instruments the Business can charge after completion. Checkout already requires a Business to filter the payment handlers it offers to the context of the cart, and names subscriptions as the example. The single instrument pays this order and is **retained** for the recurring orders, and that filter is the whole rule. A complete request for a checkout that carries a subscription policy **MUST** include an instrument the Business can charge after completion, even where the checkout `total` is `0`; the Business rejects one without it with `payment_failed` at `$.payment.instruments`.
 
-A checkout that carries a subscription policy **MUST** be funded by a single instrument; the Business rejects a submission of more than one the same way. [Split Payments](http://ucp.dev/draft/specification/payment/extensions/split-payments/index.md) composes with a checkout that carries no subscription policy, and not otherwise.
+A checkout that carries a subscription policy **MUST** be funded by a single instrument; the Business rejects a submission of more than one the same way. [Split Payments](https://ucp.dev/draft/specification/payment/extensions/split-payments/index.md) composes with a checkout that carries no subscription policy, and not otherwise.
 
 A Platform **MUST** treat the handlers in each response as authoritative, and re-read them after any change that adds or removes a subscription policy. How a handler stores an instrument, and how a payment for a recurring order is executed or recovers from a decline, are payment-handler and order-lifecycle behavior, outside this extension.
 

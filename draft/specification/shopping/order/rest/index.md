@@ -1,6 +1,6 @@
 # Order Capability - REST Binding
 
-This document specifies the REST binding for the [Order Capability](http://ucp.dev/draft/specification/shopping/order/index.md).
+This document specifies the REST binding for the [Order Capability](https://ucp.dev/draft/specification/shopping/order/index.md).
 
 ## Protocol Fundamentals
 
@@ -57,7 +57,7 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 | ----------------------- | ------ | -------------- | ---------------------------------- |
 | [Get Order](#get-order) | `GET`  | `/orders/{id}` | Get the current state of an order. |
 
-For the Order Event Webhook (business -> platform push), see the [Order Capability overview](http://ucp.dev/draft/specification/shopping/order/#order-event-webhook).
+For the Order Event Webhook (business -> platform push), see the [Order Capability overview](https://ucp.dev/draft/specification/shopping/order/#order-event-webhook).
 
 ### Get Order
 
@@ -245,7 +245,7 @@ Content-Type: application/json
 
 ## Message Signing
 
-Request and response signatures follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 HTTP Message Signatures. See [REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) and [REST Request Verification](http://ucp.dev/draft/specification/signatures/#rest-request-verification) for the complete algorithm.
+Request and response signatures follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification using RFC 9421 HTTP Message Signatures. See [REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) and [REST Request Verification](https://ucp.dev/draft/specification/signatures/#rest-request-verification) for the complete algorithm.
 
 ## Conformance
 
@@ -258,6 +258,6 @@ Platforms implementing the REST binding:
 Businesses implementing the REST binding:
 
 - **MUST** serve all endpoints over HTTPS with TLS 1.3+
-- **SHOULD** sign responses per the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification
+- **SHOULD** sign responses per the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification
 
-See [Order Capability - Guidelines](http://ucp.dev/draft/specification/shopping/order/#operations-guidelines) for capability-level requirements that apply across all transports.
+See [Order Capability - Guidelines](https://ucp.dev/draft/specification/shopping/order/#operations-guidelines) for capability-level requirements that apply across all transports.

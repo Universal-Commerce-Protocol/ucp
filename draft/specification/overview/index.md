@@ -338,7 +338,7 @@ Profiles **MAY** include public JSON Web Keys used for HTTP Message Signatures a
 
 Adding, rotating, or removing a key updates this single array. Removal is the security-critical case: a revoked or compromised key is not effectively revoked until it is absent from `keys[]`.
 
-UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm vocabularies are open and verifiers skip keys they do not recognize. See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for key format, algorithms, lookup, and rotation.
+UCP defines two well-known key types: **EC** (ECDSA P-256, P-384) and **OKP** (EdDSA Ed25519); the key-type, curve, and algorithm vocabularies are open and verifiers skip keys they do not recognize. See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for key format, algorithms, lookup, and rotation.
 
 #### Business Profile
 
@@ -475,12 +475,12 @@ The business profile advertises the business's available transports, capabilitie
 
 A WBA-shape verifier reads `keys[]` from this profile **only when the `Signature-Agent` header selects it** with `type=jwks_uri` (or `type=cimd`) pointing at the profile URL. The default `type=directory` (when `type` is omitted) instead expects a *signed* directory document at `/.well-known/http-message-signatures-directory`, not a static profile, so it will not read `keys[]` from a static `/.well-known/ucp`. See [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop).
 
-This example uses two keys. Whether a deployment needs one or two depends on the algorithms its counterparties accept — many need only one; see [Signature Algorithms](http://ucp.dev/draft/specification/signatures/#signature-algorithms). The two keys here:
+This example uses two keys. Whether a deployment needs one or two depends on the algorithms its counterparties accept — many need only one; see [Signature Algorithms](https://ucp.dev/draft/specification/signatures/#signature-algorithms). The two keys here:
 
 - An **Ed25519** key (OKP) for HTTP transport identity, WBA-compatible. The `kid` is the JWK SHA-256 Thumbprint per RFC 7638.
 - An **ECDSA P-256** key (EC) for AP2 mandate signing (`ap2.merchant_authorization`).
 
-A business that does not interact with AP2 or WBA may publish a single ES256 key in `keys[]` (the universal baseline). See [Key Discovery](#key-discovery) for key lookup and resolution, [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop) for hosting choices, and [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
+A business that does not interact with AP2 or WBA may publish a single ES256 key in `keys[]` (the universal baseline). See [Key Discovery](#key-discovery) for key lookup and resolution, [Deployment Patterns for WBA Interop](#deployment-patterns-for-wba-interop) for hosting choices, and [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signing mechanics.
 
 Businesses that support older protocol versions **SHOULD** include a `supported_versions` object mapping each older version to a version-specific profile URI. See [Protocol Version](#protocol-version) for details.
 
@@ -772,7 +772,7 @@ Discovery failures are transport errors — the required inputs could not be ret
 | `digest_mismatch`       | Body digest doesn't match `Content-Digest` header | 400  | -32600 |
 | `algorithm_unsupported` | Signature algorithm not supported                 | 400  | -32600 |
 
-See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
+See [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for signature verification details.
 
 **Protocol Errors:**
 
@@ -787,7 +787,7 @@ See [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md)
 
 For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC `error.code` provides a secondary signal. Both transports **SHOULD** include `Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503 responses.
 
-The Embedded Protocol uses the same JSON-RPC error codes for peer-to-peer communication between host and embedded context. Server-specific scenarios (rate limiting, idempotency) do not apply to the embedded transport. See [Embedded Protocol — Response Handling](http://ucp.dev/draft/specification/embedded-protocol/#response-handling) for the full error handling specification.
+The Embedded Protocol uses the same JSON-RPC error codes for peer-to-peer communication between host and embedded context. Server-specific scenarios (rate limiting, idempotency) do not apply to the embedded transport. See [Embedded Protocol — Response Handling](https://ucp.dev/draft/specification/embedded-protocol/#response-handling) for the full error handling specification.
 
 ##### The `continue_url` Field
 
@@ -1027,7 +1027,7 @@ UCP profiles serve dual purpose: they declare a party's **capabilities** for neg
 
 Businesses publish their profile at `/.well-known/ucp` as the discovery entry point — platforms fetch it to determine protocol support, locate endpoints, and negotiate capabilities. Platforms advertise their profile URL per-request via the `UCP-Agent` header, enabling businesses to negotiate capabilities and verify identity. This design enables **permissionless onboarding** — any platform with a discoverable profile can interact with any business without prior registration.
 
-**Web Bot Auth interop.** Signers opting into WBA-shape signatures additionally emit a `Signature-Agent` header advertising their keys. See [Identity Resolution Algorithm](#identity-resolution-algorithm) for how verifiers resolve identity and [Message Signatures — WBA Interop](http://ucp.dev/draft/specification/signatures/#wba-interop) for the signature shape.
+**Web Bot Auth interop.** Signers opting into WBA-shape signatures additionally emit a `Signature-Agent` header advertising their keys. See [Identity Resolution Algorithm](#identity-resolution-algorithm) for how verifiers resolve identity and [Message Signatures — WBA Interop](https://ucp.dev/draft/specification/signatures/#wba-interop) for the signature shape.
 
 ### Authentication Mechanisms
 
@@ -1036,11 +1036,11 @@ Businesses **SHOULD** authenticate platforms to prevent impersonation and ensure
 - **API Keys** — Pre-shared secrets exchanged out-of-band
 - **OAuth 2.0** — Client credentials or other OAuth flows
 - **mTLS** — Mutual TLS with client certificates
-- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) for full specification)
+- **HTTP Message Signatures** — Cryptographic signatures per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) for full specification)
 
 HTTP Message Signatures enable permissionless onboarding — businesses can verify platforms by their advertised public keys without negotiating shared secrets. The other mechanisms require prior credential exchange and imply a pre-established relationship.
 
-Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](http://ucp.dev/draft/specification/signatures/#when-signatures-apply).
+Business-to-platform webhooks **MUST** be signed. See [Message Signatures — When Signatures Apply](https://ucp.dev/draft/specification/signatures/#when-signatures-apply).
 
 #### Identity Binding
 
@@ -1058,7 +1058,7 @@ See [Profile Structure](#profile-structure) for the publishing contract (the can
 - **Resolved via `UCP-Agent`** (default UCP key lookup) — read `keys[]`.
 - **Resolved via `Signature-Agent`** (Web Bot Auth, optional) — read `keys[]`; the `cimd`/`directory` variants reach the JWK Set through their own documents.
 
-For the full verifier algorithm — capability-based key resolution, profile fetching, and covered-component enforcement — see [Identity Resolution Algorithm](#identity-resolution-algorithm) below. For key format (JWK), supported algorithms, key rotation procedures, and the Web Bot Auth interop signature shape, see [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md).
+For the full verifier algorithm — capability-based key resolution, profile fetching, and covered-component enforcement — see [Identity Resolution Algorithm](#identity-resolution-algorithm) below. For key format (JWK), supported algorithms, key rotation procedures, and the Web Bot Auth interop signature shape, see [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md).
 
 ### Profile Requirements
 
@@ -1129,8 +1129,8 @@ UCP and Web Bot Auth define two key-resolution mechanisms. Which one a verifier 
 A request MAY carry multiple signatures per [RFC 9421 §4.3](https://www.rfc-editor.org/rfc/rfc9421#section-4.3). Verifiers attempt each signature independently; the request is authenticated when at least one signature verifies. The algorithm below processes a single signature.
 
 1. **Resolve the signing key.** A verifier uses a resolution mechanism it supports whose header is present:
-   - **`UCP-Agent` — default UCP key lookup, supported by every UCP verifier.** Resolve the `UCP-Agent` profile URL and read `keys[]`. This path applies to UCP signatures that are untagged (default UCP) or carry `tag="web-bot-auth"` (the dual-audience shape); the verifier resolves them via `UCP-Agent`, treats `signature-agent` as an ordinary covered component, and need not implement Web Bot Auth key discovery. (Verifying a dual-audience signature does still require supporting the key's algorithm — whichever the signer used, per [Signature Algorithms](http://ucp.dev/draft/specification/signatures/#signature-algorithms) — and RFC 9421 §2.1.2 Dictionary-member component selection to cover `signature-agent;key="<label>"`.) Signatures with tags other than `web-bot-auth` are skipped unless UCP defines or explicitly accepts that tag.
-   - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL (WBA-aware verifiers).** For a signature carrying `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve via the `Signature-Agent` member, parsed per the [Signature-Agent parsing rules](http://ucp.dev/draft/specification/signatures/#rest-request-verification). Such a signature **MUST** satisfy the WBA agent-signature requirements in [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/) §4.2 (see [WBA Interop](http://ucp.dev/draft/specification/signatures/#wba-interop) for the signer-side shape). The member value **MUST** be an HTTPS URL. Its `type` selects resolution: `jwks_uri` and `cimd` reach the keys through the signer's profile and are resolved by the steps below; the `directory` mechanism is defined by the directory draft (see [Deployment Patterns](#deployment-patterns-for-wba-interop)). `data:` URI inline form is out of scope for UCP-WBA interop. **Skip** this signature if no mechanism the verifier supports can resolve its key — the required header is absent, no `Signature-Agent` member matches the signature label, the URL is non-HTTPS, or the `tag` is scoped to a purpose this verifier does not handle.
+   - **`UCP-Agent` — default UCP key lookup, supported by every UCP verifier.** Resolve the `UCP-Agent` profile URL and read `keys[]`. This path applies to UCP signatures that are untagged (default UCP) or carry `tag="web-bot-auth"` (the dual-audience shape); the verifier resolves them via `UCP-Agent`, treats `signature-agent` as an ordinary covered component, and need not implement Web Bot Auth key discovery. (Verifying a dual-audience signature does still require supporting the key's algorithm — whichever the signer used, per [Signature Algorithms](https://ucp.dev/draft/specification/signatures/#signature-algorithms) — and RFC 9421 §2.1.2 Dictionary-member component selection to cover `signature-agent;key="<label>"`.) Signatures with tags other than `web-bot-auth` are skipped unless UCP defines or explicitly accepts that tag.
+   - **`Signature-Agent` — Web Bot Auth key lookup, OPTIONAL (WBA-aware verifiers).** For a signature carrying `tag="web-bot-auth"`, a WBA-aware verifier **MAY** instead resolve via the `Signature-Agent` member, parsed per the [Signature-Agent parsing rules](https://ucp.dev/draft/specification/signatures/#rest-request-verification). Such a signature **MUST** satisfy the WBA agent-signature requirements in [draft-meunier-webbotauth-httpsig-protocol-00](https://datatracker.ietf.org/doc/draft-meunier-webbotauth-httpsig-protocol/00/) §4.2 (see [WBA Interop](https://ucp.dev/draft/specification/signatures/#wba-interop) for the signer-side shape). The member value **MUST** be an HTTPS URL. Its `type` selects resolution: `jwks_uri` and `cimd` reach the keys through the signer's profile and are resolved by the steps below; the `directory` mechanism is defined by the directory draft (see [Deployment Patterns](#deployment-patterns-for-wba-interop)). `data:` URI inline form is out of scope for UCP-WBA interop. **Skip** this signature if no mechanism the verifier supports can resolve its key — the required header is absent, no `Signature-Agent` member matches the signature label, the URL is non-HTTPS, or the `tag` is scoped to a purpose this verifier does not handle.
 1. **Fetch the document** per [§Fetching](#fetching). If the fetch fails (DNS error, network failure, non-2xx response, parse failure), **skip** this signature.
 1. **Locate the key list.** The profile's top-level `keys[]` (RFC 7517 JWK Set) when resolved via `UCP-Agent` or via `Signature-Agent` `type=jwks_uri`; for `type=cimd`, dereference the document's `jwks_uri` to obtain the JWK Set. Integrity derives from TLS to the resolved origin.
 1. **Match the signature's `keyid`** to a `kid` in the resolved key list. When resolving, **skip keys not usable for signature verification**: any key marked `use:"enc"`, or whose `key_ops` is present but does not include `"verify"` ([RFC 7517](https://www.rfc-editor.org/rfc/rfc7517) §4.2, §4.3). Keys that set `use:"sig"` or omit both members remain eligible. **Skip** this signature if no eligible key matches. For WBA-shape signatures (`tag="web-bot-auth"`), the verifier **MUST** also confirm `keyid` equals the [RFC 7638](https://www.rfc-editor.org/rfc/rfc7638) SHA-256 thumbprint of the matched JWK — the WBA architecture draft §4.2 requires this, binding the advertised key identity to its bytes. If it fails, skip this signature.
@@ -1141,7 +1141,7 @@ The request **MUST** be rejected (`key_not_found`, `algorithm_unsupported`, or r
 
 **Authenticated identity.** When a signature verifies, the authenticated signer is identified by the URL that supplied the verifying key — the `Signature-Agent` URL for WBA-shape signatures, the `UCP-Agent` URL for default UCP signatures. Both URLs may be present in the same request; the identity attached to the request is determined by which signature verified, not by which headers were sent. When multiple signatures verify, each identifies the signer only as the URL that supplied its key — a key resolved via `Signature-Agent` proves control of that key source, not of the `UCP-Agent` profile (whose URL is merely a signed header value). Implementations **MUST** treat the request as a single authenticated identity only when those URLs are the same after normalization; otherwise they are distinct identities and policy decides whether either suffices.
 
-This rule governs **HTTP transport identity**. Payload-layer assertions (e.g., AP2 mandate JWTs carried in the request body) have their own identity binding and key-resolution rules; see [AP2 Mandates](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md).
+This rule governs **HTTP transport identity**. Payload-layer assertions (e.g., AP2 mandate JWTs carried in the request body) have their own identity binding and key-resolution rules; see [AP2 Mandates](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md).
 
 ## Payment Architecture
 
@@ -1161,7 +1161,7 @@ The payment architecture is built on a "Trust-by-Design" philosophy. It assumes 
 
 For scenarios requiring cryptographic proof of user authorization (e.g., autonomous AI agents), UCP supports the **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`). This optional extension provides non-repudiable authorization through verifiable digital credentials.
 
-See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) for details on when and how to use this extension.
+See [Transaction Integrity](#transaction-integrity-and-non-repudiation) and [AP2 Mandates Extension](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) for details on when and how to use this extension.
 
 #### Credential Flow & PCI Scope
 
@@ -1204,9 +1204,9 @@ Payment handlers allow for a variety of different payment instruments and token-
 
 **Presentation Order:** Businesses **MAY** declare a preferred presentation order for their advertised handlers via `map_order.payment_handlers` in their profile and response envelopes (see [The `ucp` Protocol Namespace](#the-ucp-protocol-namespace)). The preference is suggestive: it communicates the business's preferred presentation — typically a conversion or risk judgment — and platforms **SHOULD** take it into account but **MAY** apply their own ordering. The same suggestive preference applies within a handler: the order of the business's advertised `available_instruments` array communicates preferred instrument presentation, earliest first. It is distinct from, and does not override, the buyer-side preference a platform submits in `context.payment[]` (buyer-preferred handlers, on the request side); the platform arbitrates between the two.
 
-**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](http://ucp.dev/draft/specification/payment/guide/#resolving-available_instruments) for the full resolution semantics.
+**Available Instrument Resolution:** Within each active handler, both the platform and the business independently advertise `available_instruments` — the set of instrument types and constraints each party supports. The business is responsible for resolving these into an authoritative value in the checkout response. The platform's declaration (from its profile) signals what it can handle; the business intersects that with its own `business_schema` declaration and cart context, then returns the resolved result. Platforms **MUST** treat the `available_instruments` in the response as authoritative for that checkout. See the [Payment Handler Guide](https://ucp.dev/draft/specification/payment/guide/#resolving-available_instruments) for the full resolution semantics.
 
-**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.common.payment.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](http://ucp.dev/draft/specification/payment/extensions/split-payments/index.md) for the extension that relaxes this constraint.
+**Instrument Cardinality:** A checkout submission **MUST** contain exactly one payment instrument unless the `dev.ucp.common.payment.split_payments` capability is active. Businesses **MUST** reject submissions that violate this constraint with a `payment_failed` error in `messages[]`. See [Split Payments](https://ucp.dev/draft/specification/payment/extensions/split-payments/index.md) for the extension that relaxes this constraint.
 
 ### Implementation Scenarios
 
@@ -1499,7 +1499,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement idempotency for payment processing (prevent double-charges)
 1. Log payment events without logging credentials
 1. Set appropriate credential timeouts
-1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.common.payment.ap2_mandate` extension (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md))
+1. For autonomous commerce scenarios requiring cryptographic proof, consider supporting the `dev.ucp.common.payment.ap2_mandate` extension (see [AP2 Mandates Extension](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md))
 
 **For Platforms:**
 
@@ -1508,7 +1508,7 @@ Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1 certi
 1. Implement timeout handling for credential acquisition
 1. Clear credentials from memory after submission
 1. Handle credential expiration gracefully (re-acquire if needed)
-1. For autonomous agents, consider using the `dev.ucp.common.payment.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md))
+1. For autonomous agents, consider using the `dev.ucp.common.payment.ap2_mandate` extension for cryptographic proof of authorization (see [AP2 Mandates Extension](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md))
 
 **For Payment Credential Providers:**
 
@@ -1531,8 +1531,8 @@ UCP supports fraud prevention through [Signals](#signals) and the payment archit
 
 The core payment architecture described above can be extended for specialized use cases:
 
-- **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md).
-- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](http://ucp.dev/draft/specification/payment/guide/index.md) for details.
+- **AP2 Mandates Extension** (`dev.ucp.common.payment.ap2_mandate`): Adds cryptographic proof of user authorization for autonomous commerce scenarios where non-repudiable evidence is required. See [AP2 Mandates Extension](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md).
+- **Custom Handler Types**: Payment credential providers can define custom handlers to support new payment instruments. See [Payment Handler Guide](https://ucp.dev/draft/specification/payment/guide/index.md) for details.
 
 The extension model ensures the core architecture remains simple while supporting advanced security and compliance requirements when needed.
 
@@ -1641,13 +1641,13 @@ One step is `10^-scale` of `unit`. The shared measure type adds a required integ
 
 The default sale basis is `each`, with machine identity (`C62`, `0`). `C62` is the United Nations Centre for Trade Facilitation and Electronic Business (UN/CEFACT) Recommendation 20 (Rec20) Common Code for one/each. The Business **MAY** omit `quantity_unit` from an authoritative Business representation to encode this default. When a Business or Platform includes a descriptor whose `unit` is `C62`, it **MUST** use an effective `scale` of `0`; `scale` can only be omitted or explicitly set to `0`.
 
-UCP does not put floating-point numbers on the wire. Quantity arithmetic feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled` accumulates across fulfillment events, and status derives from `fulfilled == total` — so quantities get money's representation: an integer count plus a declared interpretation, exactly as an `amount` relates to its `currency`. Integer counts keep every total and comparison exact in every language, and UCP therefore defines no rounding tolerances and no epsilon comparisons anywhere in the quantity lifecycle. A fulfilled quantity that legitimately differs from the ordered quantity — a 1.90 lb pick against a 2.00 lb order — is a commercial fact reconciled through [adjustments](http://ucp.dev/draft/specification/shopping/order/#adjustments) that move money together with quantity, not a numeric error absorbed by comparison fuzz.
+UCP does not put floating-point numbers on the wire. Quantity arithmetic feeds money — `price × quantity × 10^-scale` prices a line, `fulfilled` accumulates across fulfillment events, and status derives from `fulfilled == total` — so quantities get money's representation: an integer count plus a declared interpretation, exactly as an `amount` relates to its `currency`. Integer counts keep every total and comparison exact in every language, and UCP therefore defines no rounding tolerances and no epsilon comparisons anywhere in the quantity lifecycle. A fulfilled quantity that legitimately differs from the ordered quantity — a 1.90 lb pick against a 2.00 lb order — is a commercial fact reconciled through [adjustments](https://ucp.dev/draft/specification/shopping/order/#adjustments) that move money together with quantity, not a numeric error absorbed by comparison fuzz.
 
 Reading a quantity requires no arithmetic and no unit knowledge: shift the decimal point `scale` places and append `display_text`. `150` with `{ "scale": 2, "display_text": "kg" }` renders as `1.50 kg`, by the same code path for a Rec20 code and for a custom unit. Unlike a currency exponent, `scale` is per-item data rather than a static table — which is why authoritative responses always carry their own descriptor on every non-`each` line.
 
 ### Integer range and ingestion
 
-Every integer-valued field in UCP — amounts, quantity step counts, measure values — is a JSON integer; each field's schema declares its sign and bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the range within which every JSON implementation agrees exactly on integer values ([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html), Section 6) and within which [JCS](https://www.rfc-editor.org/rfc/rfc8785.html) canonicalization, required for [AP2 mandate signing](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/#canonicalization), is defined. The same cap derives `scale`'s maximum of 15: at scale 16, one whole unit (10^16 steps) would be unrepresentable. An out-of-range value is schema-invalid and is rejected like any other invalid payload.
+Every integer-valued field in UCP — amounts, quantity step counts, measure values — is a JSON integer; each field's schema declares its sign and bounds, and all are capped at ±(2^53 − 1) (±9,007,199,254,740,991) — the range within which every JSON implementation agrees exactly on integer values ([RFC 8259](https://www.rfc-editor.org/rfc/rfc8259.html), Section 6) and within which [JCS](https://www.rfc-editor.org/rfc/rfc8785.html) canonicalization, required for [AP2 mandate signing](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/#canonicalization), is defined. The same cap derives `scale`'s maximum of 15: at scale 16, one whole unit (10^16 steps) would be unrepresentable. An out-of-range value is schema-invalid and is rejected like any other invalid payload.
 
 Arithmetic over these values **MUST** be exact. Within the wire range, IEEE 754 binary64 — a JavaScript `Number` from `JSON.parse` — holds every integer exactly; products such as `amount × quantity` can exceed 64 bits, so use wider or arbitrary-precision integers, or overflow checks. An implementation that cannot produce an exact, in-range result **MUST** surface an error rather than emit, display, or act on an approximate or wrapped value.
 
@@ -1989,7 +1989,7 @@ Two separately targeted constraints cannot express this rule. Request Constraint
 
 An Action is an outstanding unit of extension-defined work for a Platform to process. Its presence means the effect defined by its Action type is gated. Actions appear only in responses, under the `actions` map. The common fields identify the work but do not define how to process it; the active extension does.
 
-This section defines the common Actions shape and the invariants every adopting response shares. The shape is reusable, but a capability supports Actions only when its specification explicitly adopts it and defines the parent-specific behavior: where Actions appear, the effect each Action type gates, how Messages apply, and how a later response reflects processing. Schema composition alone does not establish support. Cart, Checkout, and Catalog adopt this shape; see [Cart — Actions](http://ucp.dev/draft/specification/shopping/cart/#actions), [Checkout — Actions](http://ucp.dev/draft/specification/shopping/checkout/#actions), and [Catalog — Actions](http://ucp.dev/draft/specification/shopping/catalog/#actions) for their parent-specific contracts.
+This section defines the common Actions shape and the invariants every adopting response shares. The shape is reusable, but a capability supports Actions only when its specification explicitly adopts it and defines the parent-specific behavior: where Actions appear, the effect each Action type gates, how Messages apply, and how a later response reflects processing. Schema composition alone does not establish support. Cart, Checkout, and Catalog adopt this shape; see [Cart — Actions](https://ucp.dev/draft/specification/shopping/cart/#actions), [Checkout — Actions](https://ucp.dev/draft/specification/shopping/checkout/#actions), and [Catalog — Actions](https://ucp.dev/draft/specification/shopping/catalog/#actions) for their parent-specific contracts.
 
 Actions and Messages have different roles. An Action represents outstanding work: it carries an identity and extension-owned processing configuration. A Message communicates explanatory or diagnostic context about the current response and can identify an exact Action occurrence through its RFC 9535 `path`. When a Message includes `path`, the Business **MUST** make it an RFC 9535 JSONPath expression relative to the root of the containing UCP response object. Messages do not define how an Action is processed or determine its outcome, and neither an Action nor a Message requires the other.
 
@@ -2018,21 +2018,21 @@ For example, a Business can surface one outstanding Action beside an explanatory
 }
 ```
 
-The Action identifies the outstanding work and carries extension-owned processing configuration under `config`. The Message's `path` selects the exact Action occurrence it explains. The [checkout eligibility example](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) composes this pattern into a complete Student Verification flow.
+The Action identifies the outstanding work and carries extension-owned processing configuration under `config`. The Message's `path` selects the exact Action occurrence it explains. The [checkout eligibility example](https://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) composes this pattern into a complete Student Verification flow.
 
 For a newly processed successful response from a capability that adopts Actions, the Business **MUST** include every outstanding Action and **MUST** omit `actions` when none are outstanding.
 
-Cart and Checkout define request idempotency separately. Duplicate requests follow those existing rules and can return the original cached response, including its `actions` (see [Message Signatures — Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection)).
+Cart and Checkout define request idempotency separately. Duplicate requests follow those existing rules and can return the original cached response, including its `actions` (see [Message Signatures — Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection)).
 
 An Action's gate and an operation-specific outcome are orthogonal. Neither a parent status nor a Message's type or severity determines whether an Action gates its Action-defined effect. A Message explains the response or reports the outcome of a particular requested effect. A Business **MAY** include an info or warning Message whose `path` selects an outstanding Action to explain the current response without reporting an operation failure. For a state-changing operation whose requested effect was not applied because of an Action, the Business **MUST** instead return the current resource with a `recoverable` error Message whose `path` selects the exact Action occurrence.
 
 The Business's response is authoritative for the state after an operation: the returned resource, together with any parent lifecycle its capability defines, is the source of truth. The Action-type contract defines how the Business observes processing, and the Platform then follows the containing capability's operation contract.
 
-When an Action prevents a Cart or Checkout operation from succeeding, processing the Action does not repeat that operation. If the Platform wants to try again, it submits a new operation under the existing [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection) rules.
+When an Action prevents a Cart or Checkout operation from succeeding, processing the Action does not repeat that operation. If the Platform wants to try again, it submits a new operation under the existing [Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection) rules.
 
 Each Action key is a reverse-domain **Action type**: the name identifies the type of outstanding work, which is not necessarily the name of the extension that declares it. An active extension declares each Action type and defines its `config`, how a Platform processes it, its trust and fallback, and its outcomes. A single extension can declare more than one Action type. Each declaring extension contributes its Action-type keys to the containing capability's schema through `allOf` composition (see [Schema Composition](#schema-composition)), and capability negotiation selects which extensions are active. Negotiating an extension activates the whole contract it declares, including every Action type within it.
 
-Action type keys follow existing [Namespace Governance](#namespace-governance) rules: an extension can declare only types within a reverse-domain namespace controlled by its schema authority. An extension can use its own name as the key for a single Action type — as the [Student Verification example](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) does — or declare several Action types under distinct keys. Each value is a non-empty array of outstanding instances of that one Action type. The key identifies the type, so an instance carries no separate type discriminator; a Business surfaces multiple outstanding instances of the same type as multiple entries in that array.
+Action type keys follow existing [Namespace Governance](#namespace-governance) rules: an extension can declare only types within a reverse-domain namespace controlled by its schema authority. An extension can use its own name as the key for a single Action type — as the [Student Verification example](https://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion) does — or declare several Action types under distinct keys. Each value is a non-empty array of outstanding instances of that one Action type. The key identifies the type, so an instance carries no separate type discriminator; a Business surfaces multiple outstanding instances of the same type as multiple entries in that array.
 
 The `actions` map does not define a processing order across Action types. Within a single type's array, JSON preserves the order of its instances, and the extension that declares the type defines whether that order carries processing meaning. When ordering across Action types matters, the declaring extension defines the sequencing and which Action types become outstanding at each step.
 
@@ -2075,12 +2075,12 @@ A policy is a business rule — return terms, warranty, subscription terms, and 
 
 A Business publishes well-known and custom policies. Every policy carries a `type` drawn from an open, reverse-DNS vocabulary.
 
-| Well-known type                        | Description                                                                                                                                                                                |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `dev.ucp.shopping.policy.return`       | Return terms.                                                                                                                                                                              |
-| `dev.ucp.shopping.policy.warranty`     | Warranty terms.                                                                                                                                                                            |
-| `dev.ucp.shopping.policy.subscription` | Terms for the recurring orders that follow a purchase. See the [Purchase Options Extension](http://ucp.dev/draft/specification/shopping/extensions/purchase-options/#subscription-policy). |
-| `dev.ucp.lodging.policy.cancellation`  | Cancellation terms for lodging reservations.                                                                                                                                               |
+| Well-known type                        | Description                                                                                                                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev.ucp.shopping.policy.return`       | Return terms.                                                                                                                                                                               |
+| `dev.ucp.shopping.policy.warranty`     | Warranty terms.                                                                                                                                                                             |
+| `dev.ucp.shopping.policy.subscription` | Terms for the recurring orders that follow a purchase. See the [Purchase Options Extension](https://ucp.dev/draft/specification/shopping/extensions/purchase-options/#subscription-policy). |
+| `dev.ucp.lodging.policy.cancellation`  | Cancellation terms for lodging reservations.                                                                                                                                                |
 
 A Business **MAY** define custom types in its own domain (e.g., `com.example.policy.price_match`) and **MAY** add type-specific fields that a Platform modeling that `type` can read for structured context. Because the vocabulary is open, a Platform **MUST** tolerate unknown `type` values, presenting the policy from its `description` (see [Presenting policies](#presenting-policies)).
 
@@ -2119,7 +2119,7 @@ Policies describe the business rules applied to the items. A Platform **MAY** re
 
 When a Business **requires** a policy to be shown to the Buyer — a final-sale item, a regulatory notice — it **MUST** emit a `messages[]` warning that:
 
-- sets `presentation: "disclosure"`, so the Platform displays the content and cannot hide or dismiss it (see [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation));
+- sets `presentation: "disclosure"`, so the Platform displays the content and cannot hide or dismiss it (see [Warning Presentation](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation));
 - sets `path` to the item the notice concerns; and
 - sets `code` to the policy's `type`, linking the notice to its policy.
 
@@ -2292,7 +2292,7 @@ For scenarios requiring cryptographic proof of authorization (e.g., autonomous a
 
 This mechanism provides strong, end-to-end cryptographic assurances about transaction details and participant consent, significantly reducing risks of tampering and disputes.
 
-See [AP2 Mandates Extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
+See [AP2 Mandates Extension](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md) for complete specification, implementation guide, and examples.
 
 ## Versioning
 
@@ -2473,4 +2473,4 @@ A third-party extension's version is never tied to `ucp.version`. The author dec
 
 ## Glossary
 
-For definitions of acronyms and terms used throughout the UCP specification, see the [Glossary](http://ucp.dev/draft/specification/glossary/index.md).
+For definitions of acronyms and terms used throughout the UCP specification, see the [Glossary](https://ucp.dev/draft/specification/glossary/index.md).

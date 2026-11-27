@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Return Policy Extension defines the `dev.ucp.shopping.policy.return` policy type on the core [`policies[]`](http://ucp.dev/draft/specification/overview/#policies) primitive. It adds machine-readable return terms to policies that carry this type, from catalog through cart, checkout, and order, so platforms and agents can answer questions like "How long do I have to return this?", "Do I get my money back or store credit?", "Where and at what cost do I send it back?", and "Can I return this at all?" without leaving to read a policy page.
+The Return Policy Extension defines the `dev.ucp.shopping.policy.return` policy type on the core [`policies[]`](https://ucp.dev/draft/specification/overview/#policies) primitive. It adds machine-readable return terms to policies that carry this type, from catalog through cart, checkout, and order, so platforms and agents can answer questions like "How long do I have to return this?", "Do I get my money back or store credit?", "Where and at what cost do I send it back?", and "Can I return this at all?" without leaving to read a policy page.
 
 Policy pages often lack product-level granularity: one page covers the standard terms, final-sale items, category exceptions, and marketplace sellers in prose, leaving buyers and agents unable to tell which terms govern a given item. Because each return policy targets items through `applies_to`, the terms a platform reads for an item are the ones that apply to it.
 
@@ -15,7 +15,7 @@ Policy pages often lack product-level granularity: one page covers the standard 
 
 **Dependencies:**
 
-- The core `policies[]` primitive (see [Policies](http://ucp.dev/draft/specification/overview/#policies)).
+- The core `policies[]` primitive (see [Policies](https://ucp.dev/draft/specification/overview/#policies)).
 - One or more of the parent capabilities this type extends: Catalog Search, Catalog Lookup, Cart, Checkout, or Order.
 
 This extension only structures the type-specific body. The `policies[]` container, `applies_to` targeting, same-type precedence, and buyer-facing disclosure through `messages[]` are defined once by the primitive and are **unchanged** here.
@@ -117,7 +117,7 @@ A platform **MAY** present `expires_at` in any time zone and **MUST NOT** presen
 
 A business **SHOULD** state `expires_at` once it can resolve the deadline, typically on an order after the anchor event. It **MUST NOT** state an `expires_at` earlier than the end of the window its `duration` and `anchor` describe; when covered quantities reach the anchor at different times, such as a line delivered in two shipments, that is the earliest of their window ends, so a return requested by then is within the window for every covered quantity. A business scopes policies per line with `applies_to` for finer resolution.
 
-On an order, `policies` record the terms that applied at checkout (see [Order](http://ucp.dev/draft/specification/shopping/order/#policies)). Stating `expires_at` resolves those terms; it does not change them. A business adds `expires_at` to the governing return policy and **MAY** split that policy into per-line copies with `applies_to` to state a deadline for each line, but every copy carries the terms of the checkout policy unchanged: its `eligibility` kind, `duration` and `anchor`, `supported_resolutions`, `methods`, and `fees`.
+On an order, `policies` record the terms that applied at checkout (see [Order](https://ucp.dev/draft/specification/shopping/order/#policies)). Stating `expires_at` resolves those terms; it does not change them. A business adds `expires_at` to the governing return policy and **MAY** split that policy into per-line copies with `applies_to` to state a deadline for each line, but every copy carries the terms of the checkout policy unchanged: its `eligibility` kind, `duration` and `anchor`, `supported_resolutions`, `methods`, and `fees`.
 
 For a 30-day window anchored on `delivered` and an item delivered on 2026-03-02, the business states `"expires_at": "2026-04-01T18:00:00Z"`, and the platform shows "Return by Apr 1, 6:00 PM UTC" or its local equivalent (see [Order after delivery](#order-after-delivery)).
 
@@ -139,7 +139,7 @@ Businesses differ on whether the clock starts at purchase, fulfillment, or deliv
 
 To state that its return policy does not accept returns of the covered items, such as a final-sale item, a business **MUST** set `eligibility.type` to `not_accepted`. Because return terms do not apply, a business **MUST NOT** carry `supported_resolutions`, `methods`, or `fees` on a `not_accepted` policy; the schema rejects the combination, so no precedence between fields of one policy is ever needed. A business **MUST NOT** use an empty `supported_resolutions` or `methods` array to signal non-returnability, and the schema requires at least one entry in each; omit a field that is not stated structurally. A `not_accepted` eligibility is the single, unambiguous signal a platform acts on. A `not_accepted` eligibility describes the business's return policy only (see [Responsibilities](#responsibilities)).
 
-When a business requires the buyer to be shown that an item is final sale, it emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal to `dev.ucp.shopping.policy.return`, targeting the item. The disclosure pairs with the governing return policy at that node, as defined in [Presenting policies](http://ucp.dev/draft/specification/overview/#presenting-policies).
+When a business requires the buyer to be shown that an item is final sale, it emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal to `dev.ucp.shopping.policy.return`, targeting the item. The disclosure pairs with the governing return policy at that node, as defined in [Presenting policies](https://ucp.dev/draft/specification/overview/#presenting-policies).
 
 ### Return fees
 
@@ -149,11 +149,11 @@ When a business requires the buyer to be shown that an item is final sale, it em
 
 `type` is a reverse-domain fee kind, and `amount` and `max_amount` are charged per the kind's unit. The well-known kinds are:
 
-| `type`                                 | Charged per                                                                                                                                                                                           |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dev.ucp.shopping.fee.restocking`      | One whole `quantity_unit.unit` returned, or one `each` when `quantity_unit` is absent, as `price` is (see [Quantities and units](http://ucp.dev/draft/specification/overview/#quantities-and-units)). |
-| `dev.ucp.shopping.fee.return_shipping` | Return shipment, so units returned together incur it once and a return split across shipments incurs it for each one.                                                                                 |
-| `dev.ucp.shopping.fee.handling`        | Return request.                                                                                                                                                                                       |
+| `type`                                 | Charged per                                                                                                                                                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dev.ucp.shopping.fee.restocking`      | One whole `quantity_unit.unit` returned, or one `each` when `quantity_unit` is absent, as `price` is (see [Quantities and units](https://ucp.dev/draft/specification/overview/#quantities-and-units)). |
+| `dev.ucp.shopping.fee.return_shipping` | Return shipment, so units returned together incur it once and a return split across shipments incurs it for each one.                                                                                  |
+| `dev.ucp.shopping.fee.handling`        | Return request.                                                                                                                                                                                        |
 
 A vendor kind, such as `com.example.fee.eco`, is charged per return request and carries `display_text`, which the schema requires for any kind other than the three above. A vendor fee charged on another basis, such as per item, omits `amount` and states its terms in `display_text` (for example, "Eco fee, $1 per item"); such an entry states no maximum, so a platform presents its text and never an understated cap.
 
@@ -209,7 +209,7 @@ Amounts (`amount` and `max_amount` on a fee) carry no currency of their own. The
 
 ## Targeting and precedence
 
-Targeting and precedence are provided by the `policies[]` primitive and are not redefined here. In short: a policy with no `applies_to` is the response-wide default; a policy that targets specific items overrides it where they overlap, with the narrowest same-type target winning. See [Targeting](http://ucp.dev/draft/specification/overview/#targeting) and [Precedence](http://ucp.dev/draft/specification/overview/#precedence).
+Targeting and precedence are provided by the `policies[]` primitive and are not redefined here. In short: a policy with no `applies_to` is the response-wide default; a policy that targets specific items overrides it where they overlap, with the narrowest same-type target winning. See [Targeting](https://ucp.dev/draft/specification/overview/#targeting) and [Precedence](https://ucp.dev/draft/specification/overview/#precedence).
 
 For return policies this means a business states a single default return policy once, then adds targeted overrides only for the exceptions (a final-sale item, a category with a different window), rather than repeating a policy on every line. An override replaces the default for the items it governs and inherits none of its terms, so a business **MUST** restate in the override every term that still applies. A term the override omits, including `fees`, is not stated for the items it governs.
 

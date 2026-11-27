@@ -297,13 +297,13 @@ These exceptions **SHOULD** return the user to the checkout flow upon completion
 
 ## Transport & Messaging
 
-ECP uses the shared EP transport layer. See [Embedded Protocol — Transport & Messaging](http://ucp.dev/draft/specification/embedded-protocol/#transport-messaging) for message format, message types, and response handling conventions.
+ECP uses the shared EP transport layer. See [Embedded Protocol — Transport & Messaging](https://ucp.dev/draft/specification/embedded-protocol/#transport-messaging) for message format, message types, and response handling conventions.
 
 The `ucp.version` in all responses **MUST** echo the `ec_version` negotiated during session initialization and confirmed by the host in the `ec.ready` response. The version is session-bound — it **MUST NOT** change for the duration of the ECP session.
 
 ### Communication Channels
 
-ECP follows the shared EP communication channel model. See [Embedded Protocol — Communication Channels](http://ucp.dev/draft/specification/embedded-protocol/#communication-channels) for the general pattern.
+ECP follows the shared EP communication channel model. See [Embedded Protocol — Communication Channels](https://ucp.dev/draft/specification/embedded-protocol/#communication-channels) for the general pattern.
 
 For native hosts, the checkout-specific globals are:
 
@@ -490,16 +490,16 @@ When the host responds with an error, the session cannot proceed. The host **MUS
 
 #### `ec.auth`
 
-`ec.auth` implements the shared EP authentication pattern — see [Embedded Protocol — Authentication](http://ucp.dev/draft/specification/embedded-protocol/#authentication) for the request/response contract, examples, and error escalation flow.
+`ec.auth` implements the shared EP authentication pattern — see [Embedded Protocol — Authentication](https://ucp.dev/draft/specification/embedded-protocol/#authentication) for the request/response contract, examples, and error escalation flow.
 
 - **Method:** `ec.auth`
 - **Direction:** Embedded Checkout → Host (request); Host → Embedded Checkout (response)
 
-When error escalation is required, Embedded Checkout **MUST** issue an `ec.error` notification per the [session error pattern](http://ucp.dev/draft/specification/embedded-protocol/#session-error).
+When error escalation is required, Embedded Checkout **MUST** issue an `ec.error` notification per the [session error pattern](https://ucp.dev/draft/specification/embedded-protocol/#session-error).
 
 ### Lifecycle Messages
 
-Lifecycle notifications follow the shared EP pattern — see [Embedded Protocol — Lifecycle](http://ucp.dev/draft/specification/embedded-protocol/#lifecycle). All lifecycle notifications carry the full `checkout` object as their payload.
+Lifecycle notifications follow the shared EP pattern — see [Embedded Protocol — Lifecycle](https://ucp.dev/draft/specification/embedded-protocol/#lifecycle). All lifecycle notifications carry the full `checkout` object as their payload.
 
 #### `ec.start`
 
@@ -569,7 +569,7 @@ Indicates successful checkout completion.
 
 ### State Change Messages
 
-State change notifications follow the shared EP pattern — see [Embedded Protocol — State Change](http://ucp.dev/draft/specification/embedded-protocol/#state-change). All state change notifications are sent from the Embedded Checkout to the host and carry the full `checkout` object as their payload.
+State change notifications follow the shared EP pattern — see [Embedded Protocol — State Change](https://ucp.dev/draft/specification/embedded-protocol/#state-change). All state change notifications are sent from the Embedded Checkout to the host and carry the full `checkout` object as their payload.
 
 #### `ec.line_items.change`
 
@@ -724,7 +724,7 @@ Payment state has been updated. See the [Payment Extension](#payment-extension) 
 
 #### `ec.error`
 
-`ec.error` implements the shared EP session error pattern — see [Embedded Protocol — Session Error](http://ucp.dev/draft/specification/embedded-protocol/#session-error) for the payload specification and host handling requirements.
+`ec.error` implements the shared EP session error pattern — see [Embedded Protocol — Session Error](https://ucp.dev/draft/specification/embedded-protocol/#session-error) for the payload specification and host handling requirements.
 
 ## Payment Extension
 
@@ -974,7 +974,7 @@ The host **MUST** respond with either an error, or the credential for the select
 
 1. **Confirmation:** Host displays the Trusted Payment UI (Payment Sheet / Biometric Prompt). The host **MUST NOT** silently release a token based solely on the message.
 1. **Auth:** host performs User Authorization via the Payment Handler.
-1. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see **[AP2 extension](http://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)**), the host generates the `payment_mandate` here using trusted user interface.
+1. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see **[AP2 extension](https://ucp.dev/draft/specification/payment/extensions/ap2-mandates/index.md)**), the host generates the `payment_mandate` here using trusted user interface.
 
 ## Fulfillment Extension
 
@@ -1244,7 +1244,7 @@ Requests the host to handle a link activated by the buyer within the checkout.
 
 ### Error Codes
 
-See [Embedded Protocol — Error Codes](http://ucp.dev/draft/specification/embedded-protocol/#error-codes) for the shared error codes. Embedded Checkout defines the following additional codes for delegation-specific scenarios:
+See [Embedded Protocol — Error Codes](https://ucp.dev/draft/specification/embedded-protocol/#error-codes) for the shared error codes. Embedded Checkout defines the following additional codes for delegation-specific scenarios:
 
 | Code                         | Severity        | Description                                                                                                                                    |
 | ---------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1255,7 +1255,7 @@ For `not_allowed_error`, recovery requires a new [user activation](https://html.
 
 ### Security for Web-Based Hosts
 
-ECP inherits the shared EP security requirements for CSP, iframe sandboxing, credentialless iframes, and strict origin validation. See [Embedded Protocol — Security](http://ucp.dev/draft/specification/embedded-protocol/#security) for the full specification.
+ECP inherits the shared EP security requirements for CSP, iframe sandboxing, credentialless iframes, and strict origin validation. See [Embedded Protocol — Security](https://ucp.dev/draft/specification/embedded-protocol/#security) for the full specification.
 
 ### Prevention of Unsolicited Payment Requests
 

@@ -39,7 +39,7 @@ When a request is user-authenticated, a business **MAY** populate response field
 
 Request annotations determine whether the platform may send a field; they do not assign semantic ownership of its value. A field annotated `ucp_request: "omit"` is excluded from requests and, when permitted and present on a response, is populated by the business (for example, `totals`, `messages`, and `order`). Fields annotated `optional` for an operation, or left unannotated, may also be supplied by the platform in applicable requests. Where the response schema and the field's semantic contract permit business-owned user state, the business **MAY** populate it from stored state on the response (for example, `buyer` and `payment.instruments[]`).
 
-Identity linking provides the authenticated user context for these values. When the request is user-authenticated, a business **MAY** return the user's loyalty membership in `loyalty` (see [Loyalty](http://ucp.dev/draft/specification/common/extensions/loyalty/index.md)), saved payment instruments in `payment.instruments[]` (see [Checkout](http://ucp.dev/draft/specification/shopping/checkout/index.md)), or buyer profile data in `buyer`, subject to the limits below.
+Identity linking provides the authenticated user context for these values. When the request is user-authenticated, a business **MAY** return the user's loyalty membership in `loyalty` (see [Loyalty](https://ucp.dev/draft/specification/common/extensions/loyalty/index.md)), saved payment instruments in `payment.instruments[]` (see [Checkout](https://ucp.dev/draft/specification/shopping/checkout/index.md)), or buyer profile data in `buyer`, subject to the limits below.
 
 Businesses **MUST NOT** return stored user-specific state unless the request is user-authenticated and authorized for the operation. They **MUST** only return values that belong to the authenticated user and are appropriate for the current transaction, and **SHOULD** limit them to the data needed for that transaction. Platforms **MUST** treat returned business-owned identifiers as opaque and business-scoped, and **MUST NOT** infer raw credentials from a display value.
 
@@ -188,7 +188,7 @@ The `config.providers` map declares external trusted identity providers from whi
 
 Each key in `config.providers` is a reverse-domain identifier for an IdP namespace; its value is an array of mechanism entries.
 
-A provider key is a reverse-domain **identifier**, not a schema-bearing entity: it declares no `schema` URL, so the [Authority Binding](http://ucp.dev/draft/specification/overview/#authority-binding) (which binds an entity's `schema` URL to its namespace authority) does not apply here. A provider's trust anchor is its `auth_url`, governed by the discovery rules below; binding `auth_url` to the provider's namespace authority is a possible future hardening, tracked separately.
+A provider key is a reverse-domain **identifier**, not a schema-bearing entity: it declares no `schema` URL, so the [Authority Binding](https://ucp.dev/draft/specification/overview/#authority-binding) (which binds an entity's `schema` URL to its namespace authority) does not apply here. A provider's trust anchor is its `auth_url`, governed by the discovery rules below; binding `auth_url` to the provider's namespace authority is a possible future hardening, tracked separately.
 
 Each entry is described by its `type`:
 

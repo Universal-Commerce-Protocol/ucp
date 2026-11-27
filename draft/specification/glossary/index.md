@@ -21,17 +21,17 @@ This glossary provides a best-effort capture of acronyms and terms used througho
 
 ## Commerce
 
-| Term                         | Acronym | Definition                                                                                                                                                                           |
-| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.                                |
-| **Buyer**                    | -       | The transacting customer or end consumer completing a commerce action over UCP. Synonymous to vocabularies like `user` and `consumer`.                                               |
-| **Location**                 | -       | A physical place (e.g., store, restaurant, property, pickup point) identified by a stable, opaque string in a Business's namespace.                                                  |
-| **Increment**                | -       | Optional [ordering granularity](http://ucp.dev/draft/specification/overview/#ordering-increment) of a sale basis, a count of steps; advisory for Platform-authored quantities.       |
-| **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                                                        |
-| **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                                            |
-| **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                                                    |
-| **Quantity Unit**            | -       | A [sale-basis descriptor](http://ucp.dev/draft/specification/overview/#quantities-and-units) with machine identity (`unit`, effective `scale`); excludes `display_text`/`increment`. |
-| **Step**                     | -       | One [integer increment](http://ucp.dev/draft/specification/overview/#quantities-and-units) in the authoritative sale basis: `10^-scale` of `unit`.                                   |
+| Term                         | Acronym | Definition                                                                                                                                                                            |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Business**                 | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.                                 |
+| **Buyer**                    | -       | The transacting customer or end consumer completing a commerce action over UCP. Synonymous to vocabularies like `user` and `consumer`.                                                |
+| **Location**                 | -       | A physical place (e.g., store, restaurant, property, pickup point) identified by a stable, opaque string in a Business's namespace.                                                   |
+| **Increment**                | -       | Optional [ordering granularity](https://ucp.dev/draft/specification/overview/#ordering-increment) of a sale basis, a count of steps; advisory for Platform-authored quantities.       |
+| **Merchant of Record**       | MoR     | The legal entity responsible for the sale, including financial liability and order ownership.                                                                                         |
+| **Payment Service Provider** | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                                             |
+| **Platform**                 | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                                                     |
+| **Quantity Unit**            | -       | A [sale-basis descriptor](https://ucp.dev/draft/specification/overview/#quantities-and-units) with machine identity (`unit`, effective `scale`); excludes `display_text`/`increment`. |
+| **Step**                     | -       | One [integer increment](https://ucp.dev/draft/specification/overview/#quantities-and-units) in the authoritative sale basis: `10^-scale` of `unit`.                                   |
 
 ## Payments
 

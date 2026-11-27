@@ -1,6 +1,6 @@
 # Booking Capability - REST Binding
 
-This document specifies the REST binding for the [Booking Capability](http://ucp.dev/draft/specification/lodging/booking/index.md).
+This document specifies the REST binding for the [Booking Capability](https://ucp.dev/draft/specification/lodging/booking/index.md).
 
 ## Protocol Fundamentals
 
@@ -67,13 +67,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation                                                                                                | Method | Endpoint                          | Description               |
-| -------------------------------------------------------------------------------------------------------- | ------ | --------------------------------- | ------------------------- |
-| [Create Booking Session](http://ucp.dev/draft/specification/lodging/booking/#create-booking-session)     | `POST` | `/booking-sessions`               | Create a booking session. |
-| [Get Booking Session](http://ucp.dev/draft/specification/lodging/booking/#get-booking-session)           | `GET`  | `/booking-sessions/{id}`          | Get a booking session.    |
-| [Update Booking Session](http://ucp.dev/draft/specification/lodging/booking/#update-booking-session)     | `PUT`  | `/booking-sessions/{id}`          | Update a booking session. |
-| [Complete Booking Session](http://ucp.dev/draft/specification/lodging/booking/#complete-booking-session) | `POST` | `/booking-sessions/{id}/complete` | Complete booking.         |
-| [Cancel Booking Session](http://ucp.dev/draft/specification/lodging/booking/#cancel-booking-session)     | `POST` | `/booking-sessions/{id}/cancel`   | Cancel a booking session. |
+| Operation                                                                                                 | Method | Endpoint                          | Description               |
+| --------------------------------------------------------------------------------------------------------- | ------ | --------------------------------- | ------------------------- |
+| [Create Booking Session](https://ucp.dev/draft/specification/lodging/booking/#create-booking-session)     | `POST` | `/booking-sessions`               | Create a booking session. |
+| [Get Booking Session](https://ucp.dev/draft/specification/lodging/booking/#get-booking-session)           | `GET`  | `/booking-sessions/{id}`          | Get a booking session.    |
+| [Update Booking Session](https://ucp.dev/draft/specification/lodging/booking/#update-booking-session)     | `PUT`  | `/booking-sessions/{id}`          | Update a booking session. |
+| [Complete Booking Session](https://ucp.dev/draft/specification/lodging/booking/#complete-booking-session) | `POST` | `/booking-sessions/{id}/complete` | Complete booking.         |
+| [Cancel Booking Session](https://ucp.dev/draft/specification/lodging/booking/#cancel-booking-session)     | `POST` | `/booking-sessions/{id}/cancel`   | Cancel a booking session. |
 
 ## Examples
 
@@ -478,7 +478,7 @@ Content-Type: application/json
 
 ### Update Booking Session
 
-This is a full replacement operation. The Platform **MUST** send the entire booking session resource, including any data updates to write-only fields; the supplied resource replaces the existing booking session state. The Platform **MUST NOT** start a new Update operation while the booking session is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update request in that state, it **MUST** leave the booking session unchanged and return the current booking session with a recoverable error message.
+This is a full replacement operation. The Platform **MUST** send the entire booking session resource, including any data updates to write-only fields; the supplied resource replaces the existing booking session state. The Platform **MUST NOT** start a new Update operation while the booking session is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update request in that state, it **MUST** leave the booking session unchanged and return the current booking session with a recoverable error message.
 
 All fields in `guests`, `booker`, `travel_purpose`, and `stays[].guest_assignments` are optional, allowing the Platform to progressively build the booking session across multiple calls. Outside `complete_in_progress`, each Update replaces the entire booking session, so the Platform **MUST** include all previously set fields it intends to retain.
 
@@ -1319,7 +1319,7 @@ The following headers are defined for the HTTP binding and apply to all operatio
 - **Idempotency-Key**: Operations that modify state **SHOULD** support idempotency. When provided, the server **MUST**:
   1. Store the key with the operation result for at least 24 hours.
   1. Return the cached result for duplicate keys whose request body matches the original.
-  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](http://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
+  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](https://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -1343,7 +1343,7 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 
 ### Error Responses
 
-See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
@@ -1483,7 +1483,7 @@ For `create_booking_session`, when no booking session can be created, business *
 
 ## Message Signing
 
-Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, booking operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, booking operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -1514,7 +1514,7 @@ Signature: sig1=:MEUCIQDTxNq8h7LGHpvVZQp1iHkFp9+3N8Mxk2zH1wK4YuVN8w...:
 {"payment":{...}, ...}
 ```
 
-See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
+See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
 
 ### Response Signing
 
@@ -1538,7 +1538,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"id":"booking_123","status":"completed","confirmation":{...}}
 ```
 
-See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
+See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
 
 ## Security Considerations
 
@@ -1548,7 +1548,7 @@ Authentication is optional and depends on business requirements. When authentica
 
 1. **Open API**: No authentication required for public operations.
 1. **API Keys**: Via `X-API-Key` header.
-1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the platform for agent-authenticated access, or both platform and user for user-authenticated access (see [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/index.md)).
+1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the platform for agent-authenticated access, or both platform and user for user-authenticated access (see [Identity Linking](https://ucp.dev/draft/specification/common/identity-linking/index.md)).
 1. **Mutual TLS**: For high-security environments.
 1. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signing](#message-signing) above).
 

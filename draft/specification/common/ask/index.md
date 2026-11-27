@@ -61,7 +61,7 @@ What a Business may reveal through `ask` depends on the access it grants the cur
 
 - **Public** — with no credential, `ask` answers from public Business information and public resources.
 - **Resource reference** — an identifier in `ids` grounds the question in a specific resource. Before using a protected resource — a cart or checkout, for example — a Business **MUST** apply its normal access policy for that resource. Depending on that policy, the Business **MAY** treat possession of the identifier as sufficient, require an additional credential, or decline to use the resource in its answer (see [Messages and Error Handling](#messages-and-error-handling)).
-- **Authenticated Buyer** — when the caller presents a user identity token the Business recognizes ([user-authenticated access](http://ucp.dev/draft/specification/common/identity-linking/#access-levels); see [Scopes](#scopes)), the Business **MAY** return personalized answers permitted by its policy — member pricing, entitlements, gated availability, or information derived from protected resources. This tier is the `dev.ucp.common.ask:read` scope.
+- **Authenticated Buyer** — when the caller presents a user identity token the Business recognizes ([user-authenticated access](https://ucp.dev/draft/specification/common/identity-linking/#access-levels); see [Scopes](#scopes)), the Business **MAY** return personalized answers permitted by its policy — member pricing, entitlements, gated availability, or information derived from protected resources. This tier is the `dev.ucp.common.ask:read` scope.
 
 The `dev.ucp.common.ask:read` scope permits personalized `ask` responses; it is not a blanket entitlement to all of a Buyer's data. The Business remains responsible for authorizing every protected resource and every item of information it uses in an answer.
 
@@ -73,9 +73,9 @@ A Business that returns a `conversation` **SHOULD** retain the history it repres
 
 Each follow-up is a new request for authorization. A Business **MUST** apply its access policy ([Access](#access)) using the credential presented with that request, if any. The `id` carries context, not authority: a Business **MUST NOT** treat a replayed `conversation` as carrying forward the access granted on an earlier turn or as expanding what the current caller may access, and **MUST NOT** use or disclose retained context that the current request is not authorized to access.
 
-Where its access policy permits, a Business **MAY** continue a conversation on possession of the `id` alone — an anonymous conversation over public information, for example, as in the [multi-turn example](http://ucp.dev/draft/specification/common/ask/rest/#multi-turn-example). If the authorization of a follow-up differs from an earlier turn's — a credential presented on one turn but not the next, for example — the Business **MAY** continue with only the context the current request is permitted to use, or decline the continuation under its access policy (see [Messages and Error Handling](#messages-and-error-handling)).
+Where its access policy permits, a Business **MAY** continue a conversation on possession of the `id` alone — an anonymous conversation over public information, for example, as in the [multi-turn example](https://ucp.dev/draft/specification/common/ask/rest/#multi-turn-example). If the authorization of a follow-up differs from an earlier turn's — a credential presented on one turn but not the next, for example — the Business **MAY** continue with only the context the current request is permitted to use, or decline the continuation under its access policy (see [Messages and Error Handling](#messages-and-error-handling)).
 
-A Platform **SHOULD** include an idempotency key on every request that carries a `conversation`, so a retried turn returns the earlier answer rather than appending a duplicate — as `Idempotency-Key` over [REST](http://ucp.dev/draft/specification/common/ask/rest/#http-headers), as `meta["idempotency-key"]` over [MCP](http://ucp.dev/draft/specification/common/ask/mcp/#request-metadata). A Business that recognizes a duplicate by its key **MUST NOT** append a second turn.
+A Platform **SHOULD** include an idempotency key on every request that carries a `conversation`, so a retried turn returns the earlier answer rather than appending a duplicate — as `Idempotency-Key` over [REST](https://ucp.dev/draft/specification/common/ask/rest/#http-headers), as `meta["idempotency-key"]` over [MCP](https://ucp.dev/draft/specification/common/ask/mcp/#request-metadata). A Business that recognizes a duplicate by its key **MUST NOT** append a second turn.
 
 | Name       | Type   | Requirement  | Description                                                                         |
 | ---------- | ------ | ------------ | ----------------------------------------------------------------------------------- |
@@ -128,7 +128,7 @@ Market and localization context for the question — country, language, intent, 
 
 ## Signals
 
-Environment data provided by the Platform to support authorization and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See [Signals](http://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
+Environment data provided by the Platform to support authorization and abuse prevention. Signal values **MUST NOT** be buyer-asserted claims. See [Signals](https://ucp.dev/draft/specification/overview/#signals) for details and privacy requirements.
 
 | Name               | Type   | Requirement | Description                                    |
 | ------------------ | ------ | ----------- | ---------------------------------------------- |
@@ -160,7 +160,7 @@ Each link also carries a `type` classifier. Well-known values are `refund_policy
 
 The two serve different needs. `ask` returns indicative, human-readable content; a structured capability returns the machine-readable representation of a resource, which is authoritative over the `answer` (see [Answer](#answer)).
 
-Vertical integration guides map a vertical's concerns onto the capabilities that own them without changing this contract — see [Ask in Shopping](http://ucp.dev/draft/specification/shopping/ask/index.md) for the Shopping vertical.
+Vertical integration guides map a vertical's concerns onto the capabilities that own them without changing this contract — see [Ask in Shopping](https://ucp.dev/draft/specification/shopping/ask/index.md) for the Shopping vertical.
 
 ## Messages and Error Handling
 
@@ -172,7 +172,7 @@ A Business **MAY** include a `messages` array of errors, warnings, or informatio
 | `warning` | Important conditions or disclaimers about the answer                                                                                                       | `disclaimer`                                        |
 | `info`    | Additional context or non-blocking notes — e.g., a referenced resource could not be resolved, or the `query` asked for an operation `ask` does not perform | `not_found`, `operation_not_performed`, `promotion` |
 
-Warnings with `presentation: "disclosure"` carry notices the Platform **MUST NOT** hide or dismiss — for example, a safety, allergen, or regulated disclosure. See [Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) for the rendering contract.
+Warnings with `presentation: "disclosure"` carry notices the Platform **MUST NOT** hide or dismiss — for example, a safety, allergen, or regulated disclosure. See [Warning Presentation](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation) for the rendering contract.
 
 ### Well-Known Codes
 
@@ -261,11 +261,11 @@ The Ask capability defines the following well-known scope for user-authenticated
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `dev.ucp.common.ask:read` | Ask on behalf of the authenticated Buyer — personalized answers reflecting member pricing, entitlements, or gated availability. |
 
-Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/common/identity-linking/#scopes).
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](https://ucp.dev/draft/specification/common/identity-linking/#scopes).
 
 ## Transport Bindings
 
 The capability is bound to specific transport protocols:
 
-- [REST Binding](http://ucp.dev/draft/specification/common/ask/rest/index.md): RESTful API mapping (`POST /ask`).
-- [MCP Binding](http://ucp.dev/draft/specification/common/ask/mcp/index.md): Model Context Protocol mapping via JSON-RPC (`ask_business` tool).
+- [REST Binding](https://ucp.dev/draft/specification/common/ask/rest/index.md): RESTful API mapping (`POST /ask`).
+- [MCP Binding](https://ucp.dev/draft/specification/common/ask/mcp/index.md): Model Context Protocol mapping via JSON-RPC (`ask_business` tool).

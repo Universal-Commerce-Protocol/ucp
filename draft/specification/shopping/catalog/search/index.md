@@ -85,9 +85,9 @@ Pagination information in responses.
 
 ## Actions
 
-Search responses adopt the response-only `actions` map. The required `products` array can be empty; the Business decides whether it contains zero, some, or all otherwise relevant products under the Action-type contract. See [Catalog — Actions](http://ucp.dev/draft/specification/shopping/catalog/#actions) for the parent contract and example, and [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common rules.
+Search responses adopt the response-only `actions` map. The required `products` array can be empty; the Business decides whether it contains zero, some, or all otherwise relevant products under the Action-type contract. See [Catalog — Actions](https://ucp.dev/draft/specification/shopping/catalog/#actions) for the parent contract and example, and [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions) for the common rules.
 
 ## Transport Bindings
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/catalog/rest/#post-catalogsearch): `POST /catalog/search`
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/catalog/mcp/#search_catalog): `search_catalog` tool
+- [REST Binding](https://ucp.dev/draft/specification/shopping/catalog/rest/#post-catalogsearch): `POST /catalog/search`
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/catalog/mcp/#search_catalog): `search_catalog` tool

@@ -1,6 +1,6 @@
 # Catalog - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Catalog Capability](http://ucp.dev/draft/specification/shopping/catalog/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Catalog Capability](https://ucp.dev/draft/specification/shopping/catalog/index.md).
 
 ## Protocol Fundamentals
 
@@ -73,15 +73,15 @@ The `meta["ucp-agent"]` field is **required** on all requests to enable version 
 
 ## Tools
 
-| Tool             | Capability                                                                                    | Description                                            |
-| ---------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `search_catalog` | [Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md)                 | Search for products.                                   |
-| `lookup_catalog` | [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)                 | Lookup one or more products or variants by identifier. |
-| `get_product`    | [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) | Get full product detail by identifier.                 |
+| Tool             | Capability                                                                                     | Description                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `search_catalog` | [Search](https://ucp.dev/draft/specification/shopping/catalog/search/index.md)                 | Search for products.                                   |
+| `lookup_catalog` | [Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)                 | Lookup one or more products or variants by identifier. |
+| `get_product`    | [Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) | Get full product detail by identifier.                 |
 
 ### `search_catalog`
 
-Maps to the [Catalog Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md) capability.
+Maps to the [Catalog Search](https://ucp.dev/draft/specification/shopping/catalog/search/index.md) capability.
 
 #### Search Request
 
@@ -242,7 +242,7 @@ Maps to the [Catalog Search](http://ucp.dev/draft/specification/shopping/catalog
 
 ### `lookup_catalog`
 
-Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
+Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md) capability. See capability documentation for supported identifiers, resolution behavior, and client correlation requirements.
 
 The `catalog.ids` parameter accepts an array of identifiers and optional context.
 
@@ -435,7 +435,7 @@ When some identifiers are not found, the response includes the found products. T
 
 ### `get_product`
 
-Maps to the [Catalog Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object for full product detail with interactive option selection.
+Maps to the [Catalog Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/#get-product-get_product) capability. Returns a singular `product` object for full product detail with interactive option selection.
 
 #### Get Product Request
 
@@ -709,11 +709,11 @@ UCP uses a two-layer error model separating transport errors from business outco
 
 ### Transport Errors
 
-Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-codes) for the complete error code registry and JSON-RPC error code mappings.
+Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing are returned as JSON-RPC `error`. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-codes) for the complete error code registry and JSON-RPC error code mappings.
 
 ### Business Outcomes
 
-All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Catalog Overview](http://ucp.dev/draft/specification/shopping/catalog/#messages-and-error-handling) for message semantics and common scenarios.
+All application-level outcomes return a successful JSON-RPC result with the UCP envelope and optional `messages` array. See [Catalog Overview](https://ucp.dev/draft/specification/shopping/catalog/#messages-and-error-handling) for message semantics and common scenarios.
 
 #### Example: All Products Not Found
 
@@ -795,10 +795,10 @@ A product in a get_product response, extended with effective selections and avai
 A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
-1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](http://ucp.dev/draft/specification/shopping/catalog/search/index.md), [Lookup](http://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `lookup_catalog` and `get_product` tools MUST be available.
+1. Implement tools for each catalog capability advertised in the business's UCP profile, per their respective capability requirements ([Search](https://ucp.dev/draft/specification/shopping/catalog/search/index.md), [Lookup](https://ucp.dev/draft/specification/shopping/catalog/lookup/index.md)). Each capability may be adopted independently. When the Lookup capability is advertised, both `lookup_catalog` and `get_product` tools MUST be available.
 1. Use JSON-RPC errors for transport issues; use `messages` array for business outcomes.
 1. Return successful result for lookup requests; unknown identifiers result in fewer products returned (MAY include informational `not_found` messages).
 1. Validate tool inputs against UCP schemas.
 1. Return products with valid `Price` objects (amount + currency).
-1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](http://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
+1. Support cursor-based pagination for Search according to the shared pagination contract (see [Pagination](https://ucp.dev/draft/specification/shopping/catalog/search/#pagination)).
 1. Return `-32602` (Invalid params) for requests exceeding batch size limits.

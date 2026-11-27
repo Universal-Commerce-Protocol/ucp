@@ -36,7 +36,7 @@ The Food Fulfillment Extension (`dev.ucp.food.fulfillment`) adds a `fulfillment`
 
 ### Design Compared to Shopping Fulfillment
 
-Fulfillment shares its vocabulary with [Shopping Fulfillment](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md) but is deliberately flatter, because a food order is cooked, bagged, and handed off together from a single kitchen:
+Fulfillment shares its vocabulary with [Shopping Fulfillment](https://ucp.dev/draft/specification/shopping/extensions/fulfillment/index.md) but is deliberately flatter, because a food order is cooked, bagged, and handed off together from a single kitchen:
 
 | Dimension       | Shopping Fulfillment                         | Food Fulfillment                                                      | Why                                                                                  |
 | --------------- | -------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
@@ -169,12 +169,12 @@ Businesses advertise food fulfillment support in their profile:
 
 ## Destinations
 
-Each method has a single `destination`. As in [Shopping Fulfillment — Destinations](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/#destinations), `destination.type` is required in Business responses and optional in Platform requests; the method `type` determines which destination contract applies:
+Each method has a single `destination`. As in [Shopping Fulfillment — Destinations](https://ucp.dev/draft/specification/shopping/extensions/fulfillment/#destinations), `destination.type` is required in Business responses and optional in Platform requests; the method `type` determines which destination contract applies:
 
-| Method `type` | Destination `type`  | Authored by                     | Contents                                                                                                |
-| ------------- | ------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `delivery`    | `delivery_address`  | Platform (address, coordinates) | [Postal Address](#postal-address) (`address`) and/or [Geo](#geo) (`geo`)                                |
-| `pickup`      | `business_location` | Business only (response-only)   | [Location Summary](http://ucp.dev/draft/specification/reference/#location-summary) of the establishment |
+| Method `type` | Destination `type`  | Authored by                     | Contents                                                                                                 |
+| ------------- | ------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `delivery`    | `delivery_address`  | Platform (address, coordinates) | [Postal Address](#postal-address) (`address`) and/or [Geo](#geo) (`geo`)                                 |
+| `pickup`      | `business_location` | Business only (response-only)   | [Location Summary](https://ucp.dev/draft/specification/reference/#location-summary) of the establishment |
 
 ### Delivery Address
 
@@ -507,7 +507,7 @@ Scheduled requests are where food differs most from retail: establishments have 
 
 ## Rendering
 
-Food options follow the method-agnostic rendering contract in [Shopping Fulfillment — Rendering](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/#rendering): `title` + `description` + `totals` is sufficient to render any option. For food, Businesses **SHOULD** put speed or slot in `title` (e.g., "Priority Delivery", "Scheduled Delivery, 9:30 PM") and provide `earliest_fulfillment_time` / `latest_fulfillment_time` so Platforms can show an arrival or ready window. Pickup options **MAY** have empty `totals`; Platforms **SHOULD** render a `0` or missing amount as "Free".
+Food options follow the method-agnostic rendering contract in [Shopping Fulfillment — Rendering](https://ucp.dev/draft/specification/shopping/extensions/fulfillment/#rendering): `title` + `description` + `totals` is sufficient to render any option. For food, Businesses **SHOULD** put speed or slot in `title` (e.g., "Priority Delivery", "Scheduled Delivery, 9:30 PM") and provide `earliest_fulfillment_time` / `latest_fulfillment_time` so Platforms can show an arrival or ready window. Pickup options **MAY** have empty `totals`; Platforms **SHOULD** render a `0` or missing amount as "Free".
 
 ```text
 Delivery to 450 Serra Mall, Apt 3B                      [ Change ]
@@ -518,7 +518,7 @@ Delivery to 450 Serra Mall, Apt 3B                      [ Change ]
 
 ## Available Methods
 
-`available_methods[]` tells the Platform whether delivery and pickup are offered for this establishment, from what time, and with what scheduling support, following [Shopping Fulfillment — Available Methods](http://ucp.dev/draft/specification/shopping/extensions/fulfillment/#available-methods):
+`available_methods[]` tells the Platform whether delivery and pickup are offered for this establishment, from what time, and with what scheduling support, following [Shopping Fulfillment — Available Methods](https://ucp.dev/draft/specification/shopping/extensions/fulfillment/#available-methods):
 
 - `fulfillable_on` (optional, RFC 3339 timestamp) — earliest timestamp from which the method can fulfill orders (e.g., the current earliest ready/arrival estimate, or `2026-04-10T17:00:00-07:00` when delivery starts for dinner service).
 - Absent from the array — not offered (e.g., a pickup-only bakery).
@@ -562,7 +562,7 @@ The `description` lets Platforms surface the alternative in conversation:
 - **MUST** return `destination.type` and `destination.id` whenever `destination` is present.
 - **MUST** validate delivery addresses against the delivery zone and return `address_undeliverable` with `path` pointing to the destination when the address cannot be served.
 - **MUST** treat an omitted `requested_fulfillment_time` as ASAP and **MUST** answer an unavailable requested time with a recoverable error; **SHOULD** provide alternative `options[]` as well when requested time is unavailable.
-- **MUST** reflect the selected option's price in checkout `totals[]` as `type: "fulfillment"` and recompute tax, fees, and (if the [Tip Extension](http://ucp.dev/draft/specification/food/extensions/tip/index.md) is active) percentage tips when the method or option changes.
+- **MUST** reflect the selected option's price in checkout `totals[]` as `type: "fulfillment"` and recompute tax, fees, and (if the [Tip Extension](https://ucp.dev/draft/specification/food/extensions/tip/index.md) is active) percentage tips when the method or option changes.
 - **SHOULD** pre-select a default `selected_option_id` and default handoff preferences (`selected_preference_option_ids[]`) so the session can reach `ready_for_complete` without extra round trips.
 - **MUST** return in `selected_preference_option_ids[]` only the preferences it will honor, and **MUST NOT** add an option the Platform did not select, except to apply a default when `selected_preference_option_ids[]` was omitted or when a selection is required and none remains.
 - **MUST NOT** fail the request, or withhold `ready_for_complete`, only because of preferences it cannot honor. It **SHOULD** drop each rejected option and return a `preference_option_*` warning (see [Rejected Preferences](#rejected-preferences)), keeping the earlier entry when two selections conflict.
@@ -640,7 +640,7 @@ A buyer who started with delivery switches to pickup. The Platform replaces the 
 
 ## Security & Privacy Considerations
 
-A `destination` with type `delivery_address` carries precise Buyer location data. The following considerations mirror the [Location capability's Security & Privacy Considerations](http://ucp.dev/draft/specification/common/location/#security-privacy-considerations) and apply to any `address` or `geo` exchanged through this extension.
+A `destination` with type `delivery_address` carries precise Buyer location data. The following considerations mirror the [Location capability's Security & Privacy Considerations](https://ucp.dev/draft/specification/common/location/#security-privacy-considerations) and apply to any `address` or `geo` exchanged through this extension.
 
 ### Consistency
 

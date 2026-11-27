@@ -55,7 +55,7 @@ Implementations SHOULD accept at least 10 identifiers per request. Implementatio
 
 ### Filters
 
-Both `lookup_catalog` and `get_product` accept optional `filters` to narrow the returned products and variants. Filters use the same schema and AND semantics as [Search Filters](http://ucp.dev/draft/specification/shopping/catalog/search/#search-filters) — for example, a price filter excludes variants outside the specified range.
+Both `lookup_catalog` and `get_product` accept optional `filters` to narrow the returned products and variants. Filters use the same schema and AND semantics as [Search Filters](https://ucp.dev/draft/specification/shopping/catalog/search/#search-filters) — for example, a price filter excludes variants outside the specified range.
 
 Filters apply *after* identifier resolution (lookup) or option selection (get_product). An identifier that resolves to a product whose variants all fall outside the price filter results in that product being excluded from the response.
 
@@ -160,11 +160,11 @@ ______________________________________________________________________
 
 ## Actions
 
-The batch Lookup response and a successful Get Product response adopt the response-only `actions` map. Batch Lookup retains its required `products` array, which can be empty; successful Get Product retains its required `product`, and its existing error response is unchanged. See [Catalog — Actions](http://ucp.dev/draft/specification/shopping/catalog/#actions) for the parent contract and [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) for the common rules.
+The batch Lookup response and a successful Get Product response adopt the response-only `actions` map. Batch Lookup retains its required `products` array, which can be empty; successful Get Product retains its required `product`, and its existing error response is unchanged. See [Catalog — Actions](https://ucp.dev/draft/specification/shopping/catalog/#actions) for the parent contract and [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions) for the common rules.
 
 ## Transport Bindings
 
-- [REST Binding](http://ucp.dev/draft/specification/shopping/catalog/rest/#post-cataloglookup): `POST /catalog/lookup` (batch)
-- [REST Binding](http://ucp.dev/draft/specification/shopping/catalog/rest/#post-catalogproduct): `POST /catalog/product` (single)
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/catalog/mcp/#lookup_catalog): `lookup_catalog` tool (batch)
-- [MCP Binding](http://ucp.dev/draft/specification/shopping/catalog/mcp/#get_product): `get_product` tool (single)
+- [REST Binding](https://ucp.dev/draft/specification/shopping/catalog/rest/#post-cataloglookup): `POST /catalog/lookup` (batch)
+- [REST Binding](https://ucp.dev/draft/specification/shopping/catalog/rest/#post-catalogproduct): `POST /catalog/product` (single)
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/catalog/mcp/#lookup_catalog): `lookup_catalog` tool (batch)
+- [MCP Binding](https://ucp.dev/draft/specification/shopping/catalog/mcp/#get_product): `get_product` tool (single)

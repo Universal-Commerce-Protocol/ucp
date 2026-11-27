@@ -1,6 +1,6 @@
 # Ask - REST Binding
 
-This document specifies the HTTP/REST binding for the [Ask Capability](http://ucp.dev/draft/specification/common/ask/index.md).
+This document specifies the HTTP/REST binding for the [Ask Capability](https://ucp.dev/draft/specification/common/ask/index.md).
 
 ## Protocol Fundamentals
 
@@ -37,13 +37,13 @@ Businesses advertise REST transport availability for the Common service and the 
 
 ## Endpoints
 
-| Endpoint | Method | Capability                                                    | Description                                                                                                         |
-| -------- | ------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `/ask`   | POST   | [Ask](http://ucp.dev/draft/specification/common/ask/index.md) | Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. |
+| Endpoint | Method | Capability                                                     | Description                                                                                                         |
+| -------- | ------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/ask`   | POST   | [Ask](https://ucp.dev/draft/specification/common/ask/index.md) | Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. |
 
 ### `POST /ask`
 
-Maps to the [Ask](http://ucp.dev/draft/specification/common/ask/index.md) capability.
+Maps to the [Ask](https://ucp.dev/draft/specification/common/ask/index.md) capability.
 
 **Inputs**
 
@@ -67,7 +67,7 @@ Maps to the [Ask](http://ucp.dev/draft/specification/common/ask/index.md) capabi
 
 #### Example
 
-The Buyer asks a policy question about a specific product, identified here by its page URL. `ids` grounds the question in any Business resource, by a Business-issued Global ID (GID) or by a secondary identifier the Business recognizes — a SKU, handle, or URL — so the Platform can pass whichever it already has (see [Scoping a Question](http://ucp.dev/draft/specification/common/ask/#scoping-a-question)).
+The Buyer asks a policy question about a specific product, identified here by its page URL. `ids` grounds the question in any Business resource, by a Business-issued Global ID (GID) or by a secondary identifier the Business recognizes — a SKU, handle, or URL — so the Platform can pass whichever it already has (see [Scoping a Question](https://ucp.dev/draft/specification/common/ask/#scoping-a-question)).
 
 ```json
 POST /ask HTTP/1.1
@@ -232,11 +232,11 @@ The following headers are defined for the HTTP binding.
 
 - **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header containing the platform profile URI using Dictionary Structured Field syntax ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941)). Format: `profile="https://platform.example/profile"`.
 
-- **Idempotency-Key**: The Common service declares `Idempotency-Key` as an optional request header. A Platform **SHOULD** include it on any request that carries a `conversation`, and **MAY** include it on any other (see [Conversation](http://ucp.dev/draft/specification/common/ask/#conversation)). When present, the Business **MUST**:
+- **Idempotency-Key**: The Common service declares `Idempotency-Key` as an optional request header. A Platform **SHOULD** include it on any request that carries a `conversation`, and **MAY** include it on any other (see [Conversation](https://ucp.dev/draft/specification/common/ask/#conversation)). When present, the Business **MUST**:
 
   1. Store the key with the result for at least 24 hours.
   1. Return the cached result for a duplicate key whose request body matches the original, without appending a second turn.
-  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
+  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
 
 ## Error Handling
 
@@ -255,7 +255,7 @@ Use HTTP status codes for protocol-level issues that prevent request processing:
 
 ### Business Outcomes
 
-All application-level outcomes return HTTP 200 with the UCP envelope and a populated `answer`. Per-answer warnings or info notes ride in the optional `messages` array. See [Ask Overview](http://ucp.dev/draft/specification/common/ask/#messages-and-error-handling) for message semantics.
+All application-level outcomes return HTTP 200 with the UCP envelope and a populated `answer`. Per-answer warnings or info notes ride in the optional `messages` array. See [Ask Overview](https://ucp.dev/draft/specification/common/ask/#messages-and-error-handling) for message semantics.
 
 #### Example: Answer with a Disclosure Warning
 
@@ -329,6 +329,6 @@ UCP metadata for ask responses.
 A conforming REST transport implementation **MUST**:
 
 1. When `dev.ucp.common.ask` is advertised in the Business's UCP profile, expose `POST /ask` under the `dev.ucp.common` service's REST `endpoint`.
-1. Validate request bodies against the [Ask schema](http://ucp.dev/draft/specification/common/ask/index.md).
+1. Validate request bodies against the [Ask schema](https://ucp.dev/draft/specification/common/ask/index.md).
 1. Return HTTP 200 for every well-formed, authorized, in-limits request; convey business outcomes through the `answer` and `messages` array, and use HTTP error status codes only for transport-level issues (authentication, rate limiting, unavailability, malformed input).
 1. Return a populated `answer` on every successful response. A "can't answer" outcome is a populated `answer` that states the limitation plainly, **not** an omitted field, error code, or non-2xx status.

@@ -65,9 +65,9 @@ Checkout follows a progressive session lifecycle:
 - `line_items[1]` 🥗 × 1
   - `dish` Caesar Salad — $11.00
   - `note` 📝 "Dressing on the side"
-- `fulfillment.methods[0]` 🛵 delivery → 450 Serra Mall, Apt 3B *(via the [Fulfillment Extension](http://ucp.dev/draft/specification/food/extensions/fulfillment/index.md))*
+- `fulfillment.methods[0]` 🛵 delivery → 450 Serra Mall, Apt 3B *(via the [Fulfillment Extension](https://ucp.dev/draft/specification/food/extensions/fulfillment/index.md))*
   - `selected_option_id` 🔘✅ Standard Delivery, 6:35–6:50 PM, $2.99
-- `tip` 💵 `selected_option_id` 🔘✅ 18% *(via the [Tip Extension](http://ucp.dev/draft/specification/food/extensions/tip/index.md))*
+- `tip` 💵 `selected_option_id` 🔘✅ 18% *(via the [Tip Extension](https://ucp.dev/draft/specification/food/extensions/tip/index.md))*
 - `totals[]` 🧾 subtotal · delivery · fees · tax · tip · **total**
 - `order` 🎫 `#42` → `tracking_url` *(after completion)*
 
@@ -179,13 +179,13 @@ When a `line_items[].note` asks for something the menu models as a modification,
 
 ### Pricing Scope
 
-Checkout uses the shared [Total](#total) structure and follows the rendering contract, verification rule, repeating types, and `lines[]` sub-line invariant defined in [Checkout — Total](http://ucp.dev/draft/specification/shopping/checkout/#totals). Amounts are signed: discounts are negative, charges are non-negative, and all non-total entries sum to the single `total` entry.
+Checkout uses the shared [Total](#total) structure and follows the rendering contract, verification rule, repeating types, and `lines[]` sub-line invariant defined in [Checkout — Total](https://ucp.dev/draft/specification/shopping/checkout/#totals). Amounts are signed: discounts are negative, charges are non-negative, and all non-total entries sum to the single `total` entry.
 
 - **Line items (`subtotal`, `items_discount`)**: `subtotal` is the sum of `line_items[].totals[type=subtotal]` (dish plus modification prices). Dish-level promotions (e.g., "Free garlic knots with any large pizza") roll up as `items_discount`.
-- **Delivery (`fulfillment`)**: The price of the selected [fulfillment option](http://ucp.dev/draft/specification/food/extensions/fulfillment/#fulfillment-option). Pickup options are typically `0`.
+- **Delivery (`fulfillment`)**: The price of the selected [fulfillment option](https://ucp.dev/draft/specification/food/extensions/fulfillment/#fulfillment-option). Pickup options are typically `0`.
 - **Fees (`fee`)**: Some common examples include: marketplace service fees, small-order fees (basket below a threshold), bag or packaging fees, and municipal surcharges (e.g., courier minimum-pay regulatory fees). Use repeating `fee` entries or one `fee` entry with itemized `lines[]`.
 - **Tax (`tax`)**: Sales tax and prepared-food or beverage taxes, which may differ from grocery rates and may apply to fees and delivery in some jurisdictions.
-- **Gratuity (`tip`)**: A **food-defined total type** populated when the [Tip Extension](http://ucp.dev/draft/specification/food/extensions/tip/index.md) is active. Because `tip` is not in the common well-known set, Businesses **MUST** include `display_text` on it.
+- **Gratuity (`tip`)**: A **food-defined total type** populated when the [Tip Extension](https://ucp.dev/draft/specification/food/extensions/tip/index.md) is active. Because `tip` is not in the common well-known set, Businesses **MUST** include `display_text` on it.
 
 The following snippets illustrate canonical food pricing patterns:
 
@@ -253,7 +253,7 @@ Total                                                         $71.87
 
 ### Payments
 
-Payment handlers are discovered from the Business's UCP profile at `/.well-known/ucp` and `checkout.ucp.payment_handlers`, following the same model as [Checkout — Payments](http://ucp.dev/draft/specification/shopping/checkout/#payments). `payment` is optional on create & update and **REQUIRED** on Complete Checkout.
+Payment handlers are discovered from the Business's UCP profile at `/.well-known/ucp` and `checkout.ucp.payment_handlers`, following the same model as [Checkout — Payments](https://ucp.dev/draft/specification/shopping/checkout/#payments). `payment` is optional on create & update and **REQUIRED** on Complete Checkout.
 
 Because dynamic charges such as delivery fees and tips can change up to the moment of completion, Platforms **MUST** present the final `totals[]` for buyer confirmation before submitting payment.
 
@@ -261,7 +261,7 @@ Because dynamic charges such as delivery fees and tips can change up to the mome
 
 The Platform can create a checkout when the Platform and Business share an out-of-band communicated cart identifier that both parties acknowledge (for example, a pre-built basket built on the food establishment's web/app surface).
 
-Conversion follows [Cart — Cart-to-Checkout Conversion](http://ucp.dev/draft/specification/shopping/cart/#cart-to-checkout-conversion): the Business initializes the session from the cart's `food_establishment`, `line_items[]` (dishes, modifications, and notes), `buyer`, and `context`, and **MUST** ignore overlapping fields in the request. The Platform **MAY** omit `food_establishment` and `line_items` (or send `"line_items": []`) when providing `cart_id`. Checkout-only and extension fields — such as `fulfillment`, `tip`, and `payment` — **MAY** be sent alongside `cart_id`. The Business **MUST** reject requests containing `cart_id` if an out-of-band cart source is not recognized, and **MUST NOT** silently fall back to inline `line_items`. `cart_id` is an initialization input only and is omitted from checkout responses.
+Conversion follows [Cart — Cart-to-Checkout Conversion](https://ucp.dev/draft/specification/shopping/cart/#cart-to-checkout-conversion): the Business initializes the session from the cart's `food_establishment`, `line_items[]` (dishes, modifications, and notes), `buyer`, and `context`, and **MUST** ignore overlapping fields in the request. The Platform **MAY** omit `food_establishment` and `line_items` (or send `"line_items": []`) when providing `cart_id`. Checkout-only and extension fields — such as `fulfillment`, `tip`, and `payment` — **MAY** be sent alongside `cart_id`. The Business **MUST** reject requests containing `cart_id` if an out-of-band cart source is not recognized, and **MUST NOT** silently fall back to inline `line_items`. `cart_id` is an initialization input only and is omitted from checkout responses.
 
 ```json
 {
@@ -271,26 +271,26 @@ Conversion follows [Cart — Cart-to-Checkout Conversion](http://ucp.dev/draft/s
 
 ### Checkout Status Lifecycle
 
-The `status` field indicates the current phase of the session. Statuses follow [Checkout — Status Values](http://ucp.dev/draft/specification/shopping/checkout/#status-values); in food ordering they typically mean:
+The `status` field indicates the current phase of the session. Statuses follow [Checkout — Status Values](https://ucp.dev/draft/specification/shopping/checkout/#status-values); in food ordering they typically mean:
 
-| Status                 | Typical food ordering situation                                                                                                                                                                   | Recommended Platform action                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `incomplete`           | No fulfillment method yet, a dish was 86'd, or the basket is under the delivery minimum.                                                                                                          | Resolve `messages[]` via Update Checkout.                       |
-| `requires_escalation`  | Alcohol in the basket requires ID verification, or a catering order needs business review.                                                                                                        | Hand off via `continue_url`.                                    |
-| `ready_for_complete`   | Dishes, buyer contact, and any active extension's inputs (e.g., fulfillment, tip) are valid, and no gating Action remains outstanding.                                                            | Show the final summary and disclosures; call Complete Checkout. |
-| `complete_in_progress` | Payment capture or kitchen POS injection is still running. See [Accepted Completion](http://ucp.dev/draft/specification/shopping/checkout/#accepted-completion). `order` **MUST NOT** be present. | Process any outstanding Action, then poll Get Checkout.         |
-| `completed`            | The kitchen has the ticket. `order` is present.                                                                                                                                                   | Show confirmation screen.                                       |
-| `canceled`             | Canceled by the Platform or expired (default TTL: 6 hours).                                                                                                                                       | Start a new session if needed.                                  |
+| Status                 | Typical food ordering situation                                                                                                                                                                    | Recommended Platform action                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `incomplete`           | No fulfillment method yet, a dish was 86'd, or the basket is under the delivery minimum.                                                                                                           | Resolve `messages[]` via Update Checkout.                       |
+| `requires_escalation`  | Alcohol in the basket requires ID verification, or a catering order needs business review.                                                                                                         | Hand off via `continue_url`.                                    |
+| `ready_for_complete`   | Dishes, buyer contact, and any active extension's inputs (e.g., fulfillment, tip) are valid, and no gating Action remains outstanding.                                                             | Show the final summary and disclosures; call Complete Checkout. |
+| `complete_in_progress` | Payment capture or kitchen POS injection is still running. See [Accepted Completion](https://ucp.dev/draft/specification/shopping/checkout/#accepted-completion). `order` **MUST NOT** be present. | Process any outstanding Action, then poll Get Checkout.         |
+| `completed`            | The kitchen has the ticket. `order` is present.                                                                                                                                                    | Show confirmation screen.                                       |
+| `canceled`             | Canceled by the Platform or expired (default TTL: 6 hours).                                                                                                                                        | Start a new session if needed.                                  |
 
 #### Actions
 
-When an active extension has outstanding step-up work for the checkout (such as 3D Secure device data collection or a buyer authentication challenge), the Business surfaces instances in the response-only `actions` map. Food Checkout adopts the [Overview — Actions](http://ucp.dev/draft/specification/overview/#actions) model and follows the lifecycle, message-targeting, and [Accepted Completion](http://ucp.dev/draft/specification/shopping/checkout/#accepted-completion) contracts defined in [Shopping Checkout — Actions](http://ucp.dev/draft/specification/shopping/checkout/#actions).
+When an active extension has outstanding step-up work for the checkout (such as 3D Secure device data collection or a buyer authentication challenge), the Business surfaces instances in the response-only `actions` map. Food Checkout adopts the [Overview — Actions](https://ucp.dev/draft/specification/overview/#actions) model and follows the lifecycle, message-targeting, and [Accepted Completion](https://ucp.dev/draft/specification/shopping/checkout/#accepted-completion) contracts defined in [Shopping Checkout — Actions](https://ucp.dev/draft/specification/shopping/checkout/#actions).
 
 ### Error Handling
 
-Checkout uses the shared `messages[]` model, severities, and [`path`](http://ucp.dev/draft/specification/shopping/checkout/#the-path-field) targeting defined in [Checkout — Error Handling](http://ucp.dev/draft/specification/shopping/checkout/#error-handling), including [eligibility verification at completion](http://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion).
+Checkout uses the shared `messages[]` model, severities, and [`path`](https://ucp.dev/draft/specification/shopping/checkout/#the-path-field) targeting defined in [Checkout — Error Handling](https://ucp.dev/draft/specification/shopping/checkout/#error-handling), including [eligibility verification at completion](https://ucp.dev/draft/specification/shopping/checkout/#eligibility-verification-at-completion).
 
-Kitchen state changes by the minute, so food checkouts surface recoverable errors far more often than retail. In addition to the shared [standard errors](http://ucp.dev/draft/specification/shopping/checkout/#standard-errors), food Businesses **SHOULD** use these codes so Platforms can offer targeted recovery:
+Kitchen state changes by the minute, so food checkouts surface recoverable errors far more often than retail. In addition to the shared [standard errors](https://ucp.dev/draft/specification/shopping/checkout/#standard-errors), food Businesses **SHOULD** use these codes so Platforms can offer targeted recovery:
 
 | Code                           | Typical `path`                                               | Food ordering meaning                                                         | Suggested recovery                                     |
 | ------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -357,7 +357,7 @@ Platforms turn these messages into recovery prompts, for example:
 
 ### Warning Presentation
 
-Checkout follows the `notice` vs. `disclosure` presentation contract in [Checkout — Warning Presentation](http://ucp.dev/draft/specification/shopping/checkout/#warning-presentation). In food ordering, `disclosure` is the right tier for **statutory food-safety and labeling notices**, which Platforms **MUST** show prominently near the referenced item and **MUST NOT** auto-dismiss:
+Checkout follows the `notice` vs. `disclosure` presentation contract in [Checkout — Warning Presentation](https://ucp.dev/draft/specification/shopping/checkout/#warning-presentation). In food ordering, `disclosure` is the right tier for **statutory food-safety and labeling notices**, which Platforms **MUST** show prominently near the referenced item and **MUST NOT** auto-dismiss:
 
 - **Consumer advisory** (`consumer_advisory`): Raw or undercooked animal products, as required by food codes such as the U.S. FDA.
 - **Allergens** (`allergens`): Major allergens or shared-equipment cross-contact.
@@ -435,11 +435,11 @@ The Checkout capability defines the following well-known scopes for user-authent
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `dev.ucp.food.checkout:manage` | All checkout operations on behalf of the authenticated user — create, update, complete, and cancel checkout. |
 
-Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](http://ucp.dev/draft/specification/common/identity-linking/#scopes).
+Scope declaration, derivation, and rules for extending this set with custom scopes are defined in [Identity Linking — Scopes](https://ucp.dev/draft/specification/common/identity-linking/#scopes).
 
 ## Continue URL
 
-The `continue_url` field enables checkout handoff from the Platform to the Business UI — for example, for ID verification or catering approval. URL construction (server-side state vs. permalink) and security/recovery considerations follow [Checkout — Continue URL](http://ucp.dev/draft/specification/shopping/checkout/#continue-url).
+The `continue_url` field enables checkout handoff from the Platform to the Business UI — for example, for ID verification or catering approval. URL construction (server-side state vs. permalink) and security/recovery considerations follow [Checkout — Continue URL](https://ucp.dev/draft/specification/shopping/checkout/#continue-url).
 
 ### Availability
 
@@ -508,7 +508,7 @@ The Checkout capability defines the following logical operations:
 
 Invoked when the buyer expresses intent to order from a food establishment.
 
-The create request initializes the checkout from one of two sources: `food_establishment` and `line_items` provided inline, or the contents of a cart identified by `cart_id` — e.g., an out-of-band communicated cart that both the Platform and Business acknowledge (see [Cart-to-Checkout Conversion](#cart-to-checkout-conversion) and [Shopping Checkout — Create Checkout](http://ucp.dev/draft/specification/shopping/checkout/#create-checkout)). The Business **MUST** reject a create request that provides `cart_id` when out-of-band cart resolution is not supported (or when `cart_id` cannot be resolved), and **MUST NOT** ignore `cart_id` and initialize the checkout from inline `line_items` instead. The Business **MUST** also reject a create request that provides neither inline items nor `cart_id`.
+The create request initializes the checkout from one of two sources: `food_establishment` and `line_items` provided inline, or the contents of a cart identified by `cart_id` — e.g., an out-of-band communicated cart that both the Platform and Business acknowledge (see [Cart-to-Checkout Conversion](#cart-to-checkout-conversion) and [Shopping Checkout — Create Checkout](https://ucp.dev/draft/specification/shopping/checkout/#create-checkout)). The Business **MUST** reject a create request that provides `cart_id` when out-of-band cart resolution is not supported (or when `cart_id` cannot be resolved), and **MUST NOT** ignore `cart_id` and initialize the checkout from inline `line_items` instead. The Business **MUST** also reject a create request that provides neither inline items nor `cart_id`.
 
 **Inputs**
 
@@ -594,8 +594,8 @@ This object MUST be one of the following types: [Checkout](/draft/specification/
 
 The abstract operations above are bound to specific transport protocols:
 
-- [REST Binding](http://ucp.dev/draft/specification/food/checkout/rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-- [MCP Binding](http://ucp.dev/draft/specification/food/checkout/mcp/index.md): Model Context Protocol mapping for agentic interaction.
+- [REST Binding](https://ucp.dev/draft/specification/food/checkout/rest/index.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
+- [MCP Binding](https://ucp.dev/draft/specification/food/checkout/mcp/index.md): Model Context Protocol mapping for agentic interaction.
 
 ## Entities
 
@@ -777,7 +777,7 @@ Platform-supplied fraud and security context.
 
 ### Total
 
-Authoritative itemized price components and the aggregate order total. See [Checkout — Total](http://ucp.dev/draft/specification/shopping/checkout/#totals) for the rendering and verification contract.
+Authoritative itemized price components and the aggregate order total. See [Checkout — Total](https://ucp.dev/draft/specification/shopping/checkout/#totals) for the rendering and verification contract.
 
 | Name         | Type                                                           | Requirement  | Description                                                                                                                                                                                                                                                                                 |
 | ------------ | -------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

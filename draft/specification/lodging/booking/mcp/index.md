@@ -1,6 +1,6 @@
 # Booking Capability - MCP Binding
 
-This document specifies the Model Context Protocol (MCP) binding for the [Booking Capability](http://ucp.dev/draft/specification/lodging/booking/index.md).
+This document specifies the Model Context Protocol (MCP) binding for the [Booking Capability](https://ucp.dev/draft/specification/lodging/booking/index.md).
 
 ## Protocol Fundamentals
 
@@ -77,7 +77,7 @@ MCP clients **MUST** include a `meta` object in every request containing protoco
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](http://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_booking_session` and `cancel_booking_session` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
+The `meta["ucp-agent"]` field is **required** on all requests to enable [capability negotiation](https://ucp.dev/draft/specification/overview/#negotiation-protocol). The `complete_booking_session` and `cancel_booking_session` operations also require `meta["idempotency-key"]` for retry safety. Platforms **MAY** include additional metadata fields.
 
 ## Tools
 
@@ -91,17 +91,17 @@ MCP tools separate resource identification from payload data:
 - **Responses:** All responses **MUST** include `booking.id` as part of the full resource state.
 - **Create:** The `create_booking_session` operation does not require an `id` in the request, and the response includes the newly assigned `booking.id`.
 
-| Tool                       | Operation                                                                                                | Description               |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `create_booking_session`   | [Create Booking Session](http://ucp.dev/draft/specification/lodging/booking/#create-booking-session)     | Create a booking session. |
-| `get_booking_session`      | [Get Booking Session](http://ucp.dev/draft/specification/lodging/booking/#get-booking-session)           | Get a booking session.    |
-| `update_booking_session`   | [Update Booking Session](http://ucp.dev/draft/specification/lodging/booking/#update-booking-session)     | Update a booking session. |
-| `complete_booking_session` | [Complete Booking Session](http://ucp.dev/draft/specification/lodging/booking/#complete-booking-session) | Complete booking.         |
-| `cancel_booking_session`   | [Cancel Booking Session](http://ucp.dev/draft/specification/lodging/booking/#cancel-booking-session)     | Cancel a booking session. |
+| Tool                       | Operation                                                                                                 | Description               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `create_booking_session`   | [Create Booking Session](https://ucp.dev/draft/specification/lodging/booking/#create-booking-session)     | Create a booking session. |
+| `get_booking_session`      | [Get Booking Session](https://ucp.dev/draft/specification/lodging/booking/#get-booking-session)           | Get a booking session.    |
+| `update_booking_session`   | [Update Booking Session](https://ucp.dev/draft/specification/lodging/booking/#update-booking-session)     | Update a booking session. |
+| `complete_booking_session` | [Complete Booking Session](https://ucp.dev/draft/specification/lodging/booking/#complete-booking-session) | Complete booking.         |
+| `cancel_booking_session`   | [Cancel Booking Session](https://ucp.dev/draft/specification/lodging/booking/#cancel-booking-session)     | Cancel a booking session. |
 
 ### `create_booking_session`
 
-Maps to the [Create Booking Session](http://ucp.dev/draft/specification/lodging/booking/#create-booking-session) operation.
+Maps to the [Create Booking Session](https://ucp.dev/draft/specification/lodging/booking/#create-booking-session) operation.
 
 #### Input Schema
 
@@ -351,7 +351,7 @@ Selected room is no longer available — no booking session resource is created:
 
 ### `get_booking_session`
 
-Maps to the [Get Booking Session](http://ucp.dev/draft/specification/lodging/booking/#get-booking-session) operation.
+Maps to the [Get Booking Session](https://ucp.dev/draft/specification/lodging/booking/#get-booking-session) operation.
 
 #### Input Schema
 
@@ -384,7 +384,7 @@ Maps to the [Get Booking Session](http://ucp.dev/draft/specification/lodging/boo
 
 ### `update_booking_session`
 
-Maps to the [Update Booking Session](http://ucp.dev/draft/specification/lodging/booking/#update-booking-session) operation.
+Maps to the [Update Booking Session](https://ucp.dev/draft/specification/lodging/booking/#update-booking-session) operation.
 
 #### Input Schema
 
@@ -656,7 +656,7 @@ Maps to the [Update Booking Session](http://ucp.dev/draft/specification/lodging/
 
 ### `complete_booking_session`
 
-Maps to the [Complete Booking Session](http://ucp.dev/draft/specification/lodging/booking/#complete-booking-session) operation.
+Maps to the [Complete Booking Session](https://ucp.dev/draft/specification/lodging/booking/#complete-booking-session) operation.
 
 #### Input Schema
 
@@ -914,7 +914,7 @@ Maps to the [Complete Booking Session](http://ucp.dev/draft/specification/lodgin
 
 ### `cancel_booking_session`
 
-Maps to the [Cancel Booking Session](http://ucp.dev/draft/specification/lodging/booking/#cancel-booking-session) operation.
+Maps to the [Cancel Booking Session](https://ucp.dev/draft/specification/lodging/booking/#cancel-booking-session) operation.
 
 #### Input Schema
 
@@ -949,7 +949,7 @@ Maps to the [Cancel Booking Session](http://ucp.dev/draft/specification/lodging/
 
 ## Error Handling
 
-UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+UCP distinguishes between protocol errors and business outcomes. See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Transport-level failures (authentication, rate limiting, unavailability) that prevent request processing. Returned as JSON-RPC `error` with code `-32000` (or `-32001` for discovery errors).
 - **Business outcomes**: Application-level results from successful request processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
@@ -1107,7 +1107,7 @@ For `create_booking_session`, when no booking session can be created, JSON-RPC `
 
 ## Message Signing
 
-Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all booking operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **SHOULD** authenticate agents when using MCP transport. When using HTTP Message Signatures, all booking operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -1140,7 +1140,7 @@ Signature: sig1=:MEUCIQDXyK9N3p5Rt...:
 
 The `Content-Digest` binds the JSON-RPC body to the signature. No JSON canonicalization is required.
 
-See [Message Signatures - MCP Transport](http://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
+See [Message Signatures - MCP Transport](https://ucp.dev/draft/specification/signatures/#mcp-transport) for details.
 
 ### Response Signing
 
@@ -1164,7 +1164,7 @@ Signature: sig1=:MFQCIH7kL9nM2oP5qR8sT1uV4wX6yZaB3cD...:
 {"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"..."}],"structuredContent":{"id":"booking_123","status":"completed", ...}}}
 ```
 
-See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
+See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the signing algorithm (identical for MCP over HTTP).
 
 ## Conformance
 
@@ -1172,14 +1172,14 @@ A conforming MCP transport implementation **MUST**:
 
 1. Implement JSON-RPC 2.0 protocol correctly.
 1. Provide all core booking tools defined in this specification.
-1. Return errors per the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling).
+1. Return errors per the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling).
 1. Return business outcomes as JSON-RPC `result` with UCP envelope and `messages` array.
 1. Validate tool inputs against UCP schemas.
 1. Support HTTP transport with streaming.
 
 A conforming implementation **SHOULD**:
 
-1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md)).
+1. Authenticate agents using one of the supported mechanisms (API keys, OAuth, mTLS, or HTTP Message Signatures per [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md)).
 1. Verify authentication on incoming requests before processing.
 
 ## Implementation

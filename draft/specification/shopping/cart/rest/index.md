@@ -1,6 +1,6 @@
 # Cart Capability - REST Binding
 
-This document specifies the REST binding for the [Cart Capability](http://ucp.dev/draft/specification/shopping/cart/index.md).
+This document specifies the REST binding for the [Cart Capability](https://ucp.dev/draft/specification/shopping/cart/index.md).
 
 ## Protocol Fundamentals
 
@@ -520,7 +520,7 @@ The following headers are defined for the HTTP binding and apply to all operatio
 - **Idempotency-Key**: Operations that modify state **SHOULD** support idempotency. When provided, the server **MUST**:
   1. Store the key with the operation result for at least 24 hours.
   1. Return the cached result for duplicate keys whose request body matches the original.
-  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](http://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
+  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](https://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -542,7 +542,7 @@ The following headers are defined for the HTTP binding and apply to all operatio
 
 ### Error Responses
 
-See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
@@ -580,7 +580,7 @@ Authentication is optional and depends on business requirements. When authentica
 
 1. **Open API**: No authentication required for public operations.
 1. **API Keys**: Via `X-API-Key` header.
-1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the platform for agent-authenticated access, or both platform and user for user-authenticated access (see [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/index.md)).
+1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the platform for agent-authenticated access, or both platform and user for user-authenticated access (see [Identity Linking](https://ucp.dev/draft/specification/common/identity-linking/index.md)).
 1. **Mutual TLS**: For high-security environments.
 
 Businesses **MAY** require authentication for some operations while leaving others open (e.g., public cart without authentication).

@@ -77,7 +77,7 @@ Businesses advertise support for this handler in their UCP profile's `payment_ha
 
 **Schema URL:** `{schema_url}`
 
-The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](http://ucp.dev/draft/specification/payment/guide/#defining-the-schema) for the full pattern.
+The handler schema defines three config variants for different contexts. See [Payment Handler Guide: Defining the Schema](https://ucp.dev/draft/specification/payment/guide/#defining-the-schema) for the full pattern.
 
 | Config Variant    | Context            | Purpose                             |
 | ----------------- | ------------------ | ----------------------------------- |
@@ -275,7 +275,7 @@ ______________________________________________________________________
 
 ## Payment Actions [CONDITIONAL]
 
-{Include this section if the handler can cause Actions. Identify the negotiated Checkout extension that declares them. Use the standard [Payment Authentication extension](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md) for device data collection and 3DS challenges; link to the defining extension specification for custom Actions.}
+{Include this section if the handler can cause Actions. Identify the negotiated Checkout extension that declares them. Use the standard [Payment Authentication extension](https://ucp.dev/draft/specification/payment/extensions/authentication/index.md) for device data collection and 3DS challenges; link to the defining extension specification for custom Actions.}
 
 | Action type     | When emitted | Gated effect | Handler-specific requirements                                   |
 | --------------- | ------------ | ------------ | --------------------------------------------------------------- |

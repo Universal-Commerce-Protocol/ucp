@@ -363,7 +363,7 @@ ______________________________________________________________________
 
 ## Runtime Payment Authentication Actions
 
-This handler supports both Action types from the negotiated [Payment Authentication extension](http://ucp.dev/draft/specification/payment/extensions/authentication/index.md):
+This handler supports both Action types from the negotiated [Payment Authentication extension](https://ucp.dev/draft/specification/payment/extensions/authentication/index.md):
 
 | Action type                                     | Use                                                                |
 | ----------------------------------------------- | ------------------------------------------------------------------ |
@@ -453,6 +453,6 @@ ______________________________________________________________________
 
 ## References
 
-- **Pattern:** [Tokenization Payment Handler](http://ucp.dev/draft/specification/payment/guide/index.md)
+- **Pattern:** [Tokenization Payment Handler](https://ucp.dev/draft/specification/payment/guide/index.md)
 - **API Pattern:** [handlers/tokenization/openapi.json](/draft/handlers/tokenization/openapi.json)
 - **Identity Schema:** [schemas/common/types/payment_identity.json](/draft/schemas/common/types/payment_identity.json)

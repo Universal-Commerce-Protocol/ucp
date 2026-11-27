@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Cancellation Policy Extension defines the `dev.ucp.lodging.policy.cancellation` policy type on the core [`policies[]`](http://ucp.dev/draft/specification/overview/#policies) primitive for the lodging service. It adds pre-purchase, machine-readable cancellation terms to policies that carry this type, so platforms can answer questions like "Can I cancel this booking?", "Is it free cancellation or is there a fee?", and "Is this rate completely non-refundable?" without leaving to parse external policy pages.
+The Cancellation Policy Extension defines the `dev.ucp.lodging.policy.cancellation` policy type on the core [`policies[]`](https://ucp.dev/draft/specification/overview/#policies) primitive for the lodging service. It adds pre-purchase, machine-readable cancellation terms to policies that carry this type, so platforms can answer questions like "Can I cancel this booking?", "Is it free cancellation or is there a fee?", and "Is this rate completely non-refundable?" without leaving to parse external policy pages.
 
 **Key features:**
 
@@ -12,7 +12,7 @@ The Cancellation Policy Extension defines the `dev.ucp.lodging.policy.cancellati
 
 **Dependencies:**
 
-- The core `policies[]` primitive (see [Policies](http://ucp.dev/draft/specification/overview/#policies)).
+- The core `policies[]` primitive (see [Policies](https://ucp.dev/draft/specification/overview/#policies)).
 - Any parent capabilities this type extends: Booking (`dev.ucp.lodging.booking`).
 
 ## Discovery
@@ -65,7 +65,7 @@ The `refundability` field provides a standardized high-level classification:
 
 To signal that a booking or rate is non-refundable, a business **MUST** set `refundability` to `"non_refundable"`.
 
-When a business requires the booker to be shown that a booking is non-refundable prior to confirmation, it emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal to `dev.ucp.lodging.policy.cancellation`, targeting the item. The disclosure pairs with the governing cancellation policy at that node, as defined in [Presenting policies](http://ucp.dev/draft/specification/overview/#presenting-policies).
+When a business requires the booker to be shown that a booking is non-refundable prior to confirmation, it emits a `messages[]` warning with `presentation: "disclosure"` and `code` equal to `dev.ucp.lodging.policy.cancellation`, targeting the item. The disclosure pairs with the governing cancellation policy at that node, as defined in [Presenting policies](https://ucp.dev/draft/specification/overview/#presenting-policies).
 
 ### Human-readable descriptions
 
@@ -73,7 +73,7 @@ Because lodging cancellation rules frequently incorporate specific property loca
 
 ## Targeting and precedence
 
-Targeting and precedence are provided by the `policies[]` primitive and are not redefined here. In short: a policy with no `applies_to` is the response-wide default; a policy that targets specific room overrides will result in the narrowest same-type target winning. See [Targeting](http://ucp.dev/draft/specification/overview/#targeting) and [Precedence](http://ucp.dev/draft/specification/overview/#precedence).
+Targeting and precedence are provided by the `policies[]` primitive and are not redefined here. In short: a policy with no `applies_to` is the response-wide default; a policy that targets specific room overrides will result in the narrowest same-type target winning. See [Targeting](https://ucp.dev/draft/specification/overview/#targeting) and [Precedence](https://ucp.dev/draft/specification/overview/#precedence).
 
 For lodging bookings, a common example is when a business states a single default cancellation policy once, then adds targeted overrides only for specific exceptions (such as a non-refundable room rate or promotional upgrade).
 

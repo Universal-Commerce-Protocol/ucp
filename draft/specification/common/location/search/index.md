@@ -68,7 +68,7 @@ A Business **MAY** use `context`, `signals`, and IP-derived locality to influenc
 
 ### Rejection and Empty Results
 
-Requests that fail the Search request schema use the binding's invalid-request mechanism. The same mechanism carries the defined semantic errors for `distance`, `serves`, and unsupported filters; see [Spatial Relations](#spatial-relations) and [Search Filters](#search-filters). A well-formed relation or supported predicate that simply matches no Locations remains a successful empty business outcome (see [Empty Search](http://ucp.dev/draft/specification/common/location/#common-scenarios)).
+Requests that fail the Search request schema use the binding's invalid-request mechanism. The same mechanism carries the defined semantic errors for `distance`, `serves`, and unsupported filters; see [Spatial Relations](#spatial-relations) and [Search Filters](#search-filters). A well-formed relation or supported predicate that simply matches no Locations remains a successful empty business outcome (see [Empty Search](https://ucp.dev/draft/specification/common/location/#common-scenarios)).
 
 ## Spatial Relations
 
@@ -136,7 +136,7 @@ The standard `filters.hours` object requires `open_at`, an RFC 3339 instant expr
 
 A Platform selects `open_at` to represent the time relevant to the Buyer's intent. It can use its current time or choose another time, such as an expected arrival, pickup, or order-acceptance time. A Platform **MAY** round or adjust its selected time to the granularity appropriate to the interaction, but the value it sends identifies one specific instant.
 
-For each candidate Location, a Business **MUST** evaluate `open_at` exactly as supplied. It converts the instant to the local date, day of week, and time using the Location's authoritative `timezone`, then evaluates the effective schedule under [Operating Hours](http://ucp.dev/draft/specification/common/location/#operating-hours). The `Z` or numeric offset in `open_at` identifies the instant; it does not identify the Location's timezone.
+For each candidate Location, a Business **MUST** evaluate `open_at` exactly as supplied. It converts the instant to the local date, day of week, and time using the Location's authoritative `timezone`, then evaluates the effective schedule under [Operating Hours](https://ucp.dev/draft/specification/common/location/#operating-hours). The `Z` or numeric offset in `open_at` identifies the instant; it does not identify the Location's timezone.
 
 A Business **MUST** return a Location only when it can establish that the Location is open at `open_at`. If its schedule data is absent, invalid, outside the range for which it can evaluate authoritatively, or otherwise unusable, the Location does not match the filter. A Business **MUST NOT** round, shift, or otherwise reinterpret the supplied instant.
 
@@ -155,7 +155,7 @@ UCP defines an open reverse-DNS vocabulary for amenity identifiers. A Business *
 | `dev.ucp.amenity.shopping.curbside_pickup` | Retail Shopping    | Dedicated vehicle bays for order pickup without entering the building. |
 | `dev.ucp.amenity.shopping.in_store_pickup` | Retail Shopping    | Dedicated counter or area inside store for order pickup.               |
 
-Location responses use the shared [Amenity representation](http://ucp.dev/draft/specification/common/location/#amenity), which keeps custom identifiers presentable without assigning them standardized semantics.
+Location responses use the shared [Amenity representation](https://ucp.dev/draft/specification/common/location/#amenity), which keeps custom identifiers presentable without assigning them standardized semantics.
 
 A Platform supplies amenity filters as an array of identifiers. Matching uses exact whole-key equality; namespace prefixes carry no wildcard or inheritance semantics. A Business **MUST NOT** ignore a supplied identifier: a Location whose authoritative amenity set lacks any supplied key does not match. This includes identifiers the Business does not use; no diagnostic is required for an ordinary non-match. When `filters.amenities` is present, the Business **MUST** include every supplied identifier in each returned Location's `amenities` map. A Platform **MUST** reject a returned Location as non-conforming if it omits the map or any requested key, rather than accept a broadened or unverifiable result.
 
@@ -165,9 +165,9 @@ The standard `filters.items` value is a nonempty array of distinct item identifi
 
 A Location matches only when the Business can currently provide every referenced item at that Location. The Business evaluates each identifier independently against its current data when processing the request, and the per-item outcomes combine with AND. Evaluation is independent of the Location's operating hours and of any fulfillment method: `filters.hours` is a separate conjunctive predicate, and `filters.hours.open_at` does not change the availability evaluation instant, even when it represents a future arrival or pickup time.
 
-An identifier that is unknown, is currently unavailable, or cannot be evaluated at a candidate Location fails the filter for that Location. The Business **MUST NOT** ignore such an identifier to return broadened results; the candidate does not match. This is an ordinary non-match and requires no diagnostic (see [Empty Search](http://ucp.dev/draft/specification/common/location/#common-scenarios)).
+An identifier that is unknown, is currently unavailable, or cannot be evaluated at a candidate Location fails the filter for that Location. The Business **MUST NOT** ignore such an identifier to return broadened results; the candidate does not match. This is an ordinary non-match and requires no diagnostic (see [Empty Search](https://ucp.dev/draft/specification/common/location/#common-scenarios)).
 
-A match is a coarse, provisional assertion, and the response intentionally remains Location-shaped without echoing per-item facts. The result does not evaluate Platform-selected quantities, prove that the referenced items can be transacted together as one basket, select or identify a fulfillment method, reserve any item, or predict availability at a future instant. The Business **MUST** revalidate transaction-specific availability, quantities, methods, and terms later in the commerce flow. See [Relationship to Other Capabilities](http://ucp.dev/draft/specification/common/location/#relationship-to-other-capabilities).
+A match is a coarse, provisional assertion, and the response intentionally remains Location-shaped without echoing per-item facts. The result does not evaluate Platform-selected quantities, prove that the referenced items can be transacted together as one basket, select or identify a fulfillment method, reserve any item, or predict availability at a future instant. The Business **MUST** revalidate transaction-specific availability, quantities, methods, and terms later in the commerce flow. See [Relationship to Other Capabilities](https://ucp.dev/draft/specification/common/location/#relationship-to-other-capabilities).
 
 Combining `filters.items` with a pickup amenity (for example, `dev.ucp.amenity.shopping.in_store_pickup`) matches Locations where every referenced item is currently available and pickup is generally supported. The two predicates remain independent: the combination does not establish that the referenced items are available through pickup. Exact one-shot, method-qualified store finding is outside the base Location capability and requires an applicable domain capability that can correlate item availability with a fulfillment method.
 
@@ -277,7 +277,7 @@ The following requests and responses are transport-neutral UCP payloads.
 }
 ```
 
-The explicit `serves.point` is the authoritative service target; the coarse `context` hints only shape ranking and localization. At the supplied instant, it is Monday at `10:00` in `America/Los_Angeles`, within the returned interval. See [Operating Hours](http://ucp.dev/draft/specification/common/location/#operating-hours) for complete schedule evaluation rules. The custom amenity remains presentable through its description without assigning the identifier any standardized UCP meaning.
+The explicit `serves.point` is the authoritative service target; the coarse `context` hints only shape ranking and localization. At the supplied instant, it is Monday at `10:00` in `America/Los_Angeles`, within the returned interval. See [Operating Hours](https://ucp.dev/draft/specification/common/location/#operating-hours) for complete schedule evaluation rules. The custom amenity remains presentable through its description without assigning the identifier any standardized UCP meaning.
 
 ### Locations where every requested item is available within a distance
 
@@ -337,5 +337,5 @@ Each returned Location satisfies the `distance` relation and the `items` availab
 
 ## Transport Bindings
 
-- [REST Binding](http://ucp.dev/draft/specification/common/location/rest/#post-locationssearch): `POST /locations/search`
-- [MCP Binding](http://ucp.dev/draft/specification/common/location/mcp/#search_locations): `search_locations` tool
+- [REST Binding](https://ucp.dev/draft/specification/common/location/rest/#post-locationssearch): `POST /locations/search`
+- [MCP Binding](https://ucp.dev/draft/specification/common/location/mcp/#search_locations): `search_locations` tool

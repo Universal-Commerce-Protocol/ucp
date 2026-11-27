@@ -82,7 +82,7 @@ Add a tip for your courier
 ### Fulfillment Changes & Checkout Handoff
 
 - **Fulfillment switch**: When a fulfillment switch (e.g., `delivery` → `pickup`) replaces `tip.options[]` and invalidates a prior `selected_option_id`, the Business **MUST** clear `selected_option_id` (returning `tip` to `Unset` state) and **SHOULD** surface a `notice` warning.
-- **Checkout handoff (`continue_url`)**: When a Platform hands off a checkout session to the Business UI via [`continue_url`](http://ucp.dev/draft/specification/food/checkout/#continue-url) before a tip has been selected, it **SHOULD** label the displayed total as pre-tip so the buyer expects gratuity selection on the Business UI.
+- **Checkout handoff (`continue_url`)**: When a Platform hands off a checkout session to the Business UI via [`continue_url`](https://ucp.dev/draft/specification/food/checkout/#continue-url) before a tip has been selected, it **SHOULD** label the displayed total as pre-tip so the buyer expects gratuity selection on the Business UI.
 
 ## Guidelines
 

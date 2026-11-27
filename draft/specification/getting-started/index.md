@@ -205,7 +205,7 @@ app.post('/checkout-sessions', (req, res) => {
 
 Note
 
-If the required UCP headers are missing, FastAPI (Python) will automatically return an **HTTP 422 Unprocessable Entity** error due to its built-in validation. In our Express (Node.js) implementation, we manually return an **HTTP 400 Bad Request** error. For simplicity, this quickstart returns plain JSON errors (such as `{"error": "..."}` or FastAPI's `{"detail": "..."}`) for missing headers, validation failures, and `404` responses; production servers must return the specification's standard error format (see [Error Responses](http://ucp.dev/draft/specification/shopping/checkout/rest/#error-responses) and [Core Specification — Error Handling](http://ucp.dev/draft/specification/overview/#error-handling)).
+If the required UCP headers are missing, FastAPI (Python) will automatically return an **HTTP 422 Unprocessable Entity** error due to its built-in validation. In our Express (Node.js) implementation, we manually return an **HTTP 400 Bad Request** error. For simplicity, this quickstart returns plain JSON errors (such as `{"error": "..."}` or FastAPI's `{"detail": "..."}`) for missing headers, validation failures, and `404` responses; production servers must return the specification's standard error format (see [Error Responses](https://ucp.dev/draft/specification/shopping/checkout/rest/#error-responses) and [Core Specification — Error Handling](https://ucp.dev/draft/specification/overview/#error-handling)).
 
 ### 3. Business Logic (Process Items & Calculate Totals)
 
@@ -393,7 +393,7 @@ In production, a business uses the `UCP-Agent` header to resolve the platform's 
 
 ### 5. Get Checkout Endpoint
 
-Implement the retrieval route so the platform can fetch the checkout state. Per [UCP Header Requirements](http://ucp.dev/draft/specification/shopping/checkout/rest/#specific-header-requirements), UCP requires the `UCP-Agent` header on all requests (not just mutating operations like create, update, or complete).
+Implement the retrieval route so the platform can fetch the checkout state. Per [UCP Header Requirements](https://ucp.dev/draft/specification/shopping/checkout/rest/#specific-header-requirements), UCP requires the `UCP-Agent` header on all requests (not just mutating operations like create, update, or complete).
 
 ```python
 # main.py

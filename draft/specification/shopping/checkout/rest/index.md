@@ -1,6 +1,6 @@
 # Checkout Capability - REST Binding
 
-This document specifies the REST binding for the [Checkout Capability](http://ucp.dev/draft/specification/shopping/checkout/index.md).
+This document specifies the REST binding for the [Checkout Capability](https://ucp.dev/draft/specification/shopping/checkout/index.md).
 
 ## Protocol Fundamentals
 
@@ -54,13 +54,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ## Operations
 
-| Operation                                                                                    | Method | Endpoint                           | Description                |
-| -------------------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
-| [Create Checkout](http://ucp.dev/draft/specification/shopping/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](http://ucp.dev/draft/specification/shopping/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](http://ucp.dev/draft/specification/shopping/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](http://ucp.dev/draft/specification/shopping/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](http://ucp.dev/draft/specification/shopping/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| Operation                                                                                     | Method | Endpoint                           | Description                |
+| --------------------------------------------------------------------------------------------- | ------ | ---------------------------------- | -------------------------- |
+| [Create Checkout](https://ucp.dev/draft/specification/shopping/checkout/#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
+| [Get Checkout](https://ucp.dev/draft/specification/shopping/checkout/#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
+| [Update Checkout](https://ucp.dev/draft/specification/shopping/checkout/#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
+| [Complete Checkout](https://ucp.dev/draft/specification/shopping/checkout/#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
+| [Cancel Checkout](https://ucp.dev/draft/specification/shopping/checkout/#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
 
 ## Examples
 
@@ -195,7 +195,7 @@ Content-Type: application/json
 
 ### Update Checkout
 
-Update Checkout is a full replacement operation. The Platform **MUST** send the entire Checkout resource, including any data updates to write-only fields; the supplied resource replaces the existing Checkout session state. The Platform **MUST NOT** start a new Update Checkout operation while the Checkout is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](http://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update Checkout request in that state, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message.
+Update Checkout is a full replacement operation. The Platform **MUST** send the entire Checkout resource, including any data updates to write-only fields; the supplied resource replaces the existing Checkout session state. The Platform **MUST NOT** start a new Update Checkout operation while the Checkout is `complete_in_progress`. Duplicate requests remain subject to [Replay Protection](https://ucp.dev/draft/specification/signatures/#replay-protection). If the Business receives a new Update Checkout request in that state, it **MUST** leave the Checkout unchanged and return the current Checkout with a recoverable error Message.
 
 #### Update Buyer Info
 
@@ -711,7 +711,7 @@ Content-Type: application/json
 
 If businesses have specific logic to enforce field existence in `buyer` and addresses (i.e. `fulfillment_address`, `billing_address`), this is the right place to set these expectations via `messages`.
 
-The response is the Checkout object; the example below shows the synchronous `completed` case. See core [Complete Checkout](http://ucp.dev/draft/specification/shopping/checkout/#complete-checkout) for status and `order` semantics.
+The response is the Checkout object; the example below shows the synchronous `completed` case. See core [Complete Checkout](https://ucp.dev/draft/specification/shopping/checkout/#complete-checkout) for status and `order` semantics.
 
 ```json
 POST /checkout-sessions/{id}/complete
@@ -1235,7 +1235,7 @@ The following headers are defined for the HTTP binding and apply to all operatio
 - **Idempotency-Key**: Operations that modify state **SHOULD** support idempotency. When provided, the server **MUST**:
   1. Store the key with the operation result for at least 24 hours.
   1. Return the cached result for duplicate keys whose request body matches the original.
-  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](http://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
+  1. Return `409 Conflict` if the key is reused with a mismatched body. See [Message Signatures — Idempotency Key Requirements](https://ucp.dev/draft/specification/signatures/#replay-protection) for the full payload-matching contract.
 
 ## Protocol Mechanics
 
@@ -1259,7 +1259,7 @@ UCP uses standard HTTP status codes to indicate the success or failure of an API
 
 ### Error Responses
 
-See the [Core Specification](http://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
+See the [Core Specification](https://ucp.dev/draft/specification/overview/#error-handling) for the complete error code registry and transport binding examples.
 
 - **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429, 503) with JSON body containing `code` and `content`.
 - **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
@@ -1326,7 +1326,7 @@ For `create_checkout`, when all items unavailable and no checkout can be created
 
 ## Message Signing
 
-Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](http://ucp.dev/draft/specification/signatures/index.md) specification.
+Platforms **MAY** choose among authentication mechanisms (API keys, OAuth, mTLS, HTTP Message Signatures). When using HTTP Message Signatures, checkout operations follow the [Message Signatures](https://ucp.dev/draft/specification/signatures/index.md) specification.
 
 ### Request Signing
 
@@ -1355,7 +1355,7 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 {"line_items":[{"item":{"id":"item_123"},"quantity":2}]}
 ```
 
-See [Message Signatures - REST Request Signing](http://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
+See [Message Signatures - REST Request Signing](https://ucp.dev/draft/specification/signatures/#rest-request-signing) for the complete signing algorithm.
 
 ### Response Signing
 
@@ -1379,7 +1379,7 @@ Signature: sig1=:6G4i8TS6oUkGrx8KnCFUpsSPwd74...:
 {"id":"chk_123","status":"completed","order":{"id":"ord_456"}}
 ```
 
-See [Message Signatures - REST Response Signing](http://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
+See [Message Signatures - REST Response Signing](https://ucp.dev/draft/specification/signatures/#rest-response-signing) for the complete signing algorithm.
 
 ## Security Considerations
 
@@ -1389,7 +1389,7 @@ Authentication is optional and depends on business requirements. When authentica
 
 1. **Open API**: No authentication required for public operations.
 1. **API Keys**: Via `X-API-Key` header.
-1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the platform for agent-authenticated access, or both platform and user for user-authenticated access (see [Identity Linking](http://ucp.dev/draft/specification/common/identity-linking/index.md)).
+1. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the platform for agent-authenticated access, or both platform and user for user-authenticated access (see [Identity Linking](https://ucp.dev/draft/specification/common/identity-linking/index.md)).
 1. **Mutual TLS**: For high-security environments.
 1. **HTTP Message Signatures**: Per [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421) (see [Message Signing](#message-signing) above).
 
