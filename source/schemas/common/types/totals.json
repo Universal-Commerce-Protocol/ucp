@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/common/types/totals.json",
   "title": "Totals",
-  "description": "Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.",
+  "description": "Pricing breakdown provided by the business. MUST contain exactly one subtotal and one total entry. The total entry amount MUST be greater than or equal to zero (the amount the buyer pays). Detail types (tax, fee, discount, fulfillment) may appear multiple times for itemization. Platforms MUST render all entries in order using display_text and amount.",
   "type": "array",
   "items": {
     "allOf": [
@@ -44,6 +44,19 @@
           "required": ["type"]
         },
         "then": { "required": ["display_text"] }
+      },
+      {
+        "if": {
+          "properties": {
+            "type": { "const": "total" }
+          },
+          "required": ["type"]
+        },
+        "then": {
+          "properties": {
+            "amount": { "minimum": 0 }
+          }
+        }
       }
     ]
   },
