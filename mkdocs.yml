@@ -98,6 +98,8 @@ nav:
                   specification/shopping/extensions/return-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
+              - B2B Catalog (Working Draft):
+                  specification/shopping/extensions/b2b-catalog.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -607,6 +609,16 @@ plugins:
               results in; the extension also defines the
               dev.ucp.shopping.policy.subscription policy type, its required
               buyer disclosure, and the Platform obligations that come with it.
+          - specification/shopping/extensions/b2b-catalog.md: >-
+              B2B Catalog Extension (Working Draft for #1110), adding to
+              catalog variants and products the facts a procurement agent
+              needs to shortlist and verify a business-to-business supplier:
+              minimum order quantity and quantity brackets under Incoterms,
+              lead time and capacity, supplier type, certifications with a
+              verification level and evidence pointer, and product and
+              variant attributes in the #401 shape with a source pointer
+              (document copy hash, last-checked date, additional sources),
+              plus matching search filters.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
