@@ -590,6 +590,78 @@ def test_required_anyof_coverage() -> None:
   )
 
 
+def test_nested_allof_coverage() -> None:
+  """Required fields and child schemas survive nested allOf composition."""
+  schema = {
+    "required": ["child"],
+    "properties": {
+      "child": {"type": "object", "required": ["id"]},
+    },
+    "anyOf": [{"required": ["line_items"]}, {"required": ["cart_id"]}],
+  }
+  for depth in range(3):
+    complete = {"child": {"id": "c1"}, "cart_id": "cart_1"}
+    for name, example, expected in (
+      ("complete", complete, True),
+      ("missing_child", {"cart_id": "cart_1"}, False),
+      ("missing_child_id", {"child": {}, "cart_id": "cart_1"}, False),
+      ("missing_alternative", {"child": {"id": "c1"}}, False),
+      ("elided_child", {"child": "...", "cart_id": "cart_1"}, True),
+    ):
+      errors = v.check_coverage(example, schema)
+      _check(
+        f"nested_allof_coverage[{depth}/{name}]",
+        bool(errors) is not expected,
+        f"got {errors!r}",
+      )
+    schema = {"allOf": [schema]}
+
+  _check(
+    "nested_allof_required_only",
+    bool(v.check_coverage({}, {"allOf": [{"required": ["id"]}]})),
+  )
+
+
+def test_nested_allof_scaffold_coverage() -> None:
+  """Scaffolds cannot hide missing inherited fields in a real composition."""
+  if not _has_ucp_schema():
+    _check("nested_allof_scaffold_coverage", False, "ucp-schema not on PATH")
+    return
+  seed = v.load_scaffold(
+    "shopping/purchase_options", "response", "get_product", _SCAFFOLDS_DIR
+  )
+  for field in (None, "id", "title", "price_range", "variants"):
+    payload = json.loads(json.dumps(seed))
+    if field:
+      del payload["product"][field]
+    result = _process(
+      "<!-- ucp:example schema=shopping/purchase_options "
+      "def=get_product_response op=get_product -->\n"
+      f"```json\n{json.dumps(payload)}\n```\n"
+    )
+    _check(
+      f"nested_allof_scaffold[{field or 'complete'}]",
+      result.status == "ok"
+      if field is None
+      else result.status == "fail"
+      and f'coverage: $.product: missing required field "{field}"'
+      in result.message,
+      f"got {result.status}: {result.message}",
+    )
+
+  seed["product"]["title"] = "..."
+  result = _process(
+    "<!-- ucp:example schema=shopping/purchase_options "
+    "def=get_product_response op=get_product -->\n"
+    f"```json\n{json.dumps(seed)}\n```\n"
+  )
+  _check(
+    "nested_allof_scaffold_elided_field",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+
 # -----------------------------------------------------------
 # process_block: integration tests requiring ucp-schema
 # -----------------------------------------------------------
@@ -1407,6 +1479,8 @@ def main() -> int:
   test_reads_are_utf8()
   test_missing_binary_says_how_to_install()
   test_required_anyof_coverage()
+  test_nested_allof_coverage()
+  test_nested_allof_scaffold_coverage()
   test_scaffold_resolution()
   test_jsonpath_quoted_keys()
   test_pointer_escaping()
