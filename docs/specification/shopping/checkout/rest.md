@@ -1471,7 +1471,8 @@ authentication is required, the REST transport **MAY** use:
 
 1. **Open API**: No authentication required for public operations.
 2. **API Keys**: Via `X-API-Key` header.
-3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header. Identifies the
+3. **OAuth 2.0**: Via the `Authorization` header, as `Bearer {token}` or
+   `DPoP {token}` for sender-constrained tokens. Identifies the
    platform for agent-authenticated access, or both platform and user for
    user-authenticated access (see [Identity Linking](../../common/identity-linking/index.md)).
 4. **Mutual TLS**: For high-security environments.
