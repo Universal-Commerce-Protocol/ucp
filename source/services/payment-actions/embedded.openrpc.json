@@ -35,6 +35,7 @@
           "oneOf": [
             {
               "type": "object",
+	      	  "maxProperties": 0,
               "description": "Empty acknowledgement confirming acceptance of the requested Payment Authentication extension version."
             },
             {
