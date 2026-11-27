@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/protocol_error.json",
+  "title": "Protocol Error",
+  "description": "Body of a non-2xx REST response. Optional; when present it uses this shape. Business outcomes on HTTP 200/201 use error_response.json instead.",
+  "type": "object",
+  "required": ["code", "content"],
+  "properties": {
+    "code": {
+      "$ref": "error_code.json"
+    },
+    "content": {
+      "type": "string",
+      "description": "Human-readable description of the error."
+    },
+    "continue_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for buyer handoff or session recovery."
+    }
+  },
+  "examples": [
+    {
+      "code": "profile_unreachable",
+      "content": "Unable to fetch agent profile: connection timeout",
+      "continue_url": "https://merchant.com/cart"
+    }
+  ]
+}
