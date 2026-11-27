@@ -49,10 +49,11 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       github.repository == 'Universal-Commerce-Protocol/ucp'
     permissions:
+      # Uploading the lychee report artifact needs no actions
+      # permission: upload-artifact uses the runner's internal token,
+      # not GITHUB_TOKEN, so the third-party step only ever sees a
+      # read-only token.
       contents: read
-      # Uploading the lychee report artifact. The link-checking step never
-      # sees issues: write; that stays with the report job below.
-      actions: write
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
@@ -89,8 +90,10 @@ jobs:
         if: >-
           steps.lychee.outputs.exit_code != '0' &&
           steps.lychee.outputs.exit_code != '2'
+        env:
+          EXIT_CODE: ${{ steps.lychee.outputs.exit_code }}
         run: |
-          echo "::error::lychee exited with code ${{ steps.lychee.outputs.exit_code }} (expected 0 or 2); see the check job log."
+          echo "::error::lychee exited with code $EXIT_CODE (expected 0 or 2); see the check job log."
           exit 1
 
   report:
@@ -98,8 +101,8 @@ jobs:
     # Only file when lychee actually found broken links (exit code 2).
     if: needs.check.outputs.exit_code == '2'
     permissions:
-      # Downloading the lychee report artifact.
-      actions: read
+      # Same-run artifact downloads need no actions permission; only
+      # filing and commenting on issues does.
       issues: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -110,9 +113,12 @@ jobs:
           name: lychee-report
           path: lychee-report
 
+      # No checkout in this job, so gh gets its repository context from
+      # GH_REPO instead of the working tree.
       - name: File issue for broken links
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           title="Weekly link check: broken links in docs"
