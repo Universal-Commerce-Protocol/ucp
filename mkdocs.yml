@@ -98,6 +98,8 @@ nav:
                   specification/shopping/extensions/return-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
+              - Pack:
+                  specification/shopping/extensions/pack.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -607,6 +609,11 @@ plugins:
               results in; the extension also defines the
               dev.ucp.shopping.policy.subscription policy type, its required
               buyer disclosure, and the Platform obligations that come with it.
+          - specification/shopping/extensions/pack.md: >-
+              Pack Extension, letting a business state the declared content of
+              the physical item a catalog variant sells: net content, drained
+              weight, and the count of identical inner units, as a
+              response-only pack object on Catalog Search and Lookup variants.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data

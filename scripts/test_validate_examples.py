@@ -873,6 +873,48 @@ def test_extension_validation() -> None:
   )
 
 
+def test_catalog_pack_response() -> None:
+  """Check sale basis and pack contents on complete catalog responses."""
+  if not _has_ucp_schema():
+    _check("catalog_pack_response", False, "ucp-schema binary not on PATH")
+    return
+  schema = "shopping/pack"
+  unit = {"unit": "LBR", "display_text": "lb"}
+  each = {"unit": "C62", "display_text": "case"}
+  net = {"unit": "GRM", "display_text": "g", "value": 100}
+  case = {"contained": {"count": 6, "net_content": net}}
+  scenarios = (
+    ("implicit_each", {"pack": case}, True),
+    ("explicit_each", {"quantity_unit": each, "pack": case}, True),
+    ("measured_without_pack", {"quantity_unit": unit}, True),
+    ("measured_with_pack", {"quantity_unit": unit, "pack": case}, False),
+    ("empty", {"pack": {}}, False),
+    ("two_levels", {"pack": {**case, "net_content": net}}, False),
+    ("missing_count", {"pack": {"contained": {"net_content": net}}}, False),
+  )
+  for op in ("search", "lookup", "get_product"):
+    fixture = "lookup" if op == "search" else op
+    response = v.load_scaffold(schema, "response", fixture, _SCAFFOLDS_DIR)
+    assert response is not None
+    if op == "get_product":
+      product = response["product"]
+    else:
+      product = response["products"][0]
+    variant = product["variants"][0]
+    if op == "search":
+      del variant["inputs"]
+      capabilities = response["ucp"]["capabilities"]
+      capabilities["dev.ucp.shopping.catalog.search"] = capabilities.pop(
+        "dev.ucp.shopping.catalog.lookup"
+      )
+    for label, fields, expected in scenarios:
+      product["variants"] = [{**variant, **fields}]
+      valid, errors = v.validate_payload(
+        response, schema, "response", op, _SCHEMA_BASE
+      )
+      _check(f"pack_{op}_{label}", valid == expected, str(errors))
+
+
 def test_checkout_item_source_process_block() -> None:
   """Authored checkout create examples provide an item source before merge."""
   if not _has_ucp_schema():
@@ -1358,6 +1400,7 @@ def main() -> int:
   test_parallel_validation_keeps_order_and_single_resolve()
   test_process_block_integration()
   test_extension_validation()
+  test_catalog_pack_response()
   test_checkout_item_source_process_block()
   test_checkout_item_source()
   return _report()

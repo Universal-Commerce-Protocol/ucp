@@ -216,3 +216,5 @@ mpegurl
 usdz
 vnd
 webm
+# GS1 product data standards
+GDSN
