@@ -79,12 +79,14 @@ Zapatillas
 adyen
 agentic
 amortiguación
+aread
 atok
 backorder
 barcodes
 cartebancaire
 checkout
 cimd
+codegen
 credentialization
 credentialless
 datamodel
@@ -119,6 +121,7 @@ midsole
 millilitre
 misparsed
 mkdocs
+modelcontextprotocol
 mtok
 openapi
 openrpc

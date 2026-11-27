@@ -1,0 +1,59 @@
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {
+      "dev.ucp.shopping": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "rest",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/rest.openapi.json"
+        },
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/shopping/mcp.openrpc.json"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.shopping.catalog.search": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/catalog/search",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/catalog_search.json"
+        }
+      ],
+      "dev.ucp.shopping.cart": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/cart",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/cart.json"
+        }
+      ],
+      "dev.ucp.shopping.checkout": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/shopping/checkout",
+          "schema": "https://ucp.dev/{{ ucp_version }}/schemas/shopping/checkout.json"
+        }
+      ]
+    },
+    "payment_handlers": {
+      "com.example.mock_pay": [
+        {
+          "id": "mock_pay",
+          "version": "{{ ucp_version }}",
+          "spec": "https://example.com/mock_pay",
+          "schema": "https://example.com/mock_pay/schema.json",
+          "available_instruments": [
+            {
+              "type": "mock_instrument"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
