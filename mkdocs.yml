@@ -116,6 +116,7 @@ nav:
           - Extensions:
               - Fulfillment: specification/food/extensions/fulfillment.md
               - Tip: specification/food/extensions/tip.md
+              - Discounts: specification/food/extensions/discount.md
       - Payment:
           - Extensions:
               - AP2 Mandates Extension: specification/payment/extensions/ap2-mandates.md
@@ -648,6 +649,11 @@ plugins:
               Food Tip Extension, defining Business-suggested tip options,
               buyer-selected preset or custom gratuity amounts, and resolution
               into checkout totals for online food orders.
+          - specification/food/extensions/discount.md: >-
+              Food Discount Extension, covering discount code discovery, applied
+              discounts, allocation method stacking orders, rejected code
+              message handling, and automatic or provisional eligibility
+              promotions.
         Payment:
           - specification/payment/extensions/ap2-mandates.md: >-
               AP2 Mandates Extension, detailing secure, cryptographically bound
