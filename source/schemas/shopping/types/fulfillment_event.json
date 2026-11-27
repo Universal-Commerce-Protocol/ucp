@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_event.json",
   "title": "Fulfillment Event",
-  "description": "Append-only fulfillment event representing an actual shipment. References line items by ID.",
+  "description": "Append-only event representing a fact in physical fulfillment. References line items and quantities by ID.",
   "type": "object",
   "required": [
     "id",
@@ -22,7 +22,7 @@
     },
     "type": {
       "type": "string",
-      "description": "Fulfillment event type. Common values include: processing (preparing to ship), shipped (handed to carrier), in_transit (in delivery network), delivered (received by buyer), failed_attempt (delivery attempt failed), canceled (fulfillment canceled), undeliverable (cannot be delivered), returned_to_sender (returned to merchant)."
+      "description": "Open fulfillment event type. Well-known values: processing (preparing goods before carrier or delivery-network handoff), shipped (goods have left the Business's control, normally through handoff; no movement scan required), in_transit (carrier or delivery network has confirmed movement), delivered (delivered to the buyer or agreed location), canceled (this fulfillment flow was canceled and is not expected to complete; not necessarily the entire Order). Businesses MUST use the corresponding well-known value when its semantics match. Businesses MAY use additional values for other semantics, with a non-empty, consumer-understandable description."
     },
     "line_items": {
       "type": "array",
@@ -42,7 +42,7 @@
           }
         }
       },
-      "description": "Which line items and quantities are fulfilled in this event."
+      "description": "Line items and quantities to which this fulfillment fact applies. Multiple events can describe successive stages for the same quantities; event quantities MUST NOT be summed to derive the line item's fulfilled quantity."
     },
     "tracking_number": {
       "type": "string",
@@ -59,7 +59,31 @@
     },
     "description": {
       "type": "string",
-      "description": "Human-readable description of the shipment status or delivery information (e.g., 'Delivered to front door', 'Out for delivery')."
+      "minLength": 1,
+      "description": "Consumer-understandable description of the fulfillment event (e.g., 'Delivered to front door'). MUST be present and non-empty for a type outside the well-known values. Optional for well-known values; additional context MUST NOT change their normative meaning. Platforms MUST use this description as the consumer-facing fallback when presenting an unknown type and treat it as untrusted Business-provided text."
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "not": {
+              "enum": [
+                "processing",
+                "shipped",
+                "in_transit",
+                "delivered",
+                "canceled"
+              ]
+            }
+          }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "required": ["description"]
+      }
+    }
+  ]
 }
