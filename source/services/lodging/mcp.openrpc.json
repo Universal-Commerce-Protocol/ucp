@@ -63,6 +63,7 @@
   "methods": [
     {
       "name": "create_booking_session",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false},
       "summary": "Create a booking session",
       "description": "Create a new booking session.",
       "params": [
@@ -90,6 +91,7 @@
     },
     {
       "name": "get_booking_session",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": false},
       "summary": "Get booking session",
       "params": [
         {
@@ -116,6 +118,7 @@
     },
     {
       "name": "update_booking_session",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false},
       "summary": "Update booking session",
       "params": [
         {
@@ -149,6 +152,7 @@
     },
     {
       "name": "complete_booking_session",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": true, "idempotentHint": false, "openWorldHint": true},
       "summary": "Complete booking session and confirm stay reservation",
       "params": [
         {
@@ -192,6 +196,7 @@
     },
     {
       "name": "cancel_booking_session",
+      "x-ucp-mcp-annotations": {"readOnlyHint": false, "destructiveHint": true, "idempotentHint": true, "openWorldHint": false},
       "summary": "Cancel booking session",
       "params": [
         {

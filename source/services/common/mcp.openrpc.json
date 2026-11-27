@@ -49,6 +49,7 @@
   "methods": [
     {
       "name": "search_locations",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": true},
       "summary": "Search for physical locations",
       "description": "Search for physical locations using query text, explicit spatial relations, and structured filters.",
       "params": [
@@ -70,6 +71,7 @@
     },
     {
       "name": "lookup_locations",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": true},
       "summary": "Batch lookup locations by identifier",
       "description": "Batch lookup of physical Locations by supported identifiers, optionally refined by explicit spatial relations and structured filters. Returns matching Locations.",
       "params": [
@@ -91,6 +93,7 @@
     },
     {
       "name": "ask_business",
+      "x-ucp-mcp-annotations": {"readOnlyHint": true, "openWorldHint": true},
       "summary": "Ask the business a question",
       "description": "Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. Returns a text answer with related links; pass resource identifiers to ground the question in Business resources across commerce domains, such as a product, location, cart, order, or booking.",
       "params": [
