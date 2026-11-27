@@ -115,6 +115,13 @@
       "$ref": "types/attribution.json",
       "description": "Snapshot of the attribution associated with the originating checkout. Read-only on the order.",
       "ucp_request": "omit"
+    },
+    "platform_reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Opaque platform-supplied correlation reference carried over verbatim from the originating checkout. When the originating checkout carried one, present on every order event webhook and on Get Order responses to the originating platform; absent otherwise, and never synthesized by the business. Immutable for the lifetime of the order. Read-only on the order.",
+      "ucp_request": "omit"
     }
   }
 }
