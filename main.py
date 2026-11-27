@@ -70,6 +70,7 @@ import re
 import subprocess
 from typing import Any
 import unicodedata
+from urllib.parse import unquote
 
 # --- CONFIGURATION ---
 # Base directories for schema resolution.
@@ -738,7 +739,11 @@ def _load_json(path: str | Path | None) -> dict[str, Any] | None:
 
 
 def _resolve_json_pointer(pointer: str, data: Any) -> Any | None:
-  """Navigate to a JSON pointer path (e.g., '#/$defs/foo' or '#/components/x').
+  """Navigate a JSON Pointer URI fragment (RFC 6901, sections 4 and 6).
+
+  Decode UTF-8 percent escapes before splitting and then decode ~1 and ~0
+  within each token. Array tokens must be unsigned ASCII indices without
+  leading zeros; unresolved or invalid pointers return None.
 
   Args:
   ----
@@ -750,16 +755,23 @@ def _resolve_json_pointer(pointer: str, data: Any) -> Any | None:
     The value at the pointer path, or None if not found.
 
   """
-  if pointer == "#":
+  if not pointer.startswith("#"):
+    return None
+  try:
+    pointer = unquote(pointer[1:], encoding="utf-8", errors="strict")
+  except UnicodeDecodeError:
+    return None
+  if pointer == "":
     return data
-  if not pointer.startswith("#/"):
+  if not pointer.startswith("/") or re.search(r"~(?![01])", pointer):
     return None
 
   current = data
-  for part in pointer[2:].split("/"):
+  for part in pointer[1:].split("/"):
+    part = part.replace("~1", "/").replace("~0", "~")
     if isinstance(current, dict) and part in current:
       current = current[part]
-    elif isinstance(current, list):
+    elif isinstance(current, list) and re.fullmatch(r"0|[1-9][0-9]*", part):
       try:
         current = current[int(part)]
       except (ValueError, IndexError):
