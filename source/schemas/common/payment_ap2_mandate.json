@@ -3,7 +3,7 @@
   "$id": "https://ucp.dev/schemas/common/payment_ap2_mandate.json",
   "name": "dev.ucp.common.payment.ap2_mandate",
   "title": "Payment AP2 Mandate Extension",
-  "description": "Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol. Uses embedded signature model with ap2 namespace.",
+  "description": "Extends Checkout with cryptographic mandate support for non-repudiable authorization per the AP2 protocol, and optionally extends Order with signed, mandate-bound receipts for money movements after checkout. Uses embedded signature model with ap2 namespace.",
   "$defs": {
     "merchant_authorization": {
       "title": "Merchant Authorization",
@@ -40,6 +40,227 @@
             "update": "omit",
             "complete": "required"
           }
+        }
+      }
+    },
+    "receipt": {
+      "title": "Order Receipt",
+      "description": "Compact JWS (RFC 7515) signed by the business over one money movement on an AP2-negotiated Order. Format: `<base64url-header>.<base64url-payload>.<base64url-signature>`. The header MUST contain 'alg' (per the AP2 extension's algorithm rule), 'kid' (resolving in the issuing business's `keys[]`), and 'typ' set to `ucp-ap2-receipt+jwt`. The payload is the JCS-canonicalized (RFC 8785) Receipt Payload.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^sha-256:[A-Za-z0-9_-]{43}$",
+      "title": "Receipt Hash",
+      "description": "`sha-256:` followed by the unpadded base64url SHA-256 digest of the referenced artifact's exact UTF-8 bytes."
+    },
+    "receipt_event": {
+      "title": "Receipt Event",
+      "description": "The single money movement a receipt attests to.",
+      "type": "object",
+      "required": [
+        "type",
+        "status",
+        "amount",
+        "currency",
+        "occurred_at"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "authorization",
+            "authorization_adjustment",
+            "capture",
+            "capture_reversal",
+            "release",
+            "refund",
+            "refund_reversal"
+          ],
+          "description": "Kind of money movement. `authorization` and `authorization_adjustment` add to `authorized`; `release` subtracts from it; `capture` adds to `captured`; `capture_reversal` subtracts from it; `refund` adds to `refunded`; `refund_reversal` subtracts from it."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "succeeded",
+            "failed"
+          ],
+          "description": "Outcome of the movement. Only `succeeded` events change the running totals."
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Amount of this movement in minor units of `currency`. Always non-negative; `type` gives the direction."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code. MUST match the Order currency."
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the movement occurred (RFC 3339). Receipts are ordered by `seq`, not by this time."
+        },
+        "seller_id": {
+          "type": "string",
+          "description": "Seller of record the movement applies to, when seller attribution is active on the Order."
+        },
+        "network_ref": {
+          "type": "string",
+          "description": "Network or acquirer reference for the movement, e.g. the Acquirer Reference Number (ARN) of a refund. MAY first appear on a follow-up receipt with the same `type` and `ref.processing_entry_id`, which does not change the totals, and MAY never be present, e.g. for a refund the processor settles as a reversal."
+        },
+        "ref": {
+          "type": "object",
+          "description": "Links the movement to other Order data.",
+          "properties": {
+            "adjustment_id": {
+              "type": "string",
+              "description": "`id` of the Order `adjustments[]` entry this movement settles (e.g. a refund)."
+            },
+            "processing_entry_id": {
+              "type": "string",
+              "description": "Identifier of the corresponding payment processing entry. A later `succeeded` receipt with the same `type` and `processing_entry_id` is a follow-up and does not change the totals again."
+            }
+          }
+        }
+      }
+    },
+    "receipt_totals": {
+      "title": "Receipt Totals",
+      "description": "Running totals for the receipt's chain after this event, in minor units. Platforms recompute these from the succeeded events they hold.",
+      "type": "object",
+      "required": [
+        "mandated",
+        "authorized",
+        "captured",
+        "refunded"
+      ],
+      "properties": {
+        "mandated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "`payment_amount` of the closed Payment Mandate this chain spends against."
+        },
+        "authorized": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of succeeded `authorization` and `authorization_adjustment` amounts minus succeeded `release` amounts. Captures do not reduce it."
+        },
+        "captured": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of succeeded `capture` amounts minus succeeded `capture_reversal` amounts."
+        },
+        "refunded": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of succeeded `refund` amounts minus succeeded `refund_reversal` amounts."
+        }
+      }
+    },
+    "receipt_payload": {
+      "title": "Receipt Payload",
+      "description": "Claims signed inside an Order Receipt. Receipts form one hash-chained sequence per `(iss, mandate_ref)` pair.",
+      "type": "object",
+      "required": [
+        "iss",
+        "iat",
+        "order_id",
+        "mandate_ref",
+        "seq",
+        "prev",
+        "event",
+        "totals"
+      ],
+      "properties": {
+        "iss": {
+          "type": "string",
+          "format": "uri",
+          "description": "Profile URI of the business whose `ap2.merchant_authorization` the referenced Payment Mandate covers. In a marketplace that is merchant of record, this is the marketplace."
+        },
+        "iat": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Issue time, in seconds since the Unix epoch."
+        },
+        "order_id": {
+          "type": "string",
+          "description": "`id` of the Order."
+        },
+        "checkout_id": {
+          "type": "string",
+          "description": "`id` of the originating checkout."
+        },
+        "mandate_ref": {
+          "$ref": "#/$defs/receipt_hash",
+          "description": "Hash of the closed Payment Mandate this event spends against, computed over the exact string carried in `payment.instruments[*].credential.token`."
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Position in the `(iss, mandate_ref)` chain. Starts at 1 and increases by exactly 1."
+        },
+        "prev": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/receipt_hash"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Hash of the previous receipt's compact JWS in the same chain; `null` when `seq` is 1."
+        },
+        "event": {
+          "$ref": "#/$defs/receipt_event"
+        },
+        "totals": {
+          "$ref": "#/$defs/receipt_totals"
+        }
+      }
+    },
+    "ap2_with_receipts": {
+      "type": "object",
+      "description": "AP2 extension data on an Order.",
+      "properties": {
+        "receipts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/receipt"
+          },
+          "description": "Every receipt issued for the Order, each chain in `seq` order.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "order_receipts_config": {
+      "title": "Order Receipts Config",
+      "description": "Optional `order_receipts` member of the `dev.ucp.common.payment.ap2_mandate` capability `config`. Order receipts are required only when both the business and platform profiles declare it.",
+      "type": "object",
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "authorization",
+              "authorization_adjustment",
+              "capture",
+              "capture_reversal",
+              "release",
+              "refund",
+              "refund_reversal"
+            ]
+          },
+          "description": "In the business profile, the event types the business issues receipts for. In the platform profile, informational: the event types the platform can process."
         }
       }
     },
@@ -130,6 +351,24 @@
         }
       ]
     },
+    "dev.ucp.shopping.order": {
+      "title": "Order with AP2 Receipts",
+      "description": "Order extended with signed, mandate-bound receipts for money movements after checkout.",
+      "allOf": [
+        {
+          "$ref": "../shopping/order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ap2": {
+              "$ref": "#/$defs/ap2_with_receipts",
+              "ucp_request": "omit"
+            }
+          }
+        }
+      ]
+    },
     "error_code": {
       "title": "AP2 Error Code",
       "description": "Error codes specific to AP2 mandate verification.",
@@ -142,6 +381,22 @@
         "mandate_scope_mismatch",
         "merchant_authorization_invalid",
         "merchant_authorization_missing"
+      ]
+    },
+    "receipt_verification_outcome": {
+      "title": "Receipt Verification Outcome",
+      "description": "Outcomes a platform records when verifying Order receipts. These are not returned as errors; the business has already moved the money.",
+      "type": "string",
+      "enum": [
+        "receipt_invalid_signature",
+        "receipt_sequence_gap",
+        "receipt_totals_mismatch",
+        "receipt_exceeds_mandate",
+        "receipt_capture_exceeds_authorization",
+        "receipt_refund_exceeds_capture",
+        "receipt_exceeds_seller_total",
+        "receipt_mandate_unknown",
+        "reconciliation_adjustment_mismatch"
       ]
     }
   }
