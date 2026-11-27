@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ucp.dev/schemas/shopping/types/fulfillment_available_method.json",
   "title": "Fulfillment Available Method",
-  "description": "Inventory availability hint for a fulfillment method type.",
+  "description": "Inventory availability hint for a fulfillment method type, optionally scoped to one destination.",
   "type": "object",
   "required": ["type", "line_item_ids"],
   "additionalProperties": true,
@@ -16,6 +16,11 @@
       "type": "array",
       "description": "Line items available for this fulfillment method.",
       "items": { "type": "string" },
+      "ucp_request": "omit"
+    },
+    "destination_id": {
+      "type": "string",
+      "description": "Stable, opaque, Business-scoped ID of the destination this availability applies to (e.g., a Business Location for `pickup`), recognized as `selected_destination_id` on a method of the same `type`; absent when availability is not scoped to one destination.",
       "ucp_request": "omit"
     },
     "fulfillable_on": {
