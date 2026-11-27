@@ -1760,7 +1760,7 @@ splits responsibilities as follows:
 When payment is required, the payment process follows a standard 3-step lifecycle
 within UCP: **Negotiation**, **Acquisition**, and **Completion**.
 
-![High-level payment flow sequence diagram](site:specification/images/ucp-payment-flow.png)
+![High-level payment flow sequence diagram](../images/ucp-payment-flow.png)
 
 1. **Negotiation (Business → Platform):** The business advertises available payment handlers in their UCP profile. This tells the platform *how* to pay (e.g., "Use this specific payment credential provider endpoint with this public key").
 2. **Acquisition (Platform ↔ Payment Credential Provider):** The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token). The business is not involved, ensuring raw data never touches the business's frontend API.
@@ -3512,7 +3512,7 @@ through `supported_versions`; see [Protocol Version](#protocol-version).
 
 ### Version Selection
 
-![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
+![High-level resolution flow sequence diagram](../images/ucp-discovery-negotiation.png)
 
 Protocol version selection chooses one complete Business profile first.
 Capability negotiation then selects active capabilities and extensions by exact
