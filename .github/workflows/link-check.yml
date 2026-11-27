@@ -1,0 +1,150 @@
+#   Copyright 2026 UCP Authors
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+# Weekly external-link check for the docs.
+#
+# scripts/check_links.py validates links on the built site, but it never
+# fetches external URLs, so a link that rots upstream goes unnoticed until
+# someone clicks it. The broken AP2 links fixed in #1124 are the case in
+# point: the built-site check passed while ap2-protocol.org/specification
+# 404'd and ap2-extension.org stopped resolving. This workflow runs lychee
+# against the raw Markdown instead and files an issue when it finds broken
+# links, rather than failing a build.
+#
+# The check is intentionally not a PR gate: fixing a rotted upstream link
+# should not block an unrelated change.
+
+name: Weekly Link Check
+
+permissions: {}
+
+on:
+  schedule:
+    # Mondays 14:00 UTC (09:00 US/Eastern standard time).
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+
+# One scheduled run at a time: overlapping runs would race to file
+# duplicate tracking issues.
+concurrency:
+  group: link-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    # Scheduled runs only on the upstream repo, so forks don't file issues
+    # against themselves; manual dispatch still works anywhere (for testing).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.repository == 'Universal-Commerce-Protocol/ucp'
+    permissions:
+      # Uploading the lychee report artifact needs no actions
+      # permission: upload-artifact uses the runner's internal token,
+      # not GITHUB_TOKEN, so the third-party step only ever sees a
+      # read-only token.
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      exit_code: ${{ steps.lychee.outputs.exit_code }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Check links with lychee
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --config .github/linters/lychee.toml --root-dir docs
+            --fallback-extensions md --no-progress docs README.md
+          fail: false
+
+      - name: Upload lychee report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lychee-report
+          path: lychee/out.md
+          if-no-files-found: warn
+          retention-days: 7
+
+      # lychee exit codes: 0 = clean, 2 = broken links, anything else = a
+      # config/tool error. Broken links are reported (not failed) by the
+      # report job; tool errors fail loudly here instead of filing a
+      # misleading "broken links" issue with an empty report.
+      - name: Fail on lychee tool errors
+        if: >-
+          steps.lychee.outputs.exit_code != '0' &&
+          steps.lychee.outputs.exit_code != '2'
+        env:
+          EXIT_CODE: ${{ steps.lychee.outputs.exit_code }}
+        run: |
+          echo "::error::lychee exited with code $EXIT_CODE (expected 0 or 2); see the check job log."
+          exit 1
+
+  report:
+    needs: check
+    # Only file when lychee actually found broken links (exit code 2).
+    if: needs.check.outputs.exit_code == '2'
+    permissions:
+      # Same-run artifact downloads need no actions permission; only
+      # filing and commenting on issues does.
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download lychee report
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: lychee-report
+          path: lychee-report
+
+      # No checkout in this job, so gh gets its repository context from
+      # GH_REPO instead of the working tree.
+      - name: File issue for broken links
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          title="Weekly link check: broken links in docs"
+          body_file="$(mktemp)"
+          {
+            echo "The weekly link check found broken links in \`docs/\` or \`README.md\`."
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo
+            echo "Fix the links below, or update \`.github/linters/lychee.toml\` if a link is"
+            echo "intentionally uncheckable (a placeholder, a local dev-server"
+            echo "URL, or a build-time reference)."
+            echo
+            if [ -f lychee-report/out.md ]; then
+              cat lychee-report/out.md
+            else
+              echo "(lychee did not produce a report file.)"
+            fi
+          } > "$body_file"
+          existing="$(gh issue list --state open \
+            --search "\"$title\" in:title" \
+            --json number,title \
+            --jq '.[] | select(.title == "Weekly link check: broken links in docs") | .number' \
+            | head -n 1)"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "$body_file"
+          else
+            gh issue create --title "$title" --label documentation --body-file "$body_file"
+          fi

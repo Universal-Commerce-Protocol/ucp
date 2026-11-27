@@ -1,0 +1,44 @@
+# lychee configuration for the weekly link check workflow
+# (.github/workflows/link-check.yml).
+#
+# lychee runs against the raw Markdown in docs/ and README.md. It catches
+# external links the built-site check never sees (for example, the broken
+# AP2 links fixed in #1124), plus relative links between pages.
+#
+# Patterns below mirror .linkignore (used by scripts/check_links.py) where
+# they also apply to raw Markdown.
+
+# `site:` URIs (for example, site:schemas/common/ask.json) are build-time
+# references resolved by MkDocs into real paths. They are not links lychee
+# can follow, and they are already covered by the built-site check.
+#
+# `gid:` URIs are example identifiers (Shopify-style global IDs), not links.
+#
+# `data:` URIs are inline images (for example, an SVG icon embedded in a
+# page), not links.
+#
+# Root-relative links (for example, /documentation/schema-authoring/) are
+# site URLs, not file paths. They resolve against the site root via
+# --root-dir docs, and --fallback-extensions md (both passed by the
+# workflow) lets lychee find their .md source files, so they are checked
+# here like any other link.
+#
+# example.com / example.org are placeholder domains used in doc examples.
+#
+# 127.0.0.1 / localhost are local dev-server URLs (for example, the MkDocs
+# preview server in README.md), not live sites.
+#
+# The ucp.dev dummy reference link and /latest/ version links are excluded
+# for the same reasons as in .linkignore: the dummy link is not a real page,
+# and the version folder is not present in the repo checkout.
+exclude = [
+  "^site:",
+  "^gid:",
+  "^data:",
+  "example\\.com",
+  "example\\.org",
+  "127\\.0\\.0\\.1",
+  "localhost",
+  "https://ucp\\.dev/specification/reference\\?v=2026-01-11",
+  "^/?latest/specification/",
+]
