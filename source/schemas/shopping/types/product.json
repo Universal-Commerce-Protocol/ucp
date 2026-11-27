@@ -33,6 +33,10 @@
       "format": "uri",
       "description": "Canonical product page URL."
     },
+    "brand": {
+      "$ref": "brand.json",
+      "description": "Brand under which this product is marketed. Applies to every variant of the product. A Business assertion; UCP does not verify it."
+    },
     "categories": {
       "type": "array",
       "items": {
