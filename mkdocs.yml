@@ -98,6 +98,8 @@ nav:
                   specification/shopping/extensions/return-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
+              - Account Status:
+                  specification/shopping/extensions/account-status.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -607,6 +609,11 @@ plugins:
               results in; the extension also defines the
               dev.ucp.shopping.policy.subscription policy type, its required
               buyer disclosure, and the Platform obligations that come with it.
+          - specification/shopping/extensions/account-status.md: >-
+              Account Status Extension for Catalog. It defines the
+              account_pending and account_ineligible info codes and a hosted
+              step Action. They tell a Platform why a signed-in buyer does not
+              see that account's terms yet.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data
