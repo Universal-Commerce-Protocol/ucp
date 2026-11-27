@@ -52,9 +52,13 @@ Carts support:
 
 ## Cart-to-Checkout Conversion
 
-When the Cart capability is negotiated, the Platform converts a cart to a
-checkout by providing `cart_id` in the Create Checkout request. The cart
-contents (`line_items`, `context`, `buyer`) initialize the checkout session.
+A Platform can initialize a checkout from a Cart by reference or by value.
+The [Create Checkout](../checkout/index.md#create-checkout) request identifies
+exactly one source: `cart_id` or `line_items`.
+
+**By reference:** When the Cart capability is negotiated, the Platform provides
+`cart_id`. When creating a new checkout, the Business **MUST** initialize it
+from the Cart's state; Checkout negotiation then proceeds as usual.
 
 <!-- ucp:example schema=shopping/cart def=checkout op=create direction=request -->
 ```json
@@ -63,19 +67,15 @@ contents (`line_items`, `context`, `buyer`) initialize the checkout session.
 }
 ```
 
-The Platform **MAY** omit `line_items`, or send an empty array
-(`"line_items": []`), when it provides `cart_id`. The Business **MUST** use the
-cart contents and **MUST** ignore overlapping fields in the checkout payload.
-All other input and negotiation requirements of
-[Create Checkout](../checkout/index.md#create-checkout) apply to the request.
-`cart_id` is a checkout initialization input only; the Business does not return
-it in checkout responses.
+**By value:** The Platform omits `cart_id` and submits a full Create Checkout
+request. The Platform can derive the input from prior Cart negotiation, with
+changes, or construct it directly.
 
 **Idempotent conversion:**
 
-If an incomplete checkout already exists for the given `cart_id`, the business
-MUST return the existing checkout session rather than creating a new one. This
-ensures a single active checkout per cart and prevents conflicting sessions.
+If an incomplete checkout already exists for the given `cart_id`, the Business
+**MUST** return the existing checkout session rather than creating a new one.
+This ensures a single active checkout per cart and prevents conflicting sessions.
 
 **Cart lifecycle after conversion:**
 
