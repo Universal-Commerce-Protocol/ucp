@@ -600,34 +600,37 @@ def deep_merge(scaffold: dict, example: dict) -> dict:
 
 
 def _collect_required(schema: dict) -> set[str]:
-  """Collect required fields, merging allOf branches."""
+  """Collect required fields recursively through allOf branches."""
   required = set(schema.get("required", []))
   for branch in schema.get("allOf", []):
-    required |= set(branch.get("required", []))
+    if isinstance(branch, dict):
+      required |= _collect_required(branch)
   return required
 
 
 def _collect_required_alternatives(schema: dict) -> list[list[set[str]]]:
-  """Collect required-key anyOf alternatives from an object and its allOf."""
+  """Collect required-key anyOf alternatives through nested allOf."""
   alternatives = []
-  for layer in (schema, *schema.get("allOf", [])):
-    if not isinstance(layer, dict) or "anyOf" not in layer:
-      continue
+  if "anyOf" in schema:
     alternatives.append(
       [
         _collect_required(branch) if isinstance(branch, dict) else set()
-        for branch in layer["anyOf"]
+        for branch in schema["anyOf"]
         if branch is not False
       ]
     )
+  for branch in schema.get("allOf", []):
+    if isinstance(branch, dict):
+      alternatives.extend(_collect_required_alternatives(branch))
   return alternatives
 
 
 def _collect_properties(schema: dict) -> dict:
-  """Collect properties, merging allOf branches."""
+  """Collect properties recursively through allOf branches."""
   props = dict(schema.get("properties", {}))
   for branch in schema.get("allOf", []):
-    props.update(branch.get("properties", {}))
+    if isinstance(branch, dict):
+      props.update(_collect_properties(branch))
   return props
 
 
@@ -670,7 +673,8 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
     has_object_shape = (
       obj_type == "object"
       or "properties" in schema
-      or any("properties" in b for b in schema.get("allOf", []))
+      or bool(_collect_properties(schema))
+      or bool(_collect_required(schema))
       or bool(_collect_required_alternatives(schema))
     )
     if has_object_shape:
