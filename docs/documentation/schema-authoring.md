@@ -264,7 +264,7 @@ All capabilities, services, and handlers extend a common `entity` base schema:
 | ----- | ---- | ----------- |
 | `version` | string | Entity version (`YYYY-MM-DD`) — always required |
 | `spec` | URI | Human-readable specification |
-| `schema` | URI | JSON Schema URL |
+| `schema` | URI | Machine-readable definition (JSON Schema for capabilities and handlers; OpenAPI/OpenRPC for services) |
 | `id` | string | Instance identifier (handlers only) |
 | `config` | object | Entity-specific configuration |
 

@@ -17,6 +17,11 @@
               "enum": ["rest", "mcp", "a2a", "embedded"],
               "description": "Transport protocol for this service binding."
             },
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL to the transport definition for this binding, not a JSON Schema: OpenAPI 3.x for `rest`, OpenRPC for `mcp` and `embedded`. For `rest` and `mcp`, its paths or methods resolve against `endpoint`. Required in platform profiles for `rest`, `mcp`, and `embedded`; `a2a` uses the Agent Card at `endpoint` instead. Optional in business profiles."
+            },
             "endpoint": {
               "type": "string",
               "format": "uri",
