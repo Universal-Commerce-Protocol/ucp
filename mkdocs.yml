@@ -98,6 +98,8 @@ nav:
                   specification/shopping/extensions/return-policy.md
               - Purchase Options:
                   specification/shopping/extensions/purchase-options.md
+              - Item Inputs:
+                  specification/shopping/extensions/item-inputs.md
           - Playground: specification/shopping/playground.md
       - Lodging:
           - Booking Capability:
@@ -607,6 +609,14 @@ plugins:
               results in; the extension also defines the
               dev.ucp.shopping.policy.subscription policy type, its required
               buyer disclosure, and the Platform obligations that come with it.
+          - specification/shopping/extensions/item-inputs.md: >-
+              Item Inputs Extension, letting a business declare the
+              information it needs from the buyer to make an item (engraving
+              text, a monogram, a font choice) as item_inputs[] on catalog variants
+              and cart or checkout lines, a platform answer them with
+              item_input_values[], and the Order preserve the answers. Defines the
+              text, choice, number, boolean, and date input types and the
+              item_input_* error codes.
         Lodging Booking Capability:
           - specification/lodging/booking/index.md: >-
               Core Booking Capability specification detailing necessary data

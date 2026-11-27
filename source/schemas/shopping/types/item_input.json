@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/types/item_input.json",
+  "title": "Item Input",
+  "description": "One piece of information a Business needs from the buyer to make or prepare an item, such as engraving text or a font choice. The Business declares it; the Platform answers it by `id`.",
+  "type": "object",
+  "required": [
+    "id",
+    "label",
+    "required",
+    "input"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque identifier, unique among the inputs of one variant or line. Sent back as `item_input_values[].id`."
+    },
+    "label": {
+      "type": "string",
+      "description": "Short buyer-facing name for the input (e.g. 'Case back engraving')."
+    },
+    "description": {
+      "$ref": "../../common/types/description.json",
+      "description": "Supplementary buyer-facing guidance on what to supply (e.g. 'Letters, numbers and basic punctuation')."
+    },
+    "required": {
+      "type": "boolean",
+      "description": "Whether a value must be supplied before the line can be purchased. When `true`, a checkout holding the line cannot become `ready_for_complete` until a valid value is supplied."
+    },
+    "input": {
+      "$ref": "#/$defs/input",
+      "description": "The kind of value expected and the limits on it."
+    },
+    "price": {
+      "$ref": "../../common/types/price.json",
+      "description": "Extra charge per unit, before taxes and fees, when the input is answered: when a `text`, `number`, or `date` value is supplied, when a `boolean` value is `true`, or when any `choice` option is selected. Indicative: the line's `item.price` and `totals` are authoritative. Absent when answering costs nothing."
+    }
+  },
+  "$defs": {
+    "input": {
+      "title": "Item Input Type",
+      "description": "The kind of value an item input expects. `type` is an open identifier; `text`, `choice`, `number`, `boolean`, and `date` are the well-known values. A Platform MUST NOT render or coerce a type it does not recognize as another type.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Input type identifier. Well-known values: `text`, `choice`, `number`, `boolean`, `date`. Platforms MUST tolerate unknown values and MUST NOT treat one as a well-known type."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "text"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/text_input"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "choice"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/choice_input"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "number"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/number_input"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "date"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/date_input"
+          }
+        }
+      ]
+    },
+    "text_input": {
+      "title": "Text Input",
+      "description": "Free text typed by the buyer. The value is a string.",
+      "type": "object",
+      "properties": {
+        "min_length": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Fewest characters the Business accepts, counted in Unicode code points. MUST NOT exceed `max_length`."
+        },
+        "max_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Most characters the Business accepts. Counted in Unicode code points. Absent when the Business does not state a limit; it still validates the answer, and a Platform MUST NOT read absence as no limit."
+        },
+        "multiline": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether line breaks are accepted."
+        }
+      }
+    },
+    "choice_input": {
+      "title": "Choice Input",
+      "description": "One selection from a list the Business provides. The value is the selected option's `value`.",
+      "type": "object",
+      "required": [
+        "options"
+      ],
+      "properties": {
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "description": "The selectable options, in the Business's order of preference.",
+          "items": {
+            "$ref": "#/$defs/choice_option"
+          }
+        }
+      }
+    },
+    "choice_option": {
+      "title": "Choice Option",
+      "description": "One selectable option of a choice input.",
+      "type": "object",
+      "required": [
+        "value",
+        "label"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Opaque value submitted when this option is selected."
+        },
+        "label": {
+          "type": "string",
+          "description": "Buyer-facing name of the option."
+        },
+        "price": {
+          "$ref": "../../common/types/price.json",
+          "description": "Extra charge per unit when this option is selected, in addition to the input's own `price`. Indicative: the line's `item.price` and `totals` are authoritative."
+        }
+      }
+    },
+    "number_input": {
+      "title": "Number Input",
+      "description": "A number, such as a shirt number or a length in centimetres. The value is a JSON number.",
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "number",
+          "description": "Smallest number the Business accepts. MUST NOT exceed `max`."
+        },
+        "max": {
+          "type": "number",
+          "description": "Largest number the Business accepts."
+        },
+        "integer": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether only whole numbers are accepted."
+        }
+      }
+    },
+    "date_input": {
+      "title": "Date Input",
+      "description": "A calendar date. The value is a string in `YYYY-MM-DD` form.",
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "string",
+          "format": "date",
+          "description": "Earliest date the Business accepts. MUST NOT be later than `max`."
+        },
+        "max": {
+          "type": "string",
+          "format": "date",
+          "description": "Latest date the Business accepts."
+        }
+      }
+    }
+  }
+}

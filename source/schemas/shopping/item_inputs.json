@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/shopping/item_inputs.json",
+  "name": "dev.ucp.shopping.item_inputs",
+  "title": "Item Inputs Extension",
+  "description": "Extends Catalog, Cart, Checkout, and Order with the information a Business needs from the buyer to make or prepare an item: a Business declares `item_inputs` on a variant, a Platform answers them with `item_input_values` on a line, and the Order preserves the answers.",
+  "$defs": {
+    "item_input": {
+      "$ref": "types/item_input.json"
+    },
+    "item_input_value": {
+      "$ref": "types/item_input_value.json"
+    },
+    "order_item_input_value": {
+      "$ref": "types/order_item_input_value.json"
+    },
+    "variant_item_inputs": {
+      "title": "Variant Item Inputs",
+      "description": "The item input fields added to a catalog variant.",
+      "type": "object",
+      "properties": {
+        "item_inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/item_input"
+          },
+          "minItems": 1,
+          "description": "The information this variant needs from the buyer, in the order the Business wants it asked. Absent when the variant needs none.",
+          "ucp_request": "omit"
+        }
+      }
+    },
+    "item_inputs_variant": {
+      "description": "A catalog variant carrying item inputs.",
+      "allOf": [
+        {
+          "$ref": "types/variant.json"
+        },
+        {
+          "$ref": "#/$defs/variant_item_inputs"
+        }
+      ]
+    },
+    "item_inputs_lookup_variant": {
+      "description": "A lookup variant (carrying input correlation) carrying item inputs.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_variant"
+        },
+        {
+          "$ref": "#/$defs/variant_item_inputs"
+        }
+      ]
+    },
+    "item_inputs_product": {
+      "description": "A catalog product whose variants carry item inputs. Used by search.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_inputs_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "item_inputs_lookup_product": {
+      "description": "A lookup product whose variants carry item inputs, preserving input correlation. Used by lookup.",
+      "allOf": [
+        {
+          "$ref": "types/product.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_inputs_lookup_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "item_inputs_detail_product": {
+      "description": "A get_product detail product whose variants carry item inputs. Used by get_product.",
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/detail_product"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variants": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_inputs_variant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "search_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_search.json#/$defs/search_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_inputs_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lookup_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/lookup_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "products": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_inputs_lookup_product"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_product_response": {
+      "allOf": [
+        {
+          "$ref": "catalog_lookup.json#/$defs/get_product_response"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "product": {
+              "$ref": "#/$defs/item_inputs_detail_product"
+            }
+          }
+        }
+      ]
+    },
+    "line_item": {
+      "title": "Line Item with Item Inputs",
+      "description": "Line item extended with the information its variant needs from the buyer and the answers supplied.",
+      "allOf": [
+        {
+          "$ref": "types/line_item.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "item_inputs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_input"
+              },
+              "minItems": 1,
+              "description": "The information this line needs from the buyer, as the Business evaluates it for this cart or checkout. Absent when the line needs none.",
+              "ucp_request": "omit"
+            },
+            "item_input_values": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/item_input_value"
+              },
+              "description": "The buyer's answers for this line, at most one per input. One set of answers applies to every unit on the line. A Platform writes the complete set; an input with no entry is unanswered.",
+              "ucp_request": {
+                "create": "optional",
+                "update": "optional"
+              },
+              "ucp_response": "optional"
+            }
+          }
+        }
+      ]
+    },
+    "order_line_item": {
+      "title": "Order Line Item with Item Inputs",
+      "description": "Order line extended with the answers the buyer supplied for it.",
+      "allOf": [
+        {
+          "$ref": "types/order_line_item.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "item_input_values": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/order_item_input_value"
+              },
+              "minItems": 1,
+              "description": "The answers the buyer supplied for this line, as they stood at checkout: a historical record, unchanged if the catalog later changes. Absent when none were supplied.",
+              "ucp_response": "optional"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.catalog.search": {
+      "description": "Catalog search composition with item inputs (extends dev.ucp.shopping.catalog.search).",
+      "$defs": {
+        "search_response": {
+          "$ref": "#/$defs/search_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.catalog.lookup": {
+      "description": "Catalog lookup composition with item inputs (extends dev.ucp.shopping.catalog.lookup).",
+      "$defs": {
+        "lookup_response": {
+          "$ref": "#/$defs/lookup_response"
+        },
+        "get_product_response": {
+          "$ref": "#/$defs/get_product_response"
+        }
+      }
+    },
+    "dev.ucp.shopping.cart": {
+      "title": "Cart with Item Inputs",
+      "description": "Cart extended so each line can carry the inputs its variant needs and the buyer's answers.",
+      "allOf": [
+        {
+          "$ref": "cart.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line_item"
+              },
+              "ucp_request": "required"
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.checkout": {
+      "title": "Checkout with Item Inputs",
+      "description": "Checkout extended so each line can carry the inputs its variant needs and the buyer's answers.",
+      "allOf": [
+        {
+          "$ref": "checkout.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line_item"
+              },
+              "ucp_request": {
+                "create": "optional",
+                "update": "required",
+                "complete": "omit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dev.ucp.shopping.order": {
+      "title": "Order with Item Inputs",
+      "description": "Order extended so each line preserves the answers the buyer supplied for it.",
+      "allOf": [
+        {
+          "$ref": "order.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "line_items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/order_line_item"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
