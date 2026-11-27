@@ -41,7 +41,11 @@
     },
     "destination": {
       "$ref": "../../common/types/postal_address.json",
-      "description": "Delivery destination address."
+      "description": "Delivery destination address; for place-based methods (e.g., `pickup`), the Business Location's address."
+    },
+    "business_location": {
+      "$ref": "../../common/types/location_summary.json",
+      "description": "Business Location these items are fulfilled at, for place-based methods (e.g., `pickup`); `id` is the Business-scoped ID Checkout accepts as `selected_destination_id`, and `destination` carries its Postal Address."
     },
     "description": {
       "type": "string",
