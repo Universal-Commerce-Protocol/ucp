@@ -284,6 +284,16 @@ When the business cannot return an order, the response includes a `messages`
 array describing the outcome. Platforms **MUST** check `messages` before
 accessing order fields.
 
+## Message Signing
+
+Request and response signatures follow the
+[Message Signatures](../../signatures.md) specification using RFC 9421 HTTP Message
+Signatures. The MCP transport is streamable HTTP, so signatures apply at the
+HTTP layer as they do for REST. See
+[Message Signatures - MCP Transport](../../signatures.md#mcp-transport) for
+requests and [REST Response Signing](../../signatures.md#rest-response-signing)
+for responses, whose algorithm is identical for MCP over HTTP.
+
 ## Conformance
 
 Platforms implementing the MCP binding:
@@ -298,6 +308,8 @@ Businesses implementing the MCP binding:
 
 * **MUST** implement the `get_order` tool per the
   [OpenRPC schema](site:services/shopping/mcp.openrpc.json)
+* **SHOULD** sign responses per the
+  [Message Signatures](../../signatures.md) specification
 
 See [Order Capability - Guidelines](index.md#operations-guidelines) for
 capability-level requirements that apply across all transports.
