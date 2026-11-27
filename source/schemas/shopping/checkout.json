@@ -4,6 +4,86 @@
   "name": "dev.ucp.shopping.checkout",
   "title": "Checkout",
   "description": "Base checkout schema. Extensions compose onto this using allOf.",
+  "$defs": {
+    "create_request": {
+      "title": "Checkout Create Request",
+      "description": "Request body for create_checkout. Includes only buyer-writable fields; server-assigned fields are omitted per the ucp_request annotations on the base schema, which remain the source of truth (equivalent to `ucp-schema resolve --request --op create`).",
+      "type": "object",
+      "required": [
+        "line_items"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "line_items": {
+          "$ref": "#/properties/line_items"
+        },
+        "buyer": {
+          "$ref": "#/properties/buyer"
+        },
+        "context": {
+          "$ref": "#/properties/context"
+        },
+        "signals": {
+          "$ref": "#/properties/signals"
+        },
+        "attribution": {
+          "$ref": "#/properties/attribution"
+        },
+        "payment": {
+          "$ref": "#/properties/payment"
+        }
+      }
+    },
+    "update_request": {
+      "title": "Checkout Update Request",
+      "description": "Request body for update_checkout. The checkout id travels in the URL path, not the body; server-assigned fields are omitted per the ucp_request annotations on the base schema, which remain the source of truth (equivalent to `ucp-schema resolve --request --op update`).",
+      "type": "object",
+      "required": [
+        "line_items"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "line_items": {
+          "$ref": "#/properties/line_items"
+        },
+        "buyer": {
+          "$ref": "#/properties/buyer"
+        },
+        "context": {
+          "$ref": "#/properties/context"
+        },
+        "signals": {
+          "$ref": "#/properties/signals"
+        },
+        "attribution": {
+          "$ref": "#/properties/attribution"
+        },
+        "payment": {
+          "$ref": "#/properties/payment"
+        }
+      }
+    },
+    "complete_request": {
+      "title": "Checkout Complete Request",
+      "description": "Request body for complete_checkout. Line items, buyer, and context are fixed at this stage and omitted per the ucp_request annotations on the base schema, which remain the source of truth (equivalent to `ucp-schema resolve --request --op complete`).",
+      "type": "object",
+      "required": [
+        "payment"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "signals": {
+          "$ref": "#/properties/signals"
+        },
+        "attribution": {
+          "$ref": "#/properties/attribution"
+        },
+        "payment": {
+          "$ref": "#/properties/payment"
+        }
+      }
+    }
+  },
   "type": "object",
   "required": [
     "ucp",
