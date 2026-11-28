@@ -91,6 +91,7 @@ datamodel
 delisted
 dpan
 eddsa
+emvco
 ewallet
 fbclid
 fontawesome
