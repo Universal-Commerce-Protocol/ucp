@@ -745,6 +745,12 @@ comment. Unannotated blocks fail CI.
 | `def`         | no                | —          | Pull `$defs/<name>` out of the schema and validate against that            |
 | `skip reason` | yes (with skip)   | —          | Free-form prose explaining why this block can't be validated               |
 
+JSONPath here is a small subset: dot-separated bare names with an optional
+array index (`$.a.b[0]`), plus bracket-quoted names for keys that are not
+bare-legal (`$.a['dev.ucp.common.identity_linking'][0]`). Use the quoted form
+for reverse-domain keys and scope tokens, whose dots and colons would
+otherwise be read as path separators.
+
 #### Placement rules
 
 - The annotation **MUST** appear on its own line preceding the ` ```json `
@@ -773,11 +779,6 @@ aid clarity; default to strict JSON otherwise.
 
 Block comments (`/* */`) are **not** supported. Use multiple `//` lines if you
 need a multi-line note.
-
-**Limitation:** the `//` stripper tracks string boundaries per-line and is
-approximate. An example containing a string literal with an escaped backslash
-followed by `//` will be misparsed. No corpus example currently triggers this;
-if you hit it, restructure the example.
 
 #### Template variable
 

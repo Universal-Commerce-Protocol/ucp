@@ -1761,6 +1761,96 @@ def test_base_def_inherits_root_title_except_ucp(macros: dict) -> None:
   )
 
 
+def test_json_pointer_fragments() -> None:
+  """Resolve RFC 6901 section 6 examples and reject invalid array indices."""
+  resolve = sys.modules["main"]._resolve_json_pointer
+  document = {
+    "foo": ["bar", "baz"],
+    "": 0,
+    "a/b": 1,
+    "c%d": 2,
+    "e^f": 3,
+    "g|h": 4,
+    "i\\j": 5,
+    'k"l': 6,
+    " ": 7,
+    "m~n": 8,
+    "~1": 9,
+    "a/b~c": 10,
+    "café": 11,
+    "01": 12,
+    "-1": 13,
+  }
+  cases = {
+    "#": document,
+    "#/foo": ["bar", "baz"],
+    "#/foo/0": "bar",
+    "#/": 0,
+    "#/a~1b": 1,
+    "#/c%25d": 2,
+    "#/e%5Ef": 3,
+    "#/g%7Ch": 4,
+    "#/i%5Cj": 5,
+    "#/k%22l": 6,
+    "#/%20": 7,
+    "#/m~0n": 8,
+    "#/~01": 9,
+    "#/a~1b~0c": 10,
+    "#/caf%C3%A9": 11,
+    "#/01": 12,
+    "#/-1": 13,
+  }
+  for pointer, expected in cases.items():
+    _check_eq(
+      f"json_pointer_resolves[{pointer}]", resolve(pointer, document), expected
+    )
+  for pointer in (
+    "#/foo/01",
+    "#/foo/-1",
+    "#/foo/+1",
+    "#/foo/١",
+    "#/foo/2",
+    "#/foo/-",
+    "#/missing",
+    "#/a~2b",
+    "#/a~",
+    "#/caf%E9",
+    "#anchor",
+    "/foo/0",
+  ):
+    _check_eq(
+      f"json_pointer_unresolved[{pointer}]", resolve(pointer, document), None
+    )
+
+
+def test_escaped_pointer_composition_renders_fields(macros: dict) -> None:
+  """An allOf ref traverses escaped OpenAPI path and media-type keys."""
+  table = _render_synthetic_schema(
+    macros,
+    {
+      "allOf": [
+        {
+          "$ref": (
+            "#/paths/~1x/post/requestBody/content/"
+            "application~1json/schema/$defs/a~1b"
+          )
+        }
+      ],
+      "$defs": {
+        "a/b": {
+          "type": "object",
+          "properties": {"count": {"type": "integer"}},
+        }
+      },
+    },
+  )
+  _check_eq(
+    "escaped_pointer_composition_renders_fields",
+    _type_cell(table, "count"),
+    "integer",
+  )
+
+
 # -----------------------------------------------------------
 # Main
 # -----------------------------------------------------------
@@ -1799,6 +1889,8 @@ def main() -> int:
   test_inline_object_all_of_merge_precedence(macros)
   test_no_header_render_emits_no_dangling_inline_links(internals)
   test_base_def_inherits_root_title_except_ucp(macros)
+  test_json_pointer_fragments()
+  test_escaped_pointer_composition_renders_fields(macros)
   return _report()
 
 

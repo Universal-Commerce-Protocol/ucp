@@ -75,6 +75,12 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
 
   - If extract= is present, the indicated subtree is selected from
     the parsed displayed example before semantic validation.
+
+  JSONPath subset used by extract= and target=: dot-separated bare
+  names with an optional array index (`$.a.b[0]`), plus bracket-quoted
+  names for keys that are not bare-legal (`$.a['dev.ucp.common.x'][0]`).
+  The quoted form is required for UCP's reverse-domain keys and scope
+  tokens, whose dots and colons are otherwise read as separators.
   - Ellipsis sentinels are recorded as elided JSON Pointer paths,
     then removed from the tree.
   - The example is deep-merged into a scaffold (a known-valid
@@ -100,10 +106,6 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
 KNOWN LIMITATIONS
 ================================================================
 
-  - Line-comment stripper tracks string boundaries per-line and is
-    approximate. An example with a string literal containing an
-    escaped backslash followed by `//` will be misparsed. No corpus
-    example currently triggers this.
   - The literal three-character string "..." cannot appear in an
     example as actual data — it is reserved as the elision sentinel.
 
@@ -339,32 +341,17 @@ def expand_templates(content: str) -> str:
   return content.replace("{{ ucp_version }}", UCP_VERSION_PLACEHOLDER)
 
 
-def strip_line_comments(content: str) -> str:
-  """Stage 3. Strip // line comments outside string literals.
+# Match quoted strings first so authoring syntax never rewrites their contents.
+_JSON_STRING_PATTERN = r'"(?:[^"\\\n]|\\[^\n])*"'
+_LINE_COMMENT_RE = re.compile(rf"{_JSON_STRING_PATTERN}|//[^\n]*")
 
-  Per-line string-boundary tracking. Approximate — see module
-  docstring for the documented edge case.
-  """
-  lines = content.split("\n")
-  cleaned = []
-  for line in lines:
-    result = []
-    in_string = False
-    i = 0
-    while i < len(line):
-      ch = line[i]
-      if ch == '"' and (i == 0 or line[i - 1] != "\\"):
-        in_string = not in_string
-        result.append(ch)
-      elif (
-        ch == "/" and not in_string and i + 1 < len(line) and line[i + 1] == "/"
-      ):
-        break  # rest of line is comment
-      else:
-        result.append(ch)
-      i += 1
-    cleaned.append("".join(result).rstrip())
-  return "\n".join(cleaned)
+
+def strip_line_comments(content: str) -> str:
+  """Stage 3. Strip // line comments outside string literals."""
+  content = _LINE_COMMENT_RE.sub(
+    lambda match: "" if match[0].startswith("//") else match[0], content
+  )
+  return "\n".join(line.rstrip() for line in content.split("\n"))
 
 
 # Bare ... inside an otherwise-empty [] or {} container. Authors
@@ -377,15 +364,23 @@ def strip_line_comments(content: str) -> str:
 # dots (e.g. `[1, ..., 3]`) are not supported — only whole-container
 # bare-dot ellipsis. For partial elision use the string form
 # (`[1, "...", 3]`).
-_BARE_ELLIPSIS_ARRAY = re.compile(r"(\[\s*)\.\.\.(\s*\])")
-_BARE_ELLIPSIS_OBJECT = re.compile(r"(\{\s*)\.\.\.(\s*\})")
+_BARE_ELLIPSIS_RE = re.compile(
+  rf"{_JSON_STRING_PATTERN}|(?P<array>\[\s*\.\.\.\s*\])"
+  r"|(?P<object>\{\s*\.\.\.\s*\})"
+)
 
 
 def lower_ellipsis_to_sentinels(content: str) -> str:
-  """Stage 4. Lower bare `...` to string-sentinel form."""
-  content = _BARE_ELLIPSIS_ARRAY.sub(r'\1"..."\2', content)
-  content = _BARE_ELLIPSIS_OBJECT.sub(r'\1"...": "..."\2', content)
-  return content
+  """Stage 4. Lower bare `...` outside strings to string-sentinel form."""
+
+  def replace(match: re.Match) -> str:
+    if match.group("array") is not None:
+      return match[0].replace("...", '"..."', 1)
+    if match.group("object") is not None:
+      return match[0].replace("...", '"...": "..."', 1)
+    return match[0]
+
+  return _BARE_ELLIPSIS_RE.sub(replace, content)
 
 
 def reduce_to_canonical_json(raw: str) -> str:
@@ -411,6 +406,15 @@ def _is_ellipsis(value) -> bool:
   )
 
 
+def escape_pointer_token(token: str) -> str:
+  """Escape one JSON Pointer reference token (RFC 6901, section 3).
+
+  `~` becomes `~0` and `/` becomes `~1`, in that order. ucp-schema reports
+  validation error paths in this form, so elision paths must match it.
+  """
+  return token.replace("~", "~0").replace("/", "~1")
+
+
 def strip_ellipsis(obj, _path="", _paths=None):
   """Replace ellipsis markers with empty defaults.
 
@@ -424,7 +428,7 @@ def strip_ellipsis(obj, _path="", _paths=None):
   if isinstance(obj, dict):
     result = {}
     for k, v in obj.items():
-      child_path = f"{_path}/{k}"
+      child_path = f"{_path}/{escape_pointer_token(k)}"
       if v == "...":
         _paths.add(child_path)
         continue
@@ -455,20 +459,60 @@ def strip_ellipsis(obj, _path="", _paths=None):
 # JSONPath navigation (minimal subset)
 # -----------------------------------------------------------
 
-_SEGMENT_RE = re.compile(r"^(\w+)(?:\[(\d+)\])?$")
+_BARE_SEGMENT_RE = re.compile(r"\w+")
+_QUOTED_SEGMENT_RE = re.compile(r"\[(['\"])(.*?)\1\]")
+_INDEX_RE = re.compile(r"\[(\d+)\]")
+
+
+def split_path(path: str) -> list[tuple[str, str | None]]:
+  """Tokenize the supported JSONPath subset into (name, index) pairs.
+
+  Bare names are dot-separated (`$.a.b`) and may carry a single array
+  index (`$.a[0]`). Names that are not bare-legal are written in
+  bracket-quoted form (`$.a['x.y'][0]`), required for the
+  reverse-domain identifiers and scope tokens UCP uses as object keys,
+  such as `dev.ucp.common.identity_linking` and
+  `dev.ucp.shopping.order:read`, whose dots and colons would otherwise
+  be read as path separators or fail to match.
+
+  Raises KeyError on an unparsable segment.
+  """
+  segments: list[tuple[str, str | None]] = []
+  pos = 1 if path.startswith("$") else 0
+  while pos < len(path):
+    if path[pos] == ".":
+      pos += 1
+      continue
+    quoted = _QUOTED_SEGMENT_RE.match(path, pos)
+    if quoted:
+      name = quoted.group(2)
+      pos = quoted.end()
+    else:
+      bare = _BARE_SEGMENT_RE.match(path, pos)
+      if not bare:
+        raise KeyError(path[pos:])
+      name = bare.group(0)
+      pos = bare.end()
+    index = None
+    indexed = _INDEX_RE.match(path, pos)
+    if indexed:
+      index = indexed.group(1)
+      pos = indexed.end()
+    segments.append((name, index))
+  return segments
 
 
 def jsonpath_to_pointer(path: str) -> str:
   """Convert the supported JSONPath subset to a JSON Pointer prefix."""
   if path == "$":
     return ""
+  try:
+    segments = split_path(path)
+  except KeyError:
+    return ""
   pointer_parts: list[str] = []
-  for seg in path.lstrip("$").lstrip(".").split("."):
-    m = _SEGMENT_RE.match(seg)
-    if not m:
-      return ""
-    name, idx = m.group(1), m.group(2)
-    pointer_parts.append(name)
+  for name, idx in segments:
+    pointer_parts.append(escape_pointer_token(name))
     if idx is not None:
       pointer_parts.append(idx)
   return "".join(f"/{part}" for part in pointer_parts)
@@ -479,11 +523,7 @@ def jsonpath_get(obj, path: str):
   if path == "$":
     return obj
   current = obj
-  for seg in path.lstrip("$").lstrip(".").split("."):
-    m = _SEGMENT_RE.match(seg)
-    if not m:
-      raise KeyError(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in split_path(path):
     current = current[name]
     if idx is not None:
       current = current[int(idx)]
@@ -492,16 +532,13 @@ def jsonpath_get(obj, path: str):
 
 def jsonpath_set(obj: dict, path: str, value):
   """Set a value at a JSONPath. Mutates obj."""
-  segments = path.lstrip("$").lstrip(".").split(".")
+  segments = split_path(path)
   current = obj
-  for seg in segments[:-1]:
-    m = _SEGMENT_RE.match(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in segments[:-1]:
     current = current[name]
     if idx is not None:
       current = current[int(idx)]
-  last = _SEGMENT_RE.match(segments[-1])
-  name, idx = last.group(1), last.group(2)
+  name, idx = segments[-1]
   if idx is not None:
     current[name][int(idx)] = value
   else:
@@ -510,11 +547,8 @@ def jsonpath_set(obj: dict, path: str, value):
 
 def jsonpath_get_schema(schema: dict, path: str) -> dict:
   """Navigate a JSON Schema to the sub-schema at path."""
-  segments = path.lstrip("$").lstrip(".").split(".")
   current = schema
-  for seg in segments:
-    m = _SEGMENT_RE.match(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in split_path(path):
     # Resolve through allOf to find properties
     current = _get_property_schema(current, name)
     if current is None:
@@ -555,34 +589,37 @@ def deep_merge(scaffold: dict, example: dict) -> dict:
 
 
 def _collect_required(schema: dict) -> set[str]:
-  """Collect required fields, merging allOf branches."""
+  """Collect required fields recursively through allOf branches."""
   required = set(schema.get("required", []))
   for branch in schema.get("allOf", []):
-    required |= set(branch.get("required", []))
+    if isinstance(branch, dict):
+      required |= _collect_required(branch)
   return required
 
 
 def _collect_required_alternatives(schema: dict) -> list[list[set[str]]]:
-  """Collect required-key anyOf alternatives from an object and its allOf."""
+  """Collect required-key anyOf alternatives through nested allOf."""
   alternatives = []
-  for layer in (schema, *schema.get("allOf", [])):
-    if not isinstance(layer, dict) or "anyOf" not in layer:
-      continue
+  if "anyOf" in schema:
     alternatives.append(
       [
         _collect_required(branch) if isinstance(branch, dict) else set()
-        for branch in layer["anyOf"]
+        for branch in schema["anyOf"]
         if branch is not False
       ]
     )
+  for branch in schema.get("allOf", []):
+    if isinstance(branch, dict):
+      alternatives.extend(_collect_required_alternatives(branch))
   return alternatives
 
 
 def _collect_properties(schema: dict) -> dict:
-  """Collect properties, merging allOf branches."""
+  """Collect properties recursively through allOf branches."""
   props = dict(schema.get("properties", {}))
   for branch in schema.get("allOf", []):
-    props.update(branch.get("properties", {}))
+    if isinstance(branch, dict):
+      props.update(_collect_properties(branch))
   return props
 
 
@@ -625,7 +662,8 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
     has_object_shape = (
       obj_type == "object"
       or "properties" in schema
-      or any("properties" in b for b in schema.get("allOf", []))
+      or bool(_collect_properties(schema))
+      or bool(_collect_required(schema))
       or bool(_collect_required_alternatives(schema))
     )
     if has_object_shape:
