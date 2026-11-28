@@ -412,9 +412,9 @@ Messages communicate business outcomes and provide context:
 
 | Type | When to Use | Example Codes |
 | :--- | :--- | :--- |
-| `error` | Business-level errors | `NOT_FOUND`, `OUT_OF_STOCK`, `REGION_RESTRICTED` |
-| `warning` | Important conditions affecting purchase | `DELAYED_FULFILLMENT`, `FINAL_SALE` |
-| `info` | Additional context without issues | `PROMOTIONAL_PRICING`, `LIMITED_AVAILABILITY` |
+| `error` | Business-level errors | `not_found`, `out_of_stock`, `region_restricted` |
+| `warning` | Important conditions affecting purchase | `delayed_fulfillment`, `final_sale` |
+| `info` | Additional context without issues | `promotional_pricing`, `limited_availability` |
 
 Warnings with `presentation: "disclosure"` carry notices (e.g., allergen
 declarations, safety warnings) that platforms must not hide or dismiss. See

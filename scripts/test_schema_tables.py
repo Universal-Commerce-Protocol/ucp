@@ -356,7 +356,7 @@ def test_restore_fragment_refs_without_nested_ids() -> None:
 def test_method_tables_name_ucp_field(macros: dict) -> None:
   """Operation tables built from OpenAPI name the `ucp` field too."""
   table = macros["method_fields"](
-    "search_catalog", "shopping/rest.openapi.json", "shopping/catalog/rest"
+    "search_locations", "common/rest.openapi.json", "common/location/rest"
   )
   cell = _type_cell(table, "ucp")
   _check(

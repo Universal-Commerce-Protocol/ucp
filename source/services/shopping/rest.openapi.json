@@ -1005,13 +1005,19 @@
         "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_request"
       },
       "catalog_search_response": {
-        "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response"
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_search.json#/$defs/search_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
       },
       "catalog_lookup_request": {
         "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_request"
       },
       "catalog_lookup_response": {
-        "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response"
+        "oneOf": [
+          { "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/lookup_response" },
+          { "$ref": "../../schemas/common/types/error_response.json" }
+        ]
       },
       "catalog_get_product_request": {
         "$ref": "../../schemas/shopping/catalog_lookup.json#/$defs/get_product_request"
