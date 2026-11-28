@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/lodging/types/customer_preference.json",
+  "title": "Customer Preference",
+  "description": "Persisted lodging and program preferences for the authenticated customer.",
+  "type": "object",
+  "properties": {
+    "stay": {
+      "type": "array",
+      "description": "Stay-time accommodation preferences in priority order.",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable preference identifier."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable label for `id` when the Platform does not recognize the identifier (for example `King bed` for `king_bed`)."
+          },
+          "category": {
+            "type": "string",
+            "description": "Preference grouping (e.g. `bed_type`, `floor`, `smoking`)."
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-based priority; lower numbers are higher priority."
+          }
+        }
+      }
+    },
+    "earn": {
+      "type": "object",
+      "description": "How the customer prefers to accrue loyalty value from qualifying stays.",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "description": "Accrual destination for qualifying stays. Well-known values: `program_currency`, `partner`. When `kind` is `partner`, `program_id` MUST identify the partner program and the preferred link SHOULD appear with `preferred: true` under `loyalty[hotel_program].partner_memberships`. Unknown values MUST be tolerated.",
+          "examples": ["program_currency", "partner"]
+        },
+        "program_id": {
+          "$ref": "../../common/types/reverse_domain_name.json",
+          "description": "Reverse-domain identifier of the partner loyalty program where the guest prefers to earn when `kind` is `partner` (for example `com.aa.aadvantage`). MUST match `program_id` on the preferred `partner_memberships` entry. Omitted when earning into the hotel program currency."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "partner"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "required": ["program_id"]
+          }
+        }
+      ]
+    }
+  }
+}

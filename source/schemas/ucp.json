@@ -383,6 +383,23 @@
           }
         }
       ]
+    },
+
+    "response_customer_schema": {
+      "title": "UCP Customer Response Schema",
+      "description": "UCP metadata for lodging customer retrieval responses.",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "capabilities": {
+              "additionalProperties": {
+                "items": { "$ref": "capability.json#/$defs/response_schema" }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
