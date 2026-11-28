@@ -93,13 +93,13 @@
       "ucp_request": "omit"
     },
     "totals": {
-      "$ref": "types/totals.json",
+      "$ref": "../common/types/totals.json",
       "description": "Different totals for the order."
     },
     "policies": {
       "type": "array",
       "items": {
-        "$ref": "types/policy.json"
+        "$ref": "../common/types/policy.json"
       },
       "description": "Snapshot of the policies that applied to the items at checkout, captured on the order as a durable record. `applies_to` targets are relative to the response root.",
       "ucp_request": "omit"

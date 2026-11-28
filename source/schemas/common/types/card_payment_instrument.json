@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/card_payment_instrument.json",
+  "title": "Card Payment Instrument",
+  "description": "A basic card payment instrument with visible card details. Can be inherited by a handler's instrument schema to define handler-specific display details or more complex credential structures.",
+  "$defs": {
+    "constraint_target": {
+      "title": "Card Constraint Target",
+      "description": "The object an available card instrument's `constraints` describes. It declares the constrainable members and their types and is never carried in a payload.",
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "description": "Card scheme. Derived from the account number, not submitted.",
+          "examples": [
+            "visa",
+            "mastercard",
+            "cartebancaire"
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "payment_instrument.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "card",
+          "description": "Indicates this is a card payment instrument."
+        },
+        "network": {
+          "type": "string",
+          "description": "Card network elected for this transaction, typically a co-badged selection. When present, the business MAY decline if the card cannot route over it and MUST NOT substitute another."
+        },
+        "display": {
+          "type": "object",
+          "description": "Display information for this card payment instrument.",
+          "properties": {
+            "brand": {
+              "type": "string",
+              "description": "The card brand/network shown to the buyer (e.g., visa, mastercard, amex). Presentational only."
+            },
+            "last_digits": {
+              "type": "string",
+              "description": "Last 4 digits of the card number."
+            },
+            "expiry_month": {
+              "type": "integer",
+              "description": "The month of the card's expiration date (1-12)."
+            },
+            "expiry_year": {
+              "type": "integer",
+              "description": "The year of the card's expiration date."
+            },
+            "description": {
+              "type": "string",
+              "description": "An optional rich text description of the card to display to the user (e.g., 'Visa ending in 1234, expires 12/2025')."
+            },
+            "card_art": {
+              "type": "string",
+              "format": "uri",
+              "description": "An optional URI to a rich image representing the card (e.g., card art provided by the issuer)."
+            }
+          }
+        }
+      }
+    }
+  ]
+}

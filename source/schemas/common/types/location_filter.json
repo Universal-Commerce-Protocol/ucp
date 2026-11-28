@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/location_filter.json",
+  "title": "Location Filter",
+  "description": "Filter criteria to narrow Location Search and Lookup results. All supplied filters combine with AND.",
+  "type": "object",
+  "properties": {
+    "hours": {
+      "type": "object",
+      "description": "Filter by operating hours, evaluated at the one supplied instant.",
+      "required": ["open_at"],
+      "properties": {
+        "open_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(?:[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+          "description": "The RFC 3339 instant at which matching Locations must be open, expressed with `Z` or a numeric offset. The Platform selects the instant that represents the Buyer's intent. The Business evaluates it exactly as supplied using each Location's authoritative `timezone`; the supplied offset does not identify that timezone."
+        }
+      }
+    },
+    "amenities": {
+      "type": "array",
+      "items": {
+        "$ref": "amenity_type.json"
+      },
+      "description": "Filter by amenity identifier. A Location matches only when its `amenities` map contains every supplied identifier as an exact key; descriptions and namespace prefixes do not participate in matching."
+    },
+    "items": {
+      "type": "array",
+      "description": "Current item-availability filter. A candidate Location matches only when the Business can currently provide every referenced item at that Location; all references combine with AND.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "description": "A non-empty, opaque Business-scoped item identifier."
+      }
+    }
+  },
+  "additionalProperties": true
+}

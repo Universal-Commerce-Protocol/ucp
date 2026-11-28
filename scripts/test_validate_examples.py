@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# cspell:ignore shema directon
+# cspell:ignore shema directon skiped
 """Contract conformance tests for validate_examples.py.
 
 Each test asserts one claim from the contract documented in
@@ -10,8 +10,8 @@ broke.
 
 Two layers of testing exist for the validator:
 
-  - **The doc corpus is the integration test.** All 268 ```json blocks
-    across 39 spec docs are validated on every CI run. This proves
+  - **The doc corpus is the integration test.** All annotated ```json
+    blocks across the spec docs are validated on every CI run. This proves
     real-world examples conform to the contract.
 
   - **This file is the unit test layer.** It proves the contract is
@@ -168,6 +168,61 @@ def test_layer1_to_layer2() -> None:
 # -----------------------------------------------------------
 
 
+def test_text_reduction_preserves_strings() -> None:
+  """Authoring conveniences only transform text outside JSON strings."""
+  values = [
+    "Size [...] guide",
+    "Notes {...}",
+    'Quoted "[...]" and // text',
+    "Path " + "\\" * 2 + " // not a comment",
+  ]
+  values.extend("Path " + "\\" * count for count in range(1, 5))
+  for index, value in enumerate(values):
+    payload = {"title": value, "url": "https://example.com/help"}
+    raw = json.dumps(payload)
+    for transform in (v.strip_line_comments, v.lower_ellipsis_to_sentinels):
+      _check(
+        f"{transform.__name__}_preserves_string[{index}]",
+        transform(raw) == raw,
+      )
+    try:
+      parsed = v.parse_example(raw + " // author note\n")
+      ok, detail = parsed == payload, repr(parsed)
+    except json.JSONDecodeError as error:
+      ok, detail = False, str(error)
+    _check(f"parse_preserves_string[{index}]", ok, detail)
+
+  raw = (
+    '{"title": "[...] {...}", "items": [ ... ], // note\n "details": { ... }}'
+  )
+  try:
+    parsed = v.parse_example(raw)
+    ok = parsed == {
+      "title": "[...] {...}",
+      "items": ["..."],
+      "details": {"...": "..."},
+    }
+    detail = repr(parsed)
+  except json.JSONDecodeError as error:
+    ok, detail = False, str(error)
+  _check("strings_and_authoring_syntax_compose", ok, detail)
+
+  for raw in (
+    '{"title": "unterminated // note}',
+    '{"title": "line\nbreak"}',
+    '{"title": "bad\\q"}',
+    '{"title": "text",}',
+    '{"title": "text" /* note */}',
+    '{"items": [1, ..., 2]}',
+  ):
+    try:
+      v.parse_example(raw)
+      rejected = False
+    except json.JSONDecodeError:
+      rejected = True
+    _check(f"invalid_json_still_rejected[{raw!r}]", rejected)
+
+
 def test_parse_example_keeps_sentinels() -> None:
   """parse_example returns the parsed tree with sentinels intact.
 
@@ -209,6 +264,29 @@ def test_string_ellipsis_in_array() -> None:
   )
 
 
+def test_array_ellipsis_paths_use_stripped_indices() -> None:
+  """Elision paths inside arrays reflect post-strip positions.
+
+  Removing a `"..."` sentinel shifts later items left. Recorded paths
+  must match the stripped payload the validator sees \u2014 recording the
+  source index would fail to suppress the acknowledged elision (and
+  could suppress a real error on the sibling that shifts into that
+  index).
+  """
+  tree = {"items": ["...", {"price": "..."}]}
+  cleaned, paths = v.strip_ellipsis(tree)
+  _check(
+    "array_sentinel_removed_items_shift",
+    cleaned == {"items": [{}]},
+    f"got {cleaned!r}",
+  )
+  _check(
+    "array_ellipsis_paths_use_stripped_indices",
+    "/items/0/price" in paths and "/items/1/price" not in paths,
+    f"got {paths!r}",
+  )
+
+
 # -----------------------------------------------------------
 # Annotation parsing
 # -----------------------------------------------------------
@@ -238,6 +316,29 @@ def test_annotation_parsing() -> None:
   )
 
   # Unknown attribute key rejected via reserved _error
+  # skip must be a whole word. Each typo below carries a valid reason=, so
+  # only a whole-word check can reject them — a reason-only guard cannot.
+  for typo in (
+    'skiped reason="oops"',
+    'skip_the_check reason="oops"',
+    'skipping validation reason="oops"',
+  ):
+    ann = v.parse_annotation(typo)
+    _check(
+      f"annotation_skip_typo_with_reason_not_skipped[{typo}]",
+      ann.get("skip") is None,
+      f"got {ann!r}",
+    )
+
+  # A bare or empty reason= is not auditable and must not skip.
+  for bad in ("skip", 'skip reason=""'):
+    ann = v.parse_annotation(bad)
+    _check(
+      f"annotation_skip_missing_reason_rejected[{bad}]",
+      ann.get("_error") is not None and ann.get("skip") is None,
+      f"got {ann!r}",
+    )
+
   ann = v.parse_annotation("shema=foo")  # typo
   _check(
     "annotation_unknown_key_rejected",
@@ -351,6 +452,213 @@ def test_extract_blocks() -> None:
     "extract_unannotated_block_yielded_with_no_annotation",
     len(blocks) == 1 and blocks[0]["annotation"] is None,
     f"got {blocks!r}",
+  )
+
+
+def test_reads_are_utf8() -> None:
+  """Docs are UTF-8 whatever the locale of the machine reading them."""
+  with tempfile.TemporaryDirectory() as td:
+    path = Path(td) / "doc.md"
+    # Written as bytes on purpose: this is what is in the repository, and it
+    # must be read the same way on a machine whose locale is not UTF-8.
+    path.write_bytes(
+      (
+        "<!-- ucp:example schema=foo -->\n```json\n"
+        '{"note": "an em dash \u2014 and a quote \u201cx\u201d"}\n'
+        "```\n"
+      ).encode()
+    )
+    try:
+      blocks = v.extract_blocks(path)
+      ok = len(blocks) == 1 and "\u2014" in blocks[0]["content"]
+      detail = f"got {blocks!r}"
+    except UnicodeDecodeError as error:
+      ok, detail = False, f"read with the locale encoding: {error}"
+  _check("extract_blocks_reads_utf8", ok, detail)
+
+
+def test_missing_binary_says_how_to_install() -> None:
+  """A missing ucp-schema is an install instruction, not a traceback."""
+  original = v.subprocess.run
+
+  def absent(*args, **kwargs):
+    raise FileNotFoundError(2, "No such file or directory")
+
+  v.subprocess.run = absent
+  try:
+    v.run_ucp_schema(["resolve", "x"], capture_output=True, text=True)
+    ok, detail = False, "no error raised"
+  except RuntimeError as error:
+    ok = "cargo install ucp-schema" in str(error)
+    detail = f"got {error!r}"
+  except FileNotFoundError as error:
+    ok, detail = False, f"raw FileNotFoundError reached the caller: {error}"
+  finally:
+    v.subprocess.run = original
+  _check("missing_ucp_schema_explains_itself", ok, detail)
+
+
+# -----------------------------------------------------------
+# Coverage walker
+# -----------------------------------------------------------
+
+
+def test_required_anyof_coverage() -> None:
+  """Authored keys satisfy one required-key alternative per anyOf layer."""
+  source_alternatives = {
+    "type": "object",
+    "anyOf": [
+      {"required": ["line_items"]},
+      {"required": ["cart_id"]},
+    ],
+  }
+  for name, example, expected in (
+    ("inline", {"line_items": []}, True),
+    ("cart", {"cart_id": "cart_123"}, True),
+    ("neither", {"buyer": {}}, False),
+    ("both", {"line_items": [], "cart_id": "cart_123"}, True),
+    ("elided_inline", {"line_items": "..."}, True),
+  ):
+    errors = v.check_coverage(example, source_alternatives)
+    _check(
+      f"coverage_required_anyof[{name}]",
+      bool(errors) is not expected,
+      f"got {errors!r}",
+    )
+
+  neutral = {
+    "type": "object",
+    "anyOf": [{}, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_neutral_branch",
+    not v.check_coverage({}, neutral),
+  )
+  true_neutral = {
+    "type": "object",
+    "anyOf": [True, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_true_branch_is_neutral",
+    not v.check_coverage({}, true_neutral),
+  )
+  false_alternative = {
+    "type": "object",
+    "anyOf": [False, {"required": ["line_items"]}],
+  }
+  _check(
+    "coverage_required_anyof_false_branch_rejects_neither",
+    bool(v.check_coverage({}, false_alternative)),
+  )
+  _check(
+    "coverage_required_anyof_false_branch_accepts_inline",
+    not v.check_coverage({"line_items": []}, false_alternative),
+  )
+
+  pure_alternatives = {
+    "anyOf": [
+      {"required": ["line_items"]},
+      {"required": ["cart_id"]},
+    ],
+  }
+  _check(
+    "coverage_required_pure_anyof_rejects_neither",
+    bool(v.check_coverage({}, pure_alternatives)),
+  )
+  _check(
+    "coverage_required_pure_anyof_accepts_either",
+    not v.check_coverage({"cart_id": "cart_123"}, pure_alternatives),
+  )
+
+  layered = {
+    "allOf": [
+      {
+        "anyOf": [
+          {"required": ["line_items"]},
+          {"required": ["cart_id"]},
+        ]
+      }
+    ],
+  }
+  _check(
+    "coverage_required_anyof_in_allof_layer",
+    bool(v.check_coverage({"buyer": {}}, layered)),
+  )
+  _check(
+    "coverage_required_anyof_in_allof_layer_satisfied",
+    not v.check_coverage({"cart_id": "cart_123"}, layered),
+  )
+
+
+def test_nested_allof_coverage() -> None:
+  """Required fields and child schemas survive nested allOf composition."""
+  schema = {
+    "required": ["child"],
+    "properties": {
+      "child": {"type": "object", "required": ["id"]},
+    },
+    "anyOf": [{"required": ["line_items"]}, {"required": ["cart_id"]}],
+  }
+  for depth in range(3):
+    complete = {"child": {"id": "c1"}, "cart_id": "cart_1"}
+    for name, example, expected in (
+      ("complete", complete, True),
+      ("missing_child", {"cart_id": "cart_1"}, False),
+      ("missing_child_id", {"child": {}, "cart_id": "cart_1"}, False),
+      ("missing_alternative", {"child": {"id": "c1"}}, False),
+      ("elided_child", {"child": "...", "cart_id": "cart_1"}, True),
+    ):
+      errors = v.check_coverage(example, schema)
+      _check(
+        f"nested_allof_coverage[{depth}/{name}]",
+        bool(errors) is not expected,
+        f"got {errors!r}",
+      )
+    schema = {"allOf": [schema]}
+
+  _check(
+    "nested_allof_required_only",
+    bool(v.check_coverage({}, {"allOf": [{"required": ["id"]}]})),
+  )
+
+
+def test_nested_allof_scaffold_coverage() -> None:
+  """Scaffolds cannot hide missing inherited fields in a real composition."""
+  if not _has_ucp_schema():
+    _check("nested_allof_scaffold_coverage", False, "ucp-schema not on PATH")
+    return
+  seed = v.load_scaffold(
+    "shopping/purchase_options", "response", "get_product", _SCAFFOLDS_DIR
+  )
+  for field in (None, "id", "title", "price_range", "variants"):
+    payload = json.loads(json.dumps(seed))
+    if field:
+      del payload["product"][field]
+    result = _process(
+      "<!-- ucp:example schema=shopping/purchase_options "
+      "def=get_product_response op=get_product -->\n"
+      f"```json\n{json.dumps(payload)}\n```\n"
+    )
+    _check(
+      f"nested_allof_scaffold[{field or 'complete'}]",
+      result.status == "ok"
+      if field is None
+      else result.status == "fail"
+      and f'coverage: $.product: missing required field "{field}"'
+      in result.message,
+      f"got {result.status}: {result.message}",
+    )
+
+  seed["product"]["title"] = "..."
+  result = _process(
+    "<!-- ucp:example schema=shopping/purchase_options "
+    "def=get_product_response op=get_product -->\n"
+    f"```json\n{json.dumps(seed)}\n```\n"
+  )
+  _check(
+    "nested_allof_scaffold_elided_field",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
   )
 
 
@@ -558,16 +866,597 @@ def test_process_block_integration() -> None:
     f"got {result.status}: {result.message}",
   )
 
-  # Empty body trivially valid
+  # Only no-body read/cancel requests retain the empty-body shortcut.
+  for op in ("read", "cancel"):
+    md = (
+      "<!-- ucp:example schema=shopping/checkout "
+      f"op={op} direction=request -->\n"
+      "```json\n{}\n```\n"
+    )
+    result = _process(md)
+    _check(
+      f"process_empty_no_body_request_ok[{op}]",
+      result.status == "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+  # Responses are authored payloads, even when empty, and must not bypass
+  # coverage merely because a scaffold could fill the missing fields.
   md = (
-    "<!-- ucp:example schema=shopping/checkout op=cancel direction=request -->\n"  # noqa: E501
+    "<!-- ucp:example schema=shopping/checkout op=read direction=response -->\n"
     "```json\n{}\n```\n"
   )
   result = _process(md)
   _check(
-    "process_empty_body_ok",
+    "process_empty_response_not_blindly_accepted",
+    result.status == "fail" and "coverage:" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  # Explicit def=/target= validation is never hidden by the request shortcut.
+  scoped_examples = (
+    (
+      "def",
+      "schema=shopping/cart def=checkout op=read direction=request",
+    ),
+    (
+      "target",
+      "schema=shopping/checkout target=$.line_items op=read direction=request",
+    ),
+  )
+  for scope, annotation in scoped_examples:
+    result = _process(
+      f"<!-- ucp:example {annotation} -->\n```json\n{{}}\n```\n"
+    )
+    _check(
+      f"process_empty_explicit_{scope}_not_shortcut",
+      result.status != "ok",
+      f"got {result.status}: {result.message}",
+    )
+
+
+def test_extension_validation() -> None:
+  """Fields an extension adds are validated against that extension.
+
+  Capability schemas are open, so a checkout example carrying
+  `fulfillment` passes the checkout schema whatever `fulfillment`
+  contains. The validator must also check it against the fulfillment
+  extension's composition of checkout.
+  """
+  capabilities, extensions = v.load_extensions(_SCHEMA_BASE)
+  checkout_exts = dict(extensions.get("dev.ucp.shopping.checkout", []))
+  _check(
+    "extensions_index_capability_path",
+    capabilities.get("dev.ucp.shopping.checkout") == "shopping/checkout",
+    f"got {capabilities.get('dev.ucp.shopping.checkout')!r}",
+  )
+  _check(
+    "extensions_index_fulfillment_fields",
+    "fulfillment" in checkout_exts.get("shopping/fulfillment", ()),
+    f"got {sorted(checkout_exts)}",
+  )
+  _check(
+    "extensions_index_excludes_capability_itself",
+    "shopping/checkout" not in checkout_exts,
+  )
+
+  if not _has_ucp_schema():
+    _check(
+      "extension_validation_integration",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  def option(description: str) -> str:
+    return (
+      "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+      "```json\n"
+      '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], '  # noqa: E501
+      '"groups": [ { "id": "g1", "line_item_ids": ["li_1"], "options": [ '
+      f'{{ "id": "o1", "title": "Standard", "description": {description}, '
+      '"totals": [ { "type": "total", "amount": 500 } ] } ] } ] } ] }\n'
+      "```\n"
+    )
+
+  result = _process(option('"Arrives soon"'))
+  _check(
+    "extension_field_type_error_fails",
+    result.status == "fail"
+    and "extension shopping/fulfillment:" in result.message
+    and "/description" in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  result = _process(option('{ "plain": "Arrives soon" }'))
+  _check(
+    "extension_field_valid_ok",
     result.status == "ok",
     f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    '```json\n{ "methods": [ { "id": "m1", "type": "shipping" } ] }\n```\n'
+  )
+  result = _process(md)
+  _check(
+    "extension_missing_required_fails",
+    result.status == "fail" and '"line_item_ids"' in result.message,
+    f"got {result.status}: {result.message}",
+  )
+
+  md = (
+    "<!-- ucp:example schema=shopping/checkout op=read target=$.fulfillment -->\n"  # noqa: E501
+    "```json\n"
+    '{ "methods": [ { "id": "m1", "type": "shipping", "line_item_ids": ["li_1"], "groups": [ ... ] } ] }\n'  # noqa: E501
+    "```\n"
+  )
+  result = _process(md)
+  _check(
+    "extension_elided_paths_suppressed",
+    result.status == "ok",
+    f"got {result.status}: {result.message}",
+  )
+
+
+def test_checkout_item_source_process_block() -> None:
+  """Authored checkout create examples provide an item source before merge."""
+  if not _has_ucp_schema():
+    _check(
+      "checkout_item_source_process_block",
+      False,
+      "SKIPPED: ucp-schema binary not on PATH",
+    )
+    return
+
+  annotations = (
+    "schema=shopping/checkout op=create direction=request",
+    "schema=shopping/cart def=checkout op=create direction=request",
+  )
+  examples = (
+    ("buyer_only", '{"buyer": {"email": "buyer@example.com"}}', False),
+    ("empty", "{}", False),
+    ("cart_only", '{"cart_id": "cart_abc123"}', True),
+    ("inline", '{"line_items": []}', True),
+    (
+      "both",
+      '{"cart_id": "cart_abc123", "line_items": []}',
+      True,
+    ),
+    ("elided_source", '{"line_items": "..."}', True),
+  )
+  for annotation in annotations:
+    schema_name = "cart_def" if "def=" in annotation else "base"
+    for example_name, payload, expected in examples:
+      md = f"<!-- ucp:example {annotation} -->\n```json\n{payload}\n```\n"
+      result = _process(md)
+      _check(
+        f"process_checkout_create_source[{schema_name}/{example_name}]",
+        (result.status == "ok") == expected,
+        f"got {result.status}: {result.message}",
+      )
+
+
+def test_checkout_item_source() -> None:
+  """Checkout owns the create-only line_items or cart_id requirement."""
+  if not _has_ucp_schema():
+    _check(
+      "checkout_item_source", False, "SKIPPED: ucp-schema binary not on PATH"
+    )
+    return
+
+  items = [{"item": {"id": "item_123"}, "quantity": 1}]
+  for schema_path in ("shopping/checkout", "shopping/cart"):
+    resolved = v.resolve_schema(schema_path, "request", "create", _SCHEMA_BASE)
+    schema = (
+      resolved
+      if schema_path == "shopping/checkout"
+      else resolved["$defs"]["checkout"]
+    )
+    body = schema if schema_path == "shopping/checkout" else schema["allOf"][0]
+    _check(
+      f"checkout_create_source_disjunction[{schema_path}]",
+      [branch.get("required", []) for branch in body.get("anyOf", [])]
+      == [["line_items"], ["cart_id"]],
+    )
+    # Validate complete resolved schemas directly, without process_block's
+    # empty-body shortcut or scaffold merge masking absent item sources.
+    for name, payload, expected in (
+      ("empty", {}, False),
+      ("buyer_only", {"buyer": {"email": "buyer@example.com"}}, False),
+      ("unknown_source_only", {"unknown_source": "source_123"}, False),
+      ("cart_id_only", {"cart_id": "cart_abc123"}, True),
+      ("inline_items", {"line_items": items}, True),
+      ("inline_empty_items", {"line_items": []}, True),
+      (
+        "legacy_empty_items",
+        {"cart_id": "cart_abc123", "line_items": []},
+        True,
+      ),
+      (
+        "overlapping_items",
+        {"cart_id": "cart_abc123", "line_items": items},
+        True,
+      ),
+      (
+        "extension_items",
+        {"line_items": items, "unknown_source": "source_123"},
+        True,
+      ),
+      ("null_items", {"cart_id": "cart_abc123", "line_items": None}, False),
+      ("non_array_items", {"cart_id": "cart_abc123", "line_items": {}}, False),
+      (
+        "malformed_item",
+        {"cart_id": "cart_abc123", "line_items": [None]},
+        False,
+      ),
+      ("null_cart_id", {"cart_id": None, "line_items": items}, False),
+      ("non_string_cart_id", {"cart_id": 123, "line_items": items}, False),
+    ):
+      valid, errors = v.validate_payload_with_schema(
+        payload, schema, "request", "create", _SCHEMA_BASE
+      )
+      _check(
+        f"checkout_create[{schema_path}/{name}]",
+        valid == expected,
+        f"valid={valid}, errors={errors}",
+      )
+
+  complete = v.load_scaffold(
+    "shopping/checkout", "request", "complete", _SCAFFOLDS_DIR
+  )
+  assert complete is not None and set(complete) == {"payment"}
+  for op in ("create", "update", "complete", "read"):
+    base = v.resolve_schema("shopping/checkout", "request", op, _SCHEMA_BASE)
+    cart = v.resolve_schema("shopping/cart", "request", op, _SCHEMA_BASE)
+    for name, schema in (
+      ("base", base),
+      ("cart_composed", cart["$defs"]["checkout"]),
+    ):
+      bodies = [schema] if name == "base" else schema["allOf"]
+      body = bodies[0]
+      properties = body.get("properties", {})
+      required = body.get("required", [])
+      _check(
+        f"checkout_{op}_line_items_projection[{name}]",
+        ("line_items" in properties) == (op != "complete")
+        and ("line_items" in required) == (op in ("update", "read")),
+        f"properties={list(properties)}, required={required}",
+      )
+      _check(
+        f"checkout_{op}_cart_id_projection[{name}]",
+        ("cart_id" in properties) == (op == "create")
+        and any("cart_id" in b.get("properties", {}) for b in bodies)
+        == (op == "create"),
+      )
+      if op != "create":
+        _check(
+          f"checkout_{op}_source_unconstrained[{name}]",
+          all(
+            not b.get("required") and not b.get("properties")
+            for b in body.get("anyOf", [])
+          ),
+        )
+        # Read retains the shared schema's existing item requirement
+        # and line IDs; the new source branches must not add constraints.
+        op_items = [{"id": "line_123", **items[0]}] if op == "read" else items
+        for label, payload, expected in (
+          ("seed", complete if op == "complete" else {}, op == "complete"),
+          ("items", {"line_items": op_items}, op != "complete"),
+          ("cart_only", {"cart_id": "cart_abc123"}, False),
+        ):
+          valid, errors = v.validate_payload_with_schema(
+            payload, schema, "request", op, _SCHEMA_BASE
+          )
+          _check(
+            f"checkout_{op}[{name}/{label}]",
+            valid == expected,
+            f"valid={valid}, errors={errors}",
+          )
+
+  for op in ("create", "update"):
+    cart = v.resolve_schema("shopping/cart", "request", op, _SCHEMA_BASE)
+    _check(
+      f"cart_{op}_line_items_required",
+      "line_items" in cart.get("required", []),
+    )
+    valid, errors = v.validate_payload_with_schema(
+      {}, cart, "request", op, _SCHEMA_BASE
+    )
+    _check(f"cart_{op}_missing_items_rejected", not valid, str(errors))
+
+  response = v.load_scaffold(
+    "shopping/checkout", "response", "read", _SCAFFOLDS_DIR
+  )
+  assert response is not None
+  for op in ("create", "read", "update", "complete", "cancel"):
+    base = v.resolve_schema("shopping/checkout", "response", op, _SCHEMA_BASE)
+    cart = v.resolve_schema("shopping/cart", "response", op, _SCHEMA_BASE)
+    for name, schema in (
+      ("base", base),
+      ("cart_composed", cart["$defs"]["checkout"]),
+    ):
+      body = schema if name == "base" else schema["allOf"][0]
+      bodies = [schema] if name == "base" else schema["allOf"]
+      _check(
+        f"checkout_{op}_response_cart_id_projection[{name}]",
+        all("cart_id" not in b.get("properties", {}) for b in bodies),
+      )
+      # Omitted contract fields remain tolerated as unknown extra properties.
+      for cart_id in ("cart_abc123", None, 123):
+        valid, errors = v.validate_payload_with_schema(
+          {**response, "cart_id": cart_id},
+          schema,
+          "response",
+          op,
+          _SCHEMA_BASE,
+        )
+        _check(
+          f"checkout_{op}_response_unknown_cart_id[{name}/{cart_id!r}]",
+          valid,
+          str(errors),
+        )
+      _check(
+        f"checkout_{op}_response_items_required[{name}]",
+        "line_items" in body.get("required", []),
+      )
+      valid, errors = v.validate_payload_with_schema(
+        response, schema, "response", op, _SCHEMA_BASE
+      )
+      _check(f"checkout_{op}_response_seed_valid[{name}]", valid, str(errors))
+      missing_items = {
+        k: value for k, value in response.items() if k != "line_items"
+      }
+      valid, errors = v.validate_payload_with_schema(
+        missing_items, schema, "response", op, _SCHEMA_BASE
+      )
+      _check(
+        f"checkout_{op}_response_missing_items_rejected[{name}]",
+        not valid,
+        str(errors),
+      )
+
+
+def test_resolve_schema_cache_key() -> None:
+  """Resolved schemas are cached per schema root as well as schema identity."""
+  original_run = v.subprocess.run
+  calls: list[Path] = []
+
+  def fake_run(*args: object, **kwargs: object) -> object:
+    cwd = Path(str(kwargs["cwd"]))
+    calls.append(cwd)
+    return v.subprocess.CompletedProcess(
+      args[0], 0, stdout=json.dumps({"schema_root": cwd.name}), stderr=""
+    )
+
+  v._schema_cache.clear()
+  v.subprocess.run = fake_run
+  try:
+    with tempfile.TemporaryDirectory() as tmp:
+      base_a = Path(tmp, "a", "schemas")
+      base_b = Path(tmp, "b", "schemas")
+      base_a.mkdir(parents=True)
+      base_b.mkdir(parents=True)
+
+      first = v.resolve_schema("shopping/checkout", "response", "read", base_a)
+      cached = v.resolve_schema("shopping/checkout", "response", "read", base_a)
+      second = v.resolve_schema("shopping/checkout", "response", "read", base_b)
+
+    _check("schema_cache_same_base_hits", first == cached and len(calls) == 2)
+    _check("schema_cache_separates_bases", first != second, f"got {second!r}")
+  finally:
+    v.subprocess.run = original_run
+    v._schema_cache.clear()
+
+
+def test_parallel_validation_keeps_order_and_single_resolve() -> None:
+  """Concurrent blocks preserve document order and resolve once per key.
+
+  Block results are reassembled in document order, so a failing block must
+  still be reported at its authored position rather than at whatever time
+  a worker finished. Resolution is shared across workers, so N blocks that
+  name the same schema must still spawn exactly one resolve.
+  """
+  original_run = v.run_ucp_schema
+  resolve_calls: list[str] = []
+  import time
+
+  def fake_run(args: list[str], **kwargs: object) -> object:
+    if args[0] == "resolve":
+      resolve_calls.append(args[1])
+      # Widen the miss window: without a per-key lock every worker that
+      # checked the cache before the first result landed resolves again.
+      time.sleep(0.05)
+      payload: dict = {"title": "Checkout", "type": "object"}
+      return v.subprocess.CompletedProcess(
+        args, 0, stdout=json.dumps(payload), stderr=""
+      )
+    return v.subprocess.CompletedProcess(
+      args, 0, stdout=json.dumps({"valid": True, "errors": []}), stderr=""
+    )
+
+  def block(line: int) -> dict:
+    return {
+      "file": "docs/specification/x.md",
+      "line": line,
+      "content": "{}",
+      "annotation": {
+        "schema": "shopping/checkout",
+        "direction": "response",
+        "op": "read",
+      },
+      "error": None,
+    }
+
+  v._schema_cache.clear()
+  v.run_ucp_schema = fake_run
+  try:
+    import concurrent.futures
+
+    blocks = [block(line) for line in range(1, 17)]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+      results = list(
+        pool.map(
+          lambda b: v.process_block(
+            b, Path("source/schemas"), Path("scaffolds")
+          ),
+          blocks,
+        )
+      )
+
+    _check(
+      "parallel_resolve_once_per_key",
+      len(resolve_calls) == 1,
+      f"resolve spawned {len(resolve_calls)} times",
+    )
+    _check(
+      "parallel_preserves_block_order",
+      [r.line for r in results] == [b["line"] for b in blocks]
+      and all(r.status == "ok" for r in results),
+      f"got {[r.status for r in results]}",
+    )
+  finally:
+    v.run_ucp_schema = original_run
+    v._schema_cache.clear()
+
+
+# -----------------------------------------------------------
+# JSONPath subset: bare, indexed and bracket-quoted segments
+# -----------------------------------------------------------
+
+
+def test_jsonpath_quoted_keys() -> None:
+  """Keys that are not bare-legal are reachable in bracket-quoted form.
+
+  UCP uses reverse-domain identifiers and scope tokens as object keys
+  (`dev.ucp.common.identity_linking`, `dev.ucp.shopping.order:read`).
+  Their dots and colons cannot appear in a bare segment, so extract=
+  and target= must accept the quoted form to address them at all.
+  """
+  doc = {
+    "capabilities": {
+      "dev.ucp.common.identity_linking": [{"config": {"scopes": {}}}]
+    },
+    "config": {
+      "scopes": {"dev.ucp.shopping.order:read": {"description": "d"}},
+      "providers": {"com.example.attestor": [{"type": "wallet_attestation"}]},
+    },
+    "messages": [{"code": "identity_optional"}],
+  }
+
+  # Bare and indexed paths are unchanged.
+  _check(
+    "jsonpath_bare_unchanged",
+    v.jsonpath_get(doc, "$.messages")[0]["code"] == "identity_optional",
+  )
+  _check(
+    "jsonpath_index_unchanged",
+    v.jsonpath_get(doc, "$.messages[0]")["code"] == "identity_optional",
+  )
+  _check("jsonpath_root_unchanged", v.jsonpath_get(doc, "$") is doc)
+
+  # Dotted key, with and without a trailing index.
+  _check(
+    "jsonpath_quoted_dotted_key",
+    v.jsonpath_get(doc, "$.config.providers['com.example.attestor'][0]")["type"]
+    == "wallet_attestation",
+  )
+  _check(
+    "jsonpath_quoted_capability_name",
+    v.jsonpath_get(doc, "$.capabilities['dev.ucp.common.identity_linking'][0]")[
+      "config"
+    ]
+    == {"scopes": {}},
+  )
+
+  # Colon-bearing scope token, and the double-quoted spelling.
+  _check(
+    "jsonpath_quoted_scope_token",
+    v.jsonpath_get(doc, "$.config.scopes['dev.ucp.shopping.order:read']")[
+      "description"
+    ]
+    == "d",
+  )
+  _check(
+    "jsonpath_quoted_double_quotes",
+    v.jsonpath_get(doc, '$.config.scopes["dev.ucp.shopping.order:read"]')[
+      "description"
+    ]
+    == "d",
+  )
+
+  # target= writes through the same parser.
+  target = {
+    "config": {"providers": {"com.example.attestor": [{"type": "oauth2"}]}}
+  }
+  v.jsonpath_set(
+    target,
+    "$.config.providers['com.example.attestor'][0]",
+    {"type": "wallet_attestation"},
+  )
+  _check(
+    "jsonpath_set_quoted_key",
+    target["config"]["providers"]["com.example.attestor"][0]["type"]
+    == "wallet_attestation",
+  )
+
+  # Elision paths are reported as JSON Pointers against the same subset.
+  _check(
+    "jsonpath_pointer_quoted_key",
+    v.jsonpath_to_pointer("$.config.providers['com.example.attestor'][0]")
+    == "/config/providers/com.example.attestor/0",
+  )
+
+  # Unparsable segments still raise rather than silently mis-navigating.
+  try:
+    v.jsonpath_get(doc, "$.config.providers.com.example.attestor")
+    _check("jsonpath_unquoted_dotted_key_raises", False, "expected KeyError")
+  except KeyError:
+    _check("jsonpath_unquoted_dotted_key_raises", True)
+
+
+def test_pointer_escaping() -> None:
+  """Quoted keys may hold `/` or `~`; pointers escape them per RFC 6901.
+
+  ucp-schema reports error paths with `~` as `~0` and `/` as `~1`
+  (`{"a/b": {"n": "x"}}` failing on `n` is reported at `/a~1b/n`), so
+  elision paths built from target= and from elided keys must use the same
+  form, or a suppressed error would be reported and vice versa.
+  """
+  _check(
+    "pointer_escapes_slash",
+    v.jsonpath_to_pointer("$.x['a/b'][0]") == "/x/a~1b/0",
+  )
+  _check(
+    "pointer_escapes_tilde",
+    v.jsonpath_to_pointer("$.x['c~d']") == "/x/c~0d",
+  )
+  # `~` first, so a literal `~1` in a key is not read back as `/`.
+  _check(
+    "pointer_escapes_tilde_before_slash",
+    v.jsonpath_to_pointer("$['~1']") == "/~01",
+  )
+  _check(
+    "pointer_leaves_dots_and_colons",
+    v.jsonpath_to_pointer("$['dev.ucp.shopping.order:read']")
+    == "/dev.ucp.shopping.order:read",
+  )
+
+  _, paths = v.strip_ellipsis({"a/b": "...", "c~d": {"n": "..."}})
+  _check(
+    "strip_ellipsis_escapes_keys",
+    paths == {"/a~1b", "/c~0d/n"},
+    f"got {sorted(paths)}",
+  )
+
+  # The two halves joined, as process_block does for target=, give the
+  # path ucp-schema itself reports.
+  target_pointer = v.jsonpath_to_pointer("$['a/b']")
+  _, rel = v.strip_ellipsis({"n": "..."})
+  _check(
+    "pointer_joined_matches_validator_form",
+    {f"{target_pointer}{r}" for r in rel} == {"/a~1b/n"},
   )
 
 
@@ -580,13 +1469,27 @@ def main() -> int:
   """Run all contract tests and report. Exit 0 on pass, 1 on failure."""
   print("Running validate_examples contract tests...\n")
   test_layer1_to_layer2()
+  test_text_reduction_preserves_strings()
   test_parse_example_keeps_sentinels()
   test_strip_ellipsis_records_paths()
   test_string_ellipsis_in_array()
+  test_array_ellipsis_paths_use_stripped_indices()
   test_annotation_parsing()
   test_extract_blocks()
+  test_reads_are_utf8()
+  test_missing_binary_says_how_to_install()
+  test_required_anyof_coverage()
+  test_nested_allof_coverage()
+  test_nested_allof_scaffold_coverage()
   test_scaffold_resolution()
+  test_jsonpath_quoted_keys()
+  test_pointer_escaping()
+  test_resolve_schema_cache_key()
+  test_parallel_validation_keeps_order_and_single_resolve()
   test_process_block_integration()
+  test_extension_validation()
+  test_checkout_item_source_process_block()
+  test_checkout_item_source()
   return _report()
 
 

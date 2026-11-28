@@ -1,0 +1,413 @@
+<!--
+   Copyright 2026 UCP Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# Ask - MCP Binding
+
+This document specifies the Model Context Protocol (MCP) binding for the
+[Ask Capability](index.md).
+
+## Protocol Fundamentals
+
+### Discovery
+
+Businesses advertise MCP transport availability for the Common service and
+the Ask capability through their UCP profile at `/.well-known/ucp`.
+
+<!-- ucp:example schema=profile def=business_schema -->
+```json
+{
+  "ucp": {
+    "version": "{{ ucp_version }}",
+    "services": {
+      "dev.ucp.common": [
+        {
+          "version": "{{ ucp_version }}",
+          "spec": "https://ucp.dev/{{ ucp_version }}/specification/overview",
+          "transport": "mcp",
+          "schema": "https://ucp.dev/{{ ucp_version }}/services/common/mcp.openrpc.json",
+          "endpoint": "https://business.example.com/ucp/mcp"
+        }
+      ]
+    },
+    "capabilities": {
+      "dev.ucp.common.ask": [{
+        "version": "{{ ucp_version }}",
+        "spec": "https://ucp.dev/{{ ucp_version }}/specification/common/ask",
+        "schema": "https://ucp.dev/{{ ucp_version }}/schemas/common/ask.json"
+      }]
+    },
+    "payment_handlers": {}
+  }
+}
+```
+
+### Request Metadata
+
+A Platform using MCP **MUST** include a `meta` object with
+`meta["ucp-agent"].profile` in every request. The field identifies the
+Platform's UCP profile for version compatibility checks and capability
+negotiation. Protocol metadata stays in `meta`, separate from the domain
+request in `ask`:
+
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "ask_business",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
+        }
+      },
+      "ask": {
+        "query": "What is your return policy for sale items?"
+      }
+    }
+  }
+}
+```
+
+The Common service's `meta` also defines an optional `idempotency-key`, the MCP
+counterpart of the HTTP `Idempotency-Key` header. A Platform **SHOULD** include
+`meta["idempotency-key"]` on any request that carries a `conversation`, and
+**MAY** include it on any other; see [Conversation](index.md#conversation) for
+the retry contract.
+
+## Tools
+
+| Tool | Capability | Description |
+| :--- | :--- | :--- |
+| `ask_business` | [Ask](index.md) | Ask the Business about its resources, policies, and services, including questions other capabilities cannot answer. |
+
+### `ask_business`
+
+Maps to the [Ask](index.md) capability.
+
+#### Ask Request
+
+{{ extension_schema_fields(
+  'ask.json#/$defs/ask_request', 'common/ask/mcp'
+) }}
+
+#### Ask Response
+
+{{ extension_schema_fields(
+  'ask.json#/$defs/ask_response', 'common/ask/mcp'
+) }}
+
+#### Ask Example
+
+The Buyer asks a policy question about a specific product, identified here by
+its page URL. `ids` grounds the question in any Business resource, by a
+Business-issued Global ID (GID) or by a secondary identifier the Business
+recognizes — a SKU, handle, or URL — so the Platform can pass whichever it
+already has (see [Scoping a Question](index.md#scoping-a-question)).
+
+=== "Request"
+
+    <!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "method": "tools/call",
+      "params": {
+        "name": "ask_business",
+        "arguments": {
+          "meta": {
+            "ucp-agent": {
+              "profile": "https://platform.example/profiles/v2026-01/agent.json"
+            }
+          },
+          "ask": {
+            "query": "What is your return policy for these on sale?",
+            "ids": ["https://business.example.com/products/winter-jacket"],
+            "context": {
+              "address_country": "US",
+              "language": "en",
+              "intent": "buying a discounted winter jacket as a gift"
+            }
+          }
+        }
+      }
+    }
+    ```
+
+=== "Response"
+
+    <!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "structuredContent": {
+          "ucp": {
+            "version": "{{ ucp_version }}",
+            "capabilities": {
+              "dev.ucp.common.ask": [
+                {"version": "{{ ucp_version }}"}
+              ]
+            }
+          },
+          "answer": {
+            "plain": "Sale items can be returned within 14 days of delivery for store credit. Items returned to a different region may be subject to local return rules — see the refund policy for details.",
+            "markdown": "Sale items can be returned within **14 days** of delivery for store credit. Items returned to a different region may be subject to local return rules — see the refund policy for details."
+          },
+          "links": [
+            {
+              "type": "refund_policy",
+              "url": "https://business.example.com/policies/refunds",
+              "title": "Refund Policy"
+            }
+          ]
+        }
+      }
+    }
+    ```
+
+#### Multi-turn Example
+
+A Business that supports multi-turn conversations returns a `conversation`
+whose opaque `id` the Platform replays on the next turn. Turn 1 omits
+`conversation` (a new conversation); turn 2 replays the identifier to build
+on it.
+
+Turn 1, request — a new conversation (no `conversation`):
+
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "ask_business",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
+        }
+      },
+      "ask": {
+        "query": "Is this jacket warm enough for winter?",
+        "ids": ["https://business.example.com/products/winter-jacket"]
+      }
+    }
+  }
+}
+```
+
+Turn 1, response — the Business issues a conversation identifier:
+
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.ask": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "answer": {
+        "plain": "Yes — it's insulated for sub-zero conditions and rated for harsh winter use."
+      },
+      "conversation": { "id": "conv_9a3f2e7b", "expires_at": "2026-06-22T18:30:00Z" }
+    }
+  }
+}
+```
+
+Turn 2, request — replay the identifier to continue:
+
+<!-- ucp:example schema=common/ask def=ask_request op=create direction=request extract=$.params.arguments.ask -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "ask_business",
+    "arguments": {
+      "meta": {
+        "ucp-agent": {
+          "profile": "https://platform.example/profiles/v2026-01/agent.json"
+        },
+        "idempotency-key": "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+      },
+      "ask": {
+        "query": "And is it waterproof?",
+        "conversation": { "id": "conv_9a3f2e7b" }
+      }
+    }
+  }
+}
+```
+
+Turn 2, response:
+
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.ask": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "answer": {
+        "plain": "It's water-resistant with a durable water-repellent finish — good for snow and light rain, though not fully waterproof."
+      },
+      "conversation": { "id": "conv_9a3f2e7b", "expires_at": "2026-06-22T18:30:00Z" }
+    }
+  }
+}
+```
+
+#### "Can't Answer" Example
+
+When the Business cannot address the question, the response is still a
+successful result with a populated `answer` stating the limitation.
+
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.ask": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "answer": {
+        "plain": "I don't have information about competitor pricing. For questions about this store's products, I can help with policies, materials, fit, and availability."
+      }
+    }
+  }
+}
+```
+
+## Error Handling
+
+UCP uses a two-layer error model separating transport errors from business outcomes.
+
+### Transport Errors
+
+Transport-level failures (authentication, rate limiting, unavailability) that
+prevent request processing are returned as JSON-RPC `error`. See the
+[Core Specification](../../overview/index.md#error-codes) for the complete error code
+registry and JSON-RPC error code mappings.
+
+### Business Outcomes
+
+All application-level outcomes return a successful JSON-RPC result with the UCP
+envelope and a populated `answer`. Per-answer warnings or info notes ride in
+the optional `messages` array. See
+[Ask Overview](index.md#messages-and-error-handling) for message semantics.
+
+#### Example: Answer with a Disclosure Warning
+
+When an answer touches on a regulated disclosure (allergens, safety, legal),
+the binding disclosure is referenced as a warning with
+`presentation: "disclosure"`. The answer itself states the limitation and
+defers to the binding source.
+
+<!-- ucp:example schema=common/ask def=ask_response op=read direction=response extract=$.result.structuredContent -->
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "structuredContent": {
+      "ucp": {
+        "version": "{{ ucp_version }}",
+        "capabilities": {
+          "dev.ucp.common.ask": [
+            {"version": "{{ ucp_version }}"}
+          ]
+        }
+      },
+      "answer": {
+        "plain": "This nut butter is made with almonds. For complete allergen information, please consult the on-product allergen disclosure, which is the authoritative source.",
+        "markdown": "This nut butter is made with almonds. For complete allergen information, please consult the on-product allergen disclosure, which is the authoritative source."
+      },
+      "links": [
+        {
+          "type": "faq",
+          "url": "https://business.example.com/faq/allergens",
+          "title": "Allergen FAQ"
+        }
+      ],
+      "messages": [
+        {
+          "type": "warning",
+          "code": "allergens",
+          "content": "**Contains: tree nuts.** Produced in a facility that also processes peanuts, milk, and soy.",
+          "content_type": "markdown",
+          "presentation": "disclosure"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Entities
+
+### UCP Response Ask {: #ucp-response-ask-schema }
+
+{{ extension_schema_fields('ucp.json#/$defs/response_ask_schema', 'common/ask/mcp') }}
+
+### Error Response {: #error-response }
+
+{{ schema_fields('types/error_response', 'common/ask/mcp') }}
+
+## Conformance
+
+A conforming MCP transport implementation **MUST**:
+
+1. Implement JSON-RPC 2.0.
+2. When `dev.ucp.common.ask` is advertised in the Business's UCP profile, expose
+   the `ask_business` tool at the `dev.ucp.common` service's MCP `endpoint`.
+3. Validate tool inputs against the [Ask schema](index.md).
+4. Return a successful JSON-RPC result for every well-formed, authorized,
+   in-limits request; convey business outcomes through the `answer` and
+   `messages` array, and use JSON-RPC errors only for transport-level issues
+   (authentication, rate limiting, unavailability, malformed input).
+5. Return a populated `answer` on every successful response. A "can't answer"
+   outcome is a populated `answer` that states the limitation plainly, **not**
+   an omitted field, error code, or JSON-RPC error.

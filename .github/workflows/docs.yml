@@ -15,6 +15,8 @@
 
 name: Docs Build and Deploy
 
+permissions: {}
+
 on:
   workflow_dispatch:
 
@@ -27,6 +29,7 @@ on:
       - main
       - "release/**"
     paths:
+      - ".github/actions/**"
       - ".github/workflows/docs.yml"
       - "pyproject.toml"
       - "uv.lock"
@@ -39,7 +42,10 @@ on:
 
 jobs:
   lint:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Don't run this workflow if this is a release branch creation event
     # (event.before SHA is all zeros)
     if: >-
@@ -48,7 +54,7 @@ jobs:
         github.event.before == '0000000000000000000000000000000000000000')
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
@@ -59,13 +65,55 @@ jobs:
 
       - name: Check for changed files in source
         id: source_files_changed
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
-          files: source/**
+          files: |
+            source/**
+            .github/workflows/docs.yml
+            .github/actions/**
 
       - name: Lint source schemas
         if: steps.source_files_changed.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: ucp-schema lint source/
+
+      - name: Validate IR compilation (all verticals)
+        if: >-
+          steps.source_files_changed.outputs.any_changed == 'true' ||
+          github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/ucp-ir-gate.XXXXXX")"
+          trap 'rm -rf "$TMP_ROOT"' EXIT
+          found_vertical=0
+          for vertical_path in source/schemas/*/; do
+            [ -d "$vertical_path" ] || continue
+            vertical="$(basename "$vertical_path")"
+            case "$vertical" in
+              common|transports) continue ;;
+            esac
+            found_vertical=1
+            echo "Validating IR compilation for vertical: $vertical"
+            TMP_VERTICAL="$TMP_ROOT/$vertical"
+            mkdir -p "$TMP_VERTICAL"
+            if compgen -G "source/schemas/*.json" > /dev/null; then
+              cp source/schemas/*.json "$TMP_VERTICAL"/
+            fi
+            for shared in common transports "$vertical"; do
+              if [ -d "source/schemas/$shared" ]; then
+                cp -R "source/schemas/$shared" "$TMP_VERTICAL/$shared"
+              fi
+            done
+            # Catch broken or cross-vertical $refs inside staged vertical.
+            ucp-schema lint "$TMP_VERTICAL/$vertical"
+            ucp-schema generate-types \
+              --schema-dir "$TMP_VERTICAL" \
+              --pretty=false \
+              --output /dev/null
+          done
+          if [ "$found_vertical" -eq 0 ]; then
+            echo "Error: No vertical directories found in source/schemas/" >&2
+            exit 1
+          fi
 
       # Enforce the schema-authoring contract end-to-end: every ```json block
       # in the spec docs either validates against its declared schema, or is
@@ -77,16 +125,20 @@ jobs:
       - name: Run validator unit tests
         run: uv run python scripts/test_validate_examples.py
 
+      - name: Run schema table macro tests
+        run: uv run python scripts/test_schema_tables.py
+
   build_and_verify_main:
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
     permissions:
       contents: read
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
@@ -107,6 +159,7 @@ jobs:
   build_and_verify_release:
     needs: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: >-
       startsWith(github.ref, 'refs/heads/release/') ||
       startsWith(github.event.pull_request.base.ref, 'release/')
@@ -115,7 +168,7 @@ jobs:
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
 
@@ -137,13 +190,24 @@ jobs:
   deploy_main:
     needs: build_and_verify_main
     runs-on: ubuntu-latest
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && github.ref == 'refs/heads/main'
+    timeout-minutes: 30
+    # Both deploy jobs write the gh-pages branch. Without a shared group two
+    # merges landing inside one deploy's runtime race and the loser's push is
+    # rejected, so that commit's docs never publish. Queue them instead of
+    # cancelling: a cancelled deploy is a deploy that did not happen.
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      github.ref == 'refs/heads/main'
     permissions:
       contents: write
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -190,13 +254,20 @@ jobs:
   deploy_release:
     needs: build_and_verify_release
     runs-on: ubuntu-latest
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    timeout-minutes: 30
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
       pages: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -226,12 +297,16 @@ jobs:
   create_release:
     needs: deploy_release
     runs-on: ubuntu-latest
-    if: contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) && startsWith(github.ref, 'refs/heads/release/')
+    timeout-minutes: 30
+    if: >-
+      github.repository == 'Universal-Commerce-Protocol/ucp' &&
+      contains(fromJson('["push", "workflow_dispatch"]'), github.event_name) &&
+      startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0

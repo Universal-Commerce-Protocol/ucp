@@ -20,6 +20,10 @@
     "title": {
       "type": "string",
       "description": "Optional display text for the link. When provided, use this instead of generating from type."
+    },
+    "id": {
+      "type": "string",
+      "description": "Optional identifier for the linked resource when it is an addressable UCP resource (for example, a product or variant), so a platform can act on it through the capability that owns it. Omit for resources without a UCP identifier, such as a policy page."
     }
   }
 }

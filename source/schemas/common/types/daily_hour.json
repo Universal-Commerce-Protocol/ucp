@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/daily_hour.json",
+  "title": "Daily Hour",
+  "description": "A regular weekly operating interval. Its `day`, `opens`, and `closes` are recurring local civil values interpreted in the containing Location's `timezone`. Multiple entries for the same day support split shifts.",
+  "type": "object",
+  "required": ["day", "opens", "closes"],
+  "allOf": [
+    { "$ref": "time_interval.json" },
+    {
+      "type": "object",
+      "properties": {
+        "day": {
+          "type": "string",
+          "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+          "description": "A stable UCP day-of-week identifier for the day on which this recurring local civil-time interval begins in the containing Location's `timezone`. It is not localized display text.",
+          "ucp_request": "omit"
+        }
+      }
+    }
+  ]
+}

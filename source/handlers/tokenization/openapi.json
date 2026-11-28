@@ -10,7 +10,7 @@
       "post": {
         "operationId": "tokenize",
         "summary": "Tokenize Credential",
-        "description": "Convert a credential into a token bound to a specific checkout session. Handlers define accepted credential schemas and their own authentication requirements.",
+        "description": "Convert a credential into a token bound to a specific capability resource. Handlers define accepted credential schemas and their own authentication requirements.",
         "requestBody": {
           "required": true,
           "content": {
@@ -20,22 +20,25 @@
                 "required": ["credential", "binding"],
                 "properties": {
                   "credential": {
-                    "$ref": "../../schemas/shopping/types/payment_credential.json",
+                    "$ref": "../../schemas/common/types/payment_credential.json",
                     "description": "Credential to tokenize. Handlers define accepted credential types in their specification."
                   },
                   "binding": {
-                    "$ref": "../../schemas/shopping/types/binding.json",
-                    "description": "Binding context that ties this token to a specific checkout and participant identity."
+                    "$ref": "../../schemas/common/types/binding.json",
+                    "description": "Resource this token is bound to. Ties the token to a specific capability resource."
+                  },
+                  "identity": {
+                    "$ref": "../../schemas/common/types/payment_identity.json",
+                    "description": "The participant this token is issued to. Required when acting on behalf of another participant, for example an agent tokenizing for a business. Omit when the authenticated caller is that participant."
                   }
                 }
               },
               "examples": {
-                "card_credential_agent": {
-                  "summary": "Agent tokenizing on behalf of merchant",
+                "pan_credential_agent": {
+                  "summary": "Agent tokenizing a PAN credential on behalf of merchant",
                   "value": {
                     "credential": {
-                      "type": "card",
-                      "card_number_type": "fpan",
+                      "type": "pan",
                       "number": "4111111111111111",
                       "expiry_month": 12,
                       "expiry_year": 2026,
@@ -43,19 +46,19 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 },
-                "card_credential_merchant": {
-                  "summary": "Merchant tokenizing for themselves",
+                "pan_credential_merchant": {
+                  "summary": "Merchant tokenizing a PAN credential for themselves",
                   "value": {
                     "credential": {
-                      "type": "card",
-                      "card_number_type": "fpan",
+                      "type": "pan",
                       "number": "4111111111111111",
                       "expiry_month": 12,
                       "expiry_year": 2026,
@@ -63,28 +66,30 @@
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "xyz789"
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "xyz789"
                     }
                   }
                 },
-                "card_credential_network_token": {
-                  "summary": "Card credential (network token)",
+                "network_token_credential_agent": {
+                  "summary": "Agent tokenizing a network token credential",
                   "value": {
                     "credential": {
-                      "type": "card",
-                      "card_number_type": "network_token",
-                      "number": "4111111111111111",
+                      "type": "network_token",
+                      "number": "5204240000004242",
                       "expiry_month": 12,
                       "expiry_year": 2026,
                       "cryptogram": "gXc5UCLnM6ckD7pjM1TdPA==",
                       "eci_value": "07",
+                      "token_requestor_id": "12345678901",
                       "name": "Jane Doe"
                     },
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 }
@@ -139,8 +144,12 @@
                     "description": "The token value."
                   },
                   "binding": {
-                    "$ref": "../../schemas/shopping/types/binding.json",
-                    "description": "Binding context that must match the original tokenization request."
+                    "$ref": "../../schemas/common/types/binding.json",
+                    "description": "Resource binding that must match the original tokenization request."
+                  },
+                  "identity": {
+                    "$ref": "../../schemas/common/types/payment_identity.json",
+                    "description": "Participant whose token is being retrieved. Required when the caller acts on behalf of another participant; omit when the authenticated caller is that participant."
                   }
                 }
               },
@@ -150,7 +159,8 @@
                   "value": {
                     "token": "tok_abc123xyz789",
                     "binding": {
-                      "checkout_id": "xyz789"
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "xyz789"
                     }
                   }
                 },
@@ -159,10 +169,11 @@
                   "value": {
                     "token": "tok_abc123xyz789",
                     "binding": {
-                      "checkout_id": "abc123",
-                      "identity": {
-                        "access_token": "merchant_abc123"
-                      }
+                      "type": "dev.ucp.shopping.checkout",
+                      "id": "abc123"
+                    },
+                    "identity": {
+                      "access_token": "merchant_abc123"
                     }
                   }
                 }
@@ -176,14 +187,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "../../schemas/shopping/types/payment_credential.json"
+                  "$ref": "../../schemas/common/types/payment_credential.json"
                 },
                 "examples": {
-                  "card_credential_fpan": {
-                    "summary": "Card credential (FPAN)",
+                  "pan_credential": {
+                    "summary": "PAN credential",
                     "value": {
-                      "type": "card",
-                      "card_number_type": "fpan",
+                      "type": "pan",
                       "number": "4111111111111111",
                       "expiry_month": 12,
                       "expiry_year": 2026,
@@ -191,16 +201,16 @@
                       "name": "Jane Doe"
                     }
                   },
-                  "card_credential_network_token": {
-                    "summary": "Card credential (network token)",
+                  "network_token_credential": {
+                    "summary": "Network token credential",
                     "value": {
-                      "type": "card",
-                      "card_number_type": "network_token",
-                      "number": "4111111111111111",
+                      "type": "network_token",
+                      "number": "5204240000004242",
                       "expiry_month": 12,
                       "expiry_year": 2026,
                       "cryptogram": "gXc5UCLnM6ckD7pjM1TdPA==",
                       "eci_value": "07",
+                      "token_requestor_id": "12345678901",
                       "name": "Jane Doe"
                     }
                   }

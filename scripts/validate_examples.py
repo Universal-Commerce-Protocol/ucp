@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# cspell:ignore shema directon
+# cspell:ignore shema directon skiped
 """Validate JSON examples in UCP specification documentation.
 
 UCP doc examples use a bespoke JSON capability set: strict JSON plus
@@ -75,14 +75,30 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
 
   - If extract= is present, the indicated subtree is selected from
     the parsed displayed example before semantic validation.
+
+  JSONPath subset used by extract= and target=: dot-separated bare
+  names with an optional array index (`$.a.b[0]`), plus bracket-quoted
+  names for keys that are not bare-legal (`$.a['dev.ucp.common.x'][0]`).
+  The quoted form is required for UCP's reverse-domain keys and scope
+  tokens, whose dots and colons are otherwise read as separators.
   - Ellipsis sentinels are recorded as elided JSON Pointer paths,
     then removed from the tree.
   - The example is deep-merged into a scaffold (a known-valid
     fixture per schema/op/direction). Example fields win; scaffold
     fills required gaps.
   - Coverage walk: for each object in the example, verify every
-    schema-required field is either present or elision-acknowledged.
+    schema-required field is either present or elision-acknowledged;
+    required-key anyOf alternatives must have at least one branch
+    represented by authored keys before scaffold merge.
+  - Empty objects only bypass body validation for unscoped read/cancel
+    requests, whose operations have no request body.
   - The merged payload is validated by `ucp-schema validate`.
+  - Extension fields: if the payload carries a top-level field that
+    the annotated capability does not declare but an extension
+    composes onto it (under the extension's $defs/<capability name>,
+    e.g. checkout `fulfillment`), the payload is also validated
+    against that extension's composed schema. Capability schemas are
+    open, so without this such fields would go unchecked.
   - Validation errors whose path is an elided path (or descendant)
     are suppressed.
 
@@ -90,10 +106,6 @@ Layer 3 — Semantic interpretation. Operates on the parsed tree:
 KNOWN LIMITATIONS
 ================================================================
 
-  - Line-comment stripper tracks string boundaries per-line and is
-    approximate. An example with a string literal containing an
-    escaped backslash followed by `//` will be misparsed. No corpus
-    example currently triggers this.
   - The literal three-character string "..." cannot appear in an
     example as actual data — it is reserved as the elision sentinel.
 
@@ -103,17 +115,27 @@ CLI
 
   validate_examples.py --schema-base source/schemas/
   validate_examples.py --schema-base source/schemas/ --file FILE
+  validate_examples.py --schema-base source/schemas/ --jobs 8
   validate_examples.py --schema-base source/schemas/ --audit
 
 Exit codes: 0 if all pass or skip; 1 if any block fails or errors.
+
+Block validation is independent per example, and each one shells out to
+ucp-schema. They are therefore validated concurrently, with results
+reassembled in document order so reporting and exit codes are unchanged
+for any --jobs value.
 """
 
 import argparse
+import concurrent.futures
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 # -----------------------------------------------------------
@@ -136,6 +158,10 @@ _KNOWN_ATTRS = frozenset(
   {"schema", "op", "direction", "extract", "target", "def"}
 )
 
+# `skip` must appear as a whole word. A prefix match would let a typo such as
+# `skiped` or `skip_the_check` silently disable validation for that example.
+_SKIP_RE = re.compile(r"skip\b")
+
 # -----------------------------------------------------------
 # Annotation parsing
 # -----------------------------------------------------------
@@ -149,11 +175,18 @@ def parse_annotation(text: str) -> dict:
   reported via a reserved "_error" key (consumed by process_block).
   """
   text = text.strip()
-  if text.startswith("skip"):
-    reason_match = re.search(r'reason="([^"]*)"', text)
+  if _SKIP_RE.match(text):
+    reason_match = re.search(r'reason="([^"]+)"', text)
+    if reason_match is None:
+      return {
+        "_error": (
+          'skip annotation requires a non-empty reason="..." '
+          "so every skipped example stays auditable"
+        )
+      }
     return {
       "skip": True,
-      "reason": (reason_match.group(1) if reason_match else ""),
+      "reason": reason_match.group(1),
     }
   attrs: dict = {}
   unknown: list[str] = []
@@ -190,7 +223,7 @@ def extract_blocks(filepath: Path) -> list[dict]:
   fence with no intervening fence — and emits an error block for the
   second one. Per contract, at most one annotation per block.
   """
-  lines = filepath.read_text().splitlines()
+  lines = filepath.read_text(encoding="utf-8").splitlines()
   blocks: list[dict] = []
   i = 0
   pending_annotation = None
@@ -308,32 +341,17 @@ def expand_templates(content: str) -> str:
   return content.replace("{{ ucp_version }}", UCP_VERSION_PLACEHOLDER)
 
 
-def strip_line_comments(content: str) -> str:
-  """Stage 3. Strip // line comments outside string literals.
+# Match quoted strings first so authoring syntax never rewrites their contents.
+_JSON_STRING_PATTERN = r'"(?:[^"\\\n]|\\[^\n])*"'
+_LINE_COMMENT_RE = re.compile(rf"{_JSON_STRING_PATTERN}|//[^\n]*")
 
-  Per-line string-boundary tracking. Approximate — see module
-  docstring for the documented edge case.
-  """
-  lines = content.split("\n")
-  cleaned = []
-  for line in lines:
-    result = []
-    in_string = False
-    i = 0
-    while i < len(line):
-      ch = line[i]
-      if ch == '"' and (i == 0 or line[i - 1] != "\\"):
-        in_string = not in_string
-        result.append(ch)
-      elif (
-        ch == "/" and not in_string and i + 1 < len(line) and line[i + 1] == "/"
-      ):
-        break  # rest of line is comment
-      else:
-        result.append(ch)
-      i += 1
-    cleaned.append("".join(result).rstrip())
-  return "\n".join(cleaned)
+
+def strip_line_comments(content: str) -> str:
+  """Stage 3. Strip // line comments outside string literals."""
+  content = _LINE_COMMENT_RE.sub(
+    lambda match: "" if match[0].startswith("//") else match[0], content
+  )
+  return "\n".join(line.rstrip() for line in content.split("\n"))
 
 
 # Bare ... inside an otherwise-empty [] or {} container. Authors
@@ -346,15 +364,23 @@ def strip_line_comments(content: str) -> str:
 # dots (e.g. `[1, ..., 3]`) are not supported — only whole-container
 # bare-dot ellipsis. For partial elision use the string form
 # (`[1, "...", 3]`).
-_BARE_ELLIPSIS_ARRAY = re.compile(r"(\[\s*)\.\.\.(\s*\])")
-_BARE_ELLIPSIS_OBJECT = re.compile(r"(\{\s*)\.\.\.(\s*\})")
+_BARE_ELLIPSIS_RE = re.compile(
+  rf"{_JSON_STRING_PATTERN}|(?P<array>\[\s*\.\.\.\s*\])"
+  r"|(?P<object>\{\s*\.\.\.\s*\})"
+)
 
 
 def lower_ellipsis_to_sentinels(content: str) -> str:
-  """Stage 4. Lower bare `...` to string-sentinel form."""
-  content = _BARE_ELLIPSIS_ARRAY.sub(r'\1"..."\2', content)
-  content = _BARE_ELLIPSIS_OBJECT.sub(r'\1"...": "..."\2', content)
-  return content
+  """Stage 4. Lower bare `...` outside strings to string-sentinel form."""
+
+  def replace(match: re.Match) -> str:
+    if match.group("array") is not None:
+      return match[0].replace("...", '"..."', 1)
+    if match.group("object") is not None:
+      return match[0].replace("...", '"...": "..."', 1)
+    return match[0]
+
+  return _BARE_ELLIPSIS_RE.sub(replace, content)
 
 
 def reduce_to_canonical_json(raw: str) -> str:
@@ -380,6 +406,15 @@ def _is_ellipsis(value) -> bool:
   )
 
 
+def escape_pointer_token(token: str) -> str:
+  """Escape one JSON Pointer reference token (RFC 6901, section 3).
+
+  `~` becomes `~0` and `/` becomes `~1`, in that order. ucp-schema reports
+  validation error paths in this form, so elision paths must match it.
+  """
+  return token.replace("~", "~0").replace("/", "~1")
+
+
 def strip_ellipsis(obj, _path="", _paths=None):
   """Replace ellipsis markers with empty defaults.
 
@@ -393,7 +428,7 @@ def strip_ellipsis(obj, _path="", _paths=None):
   if isinstance(obj, dict):
     result = {}
     for k, v in obj.items():
-      child_path = f"{_path}/{k}"
+      child_path = f"{_path}/{escape_pointer_token(k)}"
       if v == "...":
         _paths.add(child_path)
         continue
@@ -407,11 +442,15 @@ def strip_ellipsis(obj, _path="", _paths=None):
         result[k] = strip_ellipsis(v, child_path, _paths)
     return result if _path else (result, _paths)
   elif isinstance(obj, list):
+    # Child paths use the post-strip index — the position the item
+    # occupies in the payload the validator sees. Removed sentinels
+    # shift later items left, so the source index would point at the
+    # wrong element (or suppress a real error on a shifted sibling).
     items = []
-    for i, item in enumerate(obj):
+    for item in obj:
       if item == "...":
         continue
-      items.append(strip_ellipsis(item, f"{_path}/{i}", _paths))
+      items.append(strip_ellipsis(item, f"{_path}/{len(items)}", _paths))
     return items if _path else (items, _paths)
   return obj if _path else (obj, _paths)
 
@@ -420,20 +459,60 @@ def strip_ellipsis(obj, _path="", _paths=None):
 # JSONPath navigation (minimal subset)
 # -----------------------------------------------------------
 
-_SEGMENT_RE = re.compile(r"^(\w+)(?:\[(\d+)\])?$")
+_BARE_SEGMENT_RE = re.compile(r"\w+")
+_QUOTED_SEGMENT_RE = re.compile(r"\[(['\"])(.*?)\1\]")
+_INDEX_RE = re.compile(r"\[(\d+)\]")
+
+
+def split_path(path: str) -> list[tuple[str, str | None]]:
+  """Tokenize the supported JSONPath subset into (name, index) pairs.
+
+  Bare names are dot-separated (`$.a.b`) and may carry a single array
+  index (`$.a[0]`). Names that are not bare-legal are written in
+  bracket-quoted form (`$.a['x.y'][0]`), required for the
+  reverse-domain identifiers and scope tokens UCP uses as object keys,
+  such as `dev.ucp.common.identity_linking` and
+  `dev.ucp.shopping.order:read`, whose dots and colons would otherwise
+  be read as path separators or fail to match.
+
+  Raises KeyError on an unparsable segment.
+  """
+  segments: list[tuple[str, str | None]] = []
+  pos = 1 if path.startswith("$") else 0
+  while pos < len(path):
+    if path[pos] == ".":
+      pos += 1
+      continue
+    quoted = _QUOTED_SEGMENT_RE.match(path, pos)
+    if quoted:
+      name = quoted.group(2)
+      pos = quoted.end()
+    else:
+      bare = _BARE_SEGMENT_RE.match(path, pos)
+      if not bare:
+        raise KeyError(path[pos:])
+      name = bare.group(0)
+      pos = bare.end()
+    index = None
+    indexed = _INDEX_RE.match(path, pos)
+    if indexed:
+      index = indexed.group(1)
+      pos = indexed.end()
+    segments.append((name, index))
+  return segments
 
 
 def jsonpath_to_pointer(path: str) -> str:
   """Convert the supported JSONPath subset to a JSON Pointer prefix."""
   if path == "$":
     return ""
+  try:
+    segments = split_path(path)
+  except KeyError:
+    return ""
   pointer_parts: list[str] = []
-  for seg in path.lstrip("$").lstrip(".").split("."):
-    m = _SEGMENT_RE.match(seg)
-    if not m:
-      return ""
-    name, idx = m.group(1), m.group(2)
-    pointer_parts.append(name)
+  for name, idx in segments:
+    pointer_parts.append(escape_pointer_token(name))
     if idx is not None:
       pointer_parts.append(idx)
   return "".join(f"/{part}" for part in pointer_parts)
@@ -444,11 +523,7 @@ def jsonpath_get(obj, path: str):
   if path == "$":
     return obj
   current = obj
-  for seg in path.lstrip("$").lstrip(".").split("."):
-    m = _SEGMENT_RE.match(seg)
-    if not m:
-      raise KeyError(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in split_path(path):
     current = current[name]
     if idx is not None:
       current = current[int(idx)]
@@ -457,16 +532,13 @@ def jsonpath_get(obj, path: str):
 
 def jsonpath_set(obj: dict, path: str, value):
   """Set a value at a JSONPath. Mutates obj."""
-  segments = path.lstrip("$").lstrip(".").split(".")
+  segments = split_path(path)
   current = obj
-  for seg in segments[:-1]:
-    m = _SEGMENT_RE.match(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in segments[:-1]:
     current = current[name]
     if idx is not None:
       current = current[int(idx)]
-  last = _SEGMENT_RE.match(segments[-1])
-  name, idx = last.group(1), last.group(2)
+  name, idx = segments[-1]
   if idx is not None:
     current[name][int(idx)] = value
   else:
@@ -475,11 +547,8 @@ def jsonpath_set(obj: dict, path: str, value):
 
 def jsonpath_get_schema(schema: dict, path: str) -> dict:
   """Navigate a JSON Schema to the sub-schema at path."""
-  segments = path.lstrip("$").lstrip(".").split(".")
   current = schema
-  for seg in segments:
-    m = _SEGMENT_RE.match(seg)
-    name, idx = m.group(1), m.group(2)
+  for name, idx in split_path(path):
     # Resolve through allOf to find properties
     current = _get_property_schema(current, name)
     if current is None:
@@ -520,18 +589,37 @@ def deep_merge(scaffold: dict, example: dict) -> dict:
 
 
 def _collect_required(schema: dict) -> set[str]:
-  """Collect required fields, merging allOf branches."""
+  """Collect required fields recursively through allOf branches."""
   required = set(schema.get("required", []))
   for branch in schema.get("allOf", []):
-    required |= set(branch.get("required", []))
+    if isinstance(branch, dict):
+      required |= _collect_required(branch)
   return required
 
 
+def _collect_required_alternatives(schema: dict) -> list[list[set[str]]]:
+  """Collect required-key anyOf alternatives through nested allOf."""
+  alternatives = []
+  if "anyOf" in schema:
+    alternatives.append(
+      [
+        _collect_required(branch) if isinstance(branch, dict) else set()
+        for branch in schema["anyOf"]
+        if branch is not False
+      ]
+    )
+  for branch in schema.get("allOf", []):
+    if isinstance(branch, dict):
+      alternatives.extend(_collect_required_alternatives(branch))
+  return alternatives
+
+
 def _collect_properties(schema: dict) -> dict:
-  """Collect properties, merging allOf branches."""
+  """Collect properties recursively through allOf branches."""
   props = dict(schema.get("properties", {}))
   for branch in schema.get("allOf", []):
-    props.update(branch.get("properties", {}))
+    if isinstance(branch, dict):
+      props.update(_collect_properties(branch))
   return props
 
 
@@ -569,12 +657,14 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
   # Object coverage
   if isinstance(example, dict):
     obj_type = schema.get("type")
-    # Schemas without explicit "type" but with
-    # "properties" or "allOf" are still objects.
+    # Schemas without explicit "type" but with properties or required-key
+    # alternatives are still objects for authored-key coverage.
     has_object_shape = (
       obj_type == "object"
       or "properties" in schema
-      or any("properties" in b for b in schema.get("allOf", []))
+      or bool(_collect_properties(schema))
+      or bool(_collect_required(schema))
+      or bool(_collect_required_alternatives(schema))
     )
     if has_object_shape:
       required = _collect_required(schema)
@@ -582,6 +672,19 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
       missing = required - present
       for field in sorted(missing):
         errors.append(f'{path}: missing required field "{field}"')
+
+      for alternatives in _collect_required_alternatives(schema):
+        # A branch without required keys imposes no authored-key coverage
+        # constraint (as in non-create operation projections).
+        if any(not required_keys for required_keys in alternatives):
+          continue
+        if not any(required_keys <= present for required_keys in alternatives):
+          choices = " or ".join(
+            "+".join(sorted(required_keys)) for required_keys in alternatives
+          )
+          errors.append(
+            f"{path}: missing required field alternative ({choices})"
+          )
 
       # Recurse into non-ellipsis fields
       for key, value in example.items():
@@ -628,6 +731,34 @@ def check_coverage(example, schema: dict, path: str = "$") -> list[str]:
 # -----------------------------------------------------------
 
 _schema_cache: dict[tuple, dict] = {}
+# Blocks are validated on worker threads, so two misses for the same key
+# would otherwise spawn the same resolve twice. Holding the lock across the
+# subprocess call keeps it to exactly one resolve per key.
+_schema_cache_lock = threading.Lock()
+
+UCP_SCHEMA_MISSING = (
+  "ucp-schema not found on PATH. Install it with"
+  " `cargo install ucp-schema` (see AGENTS.md)."
+)
+
+
+def run_ucp_schema(args: list[str], **kwargs) -> subprocess.CompletedProcess:
+  """Run the ucp-schema binary, or explain how to get it.
+
+  Without this, a contributor who has not installed the binary sees a
+  FileNotFoundError traceback rather than the install line that AGENTS.md
+  already documents.
+
+  ucp-schema always writes UTF-8, so decode it as UTF-8 rather than by the
+  locale: schemas under source/schemas/ carry em dashes and section signs,
+  and a cp1252 machine would otherwise fail on the bytes that carry them.
+  """
+  if kwargs.get("text"):
+    kwargs.setdefault("encoding", "utf-8")
+  try:
+    return subprocess.run(["ucp-schema", *args], **kwargs)
+  except FileNotFoundError:
+    raise RuntimeError(UCP_SCHEMA_MISSING) from None
 
 
 def resolve_schema(
@@ -637,35 +768,35 @@ def resolve_schema(
   schema_base: Path,
 ) -> dict:
   """Resolve a schema via ucp-schema, with caching."""
-  key = (schema_path, direction, op)
-  if key in _schema_cache:
-    return _schema_cache[key]
+  key = (schema_base.resolve(), schema_path, direction, op)
+  with _schema_cache_lock:
+    if key in _schema_cache:
+      return _schema_cache[key]
 
-  full_path = schema_base / f"{schema_path}.json"
-  result = subprocess.run(
-    [
-      "ucp-schema",
-      "resolve",
-      str(full_path),
-      f"--{direction}",
-      "--op",
-      op,
-      "--bundle",
-      "--pretty",
-    ],
-    capture_output=True,
-    text=True,
-    cwd=str(schema_base.parent),
-  )
-  if result.returncode != 0:
-    raise RuntimeError(
-      f"ucp-schema resolve failed for"
-      f" {schema_path} ({direction}/{op}):"
-      f" {result.stderr.strip()}"
+    full_path = schema_base / f"{schema_path}.json"
+    result = run_ucp_schema(
+      [
+        "resolve",
+        str(full_path),
+        f"--{direction}",
+        "--op",
+        op,
+        "--bundle",
+        "--pretty",
+      ],
+      capture_output=True,
+      text=True,
+      cwd=str(schema_base.parent),
     )
-  schema = json.loads(result.stdout)
-  _schema_cache[key] = schema
-  return schema
+    if result.returncode != 0:
+      raise RuntimeError(
+        f"ucp-schema resolve failed for"
+        f" {schema_path} ({direction}/{op}):"
+        f" {result.stderr.strip()}"
+      )
+    schema = json.loads(result.stdout)
+    _schema_cache[key] = schema
+    return schema
 
 
 # -----------------------------------------------------------
@@ -687,9 +818,8 @@ def validate_payload(
     tmp_path = f.name
 
   try:
-    result = subprocess.run(
+    result = run_ucp_schema(
       [
-        "ucp-schema",
         "validate",
         tmp_path,
         "--schema",
@@ -743,9 +873,8 @@ def validate_payload_with_schema(
     ) as f:
       json.dump(payload, f)
       tmp_payload = f.name
-    result = subprocess.run(
+    result = run_ucp_schema(
       [
-        "ucp-schema",
         "validate",
         tmp_payload,
         "--schema",
@@ -776,6 +905,107 @@ def validate_payload_with_schema(
 
 
 # -----------------------------------------------------------
+# Extension validation
+# -----------------------------------------------------------
+
+_extension_cache: dict[Path, tuple[dict, dict]] = {}
+_extension_cache_lock = threading.Lock()
+
+
+def load_extensions(schema_base: Path) -> tuple[dict, dict]:
+  """Index capabilities and the extensions that compose onto them.
+
+  Returns (capabilities, extensions). capabilities maps a capability
+  name (e.g. dev.ucp.shopping.checkout) to its schema path. extensions
+  maps a capability name to (schema path, added fields) for every other
+  schema that composes onto it under $defs/<capability name>, where
+  added fields are the properties the extension's own allOf branches
+  declare.
+  """
+  key = schema_base.resolve()
+  with _extension_cache_lock:
+    if key in _extension_cache:
+      return _extension_cache[key]
+
+    schemas = {}
+    for path in sorted(schema_base.rglob("*.json")):
+      rel = path.relative_to(schema_base).with_suffix("").as_posix()
+      schemas[rel] = json.loads(path.read_text(encoding="utf-8"))
+
+    capabilities = {
+      schema["name"]: rel
+      for rel, schema in schemas.items()
+      if str(schema.get("name", "")).startswith("dev.ucp.")
+    }
+    extensions: dict[str, list[tuple[str, frozenset[str]]]] = {}
+    for rel, schema in schemas.items():
+      for name, composed in schema.get("$defs", {}).items():
+        if name not in capabilities or capabilities[name] == rel:
+          continue
+        added = set(composed.get("properties", {}))
+        for branch in composed.get("allOf", []):
+          if "$ref" not in branch:
+            added.update(branch.get("properties", {}))
+        if added:
+          extensions.setdefault(name, []).append((rel, frozenset(added)))
+
+    _extension_cache[key] = (capabilities, extensions)
+    return capabilities, extensions
+
+
+def validate_extensions(
+  payload: dict,
+  schema_path: str,
+  schema_def: str | None,
+  resolved: dict,
+  direction: str,
+  op: str,
+  schema_base: Path,
+) -> list[tuple[str, list[dict]]]:
+  """Validate a payload against each extension whose fields it carries.
+
+  Capability schemas are open, so a field that only an extension
+  declares (e.g. checkout `fulfillment`) passes validation against the
+  capability unchecked. When the payload carries such a field, it is
+  also validated against that extension's composed schema. Fields the
+  capability itself declares (e.g. `payment`, `buyer`) do not trigger
+  this, since the capability already validates them.
+
+  Returns (extension schema path, errors) for each failing extension.
+  """
+  if not isinstance(payload, dict):
+    return []
+  capabilities, extensions = load_extensions(schema_base)
+  if schema_def:
+    capability = schema_def if schema_def in capabilities else None
+  else:
+    capability = resolved.get("name")
+  if capability not in extensions:
+    return []
+
+  base = resolve_schema(capabilities[capability], direction, op, schema_base)
+  declared = set(base.get("properties", {}))
+
+  failures = []
+  for ext_path, added in extensions[capability]:
+    if ext_path == schema_path and schema_def == capability:
+      continue
+    if not (added - declared) & payload.keys():
+      continue
+    composed = resolve_schema(ext_path, direction, op, schema_base)
+    valid, errors = validate_payload_with_schema(
+      payload,
+      composed["$defs"][capability],
+      direction,
+      op,
+      schema_base,
+    )
+    if not valid:
+      failures.append((ext_path, errors))
+  return failures
+
+
+# -----------------------------------------------------------
 # Scaffold loading
 # -----------------------------------------------------------
 
@@ -791,17 +1021,17 @@ def load_scaffold(
   name = schema_path.replace("/", "_")
   specific = scaffolds_dir / f"{name}_{direction}_{op}.json"
   if specific.exists():
-    return json.loads(specific.read_text())
+    return json.loads(specific.read_text(encoding="utf-8"))
 
   # Try direction-only: checkout_response.json
   dir_only = scaffolds_dir / f"{name}_{direction}.json"
   if dir_only.exists():
-    return json.loads(dir_only.read_text())
+    return json.loads(dir_only.read_text(encoding="utf-8"))
 
   # Try generic: checkout.json
   generic = scaffolds_dir / f"{name}.json"
   if generic.exists():
-    return json.loads(generic.read_text())
+    return json.loads(generic.read_text(encoding="utf-8"))
 
   return None
 
@@ -943,8 +1173,15 @@ def process_block(
       annotation,
     )
 
-  # Empty body — trivially valid (e.g. GET, cancel)
-  if example == {}:
+  # Read and cancel requests have no body. Keep their authored empty-object
+  # notation lightweight, but never bypass an explicitly selected shape.
+  if (
+    example == {}
+    and direction == "request"
+    and op in ("read", "cancel")
+    and schema_def is None
+    and target_path is None
+  ):
     return Result(file, line, "ok", annotation=annotation)
 
   # Layer 3: resolve schema
@@ -1029,17 +1266,33 @@ def process_block(
     merged = deep_merge(scaffold, stripped)
 
   # 9. Validate — use extracted $def schema if specified
-  if schema_def:
-    valid, val_errors = validate_payload_with_schema(
-      merged, validation_schema, direction, op, schema_base
+  try:
+    if schema_def:
+      valid, val_errors = validate_payload_with_schema(
+        merged, validation_schema, direction, op, schema_base
+      )
+    else:
+      valid, val_errors = validate_payload(
+        merged,
+        schema_path,
+        direction,
+        op,
+        schema_base,
+      )
+  except RuntimeError as e:
+    return Result(file, line, "error", str(e), annotation)
+
+  # 10. Validate fields contributed by extensions
+  try:
+    extension_errors = validate_extensions(
+      merged, schema_path, schema_def, resolved, direction, op, schema_base
     )
-  else:
-    valid, val_errors = validate_payload(
-      merged,
-      schema_path,
-      direction,
-      op,
-      schema_base,
+  except RuntimeError as e:
+    return Result(file, line, "error", str(e), annotation)
+
+  def elided(err_path: str) -> bool:
+    return any(
+      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
     )
 
   # Collect all failures
@@ -1049,11 +1302,17 @@ def process_block(
   for ve in val_errors:
     # Suppress errors at ellipsis-acknowledged paths
     err_path = ve.get("path", "")
-    if any(
-      err_path == ep or err_path.startswith(ep + "/") for ep in ellipsis_paths
-    ):
+    if elided(err_path):
       continue
     messages.append(f"validation: {err_path} \u2014 {ve.get('message', '')}")
+  for ext_path, errors in extension_errors:
+    for ve in errors:
+      err_path = ve.get("path", "")
+      if elided(err_path):
+        continue
+      messages.append(
+        f"extension {ext_path}: {err_path} \u2014 {ve.get('message', '')}"
+      )
 
   if messages:
     return Result(
@@ -1108,6 +1367,15 @@ def main() -> int:
     action="store_true",
     help="Just list blocks without validating",
   )
+  parser.add_argument(
+    "--jobs",
+    type=int,
+    default=min(8, os.cpu_count() or 1),
+    help=(
+      "Validate this many blocks concurrently (default: min(8, CPU count);"
+      " use 1 for serial execution)."
+    ),
+  )
   args = parser.parse_args()
 
   # Resolve paths relative to script location
@@ -1120,6 +1388,13 @@ def main() -> int:
 
   scaffolds_dir = args.scaffolds or script_dir / "scaffolds"
   docs_dir = args.docs or repo_root / "docs"
+
+  # Every block needs the binary, so a missing one is a single message
+  # before any work rather than the same error repeated per block. --audit
+  # only counts blocks and needs no binary.
+  if not args.audit and shutil.which("ucp-schema") is None:
+    print(UCP_SCHEMA_MISSING, file=sys.stderr)
+    return 1
 
   # Collect markdown files
   md_files = args.file if args.file else sorted(docs_dir.rglob("*.md"))
@@ -1147,11 +1422,23 @@ def main() -> int:
           print(f"  {b['file']}:{b['line']}")
     return 1 if unannotated else 0
 
-  # Validate
-  results: list[Result] = []
-  for block in all_blocks:
-    result = process_block(block, schema_base, scaffolds_dir)
-    results.append(result)
+  # Validate. Blocks are independent, so run them concurrently and keep the
+  # executor's ordering: reporting and exit codes stay identical to serial
+  # execution regardless of --jobs.
+  if args.jobs < 1:
+    parser.error("--jobs must be at least 1")
+  if args.jobs == 1:
+    results = [
+      process_block(block, schema_base, scaffolds_dir) for block in all_blocks
+    ]
+  else:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+      results = list(
+        pool.map(
+          lambda block: process_block(block, schema_base, scaffolds_dir),
+          all_blocks,
+        )
+      )
 
   # Report
   passed = sum(1 for r in results if r.status == "ok")
