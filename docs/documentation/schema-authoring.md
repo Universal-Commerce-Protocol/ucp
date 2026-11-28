@@ -98,6 +98,15 @@ Define negotiated capabilities that appear in `ucp.capabilities{}` registries.
 
 - **Top-level fields**: `$schema`, `$id`, `title`, `description`, `name`, `version`
 - **Variants**: `platform_schema`, `business_schema`, `response_schema`
+- **Business-authored entities**: `ucp_request` / `ucp_response` describe
+  which party authors a field (Platform→Business is the request direction,
+  Business→Platform the response direction), not which HTTP message carries
+  it. An entity with no Platform-authored operation in any service binding
+  carries no `ucp_request` annotations; its `required` array is its response
+  contract. Deliveries the Business pushes to the Platform (webhooks) resolve
+  in the response direction. Annotating only some fields `omit` on such an
+  entity reads as if the rest were Platform-writable. Example: `order.json`,
+  returned by `get_order` and pushed via the order event webhook.
 
 Examples: `checkout.json`, `fulfillment.json`, `discount.json`, `order.json`
 
